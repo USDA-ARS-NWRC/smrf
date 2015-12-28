@@ -2,17 +2,6 @@
 Snow Modeling Resources Framework
 ===============================
 
-.. image:: https://img.shields.io/pypi/v/smrf.svg
-        :target: https://pypi.python.org/pypi/smrf
-
-.. image:: https://img.shields.io/travis/scotthavens/smrf.svg
-        :target: https://travis-ci.org/scotthavens/smrf
-
-.. image:: https://readthedocs.org/projects/smrf/badge/?version=latest
-        :target: https://readthedocs.org/projects/smrf/?badge=latest
-        :alt: Documentation Status
-
-
 Distributed snow modeling for water resources
 
 * Free software: ISC license
