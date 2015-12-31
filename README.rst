@@ -12,6 +12,15 @@ Features
 
 * TODO
 
+
+Install
+--------
+
+1. Ensure the following environment variables are set:
+    * IPW, and $IPW/bin is in the PATH
+    *
+
+
 Credits
 ---------
 

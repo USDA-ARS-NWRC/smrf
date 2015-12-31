@@ -9,32 +9,23 @@ of development and users will require the specific table setup
 '''
 
 import numpy as np
+import scipy.stats as stats
+import pandas as pd
+import utm
 import mysql.connector
 from mysql.connector import errorcode
+from datetime import datetime, timedelta
 
-host = '10.200.28.203'
-user = 'scott'
-password = 'avalanche'
-
-# host = 'localhost'
-# user = 'wxuser_v2'
-# password = 'x340hm4h980r'
-
-db = 'weather_v2'
+import logging
 
 
 class database:
     '''
     Database class for querying metadata and station data
     '''
-    
-    _db_connection = None
-    _db_cur = None
-    station_ids = None
-    client = None
-    
-    def __init__(self, user, password, host, db):
         
+    def __init__(self, user, password, host, db):
+                
         try:
             cnx = mysql.connector.connect(user=user, password=password,
                                       host=host,
@@ -42,33 +33,107 @@ class database:
             
         except mysql.connector.Error as err:
             if err.errno == errorcode.ER_ACCESS_DENIED_ERROR:
-                print("Something is wrong with your user name or password")
+                logging.error("Something is wrong with your user name or password")
             elif err.errno == errorcode.ER_BAD_DB_ERROR:
-                print("Database does not exist")
+                logging.error("Database does not exist")
             else:
-                print(err)
+                logging.error(err)
         
         self._db_connection = cnx
         self._db_cur = self._db_connection.cursor()
         
+        self._logger = logging.getLogger(__name__)
+        self._logger.debug('Connected to MySQL database')
         
-    def metadata(self, station_ids=None, client=None):
+        
+    def metadata(self, table, station_ids=None, client=None, station_table=None):
         '''
         Similar to the CorrectWxData database call
         Get the metadata from the database for either the specified stations
         or for the specific group of stations in client
+        
+        Inputs:
+        - station_ids is a list of stations
+        - client is a string
         '''
         
-        return True
+        lambdafunc = lambda x: pd.Series(utm.from_latlon(x['latitude'], x['longitude'])[:2])
+        
+        # form the query        
+        if station_ids is not None:
+            qry = "SELECT * FROM %s WHERE primary_id IN ('%s')" % (table, "','".join(station_ids))
+            
+        else:
+            qry = "SELECT %s.* FROM tbl_metadata INNER JOIN %s " \
+                "ON %s.primary_id=%s.station_id WHERE %s.client='%s'" \
+                % (table, station_table, table, station_table, station_table, client)
+        
+        self._logger.debug(qry)
+        
+        # execute the query
+        d = pd.read_sql(qry, self._db_connection, index_col='primary_id')
+        
+        if d.empty:
+            raise Exception('No metadata found for query')
+        
+        # check to see if UTM locations are calculated
+        if 'X' not in d.columns:
+            d[['X','Y']] = d.apply(lambdafunc, axis=1)
+            
+        return d
     
     
-    def get_data(self):
+    def get_data(self, table, station_ids, start_date, end_date, variables):
         '''
         Get data from the database, either for the specified stations
         or for the specific group of stations in client
+        
+        Inputs:
+        table - table to load data from
+        station_ids - list of station ids to get
+        start_date - start of time period
+        end_date - end of time period
+        variable - string for variable to get because pandas can't do multiple
         '''
         
-        return True
+        if isinstance(variables,list):
+            variables = ','.join(variables)
+        
+        sta = "','".join(station_ids)
+        
+        qry = "SELECT date_time,station_id,%s FROM %s "\
+            "WHERE date_time BETWEEN '%s' AND '%s' AND "\
+            "station_id IN ('%s') ORDER BY date_time ASC" \
+            % (variables, table, start_date, end_date, sta)
+    
+        self._logger.debug(qry)
+            
+        # loads all the data
+        d =  pd.read_sql(qry, self._db_connection, index_col='date_time')
+        
+        # determine the times
+        dt = np.diff(d.index.unique())/60/1e9   # time difference in minutes
+        dt = dt.astype('float64')
+        m = stats.mode(dt)[0][0]    # this is the most likely time steps for the data
+        
+        self._logger.debug('Determined data time step to be %f minutes' % m)
+        
+        t = date_range(start_date, end_date, timedelta(minutes=m))
+        
+        # now we need to parse the data frame
+        df = {}
+        variables = variables.split(',')
+        for v in variables:
+            
+            # create an empty dataframe
+            dp = pd.DataFrame(index=t, columns=station_ids)
+            dp.index.name = 'date_time'
+            for s in station_ids:
+                dp[s] = d[v][d['station_id'] == s]
+        
+            df[v] = dp
+        
+        return df
         
 
     def query(self, query, params):
@@ -79,5 +144,15 @@ class database:
     
         
 
-
+def date_range(start_date, end_date, increment):
+    '''
+    Calculate a list between start and end date with
+    an increment
+    '''
+    result = []
+    nxt = start_date
+    while nxt <= end_date:
+        result.append(nxt)
+        nxt += increment
+    return np.array(result)
 

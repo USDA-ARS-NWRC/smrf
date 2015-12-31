@@ -1,5 +1,7 @@
 '''
 2015-11-30 Scott Havens
+updated 2015-12-31 Scott Havens
+    - start using panda dataframes to help keep track of stations 
 
 Distributed forcing data over a grid using different methods
 '''
@@ -15,6 +17,14 @@ class IDW:
     '''
     def __init__(self, mx, my, GridX, GridY, mz=None, GridZ=None, power=2, zeroVal=-1):
         
+        """
+        Args:
+            mx: x locations for the points
+            my: y locations for the points
+            GridX: x locations in grid to interpolate over
+            GridY: y locations in grid to interpolate over
+            power: power of the inverse distance weighting
+        """
                
         # measurement point locations
         self.mx = mx
@@ -67,7 +77,7 @@ class IDW:
         self.weights = 1/(np.power(self.distance, self.power))
         
         # if there are Inf values, set to 1 as the distance was 0
-        self.weights[np.isinf(self.weights)] = 100
+#         self.weights[np.isinf(self.weights)] = 100
   
         
     def calculateIDW(self, data):  

@@ -6,9 +6,9 @@ Read in metadata and data from CSV files
 
 
 import numpy as np
-import os, csv
+import csv
 from smrf import ipw
-
+import pandas as pd
 
 
 
@@ -25,7 +25,7 @@ def read_metadata(mFile, dem):
         dem - opened IPW file
     '''
     
-    print('Reading metadata file...')
+#     print('Reading metadata file...')
     f = open(mFile, 'rU')
     metadata = []
     
@@ -53,12 +53,23 @@ def read_csv(csvFile):
         data - data from csv file
     '''
     
-    print('Reading data file...')
+#     print('Reading data file...')
     
-    f = open(csvFile,'rU')
     data = []
-    for row in csv.DictReader(f):
-        data.append(row)
-    f.close()
+    if csvFile:
+        f = open(csvFile,'rU')
+        
+        for row in csv.DictReader(f):
+            data.append(row)
+        f.close()
     
     return data
+
+def pandas_csv(csvFile):
+    '''
+    Read a csvFile into a pandas dataframe
+    '''
+    
+    
+    
+    

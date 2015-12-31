@@ -10,9 +10,6 @@ from multiprocessing import Process
 import os
 import logging
 
-# logging message start
-logmsg = 'loadTopo: %s'
-
 class topo():
     '''
     Class for topo images and processing those images
@@ -28,6 +25,25 @@ class topo():
     topo() will guess the location of the TMPDIR env variable
     and should work for *nix systems
     
+    Attributes:
+        topoConfig: configuration for topo
+        tempDir: location of temporary working directory
+        dem: smrf.ipw.IPW instance for the DEM
+        mask: smrf.ipw.IPW instance for the mask
+        vegType: smrf.ipw.IPW instance for the veg type
+        vegHeight: smrf.ipw.IPW instance for the veg height
+        vegK: smrf.ipw.IPW instance for the veg K
+        vegTau: smrf.ipw.IPW instance for the veg transmissivity
+        ny: number of columns in DEM
+        nx: number of rows in DEM
+        u,v: UTM location of upper left corner
+        du, dv: step size of grid
+        unit: geo header units of grid
+        coord_sys_ID: coordinate syste,
+        x,y: position vectors
+        X,Y: position grid
+        stoporad_in: smrf.ipw.IPW instance for the input for stoporad
+    
     '''
     
     def __init__(self, topoConfig, tempDir=None):
@@ -36,6 +52,9 @@ class topo():
         if tempDir is None:
             tempDir = os.environ['TMPDIR']
         self.tempDir = tempDir
+        
+        self._logger = logging.getLogger(__name__)
+        self._logger.info('Reading [topo] and making stoporad input')
         
         # read images
         self.readImages()
@@ -65,7 +84,7 @@ class topo():
         # create the x,y vectors
         self.x = self.v + self.dv*np.arange(self.nx)
         self.y = self.u + self.du*np.arange(self.ny)
-        
+        [self.X, self.Y] = np.meshgrid(self.x, self.y)
         
     def stoporadInput(self):
         '''
@@ -75,7 +94,7 @@ class topo():
             
         # calculate the skyview
         svfile = os.path.join(self.tempDir, 'sky_view.ipw')
-        logging.debug(logmsg % ('sky view file - %s' % svfile))
+        self._logger.debug('sky view file - %s' % svfile)
         
 #         _viewf(self.topoConfig['dem'], svfile)
         ts = Process(target=_viewf, args=(self.topoConfig['dem'], svfile))
@@ -83,7 +102,7 @@ class topo():
             
         # calculate the gradient
         gfile = os.path.join(self.tempDir, 'gradient.ipw')
-        logging.debug(logmsg % ('gradient file - %s' % gfile))
+        self._logger.debug('gradient file - %s' % gfile)
         
 #         _gradient(self.topoConfig['dem'], gfile)
         tg = Process(target=_gradient, args=(self.topoConfig['dem'], gfile))
@@ -96,7 +115,7 @@ class topo():
             
         # combine into a value
         sfile = os.path.join(self.tempDir, 'stoporad_in.ipw')
-        logging.debug(logmsg % ('stoporad in file - %s' % sfile))
+        self._logger.debug('stoporad in file - %s' % sfile)
         
         cmd = 'mux %s %s %s > %s' % (self.topoConfig['dem'],
                                                   gfile,

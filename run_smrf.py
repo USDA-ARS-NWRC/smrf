@@ -22,8 +22,43 @@ start = datetime.now()
 
 configFile = './data/testConfig.ini'
 
-s = smrf.model.SMRF(configFile)     # initialize
+
+#===============================================================================
+# Model setup and initialize
+#===============================================================================
+#
+# These are steps that will load the necessary data and initialize the framework
+# Once loaded, this shouldn't need to be re-ran except if something major changes
+
+# 1. initialize
+s = smrf.model.SMRF(configFile, loglevel='debug')
+
+# 2. load topo data
 s.loadTopo()
+
+# 3. initialize the distribution
+s.initializeDistribution()
+
+
+#===============================================================================
+# Distribute data
+#===============================================================================
+#
+# Once the framework is setup, we can load data and distribute the data
+# This can be ran multiple times while the framework is running so that the
+# intialization doesn't have to be re-ran, i.e. if this becomes a GUI
+
+
+# 4. load weather data  and station metadata
 s.loadData()
+
+# 5. distribute  
+
+s.distributeData()
+
+#===============================================================================
+# Run model
+#===============================================================================
+
 
 print datetime.now() - start

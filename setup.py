@@ -29,7 +29,7 @@ setup(
     long_description=readme + '\n\n' + history,
     author="Scott Havens",
     author_email='scotthavens@ars.usda.gov',
-    url='https://github.com/scotthavens/smrf',
+    url='https://gitlab.com/ars-snow/smrf',
     packages=[
         'smrf',
     ],

@@ -8,3 +8,4 @@ __version__ = '0.1.0'
 from . import csv_data
 # from . import mysql_data
 from smrf.data import loadTopo
+from smrf.data import loadData
