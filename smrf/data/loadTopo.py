@@ -49,7 +49,7 @@ class topo():
     def __init__(self, topoConfig, tempDir=None):
         self.topoConfig = topoConfig
         
-        if tempDir is None:
+        if (tempDir is None) | (tempDir == 'TMPDIR'):
             tempDir = os.environ['TMPDIR']
         self.tempDir = tempDir
         

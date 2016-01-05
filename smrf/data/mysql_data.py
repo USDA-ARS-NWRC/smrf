@@ -111,6 +111,10 @@ class database:
         # loads all the data
         d =  pd.read_sql(qry, self._db_connection, index_col='date_time')
         
+        # Fill returned values 'None' with NaN
+        d = d.fillna(value=np.nan, axis='columns')
+        
+        
         # determine the times
         dt = np.diff(d.index.unique())/60/1e9   # time difference in minutes
         dt = dt.astype('float64')
@@ -129,7 +133,7 @@ class database:
             dp = pd.DataFrame(index=t, columns=station_ids)
             dp.index.name = 'date_time'
             for s in station_ids:
-                dp[s] = d[v][d['station_id'] == s]
+                dp[s] = d[v][d['station_id'] == s].copy()
         
             df[v] = dp
         

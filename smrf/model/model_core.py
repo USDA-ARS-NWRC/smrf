@@ -12,10 +12,13 @@ Steps:
 """
 
 import ConfigParser
-import logging
+import logging, os
 from datetime import datetime, timedelta
 import pandas as pd
-import itertools
+# import itertools
+import numpy as np
+import pytz
+import matplotlib.pyplot as plt
 
 from smrf import data, distribute
 
@@ -46,9 +49,16 @@ class SMRF():
         
         Returns:
         
+        To-do:
+        - Set default values for things and fill out the self.config dict
+        
         """
         
         # read the config file and store
+        if not os.path.isfile(configFile):
+            raise Exception('Configuration file does not exist --> %s' % configFile)
+        
+        
         f = MyParser()
         f.read(configFile)
         self.config = f.as_dict()
@@ -60,7 +70,11 @@ class SMRF():
         # get the time section        
         self.start_date = pd.to_datetime(self.config['time']['start_date'])
         self.end_date = pd.to_datetime(self.config['time']['end_date'])
-        self.date_time = data.mysql_data.date_range(self.start_date, self.end_date, timedelta(minutes=int(self.config['time']['time_step'])))
+        d = data.mysql_data.date_range(self.start_date, self.end_date,
+                                       timedelta(minutes=int(self.config['time']['time_step'])))
+        tzinfo = pytz.timezone(self.config['time']['time_zone'])
+        self.date_time = [di.replace(tzinfo=tzinfo) for di in d]
+        
         
         
         # start logging
@@ -104,9 +118,22 @@ class SMRF():
         
         self.distribute = {}
         
+        # 1. Air temperature
         self.distribute['air_temp'] = distribute.air_temp.ta(self.config['air_temp'])  # get the class
+        
+        # 2. Vapor pressure
+        self.distribute['vapor_pressure'] = distribute.vapor_pressure.vp(self.config['vapor_pressure'],
+                                                                         self.config['system']['tempdir'])
                 
-           
+        # 3. Wind
+        self.distribute['wind'] = distribute.wind.wind(self.config['wind'],
+                                                       self.config['system']['tempdir'])
+        
+        # 4. Precipitation
+        self.distribute['precip'] = distribute.precipitation.ppt(self.config['precip'],
+                                                                 self.config['time']['time_step'])
+        
+        
         
     def loadData(self):
         """
@@ -120,26 +147,33 @@ class SMRF():
             self.data = data.loadData.wxdata(self.config['csv'], 
                                            self.start_date,
                                            self.end_date, 
+                                           time_zone=self.config['time']['time_zone'],
                                            stations=self.config['stations'],
                                            dataType='csv')
             
         elif 'mysql' in self.config:
             self.data = data.loadData.wxdata(self.config['mysql'],
                                            self.start_date,
-                                           self.end_date, 
+                                           self.end_date,
+                                           time_zone=self.config['time']['time_zone'],
                                            stations=self.config['stations'],
                                            dataType='mysql')
             
         else:
             raise KeyError('Could not determine where station data is located')   
         
+        # just for now
+        self.data.precip = self.data.precip.diff(1)
+        self.data.precip[self.data.precip < 0] = 0
+        self.data.precip = self.data.precip.fillna(0)
   
         # ensure that the dataframes have consistent times
 #         t = date_range(start_date, end_date, timedelta(minutes=m))
   
         # determine the locations of the stations on the grid
+        self.data.metadata['xi'] = self.data.metadata.apply(lambda row: find_pixel_location(row, self.topo.x, 'X'), axis=1)
+        self.data.metadata['yi'] = self.data.metadata.apply(lambda row: find_pixel_location(row, self.topo.y, 'Y'), axis=1)
         
-    
         
     def distributeData(self):
         """
@@ -173,10 +207,21 @@ class SMRF():
         # initialize a dictionary to hold everything        
         d = self._initDistributionDict(self.date_time, self.data.variables)
         
+        
         #------------------------------------------------------------------------------
         # Initialize the distibution
         # 1. Air temperature
         self.distribute['air_temp'].initialize(self.topo, self.data.metadata)
+        
+        # 2. Vapor pressure
+        self.distribute['vapor_pressure'].initialize(self.topo, self.data.metadata)
+        
+        # 3. Wind
+        self.distribute['wind'].initialize(self.topo, self.data.metadata)
+        
+        # 4. Precipitation
+        self.distribute['precip'].initialize(self.topo, self.data.metadata)
+        
         
         #------------------------------------------------------------------------------
         # Distribute the data
@@ -184,10 +229,27 @@ class SMRF():
             
             # wait here for the model to catch up if needed
             
-            self._logger.debug('Distributing time step %s' % t)
+            self._logger.info('Distributing time step %s' % t)
         
             # 1. Air temperature 
-            d[t]['air_temp'] = self.distribute['air_temp'].distribute(self.data.air_temp.ix[t])
+            self.distribute['air_temp'].distribute(self.data.air_temp.ix[t])
+            
+            # 2. Vapor pressure
+            self.distribute['vapor_pressure'].distribute(self.data.vapor_pressure.ix[t],
+                                                        self.distribute['air_temp'].air_temp)
+            
+            # 3. Wind_speed and wind_direction
+            self.distribute['wind'].distribute(self.data.wind_speed.ix[t],
+                                               self.data.wind_direction.ix[t])
+            
+            # 4. Precipitation
+            self.distribute['precip'].distribute(self.data.precip.ix[t],
+                                                self.distribute['vapor_pressure'].dew_point)
+            
+            
+            # pull all the images together to create the input image
+#             d[t]['air_temp'] = self.distribute['air_temp'].image
+#             d[t]['vapor_pressure'] = self.distribute['vapor_pressure'].image 
             
         self.forcing_data = d
     
@@ -240,7 +302,7 @@ class SMRF():
             
         return d  
         
-        
+    
     
 class MyParser(ConfigParser.ConfigParser):
     def as_dict(self):
@@ -270,5 +332,13 @@ class MyParser(ConfigParser.ConfigParser):
         else:
             # anything else
             return obj
+        
+        
+        
+def find_pixel_location(row, vec, a):
+        """
+        Find the index of the stations X/Y location in the model domain
+        """   
+        return np.argmin(np.abs(vec - row[a]))
         
     

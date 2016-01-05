@@ -28,7 +28,7 @@ class wxdata():
     
     '''
     
-    def __init__(self, dataConfig, start_date, end_date, stations=None, dataType=None):
+    def __init__(self, dataConfig, start_date, end_date, time_zone='UTC', stations=None, dataType=None):
         
         if dataType is None:
             raise Exception('loadData.data() must have a specified dataType of "csv" or "mysql"')
@@ -37,6 +37,7 @@ class wxdata():
         self.dataType = dataType
         self.start_date = start_date
         self.end_date = end_date
+        self.time_zone = time_zone
         self.stations = stations
         self.variables = ['air_temp', 'vapor_pressure', 'precip', 'solar', 'wind_speed', 'wind_direction']
         
@@ -53,6 +54,10 @@ class wxdata():
         else:
             raise Exception('Could not resolve dataType')
         
+        # correct for the timezone
+        for v in self.variables:
+            d = getattr(self, v)
+            setattr(self, v, d.tz_localize(tz=self.time_zone))
         
         
      

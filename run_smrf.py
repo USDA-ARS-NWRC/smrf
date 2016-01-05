@@ -20,7 +20,7 @@ start = datetime.now()
 # run the model
 # output if necessary
 
-configFile = './data/testConfig.ini'
+configFile = './test_data/testConfig.ini'
 
 
 #===============================================================================

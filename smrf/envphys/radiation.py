@@ -511,18 +511,6 @@ def veg_diffuse(data, tau):
     
     return tau * data
     
-
-def set_min_max(data, min_val, max_val):
-    '''
-    Ensure that the data is in the bounds of min and max
-    20150611 Scott Havens
-    '''
-    
-    data[data <= min_val] = min_val
-    data[data >= max_val] = max_val
-    
-    return data
-    
     
 def thermal_correct_terrain(th, ta, viewf):
     '''
