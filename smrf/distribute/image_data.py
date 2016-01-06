@@ -83,15 +83,19 @@ class image_data():
                 config['zeroValue'] = None
             
                     
+        self.getStations(config)
+        
+                    
+        self.config = config
+    
+    def getStations(self, config):
+        
         # determine the stations that will be used, alphabetical order
         stations = config['stations'].split(',')
         stations = map(str.strip, stations)
         stations.sort()
         self.stations = stations
         
-                    
-        self.config = config
-    
     
     def _initialize(self, topo, metadata):
         """
@@ -118,7 +122,7 @@ class image_data():
             my = meta.Y.values
             mz = meta.elevation.values
             
-            self.idw = idw.IDW(mx, my, topo.X, topo.Y, mz=mz, GridZ=topo.dem.bands[0].data, power=self.config['power'])            
+            self.idw = idw.IDW(mx, my, topo.X, topo.Y, mz=mz, GridZ=topo.dem, power=self.config['power'])            
         
         
         else:

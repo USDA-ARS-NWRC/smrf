@@ -58,19 +58,19 @@ def water_day(indate):
     
     # check to see if it makes sense
     if indate < test_date:
-        wy = tp.tm_year - 1
-    else:
         wy = tp.tm_year
+    else:
+        wy = tp.tm_year + 1
         
     # actual water year start
-    wy_start = datetime(wy, 10, 1, 0, 0, 0)
+    wy_start = datetime(wy-1, 10, 1, 0, 0, 0)
     wy_start = wy_start.replace(tzinfo=pytz.timezone(indate.tzname()))
     
     # determine the decimal difference
     d = indate - wy_start
     dd = d.days + d.seconds/86400.0
     
-    return dd
+    return dd, wy
 
 def is_leap_year(year):
     return (year % 4 == 0 and year % 100 != 0) or year % 400 == 0

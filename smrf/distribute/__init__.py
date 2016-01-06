@@ -10,3 +10,4 @@ from smrf.distribute import albedo
 from smrf.distribute import vapor_pressure
 from smrf.distribute import wind
 from smrf.distribute import precipitation
+from smrf.distribute import solar

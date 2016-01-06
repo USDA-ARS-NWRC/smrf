@@ -74,7 +74,7 @@ class wind(image_data.image_data):
         
         
     def __del__(self):
-        self._maxus_file.close()
+        # self._maxus_file.close()
         self._logger.debug('Closed %s' % self._maxus_file)
         
         
@@ -91,7 +91,7 @@ class wind(image_data.image_data):
         
         self._initialize(topo, metadata)
         
-        self.veg_type = topo.veg_type.bands[0].data
+        self.veg_type = topo.veg_type
         
         # get the enhancements for the stations
         if 'enhancement' not in self.metadata.columns:
@@ -100,6 +100,8 @@ class wind(image_data.image_data):
             for m in self.metadata.index:
                 if m.lower() in self.config:
                     self.metadata.loc[m, 'enhancement'] = float(self.config[m.lower()])
+                    
+                    
         
     def distribute(self, data_speed, data_direction):
         """

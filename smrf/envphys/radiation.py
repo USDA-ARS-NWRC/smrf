@@ -913,7 +913,5 @@ def model_solar(dt, lat, lon, tau=0.2, tzone=0):
     
     return R[4]
 
-    
-
 
 

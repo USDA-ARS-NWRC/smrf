@@ -9,8 +9,8 @@ import numpy as np
 import logging
 from smrf.distribute import image_data
 from smrf.envphys import radiation
-import smrf.utils as utils
-import matplotlib.pyplot as plt
+# import smrf.utils as utils
+# import matplotlib.pyplot as plt
 
 class albedo(image_data.image_data):
     """

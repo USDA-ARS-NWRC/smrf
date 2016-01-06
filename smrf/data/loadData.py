@@ -39,7 +39,7 @@ class wxdata():
         self.end_date = end_date
         self.time_zone = time_zone
         self.stations = stations
-        self.variables = ['air_temp', 'vapor_pressure', 'precip', 'solar', 'wind_speed', 'wind_direction']
+        self.variables = ['air_temp', 'vapor_pressure', 'precip', 'solar', 'wind_speed', 'wind_direction', 'cloud_factor']
         
         
         self._logger = logging.getLogger(__name__)

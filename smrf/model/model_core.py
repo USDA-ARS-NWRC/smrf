@@ -97,6 +97,15 @@ class SMRF():
         """
         Provide some logging info about when SMRF was closed
         """
+        
+        # clean up the TMPDIR
+        os.remove(self.topo.stoporad_in_file)
+        os.remove(self.distribute['solar'].vis_file)
+        os.remove(self.distribute['solar'].ir_file)
+        
+        # close other files
+        self.distribute['wind']._maxus_file.close()
+        
         self._logger.info('SMRF closed --> %s' % datetime.now())   
         
     
@@ -124,11 +133,11 @@ class SMRF():
         
         # 2. Vapor pressure
         self.distribute['vapor_pressure'] = distribute.vapor_pressure.vp(self.config['vapor_pressure'],
-                                                                         self.config['system']['tempdir'])
+                                                                         self.config['system']['temp_dir'])
                 
         # 3. Wind
         self.distribute['wind'] = distribute.wind.wind(self.config['wind'],
-                                                       self.config['system']['tempdir'])
+                                                       self.config['system']['temp_dir'])
         
         # 4. Precipitation
         self.distribute['precip'] = distribute.precipitation.ppt(self.config['precip'],
@@ -136,6 +145,14 @@ class SMRF():
         
         # 5. Albedo
         self.distribute['albedo'] = distribute.albedo.albedo(self.config['albedo'])
+        
+        # 6. Solar radiation
+        self.distribute['solar'] = distribute.solar.solar(self.config['solar'],
+                                                          self.distribute['albedo'].config,
+                                                          self.topo.stoporad_in_file,
+                                                          self.config['system']['temp_dir'])
+        
+        
         
     def loadData(self):
         """
@@ -227,6 +244,8 @@ class SMRF():
         # 5. Albedo
         self.distribute['albedo'].initialize(self.topo, self.data.metadata)
         
+        # 6. Solar
+        self.distribute['solar'].initialize(self.topo, self.data.metadata)
         
         #------------------------------------------------------------------------------
         # Distribute the data
@@ -261,11 +280,20 @@ class SMRF():
             
             # 4. Precipitation
             self.distribute['precip'].distribute(self.data.precip.ix[t],
-                                                self.distribute['vapor_pressure'].dew_point)
+                                                self.distribute['vapor_pressure'].dew_point,
+                                                self.topo.mask)
             
             # 5. Albedo
             self.distribute['albedo'].distribute(t, illum_ang, self.distribute['precip'].storm_days)
             
+            # 6. Solar
+            self.distribute['solar'].distribute(self.data.cloud_factor.ix[t],
+                                                illum_ang, 
+                                                cosz, 
+                                                azimuth,
+                                                self.distribute['precip'].last_storm_day_basin,
+                                                self.distribute['albedo'].albedo_vis,
+                                                self.distribute['albedo'].albedo_ir)
             
             
 #             plt.imshow(self.distribute['albedo'].albedo_vis), plt.colorbar(), plt.show()

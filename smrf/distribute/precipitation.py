@@ -63,13 +63,14 @@ class ppt(image_data.image_data):
             
             
         
-    def distribute(self, data, dpt):
+    def distribute(self, data, dpt, mask=None):
         """
         Distribute precipitation
         
         Args:
             data: precip data frame
-            
+            dpt: dew point array
+            mask: basin mask to apply to the storm days
         """
     
         self._logger.debug('Distributing precip')
@@ -102,7 +103,16 @@ class ppt(image_data.image_data):
             self.storm_days += self.time_step/60/24
 
         # day of last storm, this will be used in albedo
-        self.last_storm_day = utils.water_day(data.name) - self.storm_days - 0.001     
+        self.last_storm_day = utils.water_day(data.name)[0] - self.storm_days - 0.001    
+
+        # get the time since most recent storm
+        if mask is not None:
+            self.last_storm_day_basin = np.max(mask * self.last_storm_day)
+        else:
+            self.last_storm_day_basin = np.max(self.last_storm_day)
+        
+
+         
         
 #         plt.imshow(self.last_storm_day), plt.colorbar(), plt.show()
     

@@ -52,6 +52,9 @@ class topo():
     def __init__(self, topoConfig, tempDir=None):
         self.topoConfig = topoConfig
         
+        if 'dem' not in topoConfig:
+            raise ValueError('DEM file not specified')
+        
         if (tempDir is None) | (tempDir == 'TMPDIR'):
             tempDir = os.environ['TMPDIR']
         self.tempDir = tempDir
@@ -78,17 +81,23 @@ class topo():
         
         # read in the images
         for v in self.images:
-            setattr(self, v, ipw.IPW(self.topoConfig[v]))
-            
-        # get some general information about the model domain from the dem
-        self.ny = self.dem.nlines
-        self.nx = self.dem.nsamps
-        self.u = self.dem.bands[0].bline
-        self.v = self.dem.bands[0].bsamp
-        self.du = self.dem.bands[0].dline
-        self.dv = self.dem.bands[0].dsamp
-        self.units = self.dem.bands[0].geounits
-        self.coord_sys_ID = self.dem.bands[0].coord_sys_ID
+            if v in self.topoConfig:
+                i = ipw.IPW(self.topoConfig[v])
+                setattr(self, v, i.bands[0].data)
+                
+                if v is 'dem':
+                    # get some general information about the model domain from the dem
+                    self.ny = i.nlines
+                    self.nx = i.nsamps
+                    self.u = i.bands[0].bline
+                    self.v = i.bands[0].bsamp
+                    self.du = i.bands[0].dline
+                    self.dv = i.bands[0].dsamp
+                    self.units = i.bands[0].geounits
+                    self.coord_sys_ID = i.bands[0].coord_sys_ID
+                
+            else:
+                setattr(self, v, None)
         
         # create the x,y vectors
         self.x = self.v + self.dv*np.arange(self.nx)
@@ -137,13 +146,15 @@ class topo():
             
         # read in the stoporad file to store in memory
         self.stoporad_in = ipw.IPW(sfile)
+        self.stoporad_in_file = sfile
         self.slope = self.stoporad_in.bands[1].data
         self.aspect = self.stoporad_in.bands[2].data
+        
         
         # clean up the TMPDIR
         os.remove(gfile)
         os.remove(svfile)
-        os.remove(sfile)
+        
         
         
         
