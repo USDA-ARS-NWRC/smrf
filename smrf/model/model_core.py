@@ -21,6 +21,7 @@ import pytz
 import matplotlib.pyplot as plt
 
 from smrf import data, distribute
+from smrf.envphys import radiation
 
 
 class SMRF():
@@ -38,6 +39,9 @@ class SMRF():
             loaded from either a CSV file or MySQL database
         
     """
+    
+    # These are the modules that the user can modify and use different methods
+    modules = ['air_temp', 'vapor_pressure', 'wind', 'precip', 'albedo']
 
     def __init__(self, configFile, loglevel='INFO'):
         """
@@ -75,8 +79,6 @@ class SMRF():
         tzinfo = pytz.timezone(self.config['time']['time_zone'])
         self.date_time = [di.replace(tzinfo=tzinfo) for di in d]
         
-        
-        
         # start logging
         numeric_level = getattr(logging, loglevel.upper(), None)
         if not isinstance(numeric_level, int):
@@ -104,8 +106,7 @@ class SMRF():
         """
     
         # load the topo 
-        self.topo = data.loadTopo.topo(self.config['topo'])
-     
+        self.topo = data.loadTopo.topo(self.config['topo'])     
      
      
     def initializeDistribution(self):
@@ -133,7 +134,8 @@ class SMRF():
         self.distribute['precip'] = distribute.precipitation.ppt(self.config['precip'],
                                                                  self.config['time']['time_step'])
         
-        
+        # 5. Albedo
+        self.distribute['albedo'] = distribute.albedo.albedo(self.config['albedo'])
         
     def loadData(self):
         """
@@ -205,7 +207,7 @@ class SMRF():
         
         #------------------------------------------------------------------------------
         # initialize a dictionary to hold everything        
-        d = self._initDistributionDict(self.date_time, self.data.variables)
+#         d = self._initDistributionDict(self.date_time, self.modules)
         
         
         #------------------------------------------------------------------------------
@@ -222,6 +224,9 @@ class SMRF():
         # 4. Precipitation
         self.distribute['precip'].initialize(self.topo, self.data.metadata)
         
+        # 5. Albedo
+        self.distribute['albedo'].initialize(self.topo, self.data.metadata)
+        
         
         #------------------------------------------------------------------------------
         # Distribute the data
@@ -230,6 +235,18 @@ class SMRF():
             # wait here for the model to catch up if needed
             
             self._logger.info('Distributing time step %s' % t)
+            
+            # 0.1 sun angle for time step
+            cosz, azimuth = radiation.sunang(t.astimezone(pytz.utc), 
+                                            self.topo.topoConfig['basin_lat'],
+                                            self.topo.topoConfig['basin_lon'],
+                                            zone=0, slope=0, aspect=0)
+            
+            # 0.2 illumination angle
+            illum_ang = None
+            if cosz > 0:
+                illum_ang = radiation.shade(self.topo.slope, self.topo.aspect, azimuth, cosz)
+                    
         
             # 1. Air temperature 
             self.distribute['air_temp'].distribute(self.data.air_temp.ix[t])
@@ -246,12 +263,23 @@ class SMRF():
             self.distribute['precip'].distribute(self.data.precip.ix[t],
                                                 self.distribute['vapor_pressure'].dew_point)
             
+            # 5. Albedo
+            self.distribute['albedo'].distribute(t, illum_ang, self.distribute['precip'].storm_days)
+            
+            
+            
+#             plt.imshow(self.distribute['albedo'].albedo_vis), plt.colorbar(), plt.show()
+            
             
             # pull all the images together to create the input image
 #             d[t]['air_temp'] = self.distribute['air_temp'].image
 #             d[t]['vapor_pressure'] = self.distribute['vapor_pressure'].image 
             
-        self.forcing_data = d
+            
+            # check if out put is desired
+            
+            
+        self.forcing_data = 1 #d
     
     def runModel(self):
         """

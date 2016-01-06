@@ -5,6 +5,7 @@
 from smrf import ipw
 import numpy as np
 import subprocess as sp
+import utm
 # import threading
 from multiprocessing import Process
 import os
@@ -46,6 +47,8 @@ class topo():
     
     '''
     
+    images = ['dem', 'mask', 'veg_type', 'veg_height', 'veg_k', 'veg_tau']
+    
     def __init__(self, topoConfig, tempDir=None):
         self.topoConfig = topoConfig
         
@@ -56,19 +59,25 @@ class topo():
         self._logger = logging.getLogger(__name__)
         self._logger.info('Reading [topo] and making stoporad input')
         
+        # convert lat/lon to float
+        self.topoConfig['basin_lat'] = float(self.topoConfig['basin_lat'])
+        self.topoConfig['basin_lon'] = float(self.topoConfig['basin_lon'])
+        
         # read images
         self.readImages()
         
         # calculate the necessary images for stoporad
         self.stoporadInput()
         
+        
+                
     def readImages(self):
         '''
         Read in the images from the config file
         '''
         
         # read in the images
-        for v in self.topoConfig:
+        for v in self.images:
             setattr(self, v, ipw.IPW(self.topoConfig[v]))
             
         # get some general information about the model domain from the dem
@@ -128,6 +137,8 @@ class topo():
             
         # read in the stoporad file to store in memory
         self.stoporad_in = ipw.IPW(sfile)
+        self.slope = self.stoporad_in.bands[1].data
+        self.aspect = self.stoporad_in.bands[2].data
         
         # clean up the TMPDIR
         os.remove(gfile)

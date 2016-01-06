@@ -102,7 +102,7 @@ class ppt(image_data.image_data):
             self.storm_days += self.time_step/60/24
 
         # day of last storm, this will be used in albedo
-        self.last_storm_day = utils.water_day(data.name) - self.storm_days - 0.001   
+        self.last_storm_day = utils.water_day(data.name) - self.storm_days - 0.001     
         
 #         plt.imshow(self.last_storm_day), plt.colorbar(), plt.show()
     

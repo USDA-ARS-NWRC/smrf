@@ -91,7 +91,7 @@ class wind(image_data.image_data):
         
         self._initialize(topo, metadata)
         
-        self.vegtype = topo.vegtype.bands[0].data
+        self.veg_type = topo.veg_type.bands[0].data
         
         # get the enhancements for the stations
         if 'enhancement' not in self.metadata.columns:
@@ -165,7 +165,7 @@ class wind(image_data.image_data):
             
         # correct for veg
         for i,v in enumerate(self.config['veg']):
-            cellmaxus[self.vegtype == int(v)] += self.config['veg'][v]
+            cellmaxus[self.veg_type == int(v)] += self.config['veg'][v]
                     
         # correct unreasonable values
         cellmaxus[cellmaxus > 32] = 32

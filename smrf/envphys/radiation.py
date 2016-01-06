@@ -62,12 +62,12 @@ def albedo(telapsed, cosz, gsize, maxgsz, dirt=2):
     '''
     Calculate the abedo, adapted from IPW function albedo
     
-    Inputs:
-    telapsed - time since last snow storm (decimal days)
-    cosz - cosine local solar illumination angle matrix
-    gsize - gsize is effective grain radius of snow after last storm (mu m)
-    maxgsz -  maxgsz is maximum grain radius expected from grain growth (mu m)
-    dirt - dirt is effective contamination for adjustment to visible albedo (usually between 1.5-3.0)
+    Args:
+        telapsed - time since last snow storm (decimal days)
+        cosz - cosine local solar illumination angle matrix
+        gsize - gsize is effective grain radius of snow after last storm (mu m)
+        maxgsz -  maxgsz is maximum grain radius expected from grain growth (mu m)
+        dirt - dirt is effective contamination for adjustment to visible albedo (usually between 1.5-3.0)
     
     Output
     
@@ -379,7 +379,7 @@ def _cosz(x1,z1,x2,z2):
     return v
         
 
-def sunang_ipw(date, lat, lon, zone=0, slope=0, aspect=0):
+def sunang(date, lat, lon, zone=0, slope=0, aspect=0):
     '''
     Wrapper for the IPW sunang function
     
@@ -416,16 +416,93 @@ def sunang_ipw(date, lat, lon, zone=0, slope=0, aspect=0):
     cmd_str = 'sunang -b %s -l %s -t %s -s %i -a %i -z %i' % \
         (lat_str, lon_str, dstr, slope, aspect, zone)
 
-    p = sp.Popen(cmd_str,stdout=sp.PIPE, shell=True, env={"PATH": IPW})
+    p = sp.Popen(cmd_str,stdout=sp.PIPE, shell=True)
     
     # get the results
     out, err = p.communicate()
     
     c = out.rstrip().split(' ')
     cosz = float(c[1])
-    azimuth = c[3]
+    azimuth = float(c[3])
     
     return cosz, azimuth
+
+
+def shade(slope, aspect, azimuth, cosz=None, zenith=None):
+    """
+    Calculate the cosize of the local illumination angle over a DEM
+    
+    Solves the following equation
+    cos(ts) = cos(t0) * cos(S) + sin(t0) * sin(S) * cos(phi0 - A)
+    
+    where
+        t0 is the illumination angle on a horizontal surface
+        phi0 is the azimuth of illumination
+        S is slope in radians
+        A is aspect in radians
+    
+    Slope and aspect are expected to come from the IPW gradient command.
+    Slope is stored as sin(S) with range from 0 to 1. Aspect is stored 
+    as radians from south (aspect 0 is toward the south) with range from 
+    -pi to pi, with negative values to the west and positive values to the east.
+    
+    Args:
+        slope: numpy array of sine of slope angles
+        aspect: numpy array of aspect in radians from south
+        azimuth: azimuth in degrees to the sun -180..180 (comes from sunang)
+        cosz: cosize of the zeinith angle 0..1 (comes from sunang)
+        zenith: the solar zenith angle 0..90 degrees
+        
+    At least on of the cosz or zenith must be specified.  If both are
+    specified the zenith is ignored 
+    
+    Returns:
+        mu: numpy matrix of the cosize of the local illumination angle cos(ts)
+        
+    The python shade() function is an interpretation of the IPW shade()
+    function and follows as close as possible.  All equations are based 
+    on Dozier & Frew, 1990. 'Rapid calculation of Terrain Parameters For
+    Radiation Modeling From Digitial Elevation Data,' IEEE TGARS
+    
+    20150106 Scott Havens
+    """
+    
+    # process the options
+    if cosz is not None:
+        if (cosz <= 0) or (cosz > 1):
+            raise Exception('cosz must be > 0 and <= 1')
+        
+        ctheta = cosz
+        zenith = np.arccos(ctheta)  # in radians
+        stheta = np.sin(zenith)
+    
+    elif zenith is not None:
+        if (zenith < 0) or (zenith >= 90):
+            raise Exception('Zenith must be >= 0 and < 90')
+     
+        zenith *= np.pi/180 # in radians
+        ctheta = np.cos(zenith)
+        stheta = np.sin(zenith)
+        
+    else:
+        raise Exception('Must specify either cosz or zenith')
+    
+    if (azimuth > 180) or (azimuth < -180):
+        raise Exception('Azimuth must be between -180 and 180 degrees')
+    
+    azimuth *= np.pi/180
+    
+    # get the cos S from cos^2 + sin^s = 1
+    costbl = np.sqrt((1 - slope) * (1 + slope))
+
+    # cosine of local illumination angle
+    # mu = ctheta * costbl[s] + stheta * sintbl[s] * cosdtbl[a]
+    mu = ctheta * costbl + stheta * slope * np.cos(azimuth - aspect)
+    
+    mu[mu < 0] = 0
+    mu[mu > 1] = 1
+    
+    return mu
 
 
 def deg_to_dms(deg):
@@ -826,7 +903,7 @@ def model_solar(dt, lat, lon, tau=0.2, tzone=0):
     '''
 
     # determine the sun angle
-    cosz, az = sunang_ipw(dt, lat, lon)
+    cosz, az = sunang(dt, lat, lon)
     
     # calculate the solar irradiance
     sol = solar_ipw(dt, [0.28,2.8])
