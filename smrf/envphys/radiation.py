@@ -522,14 +522,14 @@ def cf_cloud(beam, diffuse, cf):
     time, using input clear-sky global and diffuse radiation calculations supplied by
     locally modified toporad or locally modified stoporad
     
-    Inputs:
-    beam - global irradiance
-    diffuse - diffuse irradiance
-    cf- cloud attenuation factor
+    Args:
+        beam: global irradiance
+        diffuse: diffuse irradiance
+        cf: cloud attenuation factor - actual irradiance / clear-sky irradiance
     
-    Outputs:
-    c_grad - cloud corrected gobal irradiance
-    c_drad - cloud corrected diffuse irradiance
+    Returns:
+        c_grad: cloud corrected gobal irradiance
+        c_drad: cloud corrected diffuse irradiance
     
     20150610 Scott Havens - adapted from cloudcalc.c
     '''

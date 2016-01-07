@@ -8,13 +8,13 @@ Distribute solar radiation
 import numpy as np
 import logging, os
 import subprocess as sp
+from multiprocessing import Process
 from smrf.distribute import image_data
 from smrf.envphys import radiation
 import smrf.utils as utils
 from smrf import ipw
 
-# import smrf.utils as utils
-# import matplotlib.pyplot as plt
+import matplotlib.pyplot as plt
 
 class solar(image_data.image_data):
     """
@@ -98,9 +98,12 @@ class solar(image_data.image_data):
         """
         
         self._initialize(topo, metadata)
+        self.veg_height = topo.veg_height
+        self.veg_tau = topo.veg_tau
+        self.veg_k = topo.veg_k
                   
             
-        
+    
     def distribute(self, data, illum_ang, cosz, azimuth, min_storm_day, albedo_vis, albedo_ir):
         """
         Distribute solar
@@ -116,47 +119,33 @@ class solar(image_data.image_data):
     
         self._logger.debug('Distributing solar')
         
+        # cloud must always be distributed since it is used by thermal
+        self._distribute(data, other_attribute='cloud_factor')
+        
         # only need to calculate solar if the sun is up
         if cosz > 0:
-               
-            #------------------------------------------------------------------------------ 
-            # calculate clear sky radiation
-                    
+            
             # get the current day of water year
             wy_day, wyear = utils.water_day(data.name)
             
             # determine the minutes west of timezone
             tz_min_west = np.abs(data.name.utcoffset().total_seconds()/60)
-                
-            # Calculate ir radiation
-            self._logger.debug('Calculating clear sky radiation, ir')
             
-            ir_cmd = 'stoporad -z %i -t %s -w %s -g %s -x 0.7,2.8 -s %s'\
-                ' -d %s -f %i -y %i -A %s,%s -a %i -m %i -c %i -D %s > %s' \
-                % (self.config['clear_opt_depth'], str(self.config['clear_tau']), \
-                   str(self.config['clear_omega']), str(self.config['clear_gamma']), \
-                   str(min_storm_day), str(wy_day), tz_min_west, wyear, \
-                   str(cosz), str(azimuth), self.albedoConfig['grain_size'], self.albedoConfig['max_grain'], \
-                   self.albedoConfig['dirt'], self.stoporad_in, self.ir_file)
-            irp = sp.Popen(ir_cmd, shell=True, env={"PATH": os.environ['PATH'], "TMPDIR": os.environ['TMPDIR']}).wait()
+               
+            #------------------------------------------------------------------------------ 
+            # calculate clear sky radiation
+                    
+            # call the calc_ir and calc_vis to run as different processes
+            ti = Process(target=self.calc_ir, args=(min_storm_day, wy_day, tz_min_west, wyear, cosz, azimuth))
+            ti.start()
+                         
+            tv = Process(target=self.calc_vis, args=(min_storm_day, wy_day, tz_min_west, wyear, cosz, azimuth))
+            tv.start()
+             
+            # wait for the processes to stop
+            ti.join()
+            tv.join()
             
-            if irp != 0:
-                raise Exception('Clear sky for IR failed')
-                        
-            # Calculate visible radiation
-            self._logger.debug('Calculating clear sky radiation, visible')
-            
-            vis_cmd = 'stoporad -z %i -t %s -w %s -g %s -x 0.28,0.7 -s %s'\
-                ' -d %s -f %i -y %i -A %s,%s -a %i -m %i -c %i  -D %s > %s' \
-                % (self.config['clear_opt_depth'], str(self.config['clear_tau']), \
-                   str(self.config['clear_omega']), str(self.config['clear_gamma']), \
-                   str(min_storm_day), str(wy_day), tz_min_west, wyear, \
-                   str(cosz), str(azimuth), self.albedoConfig['grain_size'], self.albedoConfig['max_grain'], \
-                   self.albedoConfig['dirt'], self.stoporad_in, self.vis_file)
-            visp = sp.Popen(vis_cmd, shell=True, env={"PATH": os.environ['PATH'], "TMPDIR": os.environ['TMPDIR']}).wait()   
-
-            if visp != 0:
-                raise Exception('Clear sky for visible failed')
 
             # load clear sky files back in
             vis = ipw.IPW(self.vis_file)
@@ -169,22 +158,130 @@ class solar(image_data.image_data):
             
             #------------------------------------------------------------------------------ 
             # correct clear sky for cloud
-
-
+            
+            self._logger.debug('Correcting clear sky radiation for clouds')
+            self.cloud_vis_beam, self.cloud_vis_diffuse = radiation.cf_cloud(self.clear_vis_beam, 
+                                                                          self.clear_vis_diffuse, 
+                                                                          self.cloud_factor)
+            
+            self.cloud_ir_beam, self.cloud_ir_diffuse = radiation.cf_cloud(self.clear_ir_beam, 
+                                                                          self.clear_ir_diffuse, 
+                                                                          self.cloud_factor)
+            
+            #------------------------------------------------------------------------------ 
+            # correct cloud for veg
+            
+            self._logger.debug('Correcting radiation for vegitation')
+                        
+            ### calculate for visible ###
+            # correct beam
+            self.veg_vis_beam = radiation.veg_beam(self.cloud_vis_beam, self.veg_height, illum_ang, self.veg_k)
+            
+            # correct diffuse
+            self.veg_vis_diffuse = radiation.veg_diffuse(self.cloud_vis_diffuse, self.veg_tau)
+            
+            ### calculate for ir ###
+            # correct beam
+            self.veg_ir_beam = radiation.veg_beam(self.cloud_ir_beam, self.veg_height, illum_ang, self.veg_k)
+            
+            # correct diffuse
+            self.veg_ir_diffuse = radiation.veg_diffuse(self.cloud_ir_diffuse, self.veg_tau)
+            
+            
+            #------------------------------------------------------------------------------ 
+            # calculate net radiation
+            
+            self._logger.debug('Calculing net radiation')
+            
+            # calculate net visible
+            vv_n = (self.veg_vis_beam + self.veg_vis_diffuse) * (1 - albedo_vis) 
+            vv_n = utils.set_min_max(vv_n, self.min, self.max) # ensure min and max's are met
+            
+            # calculate net ir
+            vir_n = (self.veg_ir_beam + self.veg_ir_diffuse) * (1 - albedo_ir) 
+            vir_n = utils.set_min_max(vir_n, self.min, self.max) # ensure min and max's are met
+            
+            # calculate total net
+            self.net_solar = vv_n + vir_n
+            self.net_solar = utils.set_min_max(self.net_solar, self.min, self.max) # ensure min and max's are met
     
         else:
             
-            self._logger.debug('Sun is down, goodnight')
+            self._logger.debug('Sun is down, see you in the morning!')
             
-            self.clear_vis = np.zeros(albedo_vis.shape)
-            self.clear_ir = np.zeros(albedo_vis.shape)
+            # clear sky
+            self.clear_vis_beam = None
+            self.clear_vis_diffuse = None
+            self.clear_ir_beam = None
+            self.clear_ir_diffuse = None
+            
+            # cloud
+            self.cloud_vis_beam = None
+            self.cloud_vis_diffuse = None
+            self.cloud_ir_beam = None
+            self.cloud_ir_diffuse = None
+            
+            # canopy
+            self.veg_vis_beam = None
+            self.veg_vis_diffuse = None
+            self.veg_ir_beam = None
+            self.veg_ir_diffuse = None
+            
+            # net
+            self.net_solar = None
             
             
             
+    def calc_ir(self, min_storm_day, wy_day, tz_min_west, wyear, cosz, azimuth):
+        """
+        Run stoporad for the ir bands
+        Args:
+            min_storm_day
+            wy_day
+            tz_min_west
+            wyear
+            cosz
+            azimuth
+        """
+        self._logger.debug('Calculating clear sky radiation, ir')
+        
+        ir_cmd = 'stoporad -z %i -t %s -w %s -g %s -x 0.7,2.8 -s %s'\
+            ' -d %s -f %i -y %i -A %s,%s -a %i -m %i -c %i -D %s > %s' \
+            % (self.config['clear_opt_depth'], str(self.config['clear_tau']), \
+               str(self.config['clear_omega']), str(self.config['clear_gamma']), \
+               str(min_storm_day), str(wy_day), tz_min_west, wyear, \
+               str(cosz), str(azimuth), self.albedoConfig['grain_size'], self.albedoConfig['max_grain'], \
+               self.albedoConfig['dirt'], self.stoporad_in, self.ir_file)
+        irp = sp.Popen(ir_cmd, shell=True, env={"PATH": os.environ['PATH'], "TMPDIR": os.environ['TMPDIR']}).wait()
+    
+        if irp != 0:
+            raise Exception('Clear sky for IR failed')        
             
             
-            
-            
+    def calc_vis(self, min_storm_day, wy_day, tz_min_west, wyear, cosz, azimuth):
+        """
+        Run stoporad for the ir bands
+        Args:
+            min_storm_day
+            wy_day
+            tz_min_west
+            wyear
+            cosz
+            azimuth
+        """
+        self._logger.debug('Calculating clear sky radiation, visible')
+        
+        vis_cmd = 'stoporad -z %i -t %s -w %s -g %s -x 0.28,0.7 -s %s'\
+            ' -d %s -f %i -y %i -A %s,%s -a %i -m %i -c %i  -D %s > %s' \
+            % (self.config['clear_opt_depth'], str(self.config['clear_tau']), \
+               str(self.config['clear_omega']), str(self.config['clear_gamma']), \
+               str(min_storm_day), str(wy_day), tz_min_west, wyear, \
+               str(cosz), str(azimuth), self.albedoConfig['grain_size'], self.albedoConfig['max_grain'], \
+               self.albedoConfig['dirt'], self.stoporad_in, self.vis_file)
+        visp = sp.Popen(vis_cmd, shell=True, env={"PATH": os.environ['PATH'], "TMPDIR": os.environ['TMPDIR']}).wait()
+
+        if visp != 0:
+            raise Exception('Clear sky for visible failed')
             
             
     

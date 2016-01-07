@@ -73,9 +73,9 @@ class wind(image_data.image_data):
         
         
         
-    def __del__(self):
-        # self._maxus_file.close()
-        self._logger.debug('Closed %s' % self._maxus_file)
+#     def __del__(self):
+#         self._maxus_file.close()
+#         self._logger.debug('Closed %s' % self._maxus_file)
         
         
         

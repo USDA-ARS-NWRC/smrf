@@ -115,7 +115,7 @@ class topo():
         self._logger.debug('sky view file - %s' % svfile)
         
 #         _viewf(self.topoConfig['dem'], svfile)
-        ts = Process(target=_viewf, args=(self.topoConfig['dem'], svfile))
+        ts = Process(target=self._viewf, args=(self.topoConfig['dem'], svfile))
         ts.start()
             
         # calculate the gradient
@@ -123,7 +123,7 @@ class topo():
         self._logger.debug('gradient file - %s' % gfile)
         
 #         _gradient(self.topoConfig['dem'], gfile)
-        tg = Process(target=_gradient, args=(self.topoConfig['dem'], gfile))
+        tg = Process(target=self._gradient, args=(self.topoConfig['dem'], gfile))
         tg.start()
         
         # wait for the processes to stop
@@ -158,22 +158,22 @@ class topo():
         
         
         
-def _gradient(demFile, gradientFile):
-    # calculate the gradient
-    cmd = 'gradient %s > %s' % (demFile, gradientFile)
-    proc = sp.Popen(cmd, shell=True).wait()
-    
-    if proc != 0:
-        raise OSError('gradient failed')    
-    
-    
-def _viewf(demFile, viewfFile):
-    # calculate the sky view file
-    cmd = 'viewf %s > %s' % (demFile, viewfFile)
-    proc = sp.Popen(cmd, shell=True).wait()
-    
-    if proc != 0:
-        raise OSError('viewf failed')   
+    def _gradient(self, demFile, gradientFile):
+        # calculate the gradient
+        cmd = 'gradient %s > %s' % (demFile, gradientFile)
+        proc = sp.Popen(cmd, shell=True).wait()
+        
+        if proc != 0:
+            raise OSError('gradient failed')    
+        
+        
+    def _viewf(self, demFile, viewfFile):
+        # calculate the sky view file
+        cmd = 'viewf %s > %s' % (demFile, viewfFile)
+        proc = sp.Popen(cmd, shell=True).wait()
+        
+        if proc != 0:
+            raise OSError('viewf failed')   
     
         
         

@@ -253,6 +253,8 @@ class SMRF():
             
             # wait here for the model to catch up if needed
             
+            startTime = datetime.now()
+            
             self._logger.info('Distributing time step %s' % t)
             
             # 0.1 sun angle for time step
@@ -306,6 +308,8 @@ class SMRF():
             
             # check if out put is desired
             
+            telapsed = datetime.now() - startTime
+            self._logger.debug('%.1f seconds for time step' % telapsed.total_seconds())
             
         self.forcing_data = 1 #d
     
