@@ -2,10 +2,10 @@
 20151222 Scott Havens
 
 run_smrf.py is a command line program meant to take a single
-argument for the config file.  From this program, smrf.model
+argument for the config file.  From this program, smrf.framework
 will be loaded to run the full program.
 
-Users can also run the model as they want by using the smrf.model.SMRF
+Users can also run the model as they want by using the smrf.framework.SMRF
 class to change things or whatever
 '''
 
@@ -31,13 +31,16 @@ configFile = './test_data/testConfig.ini'
 # Once loaded, this shouldn't need to be re-ran except if something major changes
 
 # 1. initialize
-s = smrf.model.SMRF(configFile, loglevel='debug')
+s = smrf.framework.SMRF(configFile, loglevel='debug')
 
 # 2. load topo data
 s.loadTopo()
 
 # 3. initialize the distribution
 s.initializeDistribution()
+
+# 4. Initialize the model
+s.initializeModel()
 
 
 #===============================================================================
@@ -49,16 +52,19 @@ s.initializeDistribution()
 # intialization doesn't have to be re-ran, i.e. if this becomes a GUI
 
 
-# 4. load weather data  and station metadata
+# 5. load weather data  and station metadata
 s.loadData()
 
-# 5. distribute  
+# 6. distribute  
 
 s.distributeData()
 
 #===============================================================================
 # Run model
 #===============================================================================
+
+# 7. run the model
+s.runModel()
 
 
 print datetime.now() - start

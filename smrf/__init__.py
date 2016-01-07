@@ -10,6 +10,7 @@ from . import data
 from . import distribute
 from . import envphys
 from . import ipw
-from . import model
+from . import framework
 from . import spatial
 from . import utils
+from . import model
