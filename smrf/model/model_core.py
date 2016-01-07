@@ -70,6 +70,12 @@ class SMRF():
         # check for the desired sections
         if 'stations' not in self.config:
             self.config['stations'] = None
+            
+        if 'nthreads_forcing' not in self.config['system']:
+            self.config['system']['nthreads_forcing'] = 1
+        if 'nthreads_isnobal' not in self.config['system']:
+            self.config['system']['nthreads_isnobal'] = 1
+                
         
         # get the time section        
         self.start_date = pd.to_datetime(self.config['time']['start_date'])
@@ -152,6 +158,11 @@ class SMRF():
                                                           self.topo.stoporad_in_file,
                                                           self.config['system']['temp_dir'])
         
+        # 7. thermal radiation
+        self.distribute['thermal'] = distribute.thermal.th(self.config['thermal'])
+        
+        # 8. soil temperature
+        self.distribute['soil_temp'] = distribute.soil_temp.ts(self.config['soil_temp'])
         
         
     def loadData(self):
@@ -247,6 +258,12 @@ class SMRF():
         # 6. Solar
         self.distribute['solar'].initialize(self.topo, self.data.metadata)
         
+        # 7. thermal radiation
+        self.distribute['thermal'].initialize(self.topo, self.data.metadata)
+        
+        # 8. Soil temperature
+        self.distribute['soil_temp'].initialize(self.topo, self.data.metadata)
+        
         #------------------------------------------------------------------------------
         # Distribute the data
         for t in self.date_time:
@@ -296,6 +313,15 @@ class SMRF():
                                                 self.distribute['precip'].last_storm_day_basin,
                                                 self.distribute['albedo'].albedo_vis,
                                                 self.distribute['albedo'].albedo_ir)
+            
+            # 7. thermal radiation
+            self.distribute['thermal'].distribute(self.distribute['air_temp'].air_temp,
+                                                  self.distribute['vapor_pressure'].dew_point,
+                                                  self.distribute['solar'].cloud_factor)
+            
+            # 8. Soil temperature
+            self.distribute['soil_temp'].distribute()
+            
             
             
 #             plt.imshow(self.distribute['albedo'].albedo_vis), plt.colorbar(), plt.show()

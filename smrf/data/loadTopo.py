@@ -149,6 +149,7 @@ class topo():
         self.stoporad_in_file = sfile
         self.slope = self.stoporad_in.bands[1].data
         self.aspect = self.stoporad_in.bands[2].data
+        self.sky_view = self.stoporad_in.bands[3].data
         
         
         # clean up the TMPDIR

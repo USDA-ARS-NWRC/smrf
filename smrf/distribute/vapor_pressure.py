@@ -42,6 +42,10 @@ class vp(image_data.image_data):
         # check and assign the configuration
         self.getConfig(vpConfig)
         
+        if 'nthreads' not in self.config:
+            self.config['nthreads'] = '1'
+        
+        
         if (tempDir is None) | (tempDir == 'TMPDIR'):
             tempDir = os.environ['TMPDIR']
         self.tempDir = tempDir
@@ -62,6 +66,7 @@ class vp(image_data.image_data):
         self._initialize(topo, metadata)
                 
         
+
     def distribute(self, data, ta):
         """
         Distribute air temperature
@@ -95,7 +100,7 @@ class vp(image_data.image_data):
         
         # calculate the dew point
         dptfile = os.path.join(self.tempDir, 'dpt%04i.ipw' % randint(0,9999))
-        dp_cmd = 'idewptp -t %s %s > %s' % (self.config['tolerance'], vpfile, dptfile)
+        dp_cmd = 'idewptp -t %s -P %s %s > %s' % (self.config['tolerance'], str(self.config['nthreads']), vpfile, dptfile)
         sp.Popen(dp_cmd, shell=True).wait()
         
         # read in the dew point file

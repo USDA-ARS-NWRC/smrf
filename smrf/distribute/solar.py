@@ -23,10 +23,34 @@ class solar(image_data.image_data):
     go beyond the base class
     
     Attributes:
-        config: configuration from [solar] section
-        solar_vis: numpy matrix of the visible solar
-        solar_ir: numpy matrix of the ir solar
-        stations: stations to be used in alphabetical order
+        albedoConfig
+        clear_ir_beam
+        clear_ir_diffuse
+        clear_vis_beam
+        clear_vis_diffuse
+        cloud_factor
+        cloud_ir_beam
+        cloud_ir_diffuse
+        cloud_vis_beam
+        cloud_vis_diffuse
+        config
+        idw
+        ir_file
+        metadata
+        net_solar
+        solar
+        stations
+        stoporad_in
+        tempDir
+        variable
+        veg_height
+        veg_ir_beam
+        veg_ir_diffuse
+        veg_k
+        veg_tau
+        veg_vis_beam
+        veg_vis_diffuse
+        vis_file
     
     """
     
