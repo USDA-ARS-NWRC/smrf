@@ -58,6 +58,12 @@ class solar(image_data.image_data):
     min = 0
     max = 1200
     
+    # these are variables that can be output
+    output_variables = ['clear_ir_beam', 'clear_ir_diffuse', 'clear_vis_beam',
+        'clear_vis_diffuse', 'cloud_factor', 'cloud_ir_beam', 'cloud_ir_diffuse',
+        'cloud_vis_beam', 'cloud_vis_diffuse', 'net_solar', 'veg_ir_beam',
+        'veg_ir_diffuse', 'veg_vis_beam', 'veg_vis_diffuse']
+    
     def __init__(self, solarConfig, albedoConfig, stoporad_in, tempDir=None):
         """
         Initialize solar()

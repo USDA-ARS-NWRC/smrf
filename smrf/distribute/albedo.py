@@ -30,6 +30,9 @@ class albedo(image_data.image_data):
     min = 0
     max = 1
     
+    # these are variables that can be output
+    output_variables = ['albedo_vis', 'albedo_ir'] 
+    
     def __init__(self, albedoConfig):
         """
         Initialize albedo()

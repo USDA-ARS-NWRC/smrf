@@ -24,6 +24,7 @@ class ta(image_data.image_data):
     """
     
     variable = 'air_temp'
+    output_variables = ['air_temp'] # these are variables that can be output
     
     def __init__(self, taConfig):
         

@@ -39,8 +39,11 @@ s.loadTopo()
 # 3. initialize the distribution
 s.initializeDistribution()
 
+# initialize the outputs if desired
+s.initializeOutput()
+
 # 4. Initialize the model
-s.initializeModel()
+# s.initializeModel()
 
 
 #===============================================================================
@@ -64,7 +67,7 @@ s.distributeData()
 #===============================================================================
 
 # 7. run the model
-s.runModel()
+# s.runModel()
 
 
 print datetime.now() - start

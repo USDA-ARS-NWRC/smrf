@@ -21,6 +21,9 @@ class ts(image_data.image_data):
     
     variable = 'soil_temp'
     
+    # these are variables that can be output
+    output_variables = ['soil_temp'] 
+    
     def __init__(self, soilConfig, tempDir=None):
         """
         Initialize ts()

@@ -26,6 +26,11 @@ class ppt(image_data.image_data):
     """
     
     variable = 'precip'
+    
+    # these are variables that can be output
+    output_variables = ['precip','percent_snow','snow_density','storm_days',
+                        'storm_precip','last_storm_day'] 
+    
     min = 0
     max = np.Inf
     

@@ -20,7 +20,7 @@ import numpy as np
 import pytz
 import matplotlib.pyplot as plt
 
-from smrf import data, distribute, model
+from smrf import data, distribute, model, output
 from smrf.envphys import radiation
 
 
@@ -41,7 +41,7 @@ class SMRF():
     """
     
     # These are the modules that the user can modify and use different methods
-    modules = ['air_temp', 'vapor_pressure', 'wind', 'precip', 'albedo']
+    modules = ['air_temp', 'albedo', 'precip', 'soil_temp', 'solar', 'thermal', 'vapor_pressure', 'wind']
 
     def __init__(self, configFile, loglevel='INFO'):
         """
@@ -125,6 +125,11 @@ class SMRF():
         
         # close other files
         self.distribute['wind']._maxus_file.close()
+        
+        # close output files
+        if self.out_func.type == 'netcdf':
+            for v in self.out_func.variable_list:
+                v['nc_file'].close()
         
         self._logger.info('SMRF closed --> %s' % datetime.now())   
         
@@ -280,6 +285,7 @@ class SMRF():
         
         #------------------------------------------------------------------------------
         # Distribute the data
+        output_count = 0
         for t in self.date_time:
             
             # wait here for the model to catch up if needed
@@ -337,6 +343,10 @@ class SMRF():
             self.distribute['soil_temp'].distribute()
             
             
+            # output
+            output_count += 1
+            if output_count % self.config['output']['frequency'] == 0:
+                self.output(t)
             
 #             plt.imshow(self.distribute['albedo'].albedo_vis), plt.colorbar(), plt.show()
             
@@ -354,6 +364,73 @@ class SMRF():
         self.forcing_data = 1 #d
     
     
+    def initializeOutput(self):
+        """
+        Initialize the output files
+        
+        """
+        
+        if self.config['output']['frequency'] is not None:
+                
+            # check the out location    
+            if 'out_location' not in self.config['output']:
+                raise Exception('out_location must be specified for variable outputs')
+            elif self.config['output']['out_location'] == 'TMPDIR':
+                self.config['output']['out_location'] = os.environ['TMPDIR']
+            elif not os.path.isdir(self.config['output']['out_location']):
+                os.makedirs(self.config['output']['out_location'])
+
+            # frequency of outputs
+            self.config['output']['frequency'] = int(self.config['output']['frequency'])
+            
+            
+            # determine the variables to be output
+            self._logger.info('%s variables will be output' % self.config['output']['variables'])
+            
+            output_variables = self.config['output']['variables'].split(',')
+            output_variables = map(str.strip, output_variables)
+            
+            # determine which variables belong where
+            variable_list = {}
+            for v in output_variables:
+                for m in self.modules:
+                
+                    if v in self.distribute[m].output_variables:
+                        fname = os.path.join(self.config['output']['out_location'], v)
+                        d = {'variable': v, 'module': m, 'out_location': fname}
+                        variable_list[v] = d
+
+            
+            # determine what type of file to output    
+            if self.config['output']['file_type'].lower() == 'netcdf':
+                self.out_func = output.output_netcdf(variable_list, self.topo)
+            
+            else:
+                raise Exception('Could not determine type of file for output')
+             
+        else:
+            self._logger.info('No variables will be output')
+            self.output_variables = None
+    
+    
+    
+    def output(self, current_time_step):
+        """
+        Output the forcing data or model outputs
+        
+        Args:
+            current_time_step: the current time step datetime object
+        """
+        
+        # get the output variables then pass to the function
+        for v in self.out_func.variable_list.values():
+            
+            # get the data desired
+            data = getattr(self.distribute[v['module']], v['variable'])
+            
+            # output the time step
+            self.out_func.output(v['variable'], data, current_time_step)
+            
     
     def initializeModel(self):
         """

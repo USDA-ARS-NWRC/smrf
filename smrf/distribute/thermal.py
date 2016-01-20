@@ -30,6 +30,9 @@ class th(image_data.image_data):
     min = -600
     max = 600
     
+    # these are variables that can be output
+    output_variables = ['thermal']
+    
     def __init__(self, thermalConfig, tempDir=None):
         """
         Initialize th()

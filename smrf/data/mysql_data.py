@@ -46,6 +46,8 @@ class database:
         self._logger.debug('Connected to MySQL database')
         
         
+
+        
     def metadata(self, table, station_ids=None, client=None, station_table=None):
         '''
         Similar to the CorrectWxData database call
@@ -57,7 +59,7 @@ class database:
         - client is a string
         '''
         
-        lambdafunc = lambda x: pd.Series(utm.from_latlon(x['latitude'], x['longitude'])[:2])
+        
         
         # form the query        
         if station_ids is not None:
@@ -77,8 +79,7 @@ class database:
             raise Exception('No metadata found for query')
         
         # check to see if UTM locations are calculated
-        if 'X' not in d.columns:
-            d[['X','Y']] = d.apply(lambdafunc, axis=1)
+        d[['X','Y']] = d.apply(to_utm, axis=1)
             
         return d
     
@@ -110,6 +111,9 @@ class database:
             
         # loads all the data
         d =  pd.read_sql(qry, self._db_connection, index_col='date_time')
+        
+        if d.empty:
+            raise Exception('No data found in database')
         
         # Fill returned values 'None' with NaN
         d = d.fillna(value=np.nan, axis='columns')
@@ -146,6 +150,17 @@ class database:
     def __del__(self):
         self._db_connection.close()
     
+    
+def to_utm(row): 
+    """
+    Convert a row from data frame to X,Y
+    """
+    if (row['X'] is None) and (row['Y'] is None):
+        return pd.Series(utm.from_latlon(row['latitude'], row['longitude'])[:2])
+    elif np.isnan(row['X']) and np.isnan(row['Y']):
+        return pd.Series(utm.from_latlon(row['latitude'], row['longitude'])[:2])
+    else:
+        return pd.Series([row['X'], row['Y']])
         
 
 def date_range(start_date, end_date, increment):

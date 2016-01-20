@@ -30,6 +30,9 @@ class wind(image_data.image_data):
     min = 0.447
     max = 35
     
+    # these are variables that can be output
+    output_variables = ['flatwind', 'wind_speed', 'wind_direction']
+    
     def __init__(self, windConfig, tempDir=None):
         
         # extend the base class

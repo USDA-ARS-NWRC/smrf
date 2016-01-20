@@ -33,6 +33,9 @@ class vp(image_data.image_data):
     min = 10
     max = 7500
     
+    # these are variables that can be output
+    output_variables = ['vapor_pressure', 'dew_point']
+    
     def __init__(self, vpConfig, tempDir=None):
         
         # extend the base class

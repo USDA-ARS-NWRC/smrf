@@ -86,14 +86,18 @@ class wxdata():
         for i in v:
             if i in self.dataConfig:
                 
+                self._logger.debug('Reading %s...' % self.dataConfig[i])
                 if i == 'metadata':
                     dp = pd.read_csv(self.dataConfig[i], index_col='primary_id')
                 elif self.dataConfig[i]:
                     dp = pd.read_csv(self.dataConfig[i], index_col='date_time', parse_dates=[0])
                     
                     if sta is not None:
-                        dp = dp[sta]
+                        dp = dp[dp.columns[dp.columns.isin(sta)]]
                     dp = dp[self.start_date : self.end_date]    # only get the desired dates
+                    
+                    if dp.empty:
+                        raise Exception('No CSV data found for %s between the specified dates' % i)
                     
                 setattr(self, i, dp)
             
