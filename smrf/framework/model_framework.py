@@ -285,8 +285,7 @@ class SMRF():
         
         #------------------------------------------------------------------------------
         # Distribute the data
-        output_count = 0
-        for t in self.date_time:
+        for output_count,t in enumerate(self.date_time):
             
             # wait here for the model to catch up if needed
             
@@ -343,9 +342,8 @@ class SMRF():
             self.distribute['soil_temp'].distribute()
             
             
-            # output
-            output_count += 1
-            if output_count % self.config['output']['frequency'] == 0:
+            # output at the frequency and the last time step
+            if (output_count % self.config['output']['frequency'] == 0) or (output_count == len(self.date_time)):
                 self.output(t)
             
 #             plt.imshow(self.distribute['albedo'].albedo_vis), plt.colorbar(), plt.show()
@@ -403,7 +401,9 @@ class SMRF():
             
             # determine what type of file to output    
             if self.config['output']['file_type'].lower() == 'netcdf':
-                self.out_func = output.output_netcdf(variable_list, self.topo)
+                self.out_func = output.output_netcdf(variable_list, self.topo, 
+                                                     self.config['time']['time_step'],
+                                                     self.config['output']['frequency'])
             
             else:
                 raise Exception('Could not determine type of file for output')
