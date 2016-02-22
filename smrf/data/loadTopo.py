@@ -162,7 +162,7 @@ class topo():
     def _gradient(self, demFile, gradientFile):
         # calculate the gradient
         cmd = 'gradient %s > %s' % (demFile, gradientFile)
-        proc = sp.Popen(cmd, shell=True).wait()
+        proc = sp.Popen(cmd, shell=True, env=os.environ.copy()).wait()
         
         if proc != 0:
             raise OSError('gradient failed')    

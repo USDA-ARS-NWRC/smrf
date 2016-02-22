@@ -7,6 +7,14 @@ try:
 except ImportError:
     from distutils.core import setup
 
+from distutils.core import setup
+from distutils.extension import Extension
+from Cython.Distutils import build_ext
+import numpy
+import os
+
+# force the compiler to use gcc    
+os.environ["CC"] = "gcc"
 
 with open('README.rst') as readme_file:
     readme = readme_file.read()
@@ -21,6 +29,16 @@ requirements = [
 test_requirements = [
     # TODO: put package test requirements here
 ]
+
+loc = 'smrf/spatial/dk' # location of the dk folder
+mname = os.path.join(loc, 'detrended_kriging')
+mname.replace('/', '.')
+ext_dk = Extension(mname,
+                 sources=[os.path.join(loc, val) for val in ["detrended_kriging.pyx", "krige.c", "lusolv.c", "array.c"]],
+                 include_dirs=[numpy.get_include()],
+                 extra_compile_args=['-fopenmp'],
+                 extra_link_args=['-fopenmp']
+                 )
 
 setup(
     name='smrf',
@@ -54,5 +72,7 @@ setup(
         'Programming Language :: Python :: 3.5',
     ],
     test_suite='tests',
-    tests_require=test_requirements
+    tests_require=test_requirements,
+    cmdclass = {'build_ext': build_ext},
+    ext_modules = [ext_dk],
 )

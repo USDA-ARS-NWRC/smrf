@@ -1,0 +1,129 @@
+!    -*- f90 -*-
+! Note: the context of this file is case sensitive.
+
+python module sheppard ! in 
+    interface  ! in :sheppard
+        function store(x) ! in :sheppard:sheppard.f90
+            real :: x
+            real :: y
+            real :: store
+            common /stcom/ y
+        end function store
+        subroutine qshep2(n,x,y,f,nq,nw,nr,lcell,lnext,xmin,ymin,dx,dy,rmax,rsq,a,ier) ! in :sheppard:sheppard.f90
+            integer, optional,check(len(x)>=n),depend(x) :: n=len(x)
+            real dimension(n) :: x
+            real dimension(n),depend(n) :: y
+            real dimension(n),depend(n) :: f
+            integer :: nq
+            integer :: nw
+            integer :: nr
+            integer dimension(nr,nr), intent(out) :: lcell
+            integer dimension(n), intent(out), depend(n) :: lnext
+            real intent(out) :: xmin
+            real intent(out) :: ymin
+            real intent(out) :: dx
+            real intent(out) :: dy
+            real intent(out) :: rmax
+            real dimension(n), intent(out), depend(n) :: rsq
+            real dimension(5,n), intent(out), depend(n) :: a
+            integer intent(out) :: ier
+        end subroutine qshep2
+        function qs2val(px,py,n,x,y,f,nr,lcell,lnext,xmin,ymin,dx,dy,rmax,rsq,a) ! in :sheppard:sheppard.f90
+            real :: px
+            real :: py
+            integer, optional,check(len(x)>=n),depend(x) :: n=len(x)
+            real dimension(n) :: x
+            real dimension(n),depend(n) :: y
+            real dimension(n),depend(n) :: f
+            integer, optional,check(shape(lcell,0)==nr),depend(lcell) :: nr=shape(lcell,0)
+            integer dimension(nr,nr) :: lcell
+            integer dimension(n),depend(n) :: lnext
+            real :: xmin
+            real :: ymin
+            real :: dx
+            real :: dy
+            real :: rmax
+            real dimension(n),depend(n) :: rsq
+            real dimension(5,n),depend(n) :: a
+            real :: qs2val
+        end function qs2val
+        subroutine qs2grd(px,py,n,x,y,f,nr,lcell,lnext,xmin,ymin,dx,dy,rmax,rsq,a,q,qx,qy,ier) ! in :sheppard:sheppard.f90
+            real :: px
+            real :: py
+            integer, optional,check(len(x)>=n),depend(x) :: n=len(x)
+            real dimension(n) :: x
+            real dimension(n),depend(n) :: y
+            real dimension(n),depend(n) :: f
+            integer, optional,check(shape(lcell,0)==nr),depend(lcell) :: nr=shape(lcell,0)
+            integer dimension(nr,nr) :: lcell
+            integer dimension(n),depend(n) :: lnext
+            real :: xmin
+            real :: ymin
+            real :: dx
+            real :: dy
+            real :: rmax
+            real dimension(n),depend(n) :: rsq
+            real dimension(5,n),depend(n) :: a
+            real :: q
+            real :: qx
+            real :: qy
+            integer :: ier
+        end subroutine qs2grd
+        subroutine getnp2(px,py,x,y,nr,lcell,lnext,xmin,ymin,dx,dy,np,dsq) ! in :sheppard:sheppard.f90
+            real :: px
+            real :: py
+            real dimension(1) :: x
+            real dimension(1) :: y
+            integer, optional,check(shape(lcell,0)==nr),depend(lcell) :: nr=shape(lcell,0)
+            integer dimension(nr,nr) :: lcell
+            integer dimension(1) :: lnext
+            real :: xmin
+            real :: ymin
+            real :: dx
+            real :: dy
+            integer :: np
+            real :: dsq
+        end subroutine getnp2
+        subroutine givens(a,b,c,s) ! in :sheppard:sheppard.f90
+            real :: a
+            real :: b
+            real :: c
+            real :: s
+        end subroutine givens
+        subroutine rotate(n,c,s,x,y) ! in :sheppard:sheppard.f90
+            integer, optional,check(len(x)>=n),depend(x) :: n=len(x)
+            real :: c
+            real :: s
+            real dimension(n) :: x
+            real dimension(n),depend(n) :: y
+        end subroutine rotate
+        subroutine setup2(xk,yk,fk,xi,yi,fi,s1,s2,r,row) ! in :sheppard:sheppard.f90
+            real :: xk
+            real :: yk
+            real :: fk
+            real :: xi
+            real :: yi
+            real :: fi
+            real :: s1
+            real :: s2
+            real :: r
+            real dimension(6) :: row
+        end subroutine setup2
+        subroutine store2(n,x,y,nr,lcell,lnext,xmin,ymin,dx,dy,ier) ! in :sheppard:sheppard.f90
+            integer, optional,check(len(x)>=n),depend(x) :: n=len(x)
+            real dimension(n) :: x
+            real dimension(n),depend(n) :: y
+            integer, optional,check(shape(lcell,0)==nr),depend(lcell) :: nr=shape(lcell,0)
+            integer dimension(nr,nr) :: lcell
+            integer dimension(n),depend(n) :: lnext
+            real :: xmin
+            real :: ymin
+            real :: dx
+            real :: dy
+            integer :: ier
+        end subroutine store2
+    end interface 
+end python module sheppard
+
+! This file was auto-generated with f2py (version:2).
+! See http://cens.ioc.ee/projects/f2py2e/

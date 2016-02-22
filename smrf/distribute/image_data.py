@@ -7,7 +7,7 @@ Anything done here will be available to all variables
 
 import pandas as pd
 import numpy as np
-from smrf.spatial import idw
+from smrf.spatial import idw, dk
 import logging
 
 class image_data():
@@ -52,6 +52,7 @@ class image_data():
         
         """
         
+        # check for inverse distance weighting
         if config['distribution'] == 'idw':
             if 'detrend' in config:
                 if config['detrend'].lower() == 'true':
@@ -82,6 +83,29 @@ class image_data():
             else:
                 config['zeroValue'] = None
             
+        # check of detrended kriging
+        elif config['distribution'] == 'dk':
+            if 'slope' in config:
+                if int(config['slope']) not in [-1,0,1]:
+                    raise ValueError('Slope value for detrending must be in [-1, 0, 1]')
+                else:
+                    config['slope'] = int(config['slope'])
+                    
+            if 'nthreads' in config:
+                config['nthreads'] = int(config['nthreads'])
+            else:
+                config['nthreads'] = 1
+                
+            if 'dk_nthreads' in config:
+                config['dk_nthreads'] = int(config['dk_nthreads'])
+            else:
+                config['dk_nthreads'] = 1
+                    
+            if 'regression_method' in config:
+                config['regression_method'] = int(config['regression_method'])
+            else:
+                config['regression_method'] = 1
+                        
                     
         self.getStations(config)
         
@@ -124,6 +148,13 @@ class image_data():
             
             self.idw = idw.IDW(mx, my, topo.X, topo.Y, mz=mz, GridZ=topo.dem, power=self.config['power'])            
         
+        elif self.config['distribution'] == 'dk':
+             
+            mx = meta.X.values
+            my = meta.Y.values
+            mz = meta.elevation.values
+            
+            self.dk = dk.DK(mx, my, mz, topo.X, topo.Y, topo.dem, self.config)   
         
         else:
             raise Exception('Could not determine the distribution method for %s' % self.variable)
@@ -156,6 +187,9 @@ class image_data():
                 v = self.idw.detrendedIDW(data.values, self.config['slope'], zeros=zeros)
             else:
                 v = self.idw.calculateIDW(data.values)
+                
+        elif self.config['distribution'] == 'dk':
+            v = self.dk.calculate(data.values)
         
         
         if other_attribute is not None:

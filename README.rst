@@ -16,9 +16,14 @@ Features
 Install
 --------
 
-1. Ensure the following environment variables are set:
-    * IPW, and $IPW/bin is in the PATH
-    *
+1. Ensure the following environment variables are set and readable by Python:
+    * IPW, and $IPW/bin environment variable is set
+    * TMPDIR, the location of the system's temporary files
+    * PATH, is set and readable by Python (mainly if running inside an IDE environment)
+
+2. Install
+    * python setup.py clean
+    * python setup.py build_ext --inplace
 
 
 Credits

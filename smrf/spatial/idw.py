@@ -7,7 +7,7 @@ Distributed forcing data over a grid using different methods
 '''
 
 import numpy as np
-
+import sheppard
     
 class IDW:
     '''
@@ -80,7 +80,7 @@ class IDW:
 #         self.weights[np.isinf(self.weights)] = 100
   
         
-    def calculateIDW(self, data):  
+    def calculateIDW(self, data, local=False):  
         '''
         Calculate the IDW of the data at mx,my over GridX,GridY
         Inputs:
@@ -88,11 +88,41 @@ class IDW:
         '''         
         nan_val = ~np.isnan(data)
         w = self.weights[:,:,nan_val]
-        v = np.nansum(w * data[nan_val], 2) / np.sum(w, 2)
+        data = data[nan_val]
+        
+        if local:
+            # apply the modified Sheppards algorthim
+            N = len(data)
+            nq = 13
+            nw = 19
+            nr = np.ceil(np.sqrt(N/3))
+            mx = self.mx[nan_val]
+            my = self.my[nan_val]
+            
+            # Create the Q(x,y) surface for data interpolation
+            # out = sheppard.qshep2(mx, my, d, nq ,nw, lcell, lnext, xmin, ymin, dx, dy, rmax, rsq, a, status, [N,nr])
+            lcell, lnext, xmin, ymin, dx, dy, rmax, rsq, a, status = sheppard.qshep2(self.mx, self.my, \
+                                                                                     data, nq , nw, nr)
+            
+#             IER = ERROR INDICATOR --                                    */
+#     /*           IER = 0 IF NO ERRORS WERE ENCOUNTERED.                */
+#     /*           IER = 1 IF N, NQ, NW, OR NR IS OUT OF RANGE.            */
+#     /*           IER = 2 IF DUPLICATE NODES WERE ENCOUNTERED.            */
+#     /*           IER = 3 IF ALL NODES ARE COLLINEAR.    
+            
+            # the the cell value
+            v = np.zeros(self.GridX.shape)
+            for index,val in np.ndenumerate(v):
+                v[index] = sheppard.qs2val(self.GridX[index], self.GridY[index], mx, my,\
+                                           data, lcell, lnext, xmin, ymin, dx, dy, rmax, rsq, a)
+            
+        else:
+            v = np.nansum(w * data, 2) / np.sum(w, 2)
+        
         return v 
     
 
-    def detrendedIDW(self, data, flag=0, zeros=None):
+    def detrendedIDW(self, data, flag=0, zeros=None, local=False):
         '''
         Calculate the detrended IDW of the data at mx,my over GridX,GridY
         Inputs:
@@ -100,7 +130,7 @@ class IDW:
         '''    
         
         self.detrendData(data, flag, zeros)
-        v = self.calculateIDW(self.dtrend)
+        v = self.calculateIDW(self.dtrend, local)
         v = self.retrendData(v)
         
         if zeros is not None:
@@ -142,6 +172,14 @@ class IDW:
         
         # retrend the data
         return idw + self.pv[0]*self.GridZ + self.pv[1]
+    
+    
+    
+    
+    
+    
+    
+
         
         
         
