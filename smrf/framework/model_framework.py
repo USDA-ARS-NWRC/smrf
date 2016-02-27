@@ -43,7 +43,7 @@ class SMRF():
     # These are the modules that the user can modify and use different methods
     modules = ['air_temp', 'albedo', 'precip', 'soil_temp', 'solar', 'thermal', 'vapor_pressure', 'wind']
 
-    def __init__(self, configFile, logfile=None, loglevel='INFO'):
+    def __init__(self, configFile):
         """
         Initialize the model, read config file, start and end date, and logging
         
@@ -87,12 +87,23 @@ class SMRF():
         self.time_steps = len(self.date_time)    # number of time steps to model
         
         
+        
         # start logging
-        numeric_level = getattr(logging, loglevel.upper(), None)
+        
+        if 'log_level' in self.config['logging']:
+            loglevel = self.config['logging']['log_level'].upper()
+        else:
+            loglevel='INFO'
+            
+        numeric_level = getattr(logging, loglevel, None)
         if not isinstance(numeric_level, int):
             raise ValueError('Invalid log level: %s' % loglevel)
         
         
+        logfile=None    
+        if 'log_file' in self.config['logging']:
+            logfile = self.config['logging']['log_file']
+
         if logfile is not None:
             logging.basicConfig(filename=logfile, filemode='w', level=numeric_level)
         else:

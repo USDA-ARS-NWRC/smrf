@@ -25,10 +25,6 @@ configFile = './test_data/testConfig.ini'
 if len(sys.argv) > 1:
     configFile = sys.argv[1]
 
-logfile = None
-if len(sys.argv) > 2:
-    logfile = sys.argv[2]
-
 
 #===============================================================================
 # Model setup and initialize
@@ -38,7 +34,7 @@ if len(sys.argv) > 2:
 # Once loaded, this shouldn't need to be re-ran except if something major changes
 
 # 1. initialize
-s = smrf.framework.SMRF(configFile, logfile=logfile, loglevel='debug')
+s = smrf.framework.SMRF(configFile)
 
 # 2. load topo data
 s.loadTopo()
