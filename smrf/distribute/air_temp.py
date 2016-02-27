@@ -24,7 +24,13 @@ class ta(image_data.image_data):
     """
     
     variable = 'air_temp'
-    output_variables = ['air_temp'] # these are variables that can be output
+    
+    # these are variables that can be output
+    output_variables = {'air_temp': {
+                                     'units': 'degree Celcius',
+                                     'long_name': 'air_temperature'
+                                     }
+                        } 
     
     def __init__(self, taConfig):
         
@@ -35,7 +41,7 @@ class ta(image_data.image_data):
         # check and assign the configuration
         self.getConfig(taConfig)
         
-        self._logger.debug('Initialized distribute.air_temp')
+        self._logger.debug('Created distribute.air_temp')
         
         
     def initialize(self, topo, metadata):
@@ -48,7 +54,9 @@ class ta(image_data.image_data):
                         
         """
         
+        self._logger.debug('Initializing distribute.air_temp')
         self._initialize(topo, metadata)
+        
                 
         
     def distribute(self, data):

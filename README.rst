@@ -24,6 +24,8 @@ Install
 2. Install
     * python setup.py clean
     * python setup.py build_ext --inplace
+    * python setup.py build
+    * (sudo) python setup.py install
 
 
 Credits

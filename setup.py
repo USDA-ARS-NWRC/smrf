@@ -7,6 +7,8 @@ try:
 except ImportError:
     from distutils.core import setup
 
+
+from setuptools import find_packages
 from distutils.core import setup
 from distutils.extension import Extension
 from Cython.Distutils import build_ext
@@ -23,7 +25,16 @@ with open('HISTORY.rst') as history_file:
     history = history_file.read()
 
 requirements = [
-    # TODO: put package requirements here
+    'Cython >= 0.23.4',
+    'pytz >= 2013.7',
+    'setuptools >= 1.1.6',
+    'utm >= 0.4.0',
+#     'cryptography >= 1.2.2',
+    'mysql_connector_repackaged >= 0.3.1',
+    'netCDF4 >= 1.2.1',
+    'numpy >= 1.10.4',
+    'pandas >= 0.17.1',
+    'scipy >= 0.16.0'
 ]
 
 test_requirements = [
@@ -32,7 +43,7 @@ test_requirements = [
 
 loc = 'smrf/spatial/dk' # location of the dk folder
 mname = os.path.join(loc, 'detrended_kriging')
-mname.replace('/', '.')
+mname = mname.replace('/', '.')
 ext_dk = Extension(mname,
                  sources=[os.path.join(loc, val) for val in ["detrended_kriging.pyx", "krige.c", "lusolv.c", "array.c"]],
                  include_dirs=[numpy.get_include()],
@@ -48,11 +59,8 @@ setup(
     author="Scott Havens",
     author_email='scotthavens@ars.usda.gov',
     url='https://gitlab.com/ars-snow/smrf',
-    packages=[
-        'smrf',
-    ],
-    package_dir={'smrf':
-                 'smrf'},
+    packages=find_packages(),
+#     package_dir={'smrf':'smrf'},
     include_package_data=True,
     install_requires=requirements,
     license="ISCL",

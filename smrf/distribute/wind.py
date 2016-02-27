@@ -31,7 +31,20 @@ class wind(image_data.image_data):
     max = 35
     
     # these are variables that can be output
-    output_variables = ['flatwind', 'wind_speed', 'wind_direction']
+    output_variables = {'flatwind':{
+                                  'units': 'm/s',
+                                  'long_name': 'flatwind_wind_speed'
+                                  },
+                        'wind_speed':{
+                                  'units': 'm/s',
+                                  'long_name': 'wind_speed'
+                                  },
+                        'wind_direction':{
+                                  'units': 'degrees',
+                                  'long_name': 'wind_direction'
+                                  }
+                        }
+    
     
     def __init__(self, windConfig, tempDir=None):
         
@@ -72,7 +85,7 @@ class wind(image_data.image_data):
         else:
             self.config['peak'] = None
         
-        self._logger.debug('Initialized distribute.wind')     
+        self._logger.debug('Created distribute.wind')     
         
         
         
@@ -92,6 +105,8 @@ class wind(image_data.image_data):
                         
         """
         
+        self._logger.debug('Initializing distribute.wind')
+        
         self._initialize(topo, metadata)
         
         self.veg_type = topo.veg_type
@@ -104,7 +119,8 @@ class wind(image_data.image_data):
                 if m.lower() in self.config:
                     self.metadata.loc[m, 'enhancement'] = float(self.config[m.lower()])
                     
-                    
+             
+        
         
     def distribute(self, data_speed, data_direction):
         """
@@ -119,7 +135,7 @@ class wind(image_data.image_data):
             self.wind_direction: wind_direction matrix, corrected if dpt > ta 
         """
         
-        self._logger.debug('Distributing wind_direction')
+        self._logger.debug('Distributing wind_direction and wind_speed')
     
         data_speed = data_speed[self.stations]
         data_direction = data_direction[self.stations]
@@ -259,6 +275,8 @@ class wind(image_data.image_data):
                 
                 else:
                     idx = int(np.ceil((data_direction[m] - self.nstep/2) / self.nstep) * self.nstep)
+                    if idx == 360:
+                        idx = 0 # special case when 360=0
                     ind = self._maxus_file.variables['direction'][:] == idx
                     
                     val_maxus = self.maxus[ind, yi, xi] + e

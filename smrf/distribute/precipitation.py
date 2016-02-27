@@ -28,8 +28,31 @@ class ppt(image_data.image_data):
     variable = 'precip'
     
     # these are variables that can be output
-    output_variables = ['precip','percent_snow','snow_density','storm_days',
-                        'storm_precip','last_storm_day'] 
+    output_variables = {'precip':{
+                                  'units': 'mm',
+                                  'long_name': 'precipitation_mass'
+                                  },
+                        'percent_snow':{
+                                  'units': '%',
+                                  'long_name': 'percent_snow'
+                                  },
+                        'snow_density':{
+                                  'units': 'kg/m^3',
+                                  'long_name': 'snow_density'
+                                  },
+                        'storm_days':{
+                                  'units': 'decimal_day',
+                                  'long_name': 'days_since_last_storm'
+                                  },
+                        'storm_precip':{
+                                  'units': 'mm',
+                                  'long_name': 'precipitation_mass_storm'
+                                  },
+                        'last_storm_day':{
+                                  'units': 'decimal_day',
+                                  'long_name': 'day_of_last_storm'
+                                  },
+                        } 
     
     min = 0
     max = np.Inf
@@ -44,7 +67,7 @@ class ppt(image_data.image_data):
         self.getConfig(pptConfig)
         self.time_step = float(time_step)
         
-        self._logger.debug('Initialized distribute.air_temp')
+        self._logger.debug('Created distribute.air_temp')
         
         
     def initialize(self, topo, metadata):
@@ -57,6 +80,8 @@ class ppt(image_data.image_data):
                         
         """
         
+        self._logger.debug('Initializing distribute.air_temp')
+        
         self._initialize(topo, metadata)
         
         self.percent_snow = np.zeros((topo.ny, topo.ny))
@@ -66,7 +91,8 @@ class ppt(image_data.image_data):
         self.last_storm_day = np.zeros((topo.ny, topo.ny))
 #         self.albedo
             
-            
+        
+        
         
     def distribute(self, data, dpt, mask=None):
         """
@@ -106,6 +132,12 @@ class ppt(image_data.image_data):
         else:
             
             self.storm_days += self.time_step/60/24
+            
+            # make everything else zeros
+            self.precip = np.zeros(self.storm_days.shape)
+            self.percent_snow = np.zeros(self.storm_days.shape)
+            self.snow_density = np.zeros(self.storm_days.shape)
+            
 
         # day of last storm, this will be used in albedo
         self.last_storm_day = utils.water_day(data.name)[0] - self.storm_days - 0.001    

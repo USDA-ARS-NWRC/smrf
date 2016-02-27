@@ -97,7 +97,8 @@ double *elevations;				 /* vector of station elevations */
 	int *idx;					 /* index sorted distance */
 	double **a;                   /* data matrix for solving for kriging
                                        weights (input to m_inv()) */
-	double *w;                    /* kriging weights */
+//	double *w;                    /* kriging weights */
+	double w[nsta+1];
 
 	//   nsta = ns;
 
@@ -137,7 +138,8 @@ double *elevations;				 /* vector of station elevations */
 	//   exit(0);
 
 	a = dmatrix(nsta+1, nsta+2);
-	w = dvector(nsta+1);
+//	w = dvector(nsta+1);
+
 
 	wcalc = dvector(nsta+1);
 	while (1) {
@@ -205,7 +207,21 @@ double *elevations;				 /* vector of station elevations */
 			break;
 		}
 	}
+
+//	free(wcalc);
+
+	/* clean up 1D arrays*/
+	free(dist);
+	free(idx);
+	free(staflg);
 	free(wcalc);
+
+	/* clean up 2D arrays*/
+	for (m = 0; m < nsta+1; m++) {
+		free(a[m]);
+	}
+	free(a);
+
 
 	return w;
 }

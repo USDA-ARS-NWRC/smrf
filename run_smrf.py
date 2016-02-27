@@ -11,6 +11,7 @@ class to change things or whatever
 
 import smrf
 from datetime import datetime
+import sys
 
 start = datetime.now()
 
@@ -21,6 +22,12 @@ start = datetime.now()
 # output if necessary
 
 configFile = './test_data/testConfig.ini'
+if len(sys.argv) > 1:
+    configFile = sys.argv[1]
+
+logfile = None
+if len(sys.argv) > 2:
+    logfile = sys.argv[2]
 
 
 #===============================================================================
@@ -31,7 +38,7 @@ configFile = './test_data/testConfig.ini'
 # Once loaded, this shouldn't need to be re-ran except if something major changes
 
 # 1. initialize
-s = smrf.framework.SMRF(configFile, loglevel='debug')
+s = smrf.framework.SMRF(configFile, logfile=logfile, loglevel='debug')
 
 # 2. load topo data
 s.loadTopo()

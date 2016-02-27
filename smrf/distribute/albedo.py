@@ -31,7 +31,15 @@ class albedo(image_data.image_data):
     max = 1
     
     # these are variables that can be output
-    output_variables = ['albedo_vis', 'albedo_ir'] 
+    output_variables = {'albedo_vis': {
+                                       'units': 'None',
+                                       'long_name': 'visible_albedo'
+                                       }, 
+                        'albedo_ir': {
+                                       'units': 'None',
+                                       'long_name': 'infrared_albedo'
+                                       }
+                        } 
     
     def __init__(self, albedoConfig):
         """
@@ -63,7 +71,7 @@ class albedo(image_data.image_data):
             
         self.config = albedoConfig
                 
-        self._logger.debug('Initialized distribute.albedo')
+        self._logger.debug('Created distribute.albedo')
         
         
     def initialize(self, topo, metadata):
@@ -77,7 +85,7 @@ class albedo(image_data.image_data):
         """
         
 #         self._initialize(topo, metadata)
-                  
+        self._logger.debug('Initializing distribute.albedo')
             
         
     def distribute(self, current_time_step, cosz, storm_day):

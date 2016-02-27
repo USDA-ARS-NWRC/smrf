@@ -31,7 +31,11 @@ class th(image_data.image_data):
     max = 600
     
     # these are variables that can be output
-    output_variables = ['thermal']
+    output_variables = {'thermal':{
+                                  'units': 'W/m^2',
+                                  'long_name': 'thermal_radiation'
+                                  }
+                        }
     
     def __init__(self, thermalConfig, tempDir=None):
         """
@@ -55,7 +59,7 @@ class th(image_data.image_data):
         self.tempDir = tempDir        
         
                 
-        self._logger.debug('Initialized distribute.thermal')
+        self._logger.debug('Created distribute.thermal')
         
         
     def initialize(self, topo, metadata):
@@ -67,15 +71,15 @@ class th(image_data.image_data):
             metadata: metadata dataframe containing the station metadata
             
         """
-        
+
+        self._logger.debug('Initializing distribute.thermal')
 #         self._initialize(topo, metadata)
         self.veg_height = topo.veg_height
         self.veg_tau = topo.veg_tau
         self.veg_k = topo.veg_k
         self.sky_view = topo.sky_view
         self.dem = topo.dem
-                  
-            
+               
     
     def distribute(self, air_temp, dew_point, cloud_factor):
         """

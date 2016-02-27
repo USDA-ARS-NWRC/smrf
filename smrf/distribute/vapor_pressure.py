@@ -34,7 +34,15 @@ class vp(image_data.image_data):
     max = 7500
     
     # these are variables that can be output
-    output_variables = ['vapor_pressure', 'dew_point']
+    output_variables = {'vapor_pressure':{
+                                  'units': 'Pa',
+                                  'long_name': 'vapor_pressure'
+                                  },
+                         'dew_point':{
+                                  'units': 'degree Celcius',
+                                  'long_name': 'dew_point_temperature'
+                                  }
+                        }
     
     def __init__(self, vpConfig, tempDir=None):
         
@@ -53,7 +61,7 @@ class vp(image_data.image_data):
             tempDir = os.environ['TMPDIR']
         self.tempDir = tempDir
         
-        self._logger.debug('Initialized distribute.vapor_pressure')
+        self._logger.debug('Created distribute.vapor_pressure')
         
         
     def initialize(self, topo, metadata):
@@ -66,8 +74,9 @@ class vp(image_data.image_data):
                         
         """
         
+        self._logger.debug('Initializing distribute.vapor_pressure')
         self._initialize(topo, metadata)
-                
+        
         
 
     def distribute(self, data, ta):

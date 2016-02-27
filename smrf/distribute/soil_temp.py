@@ -22,7 +22,11 @@ class ts(image_data.image_data):
     variable = 'soil_temp'
     
     # these are variables that can be output
-    output_variables = ['soil_temp'] 
+    output_variables = {'soil_temp': {
+                                  'units': 'degree Celcius',
+                                  'long_name': 'soil_temperature'
+                                  }
+                        } 
     
     def __init__(self, soilConfig, tempDir=None):
         """
@@ -41,7 +45,7 @@ class ts(image_data.image_data):
         
         self.config = soilConfig
                 
-        self._logger.debug('Initialized distribute.soil_temp')
+        self._logger.debug('Created distribute.soil_temp')
         
         
     def initialize(self, topo, metadata):
@@ -54,9 +58,10 @@ class ts(image_data.image_data):
             
         """
         
+        self._logger.debug('Initializing distribute.soil_temp')
 #         self._initialize(topo, metadata)
         self.soil_temp = float(self.config['temp']) * np.ones(topo.dem.shape)
-            
+        
     
     def distribute(self):
         """

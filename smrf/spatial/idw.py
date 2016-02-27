@@ -7,7 +7,7 @@ Distributed forcing data over a grid using different methods
 '''
 
 import numpy as np
-import sheppard
+# import sheppard
     
 class IDW:
     '''
@@ -90,34 +90,34 @@ class IDW:
         w = self.weights[:,:,nan_val]
         data = data[nan_val]
         
-        if local:
-            # apply the modified Sheppards algorthim
-            N = len(data)
-            nq = 13
-            nw = 19
-            nr = np.ceil(np.sqrt(N/3))
-            mx = self.mx[nan_val]
-            my = self.my[nan_val]
+#         if local:
+#             # apply the modified Sheppards algorthim
+#             N = len(data)
+#             nq = 13
+#             nw = 19
+#             nr = np.ceil(np.sqrt(N/3))
+#             mx = self.mx[nan_val]
+#             my = self.my[nan_val]
+#             
+#             # Create the Q(x,y) surface for data interpolation
+#             # out = sheppard.qshep2(mx, my, d, nq ,nw, lcell, lnext, xmin, ymin, dx, dy, rmax, rsq, a, status, [N,nr])
+#             lcell, lnext, xmin, ymin, dx, dy, rmax, rsq, a, status = sheppard.qshep2(self.mx, self.my, \
+#                                                                                      data, nq , nw, nr)
+#             
+# #             IER = ERROR INDICATOR --                                    */
+# #     /*           IER = 0 IF NO ERRORS WERE ENCOUNTERED.                */
+# #     /*           IER = 1 IF N, NQ, NW, OR NR IS OUT OF RANGE.            */
+# #     /*           IER = 2 IF DUPLICATE NODES WERE ENCOUNTERED.            */
+# #     /*           IER = 3 IF ALL NODES ARE COLLINEAR.    
+#             
+#             # the the cell value
+#             v = np.zeros(self.GridX.shape)
+#             for index,val in np.ndenumerate(v):
+#                 v[index] = sheppard.qs2val(self.GridX[index], self.GridY[index], mx, my,\
+#                                            data, lcell, lnext, xmin, ymin, dx, dy, rmax, rsq, a)
             
-            # Create the Q(x,y) surface for data interpolation
-            # out = sheppard.qshep2(mx, my, d, nq ,nw, lcell, lnext, xmin, ymin, dx, dy, rmax, rsq, a, status, [N,nr])
-            lcell, lnext, xmin, ymin, dx, dy, rmax, rsq, a, status = sheppard.qshep2(self.mx, self.my, \
-                                                                                     data, nq , nw, nr)
-            
-#             IER = ERROR INDICATOR --                                    */
-#     /*           IER = 0 IF NO ERRORS WERE ENCOUNTERED.                */
-#     /*           IER = 1 IF N, NQ, NW, OR NR IS OUT OF RANGE.            */
-#     /*           IER = 2 IF DUPLICATE NODES WERE ENCOUNTERED.            */
-#     /*           IER = 3 IF ALL NODES ARE COLLINEAR.    
-            
-            # the the cell value
-            v = np.zeros(self.GridX.shape)
-            for index,val in np.ndenumerate(v):
-                v[index] = sheppard.qs2val(self.GridX[index], self.GridY[index], mx, my,\
-                                           data, lcell, lnext, xmin, ymin, dx, dy, rmax, rsq, a)
-            
-        else:
-            v = np.nansum(w * data, 2) / np.sum(w, 2)
+#         else:
+        v = np.nansum(w * data, 2) / np.sum(w, 2)
         
         return v 
     

@@ -59,10 +59,63 @@ class solar(image_data.image_data):
     max = 1200
     
     # these are variables that can be output
-    output_variables = ['clear_ir_beam', 'clear_ir_diffuse', 'clear_vis_beam',
-        'clear_vis_diffuse', 'cloud_factor', 'cloud_ir_beam', 'cloud_ir_diffuse',
-        'cloud_vis_beam', 'cloud_vis_diffuse', 'net_solar', 'veg_ir_beam',
-        'veg_ir_diffuse', 'veg_vis_beam', 'veg_vis_diffuse']
+    output_variables = {'clear_ir_beam':{
+                                  'units': 'W/m^2',
+                                  'long_name': 'clear_sky_infrared_beam'
+                                  },
+                        'clear_ir_diffuse':{
+                                  'units': 'W/m^2',
+                                  'long_name': 'clear_sky_infrared_diffuse'
+                                  },
+                        'clear_vis_beam':{
+                                  'units': 'W/m^2',
+                                  'long_name': 'clear_sky_visible_beam'
+                                  },
+                        'clear_vis_diffuse':{
+                                  'units': 'W/m^2',
+                                  'long_name': 'clear_sky_visible_diffuse'
+                                  },
+                        'cloud_factor':{
+                                  'units': 'None',
+                                  'long_name': 'cloud_factor'
+                                  },
+                        'cloud_ir_beam':{
+                                  'units': 'W/m^2',
+                                  'long_name': 'cloud_infrared_beam'
+                                  },
+                        'cloud_ir_diffuse':{
+                                  'units': 'W/m^2',
+                                  'long_name': 'cloud_infrared_diffuse'
+                                  },
+                        'cloud_vis_beam':{
+                                  'units': 'W/m^2',
+                                  'long_name': 'cloud_visible_beam'
+                                  },
+                        'cloud_vis_diffuse':{
+                                  'units': 'W/m^2',
+                                  'long_name': 'cloud_visible_diffuse'
+                                  },
+                        'net_solar':{
+                                  'units': 'W/m^2',
+                                  'long_name': 'net_solar_radiation'
+                                  },
+                        'veg_ir_beam':{
+                                  'units': 'W/m^2',
+                                  'long_name': 'vegetation_infrared_beam'
+                                  },
+                        'veg_ir_diffuse':{
+                                  'units': 'W/m^2',
+                                  'long_name': 'vegetation_infrared_diffuse'
+                                  },
+                        'veg_vis_beam':{
+                                  'units': 'W/m^2',
+                                  'long_name': 'vegetation_visible_beam'
+                                  },
+                        'veg_vis_diffuse':{
+                                  'units': 'W/m^2',
+                                  'long_name': 'vegetation_visible_diffuse'
+                                  }
+                        }
     
     def __init__(self, solarConfig, albedoConfig, stoporad_in, tempDir=None):
         """
@@ -114,7 +167,7 @@ class solar(image_data.image_data):
         self.vis_file = os.path.join(self.tempDir, 'clearsky_vis.ipw')
         
                 
-        self._logger.debug('Initialized distribute.solar')
+        self._logger.debug('Created distribute.solar')
         
         
     def initialize(self, topo, metadata):
@@ -127,12 +180,14 @@ class solar(image_data.image_data):
             
         """
         
+        self._logger.debug('Initializing distribute.solar')
+        
         self._initialize(topo, metadata)
         self.veg_height = topo.veg_height
         self.veg_tau = topo.veg_tau
         self.veg_k = topo.veg_k
-                  
-            
+        
+        
     
     def distribute(self, data, illum_ang, cosz, azimuth, min_storm_day, albedo_vis, albedo_ir):
         """
@@ -240,6 +295,8 @@ class solar(image_data.image_data):
             self._logger.debug('Sun is down, see you in the morning!')
             
             # clear sky
+#             z = np.zeros()
+
             self.clear_vis_beam = None
             self.clear_vis_diffuse = None
             self.clear_ir_beam = None

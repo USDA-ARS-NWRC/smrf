@@ -43,7 +43,7 @@ class SMRF():
     # These are the modules that the user can modify and use different methods
     modules = ['air_temp', 'albedo', 'precip', 'soil_temp', 'solar', 'thermal', 'vapor_pressure', 'wind']
 
-    def __init__(self, configFile, loglevel='INFO'):
+    def __init__(self, configFile, logfile=None, loglevel='INFO'):
         """
         Initialize the model, read config file, start and end date, and logging
         
@@ -91,8 +91,13 @@ class SMRF():
         numeric_level = getattr(logging, loglevel.upper(), None)
         if not isinstance(numeric_level, int):
             raise ValueError('Invalid log level: %s' % loglevel)
-#         logging.basicConfig(format='%(levelname)s:%(message)s', level=logging.DEBUG)
-        logging.basicConfig(level=numeric_level)
+        
+        
+        if logfile is not None:
+            logging.basicConfig(filename=logfile, filemode='w', level=numeric_level)
+        else:
+            logging.basicConfig(level=numeric_level)
+            
         self._loglevel = numeric_level
         
         self._logger = logging.getLogger(__name__)        
@@ -130,6 +135,7 @@ class SMRF():
         if self.out_func.type == 'netcdf':
             for v in self.out_func.variable_list:
                 v['nc_file'].close()
+                self._logger.debug('Closed file: %s' % v['nc_file'])
         
         self._logger.info('SMRF closed --> %s' % datetime.now())   
         
@@ -212,9 +218,9 @@ class SMRF():
             raise KeyError('Could not determine where station data is located')   
         
         # just for now
-        self.data.precip = self.data.precip.diff(1)
-        self.data.precip[self.data.precip < 0] = 0
-        self.data.precip = self.data.precip.fillna(0)
+#         self.data.precip = self.data.precip.diff(1)
+#         self.data.precip[self.data.precip < 0] = 0
+#         self.data.precip = self.data.precip.fillna(0)
   
         # ensure that the dataframes have consistent times
 #         t = date_range(start_date, end_date, timedelta(minutes=m))
@@ -393,16 +399,16 @@ class SMRF():
             for v in output_variables:
                 for m in self.modules:
                 
-                    if v in self.distribute[m].output_variables:
+                    if v in self.distribute[m].output_variables.keys():
                         fname = os.path.join(self.config['output']['out_location'], v)
-                        d = {'variable': v, 'module': m, 'out_location': fname}
+                        d = {'variable': v, 'module': m, 'out_location': fname, 'info': self.distribute[m].output_variables[v]}
                         variable_list[v] = d
 
             
             # determine what type of file to output    
             if self.config['output']['file_type'].lower() == 'netcdf':
-                self.out_func = output.output_netcdf(variable_list, self.topo, 
-                                                     self.config['time']['time_step'],
+                self.out_func = output.output_netcdf(variable_list, self.topo,
+                                                     self.config['time'],
                                                      self.config['output']['frequency'])
             
             else:
@@ -427,6 +433,9 @@ class SMRF():
             
             # get the data desired
             data = getattr(self.distribute[v['module']], v['variable'])
+            
+            if data is None:
+                data = np.zeros((self.topo.ny, self.topo.ny))
             
             # output the time step
             self.out_func.output(v['variable'], data, current_time_step)

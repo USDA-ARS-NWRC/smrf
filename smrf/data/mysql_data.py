@@ -13,7 +13,7 @@ import scipy.stats as stats
 import pandas as pd
 import utm
 import mysql.connector
-from mysql.connector import errorcode
+# from mysql.connector import errorcode
 from datetime import datetime, timedelta
 
 import logging
@@ -32,9 +32,9 @@ class database:
                                       database=db)
             
         except mysql.connector.Error as err:
-            if err.errno == errorcode.ER_ACCESS_DENIED_ERROR:
+            if err.errno == 1045: #errorcode.ER_ACCESS_DENIED_ERROR:
                 logging.error("Something is wrong with your user name or password")
-            elif err.errno == errorcode.ER_BAD_DB_ERROR:
+            elif err.errno == 1049: #errorcode.ER_BAD_DB_ERROR:
                 logging.error("Database does not exist")
             else:
                 logging.error(err)
