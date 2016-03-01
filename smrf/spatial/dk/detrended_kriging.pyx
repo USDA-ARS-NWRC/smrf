@@ -65,50 +65,50 @@ def call_grid(object ad, object dgrid,
     return None
 
 
-@cython.boundscheck(False)
-@cython.wraparound(False)
-def run(object ad, object dgrid, 
-               np.ndarray[double, mode="c", ndim=1] elevations, 
-               np.ndarray[double, mode="c", ndim=2] weights not None):
-    '''
-    Instead of calling the krige_grid, iterate over the grid here and 
-    add parallel support
-    
-    This isn't working or finished
-    '''
-
-    cdef double *w
-    cdef np.ndarray w_arr
-
-    cdef int nsta, ngrid
-    ngrid, nsta = dgrid.shape[0], dgrid.shape[1]
-    
-    # convert the ad array to C
-    cdef np.ndarray[double, mode="c", ndim=2] ad_arr
-    ad_arr = np.ascontiguousarray(ad, dtype=np.float64)
-    
-    # convert the dgrid to C
-    cdef np.ndarray[double, mode="c", ndim=2] grid
-    grid = np.ascontiguousarray(dgrid, dtype=np.float64)
-
-    for i in range(ngrid):
-
-        w = krige(nsta, &ad_arr[0,0], &grid[i,0], &elevations[0]);
-        
-        # convert C array to Python object
-        array_wrapper = ArrayWrapper()
-        array_wrapper.set_data(nsta, <void*> w) 
-        w_arr = np.array(array_wrapper, copy=False)
-        # Assign our object to the 'base' of the ndarray object
-        w_arr.base = <PyObject*> array_wrapper
-        # Increment the reference count, as the above assignement was done in
-        # C, and Python does not know that there is this additional reference
-        Py_INCREF(array_wrapper)
-  
-        
-        weights[i] = w_arr
-        
-    return None
+# @cython.boundscheck(False)
+# @cython.wraparound(False)
+# def run(object ad, object dgrid, 
+#                np.ndarray[double, mode="c", ndim=1] elevations, 
+#                np.ndarray[double, mode="c", ndim=2] weights not None):
+#     '''
+#     Instead of calling the krige_grid, iterate over the grid here and 
+#     add parallel support
+#     
+#     This isn't working or finished
+#     '''
+# 
+#     cdef double *w
+#     cdef np.ndarray w_arr
+# 
+#     cdef int nsta, ngrid
+#     ngrid, nsta = dgrid.shape[0], dgrid.shape[1]
+#     
+#     # convert the ad array to C
+#     cdef np.ndarray[double, mode="c", ndim=2] ad_arr
+#     ad_arr = np.ascontiguousarray(ad, dtype=np.float64)
+#     
+#     # convert the dgrid to C
+#     cdef np.ndarray[double, mode="c", ndim=2] grid
+#     grid = np.ascontiguousarray(dgrid, dtype=np.float64)
+# 
+#     for i in range(ngrid):
+# 
+#         w = krige(nsta, &ad_arr[0,0], &grid[i,0], &elevations[0]);
+#         
+#         # convert C array to Python object
+#         array_wrapper = ArrayWrapper()
+#         array_wrapper.set_data(nsta, <void*> w) 
+#         w_arr = np.array(array_wrapper, copy=False)
+#         # Assign our object to the 'base' of the ndarray object
+#         w_arr.base = <PyObject*> array_wrapper
+#         # Increment the reference count, as the above assignement was done in
+#         # C, and Python does not know that there is this additional reference
+#         Py_INCREF(array_wrapper)
+#   
+#         
+#         weights[i] = w_arr
+#         
+#     return None
 
 
 # @cython.boundscheck(False)

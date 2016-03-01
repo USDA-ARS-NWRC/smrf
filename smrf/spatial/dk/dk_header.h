@@ -19,5 +19,5 @@ extern void lubksb(double **a, int n, int *indx);
 
 
 // from krige.c
-extern double *krige(int nsta, double *ad, double *dgrid, double *elevations);
+extern void krige(int nsta, double *ad, double *dgrid, double *elevations, double *w);
 extern void krige_grid(int nsta, int ngrid, double *ad, double *dgrid, double *elevations, int nthreads, double *weights);

@@ -2,21 +2,66 @@
 # -*- coding: utf-8 -*-
 
 
-try:
-    from setuptools import setup
-except ImportError:
-    from distutils.core import setup
+#try:
+#    from setuptools import setup
+#except ImportError:
+#    from distutils.core import setup
 
 
-from setuptools import find_packages
 from distutils.core import setup
 from distutils.extension import Extension
-from Cython.Distutils import build_ext
+#from setuptools import setup, Extension, find_packages
+#from setuptools import find_packages
+
+#try:
+#    from Cython.Distutils import build_ext
+#except ImportError:
+#    from distutils.command import build_ext
+
 import numpy
 import os
 
 # force the compiler to use gcc    
 os.environ["CC"] = "gcc"
+
+#print find_packages()
+
+#try:
+from Cython.Distutils import build_ext
+#except ImportError:
+#    use_cython = False
+#else:
+#    use_cython = True
+
+cmdclass = { }
+ext_modules = [ ]
+
+loc = 'smrf/spatial/dk' # location of the dk folder
+mname = os.path.join(loc, 'detrended_kriging')
+mname = mname.replace('/', '.')
+
+#if use_cython:
+ext_modules += [
+                Extension(mname,
+                          sources=[os.path.join(loc, val) for val in ["detrended_kriging.pyx", "krige.c", "lusolv.c", "array.c"]],
+                          include_dirs=[numpy.get_include()],
+                          extra_compile_args=['-fopenmp'],
+                          extra_link_args=['-fopenmp']
+                          ),
+                ]
+cmdclass.update({ 'build_ext': build_ext })
+#else:
+#    ext_modules += [
+#                    Extension(mname,
+#                              sources=[os.path.join(loc, val) for val in ["detrended_kriging.c", "krige.c", "lusolv.c", "array.c"]],
+#                              include_dirs=[numpy.get_include()],
+#                              extra_compile_args=['-fopenmp'],
+#                              extra_link_args=['-fopenmp']
+#                              )
+#                    ]
+
+
+
 
 with open('README.rst') as readme_file:
     readme = readme_file.read()
@@ -27,7 +72,7 @@ with open('HISTORY.rst') as history_file:
 requirements = [
     'Cython >= 0.23.4',
     'pytz >= 2013.7',
-    'setuptools >= 1.1.6',
+    'setuptools >= 19.6',
     'utm >= 0.4.0',
 #     'cryptography >= 1.2.2',
     'mysql_connector_repackaged >= 0.3.1',
@@ -41,15 +86,7 @@ test_requirements = [
     # TODO: put package test requirements here
 ]
 
-loc = 'smrf/spatial/dk' # location of the dk folder
-mname = os.path.join(loc, 'detrended_kriging')
-mname = mname.replace('/', '.')
-ext_dk = Extension(mname,
-                 sources=[os.path.join(loc, val) for val in ["detrended_kriging.pyx", "krige.c", "lusolv.c", "array.c"]],
-                 include_dirs=[numpy.get_include()],
-                 extra_compile_args=['-fopenmp'],
-                 extra_link_args=['-fopenmp']
-                 )
+
 
 setup(
     name='smrf',
@@ -59,7 +96,7 @@ setup(
     author="Scott Havens",
     author_email='scotthavens@ars.usda.gov',
     url='https://gitlab.com/ars-snow/smrf',
-    packages=find_packages(),
+    packages=['smrf', 'smrf.data', 'smrf.distribute', 'smrf.envphys', 'smrf.framework', 'smrf.ipw', 'smrf.model', 'smrf.output', 'smrf.spatial', 'smrf.utils', 'smrf.spatial.dk'],
 #     package_dir={'smrf':'smrf'},
     include_package_data=True,
     install_requires=requirements,
@@ -81,6 +118,6 @@ setup(
     ],
     test_suite='tests',
     tests_require=test_requirements,
-    cmdclass = {'build_ext': build_ext},
-    ext_modules = [ext_dk],
+    cmdclass = cmdclass,
+    ext_modules = ext_modules,
 )

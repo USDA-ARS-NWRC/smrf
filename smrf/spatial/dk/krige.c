@@ -37,13 +37,8 @@ double *weights;			/* output weights */
 //int nthreads;					/* number of threads to use */
 {
 
-	double *w;			/* kriging weights */
-	//	double **wall;
+	double w[nsta+1];			/* kriging weights */
 	int i, j;
-	//	w = dvector(nsta);
-	//	wall = matrix(ngrid, nsta);
-	//	printf("ngrid = %i\n", ngrid);
-	//	printf("nsta = %i\n", nsta);
 
 	/* Calculate kriging weights using all stations */
 	omp_set_dynamic(0);     // Explicitly disable dynamic teams
@@ -54,19 +49,11 @@ double *weights;			/* output weights */
 #pragma omp for
 		for (i = 0; i < ngrid; i++) {
 
-			w = krige(nsta, ad, &dgrid[i*nsta], elevations);
+			krige(nsta, ad, &dgrid[i*nsta], elevations, w);
 
 			for (j = 0; j < nsta; j++){
 				weights[i*nsta + j] = w[j];
-				//			weights[i] = *w;
 			}
-
-			//		printf("%i\n", i);
-			//		for (j=0; j<nsta;j++){
-			//			printf("%1.4f / %1.4f -- ", w[j], weights[i*nsta + j]);
-			//		}
-			//		printf("\n");
-
 		}
 	}
 
@@ -75,13 +62,14 @@ double *weights;			/* output weights */
 
 
 
-double *krige(nsta, ad, dgrid, elevations)
+void krige(nsta, ad, dgrid, elevations, w)
 int nsta;                          /* number of stations used */
 double *ad;                      /* matrix of distances between prec/temp
                                     stations for computing kriging weights */
 double *dgrid;                   /* array of distances between grid cells
                                     and prec/temp stations */
 double *elevations;				 /* vector of station elevations */
+double *w;						/* kriging weights */
 {
 	double elevsave;               /* stored value of station elevation */
 	int m, mm, n, nn, i, j;             /* loop indexes */
@@ -98,7 +86,7 @@ double *elevations;				 /* vector of station elevations */
 	double **a;                   /* data matrix for solving for kriging
                                        weights (input to m_inv()) */
 //	double *w;                    /* kriging weights */
-	double w[nsta+1];
+//	double w[nsta+1];
 
 	//   nsta = ns;
 
@@ -223,6 +211,6 @@ double *elevations;				 /* vector of station elevations */
 	free(a);
 
 
-	return w;
+//	return w;
 }
 
