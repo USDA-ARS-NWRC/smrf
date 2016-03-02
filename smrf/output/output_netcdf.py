@@ -51,63 +51,65 @@ class output_netcdf():
             
             f = self.variable_list[v]
     
-#             if os.path.exists(f['file_name']):
-#                 self._logger.warn('Opening %s, data may be overwritten!' % f['file_name'])
-#                 s = nc.Dataset(f['file_name'], 'r+', 'NETCDF4')
-#             else:
-            self._logger.debug('Creating %s' % f['file_name'])
-            s = nc.Dataset(f['file_name'], 'w', format='NETCDF4', clobber=True)
-                        
-            # add dimensions
-            s.createDimension(dimensions[0], None)
-#             s.createDimension(dimensions[1], 19)
-            s.createDimension(dimensions[1], y.shape[0])
-            s.createDimension(dimensions[2], x.shape[0])
-            
-            # create the variables
-            s.createVariable('time', 'f', (dimensions[0]))
-            s.createVariable('y', 'f', dimensions[1])
-            s.createVariable('x', 'f', dimensions[2])
-            s.createVariable(f['variable'], 'f', (dimensions[0],dimensions[1],dimensions[2]))
-         
-            # define some attributes
-            setattr(s.variables['time'], 'units', 'hours since %s' % time['start_date'])
-            setattr(s.variables['time'], 'calendar', 'standard')
-            setattr(s.variables['time'], 'time_zone', time['time_zone'])
-            setattr(s.variables['y'], 'units', 'meters')
-            setattr(s.variables['y'], 'description', 'UTM, north south')
-            setattr(s.variables['x'], 'units', 'meters')
-            setattr(s.variables['x'], 'description', 'UTM, east west')
-            setattr(s.variables[f['variable']], 'module', f['module'])
-            setattr(s.variables[f['variable']], 'units', f['info']['units'])
-            setattr(s.variables[f['variable']], 'long_name', f['info']['long_name'])
-
-            # define some global attributes
-            setattr(s, 'Conventions', 'CF-1.6')
-            setattr(s, 'dateCreated', datetime.now().strftime(self.fmt))
-            setattr(s, 'title', 'Distirbuted data from SMRF')
-            setattr(s, 'history', '[%s] Create netCDF4 file' % datetime.now().strftime(self.fmt))
-            
-            
-         
-            s.variables['y'][:] = y
-            s.variables['x'][:] = x
+            if os.path.exists(f['file_name']):
+                self._logger.warn('Opening %s, data may be overwritten!' % f['file_name'])
+                s = nc.Dataset(f['file_name'], 'a')
+#                 h = getattr(s, 'history')
+                h = '[%s] Data added or updated' % datetime.now().strftime(self.fmt)
+                setattr(s, 'last_modified', h)
                 
-            self.variable_list[v]['nc_file'] = s
+            else:
+                self._logger.debug('Creating %s' % f['file_name'])
+                s = nc.Dataset(f['file_name'], 'w', format='NETCDF4', clobber=True)
+                            
+                # add dimensions
+                s.createDimension(dimensions[0], None)
+    #             s.createDimension(dimensions[1], 19)
+                s.createDimension(dimensions[1], y.shape[0])
+                s.createDimension(dimensions[2], x.shape[0])
+                
+                # create the variables
+                s.createVariable('time', 'f', (dimensions[0]))
+                s.createVariable('y', 'f', dimensions[1])
+                s.createVariable('x', 'f', dimensions[2])
+                s.createVariable(f['variable'], 'f', (dimensions[0],dimensions[1],dimensions[2]))
+             
+                # define some attributes
+                setattr(s.variables['time'], 'units', 'hours since %s' % time['start_date'])
+                setattr(s.variables['time'], 'calendar', 'standard')
+                setattr(s.variables['time'], 'time_zone', time['time_zone'])
+                setattr(s.variables['y'], 'units', 'meters')
+                setattr(s.variables['y'], 'description', 'UTM, north south')
+                setattr(s.variables['x'], 'units', 'meters')
+                setattr(s.variables['x'], 'description', 'UTM, east west')
+                setattr(s.variables[f['variable']], 'module', f['module'])
+                setattr(s.variables[f['variable']], 'units', f['info']['units'])
+                setattr(s.variables[f['variable']], 'long_name', f['info']['long_name'])
+    
+                # define some global attributes
+                setattr(s, 'Conventions', 'CF-1.6')
+                setattr(s, 'dateCreated', datetime.now().strftime(self.fmt))
+                setattr(s, 'title', 'Distirbuted data from SMRF')
+                setattr(s, 'history', '[%s] Create netCDF4 file' % datetime.now().strftime(self.fmt))
+                
+                s.variables['y'][:] = y
+                s.variables['x'][:] = x
+                
+#             self.variable_list[v]['nc_file'] = s
             
             # get all the times from the file if there are any 
 #             dt = np.array([''.join(x) for x in s.variables['time'][:]])
 #             self.date_time[v] = pd.to_datetime(dt)
 
-            times = s.variables['time']
-            dates = np.array([])
-            if times[:]:
-                dates = nc.num2date(times[:],
-                                units=times.units,
-                                calendar=times.calendar)
-            self.date_time[v] = dates
+#             times = s.variables['time']
+#             dates = np.array([])
+#             if len(times) != 0:
+#                 dates = nc.num2date(times[:],
+#                                 units=times.units,
+#                                 calendar=times.calendar)
+#             self.date_time[v] = dates
                 
-            
+            s.close()
             
 #             # determine the times
 #             dt = np.diff(self.date_time[v])/60/1e9
@@ -133,31 +135,33 @@ class output_netcdf():
         
         self._logger.debug('Writing variable %s to netCDF' % variable)
         
-        f = self.variable_list[variable]['nc_file']
+#         f = self.variable_list[variable]['nc_file']
+        f = nc.Dataset(self.variable_list[variable]['file_name'], 'a', 'NETCDF4')
         
-        # determine what inde to put into netCDF, len() will give the end of the values
-        # check if there is a time there already
-#         ind = self.date_time[variable] == date_time
+        # the current time integer
         times = f.variables['time']
+        t = nc.date2num(date_time.replace(tzinfo=None), times.units, times.calendar)
         
-        
-#         if times:
-#             ind = nc.date2index(date_time.replace(tzinfo=None), times, times.calendar, 'exact')
-        index = len(times)
-        self.date_time[variable] = np.append(self.date_time[variable], pd.to_datetime(date_time))
+        if len(times) != 0:
+            index = np.where(times[:] == t)[0]
+            if index.size == 0:
+                index = len(times)
+            else:
+                index = index[0]
+        else:
+            index = len(times)
+            
+#         self.date_time[variable] = np.append(self.date_time[variable], pd.to_datetime(date_time))
             
             # insert the time
-#             f.variables['time'][index] = date_time.strftime(self.fmt)
-        f.variables['time'][index] = nc.date2num(date_time.replace(tzinfo=None), times.units, times.calendar)
-            
-#         else:
-#             index = (i-1 for i, elem in enumerate(ind, 1) if elem).next()
+        f.variables['time'][index] = t
             
         # insert the data
         f.variables[variable][index,:] = data
         
         # synce the data to disk to that it can be viewed immediately
-        f.sync()
+#         f.sync()
+        f.close()
         
         
         

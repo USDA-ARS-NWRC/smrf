@@ -142,11 +142,11 @@ class SMRF():
         # close other files
         self.distribute['wind']._maxus_file.close()
         
-        # close output files
-        if self.out_func.type == 'netcdf':
-            for v in self.out_func.variable_list:
-                v['nc_file'].close()
-                self._logger.debug('Closed file: %s' % v['nc_file'])
+#         # close output files
+#         if self.out_func.type == 'netcdf':
+#             for v in self.out_func.variable_list:
+#                 v['nc_file'].close()
+#                 self._logger.debug('Closed file: %s' % v['nc_file'])
         
         self._logger.info('SMRF closed --> %s' % datetime.now())   
         
