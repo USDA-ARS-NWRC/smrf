@@ -83,7 +83,11 @@ class topo():
         for v in self.images:
             if v in self.topoConfig:
                 i = ipw.IPW(self.topoConfig[v])
-                setattr(self, v, i.bands[0].data)
+                
+                if v is 'veg_type':
+                    setattr(self, v, i.bands[0].data.astype(int))
+                else:
+                    setattr(self, v, i.bands[0].data)
                 
                 if v is 'dem':
                     # get some general information about the model domain from the dem
@@ -95,6 +99,8 @@ class topo():
                     self.dv = i.bands[0].dsamp
                     self.units = i.bands[0].geounits
                     self.coord_sys_ID = i.bands[0].coord_sys_ID
+                    
+                
                 
             else:
                 setattr(self, v, None)

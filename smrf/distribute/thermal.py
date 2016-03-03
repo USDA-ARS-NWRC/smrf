@@ -80,7 +80,7 @@ class th(image_data.image_data):
         self.sky_view = topo.sky_view
         self.dem = topo.dem
                
-    
+    @profile
     def distribute(self, air_temp, dew_point, cloud_factor):
         """
         Distribute solar

@@ -17,7 +17,7 @@
 
 #include <stdio.h>
 #include <stdlib.h>
-#include <malloc/malloc.h>
+//#include <malloc/malloc.h>
 #include <omp.h>
 
 #include "dk_header.h"

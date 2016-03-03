@@ -51,7 +51,7 @@ class output_netcdf():
             
             f = self.variable_list[v]
     
-            if os.path.exists(f['file_name']):
+            if os.path.isfile(f['file_name']):
                 self._logger.warn('Opening %s, data may be overwritten!' % f['file_name'])
                 s = nc.Dataset(f['file_name'], 'a')
 #                 h = getattr(s, 'history')
@@ -60,7 +60,7 @@ class output_netcdf():
                 
             else:
                 self._logger.debug('Creating %s' % f['file_name'])
-                s = nc.Dataset(f['file_name'], 'w', format='NETCDF4', clobber=True)
+                s = nc.Dataset(f['file_name'], 'w', format='NETCDF4', clobber=False)
                             
                 # add dimensions
                 s.createDimension(dimensions[0], None)

@@ -241,6 +241,7 @@ class SMRF():
         self.data.metadata['yi'] = self.data.metadata.apply(lambda row: find_pixel_location(row, self.topo.y, 'Y'), axis=1)
         
         
+    @profile
     def distributeData(self):
         """
         Distribute the data
@@ -394,7 +395,9 @@ class SMRF():
                 self.config['output']['out_location'] = os.environ['TMPDIR']
             elif not os.path.isdir(self.config['output']['out_location']):
                 os.makedirs(self.config['output']['out_location'])
-
+                
+            self.config['output']['out_location'] = os.path.abspath(self.config['output']['out_location'])
+            
             # frequency of outputs
             self.config['output']['frequency'] = int(self.config['output']['frequency'])
             

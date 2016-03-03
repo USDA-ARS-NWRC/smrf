@@ -1,6 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
-#include <malloc/malloc.h>
+//#include <malloc/malloc.h>
 
 /*
  *    vector.c

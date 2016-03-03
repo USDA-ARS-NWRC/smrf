@@ -12,7 +12,8 @@
  *    (1988).  Numerical Recipes in C.  Cambridge University Press, pp. 43-44.
  */
 
-#include <malloc/malloc.h>
+#include <stdlib.h>
+//#include <malloc/malloc.h>
 #include <math.h>
 #include <stdio.h>
 
