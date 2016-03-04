@@ -84,11 +84,11 @@ class ppt(image_data.image_data):
         
         self._initialize(topo, metadata)
         
-        self.percent_snow = np.zeros((topo.ny, topo.ny))
-        self.snow_density = np.zeros((topo.ny, topo.ny))
-        self.storm_days = np.zeros((topo.ny, topo.ny))
-        self.storm_precip = np.zeros((topo.ny, topo.ny))
-        self.last_storm_day = np.zeros((topo.ny, topo.ny))
+        self.percent_snow = np.zeros((topo.ny, topo.nx))
+        self.snow_density = np.zeros((topo.ny, topo.nx))
+        self.storm_days = np.zeros((topo.ny, topo.nx))
+        self.storm_precip = np.zeros((topo.ny, topo.nx))
+        self.last_storm_day = np.zeros((topo.ny, topo.nx))
 #         self.albedo
             
         
