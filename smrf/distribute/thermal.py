@@ -52,7 +52,8 @@ class th(image_data.image_data):
         image_data.image_data.__init__(self, self.variable)
         self._logger = logging.getLogger(__name__)
         
-        self.config = thermalConfig
+#         self.config = thermalConfig
+        self.getConfig(thermalConfig)
                 
         if (tempDir is None) | (tempDir == 'TMPDIR'):
             tempDir = os.environ['TMPDIR']
@@ -73,14 +74,16 @@ class th(image_data.image_data):
         """
 
         self._logger.debug('Initializing distribute.thermal')
-#         self._initialize(topo, metadata)
+        if self.gridded:
+            self._initialize(topo, metadata)
+                
         self.veg_height = topo.veg_height
         self.veg_tau = topo.veg_tau
         self.veg_k = topo.veg_k
         self.sky_view = topo.sky_view
         self.dem = topo.dem
                
-    @profile
+    
     def distribute(self, air_temp, dew_point, cloud_factor):
         """
         Distribute solar
@@ -105,5 +108,17 @@ class th(image_data.image_data):
         self.thermal = radiation.thermal_correct_canopy(cth, air_temp, self.veg_tau, self.veg_height)
             
             
+    def distribute_thermal(self, data):
+        """
+        Distribute thermal
+        
+        Args:
+            data: thermal values
+            
+        """
+    
+        self._logger.debug('Distributing thermal')
+        
+        self._distribute(data)
     
     

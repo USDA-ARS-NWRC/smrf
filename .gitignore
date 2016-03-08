@@ -4,6 +4,8 @@
 .pydevproject
 .DS_store
 
+test_data/wrfout_d02_2015-03-21.nc
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]

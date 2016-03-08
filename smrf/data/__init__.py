@@ -9,3 +9,4 @@ from . import csv_data
 # from . import mysql_data
 from smrf.data import loadTopo
 from smrf.data import loadData
+from smrf.data import loadGrid

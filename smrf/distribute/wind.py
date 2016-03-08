@@ -10,7 +10,7 @@ import logging, os
 from smrf.distribute import image_data
 import smrf.utils as utils
 import netCDF4 as nc
-import matplotlib.pyplot as plt
+# import matplotlib.pyplot as plt
 
 class wind(image_data.image_data):
     """
@@ -59,31 +59,35 @@ class wind(image_data.image_data):
             tempDir = os.environ['TMPDIR']
         self.tempDir = tempDir
         
-        # open the maxus netCDF
-        self._maxus_file = nc.Dataset(self.config['maxus_netcdf'], 'r')
-        self.maxus = self._maxus_file.variables['maxus']
-        self._logger.debug('Opened %s' % self._maxus_file)
-        
-        # check maxus defaults
-        if 'station_default' not in self.config:
-            self.config['station_default'] = 11.4
-        if 'veg_default' not in self.config:
-            self.config['veg_default'] = 11.4
+        if windConfig['distribution'] == 'grid':
+            self.gridded = True
             
-        # get the veg values
-        matching = [s for s in self.config.keys() if "veg_" in s]
-        v = {}
-        for m in matching:
-            if m != 'veg_default':
-                ms = m.split('_')
-                v[ms[1]] = float(self.config[m])
-        self.config['veg'] = v
-
-        # peak value
-        if 'peak' in self.config:
-            self.config['peak'] = self.config['peak'].split(',')
         else:
-            self.config['peak'] = None
+            # open the maxus netCDF
+            self._maxus_file = nc.Dataset(self.config['maxus_netcdf'], 'r')
+            self.maxus = self._maxus_file.variables['maxus']
+            self._logger.debug('Opened %s' % self._maxus_file)
+            
+            # check maxus defaults
+            if 'station_default' not in self.config:
+                self.config['station_default'] = 11.4
+            if 'veg_default' not in self.config:
+                self.config['veg_default'] = 11.4
+                
+            # get the veg values
+            matching = [s for s in self.config.keys() if "veg_" in s]
+            v = {}
+            for m in matching:
+                if m != 'veg_default':
+                    ms = m.split('_')
+                    v[ms[1]] = float(self.config[m])
+            self.config['veg'] = v
+    
+            # peak value
+            if 'peak' in self.config:
+                self.config['peak'] = self.config['peak'].split(',')
+            else:
+                self.config['peak'] = None
         
         self._logger.debug('Created distribute.wind')     
         
@@ -109,16 +113,17 @@ class wind(image_data.image_data):
         
         self._initialize(topo, metadata)
         
-        self.veg_type = topo.veg_type
-        
-        # get the enhancements for the stations
-        if 'enhancement' not in self.metadata.columns:
-            self.metadata['enhancement'] = float(self.config['station_default'])
+        if not self.gridded:
+            self.veg_type = topo.veg_type
             
-            for m in self.metadata.index:
-                if m.lower() in self.config:
-                    self.metadata.loc[m, 'enhancement'] = float(self.config[m.lower()])
-                    
+            # get the enhancements for the stations
+            if 'enhancement' not in self.metadata.columns:
+                self.metadata['enhancement'] = float(self.config['station_default'])
+                
+                for m in self.metadata.index:
+                    if m.lower() in self.config:
+                        self.metadata.loc[m, 'enhancement'] = float(self.config[m.lower()])
+                        
              
         
         
@@ -140,18 +145,35 @@ class wind(image_data.image_data):
         data_speed = data_speed[self.stations]
         data_direction = data_direction[self.stations]
         
-        # calculate the maxus at each site
-        self.stationMaxus(data_speed, data_direction)
-        
-        # distribute the flatwind
-        self._distribute(self.flatwind, other_attribute='flatwind_distributed')
-        
-        # distribute u_direction and v_direction
-        self._distribute(self.u_direction, other_attribute='u_direction_distributed')
-        self._distribute(self.v_direction, other_attribute='v_direction_distributed')
-        
-        # Calculate simulated wind speed at each cell from flatwind
-        self.simulateWind(data_speed)
+        if self.gridded:
+            self._distribute(data_speed, other_attribute='wind_speed')
+            
+            # wind direction components at the station
+            self.u_direction = np.sin(data_direction * np.pi/180)    # u
+            self.v_direction = np.cos(data_direction * np.pi/180)    # v
+            
+            # distribute u_direction and v_direction
+            self._distribute(self.u_direction, other_attribute='u_direction_distributed')
+            self._distribute(self.v_direction, other_attribute='v_direction_distributed')
+            
+            # combine u and v to azimuth
+            az = np.arctan2(self.u_direction_distributed, self.v_direction_distributed)*180/np.pi
+            az[az < 0] = az[az < 0] + 360
+            self.wind_direction = az
+            
+        else:
+            # calculate the maxus at each site
+            self.stationMaxus(data_speed, data_direction)
+            
+            # distribute the flatwind
+            self._distribute(self.flatwind, other_attribute='flatwind_distributed')
+            
+            # distribute u_direction and v_direction
+            self._distribute(self.u_direction, other_attribute='u_direction_distributed')
+            self._distribute(self.v_direction, other_attribute='v_direction_distributed')
+            
+            # Calculate simulated wind speed at each cell from flatwind
+            self.simulateWind(data_speed)
         
     
     def simulateWind(self, data_speed):

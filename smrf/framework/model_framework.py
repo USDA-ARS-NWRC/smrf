@@ -71,6 +71,11 @@ class SMRF():
         if 'stations' not in self.config:
             self.config['stations'] = None
             
+        # if a gridded dataset will be used
+        self.gridded = False
+        if 'gridded' in self.config:
+            self.gridded = True
+            
         if 'nthreads_forcing' not in self.config['system']:
             self.config['system']['nthreads_forcing'] = 1
         if 'nthreads_isnobal' not in self.config['system']:
@@ -86,7 +91,12 @@ class SMRF():
         self.date_time = [di.replace(tzinfo=tzinfo) for di in d]
         self.time_steps = len(self.date_time)    # number of time steps to model
         
-        
+        # check the temp dir
+        if 'temp_dir' in self.config['system']:
+            tempDir = self.config['system']['temp_dir']
+        else:
+            tempDir = os.environ['TMPDIR']
+        self.tempDir = tempDir
         
         # start logging
         
@@ -157,7 +167,7 @@ class SMRF():
         """
     
         # load the topo 
-        self.topo = data.loadTopo.topo(self.config['topo'])     
+        self.topo = data.loadTopo.topo(self.config['topo'], tempDir=self.tempDir)     
      
      
     def initializeDistribution(self):
@@ -225,14 +235,18 @@ class SMRF():
                                            stations=self.config['stations'],
                                            dataType='mysql')
             
+        elif 'gridded' in self.config:
+            self.data = data.loadGrid.grid(self.config['gridded'],
+                                           self.topo,
+                                           self.start_date,
+                                           self.end_date,
+                                           time_zone=self.config['time']['time_zone'],
+                                           dataType='wrf',
+                                           tempDir=self.tempDir)
+            
         else:
             raise KeyError('Could not determine where station data is located')   
         
-        # just for now
-#         self.data.precip = self.data.precip.diff(1)
-#         self.data.precip[self.data.precip < 0] = 0
-#         self.data.precip = self.data.precip.fillna(0)
-  
         # ensure that the dataframes have consistent times
 #         t = date_range(start_date, end_date, timedelta(minutes=m))
   
@@ -241,10 +255,10 @@ class SMRF():
         self.data.metadata['yi'] = self.data.metadata.apply(lambda row: find_pixel_location(row, self.topo.y, 'Y'), axis=1)
         
         
-    @profile
+
     def distributeData(self):
         """
-        Distribute the data
+        Distribute the measurement point data
         
         For now, do everything serial so that the process of distributing the 
         data is developed.  Once the methods are in place, then I can start
@@ -352,10 +366,13 @@ class SMRF():
                                                 self.distribute['albedo'].albedo_ir)
             
             # 7. thermal radiation
-            self.distribute['thermal'].distribute(self.distribute['air_temp'].air_temp,
-                                                  self.distribute['vapor_pressure'].dew_point,
-                                                  self.distribute['solar'].cloud_factor)
-            
+            if self.distribute['thermal'].gridded:
+                self.distribute['thermal'].distribute_thermal(self.data.thermal.ix[t])
+            else:
+                self.distribute['thermal'].distribute(self.distribute['air_temp'].air_temp,
+                                                      self.distribute['vapor_pressure'].dew_point,
+                                                      self.distribute['solar'].cloud_factor)
+                
             # 8. Soil temperature
             self.distribute['soil_temp'].distribute()
             
@@ -377,7 +394,146 @@ class SMRF():
             telapsed = datetime.now() - startTime
             self._logger.debug('%.1f seconds for time step' % telapsed.total_seconds())
             
-        self.forcing_data = 1 #d
+        self.forcing_data = 1
+    
+    
+    def distributeData_Grid(self):
+        """
+        Distribute from a gridded dataset
+        
+        For now, do everything serial so that the process of distributing the 
+        data is developed.  Once the methods are in place, then I can start
+        playing with threads and running the distribution in parallel
+        
+        Future: use dagger to build the time step data and keep track of
+        what file depends on another file
+        
+        Steps performed:
+            1. Air temperature
+            2. Vapor pressure
+            3. Wind 
+                3.1 Wind direction
+                3.2 Wind speed
+            4. Precipitation
+            5. Solar
+            6. Thermal
+            7. Soil temperature
+        
+        
+        To do:
+            - All classes will have an intiialize and a distribute, with the same inputs
+            - Then all can be initialized at once and all distributed at once
+        """
+        
+        #------------------------------------------------------------------------------
+        # initialize a dictionary to hold everything        
+#         d = self._initDistributionDict(self.date_time, self.modules)
+        
+        
+        #------------------------------------------------------------------------------
+        # Initialize the distibution
+        # 1. Air temperature
+        self.distribute['air_temp'].initialize_grid(self.topo, self.data.metadata)
+        
+        # 2. Vapor pressure
+        self.distribute['vapor_pressure'].initialize_grid(self.topo, self.data.metadata)
+        
+        # 3. Wind
+        self.distribute['wind'].initialize_grid(self.topo, self.data.metadata)
+        
+        # 4. Precipitation
+        self.distribute['precip'].initialize_grid(self.topo, self.data.metadata)
+        
+        # 5. Albedo
+        self.distribute['albedo'].initialize_grid(self.topo, self.data.metadata)
+        
+        # 6. Solar
+        self.distribute['solar'].initialize_grid(self.topo, self.data.metadata)
+        
+        # 7. thermal radiation
+        self.distribute['thermal'].initialize_grid(self.topo, self.data.metadata)
+        
+        # 8. Soil temperature
+        self.distribute['soil_temp'].initialize_grid(self.topo, self.data.metadata)
+        
+        #------------------------------------------------------------------------------
+        # Distribute the data
+        for output_count,t in enumerate(self.date_time):
+            
+            # wait here for the model to catch up if needed
+            
+            startTime = datetime.now()
+            
+            self._logger.info('Distributing time step %s' % t)
+            
+            # 0.1 sun angle for time step
+            cosz, azimuth = radiation.sunang(t.astimezone(pytz.utc), 
+                                            self.topo.topoConfig['basin_lat'],
+                                            self.topo.topoConfig['basin_lon'],
+                                            zone=0, slope=0, aspect=0)
+            
+            # 0.2 illumination angle
+            illum_ang = None
+            if cosz > 0:
+                illum_ang = radiation.shade(self.topo.slope, self.topo.aspect, azimuth, cosz)
+                    
+        
+            # 1. Air temperature 
+            self.distribute['air_temp'].distribute_grid(self.data.air_temp.ix[t])
+            
+            # 2. Vapor pressure
+            self.distribute['vapor_pressure'].distribute_grid(self.data.vapor_pressure.ix[t],
+                                                        self.distribute['air_temp'].air_temp)
+            
+            # 3. Wind_speed and wind_direction
+            self.distribute['wind'].distribute_grid(self.data.wind_speed.ix[t],
+                                               self.data.wind_direction.ix[t])
+            
+            # 4. Precipitation
+            self.distribute['precip'].distribute_grid(self.data.precip.ix[t],
+                                                self.distribute['vapor_pressure'].dew_point,
+                                                self.topo.mask)
+            
+            # 5. Albedo
+            self.distribute['albedo'].distribute_grid(t, illum_ang, self.distribute['precip'].storm_days)
+            
+            # 6. Solar
+            self.distribute['solar'].distribute_grid(self.data.cloud_factor.ix[t],
+                                                illum_ang, 
+                                                cosz, 
+                                                azimuth,
+                                                self.distribute['precip'].last_storm_day_basin,
+                                                self.distribute['albedo'].albedo_vis,
+                                                self.distribute['albedo'].albedo_ir)
+            
+            # 7. thermal radiation
+            self.distribute['thermal'].distribute_grid(self.distribute['air_temp'].air_temp,
+                                                  self.distribute['vapor_pressure'].dew_point,
+                                                  self.distribute['solar'].cloud_factor)
+            
+            # 8. Soil temperature
+            self.distribute['soil_temp'].distribute_grid()
+            
+            
+            # output at the frequency and the last time step
+            if (output_count % self.config['output']['frequency'] == 0) or (output_count == len(self.date_time)):
+                self.output(t)
+            
+#             plt.imshow(self.distribute['albedo'].albedo_vis), plt.colorbar(), plt.show()
+            
+            
+            # pull all the images together to create the input image
+#             d[t]['air_temp'] = self.distribute['air_temp'].image
+#             d[t]['vapor_pressure'] = self.distribute['vapor_pressure'].image 
+            
+            
+            # check if out put is desired
+            
+            telapsed = datetime.now() - startTime
+            self._logger.debug('%.1f seconds for time step' % telapsed.total_seconds())
+            
+        self.forcing_data = 1
+    
     
     
     def initializeOutput(self):

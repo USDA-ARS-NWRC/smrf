@@ -21,7 +21,7 @@ start = datetime.now()
 # run the model
 # output if necessary
 
-configFile = './test_data/testConfig.ini'
+configFile = './test_data/testConfig_Grid.ini'
 if len(sys.argv) > 1:
     configFile = sys.argv[1]
 
@@ -62,7 +62,9 @@ s.initializeOutput()
 s.loadData()
 
 # 6. distribute  
-
+# if s.gridded:
+#     s.distributeData_Grid()
+# else:
 s.distributeData()
 
 #===============================================================================

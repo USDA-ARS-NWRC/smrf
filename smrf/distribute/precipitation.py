@@ -80,7 +80,7 @@ class ppt(image_data.image_data):
                         
         """
         
-        self._logger.debug('Initializing distribute.air_temp')
+        self._logger.debug('Initializing distribute.precip')
         
         self._initialize(topo, metadata)
         

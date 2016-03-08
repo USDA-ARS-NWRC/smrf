@@ -7,7 +7,7 @@ Anything done here will be available to all variables
 
 import pandas as pd
 import numpy as np
-from smrf.spatial import idw, dk
+from smrf.spatial import idw, dk, grid
 import logging
 
 class image_data():
@@ -33,6 +33,8 @@ class image_data():
         
         self.variable = variable
         setattr(self, variable, None)
+        
+        self.gridded = False
         
         self._base_logger = logging.getLogger(__name__)
         
@@ -105,6 +107,40 @@ class image_data():
                 config['regression_method'] = int(config['regression_method'])
             else:
                 config['regression_method'] = 1
+                
+        # check of gridded interpolation
+        elif config['distribution'] == 'grid':
+            self.gridded = True
+            if 'slope' in config:
+                if int(config['slope']) not in [-1,0,1]:
+                    raise ValueError('Slope value for detrending must be in [-1, 0, 1]')
+                else:
+                    config['slope'] = int(config['slope'])
+                   
+            if 'detrend' in config:
+                if config['detrend'].lower() == 'true':
+                    config['detrend'] = True
+                elif config['detrend'].lower() == 'false':
+                    config['detrend'] = False
+                else:
+                    raise ValueError('Detrended configuration setting must be either true/false')
+            else:
+                config['detrend'] = False
+                 
+            if 'method' in config:
+                config['method'] = config['method'].lower()
+            else:
+                config['method'] = 'linear'
+                
+            if 'mask' in config:
+                if config['mask'].lower() == 'true':
+                    config['mask'] = True
+                elif config['mask'].lower() == 'false':
+                    config['mask'] = False
+                else:
+                    raise ValueError('Mask configuration setting must be either true/false')
+            else:
+                config['mask'] = False 
                         
                     
         self.getStations(config)
@@ -112,12 +148,17 @@ class image_data():
                     
         self.config = config
     
+    
     def getStations(self, config):
         
         # determine the stations that will be used, alphabetical order
-        stations = config['stations'].split(',')
-        stations = map(str.strip, stations)
-        stations.sort()
+        if 'staitons' in config:
+            stations = config['stations'].split(',')
+            stations = map(str.strip, stations)
+            stations.sort()
+        else:
+            stations = None
+            
         self.stations = stations
         
     
@@ -137,24 +178,27 @@ class image_data():
         """
         
         # pull out the metadata subset
-        meta = metadata.ix[self.stations]
-        self.metadata = meta
+        if self.stations is not None:
+            metadata = metadata.ix[self.stations]
+        else:
+            self.stations = metadata.index.values
+        self.metadata = metadata
+        
+        mx = metadata.X.values
+        my = metadata.Y.values
+        mz = metadata.elevation.values
         
         if self.config['distribution'] == 'idw':
-            
-            mx = meta.X.values
-            my = meta.Y.values
-            mz = meta.elevation.values
-            
+            # inverse distance weighting
             self.idw = idw.IDW(mx, my, topo.X, topo.Y, mz=mz, GridZ=topo.dem, power=self.config['power'])            
         
         elif self.config['distribution'] == 'dk':
-             
-            mx = meta.X.values
-            my = meta.Y.values
-            mz = meta.elevation.values
+            # detrended kriging
+            self.dk = dk.DK(mx, my, mz, topo.X, topo.Y, topo.dem, self.config)
             
-            self.dk = dk.DK(mx, my, mz, topo.X, topo.Y, topo.dem, self.config)   
+        elif self.config['distribution'] == 'grid':
+            # linear interpolation between points
+            self.grid = grid.GRID(self.config, mx, my, topo.X, topo.Y, mz=mz, GridZ=topo.dem, mask=topo.mask)
         
         else:
             raise Exception('Could not determine the distribution method for %s' % self.variable)
@@ -191,6 +235,11 @@ class image_data():
         elif self.config['distribution'] == 'dk':
             v = self.dk.calculate(data.values)
         
+        elif self.config['distribution'] == 'grid':
+            if self.config['detrend']:
+                v = self.grid.detrendedInterpolation(data.values, self.config['slope'], self.config['method'])
+            else:
+                v = self.grid.calculateInterpolation(data.values, self.config['method'])
         
         if other_attribute is not None:
             setattr(self, other_attribute, v)

@@ -57,7 +57,7 @@ class ta(image_data.image_data):
         self._logger.debug('Initializing distribute.air_temp')
         self._initialize(topo, metadata)
         
-                
+                     
         
     def distribute(self, data):
         """
@@ -71,6 +71,7 @@ class ta(image_data.image_data):
         self._logger.debug('Distributing air_temp')
         
         self._distribute(data)
+        
     
     
 
