@@ -86,32 +86,21 @@ stations:	ATAI1,BNRI1,VNNI1,TRMI1,BOGI1,TR216
 # MySQL database
 ################################################################################
 
-#[mysql]
-#user: 			wxuser_v2
-#password:		x340hm4h980r
-#host:			10.200.28.203
-#database:		weather_v2
-#metadata:		tbl_metadata		; table for metadata
-#data_table:		tbl_level1		; table for the data
-#station_table:		tbl_stations		; only required if using [stations]client
-#air_temp:		air_temp
-#vapor_pressure:		vapor_pressure
-#precip: 		precip_accum
-#solar:			solar_radiation
-#wind_speed:		wind_speed
-#wind_direction:		wind_direction
-#cloud_factor:		cloud_factor		; fraction of sky covered by cloud: actual irradiance/clear-sky irradiance
-
-
-################################################################################
-# Gridded dataset i.e. wrf_out
-################################################################################
-
-[gridded]
-file:			./test_data/wrfout_d02_2015-03-21.nc
-data_type:		wrf
-zone_number:		11
-zone_letter:		N
+[mysql]
+user: 			wxuser_v2
+password:		x340hm4h980r
+host:			10.200.28.203
+database:		weather_v2
+metadata:		tbl_metadata		; table for metadata
+data_table:		tbl_level1		; table for the data
+station_table:		tbl_stations		; only required if using [stations]client
+air_temp:		air_temp
+vapor_pressure:		vapor_pressure
+precip: 		precip_accum
+solar:			solar_radiation
+wind_speed:		wind_speed
+wind_direction:		wind_direction
+cloud_factor:		cloud_factor		; fraction of sky covered by cloud: actual irradiance/clear-sky irradiance
 
 
 ################################################################################
@@ -255,8 +244,9 @@ restart:		false
 
 [output]
 frequency:		1	; frequency in time step that should be written to disk
-out_location:		/home/scotthavens/Desktop/test_output	; location to put the files
-variables:		air_temp, vapor_pressure, albedo_vis
+out_location:		/Users/ahedrick/Desktop/test/	; location to put the files
+variables:		thermal, air_temp, vapor_pressure, wind_speed, net_solar, precip, percent_snow, snow_density, dew_point, albedo_vis
+
 file_type:		netcdf		; type of file to output as
 
 ################################################################################
@@ -272,6 +262,12 @@ log_level:		debug
 ################################################################################
 
 [system]
+<<<<<<< HEAD
 temp_dir: 		./test_data 	; location of where to put the working files
 nthreads_isnobal:	6
 nthreads_forcing:	6
+=======
+temp_dir: 		TMPDIR 	; location of where to put the working files
+nthreads_isnobal:	11
+nthreads_forcing:	11
+>>>>>>> 3d305e0eec8b04e6b8dabac4898533573ef38c58

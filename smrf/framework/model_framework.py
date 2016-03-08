@@ -255,7 +255,6 @@ class SMRF():
         self.data.metadata['yi'] = self.data.metadata.apply(lambda row: find_pixel_location(row, self.topo.y, 'Y'), axis=1)
         
         
-
     def distributeData(self):
         """
         Distribute the measurement point data
@@ -605,7 +604,7 @@ class SMRF():
             data = getattr(self.distribute[v['module']], v['variable'])
             
             if data is None:
-                data = np.zeros((self.topo.ny, self.topo.ny))
+                data = np.zeros((self.topo.ny, self.topo.nx))
             
             # output the time step
             self.out_func.output(v['variable'], data, current_time_step)
