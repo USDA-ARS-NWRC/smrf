@@ -405,15 +405,16 @@ class SMRF():
         
         if self.config['output']['frequency'] is not None:
                 
-            # check the out location    
+            # check the out location   
+            pth = os.path.abspath(os.path.expanduser(self.config['output']['out_location'])) 
             if 'out_location' not in self.config['output']:
                 raise Exception('out_location must be specified for variable outputs')
             elif self.config['output']['out_location'] == 'TMPDIR':
-                self.config['output']['out_location'] = os.environ['TMPDIR']
-            elif not os.path.isdir(self.config['output']['out_location']):
-                os.makedirs(self.config['output']['out_location'])
+                pth = os.environ['TMPDIR']
+            elif not os.path.isdir(pth):
+                os.makedirs(pth)
                 
-            self.config['output']['out_location'] = os.path.abspath(self.config['output']['out_location'])
+            self.config['output']['out_location'] = pth
             
             # frequency of outputs
             self.config['output']['frequency'] = int(self.config['output']['frequency'])

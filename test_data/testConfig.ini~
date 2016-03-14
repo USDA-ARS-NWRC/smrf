@@ -46,8 +46,8 @@ basin_lon:	-115.3333
 
 [TiMe]
 TiMe_SteP: 	60			; time step in minutes to run model, same as iSnobal
-start_date:	2015-03-21 06:00 	; model start, YYYY-MM-DD HH:MM
-end_date:	2015-03-23 06:00 	; model end, YYYY-MM-DD HH:MM
+start_date:	2015-10-21 06:00 	; model start, YYYY-MM-DD HH:MM
+end_date:	2015-10-23 06:00 	; model end, YYYY-MM-DD HH:MM
 
 # time zone for all times provided and how the model will be run
 # see pytz docs for information on what is accepted
@@ -244,7 +244,7 @@ restart:		false
 
 [output]
 frequency:		1	; frequency in time step that should be written to disk
-out_location:		/Users/ahedrick/Desktop/test/	; location to put the files
+out_location:		~/Desktop/test/	; location to put the files
 variables:		thermal, air_temp, vapor_pressure, wind_speed, net_solar, precip, percent_snow, snow_density, dew_point, albedo_vis
 
 file_type:		netcdf		; type of file to output as
@@ -262,12 +262,8 @@ log_level:		debug
 ################################################################################
 
 [system]
-<<<<<<< HEAD
+
 temp_dir: 		./test_data 	; location of where to put the working files
 nthreads_isnobal:	6
 nthreads_forcing:	6
-=======
-temp_dir: 		TMPDIR 	; location of where to put the working files
-nthreads_isnobal:	11
-nthreads_forcing:	11
->>>>>>> 3d305e0eec8b04e6b8dabac4898533573ef38c58
+

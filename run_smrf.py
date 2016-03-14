@@ -21,58 +21,63 @@ start = datetime.now()
 # run the model
 # output if necessary
 
-configFile = './test_data/testConfig_Grid.ini'
-if len(sys.argv) > 1:
-    configFile = sys.argv[1]
+try:
+    configFile = './test_data/testConfig.ini'
+    if len(sys.argv) > 1:
+        configFile = sys.argv[1]
+    
+    
+    #===============================================================================
+    # Model setup and initialize
+    #===============================================================================
+    #
+    # These are steps that will load the necessary data and initialize the framework
+    # Once loaded, this shouldn't need to be re-ran except if something major changes
+    
+    # 1. initialize
+    s = smrf.framework.SMRF(configFile)
+    
+    # 2. load topo data
+    s.loadTopo()
+    
+    # 3. initialize the distribution
+    s.initializeDistribution()
+    
+    # initialize the outputs if desired
+    s.initializeOutput()
+    
+    # 4. Initialize the model
+    # s.initializeModel()
+    
+    
+    #===============================================================================
+    # Distribute data
+    #===============================================================================
+    #
+    # Once the framework is setup, we can load data and distribute the data
+    # This can be ran multiple times while the framework is running so that the
+    # intialization doesn't have to be re-ran, i.e. if this becomes a GUI
+    
+    
+    # 5. load weather data  and station metadata
+    s.loadData()
+    
+    # 6. distribute  
+    # if s.gridded:
+    #     s.distributeData_Grid()
+    # else:
+    s.distributeData()
+    
+    #===============================================================================
+    # Run model
+    #===============================================================================
+    
+    # 7. run the model
+    # s.runModel()
+
+except Exception as e:
+    s._logger.error(e)
+    
 
 
-#===============================================================================
-# Model setup and initialize
-#===============================================================================
-#
-# These are steps that will load the necessary data and initialize the framework
-# Once loaded, this shouldn't need to be re-ran except if something major changes
-
-# 1. initialize
-s = smrf.framework.SMRF(configFile)
-
-# 2. load topo data
-s.loadTopo()
-
-# 3. initialize the distribution
-s.initializeDistribution()
-
-# initialize the outputs if desired
-s.initializeOutput()
-
-# 4. Initialize the model
-# s.initializeModel()
-
-
-#===============================================================================
-# Distribute data
-#===============================================================================
-#
-# Once the framework is setup, we can load data and distribute the data
-# This can be ran multiple times while the framework is running so that the
-# intialization doesn't have to be re-ran, i.e. if this becomes a GUI
-
-
-# 5. load weather data  and station metadata
-s.loadData()
-
-# 6. distribute  
-# if s.gridded:
-#     s.distributeData_Grid()
-# else:
-s.distributeData()
-
-#===============================================================================
-# Run model
-#===============================================================================
-
-# 7. run the model
-# s.runModel()
-
-
-print datetime.now() - start
+s._logger.info(datetime.now() - start)

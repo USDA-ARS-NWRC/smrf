@@ -117,7 +117,7 @@ class topo():
         '''
             
         # calculate the skyview
-        svfile = os.path.join(self.tempDir, 'sky_view.ipw')
+        svfile = os.path.abspath(os.path.expanduser(os.path.join(self.tempDir, 'sky_view.ipw')))
         self._logger.debug('sky view file - %s' % svfile)
         
 #         _viewf(self.topoConfig['dem'], svfile)
@@ -125,7 +125,7 @@ class topo():
         ts.start()
             
         # calculate the gradient
-        gfile = os.path.join(self.tempDir, 'gradient.ipw')
+        gfile = os.path.abspath(os.path.expanduser(os.path.join(self.tempDir, 'gradient.ipw')))
         self._logger.debug('gradient file - %s' % gfile)
         
 #         _gradient(self.topoConfig['dem'], gfile)
@@ -138,7 +138,7 @@ class topo():
         
             
         # combine into a value
-        sfile = os.path.join(self.tempDir, 'stoporad_in.ipw')
+        sfile = os.path.abspath(os.path.expanduser(os.path.join(self.tempDir, 'stoporad_in.ipw')))
         self._logger.debug('stoporad in file - %s' % sfile)
         
         cmd = 'mux %s %s %s > %s' % (self.topoConfig['dem'],

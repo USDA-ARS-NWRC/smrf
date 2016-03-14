@@ -55,92 +55,93 @@ class image_data():
         """
         
         # check for inverse distance weighting
-        if config['distribution'] == 'idw':
-            if 'detrend' in config:
-                if config['detrend'].lower() == 'true':
-                    config['detrend'] = True
-                elif config['detrend'].lower() == 'false':
+        if 'distribution' in config:
+            if config['distribution'] == 'idw':
+                if 'detrend' in config:
+                    if config['detrend'].lower() == 'true':
+                        config['detrend'] = True
+                    elif config['detrend'].lower() == 'false':
+                        config['detrend'] = False
+                    else:
+                        raise ValueError('Detrended configuration setting must be either true/false')
+                else:
                     config['detrend'] = False
+                    
+                if 'slope' in config:
+                    if int(config['slope']) not in [-1,0,1]:
+                        raise ValueError('Slope value for detrending must be in [-1, 0, 1]')
+                    else:
+                        config['slope'] = int(config['slope'])
+                        
+                if 'power' in config:
+                    if float(config['power']) < 0:
+                        raise ValueError('IDW power must be greater than zero')
+                    else:
+                        config['power'] = float(config['power'])
                 else:
-                    raise ValueError('Detrended configuration setting must be either true/false')
-            else:
-                config['detrend'] = False
+                    config['power'] = 2
+                        
+                if 'zeroValue' in config:
+                    config['zeroValue'] = float(config['zeroValue'])
+                else:
+                    config['zeroValue'] = None
                 
-            if 'slope' in config:
-                if int(config['slope']) not in [-1,0,1]:
-                    raise ValueError('Slope value for detrending must be in [-1, 0, 1]')
+            # check of detrended kriging
+            elif config['distribution'] == 'dk':
+                if 'slope' in config:
+                    if int(config['slope']) not in [-1,0,1]:
+                        raise ValueError('Slope value for detrending must be in [-1, 0, 1]')
+                    else:
+                        config['slope'] = int(config['slope'])
+                        
+                if 'nthreads' in config:
+                    config['nthreads'] = int(config['nthreads'])
                 else:
-                    config['slope'] = int(config['slope'])
+                    config['nthreads'] = 1
                     
-            if 'power' in config:
-                if float(config['power']) < 0:
-                    raise ValueError('IDW power must be greater than zero')
+                if 'dk_nthreads' in config:
+                    config['dk_nthreads'] = int(config['dk_nthreads'])
                 else:
-                    config['power'] = float(config['power'])
-            else:
-                config['power'] = 2
-                    
-            if 'zeroValue' in config:
-                config['zeroValue'] = float(config['zeroValue'])
-            else:
-                config['zeroValue'] = None
-            
-        # check of detrended kriging
-        elif config['distribution'] == 'dk':
-            if 'slope' in config:
-                if int(config['slope']) not in [-1,0,1]:
-                    raise ValueError('Slope value for detrending must be in [-1, 0, 1]')
+                    config['dk_nthreads'] = 1
+                        
+                if 'regression_method' in config:
+                    config['regression_method'] = int(config['regression_method'])
                 else:
-                    config['slope'] = int(config['slope'])
+                    config['regression_method'] = 1
                     
-            if 'nthreads' in config:
-                config['nthreads'] = int(config['nthreads'])
-            else:
-                config['nthreads'] = 1
-                
-            if 'dk_nthreads' in config:
-                config['dk_nthreads'] = int(config['dk_nthreads'])
-            else:
-                config['dk_nthreads'] = 1
-                    
-            if 'regression_method' in config:
-                config['regression_method'] = int(config['regression_method'])
-            else:
-                config['regression_method'] = 1
-                
-        # check of gridded interpolation
-        elif config['distribution'] == 'grid':
-            self.gridded = True
-            if 'slope' in config:
-                if int(config['slope']) not in [-1,0,1]:
-                    raise ValueError('Slope value for detrending must be in [-1, 0, 1]')
+            # check of gridded interpolation
+            elif config['distribution'] == 'grid':
+                self.gridded = True
+                if 'slope' in config:
+                    if int(config['slope']) not in [-1,0,1]:
+                        raise ValueError('Slope value for detrending must be in [-1, 0, 1]')
+                    else:
+                        config['slope'] = int(config['slope'])
+                       
+                if 'detrend' in config:
+                    if config['detrend'].lower() == 'true':
+                        config['detrend'] = True
+                    elif config['detrend'].lower() == 'false':
+                        config['detrend'] = False
+                    else:
+                        raise ValueError('Detrended configuration setting must be either true/false')
                 else:
-                    config['slope'] = int(config['slope'])
-                   
-            if 'detrend' in config:
-                if config['detrend'].lower() == 'true':
-                    config['detrend'] = True
-                elif config['detrend'].lower() == 'false':
                     config['detrend'] = False
+                     
+                if 'method' in config:
+                    config['method'] = config['method'].lower()
                 else:
-                    raise ValueError('Detrended configuration setting must be either true/false')
-            else:
-                config['detrend'] = False
-                 
-            if 'method' in config:
-                config['method'] = config['method'].lower()
-            else:
-                config['method'] = 'linear'
-                
-            if 'mask' in config:
-                if config['mask'].lower() == 'true':
-                    config['mask'] = True
-                elif config['mask'].lower() == 'false':
-                    config['mask'] = False
+                    config['method'] = 'linear'
+                    
+                if 'mask' in config:
+                    if config['mask'].lower() == 'true':
+                        config['mask'] = True
+                    elif config['mask'].lower() == 'false':
+                        config['mask'] = False
+                    else:
+                        raise ValueError('Mask configuration setting must be either true/false')
                 else:
-                    raise ValueError('Mask configuration setting must be either true/false')
-            else:
-                config['mask'] = False 
+                    config['mask'] = False 
                         
                     
         self.getStations(config)
