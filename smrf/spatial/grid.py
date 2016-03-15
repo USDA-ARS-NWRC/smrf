@@ -70,9 +70,7 @@ class GRID:
             
         # get the trend, ensure it's positive
         pv = np.polyfit(self.mz[self.mask].astype(float), data[self.mask], 1)
-        if pv[0] >= 0:
-            pv = np.array([0,0])
-        
+                
         # apply trend constraints
         if flag == 1 and pv[0] < 0:
             pv = np.array([0,0])

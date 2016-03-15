@@ -46,8 +46,8 @@ basin_lon:	-115.3333
 
 [TiMe]
 TiMe_SteP: 	60			; time step in minutes to run model, same as iSnobal
-start_date:	2015-03-21 06:00 	; model start, YYYY-MM-DD HH:MM
-end_date:	2015-03-23 06:00 	; model end, YYYY-MM-DD HH:MM
+start_date:	2016-03-10 06:00 	; model start, YYYY-MM-DD HH:MM
+end_date:	2016-03-13 06:00 	; model end, YYYY-MM-DD HH:MM
 
 # time zone for all times provided and how the model will be run
 # see pytz docs for information on what is accepted
@@ -112,7 +112,7 @@ detrend:		false	; defaults to false
 distribution:		grid
 method:			linear
 detrend:		true	; defaults to false
-slope:			-1
+slope:			1
 mask:			true
 
 
