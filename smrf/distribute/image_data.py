@@ -249,7 +249,23 @@ class image_data():
             
             
             
-            
+#     def distribute_thread(self, queue, *args, **kwargs):
+#         """
+#         Distribute the data using threading and queue
+#         
+#         Args:
+#             queue: queue dict for all variables
+#             data: pandas dataframe for all data required
+#         
+#         Output:
+#             Changes the queue air_temp for the given date
+#         """
+#         
+#         for t in data.index:
+#             
+#             self.distribute(data.ix[t])
+#         
+#             queue[self.variable].put( [t, getattr(self, self.variable)] )        
             
             
             
