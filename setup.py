@@ -36,11 +36,11 @@ from Cython.Distutils import build_ext
 cmdclass = { }
 ext_modules = [ ]
 
+# detrended kriging
 loc = 'smrf/spatial/dk' # location of the dk folder
 mname = os.path.join(loc, 'detrended_kriging')
 mname = mname.replace('/', '.')
 
-#if use_cython:
 ext_modules += [
                 Extension(mname,
                           sources=[os.path.join(loc, val) for val in ["detrended_kriging.pyx", "krige.c", "lusolv.c", "array.c"]],
@@ -50,15 +50,21 @@ ext_modules += [
                           ),
                 ]
 cmdclass.update({ 'build_ext': build_ext })
-#else:
-#    ext_modules += [
-#                    Extension(mname,
-#                              sources=[os.path.join(loc, val) for val in ["detrended_kriging.c", "krige.c", "lusolv.c", "array.c"]],
-#                              include_dirs=[numpy.get_include()],
-#                              extra_compile_args=['-fopenmp'],
-#                              extra_link_args=['-fopenmp']
-#                              )
-#                    ]
+
+# topotherm
+loc = 'smrf/envphys/radiation' # location of the dk folder
+mname = os.path.join(loc, 'radiation_c')
+mname = mname.replace('/', '.')
+
+ext_modules += [
+                Extension(mname,
+                          sources=[os.path.join(loc, val) for val in ["radiation_c.pyx", "topotherm.c"]],
+                          include_dirs=[numpy.get_include()],
+                          extra_compile_args=['-fopenmp'],
+                          extra_link_args=['-fopenmp']
+                          ),
+                ]
+cmdclass.update({ 'build_ext': build_ext })
 
 
 

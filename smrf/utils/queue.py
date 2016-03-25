@@ -108,7 +108,7 @@ class DateQueue(Queue):
         try:
             if index in self.queue:
                 del self.queue[index]
-                self.not_full.notify()
+                self.not_full.notifyAll()
         finally:
             self.not_empty.release()
         
@@ -277,7 +277,7 @@ class QueueOutput(threading.Thread):
                         self.out_func.output(v['variable'], data, t)
                         
                     else:
-                        self._logger.warning('Output variable %s not in queue' % v['variable'])
+                        self._logger.warning('%s Output variable %s not in queue' % (t, v['variable']))
                         
                     
                 

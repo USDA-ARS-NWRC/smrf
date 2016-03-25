@@ -87,7 +87,7 @@ class topo():
                 if v is 'veg_type':
                     setattr(self, v, i.bands[0].data.astype(int))
                 else:
-                    setattr(self, v, i.bands[0].data)
+                    setattr(self, v, i.bands[0].data.astype(np.float64))
                 
                 if v is 'dem':
                     # get some general information about the model domain from the dem
@@ -153,9 +153,9 @@ class topo():
         # read in the stoporad file to store in memory
         self.stoporad_in = ipw.IPW(sfile)
         self.stoporad_in_file = sfile
-        self.slope = self.stoporad_in.bands[1].data
-        self.aspect = self.stoporad_in.bands[2].data
-        self.sky_view = self.stoporad_in.bands[3].data
+        self.slope = self.stoporad_in.bands[1].data.astype(np.float64)
+        self.aspect = self.stoporad_in.bands[2].data.astype(np.float64)
+        self.sky_view = self.stoporad_in.bands[3].data.astype(np.float64)
         
         
         # clean up the TMPDIR

@@ -133,7 +133,7 @@ class output_netcdf():
             date_time: the date time object for the time step
         """
         
-        self._logger.debug('Writing variable %s to netCDF' % variable)
+        self._logger.debug('%s Writing variable %s to netCDF' % (date_time, variable))
         
 #         f = self.variable_list[variable]['nc_file']
         f = nc.Dataset(self.variable_list[variable]['file_name'], 'a', 'NETCDF4')

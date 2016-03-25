@@ -300,35 +300,9 @@ class SMRF():
         """
         
         #------------------------------------------------------------------------------
-        # initialize a dictionary to hold everything        
-#         d = self._initDistributionDict(self.date_time, self.modules)
-        
-        
-        #------------------------------------------------------------------------------
         # Initialize the distibution
-        # 1. Air temperature
-        self.distribute['air_temp'].initialize(self.topo, self.data.metadata)
-        
-        # 2. Vapor pressure
-        self.distribute['vapor_pressure'].initialize(self.topo, self.data.metadata)
-        
-        # 3. Wind
-        self.distribute['wind'].initialize(self.topo, self.data.metadata)
-        
-        # 4. Precipitation
-        self.distribute['precip'].initialize(self.topo, self.data.metadata)
-        
-        # 5. Albedo
-        self.distribute['albedo'].initialize(self.topo, self.data.metadata)
-        
-        # 6. Solar
-        self.distribute['solar'].initialize(self.topo, self.data.metadata)
-        
-        # 7. thermal radiation
-        self.distribute['thermal'].initialize(self.topo, self.data.metadata)
-        
-        # 8. Soil temperature
-        self.distribute['soil_temp'].initialize(self.topo, self.data.metadata)
+        for v in self.distribute:
+            self.distribute[v].initialize(self.topo, self.data.metadata)
         
         #------------------------------------------------------------------------------
         # Distribute the data
@@ -432,11 +406,6 @@ class SMRF():
             - All classes will have an intiialize and a distribute, with the same inputs
             - Then all can be initialized at once and all distributed at once
         """
-        
-        #------------------------------------------------------------------------------
-        # initialize a dictionary to hold everything        
-#         d = self._initDistributionDict(self.date_time, self.modules)
-        
         
         #------------------------------------------------------------------------------
         # Initialize the distibutions

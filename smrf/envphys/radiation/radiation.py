@@ -802,6 +802,7 @@ def brutsaert(ta, l, ea, z, pa):
     return air_emiss
     
 
+
 def topotherm(ta, tw, z, skvfac):
     '''
     Calculate the clear sky thermal radiation.  topotherm calculates  thermal 

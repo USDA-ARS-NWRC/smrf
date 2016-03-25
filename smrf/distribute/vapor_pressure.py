@@ -116,7 +116,7 @@ class vp(image_data.image_data):
         
         # read in the dew point file
         dp = ipw.IPW(dptfile)
-        dpt = dp.bands[0].data
+        dpt = dp.bands[0].data.astype(np.float64)
                 
         # find where dpt > ta
         ind = dpt >= ta

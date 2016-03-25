@@ -54,7 +54,12 @@ class th(image_data.image_data):
         
 #         self.config = thermalConfig
         self.getConfig(thermalConfig)
-                
+        
+        nthreads = 1
+        if 'nthreads' in self.config:
+            nthreads = int(self.config['nthreads'])
+        self.config['nthreads'] = nthreads
+        
         if (tempDir is None) | (tempDir == 'TMPDIR'):
             tempDir = os.environ['TMPDIR']
         self.tempDir = tempDir        
@@ -97,7 +102,9 @@ class th(image_data.image_data):
         self._logger.debug('%s Distributing thermal' % date_time)
         
         # calculate clear sky thermal
-        cth = radiation.topotherm(air_temp, dew_point, self.dem, self.sky_view)
+#         cth = radiation.topotherm(air_temp, dew_point, self.dem, self.sky_view)
+        cth = np.zeros_like(air_temp, dtype=np.float64)
+        radiation.ctopotherm(air_temp, dew_point, self.dem, self.sky_view, cth, self.config['nthreads'])       
     
         # correct for the cloud factor based on Garen and Marks 2005
         # ratio of measured/modeled solar indicates the thermal correction
