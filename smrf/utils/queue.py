@@ -231,9 +231,10 @@ class QueueCleaner(threading.Thread):
     
 class QueueOutput(threading.Thread):
     """
+    Takes values from the queue and outputs using 'out_func'
     """
     
-    def __init__( self, queue, date_time, out_func, out_frequency ):
+    def __init__( self, queue, date_time, out_func, out_frequency, nx, ny ):
         """
         Args:
             date_time: array of date_time
@@ -244,7 +245,8 @@ class QueueOutput(threading.Thread):
         self.date_time = date_time
         self.out_func = out_func
         self.out_frequency = out_frequency
-        
+        self.nx = nx
+        self.ny = ny
         
         self._logger = logging.getLogger(__name__)
         self._logger.debug('Initialized output thread')
@@ -269,7 +271,7 @@ class QueueOutput(threading.Thread):
                         data = self.queues[v['variable']].get(t)
                         
                         if data is None:
-                            data = np.zeros((self.topo.ny, self.topo.nx))
+                            data = np.zeros((self.ny, self.nx))
                         
                         # output the time step
                         self.out_func.output(v['variable'], data, t)

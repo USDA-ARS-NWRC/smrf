@@ -18,7 +18,7 @@ import pandas as pd
 # import itertools
 import numpy as np
 import pytz
-import matplotlib.pyplot as plt
+# import matplotlib.pyplot as plt
 
 from smrf import data, distribute, model, output
 from smrf.envphys import radiation
@@ -45,10 +45,12 @@ class SMRF():
     # These are the modules that the user can modify and use different methods
     modules = ['air_temp', 'albedo', 'precip', 'soil_temp', 'solar', 'thermal', 'vapor_pressure', 'wind']
     
-    # These are the variables that will be threaded
-#     thread_variables = ['air_temp', 'albedo', 'precip', 'solar', 'thermal', 
-#                  'dew_point','vapor_pressure', 'wind_speed', 'output']
-    thread_variables = ['air_temp', 'dew_point','vapor_pressure', 'output']
+    # These are the variables that will be queued
+    thread_variables = ['cosz', 'azimuth', 'illum_ang',
+                        'air_temp', 'dew_point', 'vapor_pressure', 'wind_speed', 
+                        'precip', 'percent_snow', 'snow_density', 'last_storm_day_basin', 'storm_days',
+                        'albedo_vis', 'albedo_ir', 'net_solar', 'cloud_factor', 'thermal',
+                        'output']
 
     def __init__(self, configFile):
         """
@@ -382,7 +384,7 @@ class SMRF():
             if self.distribute['thermal'].gridded:
                 self.distribute['thermal'].distribute_thermal(self.data.thermal.ix[t])
             else:
-                self.distribute['thermal'].distribute(self.distribute['air_temp'].air_temp,
+                self.distribute['thermal'].distribute(t, self.distribute['air_temp'].air_temp,
                                                       self.distribute['vapor_pressure'].dew_point,
                                                       self.distribute['solar'].cloud_factor)
                 
@@ -444,123 +446,95 @@ class SMRF():
         #------------------------------------------------------------------------------       
         # Create Queues for all the variables
         q = {}
+        t = []
         for v in self.thread_variables:
             q[v] = queue.DateQueue(self.max_values)
                
         #------------------------------------------------------------------------------
         # Distribute the data
         
-        # 1. Air temperature 
-        ta = Thread(target=self.distribute['air_temp'].distribute_thread,
-                   name='air_temp',
-                   args=(q, self.data.air_temp))
-        ta.start()
+        # 0.1 sun angle for time step
+        t.append(Thread(target=radiation.sunang_thread,
+                        name='sun_angle',
+                        args=(q, self.date_time,
+                              self.topo.topoConfig['basin_lat'],
+                              self.topo.topoConfig['basin_lon'],
+                              0, 0, 0)))
         
+        # 0.2 illumination angle
+        t.append(Thread(target=radiation.shade_thread,
+                        name='illum_angle',
+                        args=(q, self.date_time, 
+                              self.topo.slope, self.topo.aspect)))
+        
+        # 1. Air temperature 
+        t.append(Thread(target=self.distribute['air_temp'].distribute_thread,
+                   name='air_temp',
+                   args=(q, self.data.air_temp)))
+               
         # 2. Vapor pressure
-        vp = Thread(target=self.distribute['vapor_pressure'].distribute_thread,
+        t.append(Thread(target=self.distribute['vapor_pressure'].distribute_thread,
                    name='vapor_pressure',
-                   args=(q, self.data.vapor_pressure))
-        vp.start()
+                   args=(q, self.data.vapor_pressure)))
+        
+        # 3. Wind_speed and wind_direction
+        t.append(Thread(target=self.distribute['wind'].distribute_thread,
+                        name='wind',
+                        args=(q, self.data.wind_speed,
+                              self.data.wind_direction)))
+        
+        # 4. Precipitation
+        t.append(Thread(target=self.distribute['precip'].distribute_thread,
+                        name='precipitation',
+                        args=(q, self.data.precip,
+                              self.topo.mask)))
+                 
+        # 5. Albedo
+        t.append(Thread(target=self.distribute['albedo'].distribute_thread,
+                        name='albedo',
+                        args=(q, self.date_time)))
                 
+        # 6. Solar
+        t.append(Thread(target=self.distribute['solar'].distribute_thread,
+                        name='solar',
+                        args=(q, self.data.cloud_factor)))
+        
+        # 7. thermal radiation
+        if self.distribute['thermal'].gridded:
+            t.append(Thread(target=self.distribute['thermal'].distribute_thermal_thread,
+                            name='thermal',
+                            args=(q, self.data.thermal)))
+        else:
+            t.append(Thread(target=self.distribute['thermal'].distribute_thread,
+                            name='thermal',
+                            args=(q, self.date_time)))
+        
+        # 8. Soil temperature
+#         self.distribute['soil_temp'].distribute()
          
         # output thread
-        out = queue.QueueOutput(q, self.date_time, self.out_func, self.config['output']['frequency'])
-        out.start()
-         
+        t.append(queue.QueueOutput(q, self.date_time, 
+                                   self.out_func, 
+                                   self.config['output']['frequency'],
+                                   self.topo.nx,
+                                   self.topo.ny))
+        
         # the cleaner
-        cl = queue.QueueCleaner(self.date_time, q)
-        cl.start()
-        
+        t.append(queue.QueueCleaner(self.date_time, q))
+              
+        # start all the threads  
+        for i in range(len(t)):
+            t[i].start()
+              
         # wait for all the threads to stop
-        for v in q:
-            q[v].join()
+#         for v in q:
+#             q[v].join()
         
-        
-        ta.join()
-        vp.join()
-        out.join()
-        cl.join()
+        for i in range(len(t)):
+            t[i].join()
 
+        self._logger.debug('DONE!!!!')
         
-        for output_count,t in enumerate(self.date_time):
-            
-            # wait here for the model to catch up if needed
-            
-            startTime = datetime.now()
-            
-            self._logger.info('Distributing time step %s' % t)
-            
-            # 0.1 sun angle for time step
-            cosz, azimuth = radiation.sunang(t.astimezone(pytz.utc), 
-                                            self.topo.topoConfig['basin_lat'],
-                                            self.topo.topoConfig['basin_lon'],
-                                            zone=0, slope=0, aspect=0)
-            
-            # 0.2 illumination angle
-            illum_ang = None
-            if cosz > 0:
-                illum_ang = radiation.shade(self.topo.slope, self.topo.aspect, azimuth, cosz)
-                    
-        
-            # 1. Air temperature 
-            self.distribute['air_temp'].distribute(self.data.air_temp.ix[t])
-            
-            # 2. Vapor pressure
-            self.distribute['vapor_pressure'].distribute(self.data.vapor_pressure.ix[t],
-                                                        self.distribute['air_temp'].air_temp)
-            
-            # 3. Wind_speed and wind_direction
-            self.distribute['wind'].distribute(self.data.wind_speed.ix[t],
-                                               self.data.wind_direction.ix[t])
-            
-            # 4. Precipitation
-            self.distribute['precip'].distribute(self.data.precip.ix[t],
-                                                self.distribute['vapor_pressure'].dew_point,
-                                                self.topo.mask)
-            
-            # 5. Albedo
-            self.distribute['albedo'].distribute(t, illum_ang, self.distribute['precip'].storm_days)
-            
-            # 6. Solar
-            self.distribute['solar'].distribute(self.data.cloud_factor.ix[t],
-                                                illum_ang, 
-                                                cosz, 
-                                                azimuth,
-                                                self.distribute['precip'].last_storm_day_basin,
-                                                self.distribute['albedo'].albedo_vis,
-                                                self.distribute['albedo'].albedo_ir)
-            
-            # 7. thermal radiation
-            if self.distribute['thermal'].gridded:
-                self.distribute['thermal'].distribute_thermal(self.data.thermal.ix[t])
-            else:
-                self.distribute['thermal'].distribute(self.distribute['air_temp'].air_temp,
-                                                      self.distribute['vapor_pressure'].dew_point,
-                                                      self.distribute['solar'].cloud_factor)
-                
-            # 8. Soil temperature
-            self.distribute['soil_temp'].distribute()
-            
-            
-            # output at the frequency and the last time step
-            if (output_count % self.config['output']['frequency'] == 0) or (output_count == len(self.date_time)):
-                self.output(t)
-            
-#             plt.imshow(self.distribute['albedo'].albedo_vis), plt.colorbar(), plt.show()
-            
-            
-            # pull all the images together to create the input image
-#             d[t]['air_temp'] = self.distribute['air_temp'].image
-#             d[t]['vapor_pressure'] = self.distribute['vapor_pressure'].image 
-            
-            
-            # check if out put is desired
-            
-            telapsed = datetime.now() - startTime
-            self._logger.debug('%.1f seconds for time step' % telapsed.total_seconds())
-            
-        self.forcing_data = 1
-    
     
     def initializeOutput(self):
         """

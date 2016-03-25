@@ -251,5 +251,5 @@ log_level:		debug
 
 temp_dir: 		./test_data 	; location of where to put the working files
 threading:		true		; whether or not to use threading and queues
-max_values:		10		; maximum number of steps to keep
+max_values:		5		; maximum number of steps to keep
 

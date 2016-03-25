@@ -99,7 +99,7 @@ class albedo(image_data.image_data):
             
         """
     
-        self._logger.debug('Distributing albedo')
+        self._logger.debug('%s Distributing albedo' % current_time_step)
         
         # only need to calculate albedo if the sun is up
         if cosz is not None:
@@ -118,7 +118,28 @@ class albedo(image_data.image_data):
             
             
             
+    def distribute_thread(self, queue, date):
+        """
+        Distribute the data using threading and queue
+        
+        Args:
+            queue: queue dict for all variables
+            date: dates to loop over
+        
+        Output:
+            Changes the queue albedo_vis, albedo_ir
+                for the given date
+        """
+        
+        for t in date:
+                        
+            illum_ang = queue['illum_ang'].get(t)
+            storm_day = queue['storm_days'].get(t)
             
+            self.distribute(t, illum_ang, storm_day)
+        
+            queue['albedo_vis'].put( [t, self.albedo_vis] )
+            queue['albedo_ir'].put( [t, self.albedo_ir] )
             
             
             

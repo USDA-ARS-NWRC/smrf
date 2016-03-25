@@ -9,8 +9,8 @@ import numpy as np
 import logging
 from smrf.distribute import image_data
 from smrf.envphys import precip
-import smrf.utils as utils
-import matplotlib.pyplot as plt
+from smrf.utils import utils
+# import matplotlib.pyplot as plt
 
 class ppt(image_data.image_data):
     """
@@ -104,7 +104,7 @@ class ppt(image_data.image_data):
             mask: basin mask to apply to the storm days
         """
     
-        self._logger.debug('Distributing precip')
+        self._logger.debug('%s Distributing precip' % data.name)
         
         # only need to distribute precip if there is any
         if data[self.stations].sum() > 0:
@@ -149,9 +149,30 @@ class ppt(image_data.image_data):
             self.last_storm_day_basin = np.max(self.last_storm_day)
         
 
-         
+    def distribute_thread(self, queue, data, mask=None):
+        """
+        Distribute the data using threading and queue
         
-#         plt.imshow(self.last_storm_day), plt.colorbar(), plt.show()
+        Args:
+            queue: queue dict for all variables
+            data: pandas dataframe for all data required
+        
+        Output:
+            Changes the queue precip, percent_snow, snow_density, last_storm_day
+                for the given date
+        """
+        
+        for t in data.index:
+                        
+            dpt = queue['dew_point'].get(t)
+            
+            self.distribute(data.ix[t], dpt, mask)
+        
+            queue[self.variable].put( [t, self.precip] )
+            queue['percent_snow'].put( [t, self.percent_snow] )
+            queue['snow_density'].put( [t, self.snow_density] )
+            queue['last_storm_day_basin'].put( [t, self.last_storm_day_basin] )
+            queue['storm_days'].put( [t, self.storm_days] )
     
     
     

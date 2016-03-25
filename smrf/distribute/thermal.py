@@ -7,14 +7,14 @@ Distribute thermal radiation
 
 import numpy as np
 import logging, os
-import subprocess as sp
-from multiprocessing import Process
+# import subprocess as sp
+# from multiprocessing import Process
 from smrf.distribute import image_data
 from smrf.envphys import radiation
-import smrf.utils as utils
+from smrf.utils import utils
 from smrf import ipw
 
-import matplotlib.pyplot as plt
+# import matplotlib.pyplot as plt
 
 class th(image_data.image_data):
     """
@@ -84,7 +84,7 @@ class th(image_data.image_data):
         self.dem = topo.dem
 
 
-    def distribute(self, air_temp, dew_point, cloud_factor):
+    def distribute(self, date_time, air_temp, dew_point, cloud_factor):
         """
         Distribute solar
         
@@ -94,7 +94,7 @@ class th(image_data.image_data):
             cloud_factor: distributed cloud factor for the time step measured/modeled
         """
     
-        self._logger.debug('Distributing thermal')
+        self._logger.debug('%s Distributing thermal' % date_time)
         
         # calculate clear sky thermal
         cth = radiation.topotherm(air_temp, dew_point, self.dem, self.sky_view)
@@ -107,7 +107,32 @@ class th(image_data.image_data):
         # correct for vegetation
         self.thermal = radiation.thermal_correct_canopy(cth, air_temp, self.veg_tau, self.veg_height)
             
+    
+    
+    def distribute_thread(self, queue, date):
+        """
+        Distribute the data using threading and queue
+        
+        Args:
+            queue: queue dict for all variables
+            date: dates to loop over
+        
+        Output:
+            Changes the queue net_solar, cloud_factor
+                for the given date
+        """
+        
+        for t in date:
+                        
+            air_temp = queue['air_temp'].get(t)
+            dew_point = queue['dew_point'].get(t)
+            cloud_factor = queue['cloud_factor'].get(t)
             
+            self.distribute(t, air_temp, dew_point, cloud_factor)
+        
+            queue['thermal'].put( [t, self.thermal] )
+     
+           
     def distribute_thermal(self, data):
         """
         Distribute thermal
@@ -117,8 +142,25 @@ class th(image_data.image_data):
             
         """
     
-        self._logger.debug('Distributing thermal')
+        self._logger.debug('%s Distributing thermal' % data.name)
         
         self._distribute(data)
+        
+        
+    def distribute_thermal_thread(self, queue, data):
+        """
+        Distribute thermal
+        
+        Args:
+            queue: queue dict for all variables
+            data: thermal values
+            
+        """
+        
+        for t in data.index:
+        
+            self.distribute_thermal(data.ix[t])
+            
+            queue['thermal'].put( [t, self.thermal] )
     
     

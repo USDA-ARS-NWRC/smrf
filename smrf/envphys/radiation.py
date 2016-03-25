@@ -14,11 +14,9 @@ import subprocess as sp
 import math
 import os
 import datetime
-# import progressbar
-# from joblib import Parallel, delayed  
-# import multiprocessing as mp
-# import ctypes
-# from isnobal import ipw
+import logging
+import pytz
+
 
 IPW = os.environ['IPW']     # IPW executables
 
@@ -428,6 +426,36 @@ def sunang(date, lat, lon, zone=0, slope=0, aspect=0):
     return cosz, azimuth
 
 
+
+def sunang_thread(queue, date, lat, lon, zone=0, slope=0, aspect=0):
+    '''
+    See sunang for input descriptions
+    
+    Args:
+        queue: queue with cosz, azimuth
+        date: loop through dates to accesss queue, must be same as rest of queues
+    
+    20160325 Scott Havens
+    '''
+    
+    if 'cosz' not in queue.keys():
+        raise ValueError('queue must have cosz key')
+    if 'azimuth' not in queue.keys():
+        raise ValueError('queue must have cosz key')
+    
+    log = logging.getLogger(__name__)
+    
+    for t in date:
+        
+        log.debug('%s Calculating sun angle' % t)
+        
+        cosz, azimuth = sunang(t.astimezone(pytz.utc), lat, lon, zone, slope, aspect)
+        
+        queue['cosz'].put([t, cosz])
+        queue['azimuth'].put([t, azimuth])
+            
+
+
 def shade(slope, aspect, azimuth, cosz=None, zenith=None):
     """
     Calculate the cosize of the local illumination angle over a DEM
@@ -503,6 +531,42 @@ def shade(slope, aspect, azimuth, cosz=None, zenith=None):
     mu[mu > 1] = 1
     
     return mu
+
+
+def shade_thread(queue, date, slope, aspect, zenith=None):
+    """
+    See shade for input argument descriptions
+    
+    Args:
+        queue: queue with illum_ang, cosz, azimuth
+        date_time: loop through dates to accesss queue
+    
+    20160325 Scott Havens
+    """
+    
+    if 'cosz' not in queue.keys():
+        raise ValueError('queue must have cosz key')
+    if 'azimuth' not in queue.keys():
+        raise ValueError('queue must have cosz key')
+    if 'illum_ang' not in queue.keys():
+        raise ValueError('queue must have illum_ang key')
+    
+    log = logging.getLogger(__name__)
+    
+    for t in date:
+        
+        log.debug('%s Calculating illuminagion angle' % t)
+        
+        mu = None
+        cosz = queue['cosz'].get(t)
+        
+        if cosz > 0:
+            azimuth = queue['azimuth'].get(t)
+            mu = shade(slope, aspect, azimuth, cosz, zenith)
+                
+        queue['illum_ang'].put([t, mu])
+    
+
 
 
 def deg_to_dms(deg):
