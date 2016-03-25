@@ -9,7 +9,7 @@ import numpy as np
 import logging, os
 from smrf.distribute import image_data
 import smrf.ipw as ipw
-import smrf.utils as utils
+from smrf.utils import utils
 import subprocess as sp
 from random import randint
 # import matplotlib.pyplot as plt
@@ -92,7 +92,7 @@ class vp(image_data.image_data):
             self.dew_point: dew point matrix, corrected if dpt > ta 
         """
         
-        self._logger.debug('Distributing vapor_pressure')
+        self._logger.debug('%s -- Distributing vapor_pressure' % data.name)
     
         # calculate the vapor pressure
         self._distribute(data)
@@ -100,9 +100,8 @@ class vp(image_data.image_data):
         # set the limits
         self.vapor_pressure = utils.set_min_max(self.vapor_pressure, self.min, self.max)
         
-        
         # calculate the dew point
-        self._logger.debug('Calculating dew point')
+        self._logger.debug('%s -- Calculating dew point' % data.name)
         
         # make a vapor pressure IPW file
         vpfile = os.path.join(self.tempDir, 'vp%04i.ipw' % randint(0,9999))
@@ -133,7 +132,26 @@ class vp(image_data.image_data):
         
         
     
-    
+    def distribute_thread(self, queue, data):
+        """
+        Distribute the data using threading and queue
+        
+        Args:
+            queue: queue dict for all variables
+            data: pandas dataframe for all data required
+        
+        Output:
+            Changes the queue air_temp for the given date
+        """
+        
+        for t in data.index:
+            
+            ta = queue['air_temp'].get(t)
+            
+            self.distribute(data.ix[t], ta)
+        
+            queue[self.variable].put( [t, self.vapor_pressure] )
+            queue['dew_point'].put( [t, self.dew_point] )
 
     
     

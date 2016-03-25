@@ -18,10 +18,12 @@ import pandas as pd
 # import itertools
 import numpy as np
 import pytz
-import matplotlib.pyplot as plt
+# import matplotlib.pyplot as plt
 
 from smrf import data, distribute, model, output
 from smrf.envphys import radiation
+from smrf.utils import queue
+from threading import Thread
 
 
 class SMRF():
@@ -42,6 +44,13 @@ class SMRF():
     
     # These are the modules that the user can modify and use different methods
     modules = ['air_temp', 'albedo', 'precip', 'soil_temp', 'solar', 'thermal', 'vapor_pressure', 'wind']
+    
+    # These are the variables that will be queued
+    thread_variables = ['cosz', 'azimuth', 'illum_ang',
+                        'air_temp', 'dew_point', 'vapor_pressure', 'wind_speed', 
+                        'precip', 'percent_snow', 'snow_density', 'last_storm_day_basin', 'storm_days',
+                        'albedo_vis', 'albedo_ir', 'net_solar', 'cloud_factor', 'thermal',
+                        'output']
 
     def __init__(self, configFile):
         """
@@ -76,11 +85,22 @@ class SMRF():
         if 'gridded' in self.config:
             self.gridded = True
             
-        if 'nthreads_forcing' not in self.config['system']:
-            self.config['system']['nthreads_forcing'] = 1
-        if 'nthreads_isnobal' not in self.config['system']:
-            self.config['system']['nthreads_isnobal'] = 1
-                
+        # process the system variables
+        if 'temp_dir' in self.config['system']:
+            tempDir = self.config['system']['temp_dir']
+        else:
+            tempDir = os.environ['TMPDIR']
+        self.tempDir = tempDir
+        
+        self.threading = False
+        if 'threading' in self.config['system']:
+            if self.config['system']['threading'].lower() == 'true':
+                self.threading = True
+            
+        self.max_values = 1
+        if 'max_values' in self.config['system']:
+            self.max_values = int(self.config['system']['max_values'])
+           
         
         # get the time section        
         self.start_date = pd.to_datetime(self.config['time']['start_date'])
@@ -91,13 +111,7 @@ class SMRF():
         self.date_time = [di.replace(tzinfo=tzinfo) for di in d]
         self.time_steps = len(self.date_time)    # number of time steps to model
         
-        # check the temp dir
-        if 'temp_dir' in self.config['system']:
-            tempDir = self.config['system']['temp_dir']
-        else:
-            tempDir = os.environ['TMPDIR']
-        self.tempDir = tempDir
-        
+                
         # start logging
         
         if 'log_level' in self.config['logging']:
@@ -126,17 +140,7 @@ class SMRF():
         self._logger.info('Model start --> %s' % self.start_date)
         self._logger.info('Model end --> %s' % self.end_date)
         self._logger.info('Number of time steps --> %i' % self.time_steps)
-        
-        # determine if this will be a restart
-        restart = False
-        if 'restart' in self.config['isnobal']:
-            if self.config['isnobal']['restart'].lower == 'true':
-                restart = True
-        
-        self.config['isnobal']['restart'] = restart
-        
-        
-        
+         
         
         
     def __del__(self):
@@ -257,6 +261,18 @@ class SMRF():
         
     def distributeData(self):
         """
+        Wrapper for various distribute methods
+        """    
+        
+        if self.threading:
+            self.distributeData_threaded()
+        else:
+            self.distributeData_single()
+            
+            
+    
+    def distributeData_single(self):
+        """
         Distribute the measurement point data
         
         For now, do everything serial so that the process of distributing the 
@@ -368,7 +384,7 @@ class SMRF():
             if self.distribute['thermal'].gridded:
                 self.distribute['thermal'].distribute_thermal(self.data.thermal.ix[t])
             else:
-                self.distribute['thermal'].distribute(self.distribute['air_temp'].air_temp,
+                self.distribute['thermal'].distribute(t, self.distribute['air_temp'].air_temp,
                                                       self.distribute['vapor_pressure'].dew_point,
                                                       self.distribute['solar'].cloud_factor)
                 
@@ -396,6 +412,129 @@ class SMRF():
         self.forcing_data = 1
     
     
+    def distributeData_threaded(self):
+        """
+        Distribute the measurement point data using threading and queues
+        
+        Steps performed:
+            1. Air temperature
+            2. Vapor pressure
+            3. Wind 
+                3.1 Wind direction
+                3.2 Wind speed
+            4. Precipitation
+            5. Solar
+            6. Thermal
+            7. Soil temperature
+        
+        
+        To do:
+            - All classes will have an intiialize and a distribute, with the same inputs
+            - Then all can be initialized at once and all distributed at once
+        """
+        
+        #------------------------------------------------------------------------------
+        # initialize a dictionary to hold everything        
+#         d = self._initDistributionDict(self.date_time, self.modules)
+        
+        
+        #------------------------------------------------------------------------------
+        # Initialize the distibutions
+        for v in self.distribute:
+            self.distribute[v].initialize(self.topo, self.data.metadata)
+        
+        #------------------------------------------------------------------------------       
+        # Create Queues for all the variables
+        q = {}
+        t = []
+        for v in self.thread_variables:
+            q[v] = queue.DateQueue(self.max_values)
+               
+        #------------------------------------------------------------------------------
+        # Distribute the data
+        
+        # 0.1 sun angle for time step
+        t.append(Thread(target=radiation.sunang_thread,
+                        name='sun_angle',
+                        args=(q, self.date_time,
+                              self.topo.topoConfig['basin_lat'],
+                              self.topo.topoConfig['basin_lon'],
+                              0, 0, 0)))
+        
+        # 0.2 illumination angle
+        t.append(Thread(target=radiation.shade_thread,
+                        name='illum_angle',
+                        args=(q, self.date_time, 
+                              self.topo.slope, self.topo.aspect)))
+        
+        # 1. Air temperature 
+        t.append(Thread(target=self.distribute['air_temp'].distribute_thread,
+                   name='air_temp',
+                   args=(q, self.data.air_temp)))
+               
+        # 2. Vapor pressure
+        t.append(Thread(target=self.distribute['vapor_pressure'].distribute_thread,
+                   name='vapor_pressure',
+                   args=(q, self.data.vapor_pressure)))
+        
+        # 3. Wind_speed and wind_direction
+        t.append(Thread(target=self.distribute['wind'].distribute_thread,
+                        name='wind',
+                        args=(q, self.data.wind_speed,
+                              self.data.wind_direction)))
+        
+        # 4. Precipitation
+        t.append(Thread(target=self.distribute['precip'].distribute_thread,
+                        name='precipitation',
+                        args=(q, self.data.precip,
+                              self.topo.mask)))
+                 
+        # 5. Albedo
+        t.append(Thread(target=self.distribute['albedo'].distribute_thread,
+                        name='albedo',
+                        args=(q, self.date_time)))
+                
+        # 6. Solar
+        t.append(Thread(target=self.distribute['solar'].distribute_thread,
+                        name='solar',
+                        args=(q, self.data.cloud_factor)))
+        
+        # 7. thermal radiation
+        if self.distribute['thermal'].gridded:
+            t.append(Thread(target=self.distribute['thermal'].distribute_thermal_thread,
+                            name='thermal',
+                            args=(q, self.data.thermal)))
+        else:
+            t.append(Thread(target=self.distribute['thermal'].distribute_thread,
+                            name='thermal',
+                            args=(q, self.date_time)))
+        
+        # 8. Soil temperature
+#         self.distribute['soil_temp'].distribute()
+         
+        # output thread
+        t.append(queue.QueueOutput(q, self.date_time, 
+                                   self.out_func, 
+                                   self.config['output']['frequency'],
+                                   self.topo.nx,
+                                   self.topo.ny))
+        
+        # the cleaner
+        t.append(queue.QueueCleaner(self.date_time, q))
+              
+        # start all the threads  
+        for i in range(len(t)):
+            t[i].start()
+              
+        # wait for all the threads to stop
+#         for v in q:
+#             q[v].join()
+        
+        for i in range(len(t)):
+            t[i].join()
+
+        self._logger.debug('DONE!!!!')
+        
     
     def initializeOutput(self):
         """
@@ -450,9 +589,8 @@ class SMRF():
             self._logger.info('No variables will be output')
             self.output_variables = None
     
-    
-    
-    def output(self, current_time_step):
+        
+    def output(self, current_time_step, q=None):
         """
         Output the forcing data or model outputs
         
@@ -464,14 +602,43 @@ class SMRF():
         for v in self.out_func.variable_list.values():
             
             # get the data desired
-            data = getattr(self.distribute[v['module']], v['variable'])
+            output_now = True
+            if q is None:
+                data = getattr(self.distribute[v['module']], v['variable'])
+            elif v['variable'] in q.keys():
+                data = q[v['variable']].get(current_time_step)
+            else:
+                self._logger.warning('Output variable %s not in queue' % v['variable'])
+                output_now = False
             
-            if data is None:
-                data = np.zeros((self.topo.ny, self.topo.nx))
+            if output_now:
+                if data is None:
+                    data = np.zeros((self.topo.ny, self.topo.nx))
+                
+                # output the time step
+                self.out_func.output(v['variable'], data, current_time_step)
+                
+                
+    def output_thread(self, q):
+        """
+        Output the desired variables to a file.
+        
+        Go through the date times and look for when all the queues
+        have that date_time
+        """
+        
+        for output_count,t in enumerate(self.date_time):
             
-            # output the time step
-            self.out_func.output(v['variable'], data, current_time_step)
-            
+            # output at the frequency and the last time step
+            if (output_count % self.config['output']['frequency'] == 0) or (output_count == len(self.date_time)):          
+                
+                self.output(t, q)
+                
+                # put the value into the output queue so clean knows it's done
+                q['output'].put([t, True])
+                                
+                self._logger.debug('%s Variables output from queues' % t)
+                
     
     def initializeModel(self):
         """

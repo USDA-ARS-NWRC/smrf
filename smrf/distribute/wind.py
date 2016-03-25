@@ -8,7 +8,7 @@ Distribute wind_speed and wind_direction
 import numpy as np
 import logging, os
 from smrf.distribute import image_data
-import smrf.utils as utils
+from smrf.utils import utils
 import netCDF4 as nc
 # import matplotlib.pyplot as plt
 
@@ -140,7 +140,7 @@ class wind(image_data.image_data):
             self.wind_direction: wind_direction matrix, corrected if dpt > ta 
         """
         
-        self._logger.debug('Distributing wind_direction and wind_speed')
+        self._logger.debug('%s Distributing wind_direction and wind_speed' % data_speed.name)
     
         data_speed = data_speed[self.stations]
         data_direction = data_direction[self.stations]
@@ -174,7 +174,27 @@ class wind(image_data.image_data):
             
             # Calculate simulated wind speed at each cell from flatwind
             self.simulateWind(data_speed)
+    
+    
+    def distribute_thread(self, queue, data_speed, data_direction):
+        """
+        Distribute the data using threading and queue
         
+        Args:
+            queue: queue dict for all variables
+            data: pandas dataframe for all data required
+        
+        Output:
+            Changes the queue wind_speed for the given date
+        """
+        
+        for t in data_speed.index:
+                        
+            self.distribute(data_speed.ix[t], data_direction.ix[t])
+        
+            queue['wind_speed'].put( [t, self.wind_speed] )   
+            
+            
     
     def simulateWind(self, data_speed):
         """

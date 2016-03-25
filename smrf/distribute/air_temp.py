@@ -5,10 +5,11 @@ Distribute air temperature
 
 """
 
-import numpy as np
+# import numpy as np
 import logging
 from smrf.distribute import image_data
-import matplotlib.pyplot as plt
+
+#import matplotlib.pyplot as plt
 
 class ta(image_data.image_data):
     """
@@ -68,11 +69,28 @@ class ta(image_data.image_data):
             
         """
     
-        self._logger.debug('Distributing air_temp')
+        self._logger.debug('%s -- Distributing air_temp' % data.name)
         
         self._distribute(data)
         
-    
+        
+    def distribute_thread(self, queue, data):
+        """
+        Distribute the data using threading and queue
+         
+        Args:
+            queue: queue dict for all variables
+            data: pandas dataframe for all data required
+         
+        Output:
+            Changes the queue air_temp for the given date
+        """
+         
+        for t in data.index:
+             
+            self.distribute(data.ix[t])
+         
+            queue[self.variable].put( [t, self.air_temp] )
     
 
     

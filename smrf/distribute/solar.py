@@ -11,10 +11,10 @@ import subprocess as sp
 from multiprocessing import Process
 from smrf.distribute import image_data
 from smrf.envphys import radiation
-import smrf.utils as utils
+from smrf.utils import utils
 from smrf import ipw
 
-import matplotlib.pyplot as plt
+# import matplotlib.pyplot as plt
 
 class solar(image_data.image_data):
     """
@@ -202,7 +202,7 @@ class solar(image_data.image_data):
             
         """
     
-        self._logger.debug('Distributing solar')
+        self._logger.debug('%s Distributing solar' % data.name)
         
         # cloud must always be distributed since it is used by thermal
         self._distribute(data, other_attribute='cloud_factor')
@@ -316,7 +316,36 @@ class solar(image_data.image_data):
             
             # net
             self.net_solar = None
+    
+     
+    def distribute_thread(self, queue, data):
+        """
+        Distribute the data using threading and queue
+        
+        Args:
+            queue: queue dict for all variables
+            data: cloud_factor
+        
+        Output:
+            Changes the queue net_solar, cloud_factor
+                for the given date
+        """
+        
+        for t in data.index:
+                        
+            illum_ang = queue['illum_ang'].get(t)
+            cosz = queue['cosz'].get(t)
+            azimuth = queue['azimuth'].get(t)
+            min_storm_day = queue['last_storm_day_basin'].get(t)
+            albedo_vis = queue['albedo_vis'].get(t)
+            albedo_ir = queue['albedo_ir'].get(t)
             
+            self.distribute(data.ix[t], illum_ang, cosz, azimuth, min_storm_day, albedo_vis, albedo_ir)
+        
+            queue['net_solar'].put( [t, self.net_solar] )
+            queue['cloud_factor'].put( [t, self.cloud_factor] )
+            
+             
             
             
     def calc_ir(self, min_storm_day, wy_day, tz_min_west, wyear, cosz, azimuth):

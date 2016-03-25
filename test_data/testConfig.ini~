@@ -46,8 +46,8 @@ basin_lon:	-115.3333
 
 [TiMe]
 TiMe_SteP: 	60			; time step in minutes to run model, same as iSnobal
-start_date:	2015-10-21 06:00 	; model start, YYYY-MM-DD HH:MM
-end_date:	2015-10-23 06:00 	; model end, YYYY-MM-DD HH:MM
+start_date:	2008-10-21 06:00 	; model start, YYYY-MM-DD HH:MM
+end_date:	2008-10-23 06:00 	; model end, YYYY-MM-DD HH:MM
 
 # time zone for all times provided and how the model will be run
 # see pytz docs for information on what is accepted
@@ -223,20 +223,6 @@ distribution:		idw
 temp:			-2.5
 
 ################################################################################
-# isnobal model parameters
-################################################################################
-
-[isnobal]
-z_0:			test_data/topo/z0.ipw
-ppt_file:		test_data/ppt_desc.txt
-input_prefix:		in
-
-# initial input image
-restart:		false
-
-# if restart=true specify the last output file 
-
-################################################################################
 # output variables
 ################################################################################
 
@@ -264,6 +250,6 @@ log_level:		debug
 [system]
 
 temp_dir: 		./test_data 	; location of where to put the working files
-nthreads_isnobal:	6
-nthreads_forcing:	6
+threading:		true		; whether or not to use threading and queues
+max_values:		5		; maximum number of steps to keep
 

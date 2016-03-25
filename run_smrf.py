@@ -22,7 +22,7 @@ start = datetime.now()
 # output if necessary
 
 try:
-    configFile = './test_data/testConfig_Grid.ini'
+    configFile = './test_data/testConfig.ini'
     if len(sys.argv) > 1:
         configFile = sys.argv[1]
     
@@ -62,10 +62,7 @@ try:
     # 5. load weather data  and station metadata
     s.loadData()
     
-    # 6. distribute  
-    # if s.gridded:
-    #     s.distributeData_Grid()
-    # else:
+    # 6. distribute
     s.distributeData()
     
     #===============================================================================
