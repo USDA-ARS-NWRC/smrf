@@ -190,7 +190,7 @@ class grid():
         
         self._logger.debug('Loading cloud_factor')
         self.cloud_factor = pd.DataFrame(index=time, columns=primary_id)
-        cf = np.mean(f.variables['CLDFRA'][:], axis=1)
+        cf = 1 - np.mean(f.variables['CLDFRA'][:], axis=1)
         for i in a:
             g = 'grid_y%i_x%i' % (i[0], i[1])
             v = cf[:, i[0], i[1]]
