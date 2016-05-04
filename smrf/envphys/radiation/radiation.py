@@ -694,6 +694,7 @@ def thermal_correct_canopy(th, ta, tau, veg_height, height_thresh=2):
     Output:
     th_c - corrected thermal radiation
     
+    Equations from Links and Marks 1999
     20150611 Scott Havens
     '''
     

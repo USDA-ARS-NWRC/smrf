@@ -24,6 +24,7 @@ from smrf import data, distribute, model, output
 from smrf.envphys import radiation
 from smrf.utils import queue
 from threading import Thread
+# from multiprocessing import Process
 
 
 class SMRF():
@@ -100,6 +101,10 @@ class SMRF():
         self.max_values = 1
         if 'max_values' in self.config['system']:
             self.max_values = int(self.config['system']['max_values'])
+            
+        self.time_out = None
+        if 'time_out' in self.config['system']:
+            self.max_values = float(self.config['system']['time_out'])
            
         
         # get the time section        
@@ -417,7 +422,7 @@ class SMRF():
         q = {}
         t = []
         for v in self.thread_variables:
-            q[v] = queue.DateQueue(self.max_values)
+            q[v] = queue.DateQueue_Threading(self.max_values, self.time_out)
                
         #------------------------------------------------------------------------------
         # Distribute the data

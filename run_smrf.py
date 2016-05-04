@@ -12,6 +12,9 @@ class to change things or whatever
 import smrf
 from datetime import datetime
 import sys
+import faulthandler
+
+faulthandler.enable()
 
 start = datetime.now()
 
@@ -23,6 +26,7 @@ start = datetime.now()
 
 try:
     configFile = './test_data/testConfig.ini'
+    # configFile = '/home/scotthavens/working/BRB-wy16/data/data.7.forecast/BRB_wy2016_data.7.forecast.ini'
     if len(sys.argv) > 1:
         configFile = sys.argv[1]
     

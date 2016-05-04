@@ -153,7 +153,7 @@ class image_data():
     def getStations(self, config):
         
         # determine the stations that will be used, alphabetical order
-        if 'staitons' in config:
+        if 'stations' in config:
             stations = config['stations'].split(',')
             stations = map(str.strip, stations)
             stations.sort()

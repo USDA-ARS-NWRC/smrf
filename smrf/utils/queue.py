@@ -4,58 +4,59 @@ Create classes for running on multiple threads
 20160323 Scott Havens
 """
 from Queue import Queue, Empty, Full
-import numpy as np
+# from Queue import Empty, Full
 
+# from multiprocessing.queues import Queue
+# from multiprocessing.util import debug, Finalize
+
+import numpy as np
 import threading
-import random
-import time
 from time import time as _time
 import logging
-
-class ProducerThread( threading.Thread ):
-    def __init__( self, threadName, queue ):
-        threading.Thread.__init__( self, name = threadName )
-        self.sharedObject = queue
-      
-    def run( self ):
-        for i in range( 11, 21 ):
-            time.sleep( random.randrange( 4 ) )
-            print "%s adding %s to queue" % ( self.getName(), i )
-            self.sharedObject.put( i )
-
-        print self.getName(), "finished producing values"
-        print "Terminating", self.getName()
+# import weakref
+# import time
 
 
-class ConsumerThread( threading.Thread ):
-    def __init__( self, var_name, queue ):
-        """
-        Args:
-            var_name: Variable that is being threaded
-            queue: dict of the queue
-        """
-        threading.Thread.__init__( self, name = var_name )
-        self.sharedObject = queue
-        self.var_name = var_name
-
-    def run( self, data ):
-        sum = 0
-        current = 10
-
-        for i in range( 10 ):
-            time.sleep( random.randrange( 4 ) )
-            print "%s attempting to read %s..." % ( self.getName(), current + 1 )
-            current = self.sharedObject.get()
-            print "%s read %s" % ( self.getName(), current )
-            sum += current
-
-        print "%s retrieved values totaling: %d" % ( self.getName(), sum )
-        print "Terminating", self.getName()
+# class ProducerThread( threading.Thread ):
+#     def __init__( self, threadName, queue ):
+#         threading.Thread.__init__( self, name = threadName )
+#         self.sharedObject = queue
+#       
+#     def run( self ):
+#         for i in range( 11, 21 ):
+#             time.sleep( random.randrange( 4 ) )
+#             print "%s adding %s to queue" % ( self.getName(), i )
+#             self.sharedObject.put( i )
+# 
+#         print self.getName(), "finished producing values"
+#         print "Terminating", self.getName()
+# 
+# 
+# class ConsumerThread( threading.Thread ):
+#     def __init__( self, var_name, queue ):
+#         """
+#         Args:
+#             var_name: Variable that is being threaded
+#             queue: dict of the queue
+#         """
+#         threading.Thread.__init__( self, name = var_name )
+#         self.sharedObject = queue
+#         self.var_name = var_name
+# 
+#     def run( self, data ):
+#         sum = 0
+#         current = 10
+# 
+#         for i in range( 10 ):
+#             time.sleep( random.randrange( 4 ) )
+#             print "%s attempting to read %s..." % ( self.getName(), current + 1 )
+#             current = self.sharedObject.get()
+#             print "%s read %s" % ( self.getName(), current )
+#             sum += current
+# 
+#         print "%s retrieved values totaling: %d" % ( self.getName(), sum )
+#         print "Terminating", self.getName()
         
-        
-        
-        
-
 # queue = Queue()
 # producer = ProducerThread( "Producer", queue )
 # consumer = ConsumerThread( "Consumer", queue )
@@ -67,9 +68,142 @@ class ConsumerThread( threading.Thread ):
 # consumer.join()
 
 
-class DateQueue(Queue):
+
+# class DateQueue_Process(Queue):
+#     """
+#     DateQueue extends multiprocessing Queue
+#     Stores the items in a dictionary with date_time keys
+#     When values are retrieved, it will not remove them and will
+#     require cleaning at the end to not have to many values
+#     
+#     20160504 Scott Havens
+#     """
+#     
+#     def __init__(self, maxsize=0, timeout=None):
+#         # extend the base class
+#         Queue.__init__(self, maxsize)
+#         self.timeout = timeout
+#         
+#         # update the _buffer
+#         self._buffer = {}
+#         
+#     # The following override the methods in Queue to use
+#     # a date approach to the queue
+#     
+# #     # Initialize the queue representation
+# #     def _init(self, maxsize):
+# #         self.queue = {}
+# #
+# #     def _qsize(self, len=len):
+# #         return len(self.queue)
+# #
+# #     # Put a new item in the queue
+# #     def _put(self, item):
+# #         # self.queue.append(item)
+# #         self.queue.update({item[0]: item[1]})
+# # 
+# #     # Get an item from the queue
+# #     def _get(self, index):
+# #         return self.queue[index]
+#     
+#     def clean(self, index):
+#         """
+#         Need to clean it out so mimic the original get
+#         """
+#         self.not_empty.acquire()
+#         try:
+#             if index in self.queue:
+#                 del self.queue[index]
+#                 self.not_full.notifyAll()
+#         finally:
+#             self.not_empty.release()
+#     
+#     def put(self, obj, block=True, timeout=None):
+#         """
+#         Over-ride the default implemntation to use dict
+#         """
+#         assert not self._closed
+#         if not self._sem.acquire(block, timeout):
+#             raise Full
+# 
+#         self._notempty.acquire()
+#         try:
+#             if self._thread is None:
+#                 self._start_thread()
+#             self._buffer.update({obj[0]: obj[1]})
+#             self._notempty.notify()
+#         finally:
+#             self._notempty.release()
+# 
+# 
+#     def get(self, block=True, timeout=None):
+#         """
+#         Over-ride the default implemntation to use dict
+#         """
+#         if block and timeout is None:
+#             self._rlock.acquire()
+#             try:
+#                 res = self._recv()
+#                 self._sem.release()
+#                 return res
+#             finally:
+#                 self._rlock.release()
+# 
+#         else:
+#             if block:
+#                 deadline = time.time() + timeout
+#             if not self._rlock.acquire(block, timeout):
+#                 raise Empty
+#             try:
+#                 if block:
+#                     timeout = deadline - time.time()
+#                     if timeout < 0 or not self._poll(timeout):
+#                         raise Empty
+#                 elif not self._poll():
+#                     raise Empty
+#                 res = self._recv()
+#                 self._sem.release()
+#                 return res
+#             finally:
+#                 self._rlock.release()
+# 
+# 
+#     def _start_thread(self):
+#         debug('Queue._start_thread()')
+# 
+#         # Start thread which transfers data from buffer to pipe
+#         self._buffer = {}
+#         self._thread = threading.Thread(
+#             target=Queue._feed,
+#             args=(self._buffer, self._notempty, self._send,
+#                   self._wlock, self._writer.close),
+#             name='QueueFeederThread'
+#             )
+#         self._thread.daemon = True
+# 
+#         debug('doing self._thread.start()')
+#         self._thread.start()
+#         debug('... done self._thread.start()')
+# 
+#         # On process exit we will wait for data to be flushed to pipe.
+#         if not self._joincancelled:
+#             self._jointhread = Finalize(
+#                 self._thread, Queue._finalize_join,
+#                 [weakref.ref(self._thread)],
+#                 exitpriority=-5
+#                 )
+# 
+#         # Send sentinel to the thread queue object when garbage collected
+#         self._close = Finalize(
+#             self, Queue._finalize_close,
+#             [self._buffer, self._notempty],
+#             exitpriority=10
+#             )
+
+
+class DateQueue_Threading(Queue):
     """
-    DateQueue extends Queue module
+    DateQueue extends Queue.Queue module
     Stores the items in a dictionary with date_time keys
     When values are retrieved, it will not remove them and will
     require cleaning at the end to not have to many values
@@ -77,9 +211,10 @@ class DateQueue(Queue):
     20160323 Scott Havens
     """
     
-    def __init__(self, maxsize=0):
+    def __init__(self, maxsize=0, timeout=None):
         # extend the base class
         Queue.__init__(self, maxsize)
+        self.timeout = timeout
         
     # The following override the methods in Queue to use
     # a date approach to the queue
@@ -126,18 +261,23 @@ class DateQueue(Queue):
         
         This is from queue.Queue but with modifcation for supplying what to get
         """
+        
+        # see if timeout was passed
+        if timeout is not None:
+            self.timeout = timeout
+        
         self.not_empty.acquire()
         try:
             if not block:
                 if not self._qsize():
                     raise Empty
-            elif timeout is None:
+            elif self.timeout is None:
                 while index not in self.queue.keys():
                     self.not_empty.wait()
-            elif timeout < 0:
+            elif self.timeout < 0:
                 raise ValueError("'timeout' must be a non-negative number")
             else:
-                endtime = _time() + timeout
+                endtime = _time() + self.timeout
                 while index not in self.queue.keys():
                     remaining = endtime - _time()
                     if remaining <= 0.0:
@@ -161,19 +301,25 @@ class DateQueue(Queue):
         is immediately available, else raise the Full exception ('timeout'
         is ignored in that case).
         """
+        
+        # see if timeout was passed
+        timeout = None
+        if timeout is not None:
+            self.timeout = timeout
+        
         self.not_full.acquire()
         try:
             if self.maxsize > 0:
                 if not block:
                     if self._qsize() == self.maxsize:
                         raise Full
-                elif timeout is None:
+                elif self.timeout is None:
                     while self._qsize() == self.maxsize:
                         self.not_full.wait()
-                elif timeout < 0:
+                elif self.timeout < 0:
                     raise ValueError("'timeout' must be a non-negative number")
                 else:
-                    endtime = _time() + timeout
+                    endtime = _time() + self.timeout
                     while self._qsize() == self.maxsize:
                         remaining = endtime - _time()
                         if remaining <= 0.0:

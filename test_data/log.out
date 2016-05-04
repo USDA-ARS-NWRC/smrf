@@ -1,15 +1,15 @@
-INFO:smrf.framework.model_framework:Started SMRF --> 2016-03-02 09:14:46.218459
-INFO:smrf.framework.model_framework:Model start --> 2008-10-01 01:00:00
-INFO:smrf.framework.model_framework:Model end --> 2008-10-01 07:00:00
-INFO:smrf.framework.model_framework:Number of time steps --> 7
+INFO:smrf.framework.model_framework:Started SMRF --> 2016-05-04 15:03:10.525273
+INFO:smrf.framework.model_framework:Model start --> 2008-10-21 06:00:00
+INFO:smrf.framework.model_framework:Model end --> 2008-10-23 06:00:00
+INFO:smrf.framework.model_framework:Number of time steps --> 49
 INFO:smrf.data.loadTopo:Reading [topo] and making stoporad input
-DEBUG:smrf.data.loadTopo:sky view file - /var/folders/s9/jmflrr9952j1j2y2wgz9xcr40000gw/T/sky_view.ipw
-DEBUG:smrf.data.loadTopo:gradient file - /var/folders/s9/jmflrr9952j1j2y2wgz9xcr40000gw/T/gradient.ipw
-DEBUG:smrf.data.loadTopo:stoporad in file - /var/folders/s9/jmflrr9952j1j2y2wgz9xcr40000gw/T/stoporad_in.ipw
+DEBUG:smrf.data.loadTopo:sky view file - /home/scotthavens/Documents/Projects/smrf/test_data/sky_view.ipw
+DEBUG:smrf.data.loadTopo:gradient file - /home/scotthavens/Documents/Projects/smrf/test_data/gradient.ipw
+DEBUG:smrf.data.loadTopo:stoporad in file - /home/scotthavens/Documents/Projects/smrf/test_data/stoporad_in.ipw
 DEBUG:smrf.distribute.air_temp:Created distribute.air_temp
 DEBUG:smrf.distribute.vapor_pressure:Created distribute.vapor_pressure
 DEBUG:smrf.distribute.wind:Opened <type 'netCDF4._netCDF4.Dataset'>
-root group (NETCDF4 data model, file format HDF5):
+root group (NETCDF4 data model, file format UNDEFINED):
     dateCreated: 2016-01-04T13:44:58.207060
     dimensions(sizes): Direction(72), y(1500), x(1500)
     variables(dimensions): int32 [4mdirection[0m(Direction), float32 [4my[0m(y), float32 [4mx[0m(x), float32 [4mmaxus[0m(Direction,y,x)
@@ -21,5 +21,799 @@ DEBUG:smrf.distribute.albedo:Created distribute.albedo
 DEBUG:smrf.distribute.solar:Created distribute.solar
 DEBUG:smrf.distribute.thermal:Created distribute.thermal
 DEBUG:smrf.distribute.soil_temp:Created distribute.soil_temp
-INFO:smrf.framework.model_framework:air_temp, vapor_pressure, albedo_vis variables will be output
-WARNING:smrf.output.output_netcdf:Opening /Users/scott/Desktop/test_output/air_temp.nc, data may be overwritten!
+INFO:smrf.framework.model_framework:thermal, air_temp, vapor_pressure, wind_speed, net_solar, precip, percent_snow, snow_density, dew_point, albedo_vis variables will be output
+WARNING:smrf.output.output_netcdf:Opening /home/scotthavens/Desktop/test/wind_speed.nc, data may be overwritten!
+WARNING:smrf.output.output_netcdf:Opening /home/scotthavens/Desktop/test/air_temp.nc, data may be overwritten!
+WARNING:smrf.output.output_netcdf:Opening /home/scotthavens/Desktop/test/dew_point.nc, data may be overwritten!
+WARNING:smrf.output.output_netcdf:Opening /home/scotthavens/Desktop/test/net_solar.nc, data may be overwritten!
+WARNING:smrf.output.output_netcdf:Opening /home/scotthavens/Desktop/test/percent_snow.nc, data may be overwritten!
+WARNING:smrf.output.output_netcdf:Opening /home/scotthavens/Desktop/test/albedo_vis.nc, data may be overwritten!
+WARNING:smrf.output.output_netcdf:Opening /home/scotthavens/Desktop/test/snow_density.nc, data may be overwritten!
+WARNING:smrf.output.output_netcdf:Opening /home/scotthavens/Desktop/test/thermal.nc, data may be overwritten!
+WARNING:smrf.output.output_netcdf:Opening /home/scotthavens/Desktop/test/precip.nc, data may be overwritten!
+WARNING:smrf.output.output_netcdf:Opening /home/scotthavens/Desktop/test/vapor_pressure.nc, data may be overwritten!
+INFO:smrf.data.loadData:Reading data coming from CSV files
+DEBUG:smrf.data.loadData:Using only stations ATAI1,BNRI1,VNNI1,TRMI1,BOGI1,TR216
+DEBUG:smrf.data.loadData:Reading test_data/stationData/final_air_temp.csv...
+DEBUG:smrf.data.loadData:Reading test_data/stationData/final_vp.csv...
+DEBUG:smrf.data.loadData:Reading test_data/stationData/final_precip.csv...
+DEBUG:smrf.data.loadData:Reading test_data/stationData/final_solar.csv...
+DEBUG:smrf.data.loadData:Reading test_data/stationData/final_wind_speed.csv...
+DEBUG:smrf.data.loadData:Reading test_data/stationData/final_wind_dir.csv...
+DEBUG:smrf.data.loadData:Reading test_data/stationData/final_cf.csv...
+DEBUG:smrf.data.loadData:Reading test_data/stationData/ta_metadata.csv...
+DEBUG:smrf.distribute.air_temp:Initializing distribute.air_temp
+DEBUG:smrf.distribute.soil_temp:Initializing distribute.soil_temp
+DEBUG:smrf.distribute.thermal:Initializing distribute.thermal
+DEBUG:smrf.distribute.precipitation:Initializing distribute.precip
+DEBUG:smrf.distribute.solar:Initializing distribute.solar
+DEBUG:smrf.distribute.vapor_pressure:Initializing distribute.vapor_pressure
+DEBUG:smrf.distribute.albedo:Initializing distribute.albedo
+DEBUG:smrf.distribute.wind:Initializing distribute.wind
+DEBUG:smrf.utils.queue:Initialized output thread
+DEBUG:smrf.utils.queue:Initialized cleaner thread
+DEBUG:smrf.envphys.radiation.radiation:2008-10-21 06:00:00+00:00 Calculating sun angle
+DEBUG:smrf.envphys.radiation.radiation:2008-10-21 06:00:00+00:00 Calculating illuminagion angle
+DEBUG:smrf.distribute.air_temp:2008-10-21 06:00:00+00:00 -- Distributing air_temp
+DEBUG:smrf.distribute.wind:2008-10-21 06:00:00+00:00 Distributing wind_direction and wind_speed
+DEBUG:smrf.envphys.radiation.radiation:2008-10-21 07:00:00+00:00 Calculating sun angle
+DEBUG:smrf.envphys.radiation.radiation:2008-10-21 07:00:00+00:00 Calculating illuminagion angle
+DEBUG:smrf.distribute.air_temp:2008-10-21 07:00:00+00:00 -- Distributing air_temp
+DEBUG:smrf.distribute.vapor_pressure:2008-10-21 06:00:00+00:00 -- Distributing vapor_pressure
+DEBUG:smrf.distribute.vapor_pressure:2008-10-21 06:00:00+00:00 -- Calculating dew point
+DEBUG:smrf.distribute.wind:2008-10-21 07:00:00+00:00 Distributing wind_direction and wind_speed
+DEBUG:smrf.output.output_netcdf:2008-10-21 06:00:00+00:00 Writing variable wind_speed to netCDF
+DEBUG:smrf.output.output_netcdf:2008-10-21 06:00:00+00:00 Writing variable air_temp to netCDF
+DEBUG:smrf.distribute.precipitation:2008-10-21 06:00:00+00:00 Distributing precip
+DEBUG:smrf.output.output_netcdf:2008-10-21 06:00:00+00:00 Writing variable dew_point to netCDF
+DEBUG:smrf.distribute.albedo:2008-10-21 06:00:00+00:00 Distributing albedo
+DEBUG:smrf.distribute.solar:2008-10-21 06:00:00+00:00 Distributing solar
+DEBUG:smrf.distribute.solar:Sun is down, see you in the morning!
+DEBUG:smrf.distribute.thermal:2008-10-21 06:00:00+00:00 Distributing thermal
+DEBUG:smrf.output.output_netcdf:2008-10-21 06:00:00+00:00 Writing variable net_solar to netCDF
+DEBUG:smrf.output.output_netcdf:2008-10-21 06:00:00+00:00 Writing variable percent_snow to netCDF
+DEBUG:smrf.output.output_netcdf:2008-10-21 06:00:00+00:00 Writing variable albedo_vis to netCDF
+DEBUG:smrf.output.output_netcdf:2008-10-21 06:00:00+00:00 Writing variable snow_density to netCDF
+DEBUG:smrf.output.output_netcdf:2008-10-21 06:00:00+00:00 Writing variable thermal to netCDF
+DEBUG:smrf.output.output_netcdf:2008-10-21 06:00:00+00:00 Writing variable precip to netCDF
+DEBUG:smrf.output.output_netcdf:2008-10-21 06:00:00+00:00 Writing variable vapor_pressure to netCDF
+DEBUG:smrf.utils.queue:2008-10-21 06:00:00+00:00 Variables output from queues
+DEBUG:smrf.distribute.air_temp:2008-10-21 08:00:00+00:00 -- Distributing air_temp
+DEBUG:smrf.distribute.vapor_pressure:2008-10-21 07:00:00+00:00 -- Distributing vapor_pressure
+DEBUG:smrf.utils.queue:2008-10-21 06:00:00+00:00 Cleaned from queues
+DEBUG:smrf.envphys.radiation.radiation:2008-10-21 08:00:00+00:00 Calculating illuminagion angle
+DEBUG:smrf.envphys.radiation.radiation:2008-10-21 08:00:00+00:00 Calculating sun angle
+DEBUG:smrf.distribute.wind:2008-10-21 08:00:00+00:00 Distributing wind_direction and wind_speed
+DEBUG:smrf.output.output_netcdf:2008-10-21 07:00:00+00:00 Writing variable wind_speed to netCDF
+DEBUG:smrf.output.output_netcdf:2008-10-21 07:00:00+00:00 Writing variable air_temp to netCDF
+DEBUG:smrf.distribute.vapor_pressure:2008-10-21 07:00:00+00:00 -- Calculating dew point
+DEBUG:smrf.distribute.precipitation:2008-10-21 07:00:00+00:00 Distributing precip
+DEBUG:smrf.output.output_netcdf:2008-10-21 07:00:00+00:00 Writing variable dew_point to netCDF
+DEBUG:smrf.distribute.albedo:2008-10-21 07:00:00+00:00 Distributing albedo
+DEBUG:smrf.distribute.solar:2008-10-21 07:00:00+00:00 Distributing solar
+DEBUG:smrf.distribute.solar:Sun is down, see you in the morning!
+DEBUG:smrf.distribute.thermal:2008-10-21 07:00:00+00:00 Distributing thermal
+DEBUG:smrf.output.output_netcdf:2008-10-21 07:00:00+00:00 Writing variable net_solar to netCDF
+DEBUG:smrf.output.output_netcdf:2008-10-21 07:00:00+00:00 Writing variable percent_snow to netCDF
+DEBUG:smrf.output.output_netcdf:2008-10-21 07:00:00+00:00 Writing variable albedo_vis to netCDF
+DEBUG:smrf.output.output_netcdf:2008-10-21 07:00:00+00:00 Writing variable snow_density to netCDF
+DEBUG:smrf.output.output_netcdf:2008-10-21 07:00:00+00:00 Writing variable thermal to netCDF
+DEBUG:smrf.output.output_netcdf:2008-10-21 07:00:00+00:00 Writing variable precip to netCDF
+DEBUG:smrf.output.output_netcdf:2008-10-21 07:00:00+00:00 Writing variable vapor_pressure to netCDF
+DEBUG:smrf.utils.queue:2008-10-21 07:00:00+00:00 Variables output from queues
+DEBUG:smrf.distribute.wind:2008-10-21 09:00:00+00:00 Distributing wind_direction and wind_speed
+DEBUG:smrf.output.output_netcdf:2008-10-21 08:00:00+00:00 Writing variable wind_speed to netCDF
+DEBUG:smrf.distribute.vapor_pressure:2008-10-21 08:00:00+00:00 -- Distributing vapor_pressure
+DEBUG:smrf.distribute.air_temp:2008-10-21 09:00:00+00:00 -- Distributing air_temp
+DEBUG:smrf.utils.queue:2008-10-21 07:00:00+00:00 Cleaned from queues
+DEBUG:smrf.envphys.radiation.radiation:2008-10-21 09:00:00+00:00 Calculating sun angle
+DEBUG:smrf.envphys.radiation.radiation:2008-10-21 09:00:00+00:00 Calculating illuminagion angle
+DEBUG:smrf.output.output_netcdf:2008-10-21 08:00:00+00:00 Writing variable air_temp to netCDF
+DEBUG:smrf.distribute.vapor_pressure:2008-10-21 08:00:00+00:00 -- Calculating dew point
+DEBUG:smrf.distribute.precipitation:2008-10-21 08:00:00+00:00 Distributing precip
+DEBUG:smrf.output.output_netcdf:2008-10-21 08:00:00+00:00 Writing variable dew_point to netCDF
+DEBUG:smrf.distribute.albedo:2008-10-21 08:00:00+00:00 Distributing albedo
+DEBUG:smrf.distribute.solar:2008-10-21 08:00:00+00:00 Distributing solar
+DEBUG:smrf.distribute.solar:Sun is down, see you in the morning!
+DEBUG:smrf.distribute.thermal:2008-10-21 08:00:00+00:00 Distributing thermal
+DEBUG:smrf.output.output_netcdf:2008-10-21 08:00:00+00:00 Writing variable net_solar to netCDF
+DEBUG:smrf.output.output_netcdf:2008-10-21 08:00:00+00:00 Writing variable percent_snow to netCDF
+DEBUG:smrf.output.output_netcdf:2008-10-21 08:00:00+00:00 Writing variable albedo_vis to netCDF
+DEBUG:smrf.output.output_netcdf:2008-10-21 08:00:00+00:00 Writing variable snow_density to netCDF
+DEBUG:smrf.output.output_netcdf:2008-10-21 08:00:00+00:00 Writing variable thermal to netCDF
+DEBUG:smrf.output.output_netcdf:2008-10-21 08:00:00+00:00 Writing variable precip to netCDF
+DEBUG:smrf.output.output_netcdf:2008-10-21 08:00:00+00:00 Writing variable vapor_pressure to netCDF
+DEBUG:smrf.utils.queue:2008-10-21 08:00:00+00:00 Variables output from queues
+DEBUG:smrf.distribute.vapor_pressure:2008-10-21 09:00:00+00:00 -- Distributing vapor_pressure
+DEBUG:smrf.distribute.air_temp:2008-10-21 10:00:00+00:00 -- Distributing air_temp
+DEBUG:smrf.output.output_netcdf:2008-10-21 09:00:00+00:00 Writing variable wind_speed to netCDF
+DEBUG:smrf.distribute.wind:2008-10-21 10:00:00+00:00 Distributing wind_direction and wind_speed
+DEBUG:smrf.utils.queue:2008-10-21 08:00:00+00:00 Cleaned from queues
+DEBUG:smrf.envphys.radiation.radiation:2008-10-21 10:00:00+00:00 Calculating sun angle
+DEBUG:smrf.envphys.radiation.radiation:2008-10-21 10:00:00+00:00 Calculating illuminagion angle
+DEBUG:smrf.output.output_netcdf:2008-10-21 09:00:00+00:00 Writing variable air_temp to netCDF
+DEBUG:smrf.distribute.vapor_pressure:2008-10-21 09:00:00+00:00 -- Calculating dew point
+DEBUG:smrf.output.output_netcdf:2008-10-21 09:00:00+00:00 Writing variable dew_point to netCDF
+DEBUG:smrf.distribute.precipitation:2008-10-21 09:00:00+00:00 Distributing precip
+DEBUG:smrf.distribute.albedo:2008-10-21 09:00:00+00:00 Distributing albedo
+DEBUG:smrf.distribute.solar:2008-10-21 09:00:00+00:00 Distributing solar
+DEBUG:smrf.distribute.solar:Sun is down, see you in the morning!
+DEBUG:smrf.distribute.thermal:2008-10-21 09:00:00+00:00 Distributing thermal
+DEBUG:smrf.output.output_netcdf:2008-10-21 09:00:00+00:00 Writing variable net_solar to netCDF
+DEBUG:smrf.output.output_netcdf:2008-10-21 09:00:00+00:00 Writing variable percent_snow to netCDF
+DEBUG:smrf.output.output_netcdf:2008-10-21 09:00:00+00:00 Writing variable albedo_vis to netCDF
+DEBUG:smrf.output.output_netcdf:2008-10-21 09:00:00+00:00 Writing variable snow_density to netCDF
+DEBUG:smrf.output.output_netcdf:2008-10-21 09:00:00+00:00 Writing variable thermal to netCDF
+DEBUG:smrf.output.output_netcdf:2008-10-21 09:00:00+00:00 Writing variable precip to netCDF
+DEBUG:smrf.output.output_netcdf:2008-10-21 09:00:00+00:00 Writing variable vapor_pressure to netCDF
+DEBUG:smrf.utils.queue:2008-10-21 09:00:00+00:00 Variables output from queues
+DEBUG:smrf.distribute.air_temp:2008-10-21 11:00:00+00:00 -- Distributing air_temp
+DEBUG:smrf.distribute.wind:2008-10-21 11:00:00+00:00 Distributing wind_direction and wind_speed
+DEBUG:smrf.distribute.vapor_pressure:2008-10-21 10:00:00+00:00 -- Distributing vapor_pressure
+DEBUG:smrf.output.output_netcdf:2008-10-21 10:00:00+00:00 Writing variable wind_speed to netCDF
+DEBUG:smrf.envphys.radiation.radiation:2008-10-21 11:00:00+00:00 Calculating sun angle
+DEBUG:smrf.utils.queue:2008-10-21 09:00:00+00:00 Cleaned from queues
+DEBUG:smrf.envphys.radiation.radiation:2008-10-21 11:00:00+00:00 Calculating illuminagion angle
+DEBUG:smrf.output.output_netcdf:2008-10-21 10:00:00+00:00 Writing variable air_temp to netCDF
+DEBUG:smrf.distribute.vapor_pressure:2008-10-21 10:00:00+00:00 -- Calculating dew point
+DEBUG:smrf.distribute.precipitation:2008-10-21 10:00:00+00:00 Distributing precip
+DEBUG:smrf.output.output_netcdf:2008-10-21 10:00:00+00:00 Writing variable dew_point to netCDF
+DEBUG:smrf.distribute.albedo:2008-10-21 10:00:00+00:00 Distributing albedo
+DEBUG:smrf.distribute.solar:2008-10-21 10:00:00+00:00 Distributing solar
+DEBUG:smrf.distribute.solar:Sun is down, see you in the morning!
+DEBUG:smrf.distribute.thermal:2008-10-21 10:00:00+00:00 Distributing thermal
+DEBUG:smrf.output.output_netcdf:2008-10-21 10:00:00+00:00 Writing variable net_solar to netCDF
+DEBUG:smrf.output.output_netcdf:2008-10-21 10:00:00+00:00 Writing variable percent_snow to netCDF
+DEBUG:smrf.output.output_netcdf:2008-10-21 10:00:00+00:00 Writing variable albedo_vis to netCDF
+DEBUG:smrf.output.output_netcdf:2008-10-21 10:00:00+00:00 Writing variable snow_density to netCDF
+DEBUG:smrf.output.output_netcdf:2008-10-21 10:00:00+00:00 Writing variable thermal to netCDF
+DEBUG:smrf.output.output_netcdf:2008-10-21 10:00:00+00:00 Writing variable precip to netCDF
+DEBUG:smrf.output.output_netcdf:2008-10-21 10:00:00+00:00 Writing variable vapor_pressure to netCDF
+DEBUG:smrf.utils.queue:2008-10-21 10:00:00+00:00 Variables output from queues
+DEBUG:smrf.distribute.air_temp:2008-10-21 12:00:00+00:00 -- Distributing air_temp
+DEBUG:smrf.distribute.wind:2008-10-21 12:00:00+00:00 Distributing wind_direction and wind_speed
+DEBUG:smrf.output.output_netcdf:2008-10-21 11:00:00+00:00 Writing variable wind_speed to netCDF
+DEBUG:smrf.distribute.vapor_pressure:2008-10-21 11:00:00+00:00 -- Distributing vapor_pressure
+DEBUG:smrf.utils.queue:2008-10-21 10:00:00+00:00 Cleaned from queues
+DEBUG:smrf.envphys.radiation.radiation:2008-10-21 12:00:00+00:00 Calculating illuminagion angle
+DEBUG:smrf.envphys.radiation.radiation:2008-10-21 12:00:00+00:00 Calculating sun angle
+DEBUG:smrf.output.output_netcdf:2008-10-21 11:00:00+00:00 Writing variable air_temp to netCDF
+DEBUG:smrf.distribute.vapor_pressure:2008-10-21 11:00:00+00:00 -- Calculating dew point
+DEBUG:smrf.output.output_netcdf:2008-10-21 11:00:00+00:00 Writing variable dew_point to netCDF
+DEBUG:smrf.distribute.precipitation:2008-10-21 11:00:00+00:00 Distributing precip
+DEBUG:smrf.distribute.albedo:2008-10-21 11:00:00+00:00 Distributing albedo
+DEBUG:smrf.distribute.solar:2008-10-21 11:00:00+00:00 Distributing solar
+DEBUG:smrf.distribute.solar:Sun is down, see you in the morning!
+DEBUG:smrf.distribute.thermal:2008-10-21 11:00:00+00:00 Distributing thermal
+DEBUG:smrf.output.output_netcdf:2008-10-21 11:00:00+00:00 Writing variable net_solar to netCDF
+DEBUG:smrf.output.output_netcdf:2008-10-21 11:00:00+00:00 Writing variable percent_snow to netCDF
+DEBUG:smrf.output.output_netcdf:2008-10-21 11:00:00+00:00 Writing variable albedo_vis to netCDF
+DEBUG:smrf.output.output_netcdf:2008-10-21 11:00:00+00:00 Writing variable snow_density to netCDF
+DEBUG:smrf.output.output_netcdf:2008-10-21 11:00:00+00:00 Writing variable thermal to netCDF
+DEBUG:smrf.output.output_netcdf:2008-10-21 11:00:00+00:00 Writing variable precip to netCDF
+DEBUG:smrf.output.output_netcdf:2008-10-21 11:00:00+00:00 Writing variable vapor_pressure to netCDF
+DEBUG:smrf.utils.queue:2008-10-21 11:00:00+00:00 Variables output from queues
+DEBUG:smrf.distribute.air_temp:2008-10-21 13:00:00+00:00 -- Distributing air_temp
+DEBUG:smrf.distribute.vapor_pressure:2008-10-21 12:00:00+00:00 -- Distributing vapor_pressure
+DEBUG:smrf.distribute.wind:2008-10-21 13:00:00+00:00 Distributing wind_direction and wind_speed
+DEBUG:smrf.output.output_netcdf:2008-10-21 12:00:00+00:00 Writing variable wind_speed to netCDF
+DEBUG:smrf.utils.queue:2008-10-21 11:00:00+00:00 Cleaned from queues
+DEBUG:smrf.envphys.radiation.radiation:2008-10-21 13:00:00+00:00 Calculating sun angle
+DEBUG:smrf.envphys.radiation.radiation:2008-10-21 13:00:00+00:00 Calculating illuminagion angle
+DEBUG:smrf.output.output_netcdf:2008-10-21 12:00:00+00:00 Writing variable air_temp to netCDF
+DEBUG:smrf.distribute.vapor_pressure:2008-10-21 12:00:00+00:00 -- Calculating dew point
+DEBUG:smrf.distribute.precipitation:2008-10-21 12:00:00+00:00 Distributing precip
+DEBUG:smrf.output.output_netcdf:2008-10-21 12:00:00+00:00 Writing variable dew_point to netCDF
+DEBUG:smrf.distribute.albedo:2008-10-21 12:00:00+00:00 Distributing albedo
+DEBUG:smrf.distribute.solar:2008-10-21 12:00:00+00:00 Distributing solar
+DEBUG:smrf.distribute.solar:Sun is down, see you in the morning!
+DEBUG:smrf.distribute.thermal:2008-10-21 12:00:00+00:00 Distributing thermal
+DEBUG:smrf.output.output_netcdf:2008-10-21 12:00:00+00:00 Writing variable net_solar to netCDF
+DEBUG:smrf.output.output_netcdf:2008-10-21 12:00:00+00:00 Writing variable percent_snow to netCDF
+DEBUG:smrf.output.output_netcdf:2008-10-21 12:00:00+00:00 Writing variable albedo_vis to netCDF
+DEBUG:smrf.output.output_netcdf:2008-10-21 12:00:00+00:00 Writing variable snow_density to netCDF
+DEBUG:smrf.output.output_netcdf:2008-10-21 12:00:00+00:00 Writing variable thermal to netCDF
+DEBUG:smrf.output.output_netcdf:2008-10-21 12:00:00+00:00 Writing variable precip to netCDF
+DEBUG:smrf.output.output_netcdf:2008-10-21 12:00:00+00:00 Writing variable vapor_pressure to netCDF
+DEBUG:smrf.utils.queue:2008-10-21 12:00:00+00:00 Variables output from queues
+DEBUG:smrf.distribute.wind:2008-10-21 14:00:00+00:00 Distributing wind_direction and wind_speed
+DEBUG:smrf.distribute.air_temp:2008-10-21 14:00:00+00:00 -- Distributing air_temp
+DEBUG:smrf.output.output_netcdf:2008-10-21 13:00:00+00:00 Writing variable wind_speed to netCDF
+DEBUG:smrf.distribute.vapor_pressure:2008-10-21 13:00:00+00:00 -- Distributing vapor_pressure
+DEBUG:smrf.envphys.radiation.radiation:2008-10-21 14:00:00+00:00 Calculating sun angle
+DEBUG:smrf.utils.queue:2008-10-21 12:00:00+00:00 Cleaned from queues
+DEBUG:smrf.envphys.radiation.radiation:2008-10-21 14:00:00+00:00 Calculating illuminagion angle
+DEBUG:smrf.output.output_netcdf:2008-10-21 13:00:00+00:00 Writing variable air_temp to netCDF
+DEBUG:smrf.distribute.vapor_pressure:2008-10-21 13:00:00+00:00 -- Calculating dew point
+DEBUG:smrf.output.output_netcdf:2008-10-21 13:00:00+00:00 Writing variable dew_point to netCDF
+DEBUG:smrf.distribute.precipitation:2008-10-21 13:00:00+00:00 Distributing precip
+DEBUG:smrf.distribute.albedo:2008-10-21 13:00:00+00:00 Distributing albedo
+DEBUG:smrf.distribute.solar:2008-10-21 13:00:00+00:00 Distributing solar
+DEBUG:smrf.distribute.solar:Sun is down, see you in the morning!
+DEBUG:smrf.distribute.thermal:2008-10-21 13:00:00+00:00 Distributing thermal
+DEBUG:smrf.output.output_netcdf:2008-10-21 13:00:00+00:00 Writing variable net_solar to netCDF
+DEBUG:smrf.output.output_netcdf:2008-10-21 13:00:00+00:00 Writing variable percent_snow to netCDF
+DEBUG:smrf.output.output_netcdf:2008-10-21 13:00:00+00:00 Writing variable albedo_vis to netCDF
+DEBUG:smrf.output.output_netcdf:2008-10-21 13:00:00+00:00 Writing variable snow_density to netCDF
+DEBUG:smrf.output.output_netcdf:2008-10-21 13:00:00+00:00 Writing variable thermal to netCDF
+DEBUG:smrf.output.output_netcdf:2008-10-21 13:00:00+00:00 Writing variable precip to netCDF
+DEBUG:smrf.output.output_netcdf:2008-10-21 13:00:00+00:00 Writing variable vapor_pressure to netCDF
+DEBUG:smrf.utils.queue:2008-10-21 13:00:00+00:00 Variables output from queues
+DEBUG:smrf.distribute.wind:2008-10-21 15:00:00+00:00 Distributing wind_direction and wind_speed
+DEBUG:smrf.output.output_netcdf:2008-10-21 14:00:00+00:00 Writing variable wind_speed to netCDF
+DEBUG:smrf.distribute.air_temp:2008-10-21 15:00:00+00:00 -- Distributing air_temp
+DEBUG:smrf.distribute.vapor_pressure:2008-10-21 14:00:00+00:00 -- Distributing vapor_pressure
+DEBUG:smrf.envphys.radiation.radiation:2008-10-21 15:00:00+00:00 Calculating sun angle
+DEBUG:smrf.envphys.radiation.radiation:2008-10-21 15:00:00+00:00 Calculating illuminagion angle
+DEBUG:smrf.utils.queue:2008-10-21 13:00:00+00:00 Cleaned from queues
+DEBUG:smrf.output.output_netcdf:2008-10-21 14:00:00+00:00 Writing variable air_temp to netCDF
+DEBUG:smrf.distribute.vapor_pressure:2008-10-21 14:00:00+00:00 -- Calculating dew point
+DEBUG:smrf.distribute.precipitation:2008-10-21 14:00:00+00:00 Distributing precip
+DEBUG:smrf.output.output_netcdf:2008-10-21 14:00:00+00:00 Writing variable dew_point to netCDF
+DEBUG:smrf.distribute.albedo:2008-10-21 14:00:00+00:00 Distributing albedo
+DEBUG:smrf.distribute.solar:2008-10-21 14:00:00+00:00 Distributing solar
+DEBUG:smrf.distribute.solar:Sun is down, see you in the morning!
+DEBUG:smrf.distribute.thermal:2008-10-21 14:00:00+00:00 Distributing thermal
+DEBUG:smrf.output.output_netcdf:2008-10-21 14:00:00+00:00 Writing variable net_solar to netCDF
+DEBUG:smrf.output.output_netcdf:2008-10-21 14:00:00+00:00 Writing variable percent_snow to netCDF
+DEBUG:smrf.output.output_netcdf:2008-10-21 14:00:00+00:00 Writing variable albedo_vis to netCDF
+DEBUG:smrf.output.output_netcdf:2008-10-21 14:00:00+00:00 Writing variable snow_density to netCDF
+DEBUG:smrf.output.output_netcdf:2008-10-21 14:00:00+00:00 Writing variable thermal to netCDF
+DEBUG:smrf.output.output_netcdf:2008-10-21 14:00:00+00:00 Writing variable precip to netCDF
+DEBUG:smrf.output.output_netcdf:2008-10-21 14:00:00+00:00 Writing variable vapor_pressure to netCDF
+DEBUG:smrf.utils.queue:2008-10-21 14:00:00+00:00 Variables output from queues
+DEBUG:smrf.distribute.wind:2008-10-21 16:00:00+00:00 Distributing wind_direction and wind_speed
+DEBUG:smrf.output.output_netcdf:2008-10-21 15:00:00+00:00 Writing variable wind_speed to netCDF
+DEBUG:smrf.distribute.air_temp:2008-10-21 16:00:00+00:00 -- Distributing air_temp
+DEBUG:smrf.distribute.vapor_pressure:2008-10-21 15:00:00+00:00 -- Distributing vapor_pressure
+DEBUG:smrf.utils.queue:2008-10-21 14:00:00+00:00 Cleaned from queues
+DEBUG:smrf.envphys.radiation.radiation:2008-10-21 16:00:00+00:00 Calculating sun angle
+DEBUG:smrf.output.output_netcdf:2008-10-21 15:00:00+00:00 Writing variable air_temp to netCDF
+DEBUG:smrf.envphys.radiation.radiation:2008-10-21 16:00:00+00:00 Calculating illuminagion angle
+DEBUG:smrf.distribute.vapor_pressure:2008-10-21 15:00:00+00:00 -- Calculating dew point
+DEBUG:smrf.output.output_netcdf:2008-10-21 15:00:00+00:00 Writing variable dew_point to netCDF
+DEBUG:smrf.distribute.precipitation:2008-10-21 15:00:00+00:00 Distributing precip
+DEBUG:smrf.distribute.albedo:2008-10-21 15:00:00+00:00 Distributing albedo
+DEBUG:smrf.distribute.solar:2008-10-21 15:00:00+00:00 Distributing solar
+DEBUG:smrf.distribute.solar:Calculating clear sky radiation, ir
+DEBUG:smrf.distribute.solar:Calculating clear sky radiation, visible
+DEBUG:smrf.distribute.solar:Correcting clear sky radiation for clouds
+DEBUG:smrf.distribute.solar:Correcting radiation for vegitation
+DEBUG:smrf.distribute.solar:Calculing net radiation
+DEBUG:smrf.output.output_netcdf:2008-10-21 15:00:00+00:00 Writing variable net_solar to netCDF
+DEBUG:smrf.distribute.thermal:2008-10-21 15:00:00+00:00 Distributing thermal
+DEBUG:smrf.output.output_netcdf:2008-10-21 15:00:00+00:00 Writing variable percent_snow to netCDF
+DEBUG:smrf.output.output_netcdf:2008-10-21 15:00:00+00:00 Writing variable albedo_vis to netCDF
+DEBUG:smrf.output.output_netcdf:2008-10-21 15:00:00+00:00 Writing variable snow_density to netCDF
+DEBUG:smrf.output.output_netcdf:2008-10-21 15:00:00+00:00 Writing variable thermal to netCDF
+DEBUG:smrf.output.output_netcdf:2008-10-21 15:00:00+00:00 Writing variable precip to netCDF
+DEBUG:smrf.output.output_netcdf:2008-10-21 15:00:00+00:00 Writing variable vapor_pressure to netCDF
+DEBUG:smrf.utils.queue:2008-10-21 15:00:00+00:00 Variables output from queues
+DEBUG:smrf.distribute.air_temp:2008-10-21 17:00:00+00:00 -- Distributing air_temp
+DEBUG:smrf.distribute.wind:2008-10-21 17:00:00+00:00 Distributing wind_direction and wind_speed
+DEBUG:smrf.distribute.vapor_pressure:2008-10-21 16:00:00+00:00 -- Distributing vapor_pressure
+DEBUG:smrf.output.output_netcdf:2008-10-21 16:00:00+00:00 Writing variable wind_speed to netCDF
+DEBUG:smrf.utils.queue:2008-10-21 15:00:00+00:00 Cleaned from queues
+DEBUG:smrf.envphys.radiation.radiation:2008-10-21 17:00:00+00:00 Calculating sun angle
+DEBUG:smrf.output.output_netcdf:2008-10-21 16:00:00+00:00 Writing variable air_temp to netCDF
+DEBUG:smrf.distribute.vapor_pressure:2008-10-21 16:00:00+00:00 -- Calculating dew point
+DEBUG:smrf.envphys.radiation.radiation:2008-10-21 17:00:00+00:00 Calculating illuminagion angle
+DEBUG:smrf.distribute.precipitation:2008-10-21 16:00:00+00:00 Distributing precip
+DEBUG:smrf.output.output_netcdf:2008-10-21 16:00:00+00:00 Writing variable dew_point to netCDF
+DEBUG:smrf.distribute.albedo:2008-10-21 16:00:00+00:00 Distributing albedo
+DEBUG:smrf.distribute.solar:2008-10-21 16:00:00+00:00 Distributing solar
+DEBUG:smrf.distribute.solar:Calculating clear sky radiation, ir
+DEBUG:smrf.distribute.solar:Calculating clear sky radiation, visible
+DEBUG:smrf.distribute.solar:Correcting clear sky radiation for clouds
+DEBUG:smrf.distribute.solar:Correcting radiation for vegitation
+DEBUG:smrf.distribute.solar:Calculing net radiation
+DEBUG:smrf.distribute.thermal:2008-10-21 16:00:00+00:00 Distributing thermal
+DEBUG:smrf.output.output_netcdf:2008-10-21 16:00:00+00:00 Writing variable net_solar to netCDF
+DEBUG:smrf.output.output_netcdf:2008-10-21 16:00:00+00:00 Writing variable percent_snow to netCDF
+DEBUG:smrf.output.output_netcdf:2008-10-21 16:00:00+00:00 Writing variable albedo_vis to netCDF
+DEBUG:smrf.output.output_netcdf:2008-10-21 16:00:00+00:00 Writing variable snow_density to netCDF
+DEBUG:smrf.output.output_netcdf:2008-10-21 16:00:00+00:00 Writing variable thermal to netCDF
+DEBUG:smrf.output.output_netcdf:2008-10-21 16:00:00+00:00 Writing variable precip to netCDF
+DEBUG:smrf.output.output_netcdf:2008-10-21 16:00:00+00:00 Writing variable vapor_pressure to netCDF
+DEBUG:smrf.utils.queue:2008-10-21 16:00:00+00:00 Variables output from queues
+DEBUG:smrf.distribute.wind:2008-10-21 18:00:00+00:00 Distributing wind_direction and wind_speed
+DEBUG:smrf.distribute.air_temp:2008-10-21 18:00:00+00:00 -- Distributing air_temp
+DEBUG:smrf.distribute.vapor_pressure:2008-10-21 17:00:00+00:00 -- Distributing vapor_pressure
+DEBUG:smrf.output.output_netcdf:2008-10-21 17:00:00+00:00 Writing variable wind_speed to netCDF
+DEBUG:smrf.envphys.radiation.radiation:2008-10-21 18:00:00+00:00 Calculating sun angle
+DEBUG:smrf.utils.queue:2008-10-21 16:00:00+00:00 Cleaned from queues
+DEBUG:smrf.output.output_netcdf:2008-10-21 17:00:00+00:00 Writing variable air_temp to netCDF
+DEBUG:smrf.distribute.vapor_pressure:2008-10-21 17:00:00+00:00 -- Calculating dew point
+DEBUG:smrf.envphys.radiation.radiation:2008-10-21 18:00:00+00:00 Calculating illuminagion angle
+DEBUG:smrf.output.output_netcdf:2008-10-21 17:00:00+00:00 Writing variable dew_point to netCDF
+DEBUG:smrf.distribute.precipitation:2008-10-21 17:00:00+00:00 Distributing precip
+DEBUG:smrf.distribute.albedo:2008-10-21 17:00:00+00:00 Distributing albedo
+DEBUG:smrf.distribute.solar:2008-10-21 17:00:00+00:00 Distributing solar
+DEBUG:smrf.distribute.solar:Calculating clear sky radiation, ir
+DEBUG:smrf.distribute.solar:Calculating clear sky radiation, visible
+DEBUG:smrf.distribute.solar:Correcting clear sky radiation for clouds
+DEBUG:smrf.distribute.solar:Correcting radiation for vegitation
+DEBUG:smrf.distribute.solar:Calculing net radiation
+DEBUG:smrf.distribute.thermal:2008-10-21 17:00:00+00:00 Distributing thermal
+DEBUG:smrf.output.output_netcdf:2008-10-21 17:00:00+00:00 Writing variable net_solar to netCDF
+DEBUG:smrf.output.output_netcdf:2008-10-21 17:00:00+00:00 Writing variable percent_snow to netCDF
+DEBUG:smrf.output.output_netcdf:2008-10-21 17:00:00+00:00 Writing variable albedo_vis to netCDF
+DEBUG:smrf.output.output_netcdf:2008-10-21 17:00:00+00:00 Writing variable snow_density to netCDF
+DEBUG:smrf.output.output_netcdf:2008-10-21 17:00:00+00:00 Writing variable thermal to netCDF
+DEBUG:smrf.output.output_netcdf:2008-10-21 17:00:00+00:00 Writing variable precip to netCDF
+DEBUG:smrf.output.output_netcdf:2008-10-21 17:00:00+00:00 Writing variable vapor_pressure to netCDF
+DEBUG:smrf.utils.queue:2008-10-21 17:00:00+00:00 Variables output from queues
+DEBUG:smrf.distribute.wind:2008-10-21 19:00:00+00:00 Distributing wind_direction and wind_speed
+DEBUG:smrf.distribute.air_temp:2008-10-21 19:00:00+00:00 -- Distributing air_temp
+DEBUG:smrf.output.output_netcdf:2008-10-21 18:00:00+00:00 Writing variable wind_speed to netCDF
+DEBUG:smrf.distribute.vapor_pressure:2008-10-21 18:00:00+00:00 -- Distributing vapor_pressure
+DEBUG:smrf.utils.queue:2008-10-21 17:00:00+00:00 Cleaned from queues
+DEBUG:smrf.envphys.radiation.radiation:2008-10-21 19:00:00+00:00 Calculating sun angle
+DEBUG:smrf.output.output_netcdf:2008-10-21 18:00:00+00:00 Writing variable air_temp to netCDF
+DEBUG:smrf.envphys.radiation.radiation:2008-10-21 19:00:00+00:00 Calculating illuminagion angle
+DEBUG:smrf.distribute.vapor_pressure:2008-10-21 18:00:00+00:00 -- Calculating dew point
+DEBUG:smrf.distribute.precipitation:2008-10-21 18:00:00+00:00 Distributing precip
+DEBUG:smrf.output.output_netcdf:2008-10-21 18:00:00+00:00 Writing variable dew_point to netCDF
+DEBUG:smrf.distribute.albedo:2008-10-21 18:00:00+00:00 Distributing albedo
+DEBUG:smrf.distribute.solar:2008-10-21 18:00:00+00:00 Distributing solar
+DEBUG:smrf.distribute.solar:Calculating clear sky radiation, ir
+DEBUG:smrf.distribute.solar:Calculating clear sky radiation, visible
+DEBUG:smrf.distribute.solar:Correcting clear sky radiation for clouds
+DEBUG:smrf.distribute.solar:Correcting radiation for vegitation
+DEBUG:smrf.distribute.solar:Calculing net radiation
+DEBUG:smrf.distribute.thermal:2008-10-21 18:00:00+00:00 Distributing thermal
+DEBUG:smrf.output.output_netcdf:2008-10-21 18:00:00+00:00 Writing variable net_solar to netCDF
+DEBUG:smrf.output.output_netcdf:2008-10-21 18:00:00+00:00 Writing variable percent_snow to netCDF
+DEBUG:smrf.output.output_netcdf:2008-10-21 18:00:00+00:00 Writing variable albedo_vis to netCDF
+DEBUG:smrf.output.output_netcdf:2008-10-21 18:00:00+00:00 Writing variable snow_density to netCDF
+DEBUG:smrf.output.output_netcdf:2008-10-21 18:00:00+00:00 Writing variable thermal to netCDF
+DEBUG:smrf.output.output_netcdf:2008-10-21 18:00:00+00:00 Writing variable precip to netCDF
+DEBUG:smrf.output.output_netcdf:2008-10-21 18:00:00+00:00 Writing variable vapor_pressure to netCDF
+DEBUG:smrf.utils.queue:2008-10-21 18:00:00+00:00 Variables output from queues
+DEBUG:smrf.distribute.air_temp:2008-10-21 20:00:00+00:00 -- Distributing air_temp
+DEBUG:smrf.distribute.vapor_pressure:2008-10-21 19:00:00+00:00 -- Distributing vapor_pressure
+DEBUG:smrf.distribute.wind:2008-10-21 20:00:00+00:00 Distributing wind_direction and wind_speed
+DEBUG:smrf.output.output_netcdf:2008-10-21 19:00:00+00:00 Writing variable wind_speed to netCDF
+DEBUG:smrf.utils.queue:2008-10-21 18:00:00+00:00 Cleaned from queues
+DEBUG:smrf.envphys.radiation.radiation:2008-10-21 20:00:00+00:00 Calculating sun angle
+DEBUG:smrf.output.output_netcdf:2008-10-21 19:00:00+00:00 Writing variable air_temp to netCDF
+DEBUG:smrf.envphys.radiation.radiation:2008-10-21 20:00:00+00:00 Calculating illuminagion angle
+DEBUG:smrf.distribute.vapor_pressure:2008-10-21 19:00:00+00:00 -- Calculating dew point
+DEBUG:smrf.distribute.precipitation:2008-10-21 19:00:00+00:00 Distributing precip
+DEBUG:smrf.output.output_netcdf:2008-10-21 19:00:00+00:00 Writing variable dew_point to netCDF
+DEBUG:smrf.distribute.albedo:2008-10-21 19:00:00+00:00 Distributing albedo
+DEBUG:smrf.distribute.solar:2008-10-21 19:00:00+00:00 Distributing solar
+DEBUG:smrf.distribute.solar:Calculating clear sky radiation, ir
+DEBUG:smrf.distribute.solar:Calculating clear sky radiation, visible
+DEBUG:smrf.distribute.solar:Correcting clear sky radiation for clouds
+DEBUG:smrf.distribute.solar:Correcting radiation for vegitation
+DEBUG:smrf.distribute.solar:Calculing net radiation
+DEBUG:smrf.distribute.thermal:2008-10-21 19:00:00+00:00 Distributing thermal
+DEBUG:smrf.output.output_netcdf:2008-10-21 19:00:00+00:00 Writing variable net_solar to netCDF
+DEBUG:smrf.output.output_netcdf:2008-10-21 19:00:00+00:00 Writing variable percent_snow to netCDF
+DEBUG:smrf.output.output_netcdf:2008-10-21 19:00:00+00:00 Writing variable albedo_vis to netCDF
+DEBUG:smrf.output.output_netcdf:2008-10-21 19:00:00+00:00 Writing variable snow_density to netCDF
+DEBUG:smrf.output.output_netcdf:2008-10-21 19:00:00+00:00 Writing variable thermal to netCDF
+DEBUG:smrf.output.output_netcdf:2008-10-21 19:00:00+00:00 Writing variable precip to netCDF
+DEBUG:smrf.output.output_netcdf:2008-10-21 19:00:00+00:00 Writing variable vapor_pressure to netCDF
+DEBUG:smrf.utils.queue:2008-10-21 19:00:00+00:00 Variables output from queues
+DEBUG:smrf.distribute.air_temp:2008-10-21 21:00:00+00:00 -- Distributing air_temp
+DEBUG:smrf.distribute.wind:2008-10-21 21:00:00+00:00 Distributing wind_direction and wind_speed
+DEBUG:smrf.distribute.vapor_pressure:2008-10-21 20:00:00+00:00 -- Distributing vapor_pressure
+DEBUG:smrf.output.output_netcdf:2008-10-21 20:00:00+00:00 Writing variable wind_speed to netCDF
+DEBUG:smrf.utils.queue:2008-10-21 19:00:00+00:00 Cleaned from queues
+DEBUG:smrf.envphys.radiation.radiation:2008-10-21 21:00:00+00:00 Calculating sun angle
+DEBUG:smrf.output.output_netcdf:2008-10-21 20:00:00+00:00 Writing variable air_temp to netCDF
+DEBUG:smrf.envphys.radiation.radiation:2008-10-21 21:00:00+00:00 Calculating illuminagion angle
+DEBUG:smrf.distribute.vapor_pressure:2008-10-21 20:00:00+00:00 -- Calculating dew point
+DEBUG:smrf.distribute.precipitation:2008-10-21 20:00:00+00:00 Distributing precip
+DEBUG:smrf.output.output_netcdf:2008-10-21 20:00:00+00:00 Writing variable dew_point to netCDF
+DEBUG:smrf.distribute.albedo:2008-10-21 20:00:00+00:00 Distributing albedo
+DEBUG:smrf.distribute.solar:2008-10-21 20:00:00+00:00 Distributing solar
+DEBUG:smrf.distribute.solar:Calculating clear sky radiation, ir
+DEBUG:smrf.distribute.solar:Calculating clear sky radiation, visible
+DEBUG:smrf.distribute.solar:Correcting clear sky radiation for clouds
+DEBUG:smrf.distribute.solar:Correcting radiation for vegitation
+DEBUG:smrf.distribute.solar:Calculing net radiation
+DEBUG:smrf.distribute.thermal:2008-10-21 20:00:00+00:00 Distributing thermal
+DEBUG:smrf.output.output_netcdf:2008-10-21 20:00:00+00:00 Writing variable net_solar to netCDF
+DEBUG:smrf.output.output_netcdf:2008-10-21 20:00:00+00:00 Writing variable percent_snow to netCDF
+DEBUG:smrf.output.output_netcdf:2008-10-21 20:00:00+00:00 Writing variable albedo_vis to netCDF
+DEBUG:smrf.output.output_netcdf:2008-10-21 20:00:00+00:00 Writing variable snow_density to netCDF
+DEBUG:smrf.output.output_netcdf:2008-10-21 20:00:00+00:00 Writing variable thermal to netCDF
+DEBUG:smrf.output.output_netcdf:2008-10-21 20:00:00+00:00 Writing variable precip to netCDF
+DEBUG:smrf.output.output_netcdf:2008-10-21 20:00:00+00:00 Writing variable vapor_pressure to netCDF
+DEBUG:smrf.utils.queue:2008-10-21 20:00:00+00:00 Variables output from queues
+DEBUG:smrf.distribute.air_temp:2008-10-21 22:00:00+00:00 -- Distributing air_temp
+DEBUG:smrf.distribute.wind:2008-10-21 22:00:00+00:00 Distributing wind_direction and wind_speed
+DEBUG:smrf.output.output_netcdf:2008-10-21 21:00:00+00:00 Writing variable wind_speed to netCDF
+DEBUG:smrf.distribute.vapor_pressure:2008-10-21 21:00:00+00:00 -- Distributing vapor_pressure
+DEBUG:smrf.utils.queue:2008-10-21 20:00:00+00:00 Cleaned from queues
+DEBUG:smrf.envphys.radiation.radiation:2008-10-21 22:00:00+00:00 Calculating sun angle
+DEBUG:smrf.output.output_netcdf:2008-10-21 21:00:00+00:00 Writing variable air_temp to netCDF
+DEBUG:smrf.envphys.radiation.radiation:2008-10-21 22:00:00+00:00 Calculating illuminagion angle
+DEBUG:smrf.distribute.vapor_pressure:2008-10-21 21:00:00+00:00 -- Calculating dew point
+DEBUG:smrf.distribute.precipitation:2008-10-21 21:00:00+00:00 Distributing precip
+DEBUG:smrf.output.output_netcdf:2008-10-21 21:00:00+00:00 Writing variable dew_point to netCDF
+DEBUG:smrf.distribute.albedo:2008-10-21 21:00:00+00:00 Distributing albedo
+DEBUG:smrf.distribute.solar:2008-10-21 21:00:00+00:00 Distributing solar
+DEBUG:smrf.distribute.solar:Calculating clear sky radiation, ir
+DEBUG:smrf.distribute.solar:Calculating clear sky radiation, visible
+DEBUG:smrf.distribute.solar:Correcting clear sky radiation for clouds
+DEBUG:smrf.distribute.solar:Correcting radiation for vegitation
+DEBUG:smrf.distribute.solar:Calculing net radiation
+DEBUG:smrf.output.output_netcdf:2008-10-21 21:00:00+00:00 Writing variable net_solar to netCDF
+DEBUG:smrf.distribute.thermal:2008-10-21 21:00:00+00:00 Distributing thermal
+DEBUG:smrf.output.output_netcdf:2008-10-21 21:00:00+00:00 Writing variable percent_snow to netCDF
+DEBUG:smrf.output.output_netcdf:2008-10-21 21:00:00+00:00 Writing variable albedo_vis to netCDF
+DEBUG:smrf.output.output_netcdf:2008-10-21 21:00:00+00:00 Writing variable snow_density to netCDF
+DEBUG:smrf.output.output_netcdf:2008-10-21 21:00:00+00:00 Writing variable thermal to netCDF
+DEBUG:smrf.output.output_netcdf:2008-10-21 21:00:00+00:00 Writing variable precip to netCDF
+DEBUG:smrf.output.output_netcdf:2008-10-21 21:00:00+00:00 Writing variable vapor_pressure to netCDF
+DEBUG:smrf.utils.queue:2008-10-21 21:00:00+00:00 Variables output from queues
+DEBUG:smrf.distribute.wind:2008-10-21 23:00:00+00:00 Distributing wind_direction and wind_speed
+DEBUG:smrf.distribute.air_temp:2008-10-21 23:00:00+00:00 -- Distributing air_temp
+DEBUG:smrf.output.output_netcdf:2008-10-21 22:00:00+00:00 Writing variable wind_speed to netCDF
+DEBUG:smrf.distribute.vapor_pressure:2008-10-21 22:00:00+00:00 -- Distributing vapor_pressure
+DEBUG:smrf.utils.queue:2008-10-21 21:00:00+00:00 Cleaned from queues
+DEBUG:smrf.envphys.radiation.radiation:2008-10-21 23:00:00+00:00 Calculating sun angle
+DEBUG:smrf.output.output_netcdf:2008-10-21 22:00:00+00:00 Writing variable air_temp to netCDF
+DEBUG:smrf.distribute.vapor_pressure:2008-10-21 22:00:00+00:00 -- Calculating dew point
+DEBUG:smrf.envphys.radiation.radiation:2008-10-21 23:00:00+00:00 Calculating illuminagion angle
+DEBUG:smrf.distribute.precipitation:2008-10-21 22:00:00+00:00 Distributing precip
+DEBUG:smrf.output.output_netcdf:2008-10-21 22:00:00+00:00 Writing variable dew_point to netCDF
+DEBUG:smrf.distribute.albedo:2008-10-21 22:00:00+00:00 Distributing albedo
+DEBUG:smrf.distribute.solar:2008-10-21 22:00:00+00:00 Distributing solar
+DEBUG:smrf.distribute.solar:Calculating clear sky radiation, ir
+DEBUG:smrf.distribute.solar:Calculating clear sky radiation, visible
+DEBUG:smrf.distribute.solar:Correcting clear sky radiation for clouds
+DEBUG:smrf.distribute.solar:Correcting radiation for vegitation
+DEBUG:smrf.distribute.solar:Calculing net radiation
+DEBUG:smrf.distribute.thermal:2008-10-21 22:00:00+00:00 Distributing thermal
+DEBUG:smrf.output.output_netcdf:2008-10-21 22:00:00+00:00 Writing variable net_solar to netCDF
+DEBUG:smrf.output.output_netcdf:2008-10-21 22:00:00+00:00 Writing variable percent_snow to netCDF
+DEBUG:smrf.output.output_netcdf:2008-10-21 22:00:00+00:00 Writing variable albedo_vis to netCDF
+DEBUG:smrf.output.output_netcdf:2008-10-21 22:00:00+00:00 Writing variable snow_density to netCDF
+DEBUG:smrf.output.output_netcdf:2008-10-21 22:00:00+00:00 Writing variable thermal to netCDF
+DEBUG:smrf.output.output_netcdf:2008-10-21 22:00:00+00:00 Writing variable precip to netCDF
+DEBUG:smrf.output.output_netcdf:2008-10-21 22:00:00+00:00 Writing variable vapor_pressure to netCDF
+DEBUG:smrf.utils.queue:2008-10-21 22:00:00+00:00 Variables output from queues
+DEBUG:smrf.distribute.wind:2008-10-22 00:00:00+00:00 Distributing wind_direction and wind_speed
+DEBUG:smrf.output.output_netcdf:2008-10-21 23:00:00+00:00 Writing variable wind_speed to netCDF
+DEBUG:smrf.distribute.air_temp:2008-10-22 00:00:00+00:00 -- Distributing air_temp
+DEBUG:smrf.distribute.vapor_pressure:2008-10-21 23:00:00+00:00 -- Distributing vapor_pressure
+DEBUG:smrf.utils.queue:2008-10-21 22:00:00+00:00 Cleaned from queues
+DEBUG:smrf.envphys.radiation.radiation:2008-10-22 00:00:00+00:00 Calculating sun angle
+DEBUG:smrf.output.output_netcdf:2008-10-21 23:00:00+00:00 Writing variable air_temp to netCDF
+DEBUG:smrf.distribute.vapor_pressure:2008-10-21 23:00:00+00:00 -- Calculating dew point
+DEBUG:smrf.envphys.radiation.radiation:2008-10-22 00:00:00+00:00 Calculating illuminagion angle
+DEBUG:smrf.distribute.precipitation:2008-10-21 23:00:00+00:00 Distributing precip
+DEBUG:smrf.output.output_netcdf:2008-10-21 23:00:00+00:00 Writing variable dew_point to netCDF
+DEBUG:smrf.distribute.albedo:2008-10-21 23:00:00+00:00 Distributing albedo
+DEBUG:smrf.distribute.solar:2008-10-21 23:00:00+00:00 Distributing solar
+DEBUG:smrf.distribute.solar:Calculating clear sky radiation, ir
+DEBUG:smrf.distribute.solar:Calculating clear sky radiation, visible
+DEBUG:smrf.distribute.solar:Correcting clear sky radiation for clouds
+DEBUG:smrf.distribute.solar:Correcting radiation for vegitation
+DEBUG:smrf.distribute.solar:Calculing net radiation
+DEBUG:smrf.output.output_netcdf:2008-10-21 23:00:00+00:00 Writing variable net_solar to netCDF
+DEBUG:smrf.distribute.thermal:2008-10-21 23:00:00+00:00 Distributing thermal
+DEBUG:smrf.output.output_netcdf:2008-10-21 23:00:00+00:00 Writing variable percent_snow to netCDF
+DEBUG:smrf.output.output_netcdf:2008-10-21 23:00:00+00:00 Writing variable albedo_vis to netCDF
+DEBUG:smrf.output.output_netcdf:2008-10-21 23:00:00+00:00 Writing variable snow_density to netCDF
+DEBUG:smrf.output.output_netcdf:2008-10-21 23:00:00+00:00 Writing variable thermal to netCDF
+DEBUG:smrf.output.output_netcdf:2008-10-21 23:00:00+00:00 Writing variable precip to netCDF
+DEBUG:smrf.output.output_netcdf:2008-10-21 23:00:00+00:00 Writing variable vapor_pressure to netCDF
+DEBUG:smrf.utils.queue:2008-10-21 23:00:00+00:00 Variables output from queues
+DEBUG:smrf.distribute.wind:2008-10-22 01:00:00+00:00 Distributing wind_direction and wind_speed
+DEBUG:smrf.distribute.air_temp:2008-10-22 01:00:00+00:00 -- Distributing air_temp
+DEBUG:smrf.output.output_netcdf:2008-10-22 00:00:00+00:00 Writing variable wind_speed to netCDF
+DEBUG:smrf.distribute.vapor_pressure:2008-10-22 00:00:00+00:00 -- Distributing vapor_pressure
+DEBUG:smrf.envphys.radiation.radiation:2008-10-22 01:00:00+00:00 Calculating sun angle
+DEBUG:smrf.utils.queue:2008-10-21 23:00:00+00:00 Cleaned from queues
+DEBUG:smrf.output.output_netcdf:2008-10-22 00:00:00+00:00 Writing variable air_temp to netCDF
+DEBUG:smrf.distribute.vapor_pressure:2008-10-22 00:00:00+00:00 -- Calculating dew point
+DEBUG:smrf.envphys.radiation.radiation:2008-10-22 01:00:00+00:00 Calculating illuminagion angle
+DEBUG:smrf.distribute.precipitation:2008-10-22 00:00:00+00:00 Distributing precip
+DEBUG:smrf.output.output_netcdf:2008-10-22 00:00:00+00:00 Writing variable dew_point to netCDF
+DEBUG:smrf.distribute.albedo:2008-10-22 00:00:00+00:00 Distributing albedo
+DEBUG:smrf.distribute.solar:2008-10-22 00:00:00+00:00 Distributing solar
+DEBUG:smrf.distribute.solar:Calculating clear sky radiation, ir
+DEBUG:smrf.distribute.solar:Calculating clear sky radiation, visible
+DEBUG:smrf.distribute.solar:Correcting clear sky radiation for clouds
+DEBUG:smrf.distribute.solar:Correcting radiation for vegitation
+DEBUG:smrf.distribute.solar:Calculing net radiation
+DEBUG:smrf.distribute.thermal:2008-10-22 00:00:00+00:00 Distributing thermal
+DEBUG:smrf.output.output_netcdf:2008-10-22 00:00:00+00:00 Writing variable net_solar to netCDF
+DEBUG:smrf.output.output_netcdf:2008-10-22 00:00:00+00:00 Writing variable percent_snow to netCDF
+DEBUG:smrf.output.output_netcdf:2008-10-22 00:00:00+00:00 Writing variable albedo_vis to netCDF
+DEBUG:smrf.output.output_netcdf:2008-10-22 00:00:00+00:00 Writing variable snow_density to netCDF
+DEBUG:smrf.output.output_netcdf:2008-10-22 00:00:00+00:00 Writing variable thermal to netCDF
+DEBUG:smrf.output.output_netcdf:2008-10-22 00:00:00+00:00 Writing variable precip to netCDF
+DEBUG:smrf.output.output_netcdf:2008-10-22 00:00:00+00:00 Writing variable vapor_pressure to netCDF
+DEBUG:smrf.utils.queue:2008-10-22 00:00:00+00:00 Variables output from queues
+DEBUG:smrf.distribute.air_temp:2008-10-22 02:00:00+00:00 -- Distributing air_temp
+DEBUG:smrf.distribute.vapor_pressure:2008-10-22 01:00:00+00:00 -- Distributing vapor_pressure
+DEBUG:smrf.distribute.wind:2008-10-22 02:00:00+00:00 Distributing wind_direction and wind_speed
+DEBUG:smrf.output.output_netcdf:2008-10-22 01:00:00+00:00 Writing variable wind_speed to netCDF
+DEBUG:smrf.utils.queue:2008-10-22 00:00:00+00:00 Cleaned from queues
+DEBUG:smrf.envphys.radiation.radiation:2008-10-22 02:00:00+00:00 Calculating illuminagion angle
+DEBUG:smrf.envphys.radiation.radiation:2008-10-22 02:00:00+00:00 Calculating sun angle
+DEBUG:smrf.output.output_netcdf:2008-10-22 01:00:00+00:00 Writing variable air_temp to netCDF
+DEBUG:smrf.distribute.vapor_pressure:2008-10-22 01:00:00+00:00 -- Calculating dew point
+DEBUG:smrf.distribute.precipitation:2008-10-22 01:00:00+00:00 Distributing precip
+DEBUG:smrf.output.output_netcdf:2008-10-22 01:00:00+00:00 Writing variable dew_point to netCDF
+DEBUG:smrf.distribute.albedo:2008-10-22 01:00:00+00:00 Distributing albedo
+DEBUG:smrf.distribute.solar:2008-10-22 01:00:00+00:00 Distributing solar
+DEBUG:smrf.distribute.solar:Sun is down, see you in the morning!
+DEBUG:smrf.distribute.thermal:2008-10-22 01:00:00+00:00 Distributing thermal
+DEBUG:smrf.output.output_netcdf:2008-10-22 01:00:00+00:00 Writing variable net_solar to netCDF
+DEBUG:smrf.output.output_netcdf:2008-10-22 01:00:00+00:00 Writing variable percent_snow to netCDF
+DEBUG:smrf.output.output_netcdf:2008-10-22 01:00:00+00:00 Writing variable albedo_vis to netCDF
+DEBUG:smrf.output.output_netcdf:2008-10-22 01:00:00+00:00 Writing variable snow_density to netCDF
+DEBUG:smrf.output.output_netcdf:2008-10-22 01:00:00+00:00 Writing variable thermal to netCDF
+DEBUG:smrf.output.output_netcdf:2008-10-22 01:00:00+00:00 Writing variable precip to netCDF
+DEBUG:smrf.output.output_netcdf:2008-10-22 01:00:00+00:00 Writing variable vapor_pressure to netCDF
+DEBUG:smrf.utils.queue:2008-10-22 01:00:00+00:00 Variables output from queues
+DEBUG:smrf.distribute.air_temp:2008-10-22 03:00:00+00:00 -- Distributing air_temp
+DEBUG:smrf.distribute.vapor_pressure:2008-10-22 02:00:00+00:00 -- Distributing vapor_pressure
+DEBUG:smrf.distribute.wind:2008-10-22 03:00:00+00:00 Distributing wind_direction and wind_speed
+DEBUG:smrf.output.output_netcdf:2008-10-22 02:00:00+00:00 Writing variable wind_speed to netCDF
+DEBUG:smrf.utils.queue:2008-10-22 01:00:00+00:00 Cleaned from queues
+DEBUG:smrf.envphys.radiation.radiation:2008-10-22 03:00:00+00:00 Calculating illuminagion angle
+DEBUG:smrf.envphys.radiation.radiation:2008-10-22 03:00:00+00:00 Calculating sun angle
+DEBUG:smrf.output.output_netcdf:2008-10-22 02:00:00+00:00 Writing variable air_temp to netCDF
+DEBUG:smrf.distribute.vapor_pressure:2008-10-22 02:00:00+00:00 -- Calculating dew point
+DEBUG:smrf.output.output_netcdf:2008-10-22 02:00:00+00:00 Writing variable dew_point to netCDF
+DEBUG:smrf.distribute.precipitation:2008-10-22 02:00:00+00:00 Distributing precip
+DEBUG:smrf.distribute.albedo:2008-10-22 02:00:00+00:00 Distributing albedo
+DEBUG:smrf.distribute.solar:2008-10-22 02:00:00+00:00 Distributing solar
+DEBUG:smrf.distribute.solar:Sun is down, see you in the morning!
+DEBUG:smrf.distribute.thermal:2008-10-22 02:00:00+00:00 Distributing thermal
+DEBUG:smrf.output.output_netcdf:2008-10-22 02:00:00+00:00 Writing variable net_solar to netCDF
+DEBUG:smrf.output.output_netcdf:2008-10-22 02:00:00+00:00 Writing variable percent_snow to netCDF
+DEBUG:smrf.output.output_netcdf:2008-10-22 02:00:00+00:00 Writing variable albedo_vis to netCDF
+DEBUG:smrf.output.output_netcdf:2008-10-22 02:00:00+00:00 Writing variable snow_density to netCDF
+DEBUG:smrf.output.output_netcdf:2008-10-22 02:00:00+00:00 Writing variable thermal to netCDF
+DEBUG:smrf.output.output_netcdf:2008-10-22 02:00:00+00:00 Writing variable precip to netCDF
+DEBUG:smrf.output.output_netcdf:2008-10-22 02:00:00+00:00 Writing variable vapor_pressure to netCDF
+DEBUG:smrf.utils.queue:2008-10-22 02:00:00+00:00 Variables output from queues
+DEBUG:smrf.distribute.air_temp:2008-10-22 04:00:00+00:00 -- Distributing air_temp
+DEBUG:smrf.distribute.vapor_pressure:2008-10-22 03:00:00+00:00 -- Distributing vapor_pressure
+DEBUG:smrf.distribute.wind:2008-10-22 04:00:00+00:00 Distributing wind_direction and wind_speed
+DEBUG:smrf.output.output_netcdf:2008-10-22 03:00:00+00:00 Writing variable wind_speed to netCDF
+DEBUG:smrf.utils.queue:2008-10-22 02:00:00+00:00 Cleaned from queues
+DEBUG:smrf.envphys.radiation.radiation:2008-10-22 04:00:00+00:00 Calculating sun angle
+DEBUG:smrf.envphys.radiation.radiation:2008-10-22 04:00:00+00:00 Calculating illuminagion angle
+DEBUG:smrf.output.output_netcdf:2008-10-22 03:00:00+00:00 Writing variable air_temp to netCDF
+DEBUG:smrf.distribute.vapor_pressure:2008-10-22 03:00:00+00:00 -- Calculating dew point
+DEBUG:smrf.output.output_netcdf:2008-10-22 03:00:00+00:00 Writing variable dew_point to netCDF
+DEBUG:smrf.distribute.precipitation:2008-10-22 03:00:00+00:00 Distributing precip
+DEBUG:smrf.distribute.albedo:2008-10-22 03:00:00+00:00 Distributing albedo
+DEBUG:smrf.distribute.solar:2008-10-22 03:00:00+00:00 Distributing solar
+DEBUG:smrf.distribute.solar:Sun is down, see you in the morning!
+DEBUG:smrf.distribute.thermal:2008-10-22 03:00:00+00:00 Distributing thermal
+DEBUG:smrf.output.output_netcdf:2008-10-22 03:00:00+00:00 Writing variable net_solar to netCDF
+DEBUG:smrf.output.output_netcdf:2008-10-22 03:00:00+00:00 Writing variable percent_snow to netCDF
+DEBUG:smrf.output.output_netcdf:2008-10-22 03:00:00+00:00 Writing variable albedo_vis to netCDF
+DEBUG:smrf.output.output_netcdf:2008-10-22 03:00:00+00:00 Writing variable snow_density to netCDF
+DEBUG:smrf.output.output_netcdf:2008-10-22 03:00:00+00:00 Writing variable thermal to netCDF
+DEBUG:smrf.output.output_netcdf:2008-10-22 03:00:00+00:00 Writing variable precip to netCDF
+DEBUG:smrf.output.output_netcdf:2008-10-22 03:00:00+00:00 Writing variable vapor_pressure to netCDF
+DEBUG:smrf.utils.queue:2008-10-22 03:00:00+00:00 Variables output from queues
+DEBUG:smrf.distribute.wind:2008-10-22 05:00:00+00:00 Distributing wind_direction and wind_speed
+DEBUG:smrf.distribute.air_temp:2008-10-22 05:00:00+00:00 -- Distributing air_temp
+DEBUG:smrf.distribute.vapor_pressure:2008-10-22 04:00:00+00:00 -- Distributing vapor_pressure
+DEBUG:smrf.output.output_netcdf:2008-10-22 04:00:00+00:00 Writing variable wind_speed to netCDF
+DEBUG:smrf.utils.queue:2008-10-22 03:00:00+00:00 Cleaned from queues
+DEBUG:smrf.envphys.radiation.radiation:2008-10-22 05:00:00+00:00 Calculating illuminagion angle
+DEBUG:smrf.envphys.radiation.radiation:2008-10-22 05:00:00+00:00 Calculating sun angle
+DEBUG:smrf.output.output_netcdf:2008-10-22 04:00:00+00:00 Writing variable air_temp to netCDF
+DEBUG:smrf.distribute.vapor_pressure:2008-10-22 04:00:00+00:00 -- Calculating dew point
+DEBUG:smrf.output.output_netcdf:2008-10-22 04:00:00+00:00 Writing variable dew_point to netCDF
+DEBUG:smrf.distribute.precipitation:2008-10-22 04:00:00+00:00 Distributing precip
+DEBUG:smrf.distribute.albedo:2008-10-22 04:00:00+00:00 Distributing albedo
+DEBUG:smrf.distribute.solar:2008-10-22 04:00:00+00:00 Distributing solar
+DEBUG:smrf.distribute.solar:Sun is down, see you in the morning!
+DEBUG:smrf.distribute.thermal:2008-10-22 04:00:00+00:00 Distributing thermal
+DEBUG:smrf.output.output_netcdf:2008-10-22 04:00:00+00:00 Writing variable net_solar to netCDF
+DEBUG:smrf.output.output_netcdf:2008-10-22 04:00:00+00:00 Writing variable percent_snow to netCDF
+DEBUG:smrf.output.output_netcdf:2008-10-22 04:00:00+00:00 Writing variable albedo_vis to netCDF
+DEBUG:smrf.output.output_netcdf:2008-10-22 04:00:00+00:00 Writing variable snow_density to netCDF
+DEBUG:smrf.output.output_netcdf:2008-10-22 04:00:00+00:00 Writing variable thermal to netCDF
+DEBUG:smrf.output.output_netcdf:2008-10-22 04:00:00+00:00 Writing variable precip to netCDF
+DEBUG:smrf.output.output_netcdf:2008-10-22 04:00:00+00:00 Writing variable vapor_pressure to netCDF
+DEBUG:smrf.utils.queue:2008-10-22 04:00:00+00:00 Variables output from queues
+DEBUG:smrf.distribute.wind:2008-10-22 06:00:00+00:00 Distributing wind_direction and wind_speed
+DEBUG:smrf.output.output_netcdf:2008-10-22 05:00:00+00:00 Writing variable wind_speed to netCDF
+DEBUG:smrf.distribute.air_temp:2008-10-22 06:00:00+00:00 -- Distributing air_temp
+DEBUG:smrf.distribute.vapor_pressure:2008-10-22 05:00:00+00:00 -- Distributing vapor_pressure
+DEBUG:smrf.envphys.radiation.radiation:2008-10-22 06:00:00+00:00 Calculating sun angle
+DEBUG:smrf.utils.queue:2008-10-22 04:00:00+00:00 Cleaned from queues
+DEBUG:smrf.envphys.radiation.radiation:2008-10-22 06:00:00+00:00 Calculating illuminagion angle
+DEBUG:smrf.output.output_netcdf:2008-10-22 05:00:00+00:00 Writing variable air_temp to netCDF
+DEBUG:smrf.distribute.vapor_pressure:2008-10-22 05:00:00+00:00 -- Calculating dew point
+DEBUG:smrf.distribute.precipitation:2008-10-22 05:00:00+00:00 Distributing precip
+DEBUG:smrf.output.output_netcdf:2008-10-22 05:00:00+00:00 Writing variable dew_point to netCDF
+DEBUG:smrf.distribute.albedo:2008-10-22 05:00:00+00:00 Distributing albedo
+DEBUG:smrf.distribute.solar:2008-10-22 05:00:00+00:00 Distributing solar
+DEBUG:smrf.distribute.solar:Sun is down, see you in the morning!
+DEBUG:smrf.distribute.thermal:2008-10-22 05:00:00+00:00 Distributing thermal
+DEBUG:smrf.output.output_netcdf:2008-10-22 05:00:00+00:00 Writing variable net_solar to netCDF
+DEBUG:smrf.output.output_netcdf:2008-10-22 05:00:00+00:00 Writing variable percent_snow to netCDF
+DEBUG:smrf.output.output_netcdf:2008-10-22 05:00:00+00:00 Writing variable albedo_vis to netCDF
+DEBUG:smrf.output.output_netcdf:2008-10-22 05:00:00+00:00 Writing variable snow_density to netCDF
+DEBUG:smrf.output.output_netcdf:2008-10-22 05:00:00+00:00 Writing variable thermal to netCDF
+DEBUG:smrf.output.output_netcdf:2008-10-22 05:00:00+00:00 Writing variable precip to netCDF
+DEBUG:smrf.output.output_netcdf:2008-10-22 05:00:00+00:00 Writing variable vapor_pressure to netCDF
+DEBUG:smrf.utils.queue:2008-10-22 05:00:00+00:00 Variables output from queues
+DEBUG:smrf.distribute.wind:2008-10-22 07:00:00+00:00 Distributing wind_direction and wind_speed
+DEBUG:smrf.distribute.air_temp:2008-10-22 07:00:00+00:00 -- Distributing air_temp
+DEBUG:smrf.output.output_netcdf:2008-10-22 06:00:00+00:00 Writing variable wind_speed to netCDF
+DEBUG:smrf.distribute.vapor_pressure:2008-10-22 06:00:00+00:00 -- Distributing vapor_pressure
+DEBUG:smrf.utils.queue:2008-10-22 05:00:00+00:00 Cleaned from queues
+DEBUG:smrf.envphys.radiation.radiation:2008-10-22 07:00:00+00:00 Calculating sun angle
+DEBUG:smrf.envphys.radiation.radiation:2008-10-22 07:00:00+00:00 Calculating illuminagion angle
+DEBUG:smrf.output.output_netcdf:2008-10-22 06:00:00+00:00 Writing variable air_temp to netCDF
+DEBUG:smrf.distribute.vapor_pressure:2008-10-22 06:00:00+00:00 -- Calculating dew point
+DEBUG:smrf.distribute.precipitation:2008-10-22 06:00:00+00:00 Distributing precip
+DEBUG:smrf.output.output_netcdf:2008-10-22 06:00:00+00:00 Writing variable dew_point to netCDF
+DEBUG:smrf.distribute.albedo:2008-10-22 06:00:00+00:00 Distributing albedo
+DEBUG:smrf.distribute.solar:2008-10-22 06:00:00+00:00 Distributing solar
+DEBUG:smrf.distribute.solar:Sun is down, see you in the morning!
+DEBUG:smrf.distribute.thermal:2008-10-22 06:00:00+00:00 Distributing thermal
+DEBUG:smrf.output.output_netcdf:2008-10-22 06:00:00+00:00 Writing variable net_solar to netCDF
+DEBUG:smrf.output.output_netcdf:2008-10-22 06:00:00+00:00 Writing variable percent_snow to netCDF
+DEBUG:smrf.output.output_netcdf:2008-10-22 06:00:00+00:00 Writing variable albedo_vis to netCDF
+DEBUG:smrf.output.output_netcdf:2008-10-22 06:00:00+00:00 Writing variable snow_density to netCDF
+DEBUG:smrf.output.output_netcdf:2008-10-22 06:00:00+00:00 Writing variable thermal to netCDF
+DEBUG:smrf.output.output_netcdf:2008-10-22 06:00:00+00:00 Writing variable precip to netCDF
+DEBUG:smrf.output.output_netcdf:2008-10-22 06:00:00+00:00 Writing variable vapor_pressure to netCDF
+DEBUG:smrf.utils.queue:2008-10-22 06:00:00+00:00 Variables output from queues
+DEBUG:smrf.output.output_netcdf:2008-10-22 07:00:00+00:00 Writing variable wind_speed to netCDF
+DEBUG:smrf.distribute.wind:2008-10-22 08:00:00+00:00 Distributing wind_direction and wind_speed
+DEBUG:smrf.distribute.air_temp:2008-10-22 08:00:00+00:00 -- Distributing air_temp
+DEBUG:smrf.distribute.vapor_pressure:2008-10-22 07:00:00+00:00 -- Distributing vapor_pressure
+DEBUG:smrf.utils.queue:2008-10-22 06:00:00+00:00 Cleaned from queues
+DEBUG:smrf.envphys.radiation.radiation:2008-10-22 08:00:00+00:00 Calculating illuminagion angle
+DEBUG:smrf.envphys.radiation.radiation:2008-10-22 08:00:00+00:00 Calculating sun angle
+DEBUG:smrf.output.output_netcdf:2008-10-22 07:00:00+00:00 Writing variable air_temp to netCDF
+DEBUG:smrf.distribute.vapor_pressure:2008-10-22 07:00:00+00:00 -- Calculating dew point
+DEBUG:smrf.output.output_netcdf:2008-10-22 07:00:00+00:00 Writing variable dew_point to netCDF
+DEBUG:smrf.distribute.precipitation:2008-10-22 07:00:00+00:00 Distributing precip
+DEBUG:smrf.distribute.albedo:2008-10-22 07:00:00+00:00 Distributing albedo
+DEBUG:smrf.distribute.solar:2008-10-22 07:00:00+00:00 Distributing solar
+DEBUG:smrf.distribute.solar:Sun is down, see you in the morning!
+DEBUG:smrf.distribute.thermal:2008-10-22 07:00:00+00:00 Distributing thermal
+DEBUG:smrf.output.output_netcdf:2008-10-22 07:00:00+00:00 Writing variable net_solar to netCDF
+DEBUG:smrf.output.output_netcdf:2008-10-22 07:00:00+00:00 Writing variable percent_snow to netCDF
+DEBUG:smrf.output.output_netcdf:2008-10-22 07:00:00+00:00 Writing variable albedo_vis to netCDF
+DEBUG:smrf.output.output_netcdf:2008-10-22 07:00:00+00:00 Writing variable snow_density to netCDF
+DEBUG:smrf.output.output_netcdf:2008-10-22 07:00:00+00:00 Writing variable thermal to netCDF
+DEBUG:smrf.output.output_netcdf:2008-10-22 07:00:00+00:00 Writing variable precip to netCDF
+DEBUG:smrf.output.output_netcdf:2008-10-22 07:00:00+00:00 Writing variable vapor_pressure to netCDF
+DEBUG:smrf.utils.queue:2008-10-22 07:00:00+00:00 Variables output from queues
+DEBUG:smrf.distribute.wind:2008-10-22 09:00:00+00:00 Distributing wind_direction and wind_speed
+DEBUG:smrf.output.output_netcdf:2008-10-22 08:00:00+00:00 Writing variable wind_speed to netCDF
+DEBUG:smrf.distribute.air_temp:2008-10-22 09:00:00+00:00 -- Distributing air_temp
+DEBUG:smrf.distribute.vapor_pressure:2008-10-22 08:00:00+00:00 -- Distributing vapor_pressure
+DEBUG:smrf.utils.queue:2008-10-22 07:00:00+00:00 Cleaned from queues
+DEBUG:smrf.envphys.radiation.radiation:2008-10-22 09:00:00+00:00 Calculating illuminagion angle
+DEBUG:smrf.envphys.radiation.radiation:2008-10-22 09:00:00+00:00 Calculating sun angle
+DEBUG:smrf.output.output_netcdf:2008-10-22 08:00:00+00:00 Writing variable air_temp to netCDF
+DEBUG:smrf.distribute.vapor_pressure:2008-10-22 08:00:00+00:00 -- Calculating dew point
+DEBUG:smrf.distribute.precipitation:2008-10-22 08:00:00+00:00 Distributing precip
+DEBUG:smrf.output.output_netcdf:2008-10-22 08:00:00+00:00 Writing variable dew_point to netCDF
+DEBUG:smrf.distribute.albedo:2008-10-22 08:00:00+00:00 Distributing albedo
+DEBUG:smrf.distribute.solar:2008-10-22 08:00:00+00:00 Distributing solar
+DEBUG:smrf.distribute.solar:Sun is down, see you in the morning!
+DEBUG:smrf.distribute.thermal:2008-10-22 08:00:00+00:00 Distributing thermal
+DEBUG:smrf.output.output_netcdf:2008-10-22 08:00:00+00:00 Writing variable net_solar to netCDF
+DEBUG:smrf.output.output_netcdf:2008-10-22 08:00:00+00:00 Writing variable percent_snow to netCDF
+DEBUG:smrf.output.output_netcdf:2008-10-22 08:00:00+00:00 Writing variable albedo_vis to netCDF
+DEBUG:smrf.output.output_netcdf:2008-10-22 08:00:00+00:00 Writing variable snow_density to netCDF
+DEBUG:smrf.output.output_netcdf:2008-10-22 08:00:00+00:00 Writing variable thermal to netCDF
+DEBUG:smrf.output.output_netcdf:2008-10-22 08:00:00+00:00 Writing variable precip to netCDF
+DEBUG:smrf.output.output_netcdf:2008-10-22 08:00:00+00:00 Writing variable vapor_pressure to netCDF
+DEBUG:smrf.utils.queue:2008-10-22 08:00:00+00:00 Variables output from queues
+DEBUG:smrf.distribute.air_temp:2008-10-22 10:00:00+00:00 -- Distributing air_temp
+DEBUG:smrf.distribute.vapor_pressure:2008-10-22 09:00:00+00:00 -- Distributing vapor_pressure
+DEBUG:smrf.distribute.wind:2008-10-22 10:00:00+00:00 Distributing wind_direction and wind_speed
+DEBUG:smrf.output.output_netcdf:2008-10-22 09:00:00+00:00 Writing variable wind_speed to netCDF
+DEBUG:smrf.utils.queue:2008-10-22 08:00:00+00:00 Cleaned from queues
+DEBUG:smrf.envphys.radiation.radiation:2008-10-22 10:00:00+00:00 Calculating sun angle
+DEBUG:smrf.envphys.radiation.radiation:2008-10-22 10:00:00+00:00 Calculating illuminagion angle
+DEBUG:smrf.output.output_netcdf:2008-10-22 09:00:00+00:00 Writing variable air_temp to netCDF
+DEBUG:smrf.distribute.vapor_pressure:2008-10-22 09:00:00+00:00 -- Calculating dew point
+DEBUG:smrf.distribute.precipitation:2008-10-22 09:00:00+00:00 Distributing precip
+DEBUG:smrf.output.output_netcdf:2008-10-22 09:00:00+00:00 Writing variable dew_point to netCDF
+DEBUG:smrf.distribute.albedo:2008-10-22 09:00:00+00:00 Distributing albedo
+DEBUG:smrf.distribute.solar:2008-10-22 09:00:00+00:00 Distributing solar
+DEBUG:smrf.distribute.solar:Sun is down, see you in the morning!
+DEBUG:smrf.distribute.thermal:2008-10-22 09:00:00+00:00 Distributing thermal
+DEBUG:smrf.output.output_netcdf:2008-10-22 09:00:00+00:00 Writing variable net_solar to netCDF
+DEBUG:smrf.output.output_netcdf:2008-10-22 09:00:00+00:00 Writing variable percent_snow to netCDF
+DEBUG:smrf.output.output_netcdf:2008-10-22 09:00:00+00:00 Writing variable albedo_vis to netCDF
+DEBUG:smrf.output.output_netcdf:2008-10-22 09:00:00+00:00 Writing variable snow_density to netCDF
+DEBUG:smrf.output.output_netcdf:2008-10-22 09:00:00+00:00 Writing variable thermal to netCDF
+DEBUG:smrf.output.output_netcdf:2008-10-22 09:00:00+00:00 Writing variable precip to netCDF
+DEBUG:smrf.output.output_netcdf:2008-10-22 09:00:00+00:00 Writing variable vapor_pressure to netCDF
+DEBUG:smrf.utils.queue:2008-10-22 09:00:00+00:00 Variables output from queues
+DEBUG:smrf.distribute.air_temp:2008-10-22 11:00:00+00:00 -- Distributing air_temp
+DEBUG:smrf.distribute.wind:2008-10-22 11:00:00+00:00 Distributing wind_direction and wind_speed
+DEBUG:smrf.output.output_netcdf:2008-10-22 10:00:00+00:00 Writing variable wind_speed to netCDF
+DEBUG:smrf.distribute.vapor_pressure:2008-10-22 10:00:00+00:00 -- Distributing vapor_pressure
+DEBUG:smrf.envphys.radiation.radiation:2008-10-22 11:00:00+00:00 Calculating sun angle
+DEBUG:smrf.utils.queue:2008-10-22 09:00:00+00:00 Cleaned from queues
+DEBUG:smrf.envphys.radiation.radiation:2008-10-22 11:00:00+00:00 Calculating illuminagion angle
+DEBUG:smrf.output.output_netcdf:2008-10-22 10:00:00+00:00 Writing variable air_temp to netCDF
+DEBUG:smrf.distribute.vapor_pressure:2008-10-22 10:00:00+00:00 -- Calculating dew point
+DEBUG:smrf.distribute.precipitation:2008-10-22 10:00:00+00:00 Distributing precip
+DEBUG:smrf.output.output_netcdf:2008-10-22 10:00:00+00:00 Writing variable dew_point to netCDF
+DEBUG:smrf.distribute.albedo:2008-10-22 10:00:00+00:00 Distributing albedo
+DEBUG:smrf.distribute.solar:2008-10-22 10:00:00+00:00 Distributing solar
+DEBUG:smrf.distribute.solar:Sun is down, see you in the morning!
+DEBUG:smrf.distribute.thermal:2008-10-22 10:00:00+00:00 Distributing thermal
+DEBUG:smrf.output.output_netcdf:2008-10-22 10:00:00+00:00 Writing variable net_solar to netCDF
+DEBUG:smrf.output.output_netcdf:2008-10-22 10:00:00+00:00 Writing variable percent_snow to netCDF
+DEBUG:smrf.output.output_netcdf:2008-10-22 10:00:00+00:00 Writing variable albedo_vis to netCDF
+DEBUG:smrf.output.output_netcdf:2008-10-22 10:00:00+00:00 Writing variable snow_density to netCDF
+DEBUG:smrf.output.output_netcdf:2008-10-22 10:00:00+00:00 Writing variable thermal to netCDF
+DEBUG:smrf.output.output_netcdf:2008-10-22 10:00:00+00:00 Writing variable precip to netCDF
+DEBUG:smrf.output.output_netcdf:2008-10-22 10:00:00+00:00 Writing variable vapor_pressure to netCDF
+DEBUG:smrf.utils.queue:2008-10-22 10:00:00+00:00 Variables output from queues
+DEBUG:smrf.distribute.wind:2008-10-22 12:00:00+00:00 Distributing wind_direction and wind_speed
+DEBUG:smrf.output.output_netcdf:2008-10-22 11:00:00+00:00 Writing variable wind_speed to netCDF
+DEBUG:smrf.distribute.air_temp:2008-10-22 12:00:00+00:00 -- Distributing air_temp
+DEBUG:smrf.distribute.vapor_pressure:2008-10-22 11:00:00+00:00 -- Distributing vapor_pressure
+DEBUG:smrf.utils.queue:2008-10-22 10:00:00+00:00 Cleaned from queues
+DEBUG:smrf.envphys.radiation.radiation:2008-10-22 12:00:00+00:00 Calculating sun angle
+DEBUG:smrf.envphys.radiation.radiation:2008-10-22 12:00:00+00:00 Calculating illuminagion angle
+DEBUG:smrf.output.output_netcdf:2008-10-22 11:00:00+00:00 Writing variable air_temp to netCDF
+DEBUG:smrf.distribute.vapor_pressure:2008-10-22 11:00:00+00:00 -- Calculating dew point
+DEBUG:smrf.output.output_netcdf:2008-10-22 11:00:00+00:00 Writing variable dew_point to netCDF
+DEBUG:smrf.distribute.precipitation:2008-10-22 11:00:00+00:00 Distributing precip
+DEBUG:smrf.distribute.albedo:2008-10-22 11:00:00+00:00 Distributing albedo
+DEBUG:smrf.distribute.solar:2008-10-22 11:00:00+00:00 Distributing solar
+DEBUG:smrf.distribute.solar:Sun is down, see you in the morning!
+DEBUG:smrf.distribute.thermal:2008-10-22 11:00:00+00:00 Distributing thermal
+DEBUG:smrf.output.output_netcdf:2008-10-22 11:00:00+00:00 Writing variable net_solar to netCDF
+DEBUG:smrf.output.output_netcdf:2008-10-22 11:00:00+00:00 Writing variable percent_snow to netCDF
+DEBUG:smrf.output.output_netcdf:2008-10-22 11:00:00+00:00 Writing variable albedo_vis to netCDF
+DEBUG:smrf.output.output_netcdf:2008-10-22 11:00:00+00:00 Writing variable snow_density to netCDF
+DEBUG:smrf.output.output_netcdf:2008-10-22 11:00:00+00:00 Writing variable thermal to netCDF
+DEBUG:smrf.output.output_netcdf:2008-10-22 11:00:00+00:00 Writing variable precip to netCDF
+DEBUG:smrf.output.output_netcdf:2008-10-22 11:00:00+00:00 Writing variable vapor_pressure to netCDF
+DEBUG:smrf.utils.queue:2008-10-22 11:00:00+00:00 Variables output from queues
+DEBUG:smrf.distribute.air_temp:2008-10-22 13:00:00+00:00 -- Distributing air_temp
+DEBUG:smrf.distribute.vapor_pressure:2008-10-22 12:00:00+00:00 -- Distributing vapor_pressure
+DEBUG:smrf.distribute.wind:2008-10-22 13:00:00+00:00 Distributing wind_direction and wind_speed
+DEBUG:smrf.output.output_netcdf:2008-10-22 12:00:00+00:00 Writing variable wind_speed to netCDF
+DEBUG:smrf.envphys.radiation.radiation:2008-10-22 13:00:00+00:00 Calculating sun angle
+DEBUG:smrf.utils.queue:2008-10-22 11:00:00+00:00 Cleaned from queues
+DEBUG:smrf.envphys.radiation.radiation:2008-10-22 13:00:00+00:00 Calculating illuminagion angle
+DEBUG:smrf.output.output_netcdf:2008-10-22 12:00:00+00:00 Writing variable air_temp to netCDF
+DEBUG:smrf.distribute.vapor_pressure:2008-10-22 12:00:00+00:00 -- Calculating dew point
+DEBUG:smrf.distribute.precipitation:2008-10-22 12:00:00+00:00 Distributing precip
+DEBUG:smrf.output.output_netcdf:2008-10-22 12:00:00+00:00 Writing variable dew_point to netCDF
+DEBUG:smrf.distribute.albedo:2008-10-22 12:00:00+00:00 Distributing albedo
+DEBUG:smrf.distribute.solar:2008-10-22 12:00:00+00:00 Distributing solar
+DEBUG:smrf.distribute.solar:Sun is down, see you in the morning!
+DEBUG:smrf.distribute.thermal:2008-10-22 12:00:00+00:00 Distributing thermal
+DEBUG:smrf.output.output_netcdf:2008-10-22 12:00:00+00:00 Writing variable net_solar to netCDF
+DEBUG:smrf.output.output_netcdf:2008-10-22 12:00:00+00:00 Writing variable percent_snow to netCDF
+DEBUG:smrf.output.output_netcdf:2008-10-22 12:00:00+00:00 Writing variable albedo_vis to netCDF
+DEBUG:smrf.output.output_netcdf:2008-10-22 12:00:00+00:00 Writing variable snow_density to netCDF
+DEBUG:smrf.output.output_netcdf:2008-10-22 12:00:00+00:00 Writing variable thermal to netCDF
+DEBUG:smrf.output.output_netcdf:2008-10-22 12:00:00+00:00 Writing variable precip to netCDF
+DEBUG:smrf.output.output_netcdf:2008-10-22 12:00:00+00:00 Writing variable vapor_pressure to netCDF
+DEBUG:smrf.utils.queue:2008-10-22 12:00:00+00:00 Variables output from queues
+DEBUG:smrf.distribute.wind:2008-10-22 14:00:00+00:00 Distributing wind_direction and wind_speed
+DEBUG:smrf.output.output_netcdf:2008-10-22 13:00:00+00:00 Writing variable wind_speed to netCDF
+DEBUG:smrf.distribute.air_temp:2008-10-22 14:00:00+00:00 -- Distributing air_temp
+DEBUG:smrf.distribute.vapor_pressure:2008-10-22 13:00:00+00:00 -- Distributing vapor_pressure
+DEBUG:smrf.utils.queue:2008-10-22 12:00:00+00:00 Cleaned from queues
+DEBUG:smrf.envphys.radiation.radiation:2008-10-22 14:00:00+00:00 Calculating sun angle
+DEBUG:smrf.envphys.radiation.radiation:2008-10-22 14:00:00+00:00 Calculating illuminagion angle
+DEBUG:smrf.output.output_netcdf:2008-10-22 13:00:00+00:00 Writing variable air_temp to netCDF
+DEBUG:smrf.distribute.vapor_pressure:2008-10-22 13:00:00+00:00 -- Calculating dew point

@@ -113,6 +113,7 @@ class ppt(image_data.image_data):
             self._distribute(data, zeros=None)
             self.precip = utils.set_min_max(self.precip, self.min, self.max)
             
+            # remove very small precipitation
 
             # determine the precip phase
             perc_snow, snow_den = precip.mkprecip(self.precip, dpt)
