@@ -65,8 +65,10 @@ class wind(image_data.image_data):
         else:
             # open the maxus netCDF
             self._maxus_file = nc.Dataset(self.config['maxus_netcdf'], 'r')
-            self.maxus = self._maxus_file.variables['maxus']
-            self._logger.debug('Opened %s' % self._maxus_file)
+            self.maxus = self._maxus_file.variables['maxus'][:]
+            self.maxus_direction = self._maxus_file.variables['direction'][:]
+            self._maxus_file.close()
+            self._logger.debug('Read data from %s' % self.config['maxus_netcdf'])
             
             # check maxus defaults
             if 'station_default' not in self.config:
@@ -223,7 +225,7 @@ class wind(image_data.image_data):
         for d in dir_unique:
             # find all values for matching direction
             ind = dir_round_cell == d
-            i = np.argwhere(self._maxus_file.variables['direction'][:] == d)[0][0]
+            i = np.argwhere(self.maxus_direction == d)[0][0]
             cellmaxus[ind] = self.maxus[i][ind]
             
         # correct for veg
@@ -299,7 +301,7 @@ class wind(image_data.image_data):
         flatwind = data_speed.copy()
         
         # number of bins that the maxus library was calculated for
-        self.nbins = len(self._maxus_file.dimensions['Direction'])
+        self.nbins = len(self.maxus_direction)
         self.nstep = 360/self.nbins
         
         for m in self.metadata.index:
@@ -319,7 +321,7 @@ class wind(image_data.image_data):
                     idx = int(np.ceil((data_direction[m] - self.nstep/2) / self.nstep) * self.nstep)
                     if idx == 360:
                         idx = 0 # special case when 360=0
-                    ind = self._maxus_file.variables['direction'][:] == idx
+                    ind = self.maxus_direction == idx
                     
                     val_maxus = self.maxus[ind, yi, xi] + e
                 

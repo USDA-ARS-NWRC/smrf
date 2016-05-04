@@ -159,7 +159,7 @@ class SMRF():
         os.remove(self.distribute['solar'].ir_file)
         
         # close other files
-        self.distribute['wind']._maxus_file.close()
+#         self.distribute['wind']._maxus_file.close()
         
 #         # close output files
 #         if self.out_func.type == 'netcdf':
