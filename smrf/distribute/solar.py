@@ -220,17 +220,21 @@ class solar(image_data.image_data):
             #------------------------------------------------------------------------------ 
             # calculate clear sky radiation
                     
-            # call the calc_ir and calc_vis to run as different processes
-            ti = Process(target=self.calc_ir, args=(min_storm_day, wy_day, tz_min_west, wyear, cosz, azimuth))
-            ti.start()
+#             # call the calc_ir and calc_vis to run as different processes
+#             ti = Process(target=self.calc_ir, args=(min_storm_day, wy_day, tz_min_west, wyear, cosz, azimuth))
+#             ti.start()
+#                          
+#             tv = Process(target=self.calc_vis, args=(min_storm_day, wy_day, tz_min_west, wyear, cosz, azimuth))
+#             tv.start()
+#              
+#             # wait for the processes to stop
+#             ti.join()
+#             tv.join()
+
+            self.calc_ir(min_storm_day, wy_day, tz_min_west, wyear, cosz, azimuth)
                          
-            tv = Process(target=self.calc_vis, args=(min_storm_day, wy_day, tz_min_west, wyear, cosz, azimuth))
-            tv.start()
-             
-            # wait for the processes to stop
-            ti.join()
-            tv.join()
-            
+            self.calc_vis(min_storm_day, wy_day, tz_min_west, wyear, cosz, azimuth)
+                        
 
             # load clear sky files back in
             vis = ipw.IPW(self.vis_file)
