@@ -5,5 +5,4 @@ __email__ = 'scotthavens@ars.usda.gov'
 __version__ = '0.1.0'
 
 
-from .radiation import *
-from .radiation_c import *
+from .core_c import *

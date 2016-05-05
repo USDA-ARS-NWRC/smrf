@@ -138,7 +138,10 @@ class albedo(image_data.image_data):
             
             self.distribute(t, illum_ang, storm_day)
         
+            self._logger.debug('Putting %s -- %s' % (t, 'albedo_vis'))
             queue['albedo_vis'].put( [t, self.albedo_vis] )
+            
+            self._logger.debug('Putting %s -- %s' % (t, 'albedo_ir'))
             queue['albedo_ir'].put( [t, self.albedo_ir] )
             
             

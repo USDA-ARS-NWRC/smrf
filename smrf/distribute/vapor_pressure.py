@@ -12,6 +12,7 @@ import smrf.ipw as ipw
 from smrf.utils import utils
 import subprocess as sp
 from random import randint
+from smrf.envphys import core_c
 # import matplotlib.pyplot as plt
 
 class vp(image_data.image_data):
@@ -103,20 +104,35 @@ class vp(image_data.image_data):
         # calculate the dew point
         self._logger.debug('%s -- Calculating dew point' % data.name)
         
-        # make a vapor pressure IPW file
-        vpfile = os.path.join(self.tempDir, 'vp%04i.ipw' % randint(0,9999))
-        i = ipw.IPW()
-        i.new_band(self.vapor_pressure)
-        i.write(vpfile, nbits=16)
-        
-        # calculate the dew point
-        dptfile = os.path.join(self.tempDir, 'dpt%04i.ipw' % randint(0,9999))
-        dp_cmd = 'idewptp -t %s -P %s %s > %s' % (self.config['tolerance'], str(self.config['nthreads']), vpfile, dptfile)
-        sp.Popen(dp_cmd, shell=True).wait()
-        
-        # read in the dew point file
-        dp = ipw.IPW(dptfile)
-        dpt = dp.bands[0].data.astype(np.float64)
+#         # make a vapor pressure IPW file
+#         vpfile = os.path.join(self.tempDir, 'vp%04i.ipw' % randint(0,9999))
+#         i = ipw.IPW()
+#         i.new_band(self.vapor_pressure)
+#         i.write(vpfile, nbits=16)
+#         
+#         # calculate the dew point
+#         dptfile = os.path.join(self.tempDir, 'dpt%04i.ipw' % randint(0,9999))
+#         dp_cmd = 'idewptp -t %s -P %s %s > %s' % (self.config['tolerance'], str(self.config['nthreads']), vpfile, dptfile)
+# #         p = sp.Popen(dp_cmd, shell=True).wait()
+#         
+#         p = sp.Popen(dp_cmd, shell=True)
+#         stdoutdata, stderrdata = p.communicate()
+#             
+#         self._logger.debug(stdoutdata)
+#         self._logger.debug(stderrdata)
+#             
+#         if p.returncode != 0:
+#             raise OSError('idewpt failure')
+#         
+#         # read in the dew point file
+#         dp = ipw.IPW(dptfile)
+#         dpt = dp.bands[0].data.astype(np.float64)
+              
+        # use the core_c to calculate the dew point
+        dpt = np.zeros_like(self.vapor_pressure, dtype=np.float64)
+        core_c.cdewpt(self.vapor_pressure, dpt, 
+                      float(self.config['tolerance']), 
+                      int(self.config['nthreads']))
                 
         # find where dpt > ta
         ind = dpt >= ta
@@ -127,8 +143,8 @@ class vp(image_data.image_data):
         self.dew_point = dpt
         
         # clean up
-        os.remove(dptfile)
-        os.remove(vpfile)
+#         os.remove(dptfile)
+#         os.remove(vpfile)
         
         
     

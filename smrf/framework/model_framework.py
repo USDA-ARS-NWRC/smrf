@@ -222,7 +222,7 @@ class SMRF():
         
     def loadData(self):
         """
-        Load the data
+        Load the data, must be called after the distributions are initialized
         """
         
         # get the start date and end date requested
@@ -262,6 +262,17 @@ class SMRF():
         # determine the locations of the stations on the grid
         self.data.metadata['xi'] = self.data.metadata.apply(lambda row: find_pixel_location(row, self.topo.x, 'X'), axis=1)
         self.data.metadata['yi'] = self.data.metadata.apply(lambda row: find_pixel_location(row, self.topo.y, 'Y'), axis=1)
+        
+        # pre filter the data to only the desired stations
+        try:
+            for key in self.distribute.keys():
+                if key in self.data.variables:
+                    d = getattr(self.data, key)
+                    setattr(self.data, key, d[self.distribute[key].stations])
+        except:
+            self._logger.warn('Distribution not initialized, data not filtered to desired stations')
+            
+        
         
         
     def distributeData(self):
@@ -467,12 +478,12 @@ class SMRF():
         t.append(Thread(target=self.distribute['albedo'].distribute_thread,
                         name='albedo',
                         args=(q, self.date_time)))
-                
+                 
         # 6. Solar
         t.append(Thread(target=self.distribute['solar'].distribute_thread,
                         name='solar',
                         args=(q, self.data.cloud_factor)))
-        
+         
         # 7. thermal radiation
         if self.distribute['thermal'].gridded:
             t.append(Thread(target=self.distribute['thermal'].distribute_thermal_thread,

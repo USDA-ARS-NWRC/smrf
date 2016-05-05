@@ -10,7 +10,7 @@ import logging, os
 # import subprocess as sp
 # from multiprocessing import Process
 from smrf.distribute import image_data
-from smrf.envphys import radiation
+from smrf.envphys import radiation, core_c
 from smrf.utils import utils
 from smrf import ipw
 
@@ -104,7 +104,7 @@ class th(image_data.image_data):
         # calculate clear sky thermal
 #         cth = radiation.topotherm(air_temp, dew_point, self.dem, self.sky_view)
         cth = np.zeros_like(air_temp, dtype=np.float64)
-        radiation.ctopotherm(air_temp, dew_point, self.dem, self.sky_view, cth, self.config['nthreads'])       
+        core_c.ctopotherm(air_temp, dew_point, self.dem, self.sky_view, cth, self.config['nthreads'])       
     
         # correct for the cloud factor based on Garen and Marks 2005
         # ratio of measured/modeled solar indicates the thermal correction

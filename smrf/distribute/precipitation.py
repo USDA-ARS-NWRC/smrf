@@ -107,7 +107,8 @@ class ppt(image_data.image_data):
         self._logger.debug('%s Distributing precip' % data.name)
         
         # only need to distribute precip if there is any
-        if data[self.stations].sum() > 0:
+        data = data[self.stations]
+        if data.sum() > 0:
             
             # distribute data and set the min/max
             self._distribute(data, zeros=None)
@@ -169,10 +170,19 @@ class ppt(image_data.image_data):
             
             self.distribute(data.ix[t], dpt, mask)
         
+#             self._logger.debug('Putting %s -- %s' % (t, 'precip'))
             queue[self.variable].put( [t, self.precip] )
+            
+#             self._logger.debug('Putting %s -- %s' % (t, 'percent_snow'))
             queue['percent_snow'].put( [t, self.percent_snow] )
+            
+#             self._logger.debug('Putting %s -- %s' % (t, 'snow_density'))
             queue['snow_density'].put( [t, self.snow_density] )
+            
+#             self._logger.debug('Putting %s -- %s' % (t, 'last_storm_day_basin'))
             queue['last_storm_day_basin'].put( [t, self.last_storm_day_basin] )
+            
+#             self._logger.debug('Putting %s -- %s' % (t, 'storm_days'))
             queue['storm_days'].put( [t, self.storm_days] )
     
     

@@ -51,14 +51,14 @@ ext_modules += [
                 ]
 cmdclass.update({ 'build_ext': build_ext })
 
-# topotherm
-loc = 'smrf/envphys/radiation' # location of the dk folder
-mname = os.path.join(loc, 'radiation_c')
+# envphys core c functions
+loc = 'smrf/envphys/core_c' # location of the dk folder
+mname = os.path.join(loc, 'core_c')
 mname = mname.replace('/', '.')
 
 ext_modules += [
                 Extension(mname,
-                          sources=[os.path.join(loc, val) for val in ["radiation_c.pyx", "topotherm.c"]],
+                          sources=[os.path.join(loc, val) for val in ["core_c.pyx", "topotherm.c", "dewpt.c"]],
                           include_dirs=[numpy.get_include()],
                           extra_compile_args=['-fopenmp'],
                           extra_link_args=['-fopenmp']
@@ -85,7 +85,8 @@ requirements = [
     'netCDF4 >= 1.2.1',
     'numpy >= 1.10.4',
     'pandas >= 0.17.1',
-    'scipy >= 0.16.0'
+    'scipy >= 0.16.0',
+    'faulthandler >= 2.4'
 ]
 
 test_requirements = [

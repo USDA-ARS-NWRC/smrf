@@ -368,9 +368,16 @@ class solar(image_data.image_data):
                str(min_storm_day), str(wy_day), tz_min_west, wyear, \
                str(cosz), str(azimuth), self.albedoConfig['grain_size'], self.albedoConfig['max_grain'], \
                self.albedoConfig['dirt'], self.stoporad_in, self.ir_file)
-        irp = sp.Popen(ir_cmd, shell=True, env={"PATH": os.environ['PATH'], "TMPDIR": os.environ['TMPDIR']}).wait()
+            
+        self._logger.debug(ir_cmd)
+        
+        irp = sp.Popen(ir_cmd, shell=True, env={"PATH": os.environ['PATH'], "TMPDIR": os.environ['TMPDIR']})
+        
+        stdoutdata, stderrdata = irp.communicate()
+#         self._logger.debug(stdoutdata)
+#         self._logger.debug(stderrdata)
     
-        if irp != 0:
+        if irp.returncode != 0:
             raise Exception('Clear sky for IR failed')        
             
             
@@ -388,15 +395,21 @@ class solar(image_data.image_data):
         self._logger.debug('Calculating clear sky radiation, visible')
         
         vis_cmd = 'stoporad -z %i -t %s -w %s -g %s -x 0.28,0.7 -s %s'\
-            ' -d %s -f %i -y %i -A %s,%s -a %i -m %i -c %i  -D %s > %s' \
+            ' -d %s -f %i -y %i -A %s,%s -a %i -m %i -c %i -D %s > %s' \
             % (self.config['clear_opt_depth'], str(self.config['clear_tau']), \
                str(self.config['clear_omega']), str(self.config['clear_gamma']), \
                str(min_storm_day), str(wy_day), tz_min_west, wyear, \
                str(cosz), str(azimuth), self.albedoConfig['grain_size'], self.albedoConfig['max_grain'], \
                self.albedoConfig['dirt'], self.stoporad_in, self.vis_file)
-        visp = sp.Popen(vis_cmd, shell=True, env={"PATH": os.environ['PATH'], "TMPDIR": os.environ['TMPDIR']}).wait()
+        self._logger.debug(vis_cmd)
+            
+        visp = sp.Popen(vis_cmd, shell=True, env={"PATH": os.environ['PATH'], "TMPDIR": os.environ['TMPDIR']})
 
-        if visp != 0:
+        stdoutdata, stderrdata = visp.communicate()
+#         self._logger.debug(stdoutdata)
+#         self._logger.debug(stderrdata)
+
+        if visp.returncode != 0:
             raise Exception('Clear sky for visible failed')
             
             
