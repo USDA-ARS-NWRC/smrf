@@ -298,7 +298,7 @@ class solar(image_data.image_data):
             # distribute the cloud factor
             self._distribute(data.ix[t], other_attribute='cloud_factor')
             
-             # check if sun is up or not
+            # check if sun is up or not
             cosz = queue['cosz'].get(t)
             
             if cosz > 0:
@@ -313,6 +313,7 @@ class solar(image_data.image_data):
                 self.cloud_correct()
                 
                 # correct cloud for veg
+                illum_ang = queue['illum_ang'].get(t)
                 self.veg_correct(illum_ang)
                 
                 # get the albedo from the queue
@@ -330,7 +331,7 @@ class solar(image_data.image_data):
             queue['cloud_factor'].put( [t, self.cloud_factor] )
             
     
-    def distribute_thread_clear(self, queue, data, type):
+    def distribute_thread_clear(self, queue, data, calc_type):
         """
         Calculate clear sky radiation with threading and queue
         This doesn't set the class's clear* attributes since it
@@ -347,8 +348,8 @@ class solar(image_data.image_data):
         """
         
         # the variable names
-        beam = '%s_beam' % type
-        diffues = '%s_diffuse' % type
+        beam = '%s_beam' % calc_type
+        diffuse = '%s_diffuse' % calc_type
         
         for t in data.index:
             
@@ -357,15 +358,15 @@ class solar(image_data.image_data):
             
             if cosz > 0:
             
-                # get the rest of the 
-                illum_ang = queue['illum_ang'].get(t)
+                # get the rest of the information
                 azimuth = queue['azimuth'].get(t)
+                min_storm_day = queue['last_storm_day_basin'].get(t)
             
-                wy_day, wyear, tz_min_west = self.radiation_dates(data.name)
+                wy_day, wyear, tz_min_west = self.radiation_dates(t)
             
-                if type == 'clear_ir':
+                if calc_type == 'clear_ir':
                     val_beam, val_diffuse = self.calc_ir(min_storm_day, wy_day, tz_min_west, wyear, cosz, azimuth)
-                elif type == 'clear_vis':          
+                elif calc_type == 'clear_vis':          
                     val_beam, val_diffuse = self.calc_vis(min_storm_day, wy_day, tz_min_west, wyear, cosz, azimuth)
                 else:
                     raise Exception('Could not determine type of clear sky radiation to calculate')
@@ -376,7 +377,7 @@ class solar(image_data.image_data):
                 
             # put into the queue
             queue[beam].put([t, val_beam])
-            queue[diffuese].put([t, val_diffuse])
+            queue[diffuse].put([t, val_diffuse])
             
              
              

@@ -270,6 +270,9 @@ class SMRF():
                 if key in self.data.variables:
                     d = getattr(self.data, key)
                     setattr(self.data, key, d[self.distribute[key].stations])
+            if 'cloud_factor' in self.data.variables:
+                d = getattr(self.data, 'cloud_factor')
+                setattr(self.data, 'cloud_factor', d[self.distribute['solar'].stations])
         except:
             self._logger.warn('Distribution not initialized, data not filtered to desired stations')
             
