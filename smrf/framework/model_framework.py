@@ -50,6 +50,7 @@ class SMRF():
     thread_variables = ['cosz', 'azimuth', 'illum_ang',
                         'air_temp', 'dew_point', 'vapor_pressure', 'wind_speed', 
                         'precip', 'percent_snow', 'snow_density', 'last_storm_day_basin', 'storm_days',
+                        'clear_vis_beam', 'clear_vis_diffuse', 'clear_ir_beam', 'clear_ir_diffuse',
                         'albedo_vis', 'albedo_ir', 'net_solar', 'cloud_factor', 'thermal',
                         'output']
 
@@ -479,7 +480,17 @@ class SMRF():
                         name='albedo',
                         args=(q, self.date_time)))
                  
-        # 6. Solar
+        # 6.1 Clear sky visible
+        t.append(Thread(target=self.distribute['solar'].distribute_thread_clear,
+                        name='clear_vis',
+                        args=(q, self.data.cloud_factor, 'clear_vis')))
+        
+        # 6.2 Clear sky ir
+        t.append(Thread(target=self.distribute['solar'].distribute_thread_clear,
+                        name='clear_ir',
+                        args=(q, self.data.cloud_factor, 'clear_ir')))
+        
+        # 6.3 Net radiation
         t.append(Thread(target=self.distribute['solar'].distribute_thread,
                         name='solar',
                         args=(q, self.data.cloud_factor)))
