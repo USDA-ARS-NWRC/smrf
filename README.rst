@@ -23,7 +23,7 @@ Install
 
 2. Install
     * python setup.py clean
-    * python setup.py build_ext --inplace
+    * python setup.py build_ext --inplace, this will compile modules in place for using the test_data
     * python setup.py build
     * (sudo) python setup.py install
 
