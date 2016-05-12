@@ -26,7 +26,8 @@ start = datetime.now()
 
 try:
     configFile = './test_data/testConfig_Grid.ini'
-    configFile = '/home/scotthavens/working/BRB-wy16/data/data.11.forecast/BRB_wy2016_data.11.forecast.ini'
+    configFile = '/media/Drobo2/smrf_test/testConfig_allData.ini'
+    #configFile = '/home/scotthavens/working/BRB-wy16/data/data.11.forecast/BRB_wy2016_data.11.forecast.ini'
     if len(sys.argv) > 1:
         configFile = sys.argv[1]
     
