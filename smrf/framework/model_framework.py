@@ -228,7 +228,7 @@ class SMRF():
         
         # get the start date and end date requested
         
-        
+        flag = True
         if 'csv' in self.config:
             self.data = data.loadData.wxdata(self.config['csv'], 
                                            self.start_date,
@@ -246,6 +246,7 @@ class SMRF():
                                            dataType='mysql')
             
         elif 'gridded' in self.config:
+            flag = False
             self.data = data.loadGrid.grid(self.config['gridded'],
                                            self.topo,
                                            self.start_date,
@@ -253,6 +254,13 @@ class SMRF():
                                            time_zone=self.config['time']['time_zone'],
                                            dataType='wrf',
                                            tempDir=self.tempDir)
+            
+            # set the stations in the distribute
+            try:
+                for key in self.distribute.keys():
+                    setattr(self.distribute[key], 'stations', self.data.metadata.index.tolist())
+            except:
+                self._logger.warn('Distribution not initialized, grid stations could not be set')
             
         else:
             raise KeyError('Could not determine where station data is located')   
@@ -265,16 +273,26 @@ class SMRF():
         self.data.metadata['yi'] = self.data.metadata.apply(lambda row: find_pixel_location(row, self.topo.y, 'Y'), axis=1)
         
         # pre filter the data to only the desired stations
-        try:
-            for key in self.distribute.keys():
-                if key in self.data.variables:
-                    d = getattr(self.data, key)
-                    setattr(self.data, key, d[self.distribute[key].stations])
-            if 'cloud_factor' in self.data.variables:
-                d = getattr(self.data, 'cloud_factor')
-                setattr(self.data, 'cloud_factor', d[self.distribute['solar'].stations])
-        except:
-            self._logger.warn('Distribution not initialized, data not filtered to desired stations')
+        if flag:
+            try:
+                for key in self.distribute.keys():
+                    if key in self.data.variables:
+                        # pull out the loaded data
+                        d = getattr(self.data, key)
+                        
+                        # check to find the matching stations
+                        match = d.columns.isin(self.distribute[key].stations)
+                        sta_match = d.columns[match]
+                        
+                        # update the dataframe and the distribute stations
+                        self.distribute[key].stations = sta_match.tolist()
+                        setattr(self.data, key, d[sta_match])
+                        
+                if 'cloud_factor' in self.data.variables:
+                    d = getattr(self.data, 'cloud_factor')
+                    setattr(self.data, 'cloud_factor', d[self.distribute['solar'].stations])
+            except:
+                self._logger.warn('Distribution not initialized, data not filtered to desired stations')
             
         
         
