@@ -92,6 +92,10 @@ class wxdata():
                 elif self.dataConfig[i]:
                     dp = pd.read_csv(self.dataConfig[i], index_col='date_time', parse_dates=[0])
                     
+                    # check to see if pandas read in the date time correctly
+                    if isinstance(dp.index[0], basestring):
+                        raise Exception('Pandas could not convert date_time to timestamp. Try using %Y-%m-%d %H:%M:%S format')
+                                       
                     if sta is not None:
                         dp = dp[dp.columns[dp.columns.isin(sta)]]
                     dp = dp[self.start_date : self.end_date]    # only get the desired dates
