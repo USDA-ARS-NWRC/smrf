@@ -1,14 +1,11 @@
 """
-20151222 Scott Havens
+2015/12/22 Scott Havens
+
+Module overview
 
 Run the model given the configuration file that specifies what
 modules to run, where the data comes from, and where the data 
-is going
-
-Steps:
-1. Initialize model, load data
-2. Distribute data
-3. Run iSnobal when data is present
+is going.
 """
 
 import ConfigParser
@@ -29,18 +26,16 @@ from threading import Thread
 
 class SMRF():
     """
-    SMRF - Snow Modeling Resources Framework
+    SMRF - Spatial Modeling for Resources Framework      
     
-    Attributes:
-        config: user configuration from config file
-        start_date: start date for modeling and data
-        end_date: end date for modeling and data
-        date_time: numpy array of times start_date:time_step:end_date
-        topo: smrf.data.loadTopo.topo instance to hold all data/info about the 
-            dem, vegitation, and modeling domain
-        data: smrf.data.loadData.wxdata instance to hold all the weather data
-            loaded from either a CSV file or MySQL database
-        
+    :param configFile:  path to configuration file.
+    :type name: str.
+    :returns:  object -- SMRF class.  
+    
+    SMRF instance variable set based on the configFile
+    
+    :var: start_date: start_date read from configFile
+    :var: date_time: array of date_time objects
     """
     
     # These are the modules that the user can modify and use different methods
@@ -57,16 +52,6 @@ class SMRF():
     def __init__(self, configFile):
         """
         Initialize the model, read config file, start and end date, and logging
-        
-        Args:
-            configFile (str): path to configuration file
-            loglevel (str): 
-        
-        Returns:
-        
-        To-do:
-        - Set default values for things and fill out the self.config dict
-        
         """
         
         # read the config file and store
@@ -299,7 +284,9 @@ class SMRF():
         
     def distributeData(self):
         """
-        Wrapper for various distribute methods
+        Wrapper for various distribute methods. If threading was set in configFile, then
+        :func:`~smrf.framework.model_framework.SMRF.distributeData_threaded` will be called. 
+        Default will call :func:`~smrf.framework.model_framework.SMRF.distributeData_single`.
         """    
         
         if self.threading:
@@ -311,14 +298,10 @@ class SMRF():
     
     def distributeData_single(self):
         """
-        Distribute the measurement point data
-        
-        For now, do everything serial so that the process of distributing the 
-        data is developed.  Once the methods are in place, then I can start
-        playing with threads and running the distribution in parallel
-        
-        Future: use dagger to build the time step data and keep track of
-        what file depends on another file
+        Distribute the measurement point data for all variables in serial. Each
+        variable is initialized first using the :func:`~smrf.data.loadTopo.topo`
+        instance and the metadata loaded from :func:`~smrf.framework.model_framework.SMRF.loadData`.
+        The function distributes over each time step, 
         
         Steps performed:
             1. Air temperature
@@ -753,3 +736,4 @@ def find_pixel_location(row, vec, a):
         return np.argmin(np.abs(vec - row[a]))
         
     
+
