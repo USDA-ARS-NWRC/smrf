@@ -1,9 +1,6 @@
 smrf.envphys.core_c package
 ===========================
 
-Submodules
-----------
-
 smrf.envphys.core_c.core_c module
 ---------------------------------
 

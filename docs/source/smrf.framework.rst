@@ -1,9 +1,6 @@
 smrf.framework package
 ======================
 
-Submodules
-----------
-
 smrf.framework.model_framework module
 -------------------------------------
 

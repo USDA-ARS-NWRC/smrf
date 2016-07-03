@@ -1,9 +1,6 @@
 smrf.model package
 ==================
 
-Submodules
-----------
-
 smrf.model.isnobal module
 -------------------------
 

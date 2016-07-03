@@ -9,8 +9,17 @@ Welcome to SMRF's documentation!
 Contents:
 
 .. toctree::
-   :maxdepth: 2
-
+   
+   install
+   smrf.data
+   smrf.distribute
+   smrf.envphys
+   smrf.framework
+   smrf.ipw
+   smrf.output
+   smrf.spatial
+   smrf.utils
+   
 
 
 Indices and tables

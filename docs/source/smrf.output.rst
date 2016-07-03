@@ -1,9 +1,6 @@
 smrf.output package
 ===================
 
-Submodules
-----------
-
 smrf.output.output_netcdf module
 --------------------------------
 

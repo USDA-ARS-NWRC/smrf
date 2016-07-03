@@ -1,9 +1,6 @@
 smrf.utils package
 ==================
 
-Submodules
-----------
-
 smrf.utils.queue module
 -----------------------
 

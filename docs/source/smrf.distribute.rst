@@ -1,8 +1,6 @@
 smrf.distribute package
 =======================
 
-Submodules
-----------
 
 smrf.distribute.air_temp module
 -------------------------------

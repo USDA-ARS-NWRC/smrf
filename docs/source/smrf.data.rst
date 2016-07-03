@@ -1,9 +1,6 @@
 smrf.data package
 =================
 
-Submodules
-----------
-
 smrf.data.csv_data module
 -------------------------
 

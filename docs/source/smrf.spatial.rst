@@ -8,8 +8,6 @@ Subpackages
 
     smrf.spatial.dk
 
-Submodules
-----------
 
 smrf.spatial.grid module
 ------------------------

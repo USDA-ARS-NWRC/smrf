@@ -1,9 +1,6 @@
 smrf.ipw package
 ================
 
-Submodules
-----------
-
 smrf.ipw.ipw module
 -------------------
 
