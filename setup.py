@@ -106,7 +106,7 @@ setup(
     packages=['smrf', 'smrf.data', 'smrf.distribute', 'smrf.envphys', 'smrf.envphys.core_c', 'smrf.framework', 'smrf.ipw', 'smrf.model', 'smrf.output', 'smrf.spatial', 'smrf.utils', 'smrf.spatial.dk'],
 #     package_dir={'smrf':'smrf'},
     include_package_data=True,
-#     install_requires=requirements,
+    install_requires=requirements,
     license="ISCL",
     zip_safe=False,
     keywords='smrf',
