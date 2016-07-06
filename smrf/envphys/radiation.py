@@ -18,7 +18,12 @@ import logging
 import pytz
 
 
-IPW = os.environ['IPW']     # IPW executables
+on_rtd = os.environ.get('READTHEDOCS') == 'True'
+if on_rtd:
+    IPW = '.' # placehold while building the docs
+else:
+    IPW = os.environ['IPW']     # IPW executables
+
 
 # define some constants
 MAXV = 1.0              # vis albedo when gsize = 0
