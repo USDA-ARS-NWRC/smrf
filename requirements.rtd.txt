@@ -1,1 +1,2 @@
 numpy == 1.11.0
+mysql_connector_repackaged == 0.3.1
