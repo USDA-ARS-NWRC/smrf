@@ -11,7 +11,7 @@ import os
 import utm
 import subprocess as sp
 
-import matplotlib.pyplot as plt
+# import matplotlib.pyplot as plt
 
 class grid():
     '''

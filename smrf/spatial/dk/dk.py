@@ -7,7 +7,7 @@ Distributed forcing data over a grid using detrended kriging
 import numpy as np
 import detrended_kriging
 import logging
-import matplotlib.pyplot as plt
+# import matplotlib.pyplot as plt
     
 class DK:
     '''

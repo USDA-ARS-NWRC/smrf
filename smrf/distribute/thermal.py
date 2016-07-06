@@ -10,7 +10,8 @@ import logging, os
 # import subprocess as sp
 # from multiprocessing import Process
 from smrf.distribute import image_data
-from smrf.envphys import radiation, core_c
+from smrf.envphys import radiation
+from smrf.envphys.core_c import core_c
 from smrf.utils import utils
 from smrf import ipw
 

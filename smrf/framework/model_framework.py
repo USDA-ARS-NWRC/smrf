@@ -1,14 +1,27 @@
 """
-20151222 Scott Havens
+2015/12/22 Scott Havens
 
-Run the model given the configuration file that specifies what
-modules to run, where the data comes from, and where the data 
-is going
+The module :mod:`~smrf.framework.model_framework` contains functions and classes
+that act as a major wrapper to the underlying packages and modules contained with SMRF.
+A class instance of :class:`~smrf.framework.model_framework.SMRF` is initialized with
+a configuration file indicating where data is located, what variables to distribute and
+how, where to output the distributed data, or run as a threaded application. See the
+help on the configuration file to learn more about how to control the actions of 
+:class:`~smrf.framework.model_framework.SMRF`.
 
-Steps:
-1. Initialize model, load data
-2. Distribute data
-3. Run iSnobal when data is present
+Example:
+    The following examples shows the most generic method of running SMRF. These commands
+    will generate all the forcing data required to run iSnobal.  A complete example can
+    be found in run_smrf.py
+    
+    >>> import smrf
+    >>> s = smrf.framework.SMRF(configFile) # initialize SMRF
+    >>> s.loadTopo() # load topo data
+    >>> s.initializeDistribution() # initialize the distribution
+    >>> s.initializeOutput() # initialize the outputs if desired
+    >>> s.loadData() # load weather data  and station metadata
+    >>> s.distributeData() # distribute
+
 """
 
 import ConfigParser
@@ -29,18 +42,20 @@ from threading import Thread
 
 class SMRF():
     """
-    SMRF - Snow Modeling Resources Framework
+    SMRF - Spatial Modeling for Resources Framework
+    
+    Args:
+        configFile (str):  path to configuration file.
+    
+    Returns:  
+        SMRF class instance.  
     
     Attributes:
-        config: user configuration from config file
-        start_date: start date for modeling and data
-        end_date: end date for modeling and data
-        date_time: numpy array of times start_date:time_step:end_date
-        topo: smrf.data.loadTopo.topo instance to hold all data/info about the 
-            dem, vegitation, and modeling domain
-        data: smrf.data.loadData.wxdata instance to hold all the weather data
-            loaded from either a CSV file or MySQL database
-        
+        start_date: start_date read from configFile
+        end_date: end_date read from configFile
+        date_time: Numpy array of date_time objects between start_date and end_date
+        config: Configuration file read in as dictionary
+        distribute: Dictionary the contains all the desired variables to distribute and is initialized in :func:`~smrf.framework.model_framework.initializeDistirbution`
     """
     
     # These are the modules that the user can modify and use different methods
@@ -57,16 +72,6 @@ class SMRF():
     def __init__(self, configFile):
         """
         Initialize the model, read config file, start and end date, and logging
-        
-        Args:
-            configFile (str): path to configuration file
-            loglevel (str): 
-        
-        Returns:
-        
-        To-do:
-        - Set default values for things and fill out the self.config dict
-        
         """
         
         # read the config file and store
@@ -173,7 +178,8 @@ class SMRF():
     
     def loadTopo(self):
         """
-        load the topo data
+        Load the information from the configFile in the ['topo'] section. See
+        :func:`smrf.data.loadTopo.topo` for full description.
         """
     
         # load the topo 
@@ -182,10 +188,20 @@ class SMRF():
      
     def initializeDistribution(self):
         """
-        This initializes the distirbution classes
+        This initializes the distirbution classes based on the configFile sections
+        for each variable. :func:`~smrf.framework.model_framework.SMRF.initializeDistribution`
+        will initialize the variables within the :func:`smrf.distribute` package
+        and insert into a dictionary 'distribute' with variable names as the keys.
         
-        Loads all the necessary classes required for distributing the data
-        into dictionary 'distribute' with variable names as the keys
+        Variables that are intialized are:
+            * :func:`Air temperature <smrf.distribute.air_temp.ta>`
+            * :func:`Vapor pressure <smrf.distribute.vapor_pressure.vp>`
+            * :func:`Wind speed and direction <smrf.distribute.wind.wind>`
+            * :func:`Precipitation <smrf.distribute.precipitation.ppt>`
+            * :func:`Albedo <smrf.distribute.albedo.albedo>`
+            * :func:`Solar radiation <smrf.distribute.solar.solar>`
+            * :func:`Thermal radiation <smrf.distribute.thermal.th>`
+            * :func:`Soil Temperature <smrf.distribute.soil_temp.ts>`
         """
         
         self.distribute = {}
@@ -223,7 +239,16 @@ class SMRF():
         
     def loadData(self):
         """
-        Load the data, must be called after the distributions are initialized
+        Load the measurement point data for distributing to the DEM, 
+        must be called after the distributions are initialized. Currently, data can
+        be loaded from three different sources:
+            * :func:`CSV files <smrf.data.loadData.wxdata>`
+            * :func:`MySQL database <smrf.data.loadData.wxdata>`
+            * :func:`Gridded data source (WRF) <smrf.data.loadGrid.grid>`
+        After loading, :func:`~smrf.framework.mode_framework.SMRF.loadData` will call
+        :func:`smrf.framework.model_framework.find_pixel_location` to determine the pixel
+        locations of the point measurements and filter the data to the desired stations if CSV
+        files are used.
         """
         
         # get the start date and end date requested
@@ -299,7 +324,9 @@ class SMRF():
         
     def distributeData(self):
         """
-        Wrapper for various distribute methods
+        Wrapper for various distribute methods. If threading was set in configFile, then
+        :func:`~smrf.framework.model_framework.SMRF.distributeData_threaded` will be called. 
+        Default will call :func:`~smrf.framework.model_framework.SMRF.distributeData_single`.
         """    
         
         if self.threading:
@@ -311,30 +338,22 @@ class SMRF():
     
     def distributeData_single(self):
         """
-        Distribute the measurement point data
-        
-        For now, do everything serial so that the process of distributing the 
-        data is developed.  Once the methods are in place, then I can start
-        playing with threads and running the distribution in parallel
-        
-        Future: use dagger to build the time step data and keep track of
-        what file depends on another file
+        Distribute the measurement point data for all variables in serial. Each
+        variable is initialized first using the :func:`smrf.data.loadTopo.topo`
+        instance and the metadata loaded from :func:`~smrf.framework.model_framework.SMRF.loadData`.
+        The function distributes over each time step, all the variables below.
         
         Steps performed:
-            1. Air temperature
-            2. Vapor pressure
-            3. Wind 
-                3.1 Wind direction
-                3.2 Wind speed
-            4. Precipitation
-            5. Solar
-            6. Thermal
-            7. Soil temperature
-        
-        
-        To do:
-            - All classes will have an intiialize and a distribute, with the same inputs
-            - Then all can be initialized at once and all distributed at once
+            1. Sun angle for the time step
+            2. Illumination angle
+            3. Air temperature
+            4. Vapor pressure
+            5. Wind direction and speed
+            6. Precipitation
+            7. Solar radiation
+            8. Thermal radiation
+            9. Soil temperature
+            10. Output time step if needed
         """
         
         #------------------------------------------------------------------------------
@@ -426,23 +445,14 @@ class SMRF():
     
     def distributeData_threaded(self):
         """
-        Distribute the measurement point data using threading and queues
-        
-        Steps performed:
-            1. Air temperature
-            2. Vapor pressure
-            3. Wind 
-                3.1 Wind direction
-                3.2 Wind speed
-            4. Precipitation
-            5. Solar
-            6. Thermal
-            7. Soil temperature
-        
-        
-        To do:
-            - All classes will have an intiialize and a distribute, with the same inputs
-            - Then all can be initialized at once and all distributed at once
+        Distribute the measurement point data for all variables using threading 
+        and queues. Each variable is initialized first using the :func:`smrf.data.loadTopo.topo`
+        instance and the metadata loaded from :func:`~smrf.framework.model_framework.SMRF.loadData`.
+        A :func:`DateQueue <smrf.utils.queue.DateQueue_Threading>` is initialized for :attr:`all threading
+        variables <smrf.framework.model_framework.SMRF.thread_variables>`. Each variable in
+        :func:`smrf.distribute` is passed all the required point data at once using the distribute_thread
+        function.  The distribute_thread function iterates over :attr:`~smrf.framework.model_framework.SMRF.date_time`
+        and places the distributed values into the :func:`DateQueue <smrf.utils.queue.DateQueue_Threading>`.
         """
         
         #------------------------------------------------------------------------------
@@ -555,8 +565,8 @@ class SMRF():
     
     def initializeOutput(self):
         """
-        Initialize the output files
-        
+        Initialize the output files based on the configFile section ['output']. Currently
+        only :func:`NetCDF files <smrf.output.output_netcdf>` is supported.
         """
         
         if self.config['output']['frequency'] is not None:
@@ -607,12 +617,12 @@ class SMRF():
             self.output_variables = None
     
         
-    def output(self, current_time_step, q=None):
+    def output(self, current_time_step):
         """
-        Output the forcing data or model outputs
+        Output the forcing data or model outputs for the current_time_step.
         
         Args:
-            current_time_step: the current time step datetime object
+            current_time_step (date_time): the current time step datetime object
         """
         
         # get the output variables then pass to the function
@@ -620,13 +630,13 @@ class SMRF():
             
             # get the data desired
             output_now = True
-            if q is None:
-                data = getattr(self.distribute[v['module']], v['variable'])
-            elif v['variable'] in q.keys():
-                data = q[v['variable']].get(current_time_step)
-            else:
-                self._logger.warning('Output variable %s not in queue' % v['variable'])
-                output_now = False
+            data = getattr(self.distribute[v['module']], v['variable'])
+            
+#             elif v['variable'] in q.keys():
+#                 data = q[v['variable']].get(current_time_step)
+#             else:
+#                 self._logger.warning('Output variable %s not in queue' % v['variable'])
+#                 output_now = False
             
             if output_now:
                 if data is None:
@@ -636,86 +646,87 @@ class SMRF():
                 self.out_func.output(v['variable'], data, current_time_step)
                 
                 
-    def output_thread(self, q):
-        """
-        Output the desired variables to a file.
-        
-        Go through the date times and look for when all the queues
-        have that date_time
-        """
-        
-        for output_count,t in enumerate(self.date_time):
-            
-            # output at the frequency and the last time step
-            if (output_count % self.config['output']['frequency'] == 0) or (output_count == len(self.date_time)):          
-                
-                self.output(t, q)
-                
-                # put the value into the output queue so clean knows it's done
-                q['output'].put([t, True])
-                                
-                self._logger.debug('%s Variables output from queues' % t)
+#     def output_thread(self, q):
+#         """
+#         Output the desired variables to a file.
+#         """
+#         
+#         for output_count,t in enumerate(self.date_time):
+#             
+#             # output at the frequency and the last time step
+#             if (output_count % self.config['output']['frequency'] == 0) or (output_count == len(self.date_time)):          
+#                 
+#                 self.output(t, q)
+#                 
+#                 # put the value into the output queue so clean knows it's done
+#                 q['output'].put([t, True])
+#                                 
+#                 self._logger.debug('%s Variables output from queues' % t)
                 
     
-    def initializeModel(self):
-        """
-        Initialize the models
-        """   
-        
-        self.model = {}
-        
-        self.model['isnobal'] = model.isnobal(self.config['isnobal'], self.topo)
+#     def initializeModel(self):
+#         """
+#         Initialize the models
+#         """   
+#         
+#         self.model = {}
+#         
+#         self.model['isnobal'] = model.isnobal(self.config['isnobal'], self.topo)
         
     
-    def runModel(self):
-        """
-        Run the model
-        """
-        
-        self.model['isnobal'].runModel()
+#     def runModel(self):
+#         """
+#         Run the model
+#         """
+#         
+#         self.model['isnobal'].runModel()
     
     
-    def _initDistributionDict(self, date_time, variables):
-        """
-        Create a dictionary to hold all the data.  They keys will be datetime objects
-        with each one holding all the necessary variables for that timestep
-        
-        d = {
-            datetime.datetime(2008, 10, 1, 1, 0): {
-                'air_temp':{},
-                'vapor_pressure':{},
-                ...
-            },
-            datetime.datetime(2008, 10, 1, 2, 0): {
-                'air_temp':{},
-                'vapor_pressure':{},
-                ...
-            },
-            ...
-        }
-        
-        Args:
-            date_time: list/array of Timestamp or datetime objects
-            variables: list of variables under each time
-            
-        Return:
-            d: dictionary
-        """
-        
-        d = {}
-        b = {}
-        
-        for v in variables:
-            b[v] = []
-        
-        for k in date_time:
-            d[k] = dict(b)
-            
-        return d  
+#     def _initDistributionDict(self, date_time, variables):
+#         """
+#         Create a dictionary to hold all the data.  They keys will be datetime objects
+#         with each one holding all the necessary variables for that timestep
+#         
+#         d = {
+#             datetime.datetime(2008, 10, 1, 1, 0): {
+#                 'air_temp':{},
+#                 'vapor_pressure':{},
+#                 ...
+#             },
+#             datetime.datetime(2008, 10, 1, 2, 0): {
+#                 'air_temp':{},
+#                 'vapor_pressure':{},
+#                 ...
+#             },
+#             ...
+#         }
+#         
+#         Args:
+#             date_time: list/array of Timestamp or datetime objects
+#             variables: list of variables under each time
+#             
+#         Return:
+#             d: dictionary
+#         """
+#         
+#         d = {}
+#         b = {}
+#         
+#         for v in variables:
+#             b[v] = []
+#         
+#         for k in date_time:
+#             d[k] = dict(b)
+#             
+#         return d  
         
     
     
 class MyParser(ConfigParser.ConfigParser):
+    """
+    Custom configuration file parser to return the object
+    as a dictionary
+    """
     def as_dict(self):
         d = dict(self._sections)
         for k in d:
@@ -749,7 +760,16 @@ class MyParser(ConfigParser.ConfigParser):
 def find_pixel_location(row, vec, a):
         """
         Find the index of the stations X/Y location in the model domain
+        
+        Args:
+            row (pandas.DataFrame): metadata rows
+            vec (nparray): Array of X or Y locations in domain
+            a (str): Column in DataFrame to pull data from (i.e. 'X')
+        
+        Returns:
+            Pixel value in vec where row[a] is located
         """   
         return np.argmin(np.abs(vec - row[a]))
         
     
+
