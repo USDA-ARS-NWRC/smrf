@@ -19,7 +19,7 @@
 import os
 import sys
 #sys.path.insert(0, os.path.abspath('.'))
-sys.path.insert(0, os.path.abspath('../..'))
+sys.path.insert(0, os.path.abspath('../'))
 
 # -- Have to do a mock install of some modules that RTD doesn't have --------
 from mock import Mock as MagicMock
