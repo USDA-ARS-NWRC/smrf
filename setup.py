@@ -45,8 +45,8 @@ ext_modules += [
                 Extension(mname,
                           sources=[os.path.join(loc, val) for val in ["detrended_kriging.pyx", "krige.c", "lusolv.c", "array.c"]],
                           include_dirs=[numpy.get_include()],
-                          extra_compile_args=['-fopenmp'],
-                          extra_link_args=['-fopenmp']
+                          extra_compile_args=['-fopenmp', '-O3'],
+                          extra_link_args=['-fopenmp', '-O3']
                           ),
                 ]
 cmdclass.update({ 'build_ext': build_ext })
@@ -60,8 +60,8 @@ ext_modules += [
                 Extension(mname,
                           sources=[os.path.join(loc, val) for val in ["core_c.pyx", "topotherm.c", "dewpt.c"]],
                           include_dirs=[numpy.get_include()],
-                          extra_compile_args=['-fopenmp'],
-                          extra_link_args=['-fopenmp']
+                          extra_compile_args=['-fopenmp', '-O3'],
+                          extra_link_args=['-fopenmp', '-O3']
                           ),
                 ]
 cmdclass.update({ 'build_ext': build_ext })

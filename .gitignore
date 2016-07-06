@@ -5,6 +5,7 @@
 .DS_store
 
 test_data/wrfout_d02_2016-03-10.nc
+examples/*.nc
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
