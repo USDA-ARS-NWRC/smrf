@@ -6,7 +6,7 @@ Distributed forcing data over a grid using interpolation
 
 import numpy as np
 from scipy.interpolate import griddata
-import matplotlib.pyplot as plt
+# import matplotlib.pyplot as plt
 
     
 class GRID:
