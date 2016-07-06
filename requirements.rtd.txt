@@ -5,7 +5,7 @@ setuptools == 1.1.6
 utm == 0.4.0
 cryptography == 1.2.2
 mysql_connector_repackaged == 0.3.1
-numpy == 1.11.0rc1
+numpy == 1.11.0
 pandas == 0.17.1
 scipy == 0.17.0
 PyYAML == 3.11
