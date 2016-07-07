@@ -36,6 +36,8 @@ and utilized.
    
    install
    quick_start
+   configuration
+   input_data
    api
    
 
