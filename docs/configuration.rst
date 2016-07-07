@@ -25,6 +25,8 @@ A brief introduction to a configuration file from the `ConfigParser`_ documentat
 
 Section and keys are case insensitive.
 
+*All values below are required exept those with default values.*
+
 
 Time
 ----
@@ -57,9 +59,54 @@ Example ::
 Topo
 ----
 
+All files that SMRF reads in the topo section are IPW images, for now.
+You can convert an ASCII grid to an IPW image using the IPW command
+``text2ipw``.  The DEM must have geoheadrs set as SMRF reads in the headers
+to create the coordinate system. All files should have the same domain size.
+
+dem
+   The digital elevation model (DEM) for the basin
+   
+mask
+   A mask of the water shed is used to calculate trends, not mask generated data
+   
+veg_type
+   Vegetation type as an integer, can be from any source
+   
+veg_height
+   Height of vegetation
+   
+veg_k
+   Vegetation extenction coefficient, see Link and Marks 1999
+   
+veg_tau
+   Vegetation transmissivity, see Link and Marks 1999
+   
+basin_lat
+   The latitude of the middle of the basin, used for calculating sun angle
+
+basin_lon
+   The longitude of the middle of the basin, used for calculating sun angle   
+
+Example ::
+
+   [TOPO]
+   dem:        test_data/topo/dem.ipw
+   mask:       test_data/topo/mask.ipw
+   veg_type:   test_data/topo/veg_type.ipw
+   veg_height: test_data/topo/veg_height.ipw
+   veg_k:      test_data/topo/veg_k.ipw
+   veg_tau:    test_data/topo/veg_tau.ipw
+   
+   basin_lat:  43.8639
+   basin_lon:  -115.3333
+   
+   
 
 Data Import
 -----------
+
+
 
 Stations
 ````````
