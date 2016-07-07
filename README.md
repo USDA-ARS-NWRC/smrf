@@ -7,7 +7,7 @@ the point measurements across a watershed. SMRF was developed to be used as an
 operational or research framework, where ease of use, efficiency, and ability to
 run in near real time are high priorities.
 
-Read the documentation full for [SMRF](smrf.readthedocs.io).
+Read the documentation full for [SMRF](https://smrf.readthedocs.io).
 
 ### Navigation
 1. [Features](#features)
@@ -121,6 +121,6 @@ To run SMRF and generate all forcing variables for iSnobal, the general outline 
 Checkout the following for using and distributing a package:
 http://python-packaging.readthedocs.org/en/latest/minimal.html
 
-This package was created with [Cookiecutter](https://github.com/audreyr/cookiecutt) and 
-the [audreyr/cookiecutter-pypackage](https://github.com/audreyr/cookiecutter-pypackage project) template.
+This package was created with [Cookiecutter](https://github.com/audreyr/cookiecutter) and 
+the [audreyr/cookiecutter-pypackage](https://github.com/audreyr/cookiecutter-pypackage) project template.
 
