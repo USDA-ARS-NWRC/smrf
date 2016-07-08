@@ -38,6 +38,7 @@ and utilized.
    quick_start
    configuration
    input_data
+   dist_methods
    api
    
 
