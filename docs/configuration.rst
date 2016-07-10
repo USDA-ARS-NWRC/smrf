@@ -123,7 +123,7 @@ will perform differently for each method.
 
 stations
    * Will always take precedence over client
-   * Comma seperated list
+   * Comma seperated list of the station ID (unique identifier)
    * For CSV files, the stations imported will be filtered to those specified
    * MySQL will only select data for these stations
    
@@ -241,6 +241,34 @@ Example ::
    wind_direction:   wind_direction
    cloud_factor:     cloud_factor
 
+Gridded Data
+````````````
+
+Gridded data can be passed to SMRF. At the moment, only WRF model outputs
+are easily ingested. The required variables in the NetCDF file can be
+found in the `input data <input_data.html>`_ page and the ``test_data/testConfig_Grid.ini``
+sample configuration file. 
+
+file
+   File name for the NetCDF file
+   
+data_type
+   What type of gridded data is expected, currently only WRF is implemented
+   
+zone_number
+   For converting latitude and longitude to X and Y UTM coordinates
+  
+zone_letter
+   For converting latitude and longitude to X and Y UTM coordinates
+
+Example ::
+
+   [gridded]
+   file:             ./test_data/wrfout_d02_2016-03-10.nc
+   data_type:        wrf
+   zone_number:      11
+   zone_letter:      N
+
 
 .. _dist-methods:
 
@@ -298,7 +326,41 @@ Example ::
    distribution:  dk
    slope:         -1
    dk_nthreads:   12
+   
 
+Gridded
+```````
+
+.. _here: http://docs.scipy.org/doc/scipy/reference/generated/scipy.interpolate.griddata.html
+
+Select ``grid`` when importing a gridded dataset.  While IDW and DK can be performed on
+a gridded dataset, the amount of memory required will be tremendous (i.e. storing 1500 x 1500 x 3500 matrix).
+Therefore, the gridded distribution uses :mod:`scipy.interpolate.griddata` (documentation `here`_)
+to interpolate between the grid cells.
+
+distribution: grid
+   grid for gridded interpolation
+   
+method:
+   Interpolation method - nearest, linear, cubic 1-D, cubic 2-D
+   
+detrend (default = false)
+   defaults to false, true will detrend before distributing
+   
+slope (default = 0)
+   if detrend is true, constain the slope to positive (1), negative (-1), 
+   or no constraint (0, default)
+   
+mask
+   Use grid cells only within the mask for detrending
+   
+Example ::
+
+   distribution:     grid
+   method:           linear
+   detrend:          true
+   slope:            -1
+   mask:             true
 
 Variable configuration
 ----------------------
