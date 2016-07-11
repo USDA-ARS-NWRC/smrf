@@ -35,7 +35,6 @@ and utilized.
    :maxdepth: 2
    
    install
-   quick_start
    configuration
    input_data
    dist_methods

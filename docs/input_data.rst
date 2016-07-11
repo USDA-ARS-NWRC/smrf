@@ -5,11 +5,11 @@ Input Data
 
 To generate all the input forcing data required to run iSnobal, the following
 measured or derived variables are needed:
-   * Air temperature
-   * Vapor pressure
-   * Precipitation
-   * Wind speed and direction
-   * Cloud factor
+* Air temperature
+* Vapor pressure
+* Precipitation
+* Wind speed and direction
+* Cloud factor
    
 This page documents a more detailed description of each of the input variables,
 the types of input data that can be used for SMRF, and the data format for
