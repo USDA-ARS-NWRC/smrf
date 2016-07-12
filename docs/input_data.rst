@@ -4,7 +4,8 @@ Input Data
 ==========
 
 To generate all the input forcing data required to run iSnobal, the following
-measured or derived variables are needed:
+measured or derived variables are needed
+
 * Air temperature
 * Vapor pressure
 * Precipitation
@@ -70,6 +71,12 @@ In theory, any resolution can be utilized, but the methods have been tested and 
 Weather Reserach and Forecasting (`WRF <http://www.wrf-model.org/>`_) at a 1 and 3 km resolution. Each
 grid point will be used as if it were a weather stations, with it's own X, Y, and elevation.  Therefore,
 the coarse resolution model terrain can be taken into account when downscaling to a higher resolution DEM.
+
+.. figure:: _static/WRF_example.png
+   :scale: 75%
+   :alt: Using WRF as a gridded dataset for SMRF.
+
+   Using WRF as a gridded dataset for SMRF.
 
 See Havens et al. (in prep) for more details and further discussion on using WRF for forcing iSnobal.
 
