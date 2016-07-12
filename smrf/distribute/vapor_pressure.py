@@ -8,11 +8,8 @@ Distribute vapor pressure
 import numpy as np
 import logging, os
 from smrf.distribute import image_data
-import smrf.ipw as ipw
 from smrf.utils import utils
-import subprocess as sp
-from random import randint
-from smrf.envphys import core_c
+from smrf.envphys.core_c import core_c
 # import matplotlib.pyplot as plt
 
 class vp(image_data.image_data):
