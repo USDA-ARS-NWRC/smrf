@@ -1,9 +1,6 @@
 smrf package
 ============
 
-Subpackages
------------
-
 .. toctree::
 
     smrf.data
