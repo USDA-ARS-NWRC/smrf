@@ -17,6 +17,13 @@ smrf.utils.utils module
     :undoc-members:
     :show-inheritance:
 
+smrf.utils.wind_model module
+----------------------------
+
+.. automodule:: smrf.utils.wind_model
+    :members:
+    :undoc-members:
+    :show-inheritance:
 
 Module contents
 ---------------
