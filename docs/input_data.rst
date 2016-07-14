@@ -58,9 +58,10 @@ Weather Stations
 
 Generally, SMRF will be ran using measured variables from weather stations in and around the area
 of interest. Potential websites for finding data for weather stations:
-   * `Mesowest <http://mesowest.utah.edu>`_
-   * `NRCS SNOTEL <http://www.wcc.nrcs.usda.gov/snow/>`_
-   * `California Data Exchange Center <http://cdec.water.ca.gov/>`_
+
+* `Mesowest <http://mesowest.utah.edu>`_
+* `NRCS SNOTEL <http://www.wcc.nrcs.usda.gov/snow/>`_
+* `California Data Exchange Center <http://cdec.water.ca.gov/>`_
    
 Gridded Model Output
 ````````````````````

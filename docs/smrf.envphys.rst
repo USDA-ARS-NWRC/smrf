@@ -6,7 +6,7 @@ Subpackages
 
 .. toctree::
 
-    smrf.envphys.core_c
+    smrf.envphys.core
 
 Submodules
 ----------

@@ -7,4 +7,4 @@ __version__ = '0.1.0'
 import phys
 import precip
 import radiation
-import core_c
+import core

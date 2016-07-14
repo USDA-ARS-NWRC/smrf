@@ -9,7 +9,7 @@ import numpy as np
 import logging, os
 from smrf.distribute import image_data
 from smrf.utils import utils
-from smrf.envphys.core_c import core_c
+from smrf.envphys.core import core_c
 # import matplotlib.pyplot as plt
 
 class vp(image_data.image_data):

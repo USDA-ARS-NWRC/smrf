@@ -26,6 +26,7 @@ Ubuntu
 
 3. Install SMRF
    .. code-block::
+      
       git clone https://gitlab.com/ars-snow/smrf
       cd smrf
       pip install -r requirements.txt
@@ -39,26 +40,36 @@ Mac OSX
 Mac OSX greater than 10.8 is required to run SMRF. Mac OSX comes standard with Python installed with the default compiler clang.  To utilize multi-threading and parallel processing, gcc must be installed with Python compiled with that gcc version.
 
 1. MacPorts Install system dependencies
-   .. code-block::
-      port install gcc5
-      port install python27
+
+.. code-block:: bash
+
+   port install gcc5
+   port install python27
 
 2. Or Homebrew install system dependencies
-   .. code-block::
-      brew tap homebrew/versions
-      brew install gcc5
-      brew install python
+
+.. code-block:: python
+
+   brew tap homebrew/versions
+   brew install gcc5
+   brew install python
+   
+.. note::
+   Ensure that the correct gcc and Python are activated, use ``gcc --version`` and ``python --version``.
+   If they are not set, use Homebrew or MacPorts activate features.
 
 3. Ensure the following environment variables are set and readable by Python
     * $IPW, and $IPW/bin environment variable is set
     * PATH, is set and readable by Python (mainly if running inside an IDE environment)
 
 4. Install SMRF
-   .. code-block::
-      git clone https://gitlab.com/ars-snow/smrf
-      cd smrf
-      pip install -r requirements.txt
-      python setup.py install
+
+.. code-block:: bash
+
+   git clone https://gitlab.com/ars-snow/smrf
+   cd smrf
+   pip install -r requirements.txt
+   python setup.py install
 
 5. Test installation ``python run_smrf.py``, which should output logging information to screen if ``test_data/topo/maxus.nc`` exits
 
