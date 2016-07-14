@@ -19,7 +19,7 @@
 import os
 import sys
 # sys.path.insert(0, os.path.abspath('.'))
-# sys.path.insert(0, os.path.abspath('../'))
+sys.path.insert(0, os.path.abspath('../'))
 
 # -- Have to do a mock install of some modules that RTD doesn't have --------
 from mock import Mock as MagicMock
@@ -28,7 +28,7 @@ class Mock(MagicMock):
     @classmethod
     def __getattr__(cls, name):
             return Mock()
-MOCK_MODULES = ['netCDF4', 'matplotlib.pyplot'] #, 'detrended_kriging'] #, 'core_c', 'smrf.envphys.core_c']
+MOCK_MODULES = ['netCDF4', 'matplotlib', 'matplotlib.pyplot', 'pandas'] #, 'detrended_kriging'] #, 'core_c', 'smrf.envphys.core_c']
 
 sys.modules.update((mod_name, Mock()) for mod_name in MOCK_MODULES)
 

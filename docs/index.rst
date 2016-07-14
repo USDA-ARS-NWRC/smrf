@@ -32,7 +32,7 @@ and utilized.
 * Computation tasks implemented in C
 
 .. toctree::
-   :maxdepth: 2
+   :maxdepth: 4
    
    install
    configuration

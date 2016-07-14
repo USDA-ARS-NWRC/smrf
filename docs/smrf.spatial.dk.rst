@@ -1,9 +1,6 @@
 smrf.spatial.dk package
 =======================
 
-Submodules
-----------
-
 smrf.spatial.dk.detrended_kriging module
 ----------------------------------------
 
