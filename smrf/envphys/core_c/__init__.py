@@ -5,4 +5,5 @@ __email__ = 'scotthavens@ars.usda.gov'
 __version__ = '0.1.0'
 
 
-from . import core_c
+# from . import core_c
+import core_c
