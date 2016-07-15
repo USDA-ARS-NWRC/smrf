@@ -724,7 +724,6 @@ typedef npy_longdouble __pyx_t_5numpy_longdouble_t;
 
 
 /*--- Type declarations ---*/
-struct __pyx_obj_4smrf_7spatial_2dk_17detrended_kriging_ArrayWrapper;
 
 /* "../../../../../usr/local/lib/python2.7/dist-packages/Cython/Includes/numpy/__init__.pxd":764
  * ctypedef npy_longdouble longdouble_t
@@ -761,27 +760,6 @@ typedef npy_clongdouble __pyx_t_5numpy_clongdouble_t;
  * cdef inline object PyArray_MultiIterNew1(a):
  */
 typedef npy_cdouble __pyx_t_5numpy_complex_t;
-
-/* "smrf/spatial/dk/detrended_kriging.pyx":163
- * # https://gist.github.com/GaelVaroquaux/1249305
- * 
- * cdef class ArrayWrapper:             # <<<<<<<<<<<<<<
- *     cdef void* data_ptr
- *     cdef int size
- */
-struct __pyx_obj_4smrf_7spatial_2dk_17detrended_kriging_ArrayWrapper {
-  PyObject_HEAD
-  struct __pyx_vtabstruct_4smrf_7spatial_2dk_17detrended_kriging_ArrayWrapper *__pyx_vtab;
-  void *data_ptr;
-  int size;
-};
-
-
-
-struct __pyx_vtabstruct_4smrf_7spatial_2dk_17detrended_kriging_ArrayWrapper {
-  PyObject *(*set_data)(struct __pyx_obj_4smrf_7spatial_2dk_17detrended_kriging_ArrayWrapper *, int, void *);
-};
-static struct __pyx_vtabstruct_4smrf_7spatial_2dk_17detrended_kriging_ArrayWrapper *__pyx_vtabptr_4smrf_7spatial_2dk_17detrended_kriging_ArrayWrapper;
 
 /* --- Runtime support code (head) --- */
 #ifndef CYTHON_REFNANNY
@@ -944,8 +922,6 @@ static CYTHON_INLINE void __Pyx_RaiseTooManyValuesError(Py_ssize_t expected);
 static CYTHON_INLINE void __Pyx_RaiseNeedMoreValuesError(Py_ssize_t index);
 
 static CYTHON_INLINE void __Pyx_RaiseNoneNotIterableError(void);
-
-static int __Pyx_SetVtable(PyObject *dict, void *vtable);
 
 static PyObject *__Pyx_Import(PyObject *name, PyObject *from_list, int level);
 
@@ -1115,7 +1091,6 @@ static PyTypeObject *__Pyx_ImportType(const char *module_name, const char *class
 
 static int __Pyx_InitStrings(__Pyx_StringTabEntry *t);
 
-static PyObject *__pyx_f_4smrf_7spatial_2dk_17detrended_kriging_12ArrayWrapper_set_data(struct __pyx_obj_4smrf_7spatial_2dk_17detrended_kriging_ArrayWrapper *__pyx_v_self, int __pyx_v_size, void *__pyx_v_data_ptr); /* proto*/
 
 /* Module declarations from 'cython' */
 
@@ -1215,7 +1190,6 @@ static PyTypeObject *__pyx_ptype_5numpy_ufunc = 0;
 static CYTHON_INLINE char *__pyx_f_5numpy__util_dtypestring(PyArray_Descr *, char *, char *, int *); /*proto*/
 
 /* Module declarations from 'smrf.spatial.dk.detrended_kriging' */
-static PyTypeObject *__pyx_ptype_4smrf_7spatial_2dk_17detrended_kriging_ArrayWrapper = 0;
 static __Pyx_TypeInfo __Pyx_TypeInfo_double = { "double", NULL, sizeof(double), { 0 }, 0, 'R', 0, 0 };
 #define __Pyx_MODULE_NAME "smrf.spatial.dk.detrended_kriging"
 int __pyx_module_is_main_smrf__spatial__dk__detrended_kriging = 0;
@@ -1261,12 +1235,11 @@ static char __pyx_k_nthreads[] = "nthreads";
 static char __pyx_k_call_grid[] = "call_grid";
 static char __pyx_k_ValueError[] = "ValueError";
 static char __pyx_k_elevations[] = "elevations";
-static char __pyx_k_pyx_vtable[] = "__pyx_vtable__";
 static char __pyx_k_RuntimeError[] = "RuntimeError";
 static char __pyx_k_ascontiguousarray[] = "ascontiguousarray";
 static char __pyx_k_ndarray_is_not_C_contiguous[] = "ndarray is not C contiguous";
 static char __pyx_k_Compiling_dk_s_kriging_function[] = "\nCompiling dk's kriging function\n\n20160205 Scott Havens\n";
-static char __pyx_k_home_scotthavens_Documents_Proj[] = "/home/scotthavens/Documents/Projects/smrf/smrf/spatial/dk/detrended_kriging.pyx";
+static char __pyx_k_home_scott_Documents_Projects_s[] = "/home/scott/Documents/Projects/smrf/smrf/spatial/dk/detrended_kriging.pyx";
 static char __pyx_k_unknown_dtype_code_in_numpy_pxd[] = "unknown dtype code in numpy.pxd (%d)";
 static char __pyx_k_Format_string_allocated_too_shor[] = "Format string allocated too short, see comment in numpy.pxd";
 static char __pyx_k_Non_native_byte_order_not_suppor[] = "Non-native byte order not supported";
@@ -1287,7 +1260,7 @@ static PyObject *__pyx_n_s_dtype;
 static PyObject *__pyx_n_s_elevations;
 static PyObject *__pyx_n_s_float64;
 static PyObject *__pyx_n_s_grid;
-static PyObject *__pyx_kp_s_home_scotthavens_Documents_Proj;
+static PyObject *__pyx_kp_s_home_scott_Documents_Projects_s;
 static PyObject *__pyx_n_s_import;
 static PyObject *__pyx_n_s_main;
 static PyObject *__pyx_kp_u_ndarray_is_not_C_contiguous;
@@ -1297,7 +1270,6 @@ static PyObject *__pyx_n_s_np;
 static PyObject *__pyx_n_s_nsta;
 static PyObject *__pyx_n_s_nthreads;
 static PyObject *__pyx_n_s_numpy;
-static PyObject *__pyx_n_s_pyx_vtable;
 static PyObject *__pyx_n_s_range;
 static PyObject *__pyx_n_s_shape;
 static PyObject *__pyx_n_s_smrf_spatial_dk_detrended_krigin;
@@ -1305,11 +1277,8 @@ static PyObject *__pyx_n_s_test;
 static PyObject *__pyx_kp_u_unknown_dtype_code_in_numpy_pxd;
 static PyObject *__pyx_n_s_weights;
 static PyObject *__pyx_pf_4smrf_7spatial_2dk_17detrended_kriging_call_grid(CYTHON_UNUSED PyObject *__pyx_self, PyObject *__pyx_v_ad, PyObject *__pyx_v_dgrid, PyArrayObject *__pyx_v_elevations, PyArrayObject *__pyx_v_weights, int __pyx_v_nthreads); /* proto */
-static PyObject *__pyx_pf_4smrf_7spatial_2dk_17detrended_kriging_12ArrayWrapper___array__(struct __pyx_obj_4smrf_7spatial_2dk_17detrended_kriging_ArrayWrapper *__pyx_v_self); /* proto */
-static void __pyx_pf_4smrf_7spatial_2dk_17detrended_kriging_12ArrayWrapper_2__dealloc__(struct __pyx_obj_4smrf_7spatial_2dk_17detrended_kriging_ArrayWrapper *__pyx_v_self); /* proto */
 static int __pyx_pf_5numpy_7ndarray___getbuffer__(PyArrayObject *__pyx_v_self, Py_buffer *__pyx_v_info, int __pyx_v_flags); /* proto */
 static void __pyx_pf_5numpy_7ndarray_2__releasebuffer__(PyArrayObject *__pyx_v_self, Py_buffer *__pyx_v_info); /* proto */
-static PyObject *__pyx_tp_new_4smrf_7spatial_2dk_17detrended_kriging_ArrayWrapper(PyTypeObject *t, PyObject *a, PyObject *k); /*proto*/
 static PyObject *__pyx_tuple_;
 static PyObject *__pyx_tuple__2;
 static PyObject *__pyx_tuple__3;
@@ -1319,7 +1288,7 @@ static PyObject *__pyx_tuple__6;
 static PyObject *__pyx_tuple__7;
 static PyObject *__pyx_codeobj__8;
 
-/* "smrf/spatial/dk/detrended_kriging.pyx":30
+/* "smrf/spatial/dk/detrended_kriging.pyx":31
  * @cython.wraparound(False)
  * # https://github.com/cython/cython/wiki/tutorials-NumpyPointerToC
  * def call_grid(object ad, object dgrid,             # <<<<<<<<<<<<<<
@@ -1329,7 +1298,7 @@ static PyObject *__pyx_codeobj__8;
 
 /* Python wrapper */
 static PyObject *__pyx_pw_4smrf_7spatial_2dk_17detrended_kriging_1call_grid(PyObject *__pyx_self, PyObject *__pyx_args, PyObject *__pyx_kwds); /*proto*/
-static char __pyx_doc_4smrf_7spatial_2dk_17detrended_kriging_call_grid[] = "\n    Call the function krige_grid in krige.c which will iterate over the grid\n    within the C code\n    \n    Args:\n        ad - [nsta x nsta] matrix of distances between stations\n        dgrid - [ngrid x nsta] matrix of distances between grid points and stations\n        elevations - [nsta] array of station elevations\n        weights (return) - [ngrid x nsta] matrix of kriging weights calculated\n        nthreads - number of threads to use in parallel processing\n        \n    Out:\n        weights changed in place\n    \n    20160222 Scott Havens\n    ";
+static char __pyx_doc_4smrf_7spatial_2dk_17detrended_kriging_call_grid[] = "call_grid(ad, dgrid, ndarray elevations, ndarray weights, int nthreads=1)\n\n    Call the function krige_grid in krige.c which will iterate over the grid\n    within the C code\n    \n    Args:\n        ad - [nsta x nsta] matrix of distances between stations\n        dgrid - [ngrid x nsta] matrix of distances between grid points and stations\n        elevations - [nsta] array of station elevations\n        weights (return) - [ngrid x nsta] matrix of kriging weights calculated\n        nthreads - number of threads to use in parallel processing\n        \n    Out:\n        weights changed in place\n    \n    20160222 Scott Havens\n    ";
 static PyMethodDef __pyx_mdef_4smrf_7spatial_2dk_17detrended_kriging_1call_grid = {"call_grid", (PyCFunction)__pyx_pw_4smrf_7spatial_2dk_17detrended_kriging_1call_grid, METH_VARARGS|METH_KEYWORDS, __pyx_doc_4smrf_7spatial_2dk_17detrended_kriging_call_grid};
 static PyObject *__pyx_pw_4smrf_7spatial_2dk_17detrended_kriging_1call_grid(PyObject *__pyx_self, PyObject *__pyx_args, PyObject *__pyx_kwds) {
   PyObject *__pyx_v_ad = 0;
@@ -1366,17 +1335,17 @@ static PyObject *__pyx_pw_4smrf_7spatial_2dk_17detrended_kriging_1call_grid(PyOb
         case  1:
         if (likely((values[1] = PyDict_GetItem(__pyx_kwds, __pyx_n_s_dgrid)) != 0)) kw_args--;
         else {
-          __Pyx_RaiseArgtupleInvalid("call_grid", 0, 4, 5, 1); {__pyx_filename = __pyx_f[0]; __pyx_lineno = 30; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
+          __Pyx_RaiseArgtupleInvalid("call_grid", 0, 4, 5, 1); {__pyx_filename = __pyx_f[0]; __pyx_lineno = 31; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
         }
         case  2:
         if (likely((values[2] = PyDict_GetItem(__pyx_kwds, __pyx_n_s_elevations)) != 0)) kw_args--;
         else {
-          __Pyx_RaiseArgtupleInvalid("call_grid", 0, 4, 5, 2); {__pyx_filename = __pyx_f[0]; __pyx_lineno = 30; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
+          __Pyx_RaiseArgtupleInvalid("call_grid", 0, 4, 5, 2); {__pyx_filename = __pyx_f[0]; __pyx_lineno = 31; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
         }
         case  3:
         if (likely((values[3] = PyDict_GetItem(__pyx_kwds, __pyx_n_s_weights)) != 0)) kw_args--;
         else {
-          __Pyx_RaiseArgtupleInvalid("call_grid", 0, 4, 5, 3); {__pyx_filename = __pyx_f[0]; __pyx_lineno = 30; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
+          __Pyx_RaiseArgtupleInvalid("call_grid", 0, 4, 5, 3); {__pyx_filename = __pyx_f[0]; __pyx_lineno = 31; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
         }
         case  4:
         if (kw_args > 0) {
@@ -1385,7 +1354,7 @@ static PyObject *__pyx_pw_4smrf_7spatial_2dk_17detrended_kriging_1call_grid(PyOb
         }
       }
       if (unlikely(kw_args > 0)) {
-        if (unlikely(__Pyx_ParseOptionalKeywords(__pyx_kwds, __pyx_pyargnames, 0, values, pos_args, "call_grid") < 0)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 30; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
+        if (unlikely(__Pyx_ParseOptionalKeywords(__pyx_kwds, __pyx_pyargnames, 0, values, pos_args, "call_grid") < 0)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 31; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
       }
     } else {
       switch (PyTuple_GET_SIZE(__pyx_args)) {
@@ -1403,21 +1372,21 @@ static PyObject *__pyx_pw_4smrf_7spatial_2dk_17detrended_kriging_1call_grid(PyOb
     __pyx_v_elevations = ((PyArrayObject *)values[2]);
     __pyx_v_weights = ((PyArrayObject *)values[3]);
     if (values[4]) {
-      __pyx_v_nthreads = __Pyx_PyInt_As_int(values[4]); if (unlikely((__pyx_v_nthreads == (int)-1) && PyErr_Occurred())) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 33; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
+      __pyx_v_nthreads = __Pyx_PyInt_As_int(values[4]); if (unlikely((__pyx_v_nthreads == (int)-1) && PyErr_Occurred())) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 34; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
     } else {
       __pyx_v_nthreads = ((int)1);
     }
   }
   goto __pyx_L4_argument_unpacking_done;
   __pyx_L5_argtuple_error:;
-  __Pyx_RaiseArgtupleInvalid("call_grid", 0, 4, 5, PyTuple_GET_SIZE(__pyx_args)); {__pyx_filename = __pyx_f[0]; __pyx_lineno = 30; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
+  __Pyx_RaiseArgtupleInvalid("call_grid", 0, 4, 5, PyTuple_GET_SIZE(__pyx_args)); {__pyx_filename = __pyx_f[0]; __pyx_lineno = 31; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
   __pyx_L3_error:;
   __Pyx_AddTraceback("smrf.spatial.dk.detrended_kriging.call_grid", __pyx_clineno, __pyx_lineno, __pyx_filename);
   __Pyx_RefNannyFinishContext();
   return NULL;
   __pyx_L4_argument_unpacking_done:;
-  if (unlikely(!__Pyx_ArgTypeTest(((PyObject *)__pyx_v_elevations), __pyx_ptype_5numpy_ndarray, 1, "elevations", 0))) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 31; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
-  if (unlikely(!__Pyx_ArgTypeTest(((PyObject *)__pyx_v_weights), __pyx_ptype_5numpy_ndarray, 0, "weights", 0))) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 32; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  if (unlikely(!__Pyx_ArgTypeTest(((PyObject *)__pyx_v_elevations), __pyx_ptype_5numpy_ndarray, 1, "elevations", 0))) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 32; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  if (unlikely(!__Pyx_ArgTypeTest(((PyObject *)__pyx_v_weights), __pyx_ptype_5numpy_ndarray, 0, "weights", 0))) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 33; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __pyx_r = __pyx_pf_4smrf_7spatial_2dk_17detrended_kriging_call_grid(__pyx_self, __pyx_v_ad, __pyx_v_dgrid, __pyx_v_elevations, __pyx_v_weights, __pyx_v_nthreads);
 
   /* function exit code */
@@ -1485,71 +1454,71 @@ static PyObject *__pyx_pf_4smrf_7spatial_2dk_17detrended_kriging_call_grid(CYTHO
   __pyx_pybuffernd_weights.rcbuffer = &__pyx_pybuffer_weights;
   {
     __Pyx_BufFmt_StackElem __pyx_stack[1];
-    if (unlikely(__Pyx_GetBufferAndValidate(&__pyx_pybuffernd_elevations.rcbuffer->pybuffer, (PyObject*)__pyx_v_elevations, &__Pyx_TypeInfo_double, PyBUF_FORMAT| PyBUF_C_CONTIGUOUS, 1, 0, __pyx_stack) == -1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 30; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+    if (unlikely(__Pyx_GetBufferAndValidate(&__pyx_pybuffernd_elevations.rcbuffer->pybuffer, (PyObject*)__pyx_v_elevations, &__Pyx_TypeInfo_double, PyBUF_FORMAT| PyBUF_C_CONTIGUOUS, 1, 0, __pyx_stack) == -1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 31; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   }
   __pyx_pybuffernd_elevations.diminfo[0].strides = __pyx_pybuffernd_elevations.rcbuffer->pybuffer.strides[0]; __pyx_pybuffernd_elevations.diminfo[0].shape = __pyx_pybuffernd_elevations.rcbuffer->pybuffer.shape[0];
   {
     __Pyx_BufFmt_StackElem __pyx_stack[1];
-    if (unlikely(__Pyx_GetBufferAndValidate(&__pyx_pybuffernd_weights.rcbuffer->pybuffer, (PyObject*)__pyx_v_weights, &__Pyx_TypeInfo_double, PyBUF_FORMAT| PyBUF_C_CONTIGUOUS, 2, 0, __pyx_stack) == -1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 30; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+    if (unlikely(__Pyx_GetBufferAndValidate(&__pyx_pybuffernd_weights.rcbuffer->pybuffer, (PyObject*)__pyx_v_weights, &__Pyx_TypeInfo_double, PyBUF_FORMAT| PyBUF_C_CONTIGUOUS, 2, 0, __pyx_stack) == -1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 31; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   }
   __pyx_pybuffernd_weights.diminfo[0].strides = __pyx_pybuffernd_weights.rcbuffer->pybuffer.strides[0]; __pyx_pybuffernd_weights.diminfo[0].shape = __pyx_pybuffernd_weights.rcbuffer->pybuffer.shape[0]; __pyx_pybuffernd_weights.diminfo[1].strides = __pyx_pybuffernd_weights.rcbuffer->pybuffer.strides[1]; __pyx_pybuffernd_weights.diminfo[1].shape = __pyx_pybuffernd_weights.rcbuffer->pybuffer.shape[1];
 
-  /* "smrf/spatial/dk/detrended_kriging.pyx":52
+  /* "smrf/spatial/dk/detrended_kriging.pyx":53
  * 
  *     cdef int nsta, ngrid
  *     ngrid, nsta = dgrid.shape[0], dgrid.shape[1]             # <<<<<<<<<<<<<<
  * 
  *     # convert the ad array to C
  */
-  __pyx_t_1 = __Pyx_PyObject_GetAttrStr(__pyx_v_dgrid, __pyx_n_s_shape); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 52; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_1 = __Pyx_PyObject_GetAttrStr(__pyx_v_dgrid, __pyx_n_s_shape); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 53; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_1);
-  __pyx_t_2 = __Pyx_GetItemInt(__pyx_t_1, 0, long, 1, __Pyx_PyInt_From_long, 0, 0, 0); if (unlikely(__pyx_t_2 == NULL)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 52; __pyx_clineno = __LINE__; goto __pyx_L1_error;};
+  __pyx_t_2 = __Pyx_GetItemInt(__pyx_t_1, 0, long, 1, __Pyx_PyInt_From_long, 0, 0, 0); if (unlikely(__pyx_t_2 == NULL)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 53; __pyx_clineno = __LINE__; goto __pyx_L1_error;};
   __Pyx_GOTREF(__pyx_t_2);
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
-  __pyx_t_3 = __Pyx_PyInt_As_int(__pyx_t_2); if (unlikely((__pyx_t_3 == (int)-1) && PyErr_Occurred())) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 52; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_3 = __Pyx_PyInt_As_int(__pyx_t_2); if (unlikely((__pyx_t_3 == (int)-1) && PyErr_Occurred())) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 53; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
-  __pyx_t_2 = __Pyx_PyObject_GetAttrStr(__pyx_v_dgrid, __pyx_n_s_shape); if (unlikely(!__pyx_t_2)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 52; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_2 = __Pyx_PyObject_GetAttrStr(__pyx_v_dgrid, __pyx_n_s_shape); if (unlikely(!__pyx_t_2)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 53; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_2);
-  __pyx_t_1 = __Pyx_GetItemInt(__pyx_t_2, 1, long, 1, __Pyx_PyInt_From_long, 0, 0, 0); if (unlikely(__pyx_t_1 == NULL)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 52; __pyx_clineno = __LINE__; goto __pyx_L1_error;};
+  __pyx_t_1 = __Pyx_GetItemInt(__pyx_t_2, 1, long, 1, __Pyx_PyInt_From_long, 0, 0, 0); if (unlikely(__pyx_t_1 == NULL)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 53; __pyx_clineno = __LINE__; goto __pyx_L1_error;};
   __Pyx_GOTREF(__pyx_t_1);
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
-  __pyx_t_4 = __Pyx_PyInt_As_int(__pyx_t_1); if (unlikely((__pyx_t_4 == (int)-1) && PyErr_Occurred())) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 52; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_4 = __Pyx_PyInt_As_int(__pyx_t_1); if (unlikely((__pyx_t_4 == (int)-1) && PyErr_Occurred())) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 53; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
   __pyx_v_ngrid = __pyx_t_3;
   __pyx_v_nsta = __pyx_t_4;
 
-  /* "smrf/spatial/dk/detrended_kriging.pyx":56
+  /* "smrf/spatial/dk/detrended_kriging.pyx":57
  *     # convert the ad array to C
  *     cdef np.ndarray[double, mode="c", ndim=2] ad_arr
  *     ad_arr = np.ascontiguousarray(ad, dtype=np.float64)             # <<<<<<<<<<<<<<
  * 
  *     # convert the dgrid to C
  */
-  __pyx_t_1 = __Pyx_GetModuleGlobalName(__pyx_n_s_np); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 56; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_1 = __Pyx_GetModuleGlobalName(__pyx_n_s_np); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 57; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_1);
-  __pyx_t_2 = __Pyx_PyObject_GetAttrStr(__pyx_t_1, __pyx_n_s_ascontiguousarray); if (unlikely(!__pyx_t_2)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 56; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_2 = __Pyx_PyObject_GetAttrStr(__pyx_t_1, __pyx_n_s_ascontiguousarray); if (unlikely(!__pyx_t_2)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 57; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_2);
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
-  __pyx_t_1 = PyTuple_New(1); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 56; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_1 = PyTuple_New(1); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 57; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_1);
   __Pyx_INCREF(__pyx_v_ad);
   __Pyx_GIVEREF(__pyx_v_ad);
   PyTuple_SET_ITEM(__pyx_t_1, 0, __pyx_v_ad);
-  __pyx_t_5 = PyDict_New(); if (unlikely(!__pyx_t_5)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 56; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_5 = PyDict_New(); if (unlikely(!__pyx_t_5)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 57; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_5);
-  __pyx_t_6 = __Pyx_GetModuleGlobalName(__pyx_n_s_np); if (unlikely(!__pyx_t_6)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 56; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_6 = __Pyx_GetModuleGlobalName(__pyx_n_s_np); if (unlikely(!__pyx_t_6)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 57; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_6);
-  __pyx_t_7 = __Pyx_PyObject_GetAttrStr(__pyx_t_6, __pyx_n_s_float64); if (unlikely(!__pyx_t_7)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 56; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_7 = __Pyx_PyObject_GetAttrStr(__pyx_t_6, __pyx_n_s_float64); if (unlikely(!__pyx_t_7)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 57; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_7);
   __Pyx_DECREF(__pyx_t_6); __pyx_t_6 = 0;
-  if (PyDict_SetItem(__pyx_t_5, __pyx_n_s_dtype, __pyx_t_7) < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 56; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  if (PyDict_SetItem(__pyx_t_5, __pyx_n_s_dtype, __pyx_t_7) < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 57; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_DECREF(__pyx_t_7); __pyx_t_7 = 0;
-  __pyx_t_7 = __Pyx_PyObject_Call(__pyx_t_2, __pyx_t_1, __pyx_t_5); if (unlikely(!__pyx_t_7)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 56; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_7 = __Pyx_PyObject_Call(__pyx_t_2, __pyx_t_1, __pyx_t_5); if (unlikely(!__pyx_t_7)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 57; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_7);
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
   __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
-  if (!(likely(((__pyx_t_7) == Py_None) || likely(__Pyx_TypeTest(__pyx_t_7, __pyx_ptype_5numpy_ndarray))))) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 56; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  if (!(likely(((__pyx_t_7) == Py_None) || likely(__Pyx_TypeTest(__pyx_t_7, __pyx_ptype_5numpy_ndarray))))) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 57; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __pyx_t_8 = ((PyArrayObject *)__pyx_t_7);
   {
     __Pyx_BufFmt_StackElem __pyx_stack[1];
@@ -1565,44 +1534,44 @@ static PyObject *__pyx_pf_4smrf_7spatial_2dk_17detrended_kriging_call_grid(CYTHO
       }
     }
     __pyx_pybuffernd_ad_arr.diminfo[0].strides = __pyx_pybuffernd_ad_arr.rcbuffer->pybuffer.strides[0]; __pyx_pybuffernd_ad_arr.diminfo[0].shape = __pyx_pybuffernd_ad_arr.rcbuffer->pybuffer.shape[0]; __pyx_pybuffernd_ad_arr.diminfo[1].strides = __pyx_pybuffernd_ad_arr.rcbuffer->pybuffer.strides[1]; __pyx_pybuffernd_ad_arr.diminfo[1].shape = __pyx_pybuffernd_ad_arr.rcbuffer->pybuffer.shape[1];
-    if (unlikely(__pyx_t_4 < 0)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 56; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+    if (unlikely(__pyx_t_4 < 0)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 57; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   }
   __pyx_t_8 = 0;
   __pyx_v_ad_arr = ((PyArrayObject *)__pyx_t_7);
   __pyx_t_7 = 0;
 
-  /* "smrf/spatial/dk/detrended_kriging.pyx":60
+  /* "smrf/spatial/dk/detrended_kriging.pyx":61
  *     # convert the dgrid to C
  *     cdef np.ndarray[double, mode="c", ndim=2] grid
  *     grid = np.ascontiguousarray(dgrid, dtype=np.float64)             # <<<<<<<<<<<<<<
  * 
  *     # call the C function
  */
-  __pyx_t_7 = __Pyx_GetModuleGlobalName(__pyx_n_s_np); if (unlikely(!__pyx_t_7)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 60; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_7 = __Pyx_GetModuleGlobalName(__pyx_n_s_np); if (unlikely(!__pyx_t_7)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 61; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_7);
-  __pyx_t_5 = __Pyx_PyObject_GetAttrStr(__pyx_t_7, __pyx_n_s_ascontiguousarray); if (unlikely(!__pyx_t_5)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 60; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_5 = __Pyx_PyObject_GetAttrStr(__pyx_t_7, __pyx_n_s_ascontiguousarray); if (unlikely(!__pyx_t_5)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 61; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_5);
   __Pyx_DECREF(__pyx_t_7); __pyx_t_7 = 0;
-  __pyx_t_7 = PyTuple_New(1); if (unlikely(!__pyx_t_7)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 60; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_7 = PyTuple_New(1); if (unlikely(!__pyx_t_7)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 61; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_7);
   __Pyx_INCREF(__pyx_v_dgrid);
   __Pyx_GIVEREF(__pyx_v_dgrid);
   PyTuple_SET_ITEM(__pyx_t_7, 0, __pyx_v_dgrid);
-  __pyx_t_1 = PyDict_New(); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 60; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_1 = PyDict_New(); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 61; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_1);
-  __pyx_t_2 = __Pyx_GetModuleGlobalName(__pyx_n_s_np); if (unlikely(!__pyx_t_2)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 60; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_2 = __Pyx_GetModuleGlobalName(__pyx_n_s_np); if (unlikely(!__pyx_t_2)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 61; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_2);
-  __pyx_t_6 = __Pyx_PyObject_GetAttrStr(__pyx_t_2, __pyx_n_s_float64); if (unlikely(!__pyx_t_6)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 60; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_6 = __Pyx_PyObject_GetAttrStr(__pyx_t_2, __pyx_n_s_float64); if (unlikely(!__pyx_t_6)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 61; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_6);
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
-  if (PyDict_SetItem(__pyx_t_1, __pyx_n_s_dtype, __pyx_t_6) < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 60; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  if (PyDict_SetItem(__pyx_t_1, __pyx_n_s_dtype, __pyx_t_6) < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 61; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_DECREF(__pyx_t_6); __pyx_t_6 = 0;
-  __pyx_t_6 = __Pyx_PyObject_Call(__pyx_t_5, __pyx_t_7, __pyx_t_1); if (unlikely(!__pyx_t_6)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 60; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_6 = __Pyx_PyObject_Call(__pyx_t_5, __pyx_t_7, __pyx_t_1); if (unlikely(!__pyx_t_6)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 61; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_6);
   __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
   __Pyx_DECREF(__pyx_t_7); __pyx_t_7 = 0;
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
-  if (!(likely(((__pyx_t_6) == Py_None) || likely(__Pyx_TypeTest(__pyx_t_6, __pyx_ptype_5numpy_ndarray))))) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 60; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  if (!(likely(((__pyx_t_6) == Py_None) || likely(__Pyx_TypeTest(__pyx_t_6, __pyx_ptype_5numpy_ndarray))))) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 61; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __pyx_t_12 = ((PyArrayObject *)__pyx_t_6);
   {
     __Pyx_BufFmt_StackElem __pyx_stack[1];
@@ -1618,13 +1587,13 @@ static PyObject *__pyx_pf_4smrf_7spatial_2dk_17detrended_kriging_call_grid(CYTHO
       }
     }
     __pyx_pybuffernd_grid.diminfo[0].strides = __pyx_pybuffernd_grid.rcbuffer->pybuffer.strides[0]; __pyx_pybuffernd_grid.diminfo[0].shape = __pyx_pybuffernd_grid.rcbuffer->pybuffer.shape[0]; __pyx_pybuffernd_grid.diminfo[1].strides = __pyx_pybuffernd_grid.rcbuffer->pybuffer.strides[1]; __pyx_pybuffernd_grid.diminfo[1].shape = __pyx_pybuffernd_grid.rcbuffer->pybuffer.shape[1];
-    if (unlikely(__pyx_t_4 < 0)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 60; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+    if (unlikely(__pyx_t_4 < 0)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 61; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   }
   __pyx_t_12 = 0;
   __pyx_v_grid = ((PyArrayObject *)__pyx_t_6);
   __pyx_t_6 = 0;
 
-  /* "smrf/spatial/dk/detrended_kriging.pyx":63
+  /* "smrf/spatial/dk/detrended_kriging.pyx":64
  * 
  *     # call the C function
  *     krige_grid(nsta, ngrid, &ad_arr[0,0], &grid[0,0], &elevations[0], nthreads, &weights[0,0])             # <<<<<<<<<<<<<<
@@ -1640,7 +1609,7 @@ static PyObject *__pyx_pf_4smrf_7spatial_2dk_17detrended_kriging_call_grid(CYTHO
   __pyx_t_19 = 0;
   krige_grid(__pyx_v_nsta, __pyx_v_ngrid, (&(*__Pyx_BufPtrCContig2d(double *, __pyx_pybuffernd_ad_arr.rcbuffer->pybuffer.buf, __pyx_t_13, __pyx_pybuffernd_ad_arr.diminfo[0].strides, __pyx_t_14, __pyx_pybuffernd_ad_arr.diminfo[1].strides))), (&(*__Pyx_BufPtrCContig2d(double *, __pyx_pybuffernd_grid.rcbuffer->pybuffer.buf, __pyx_t_15, __pyx_pybuffernd_grid.diminfo[0].strides, __pyx_t_16, __pyx_pybuffernd_grid.diminfo[1].strides))), (&(*__Pyx_BufPtrCContig1d(double *, __pyx_pybuffernd_elevations.rcbuffer->pybuffer.buf, __pyx_t_17, __pyx_pybuffernd_elevations.diminfo[0].strides))), __pyx_v_nthreads, (&(*__Pyx_BufPtrCContig2d(double *, __pyx_pybuffernd_weights.rcbuffer->pybuffer.buf, __pyx_t_18, __pyx_pybuffernd_weights.diminfo[0].strides, __pyx_t_19, __pyx_pybuffernd_weights.diminfo[1].strides))));
 
-  /* "smrf/spatial/dk/detrended_kriging.pyx":65
+  /* "smrf/spatial/dk/detrended_kriging.pyx":66
  *     krige_grid(nsta, ngrid, &ad_arr[0,0], &grid[0,0], &elevations[0], nthreads, &weights[0,0])
  * 
  *     return None             # <<<<<<<<<<<<<<
@@ -1652,7 +1621,7 @@ static PyObject *__pyx_pf_4smrf_7spatial_2dk_17detrended_kriging_call_grid(CYTHO
   __pyx_r = Py_None;
   goto __pyx_L0;
 
-  /* "smrf/spatial/dk/detrended_kriging.pyx":30
+  /* "smrf/spatial/dk/detrended_kriging.pyx":31
  * @cython.wraparound(False)
  * # https://github.com/cython/cython/wiki/tutorials-NumpyPointerToC
  * def call_grid(object ad, object dgrid,             # <<<<<<<<<<<<<<
@@ -1688,180 +1657,6 @@ static PyObject *__pyx_pf_4smrf_7spatial_2dk_17detrended_kriging_call_grid(CYTHO
   __Pyx_XGIVEREF(__pyx_r);
   __Pyx_RefNannyFinishContext();
   return __pyx_r;
-}
-
-/* "smrf/spatial/dk/detrended_kriging.pyx":167
- *     cdef int size
- * 
- *     cdef set_data(self, int size, void* data_ptr):             # <<<<<<<<<<<<<<
- *         """ Set the data of the array
- *         This cannot be done in the constructor as it must recieve C-level
- */
-
-static PyObject *__pyx_f_4smrf_7spatial_2dk_17detrended_kriging_12ArrayWrapper_set_data(struct __pyx_obj_4smrf_7spatial_2dk_17detrended_kriging_ArrayWrapper *__pyx_v_self, int __pyx_v_size, void *__pyx_v_data_ptr) {
-  PyObject *__pyx_r = NULL;
-  __Pyx_RefNannyDeclarations
-  __Pyx_RefNannySetupContext("set_data", 0);
-
-  /* "smrf/spatial/dk/detrended_kriging.pyx":178
- *             Pointer to the data
- *         """
- *         self.data_ptr = data_ptr             # <<<<<<<<<<<<<<
- *         self.size = size
- * 
- */
-  __pyx_v_self->data_ptr = __pyx_v_data_ptr;
-
-  /* "smrf/spatial/dk/detrended_kriging.pyx":179
- *         """
- *         self.data_ptr = data_ptr
- *         self.size = size             # <<<<<<<<<<<<<<
- * 
- *     def __array__(self):
- */
-  __pyx_v_self->size = __pyx_v_size;
-
-  /* "smrf/spatial/dk/detrended_kriging.pyx":167
- *     cdef int size
- * 
- *     cdef set_data(self, int size, void* data_ptr):             # <<<<<<<<<<<<<<
- *         """ Set the data of the array
- *         This cannot be done in the constructor as it must recieve C-level
- */
-
-  /* function exit code */
-  __pyx_r = Py_None; __Pyx_INCREF(Py_None);
-  __Pyx_XGIVEREF(__pyx_r);
-  __Pyx_RefNannyFinishContext();
-  return __pyx_r;
-}
-
-/* "smrf/spatial/dk/detrended_kriging.pyx":181
- *         self.size = size
- * 
- *     def __array__(self):             # <<<<<<<<<<<<<<
- *         """ Here we use the __array__ method, that is called when numpy
- *             tries to get an array from the object."""
- */
-
-/* Python wrapper */
-static PyObject *__pyx_pw_4smrf_7spatial_2dk_17detrended_kriging_12ArrayWrapper_1__array__(PyObject *__pyx_v_self, CYTHON_UNUSED PyObject *unused); /*proto*/
-static char __pyx_doc_4smrf_7spatial_2dk_17detrended_kriging_12ArrayWrapper___array__[] = " Here we use the __array__ method, that is called when numpy\n            tries to get an array from the object.";
-static PyObject *__pyx_pw_4smrf_7spatial_2dk_17detrended_kriging_12ArrayWrapper_1__array__(PyObject *__pyx_v_self, CYTHON_UNUSED PyObject *unused) {
-  PyObject *__pyx_r = 0;
-  __Pyx_RefNannyDeclarations
-  __Pyx_RefNannySetupContext("__array__ (wrapper)", 0);
-  __pyx_r = __pyx_pf_4smrf_7spatial_2dk_17detrended_kriging_12ArrayWrapper___array__(((struct __pyx_obj_4smrf_7spatial_2dk_17detrended_kriging_ArrayWrapper *)__pyx_v_self));
-
-  /* function exit code */
-  __Pyx_RefNannyFinishContext();
-  return __pyx_r;
-}
-
-static PyObject *__pyx_pf_4smrf_7spatial_2dk_17detrended_kriging_12ArrayWrapper___array__(struct __pyx_obj_4smrf_7spatial_2dk_17detrended_kriging_ArrayWrapper *__pyx_v_self) {
-  npy_intp __pyx_v_shape[1];
-  PyObject *__pyx_v_ndarray = NULL;
-  PyObject *__pyx_r = NULL;
-  __Pyx_RefNannyDeclarations
-  PyObject *__pyx_t_1 = NULL;
-  int __pyx_lineno = 0;
-  const char *__pyx_filename = NULL;
-  int __pyx_clineno = 0;
-  __Pyx_RefNannySetupContext("__array__", 0);
-
-  /* "smrf/spatial/dk/detrended_kriging.pyx":185
- *             tries to get an array from the object."""
- *         cdef np.npy_intp shape[1]
- *         shape[0] = <np.npy_intp> self.size             # <<<<<<<<<<<<<<
- *         # Create a 1D array, of length 'size'
- *         ndarray = np.PyArray_SimpleNewFromData(1, shape,
- */
-  (__pyx_v_shape[0]) = ((npy_intp)__pyx_v_self->size);
-
-  /* "smrf/spatial/dk/detrended_kriging.pyx":187
- *         shape[0] = <np.npy_intp> self.size
- *         # Create a 1D array, of length 'size'
- *         ndarray = np.PyArray_SimpleNewFromData(1, shape,             # <<<<<<<<<<<<<<
- *                                                np.NPY_INT, self.data_ptr)
- *         return ndarray
- */
-  __pyx_t_1 = PyArray_SimpleNewFromData(1, __pyx_v_shape, NPY_INT, __pyx_v_self->data_ptr); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 187; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
-  __Pyx_GOTREF(__pyx_t_1);
-  __pyx_v_ndarray = __pyx_t_1;
-  __pyx_t_1 = 0;
-
-  /* "smrf/spatial/dk/detrended_kriging.pyx":189
- *         ndarray = np.PyArray_SimpleNewFromData(1, shape,
- *                                                np.NPY_INT, self.data_ptr)
- *         return ndarray             # <<<<<<<<<<<<<<
- * 
- *     def __dealloc__(self):
- */
-  __Pyx_XDECREF(__pyx_r);
-  __Pyx_INCREF(__pyx_v_ndarray);
-  __pyx_r = __pyx_v_ndarray;
-  goto __pyx_L0;
-
-  /* "smrf/spatial/dk/detrended_kriging.pyx":181
- *         self.size = size
- * 
- *     def __array__(self):             # <<<<<<<<<<<<<<
- *         """ Here we use the __array__ method, that is called when numpy
- *             tries to get an array from the object."""
- */
-
-  /* function exit code */
-  __pyx_L1_error:;
-  __Pyx_XDECREF(__pyx_t_1);
-  __Pyx_AddTraceback("smrf.spatial.dk.detrended_kriging.ArrayWrapper.__array__", __pyx_clineno, __pyx_lineno, __pyx_filename);
-  __pyx_r = NULL;
-  __pyx_L0:;
-  __Pyx_XDECREF(__pyx_v_ndarray);
-  __Pyx_XGIVEREF(__pyx_r);
-  __Pyx_RefNannyFinishContext();
-  return __pyx_r;
-}
-
-/* "smrf/spatial/dk/detrended_kriging.pyx":191
- *         return ndarray
- * 
- *     def __dealloc__(self):             # <<<<<<<<<<<<<<
- *         """ Frees the array. This is called by Python when all the
- *         references to the object are gone. """
- */
-
-/* Python wrapper */
-static void __pyx_pw_4smrf_7spatial_2dk_17detrended_kriging_12ArrayWrapper_3__dealloc__(PyObject *__pyx_v_self); /*proto*/
-static void __pyx_pw_4smrf_7spatial_2dk_17detrended_kriging_12ArrayWrapper_3__dealloc__(PyObject *__pyx_v_self) {
-  __Pyx_RefNannyDeclarations
-  __Pyx_RefNannySetupContext("__dealloc__ (wrapper)", 0);
-  __pyx_pf_4smrf_7spatial_2dk_17detrended_kriging_12ArrayWrapper_2__dealloc__(((struct __pyx_obj_4smrf_7spatial_2dk_17detrended_kriging_ArrayWrapper *)__pyx_v_self));
-
-  /* function exit code */
-  __Pyx_RefNannyFinishContext();
-}
-
-static void __pyx_pf_4smrf_7spatial_2dk_17detrended_kriging_12ArrayWrapper_2__dealloc__(struct __pyx_obj_4smrf_7spatial_2dk_17detrended_kriging_ArrayWrapper *__pyx_v_self) {
-  __Pyx_RefNannyDeclarations
-  __Pyx_RefNannySetupContext("__dealloc__", 0);
-
-  /* "smrf/spatial/dk/detrended_kriging.pyx":194
- *         """ Frees the array. This is called by Python when all the
- *         references to the object are gone. """
- *         free(<void*>self.data_ptr)             # <<<<<<<<<<<<<<
- */
-  free(((void *)__pyx_v_self->data_ptr));
-
-  /* "smrf/spatial/dk/detrended_kriging.pyx":191
- *         return ndarray
- * 
- *     def __dealloc__(self):             # <<<<<<<<<<<<<<
- *         """ Frees the array. This is called by Python when all the
- *         references to the object are gone. """
- */
-
-  /* function exit code */
-  __Pyx_RefNannyFinishContext();
 }
 
 /* "../../../../../usr/local/lib/python2.7/dist-packages/Cython/Includes/numpy/__init__.pxd":197
@@ -4006,101 +3801,6 @@ static CYTHON_INLINE PyObject *__pyx_f_5numpy_get_array_base(PyArrayObject *__py
   __Pyx_RefNannyFinishContext();
   return __pyx_r;
 }
-static struct __pyx_vtabstruct_4smrf_7spatial_2dk_17detrended_kriging_ArrayWrapper __pyx_vtable_4smrf_7spatial_2dk_17detrended_kriging_ArrayWrapper;
-
-static PyObject *__pyx_tp_new_4smrf_7spatial_2dk_17detrended_kriging_ArrayWrapper(PyTypeObject *t, CYTHON_UNUSED PyObject *a, CYTHON_UNUSED PyObject *k) {
-  struct __pyx_obj_4smrf_7spatial_2dk_17detrended_kriging_ArrayWrapper *p;
-  PyObject *o;
-  if (likely((t->tp_flags & Py_TPFLAGS_IS_ABSTRACT) == 0)) {
-    o = (*t->tp_alloc)(t, 0);
-  } else {
-    o = (PyObject *) PyBaseObject_Type.tp_new(t, __pyx_empty_tuple, 0);
-  }
-  if (unlikely(!o)) return 0;
-  p = ((struct __pyx_obj_4smrf_7spatial_2dk_17detrended_kriging_ArrayWrapper *)o);
-  p->__pyx_vtab = __pyx_vtabptr_4smrf_7spatial_2dk_17detrended_kriging_ArrayWrapper;
-  return o;
-}
-
-static void __pyx_tp_dealloc_4smrf_7spatial_2dk_17detrended_kriging_ArrayWrapper(PyObject *o) {
-  #if PY_VERSION_HEX >= 0x030400a1
-  if (unlikely(Py_TYPE(o)->tp_finalize) && (!PyType_IS_GC(Py_TYPE(o)) || !_PyGC_FINALIZED(o))) {
-    if (PyObject_CallFinalizerFromDealloc(o)) return;
-  }
-  #endif
-  {
-    PyObject *etype, *eval, *etb;
-    PyErr_Fetch(&etype, &eval, &etb);
-    ++Py_REFCNT(o);
-    __pyx_pw_4smrf_7spatial_2dk_17detrended_kriging_12ArrayWrapper_3__dealloc__(o);
-    --Py_REFCNT(o);
-    PyErr_Restore(etype, eval, etb);
-  }
-  (*Py_TYPE(o)->tp_free)(o);
-}
-
-static PyMethodDef __pyx_methods_4smrf_7spatial_2dk_17detrended_kriging_ArrayWrapper[] = {
-  {"__array__", (PyCFunction)__pyx_pw_4smrf_7spatial_2dk_17detrended_kriging_12ArrayWrapper_1__array__, METH_NOARGS, __pyx_doc_4smrf_7spatial_2dk_17detrended_kriging_12ArrayWrapper___array__},
-  {0, 0, 0, 0}
-};
-
-static PyTypeObject __pyx_type_4smrf_7spatial_2dk_17detrended_kriging_ArrayWrapper = {
-  PyVarObject_HEAD_INIT(0, 0)
-  "smrf.spatial.dk.detrended_kriging.ArrayWrapper", /*tp_name*/
-  sizeof(struct __pyx_obj_4smrf_7spatial_2dk_17detrended_kriging_ArrayWrapper), /*tp_basicsize*/
-  0, /*tp_itemsize*/
-  __pyx_tp_dealloc_4smrf_7spatial_2dk_17detrended_kriging_ArrayWrapper, /*tp_dealloc*/
-  0, /*tp_print*/
-  0, /*tp_getattr*/
-  0, /*tp_setattr*/
-  #if PY_MAJOR_VERSION < 3
-  0, /*tp_compare*/
-  #endif
-  #if PY_MAJOR_VERSION >= 3
-  0, /*tp_as_async*/
-  #endif
-  0, /*tp_repr*/
-  0, /*tp_as_number*/
-  0, /*tp_as_sequence*/
-  0, /*tp_as_mapping*/
-  0, /*tp_hash*/
-  0, /*tp_call*/
-  0, /*tp_str*/
-  0, /*tp_getattro*/
-  0, /*tp_setattro*/
-  0, /*tp_as_buffer*/
-  Py_TPFLAGS_DEFAULT|Py_TPFLAGS_HAVE_VERSION_TAG|Py_TPFLAGS_CHECKTYPES|Py_TPFLAGS_HAVE_NEWBUFFER|Py_TPFLAGS_BASETYPE, /*tp_flags*/
-  0, /*tp_doc*/
-  0, /*tp_traverse*/
-  0, /*tp_clear*/
-  0, /*tp_richcompare*/
-  0, /*tp_weaklistoffset*/
-  0, /*tp_iter*/
-  0, /*tp_iternext*/
-  __pyx_methods_4smrf_7spatial_2dk_17detrended_kriging_ArrayWrapper, /*tp_methods*/
-  0, /*tp_members*/
-  0, /*tp_getset*/
-  0, /*tp_base*/
-  0, /*tp_dict*/
-  0, /*tp_descr_get*/
-  0, /*tp_descr_set*/
-  0, /*tp_dictoffset*/
-  0, /*tp_init*/
-  0, /*tp_alloc*/
-  __pyx_tp_new_4smrf_7spatial_2dk_17detrended_kriging_ArrayWrapper, /*tp_new*/
-  0, /*tp_free*/
-  0, /*tp_is_gc*/
-  0, /*tp_bases*/
-  0, /*tp_mro*/
-  0, /*tp_cache*/
-  0, /*tp_subclasses*/
-  0, /*tp_weaklist*/
-  0, /*tp_del*/
-  0, /*tp_version_tag*/
-  #if PY_VERSION_HEX >= 0x030400a1
-  0, /*tp_finalize*/
-  #endif
-};
 
 static PyMethodDef __pyx_methods[] = {
   {0, 0, 0, 0}
@@ -4139,7 +3839,7 @@ static __Pyx_StringTabEntry __pyx_string_tab[] = {
   {&__pyx_n_s_elevations, __pyx_k_elevations, sizeof(__pyx_k_elevations), 0, 0, 1, 1},
   {&__pyx_n_s_float64, __pyx_k_float64, sizeof(__pyx_k_float64), 0, 0, 1, 1},
   {&__pyx_n_s_grid, __pyx_k_grid, sizeof(__pyx_k_grid), 0, 0, 1, 1},
-  {&__pyx_kp_s_home_scotthavens_Documents_Proj, __pyx_k_home_scotthavens_Documents_Proj, sizeof(__pyx_k_home_scotthavens_Documents_Proj), 0, 0, 1, 0},
+  {&__pyx_kp_s_home_scott_Documents_Projects_s, __pyx_k_home_scott_Documents_Projects_s, sizeof(__pyx_k_home_scott_Documents_Projects_s), 0, 0, 1, 0},
   {&__pyx_n_s_import, __pyx_k_import, sizeof(__pyx_k_import), 0, 0, 1, 1},
   {&__pyx_n_s_main, __pyx_k_main, sizeof(__pyx_k_main), 0, 0, 1, 1},
   {&__pyx_kp_u_ndarray_is_not_C_contiguous, __pyx_k_ndarray_is_not_C_contiguous, sizeof(__pyx_k_ndarray_is_not_C_contiguous), 0, 1, 0, 0},
@@ -4149,7 +3849,6 @@ static __Pyx_StringTabEntry __pyx_string_tab[] = {
   {&__pyx_n_s_nsta, __pyx_k_nsta, sizeof(__pyx_k_nsta), 0, 0, 1, 1},
   {&__pyx_n_s_nthreads, __pyx_k_nthreads, sizeof(__pyx_k_nthreads), 0, 0, 1, 1},
   {&__pyx_n_s_numpy, __pyx_k_numpy, sizeof(__pyx_k_numpy), 0, 0, 1, 1},
-  {&__pyx_n_s_pyx_vtable, __pyx_k_pyx_vtable, sizeof(__pyx_k_pyx_vtable), 0, 0, 1, 1},
   {&__pyx_n_s_range, __pyx_k_range, sizeof(__pyx_k_range), 0, 0, 1, 1},
   {&__pyx_n_s_shape, __pyx_k_shape, sizeof(__pyx_k_shape), 0, 0, 1, 1},
   {&__pyx_n_s_smrf_spatial_dk_detrended_krigin, __pyx_k_smrf_spatial_dk_detrended_krigin, sizeof(__pyx_k_smrf_spatial_dk_detrended_krigin), 0, 0, 1, 1},
@@ -4237,17 +3936,17 @@ static int __Pyx_InitCachedConstants(void) {
   __Pyx_GOTREF(__pyx_tuple__6);
   __Pyx_GIVEREF(__pyx_tuple__6);
 
-  /* "smrf/spatial/dk/detrended_kriging.pyx":30
+  /* "smrf/spatial/dk/detrended_kriging.pyx":31
  * @cython.wraparound(False)
  * # https://github.com/cython/cython/wiki/tutorials-NumpyPointerToC
  * def call_grid(object ad, object dgrid,             # <<<<<<<<<<<<<<
  *                np.ndarray[double, mode="c", ndim=1] elevations,
  *                np.ndarray[double, mode="c", ndim=2] weights not None,
  */
-  __pyx_tuple__7 = PyTuple_Pack(9, __pyx_n_s_ad, __pyx_n_s_dgrid, __pyx_n_s_elevations, __pyx_n_s_weights, __pyx_n_s_nthreads, __pyx_n_s_nsta, __pyx_n_s_ngrid, __pyx_n_s_ad_arr, __pyx_n_s_grid); if (unlikely(!__pyx_tuple__7)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 30; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_tuple__7 = PyTuple_Pack(9, __pyx_n_s_ad, __pyx_n_s_dgrid, __pyx_n_s_elevations, __pyx_n_s_weights, __pyx_n_s_nthreads, __pyx_n_s_nsta, __pyx_n_s_ngrid, __pyx_n_s_ad_arr, __pyx_n_s_grid); if (unlikely(!__pyx_tuple__7)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 31; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_tuple__7);
   __Pyx_GIVEREF(__pyx_tuple__7);
-  __pyx_codeobj__8 = (PyObject*)__Pyx_PyCode_New(5, 0, 9, 0, 0, __pyx_empty_bytes, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_tuple__7, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_kp_s_home_scotthavens_Documents_Proj, __pyx_n_s_call_grid, 30, __pyx_empty_bytes); if (unlikely(!__pyx_codeobj__8)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 30; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_codeobj__8 = (PyObject*)__Pyx_PyCode_New(5, 0, 9, 0, 0, __pyx_empty_bytes, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_tuple__7, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_kp_s_home_scott_Documents_Projects_s, __pyx_n_s_call_grid, 31, __pyx_empty_bytes); if (unlikely(!__pyx_codeobj__8)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 31; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_RefNannyFinishContext();
   return 0;
   __pyx_L1_error:;
@@ -4348,13 +4047,6 @@ PyMODINIT_FUNC PyInit_detrended_kriging(void)
   /*--- Variable export code ---*/
   /*--- Function export code ---*/
   /*--- Type init code ---*/
-  __pyx_vtabptr_4smrf_7spatial_2dk_17detrended_kriging_ArrayWrapper = &__pyx_vtable_4smrf_7spatial_2dk_17detrended_kriging_ArrayWrapper;
-  __pyx_vtable_4smrf_7spatial_2dk_17detrended_kriging_ArrayWrapper.set_data = (PyObject *(*)(struct __pyx_obj_4smrf_7spatial_2dk_17detrended_kriging_ArrayWrapper *, int, void *))__pyx_f_4smrf_7spatial_2dk_17detrended_kriging_12ArrayWrapper_set_data;
-  if (PyType_Ready(&__pyx_type_4smrf_7spatial_2dk_17detrended_kriging_ArrayWrapper) < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 163; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
-  __pyx_type_4smrf_7spatial_2dk_17detrended_kriging_ArrayWrapper.tp_print = 0;
-  if (__Pyx_SetVtable(__pyx_type_4smrf_7spatial_2dk_17detrended_kriging_ArrayWrapper.tp_dict, __pyx_vtabptr_4smrf_7spatial_2dk_17detrended_kriging_ArrayWrapper) < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 163; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
-  if (PyObject_SetAttrString(__pyx_m, "ArrayWrapper", (PyObject *)&__pyx_type_4smrf_7spatial_2dk_17detrended_kriging_ArrayWrapper) < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 163; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
-  __pyx_ptype_4smrf_7spatial_2dk_17detrended_kriging_ArrayWrapper = &__pyx_type_4smrf_7spatial_2dk_17detrended_kriging_ArrayWrapper;
   /*--- Type import code ---*/
   __pyx_ptype_7cpython_4type_type = __Pyx_ImportType(__Pyx_BUILTIN_MODULE_NAME, "type", 
   #if CYTHON_COMPILING_IN_PYPY
@@ -4377,19 +4069,19 @@ PyMODINIT_FUNC PyInit_detrended_kriging(void)
   if (__Pyx_patch_abc() < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 1; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   #endif
 
-  /* "smrf/spatial/dk/detrended_kriging.pyx":9
+  /* "smrf/spatial/dk/detrended_kriging.pyx":10
  * 
  * import cython
  * import numpy as np             # <<<<<<<<<<<<<<
  * cimport numpy as np
  * 
  */
-  __pyx_t_1 = __Pyx_Import(__pyx_n_s_numpy, 0, -1); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 9; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_1 = __Pyx_Import(__pyx_n_s_numpy, 0, -1); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 10; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_1);
-  if (PyDict_SetItem(__pyx_d, __pyx_n_s_np, __pyx_t_1) < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 9; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  if (PyDict_SetItem(__pyx_d, __pyx_n_s_np, __pyx_t_1) < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 10; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
 
-  /* "smrf/spatial/dk/detrended_kriging.pyx":17
+  /* "smrf/spatial/dk/detrended_kriging.pyx":18
  * # Numpy must be initialized. When using numpy from C or Cython you must
  * # _always_ do that, or you will have segfaults
  * np.import_array()             # <<<<<<<<<<<<<<
@@ -4398,22 +4090,22 @@ PyMODINIT_FUNC PyInit_detrended_kriging(void)
  */
   import_array();
 
-  /* "smrf/spatial/dk/detrended_kriging.pyx":30
+  /* "smrf/spatial/dk/detrended_kriging.pyx":31
  * @cython.wraparound(False)
  * # https://github.com/cython/cython/wiki/tutorials-NumpyPointerToC
  * def call_grid(object ad, object dgrid,             # <<<<<<<<<<<<<<
  *                np.ndarray[double, mode="c", ndim=1] elevations,
  *                np.ndarray[double, mode="c", ndim=2] weights not None,
  */
-  __pyx_t_1 = PyCFunction_NewEx(&__pyx_mdef_4smrf_7spatial_2dk_17detrended_kriging_1call_grid, NULL, __pyx_n_s_smrf_spatial_dk_detrended_krigin); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 30; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_1 = PyCFunction_NewEx(&__pyx_mdef_4smrf_7spatial_2dk_17detrended_kriging_1call_grid, NULL, __pyx_n_s_smrf_spatial_dk_detrended_krigin); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 31; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_1);
-  if (PyDict_SetItem(__pyx_d, __pyx_n_s_call_grid, __pyx_t_1) < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 30; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  if (PyDict_SetItem(__pyx_d, __pyx_n_s_call_grid, __pyx_t_1) < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 31; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
 
   /* "smrf/spatial/dk/detrended_kriging.pyx":1
- * '''             # <<<<<<<<<<<<<<
+ * # cython: embedsignature=True             # <<<<<<<<<<<<<<
+ * '''
  * Compiling dk's kriging function
- * 
  */
   __pyx_t_1 = PyDict_New(); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 1; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_1);
@@ -5532,23 +5224,6 @@ static CYTHON_INLINE void __Pyx_RaiseNeedMoreValuesError(Py_ssize_t index) {
 
 static CYTHON_INLINE void __Pyx_RaiseNoneNotIterableError(void) {
     PyErr_SetString(PyExc_TypeError, "'NoneType' object is not iterable");
-}
-
-static int __Pyx_SetVtable(PyObject *dict, void *vtable) {
-#if PY_VERSION_HEX >= 0x02070000
-    PyObject *ob = PyCapsule_New(vtable, 0, 0);
-#else
-    PyObject *ob = PyCObject_FromVoidPtr(vtable, 0);
-#endif
-    if (!ob)
-        goto bad;
-    if (PyDict_SetItem(dict, __pyx_n_s_pyx_vtable, ob) < 0)
-        goto bad;
-    Py_DECREF(ob);
-    return 0;
-bad:
-    Py_XDECREF(ob);
-    return -1;
 }
 
 static PyObject *__Pyx_Import(PyObject *name, PyObject *from_list, int level) {

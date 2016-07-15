@@ -52,7 +52,7 @@ ext_modules += [
 cmdclass.update({ 'build_ext': build_ext })
 
 # envphys core c functions
-loc = 'smrf/envphys/core_c' # location of the dk folder
+loc = 'smrf/envphys/core' # location of the dk folder
 mname = os.path.join(loc, 'core_c')
 mname = mname.replace('/', '.')
 

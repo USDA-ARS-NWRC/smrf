@@ -1,3 +1,4 @@
+# cython: embedsignature=True
 """
 C implementation of some radiation functions
 """
