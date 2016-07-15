@@ -10,7 +10,7 @@ import logging, os
 from smrf.distribute import image_data
 from smrf.utils import utils
 from smrf import envphys
-# from smrf.envphys.core import envphys_c
+from smrf.envphys.core import envphys_c
 # import matplotlib.pyplot as plt
 
 class vp(image_data.image_data):
@@ -128,9 +128,9 @@ class vp(image_data.image_data):
               
         # use the core_c to calculate the dew point
         dpt = np.zeros_like(self.vapor_pressure, dtype=np.float64)
-#         envphys_c.cdewpt(self.vapor_pressure, dpt, 
-#                       float(self.config['tolerance']), 
-#                       int(self.config['nthreads']))
+        envphys_c.cdewpt(self.vapor_pressure, dpt, 
+                      float(self.config['tolerance']), 
+                      int(self.config['nthreads']))
                 
         # find where dpt > ta
         ind = dpt >= ta
