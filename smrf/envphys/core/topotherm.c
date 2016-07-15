@@ -7,8 +7,8 @@
 #include <math.h>
 #include <errno.h>
 #include <omp.h>
+#include "envphys_c.h"
 #include "envphys.h"
-#include "core_c.h"
 
 // stephman boltzman constant
 #define STEF_BOLTZ 5.6697e-8

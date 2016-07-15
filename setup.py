@@ -53,12 +53,12 @@ cmdclass.update({ 'build_ext': build_ext })
 
 # envphys core c functions
 loc = 'smrf/envphys/core' # location of the folder
-mname = os.path.join(loc, 'core_c')
+mname = os.path.join(loc, 'envphys_c')
 mname = mname.replace('/', '.')
 
 ext_modules += [
                 Extension(mname,
-                          sources=[os.path.join(loc, val) for val in ["core_c.pyx", "topotherm.c", "dewpt.c"]],
+                          sources=[os.path.join(loc, val) for val in ["envphys_c.pyx", "topotherm.c", "dewpt.c"]],
                           include_dirs=[numpy.get_include()],
                           extra_compile_args=['-fopenmp', '-O3'],
                           extra_link_args=['-fopenmp', '-O3']

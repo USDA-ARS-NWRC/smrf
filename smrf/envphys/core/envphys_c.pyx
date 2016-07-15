@@ -14,7 +14,7 @@ cimport numpy as np
 np.import_array()
 
 
-cdef extern from "core_c.h":
+cdef extern from "envphys_c.h":
     void topotherm(int ngrid, double *ta, double *tw, double *z, double *skvfac, int nthreads, double *thermal);
     void dewpt(int ngrid, double *ea, int nthreads, double tol, double *dpt)
 

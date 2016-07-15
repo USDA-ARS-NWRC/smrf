@@ -7,7 +7,7 @@
 #include <errno.h>
 #include <omp.h>
 #include "envphys.h"
-#include "core_c.h"
+#include "envphys_c.h"
 
 extern int errno;
 

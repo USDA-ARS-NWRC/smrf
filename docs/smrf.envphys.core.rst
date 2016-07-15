@@ -1,10 +1,10 @@
 smrf.envphys.core package
 =========================
 
-smrf.envphys.core.core_c module
--------------------------------
+smrf.envphys.core.envphys_c module
+----------------------------------
 
-.. automodule:: smrf.envphys.core.core_c
+.. automodule:: smrf.envphys.core.envphys_c
     :members:
     :undoc-members:
     :show-inheritance:
