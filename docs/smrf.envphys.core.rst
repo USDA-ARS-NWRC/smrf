@@ -4,7 +4,10 @@ smrf.envphys.core package
 smrf.envphys.core.envphys_c module
 ----------------------------------
 
-Will manually have to enter the doc string
+.. automodule:: smrf.envphys.core.envphys_c
+    :members:
+    :undoc-members:
+    :show-inheritance:
 
 
 Module contents
