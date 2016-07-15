@@ -20,9 +20,10 @@ smrf.utils.utils module
 smrf.utils.wind_model package
 -----------------------------
 
-.. toctree::
-
-   smrf.utils.wind_model
+.. 
+   .. toctree::
+   
+      smrf.utils.wind_model
 
 Module contents
 ---------------

@@ -33,7 +33,7 @@ import numpy as np
 import pytz
 # import matplotlib.pyplot as plt
 
-from smrf import data, distribute, model, output
+from smrf import data, distribute, output
 from smrf.envphys import radiation
 from smrf.utils import queue
 from threading import Thread
