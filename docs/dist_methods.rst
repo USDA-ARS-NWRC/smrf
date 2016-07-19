@@ -39,7 +39,17 @@ in the configuration.
 **Retrending the Distributed Residuals**
 
    The distributed residuals are added to the elevational trend line evaluated at each of the DEM 
-   grid points.
+   grid points (:numref:`Fig. %sc <air_temp_trend>` and :numref:`Fig. %sc <precip_trend>`). This
+   produces a distributed value that has the underlying elevational trend in the measurment data but
+   also takes into account local changes in that value.
+   
+.. note ::
+
+   Constraints can be placed on the elevational trend to be either positive, negative, or no constraint.
+   However, if a constraint is applied and the measurement data does not fit the constratint (for example
+   negavite trend for air temp but there is a positive trend during an inversion or night time), then
+   the slope of the trend line will be set to zero. This will distribute the data based on the underlying
+   method and not apply any trends.   
    
 
 Methods
@@ -57,6 +67,8 @@ Inverse Distance Weighting
    Distribution of air temperature using inverse distance weighting. a) Air temperature as a function
    of elevation. b) Inverse distance weighting of the residuals. c) Retrending the residuals to the
    DEM elevation.
+
+:cite:`Shepard:1968`
 
 
 
@@ -77,3 +89,15 @@ Detrended Kriging
 
 Gridded Interpolation
 ---------------------
+
+For the examples above, the alpha style citation would be: [BDB79], [BB79a] and [BB79b], respectively.
+
+
+
+
+
+   
+   
+   
+   
+   
