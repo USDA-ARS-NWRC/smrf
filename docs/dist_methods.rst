@@ -68,7 +68,23 @@ Inverse Distance Weighting
    of elevation. b) Inverse distance weighting of the residuals. c) Retrending the residuals to the
    DEM elevation.
 
-:cite:`Shepard:1968`
+Inverse distance weighting takes the weighted average of the measurment data based on the inverse of the
+distance between the measurement location and the modeling grid :cite:`Shepard:1968`. For :math:`N`
+set of measurement locations, the value at any :math:`x,y` location can be calculated:
+
+.. math::
+
+   u(x,y) = \frac{\sum\limits_{i=1}^{N} w_i(x,y)~u_i}{\sum\limits_{i=1}^{N}w(x,y)}
+   
+where
+
+.. math::
+   
+   w_i(x,y) = \frac{1}{d_i(x,y)^p}
+   
+and :math:`d_i(x,y)` is the distance between the model grid cell and the measurement location raised to
+a power of :math:`p` (typcially defaults to 2). The results of the inverse distance weighting, :math:`u(x,y)`,
+is shown in :numref:`Figure %sb <air_temp_trend>`.
 
 
 
@@ -85,12 +101,14 @@ Detrended Kriging
    of elevation. b) Kriging of the residuals. c) Retrending the residuals to the
    DEM elevation.
    
+Detrended kriging uses a model semivariogram based on the station locations to distribute the measurement data
+to the model domain.  The methods explained below follow those that were developed by Garen et al. (1994)
+:cite:`Garen&al:1994`.
+
    
 
 Gridded Interpolation
 ---------------------
-
-For the examples above, the alpha style citation would be: [BDB79], [BB79a] and [BB79b], respectively.
 
 
 

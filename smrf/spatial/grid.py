@@ -6,7 +6,7 @@ Distributed forcing data over a grid using interpolation
 
 import numpy as np
 from scipy.interpolate import griddata
-# import matplotlib.pyplot as plt
+import matplotlib.pyplot as plt
 
     
 class GRID:
@@ -88,6 +88,69 @@ class GRID:
         
         # retrend the data
         rtrend = idtrend + pv[0]*self.GridZ + pv[1]
+        
+        
+        # create a plot for the DOCS
+        fs = 16
+        fw = 'bold'
+        xi = np.array([500, 3000])
+        yi = pv[0]*xi + self.pv[1] 
+        fig = plt.figure(figsize=(24,9))        
+          
+        extent = (np.min(self.GridX), np.max(self.GridX), np.min(self.GridY), np.max(self.GridY))
+        # elevational trend
+        ax0 = plt.subplot(1,3,1)
+        plt.plot(self.mz, data, 'o', xi, yi, 'k--')
+        plt.text(600, 2.0, 'Slope: %f' % self.pv[0], fontsize=fs, fontweight=fw)
+        plt.xlabel('Elevation [m]', fontsize=fs, fontweight=fw)
+        plt.ylabel('Air Temperature [C]', fontsize=fs, fontweight=fw)       
+        ax0.set_ylim(0, 3.0)       
+          
+        ax1 = plt.subplot(1,3,2)
+        im1 = ax1.imshow(idtrend, aspect='equal',extent=extent)
+#         plt.plot(self.mx, self.my, 'o')
+        plt.title('Distributed Residuals', fontsize=fs, fontweight=fw)
+        cbar = plt.colorbar(im1, orientation="horizontal")
+        cbar.ax.tick_params(labelsize=fs-2) 
+        plt.tick_params(
+            axis='both',          # changes apply to the x-axis
+            which='both',      # both major and minor ticks are affected
+            bottom='off',      # ticks along the bottom edge are off
+            top='off',         # ticks along the top edge are off
+            left='off',
+            right='off',
+            labelleft='off',
+            labelbottom='off') # labels along the bottom edge are off
+        ax1.set_xlim(extent[0], extent[1])
+        ax1.set_ylim(extent[2], extent[3])
+          
+          
+        # retrended     
+        ax2 = plt.subplot(133)
+        im2 = ax2.imshow(rtrend, aspect='equal',extent=extent)
+#         plt.plot(self.mx, self.my, 'o')
+        plt.title('Retrended by Elevation', fontsize=fs, fontweight=fw)
+        cbar = plt.colorbar(im2, orientation="horizontal")
+        cbar.ax.tick_params(labelsize=fs-2)
+        plt.tick_params(
+            axis='both',          # changes apply to the x-axis
+            which='both',      # both major and minor ticks are affected
+            bottom='off',      # ticks along the bottom edge are off
+            top='off',         # ticks along the top edge are off
+            left='off',
+            right='off',
+            labelleft='off',
+            labelbottom='off') # labels along the bottom edge are off
+        ax2.set_xlim(extent[0], extent[1])
+        ax2.set_ylim(extent[2], extent[3])
+                   
+        for item in ([ax0.xaxis.label, ax0.yaxis.label] +
+                     ax0.get_xticklabels() + ax0.get_yticklabels()):
+            item.set_fontsize(fs)
+            item.set_fontweight(fw) 
+                   
+        plt.tight_layout()
+        plt.show()
         
         return rtrend
         

@@ -26,6 +26,7 @@ start = datetime.now()
 
 try:
     configFile = './test_data/testConfig_allData.ini'
+    configFile = './test_data/testConfig_Grid.ini'
     if len(sys.argv) > 1:
         configFile = sys.argv[1]
     
@@ -76,6 +77,7 @@ try:
     # s.runModel()
 
 except Exception as e:
+    print 'Error: %s' % e
     s._logger.error(e)
     
 
