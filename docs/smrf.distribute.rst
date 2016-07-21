@@ -12,6 +12,7 @@ smrf.distribute.image_data module
 
 .. automodule:: smrf.distribute.image_data
     :members:
+    :private-members:
     :undoc-members:
     :show-inheritance:
 

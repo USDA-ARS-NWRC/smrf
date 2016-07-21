@@ -1,6 +1,9 @@
-"""
-2015/12/22 Scott Havens
+__author__ = "Scott Havens"
+__maintainer__ = "Scott Havens"
+__email__ = "scott.havens@ars.usda.gov"
+__date__ = "2015-12-22"
 
+"""
 The module :mod:`~smrf.framework.model_framework` contains functions and classes
 that act as a major wrapper to the underlying packages and modules contained with SMRF.
 A class instance of :class:`~smrf.framework.model_framework.SMRF` is initialized with

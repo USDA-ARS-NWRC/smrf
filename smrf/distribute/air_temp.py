@@ -1,9 +1,7 @@
-"""
-20151230 Scott Havens
-
-Distribute air temperature
-
-"""
+__author__ = "Scott Havens"
+__maintainer__ = "Scott Havens"
+__email__ = "scott.havens@ars.usda.gov"
+__date__ = "2015-12-30"
 
 # import numpy as np
 import logging
@@ -13,9 +11,10 @@ from smrf.distribute import image_data
 
 class ta(image_data.image_data):
     """
-    ta extends the base class of image_data()
-    The ta() class allows for variable specific distributions that 
-    go beyond the base class
+    The ``ta()`` class allows for variable specific distributions that 
+    go beyond the base class.
+    
+    Air temperature 
     
     Attributes:
         config: configuration from [air_temp] section
