@@ -251,6 +251,9 @@ class IPW:
                         
                     last_pos = fid.tell()
                     line = readline()
+                    
+                    if len(line) == 0:
+                        break
                  
                 # set pointer back one line
                 fid.seek(last_pos)
