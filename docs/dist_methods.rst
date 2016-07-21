@@ -1,5 +1,3 @@
-.. toctree::
-   :maxdepth:3
 
 Distribution Methods
 ====================

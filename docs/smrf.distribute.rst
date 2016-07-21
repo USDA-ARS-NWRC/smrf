@@ -1,6 +1,13 @@
 smrf.distribute package
 =======================
 
+smrf.distribute.image_data module
+---------------------------------
+
+.. automodule:: smrf.distribute.image_data
+    :members:
+    :undoc-members:
+    :show-inheritance:
 
 smrf.distribute.air_temp module
 -------------------------------
@@ -14,14 +21,6 @@ smrf.distribute.albedo module
 -----------------------------
 
 .. automodule:: smrf.distribute.albedo
-    :members:
-    :undoc-members:
-    :show-inheritance:
-
-smrf.distribute.image_data module
----------------------------------
-
-.. automodule:: smrf.distribute.image_data
     :members:
     :undoc-members:
     :show-inheritance:
