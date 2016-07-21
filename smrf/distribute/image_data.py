@@ -1,11 +1,10 @@
-"""
-20151231 Scott Havens
+__author__ = "Scott Havens"
+__maintainer__ = "Scott Havens"
+__email__ = "scott.havens@ars.usda.gov"
+__date__ = "2015-12-31"
 
-Base class for storing image data for distributing forcing data
-Anything done here will be available to all variables
-"""
 
-import pandas as pd
+# import pandas as pd
 import numpy as np
 from smrf.spatial import idw, dk, grid
 import logging

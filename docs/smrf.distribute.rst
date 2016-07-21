@@ -1,6 +1,12 @@
 smrf.distribute package
 =======================
 
+A base distribution method :mod:`smrf.distribute.image_data` is used in SMRF to ensure
+that all variables are distributed in the same manner. The additional benifit is 
+that when new methods are added to :mod:`smrf.spatial`, the new method will only need to be
+added into :mod:`smrf.distribute.image_data` and will be immediately available to
+all other distribution variables. 
+
 smrf.distribute.image_data module
 ---------------------------------
 

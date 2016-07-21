@@ -5,7 +5,7 @@ Credits
 Development Lead
 ----------------
 
-* Scott Havens <scotthavens@ars.usda.gov>
+* Scott Havens <scott.havens@ars.usda.gov>
 
 Contributors
 ------------

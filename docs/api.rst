@@ -13,5 +13,5 @@ Everything you could ever want to know about SMRF.
    smrf.ipw
    smrf.model
    smrf.output
-   smrf.spaital
+   smrf.spatial
    smrf.utils
