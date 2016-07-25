@@ -28,6 +28,55 @@
   isbn =     {0022-1694},
   issn =     {00221694},
   keywords = {Energy balance,Meteorological variables,Snowmelt,Spatial interpolation,Spatially distributed hydrologic modelling}
+}
+
+@Book{Geostats:2008,
+  title =     {Geostatistics for Environmental Scientists},
+  publisher = {John Wiley \& Sons, Ltd},
+  year =      {2008},
+  author =    {Webster, Richard and Oliver, Margaret A.},
+  doi =       {10.1002/9780470517277},
+  isbn =      {9780470517277},
+  pages =     {317}
+}
+
+@Article{Kormos&al:2014,
+  author =   {Kormos, Patrick R and Marks, Danny and McNamara, James P and Marshall, H P and Winstral, Adam and Flores, Alejandro N},
+  title =    {{Snow distribution, melt and surface water inputs to the soil in the mountain rain-snow transition zone}},
+  journal =  {Journal of Hydrology},
+  year =     {2014},
+  volume =   {519, Part },
+  number =   {0},
+  pages =    {190--204},
+  doi =      {http://dx.doi.org/10.1016/j.jhydrol.2014.06.051},
+  file =     {:home/scotthavens/Documents/Literature{\_}Review/2014/Journal of Hydrology/Kormos et al.{\_}2014{\_}Snow distribution, melt and surface water inputs to the soil in the mountain rain-snow transition zone.pdf:pdf},
+  issn =     {0022-1694},
+  keywords = {Snowmelt},
+  url =      {http://www.sciencedirect.com/science/article/pii/S0022169414005113}
+}
+
+@Article{Marks&al:1992,
+  author =   {Marks, Danny and Dozier, Jeff and Davis, Robert E.},
+  title =    {{Climate and Energy Exchange at the Snow Surface in the Alpine Region of the Sierra Nevada 1. Meteorolocical Measurements and Monitoring}},
+  journal =  {Water Resources Research},
+  year =     {1992},
+  volume =   {28(11)},
+  number =   {92},
+  pages =    {3029--3042},
+  file =     {:home/scotthavens/Documents/Literature{\_}Review/1992/Water Resources Research/Marks, Dozier, JeffDavis{\_}1992{\_}Climate and Energy Exchange at the Snow Surface in the Alpine Region of the Sierra Nevada 1. Meteorolocica.pdf:pdf},
+  keywords = {alpine ecosys,climate,landscape energetics,snow}
+}
+
+@Article{Marks&al:1998,
+  author =   {Marks, Danny and Kimball, John and Tingey, Dave and Link, Tim},
+  title =    {{The sensitivity of snowmelt processes to climate conditions and forest during rain on snow: a case study of the 1996 Pacific Northwest flood}},
+  journal =  {Hydrological Processes},
+  year =     {1998},
+  volume =   {1587},
+  number =   {March},
+  pages =    {1569--1587},
+  file =     {:home/scotthavens/Documents/Literature{\_}Review/1998/Hydrological Processes/Marks et al.{\_}1998{\_}The sensitivity of snowmelt processes to climate conditions and forest during rain on snow a case study of the 1996 Pa.pdf:pdf},
+  keywords = {flooding,forest canopy effects,rain-on-snow,snowmelt}
 }@inproceedings{Shepard:1968,
  author = {Shepard, Donald},
  title = {A Two-dimensional Interpolation Function for Irregularly-spaced Data},
@@ -53,6 +102,21 @@
   abstract = {Topographically distributed energy- and water-balance models can accurately simulate both the development and melting of a seasonal snowcover in the mountain basins. To do this they require time-series climate surfaces of air temperature, humidity, wind speed, precipitation, and solar and thermal radiation. If data are available, these parameters can be adequately estimated at time steps of one to three hours. Unfortunately, climate monitoring in mountain basins is very limited, and the full range of elevations and exposures that affect climate conditions, snow deposition, and melt is seldom sampled. Detailed time-series climate surfaces have been successfully developed using limited data and relatively simple methods. We present a synopsis of the tools and methods used to combine limited data with simple corrections for the topographic controls to generate high temporal resolution time-series images of these climate parameters. Methods used include simulations, elevational gradients, and detrended kriging. The generated climate surfaces are evaluated at points and spatially to determine if they are reasonable approximations of actual conditions. Recommendations are made for the addition of critical parameters and measurement sites into routine monitoring systems in mountain basins.},
   doi =      {10.1002/(SICI)1099-1085(199909)13:12/13<2003::AID-HYP884>3.0.CO;2-K},
   file =     {:home/scotthavens/Documents/Literature{\_}Review/1999/Hydrological Processes/Susong, Marks, Garen{\_}1999{\_}Methods for developing time-series climate surfaces to drive topographically distributed energy- and water-bal.pdf:pdf},
+  issn =     {08856087},
+  keywords = {climate,energy balance,hydrologic models,hydrology,kriging,modelling,mountain,snow,snowcover,snowmelt,topography},
+  url =      {ftp://ftp.nwrc.ars.usda.gov/publications/1999/Marks-Methods for developing time-series climate surfaces to drive topographically distributed energy- and water-balance models.pdf}
+}
+
+@Article{Susong&al:1999,
+  author =   {Susong, David and Marks, Danny and Garen, David},
+  title =    {{Methods for developing time-series climate surfaces to drive topographically distributed energy- and water-balance models}},
+  journal =  {Hydrological Processes},
+  year =     {1999},
+  volume =   {13},
+  number =   {May 1998},
+  pages =    {2003--2021},
+  abstract = {Topographically distributed energy- and water-balance models can accurately simulate both the development and melting of a seasonal snowcover in the mountain basins. To do this they require time-series climate surfaces of air temperature, humidity, wind speed, precipitation, and solar and thermal radiation. If data are available, these parameters can be adequately estimated at time steps of one to three hours. Unfortunately, climate monitoring in mountain basins is very limited, and the full range of elevations and exposures that affect climate conditions, snow deposition, and melt is seldom sampled. Detailed time-series climate surfaces have been successfully developed using limited data and relatively simple methods. We present a synopsis of the tools and methods used to combine limited data with simple corrections for the topographic controls to generate high temporal resolution time-series images of these climate parameters. Methods used include simulations, elevational gradients, and detrended kriging. The generated climate surfaces are evaluated at points and spatially to determine if they are reasonable approximations of actual conditions. Recommendations are made for the addition of critical parameters and measurement sites into routine monitoring systems in mountain basins.},
+  doi =      {10.1002/(SICI)1099-1085(199909)13:12/13<2003::AID-HYP884>3.0.CO;2-K},
   issn =     {08856087},
   keywords = {climate,energy balance,hydrologic models,hydrology,kriging,modelling,mountain,snow,snowcover,snowmelt,topography},
   url =      {ftp://ftp.nwrc.ars.usda.gov/publications/1999/Marks-Methods for developing time-series climate surfaces to drive topographically distributed energy- and water-balance models.pdf}

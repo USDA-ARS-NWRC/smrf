@@ -21,7 +21,6 @@ smrf.distribute.air_temp module
 
 .. automodule:: smrf.distribute.air_temp
     :members:
-    :undoc-members:
     :show-inheritance:
 
 smrf.distribute.albedo module
@@ -29,7 +28,6 @@ smrf.distribute.albedo module
 
 .. automodule:: smrf.distribute.albedo
     :members:
-    :undoc-members:
     :show-inheritance:
 
 smrf.distribute.precipitation module
@@ -37,7 +35,6 @@ smrf.distribute.precipitation module
 
 .. automodule:: smrf.distribute.precipitation
     :members:
-    :undoc-members:
     :show-inheritance:
 
 smrf.distribute.soil_temp module

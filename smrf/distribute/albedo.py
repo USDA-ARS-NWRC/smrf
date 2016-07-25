@@ -1,9 +1,7 @@
-"""
-20160106 Scott Havens
-
-Distribute albedo
-
-"""
+__author__ = "Scott Havens"
+__maintainer__ = "Scott Havens"
+__email__ = "scott.havens@ars.usda.gov"
+__date__ = "2016-01-06"
 
 import numpy as np
 import logging
@@ -14,16 +12,29 @@ from smrf.envphys import radiation
 
 class albedo(image_data.image_data):
     """
-    ta extends the base class of image_data()
-    The albedo() class allows for variable specific distributions that 
+    The :mod:`~smrf.distribute.albedo.albedo` class allows for variable specific distributions that 
     go beyond the base class
     
-    Attributes:
-        config: configuration from [albedo] section
-        albedo_vis: numpy matrix of the visible albedo
-        albedo_ir: numpy matrix of the ir albedo
-        stations: stations to be used in alphabetical order
+    The visible (280-700nm) and infrared (700-2800nm) albedo follows the relationships described in
+    Marks et al. (1992) :cite:`Marks&al:1992`. The albedo is a function of the time since last storm,
+    the solar zenith angle, and grain size. The time since last storm is tracked on a pixel by pixel
+    basis and is based on where there is significant accumulated distributed precipitation. This allows
+    for storms to only affect a small part of the basin and have the albedo decay at different rates
+    for each pixel.
     
+    Args:
+        albedoConfig: The [albedo] section of the configuration file
+    
+    Attributes:
+        albedo_vis: numpy array of the visible albedo
+        albedo_ir: numpy array of the infrared albedo
+        config: configuration from [albedo] section
+        min: minimum value of albedo is 0
+        max: maximum value of albedo is 1
+        stations: stations to be used in alphabetical order
+        output_variables: Dictionary of the variables held within class :mod:`!smrf.distribute.albedo.albedo`
+            that specifies the ``units`` and ``long_name`` for creating the NetCDF output file.
+        variable: 'albedo'
     """
     
     variable = 'albedo'
@@ -94,7 +105,8 @@ class albedo(image_data.image_data):
         
         Args:
             current_time_step: Current time step in datetime object
-            storm_day: numpy matrix of the decimal days since it last
+            cosz: numpy array of the illumination angle for the current time step
+            storm_day: numpy array of the decimal days since it last
                 snowed at a grid cell
             
         """

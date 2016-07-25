@@ -190,8 +190,7 @@ class image_data():
                 from :mod:`smrf.data.loadData` or :mod:`smrf.data.loadGrid`
                 
         Raises:
-            Exception: If the distribution method could not be determined, must be 'idw',
-                'dk', or 'grid'
+            Exception: If the distribution method could not be determined, must be idw, dk, or grid
             
         To do:
             - make a single call to the distribution initialization
