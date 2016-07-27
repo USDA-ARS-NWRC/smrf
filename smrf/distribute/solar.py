@@ -1,9 +1,7 @@
-"""
-20160106 Scott Havens
-
-Distribute solar radiation
-
-"""
+__author__ = "Scott Havens"
+__maintainer__ = "Scott Havens"
+__email__ = "scott.havens@ars.usda.gov"
+__date__ = "2016-01-06"
 
 import numpy as np
 import logging, os
@@ -18,39 +16,94 @@ from smrf import ipw
 
 class solar(image_data.image_data):
     """
-    ta extends the base class of image_data()
-    The solar() class allows for variable specific distributions that 
-    go beyond the base class
+    The :mod:`~smrf.distribute.solar.solar` class allows for variable specific distributions that 
+    go beyond the base class.
+    
+    Multiple steps are required to estimate solar radiation:
+    
+    1. Terrain corrected clear sky radiation
+    2. Distribute a cloud factor and adjust modeled clear sky
+    3. Adjust solar radiation for vegitation effects
+    4. Calculate net radiation using the albedo
+    
+    The Image Processing Workbench (IPW) includes a utility ``stoporad`` to model terrain corrected
+    clear sky radiation over the DEM. Within ``stoporad``, the radiation transfer model ``twostream``
+    simulates the clear sky radiation on a flat surface for a range of wavelengths through the atmosphere
+    :cite:`Dozier:1980` :cite:`Dozier&Frew:1981` :cite:`Dubayah:1994`. Terrain correction using the DEM
+    adjusts for terrain shading and splits the clear sky radiation into beam and diffuse radiation.
+    
+    The second step requires sites measuring solar radiation. The measured solar radiation is compared
+    to the modeled clear sky radiation from ``twostream``. The cloud factor is then the measured incoming
+    solar radiation divided by the modeled radiation.  The cloud factor can be computed on an hourly
+    timescale if the measurement locations are of high quality. For stations that are less reliable, we
+    recommend calculating a daily cloud factor which divides the daily integrated measured radiation by
+    the daily integrated modeled radiation.  This helps to reduce the problems that may be encountered from
+    instrument shading, instrument calibration, or a time shift in the data. The calculated cloud factor
+    at each station can then be distrubted using any of the method available in :mod:`smrf.spatial`.
+    Since the cloud factor is not explicitly controlled by elevation like other variables, the values may
+    be distributed without detrending to elevation. The modeled clear sky radiation (both beam and diffuse)
+    are adjusted for clouds using :mod:`smrf.envphys.radiation.cf_cloud`.
+    
+    The third step adjusts the cloud corrected solar radiation for vegitation affects, following the
+    methods developed by Link and Marks (1999) :cite:`Link&Marks:1999`. The direct beam radiation
+    is corrected by:
+    
+    .. math::
+        R_b = S_b * exp( -\\mu h / cos \\theta )
+        
+    where :math:`S_b` is the above canopy direct radiation, :math:`\\mu` is the extinction coefficient
+    (:math:`m^{-1}`), :math:`h` is the canopy height (:math:`m`), :math:`\\theta` is the solar zenith
+    angle, and :math:`R_b` is the canopy adjusted direct radiation. Adjusting the diffuse radiation is
+    performed by:
+    
+    .. math::
+        R_d = \\tau * R_d
+        
+    where :math:`R_d` is the diffuse adjusted radiation, :math:`\\tau` is the optical transmissivity of
+    the canopy, and :math:`R_d` is the above canopy diffuse radiation. Values for :math:`\\mu` and
+    :math:`\\tau` can be found in Link and Marks (1999) :cite:`Link&Marks:1999`, measured at study sites
+    in Saskatchewan and Manitoba.
+    
+    The final step for calculating the net solar radiation requires the surface albedo from 
+    :mod:`smrf.distribute.albedo`. The net radiation is the sum of the of beam and diffuse canopy 
+    adjusted radiation multipled by one minus the albedo.
+    
+    Args:
+        solarConfig: configuration from [solar] section
+        albedoConfig: configuration from [albedo] section
+        stoporad_in: file path to the stoporad_in file created from :mod:`smrf.data.loadTopo.topo`
+        tempDir: location of temp/working directory (default=None, which is the 'TMPDIR' environment variable)
     
     Attributes:
-        albedoConfig
-        clear_ir_beam
-        clear_ir_diffuse
-        clear_vis_beam
-        clear_vis_diffuse
-        cloud_factor
-        cloud_ir_beam
-        cloud_ir_diffuse
-        cloud_vis_beam
-        cloud_vis_diffuse
-        config
-        idw
-        ir_file
-        metadata
-        net_solar
-        solar
-        stations
-        stoporad_in
-        tempDir
-        variable
-        veg_height
-        veg_ir_beam
-        veg_ir_diffuse
-        veg_k
-        veg_tau
-        veg_vis_beam
-        veg_vis_diffuse
-        vis_file
+        config: configuration from [solar] section
+        albedoConfig: configuration from [albedo] section
+        stoporad_in: file path to the stoporad_in file created from :mod:`smrf.data.loadTopo.topo`
+        clear_ir_beam: numpy array modeled clear sky infrared beam radiation
+        clear_ir_diffuse: numpy array modeled clear sky infrared diffuse radiation
+        clear_vis_beam: numpy array modeled clear sky visible beam radiation
+        clear_vis_diffuse: numpy array modeled clear sky visible diffuse radiation
+        cloud_factor: numpy array distributed cloud factor
+        cloud_ir_beam: numpy array cloud adjusted infrared beam radiation
+        cloud_ir_diffuse: numpy array cloud adjusted infrared diffuse radiation
+        cloud_vis_beam: numpy array cloud adjusted visible beam radiation
+        cloud_vis_diffuse: numpy array cloud adjusted visible diffuse radiation
+        ir_file: temporary file from ``stoporad`` for infrared clear sky radiation
+        metadata: metadata for the station data
+        net_solar: numpy array for the calculated net solar radiation
+        output_variables: Dictionary of the variables held within class :mod:`!smrf.distribute.air_temp.ta`
+            that specifies the ``units`` and ``long_name`` for creating the NetCDF output file.
+        stations: stations to be used in alphabetical order
+        stoporad_in: file path to the stoporad_in file created from :mod:`smrf.data.loadTopo.topo` 
+        tempDir: temporary directory for ``stoporad``, will default to the ``TMPDIR`` environment variable
+        variable: solar
+        veg_height: numpy array of vegitation heights from :mod:`smrf.data.loadTopo.topo` 
+        veg_ir_beam: numpy array vegitation adjusted infrared beam radiation
+        veg_ir_diffuse: numpy array vegitation adjusted infrared diffuse radiation
+        veg_k: numpy array of vegitation extinction coefficient from :mod:`smrf.data.loadTopo.topo` 
+        veg_tau: numpy array of vegitation optical transmissivity from :mod:`smrf.data.loadTopo.topo` 
+        veg_vis_beam: numpy array vegitation adjusted visible beam radiation
+        veg_vis_diffuse: numpy array vegitation adjusted visible diffuse radiation
+        vis_file: temporary file from ``stoporad`` for visible clear sky radiation
     
     """
     
@@ -118,15 +171,6 @@ class solar(image_data.image_data):
                         }
     
     def __init__(self, solarConfig, albedoConfig, stoporad_in, tempDir=None):
-        """
-        Initialize solar()
-        
-        Args:
-            solarConfig: configuration from [solar] section
-            albedoConfig: configuration from [albedo] section
-            stoporad_in: file path to the stoporad_in file created from topo()
-            tempDir: location of temp/working directory
-        """
         
         # extend the base class
         image_data.image_data.__init__(self, self.variable)
@@ -172,11 +216,18 @@ class solar(image_data.image_data):
         
     def initialize(self, topo, metadata):
         """
-        Initialize the distribution, calls image_data.image_data._initialize()
+        Initialize the distribution, soley calls :mod:`smrf.distribute.image_data.image_data._initialize`.
+        Sets the following attributes:
+        
+        * :py:attr:`veg_height`
+        * :py:attr:`veg_tau`
+        * :py:attr:`veg_k`
         
         Args:
-            topo: smrf.data.loadTopo.topo instance contain topo data/info
-            metadata: metadata dataframe containing the station metadata
+            topo: :mod:`smrf.data.loadTopo.topo` instance contain topographic data
+                and infomation
+            metadata: metadata Pandas dataframe containing the station metadata,
+                from :mod:`smrf.data.loadData` or :mod:`smrf.data.loadGrid`
             
         """
         
@@ -191,14 +242,27 @@ class solar(image_data.image_data):
     
     def distribute(self, data, illum_ang, cosz, azimuth, min_storm_day, albedo_vis, albedo_ir):
         """
-        Distribute solar for a single thread
+        Distribute the cloud factor given a Panda's dataframe for a single time step. Calls
+        :mod:`smrf.distribute.image_data.image_data._initialize`.
+        
+        If the sun is up, i.e. ``cosz > 0``, then the following steps are performed:
+        
+        1. Distribute cloud factor
+        2. Model clear sky radiation
+        3. Cloud correct with :mod:`!smrf.distribute.solar.solar.cloud_correct`
+        4. Vegitation correct with :mod:`!smrf.distribute.solar.solar.veg_correct`
+        5. Calculate net radiation with :mod:`!smrf.distribute.solar.solar.calc_net`
+        
+        If sun is down, then all calculated values will be set to ``None``, signaling the output functions
+        to put zeros in their place.
         
         Args:
-            data: cloud_factor data frame
-            cosz: cosine of the zenith angle for the basin
-            azimuth: azimuth to the sun for the basin 
-            min_storm_day: decimal day of last storm for the entire basin
-            
+            data: Pandas dataframe for a single time step from cloud_factor
+            cosz: cosine of the zenith angle for the basin, from :mod:`smrf.envphys.radiation.sunang`
+            azimuth: azimuth to the sun for the basin, from :mod:`smrf.envphys.radiation.sunang`
+            min_storm_day: decimal day of last storm for the entire basin, from :mod:`smrf.distribute.precip.ppt.last_storm_day_basin`
+            albedo_vis: numpy array for visible albedo, from :mod:`smrf.distribute.albedo.albedo.albedo_vis`
+            albedo_ir: numpy array for infrared albedo, from :mod:`smrf.distribute.albedo.albedo.albedo_ir`
             
         """
     
@@ -282,15 +346,17 @@ class solar(image_data.image_data):
      
     def distribute_thread(self, queue, data):
         """
-        Distribute the data using threading and queue
+        Distribute the data using threading and queue. All data is provided and ``distribute_thread``
+        will go through each time step following the methods outlined in 
+        :mod:`smrf.distribute.solar.solar.distribute`. The data queues puts the distributed data into:
         
+        * :py:attr:`net_solar`
+        * :py:attr:`cloud_factor`
+        
+         
         Args:
-            queue: queue dict for all variables
-            data: cloud_factor
-        
-        Output:
-            Changes the queue net_solar, cloud_factor
-                for the given date
+            queue: queue dictionary for all variables
+            data: pandas dataframe for all data, indexed by date time
         """
         
         for t in data.index:
@@ -333,17 +399,14 @@ class solar(image_data.image_data):
     
     def distribute_thread_clear(self, queue, data, calc_type):
         """
-        Calculate clear sky radiation with threading and queue
-        This doesn't set the class's clear* attributes since it
-        may be ahead of other things in the radiation calc
+        Distribute the data using threading and queue. All data is provided and ``distribute_thread``
+        will go through each time step and model clear sky radiation with ``stoporad``. The data 
+        queues puts the distributed data into:
         
-        Args:
-            queue: queue dict for all variables
-            data: cloud_factor, used for date_times
-        
-        Output:
-            Changes the queue clear_type_beam, clear_type_diffuse
-                for the given date
+        * :py:attr:`clear_vis_beam`
+        * :py:attr:`clear_vis_diffuse`
+        * :py:attr:`clear_ir_beam`
+        * :py:attr:`clear_ir_diffuse`
                 
         """
         
@@ -383,7 +446,8 @@ class solar(image_data.image_data):
              
     def cloud_correct(self):
         """
-        Correct for cloud cover
+        Correct the modeled clear sky radiation for cloud cover using :mod:`smrf.envphys.radiation.cf_cloud`.
+        Sets :py:attr:`cloud_vis_beam` and :py:attr:`cloud_vis_diffuse`.
         """
         
         self._logger.debug('Correcting clear sky radiation for clouds')
@@ -398,7 +462,13 @@ class solar(image_data.image_data):
         
     def veg_correct(self, illum_ang):
         """
-        Correct for vegetation
+        Correct the cloud adjusted radiation for vegitation using :mod:`smrf.envphys.radiation.veg_beam`
+        and :mod:`smrf.envphys.radiation.veg_diffuse`. Sets :py:attr:`veg_vis_beam`, :py:attr:`veg_vis_diffuse`
+        :py:attr:`veg_ir_beam`, and :py:attr:`veg_ir_diffuse`.
+        
+        Args:
+            illum_ang: numpy array of the illumination angle over the DEM, from :mod:`smrf.envphys.radiation.sunang`
+        
         """
         
         self._logger.debug('Correcting radiation for vegitation')
@@ -420,7 +490,11 @@ class solar(image_data.image_data):
      
     def calc_net(self, albedo_vis, albedo_ir):
         """
-        Calculate net radiation
+        Calculate the net radiation using the vegitation adjusted radiation. Sets :py:attr:`net_solar`.
+        
+        Args:
+            albedo_vis: numpy array for visible albedo, from :mod:`smrf.distribute.albedo.albedo.albedo_vis`
+            albedo_ir: numpy array for infrared albedo, from :mod:`smrf.distribute.albedo.albedo.albedo_ir`
         """
         
         self._logger.debug('Calculing net radiation')
@@ -440,14 +514,15 @@ class solar(image_data.image_data):
             
     def calc_ir(self, min_storm_day, wy_day, tz_min_west, wyear, cosz, azimuth):
         """
-        Run stoporad for the ir bands
+        Run ``stoporad`` for the infrared bands
+    
         Args:
-            min_storm_day
-            wy_day
-            tz_min_west
-            wyear
-            cosz
-            azimuth
+            min_storm_day: decimal day of last storm for the entire basin, from :mod:`smrf.distribute.precip.ppt.last_storm_day_basin`
+            wy_day: day of water year, from :mod:`~smrf.distirbute.solar.solar.radiation_dates`
+            tz_min_west: time zone in minutes west from UTC, from :mod:`~smrf.distirbute.solar.solar.radiation_dates`
+            wyear: water year, from :mod:`~smrf.distirbute.solar.solar.radiation_dates`
+            cosz: cosine of the zenith angle for the basin, from :mod:`smrf.envphys.radiation.sunang`
+            azimuth: azimuth to the sun for the basin, from :mod:`smrf.envphys.radiation.sunang`
         """
         self._logger.debug('Calculating clear sky radiation, ir')
         
@@ -477,14 +552,15 @@ class solar(image_data.image_data):
             
     def calc_vis(self, min_storm_day, wy_day, tz_min_west, wyear, cosz, azimuth):
         """
-        Run stoporad for the ir bands
+        Run ``stoporad`` for the visible bands
+        
         Args:
-            min_storm_day
-            wy_day
-            tz_min_west
-            wyear
-            cosz
-            azimuth
+            min_storm_day: decimal day of last storm for the entire basin, from :mod:`smrf.distribute.precip.ppt.last_storm_day_basin`
+            wy_day: day of water year, from :mod:`~smrf.distirbute.solar.solar.radiation_dates`
+            tz_min_west: time zone in minutes west from UTC, from :mod:`~smrf.distirbute.solar.solar.radiation_dates`
+            wyear: water year, from :mod:`~smrf.distirbute.solar.solar.radiation_dates`
+            cosz: cosine of the zenith angle for the basin, from :mod:`smrf.envphys.radiation.sunang`
+            azimuth: azimuth to the sun for the basin, from :mod:`smrf.envphys.radiation.sunang`
         """
         self._logger.debug('Calculating clear sky radiation, visible')
         
@@ -514,7 +590,17 @@ class solar(image_data.image_data):
             
     def radiation_dates(self, date_time):
         """
-        Calculate some times based on the date for stoporad
+        Calculate some times based on the date for ``stoporad``
+        
+        Args:
+            date_time: date time object
+            
+        Returns:
+            (tuple): tuple containing:
+            
+                * **wy_day** - day of water year from October 1
+                * **wyear** - water year
+                * **tz_min_west** - minutes west of UTC for timezone
         """
         
         # get the current day of water year

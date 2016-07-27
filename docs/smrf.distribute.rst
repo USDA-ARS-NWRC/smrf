@@ -42,7 +42,6 @@ smrf.distribute.soil_temp module
 
 .. automodule:: smrf.distribute.soil_temp
     :members:
-    :undoc-members:
     :show-inheritance:
 
 smrf.distribute.solar module
@@ -50,7 +49,6 @@ smrf.distribute.solar module
 
 .. automodule:: smrf.distribute.solar
     :members:
-    :undoc-members:
     :show-inheritance:
 
 smrf.distribute.thermal module
