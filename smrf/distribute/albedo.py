@@ -101,7 +101,8 @@ class albedo(image_data.image_data):
         
     def distribute(self, current_time_step, cosz, storm_day):
         """
-        Distribute albedo
+        Distribute air temperature given a Panda's dataframe for a single time step. Calls
+        :mod:`smrf.distribute.image_data.image_data._distribute`.
         
         Args:
             current_time_step: Current time step in datetime object

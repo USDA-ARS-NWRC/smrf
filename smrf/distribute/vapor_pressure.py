@@ -1,9 +1,8 @@
-"""
-20160104 Scott Havens
+__author__ = "Scott Havens"
+__maintainer__ = "Scott Havens"
+__email__ = "scott.havens@ars.usda.gov"
+__date__ = "2016-01-01"
 
-Distribute vapor pressure
-
-"""
 
 import numpy as np
 import logging, os
@@ -15,16 +14,31 @@ from smrf.envphys.core import envphys_c
 
 class vp(image_data.image_data):
     """
-    ta extends the base class of image_data()
-    The vp() class allows for variable specific distributions that 
+    The :mod:`~smrf.distribute.vapor_pressure.vp` class allows for variable specific distributions that 
     go beyond the base class
+    
+    Vapor pressure is provided as an argument and is calcualted from coincident air temperature and
+    relative humidity measurements using utilities such as IPW's ``rh2vp``. The vapor pressure is distributed
+    instead of the relative humidity as it is an absolute measurement of the vapor within the atmosphere 
+    and will follow elevational trends (typically negative).  Were as relative humidity is a relative measurement which varies
+    in complex ways over the topography.  From the distributed vapor pressure, the dew point is
+    calculated for use by other distribution methods. The dew point temperature is further corrected to
+    ensure that it does not exceed the distributed air temperature.
+    
+    Args:
+        vpConfig: The [vapor_pressure] section of the configuration file
     
     Attributes:
         config: configuration from [vapor_pressure] section
         vapor_pressure: numpy matrix of the vapor pressure
         dew_point: numpy matrix of the dew point, calculated from vapor_pressure
-            and corrected for dew_point > air_temp
+            and corrected for dew_point greater than air_temp
+        min: minimum value of vapor pressure is 10 Pa
+        max: maximum value of vapor pressure is 7500 Pa
         stations: stations to be used in alphabetical order
+        output_variables: Dictionary of the variables held within class :mod:`!smrf.distribute.vapor_pressure.vp`
+            that specifies the ``units`` and ``long_name`` for creating the NetCDF output file.
+        variable: 'vapor_pressure'
     
     """
     
@@ -43,7 +57,7 @@ class vp(image_data.image_data):
                                   }
                         }
     
-    def __init__(self, vpConfig, tempDir=None):
+    def __init__(self, vpConfig):
         
         # extend the base class
         image_data.image_data.__init__(self, self.variable)
@@ -54,22 +68,20 @@ class vp(image_data.image_data):
         
         if 'nthreads' not in self.config:
             self.config['nthreads'] = '1'
-        
-        
-        if (tempDir is None) | (tempDir == 'TMPDIR'):
-            tempDir = os.environ['TMPDIR']
-        self.tempDir = tempDir
-        
+                
         self._logger.debug('Created distribute.vapor_pressure')
         
         
     def initialize(self, topo, metadata):
         """
-        Initialize the distribution, calls image_data.image_data._initialize()
+        Initialize the distribution, calls :mod:`smrf.distribute.image_data.image_data._initialize`.
+        Preallocates the following class attributes to zeros:
         
         Args:
-            topo: smrf.data.loadTopo.topo instance contain topo data/info
-            metadata: metadata dataframe containing the station metadata
+            topo: :mod:`smrf.data.loadTopo.topo` instance contain topographic data
+                and infomation
+            metadata: metadata Pandas dataframe containing the station metadata,
+                from :mod:`smrf.data.loadData` or :mod:`smrf.data.loadGrid`    
                         
         """
         
@@ -80,15 +92,19 @@ class vp(image_data.image_data):
 
     def distribute(self, data, ta):
         """
-        Distribute air temperature
+        Distribute air temperature given a Panda's dataframe for a single time step. Calls
+        :mod:`smrf.distribute.image_data.image_data._distribute`.
+        
+        The following steps are performed when distributing vapor pressure:
+        
+        1. Distribute the point vapor pressure measurements
+        2. Calculate dew point temperature using :mod:`smrf.envphys.core.envphys_c.cdewpt`
+        3. Adjsut dew point values to not exceed the air temperature
         
         Args:
-            data: vapor_pressure data frame for single time step
-            ta: ta.air_temp matrix to ensure dpt is below air temp
+            data: Pandas dataframe for a single time step from precip
+            ta: air temperature numpy array that will be used for calculating dew point temperature
             
-        Returns:
-            self.vapor_pressure: vp matrix
-            self.dew_point: dew point matrix, corrected if dpt > ta 
         """
         
         self._logger.debug('%s -- Distributing vapor_pressure' % data.name)
@@ -148,14 +164,16 @@ class vp(image_data.image_data):
     
     def distribute_thread(self, queue, data):
         """
-        Distribute the data using threading and queue
+        Distribute the data using threading and queue. All data is provided and ``distribute_thread``
+        will go through each time step and call :mod:`smrf.distribute.vapor_pressure.vp.distribute` then
+        puts the distributed data into the queue for:
         
+        * :py:attr:`vapor_pressure`
+        * :py:attr:`dew_point`
+         
         Args:
-            queue: queue dict for all variables
-            data: pandas dataframe for all data required
-        
-        Output:
-            Changes the queue air_temp for the given date
+            queue: queue dictionary for all variables
+            data: pandas dataframe for all data, indexed by date time
         """
         
         for t in data.index:

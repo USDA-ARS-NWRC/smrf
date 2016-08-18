@@ -242,8 +242,8 @@ class solar(image_data.image_data):
     
     def distribute(self, data, illum_ang, cosz, azimuth, min_storm_day, albedo_vis, albedo_ir):
         """
-        Distribute the cloud factor given a Panda's dataframe for a single time step. Calls
-        :mod:`smrf.distribute.image_data.image_data._initialize`.
+        Distribute air temperature given a Panda's dataframe for a single time step. Calls
+        :mod:`smrf.distribute.image_data.image_data._distribute`.
         
         If the sun is up, i.e. ``cosz > 0``, then the following steps are performed:
         

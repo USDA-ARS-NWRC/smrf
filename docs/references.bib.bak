@@ -104,6 +104,23 @@
   url =      {http://www.sciencedirect.com/science/article/pii/S0022169414005113}
 }
 
+@Article{Link&Marks:1999,
+  author =   {Link, Timothy and Marks, Danny},
+  title =    {{Distributed simulation of snowcover mass- and energy-balance in the boreal forest}},
+  journal =  {Hydrological Processes},
+  year =     {1999},
+  volume =   {13},
+  number =   {April 1998},
+  pages =    {2439--2452},
+  abstract = {The accurate distributed simulation of snowpack deposition and ablation beneath forest canopies is complicated by the fact that vegetation canopies strongly affect the snow surface energy balance. The canopy alters the radiation balance of the snowcover and reduces the wind speed at the snow surface. Simple canopy adjustment algorithms for solar and thermal radiation and wind speed are used in conjunction with commonly available land cover classifications to spatially distribute sub-canopy solar and thermal radiation, air and soil temperature, humidity, wind speed, and precipitation. The distributed climate surfaces are used to drive a two-layer coupled energy- and mass-balance snowmelt model over two areas within the BOREAS study region for the 1994-1995 snow season. Model results are validated using both automatic and manually collected snow depth data. The simulated timing and rate of snowpack development and ablation at both study areas are well represented beneath the canopy types where validation data are present. Rigorous evaluation of model performance beneath the full range of canopy types requires information regarding the spatial distribution of snow covered area during the ablation period. This study demonstrates that given basic landcover parameters, relatively simple canopy adjustments coupled with an energy balance model can be used to estimate climate conditions and snowcover processes across a range of boreal forest covers. Copyright (C) 1999 John Wiley {\&} Sons, Ltd.},
+  doi =      {10.1002/(sici)1099-1085(199910)13:14/15<2439::aid-hyp866>3.0.co;2-1},
+  file =     {:home/scotthavens/Documents/Literature{\_}Review/1999/Hydrological Processes/Link, Marks{\_}1999{\_}Distributed simulation of snowcover mass- and energy-balance in the boreal forest.pdf:pdf},
+  isbn =     {0885-6087},
+  issn =     {08856087},
+  keywords = {boreal forest,ects,forest canopy e,snowmelt},
+  url =      {http://doi.wiley.com/10.1002/(SICI)1099-1085(199910)13:14/15{\textless}2439::AID-HYP866{\textgreater}3.0.CO;2-1}
+}
+
 @Article{Marks&al:1992,
   author =   {Marks, Danny and Dozier, Jeff and Davis, Robert E.},
   title =    {{Climate and Energy Exchange at the Snow Surface in the Alpine Region of the Sierra Nevada 1. Meteorolocical Measurements and Monitoring}},
@@ -126,6 +143,19 @@
   pages =    {1569--1587},
   file =     {:home/scotthavens/Documents/Literature{\_}Review/1998/Hydrological Processes/Marks et al.{\_}1998{\_}The sensitivity of snowmelt processes to climate conditions and forest during rain on snow a case study of the 1996 Pa.pdf:pdf},
   keywords = {flooding,forest canopy effects,rain-on-snow,snowmelt}
+}
+
+@Article{Marks&Dozier:1979,
+  author =  {Marks, Danny and Dozier, Jeff},
+  title =   {{A clear-sky longwave radiation model for remote alpine areas}},
+  journal = {Archiv for Meteorologie, Geophysik und Bioklimatologie Serie B},
+  year =    {1979},
+  volume =  {27},
+  number =  {2-3},
+  pages =   {159--187},
+  doi =     {10.1007/BF02243741},
+  file =    {:home/scotthavens/Documents/Literature{\_}Review/1979/Archiv for Meteorologie, Geophysik und Bioklimatologie Serie B/Marks, Dozier{\_}1979{\_}A clear-sky longwave radiation model for remote alpine areas.pdf:pdf},
+  issn =    {00666424}
 }@inproceedings{Shepard:1968,
  author = {Shepard, Donald},
  title = {A Two-dimensional Interpolation Function for Irregularly-spaced Data},

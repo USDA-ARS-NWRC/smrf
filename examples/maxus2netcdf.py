@@ -15,13 +15,15 @@ import progressbar
 from datetime import datetime
 startTime = datetime.now()
 
-maxus_dir = './maxus100m/maxus690_100.*.asc'
-
 maxus_dir = '/media/Drobo1/BRB/BRB-wy09/spatial_WRF_OG/data/topo/maxus/maxus30m/'
 
-maxus_file = 'maxus690__30.%i.asc'
+maxus_file = 'maxus690_30.%i.asc'
 var = 'maxus'
 nFile = 'maxus_window.nc'
+
+maxus_file = 'maxus690_%i.asc'
+var = 'maxus'
+nFile = 'maxus.nc'
 
 # maxus_file = 'tbreak90_%i.asc'
 # var = 'tbreak'

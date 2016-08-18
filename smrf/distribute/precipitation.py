@@ -63,7 +63,7 @@ class ppt(image_data.image_data):
         min: minimum value of precipitation is 0
         max: maximum value of precipitation is infinite
         stations: stations to be used in alphabetical order
-        output_variables: Dictionary of the variables held within class :mod:`!smrf.distribute.air_temp.ta`
+        output_variables: Dictionary of the variables held within class :mod:`!smrf.distribute.precipitation.ppt`
             that specifies the ``units`` and ``long_name`` for creating the NetCDF output file.
         variable: 'precip'
         
@@ -116,7 +116,7 @@ class ppt(image_data.image_data):
         
     def initialize(self, topo, metadata):
         """
-        Initialize the distribution, soley calls :mod:`smrf.distribute.image_data.image_data._initialize`.
+        Initialize the distribution, calls :mod:`smrf.distribute.image_data.image_data._initialize`.
         Preallocates the following class attributes to zeros:
         
         * :py:attr:`percent_snow`
@@ -148,8 +148,8 @@ class ppt(image_data.image_data):
         
     def distribute(self, data, dpt, mask=None):
         """
-        Distribute air temperature given a Panda's dataframe for a single time step. Calls
-        :mod:`smrf.distribute.image_data.image_data._initialize`.
+        Distribute given a Panda's dataframe for a single time step. Calls
+        :mod:`smrf.distribute.image_data.image_data._distribute`.
         
         The following steps are taken when distributing precip, if there is precipitation measured:
         

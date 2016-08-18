@@ -1239,7 +1239,7 @@ static char __pyx_k_RuntimeError[] = "RuntimeError";
 static char __pyx_k_ascontiguousarray[] = "ascontiguousarray";
 static char __pyx_k_ndarray_is_not_C_contiguous[] = "ndarray is not C contiguous";
 static char __pyx_k_Compiling_dk_s_kriging_function[] = "\nCompiling dk's kriging function\n\n20160205 Scott Havens\n";
-static char __pyx_k_home_scott_Documents_Projects_s[] = "/home/scott/Documents/Projects/smrf/smrf/spatial/dk/detrended_kriging.pyx";
+static char __pyx_k_home_scotthavens_Documents_Proj[] = "/home/scotthavens/Documents/Projects/smrf/smrf/spatial/dk/detrended_kriging.pyx";
 static char __pyx_k_unknown_dtype_code_in_numpy_pxd[] = "unknown dtype code in numpy.pxd (%d)";
 static char __pyx_k_Format_string_allocated_too_shor[] = "Format string allocated too short, see comment in numpy.pxd";
 static char __pyx_k_Non_native_byte_order_not_suppor[] = "Non-native byte order not supported";
@@ -1260,7 +1260,7 @@ static PyObject *__pyx_n_s_dtype;
 static PyObject *__pyx_n_s_elevations;
 static PyObject *__pyx_n_s_float64;
 static PyObject *__pyx_n_s_grid;
-static PyObject *__pyx_kp_s_home_scott_Documents_Projects_s;
+static PyObject *__pyx_kp_s_home_scotthavens_Documents_Proj;
 static PyObject *__pyx_n_s_import;
 static PyObject *__pyx_n_s_main;
 static PyObject *__pyx_kp_u_ndarray_is_not_C_contiguous;
@@ -3839,7 +3839,7 @@ static __Pyx_StringTabEntry __pyx_string_tab[] = {
   {&__pyx_n_s_elevations, __pyx_k_elevations, sizeof(__pyx_k_elevations), 0, 0, 1, 1},
   {&__pyx_n_s_float64, __pyx_k_float64, sizeof(__pyx_k_float64), 0, 0, 1, 1},
   {&__pyx_n_s_grid, __pyx_k_grid, sizeof(__pyx_k_grid), 0, 0, 1, 1},
-  {&__pyx_kp_s_home_scott_Documents_Projects_s, __pyx_k_home_scott_Documents_Projects_s, sizeof(__pyx_k_home_scott_Documents_Projects_s), 0, 0, 1, 0},
+  {&__pyx_kp_s_home_scotthavens_Documents_Proj, __pyx_k_home_scotthavens_Documents_Proj, sizeof(__pyx_k_home_scotthavens_Documents_Proj), 0, 0, 1, 0},
   {&__pyx_n_s_import, __pyx_k_import, sizeof(__pyx_k_import), 0, 0, 1, 1},
   {&__pyx_n_s_main, __pyx_k_main, sizeof(__pyx_k_main), 0, 0, 1, 1},
   {&__pyx_kp_u_ndarray_is_not_C_contiguous, __pyx_k_ndarray_is_not_C_contiguous, sizeof(__pyx_k_ndarray_is_not_C_contiguous), 0, 1, 0, 0},
@@ -3946,7 +3946,7 @@ static int __Pyx_InitCachedConstants(void) {
   __pyx_tuple__7 = PyTuple_Pack(9, __pyx_n_s_ad, __pyx_n_s_dgrid, __pyx_n_s_elevations, __pyx_n_s_weights, __pyx_n_s_nthreads, __pyx_n_s_nsta, __pyx_n_s_ngrid, __pyx_n_s_ad_arr, __pyx_n_s_grid); if (unlikely(!__pyx_tuple__7)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 31; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_tuple__7);
   __Pyx_GIVEREF(__pyx_tuple__7);
-  __pyx_codeobj__8 = (PyObject*)__Pyx_PyCode_New(5, 0, 9, 0, 0, __pyx_empty_bytes, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_tuple__7, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_kp_s_home_scott_Documents_Projects_s, __pyx_n_s_call_grid, 31, __pyx_empty_bytes); if (unlikely(!__pyx_codeobj__8)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 31; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_codeobj__8 = (PyObject*)__Pyx_PyCode_New(5, 0, 9, 0, 0, __pyx_empty_bytes, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_tuple__7, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_kp_s_home_scotthavens_Documents_Proj, __pyx_n_s_call_grid, 31, __pyx_empty_bytes); if (unlikely(!__pyx_codeobj__8)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 31; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_RefNannyFinishContext();
   return 0;
   __pyx_L1_error:;

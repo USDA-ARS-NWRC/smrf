@@ -76,7 +76,7 @@ class ta(image_data.image_data):
     def distribute(self, data):
         """
         Distribute air temperature given a Panda's dataframe for a single time step. Calls
-        :mod:`smrf.distribute.image_data.image_data._initialize`.
+        :mod:`smrf.distribute.image_data.image_data._distribute`.
         
         Args:
             data: Pandas dataframe for a single time step from air_temp

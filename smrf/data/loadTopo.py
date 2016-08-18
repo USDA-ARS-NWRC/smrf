@@ -29,12 +29,13 @@ class topo():
     Attributes:
         topoConfig: configuration for topo
         tempDir: location of temporary working directory
-        dem: smrf.ipw.IPW instance for the DEM
-        mask: smrf.ipw.IPW instance for the mask
-        vegType: smrf.ipw.IPW instance for the veg type
-        vegHeight: smrf.ipw.IPW instance for the veg height
-        vegK: smrf.ipw.IPW instance for the veg K
-        vegTau: smrf.ipw.IPW instance for the veg transmissivity
+        dem: numpy array for the DEM
+        mask: numpy array for the mask
+        veg_type: numpy array for the veg type
+        veg_height: numpy array for the veg height
+        veg_k: numpy array for the veg K
+        veg_tau: numpy array for the veg transmissivity
+        sky_view: 
         ny: number of columns in DEM
         nx: number of rows in DEM
         u,v: UTM location of upper left corner
@@ -43,7 +44,7 @@ class topo():
         coord_sys_ID: coordinate syste,
         x,y: position vectors
         X,Y: position grid
-        stoporad_in: smrf.ipw.IPW instance for the input for stoporad
+        stoporad_in: numpy array for the sky view factor
     
     '''
     

@@ -64,7 +64,20 @@ ext_modules += [
                           extra_link_args=['-fopenmp', '-O3']
                           ),
                 ]
-cmdclass.update({ 'build_ext': build_ext })
+
+# wind model c functions
+loc = 'smrf/utils/wind_model' # location of the folder
+mname = os.path.join(loc, 'wind_c')
+mname = mname.replace('/', '.')
+
+ext_modules += [
+                Extension(mname,
+                          sources=[os.path.join(loc, val) for val in ["wind_c.pyx", "breshen.c", "calc_wind.c"]],
+                          include_dirs=[numpy.get_include()],
+                          extra_compile_args=['-fopenmp', '-O3'],
+                          extra_link_args=['-fopenmp', '-O3']
+                          ),
+                ]
 
 
 

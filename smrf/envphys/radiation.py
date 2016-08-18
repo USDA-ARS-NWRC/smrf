@@ -233,6 +233,7 @@ def find_horizon(i, H, xr, yr, Z, mu):
 #     pbar.finish()
         
     
+
 def hord(z):
     '''
     Calculate the horizon pixel for all x,z

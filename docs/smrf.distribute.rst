@@ -56,7 +56,6 @@ smrf.distribute.thermal module
 
 .. automodule:: smrf.distribute.thermal
     :members:
-    :undoc-members:
     :show-inheritance:
 
 smrf.distribute.vapor_pressure module
@@ -64,7 +63,6 @@ smrf.distribute.vapor_pressure module
 
 .. automodule:: smrf.distribute.vapor_pressure
     :members:
-    :undoc-members:
     :show-inheritance:
 
 smrf.distribute.wind module
@@ -72,14 +70,6 @@ smrf.distribute.wind module
 
 .. automodule:: smrf.distribute.wind
     :members:
-    :undoc-members:
     :show-inheritance:
 
 
-Module contents
----------------
-
-.. automodule:: smrf.distribute
-    :members:
-    :undoc-members:
-    :show-inheritance:

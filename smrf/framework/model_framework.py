@@ -213,8 +213,7 @@ class SMRF():
         self.distribute['air_temp'] = distribute.air_temp.ta(self.config['air_temp'])  # get the class
         
         # 2. Vapor pressure
-        self.distribute['vapor_pressure'] = distribute.vapor_pressure.vp(self.config['vapor_pressure'],
-                                                                         self.config['system']['temp_dir'])
+        self.distribute['vapor_pressure'] = distribute.vapor_pressure.vp(self.config['vapor_pressure'])
                 
         # 3. Wind
         self.distribute['wind'] = distribute.wind.wind(self.config['wind'],
@@ -416,7 +415,8 @@ class SMRF():
             
             # 7. thermal radiation
             if self.distribute['thermal'].gridded:
-                self.distribute['thermal'].distribute_thermal(self.data.thermal.ix[t])
+                self.distribute['thermal'].distribute_thermal(self.data.thermal.ix[t],
+                                                              self.distribute['air_temp'].air_temp)
             else:
                 self.distribute['thermal'].distribute(t, self.distribute['air_temp'].air_temp,
                                                       self.distribute['vapor_pressure'].dew_point,
