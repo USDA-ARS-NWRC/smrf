@@ -222,7 +222,9 @@ class th(image_data.image_data):
         
         for t in data.index:
         
-            self.distribute_thermal(data.ix[t])
+            air_temp = queue['air_temp'].get(t)
+        
+            self.distribute_thermal(data.ix[t], air_temp)
             
             queue['thermal'].put( [t, self.thermal] )
     

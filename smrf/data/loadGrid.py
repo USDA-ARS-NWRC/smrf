@@ -39,7 +39,9 @@ class grid():
         self.start_date = start_date
         self.end_date = end_date
         self.time_zone = time_zone
-        self.variables = ['air_temp', 'vapor_pressure', 'precip', 'solar', 'wind_speed', 'wind_direction', 'cloud_factor']
+        
+        # The data that will be output
+        self.variables = ['air_temp', 'vapor_pressure', 'precip', 'wind_speed', 'wind_direction', 'cloud_factor', 'thermal']
         
         # get the bounds of the model so that only the values inside the model domain are used
         self.x = topo.x
@@ -84,7 +86,7 @@ class grid():
         '''
         
         self.wrf_variables = ['GLW','T2','DWPT','UGRD','VGRD','CLDFRA','RAINNC']
-        self.variables = ['thermal','air_temp','dew_point','wind_speed','wind_direction','cloud_factor','precip']
+#         self.variables = ['thermal','air_temp','dew_point','wind_speed','wind_direction','cloud_factor','precip']
         
         # degree offset for a buffer around the model domain
         offset = 0.1
@@ -236,7 +238,7 @@ class grid():
         # correct for the timezone and get only the desired dates
         for v in self.variables:
             d = getattr(self, v)
-            d = d[self.start_date : self.end_date]
+            # d = d[self.start_date : self.end_date] # step performed above while reading in the data
             setattr(self, v, d.tz_localize(tz=self.time_zone))
             
         
