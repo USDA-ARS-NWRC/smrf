@@ -45,7 +45,7 @@ class th(image_data.image_data):
     .. math::
         th_{canopy} = \\tau_d * th_{cloud} + (1 - \\tau_d) \epsilon \sigma T_a^4
     
-    where :math:`\tau_d` is the optical transmissivity, :math:`th_{cloud}` is the cloud corrected thermal
+    where :math:`\\tau_d` is the optical transmissivity, :math:`th_{cloud}` is the cloud corrected thermal
     radiation, :math:`\epsilon` is the emissivity of the canopy (0.96), :math:`\sigma` is the Stephan-Boltzmann
     constant, and :math:`T_a` is the distributed air temperature. 
     

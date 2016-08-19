@@ -73,7 +73,7 @@ m.close()
 # plt.imshow(w.maxus_val - mxs)
 # plt.colorbar()
 
-
+plt.plot(w.maxus_val[1,:] - mxs[1,:])
 plt.show()
 
 

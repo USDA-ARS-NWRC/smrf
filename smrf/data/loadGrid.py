@@ -147,6 +147,10 @@ class grid():
         times = [('').join(v) for v in t]
         times = [v.replace('_', ' ') for v in times]  # remove the underscore
         time = pd.to_datetime(times)
+        
+        # subset the times to only those needed
+        time_ind = (time >= pd.to_datetime(self.start_date)) & (time <= pd.to_datetime(self.end_date))
+        time = time[time_ind]
                 
                 
         ### GET THE DATA, ONE AT A TIME ###
@@ -154,7 +158,7 @@ class grid():
         self.air_temp = pd.DataFrame(index=time, columns=primary_id)
         for i in a:
             g = 'grid_y%i_x%i' % (i[0], i[1])
-            v = f.variables['T2'][:, i[0], i[1]] - 273.15
+            v = f.variables['T2'][time_ind, i[0], i[1]] - 273.15
             self.air_temp[g] = v
             
         
@@ -163,7 +167,7 @@ class grid():
         self.dew_point = pd.DataFrame(index=time, columns=primary_id)
         for i in a:
             g = 'grid_y%i_x%i' % (i[0], i[1])
-            v = f.variables['DWPT'][:, i[0], i[1]]
+            v = f.variables['DWPT'][time_ind, i[0], i[1]]
             self.dew_point[g] = v
             
             tmp_file = os.path.join(self.tempDir, 'dpt.txt')        
@@ -184,13 +188,13 @@ class grid():
         self.thermal = pd.DataFrame(index=time, columns=primary_id)
         for i in a:
             g = 'grid_y%i_x%i' % (i[0], i[1])
-            v = f.variables['GLW'][:, i[0], i[1]]
+            v = f.variables['GLW'][time_ind, i[0], i[1]]
             self.thermal[g] = v
             
         
         self._logger.debug('Loading cloud_factor')
         self.cloud_factor = pd.DataFrame(index=time, columns=primary_id)
-        cf = 1 - np.mean(f.variables['CLDFRA'][:], axis=1)
+        cf = 1 - np.mean(f.variables['CLDFRA'][time_ind, :], axis=1)
         for i in a:
             g = 'grid_y%i_x%i' % (i[0], i[1])
             v = cf[:, i[0], i[1]]
@@ -202,8 +206,8 @@ class grid():
         self.wind_direction = pd.DataFrame(index=time, columns=primary_id)
         min_speed = 0.47
         
-        u10 = f.variables['UGRD'][:]
-        v10 = f.variables['VGRD'][:]
+        u10 = f.variables['UGRD'][time_ind, :]
+        v10 = f.variables['VGRD'][time_ind, :]
         
         # calculate the wind speed
         s = np.sqrt(u10**2 + v10**2)
@@ -224,7 +228,7 @@ class grid():
         
         self._logger.debug('Loading precip')
         self.precip = pd.DataFrame(index=time, columns=primary_id)
-        precip = np.diff(f.variables['RAINNC'][:], axis=0)
+        precip = np.diff(f.variables['RAINNC'][time_ind, :], axis=0)
         for i in a:
             g = 'grid_y%i_x%i' % (i[0], i[1])
             self.precip[g] = np.concatenate(([0], precip[:, i[0], i[1]]))
