@@ -6,6 +6,7 @@ __version__ = '0.1.0'
 
 import utils
 import queue
-import wind_model
+import wind
+
 # from .wind_model import wind_model
 # import wind_model

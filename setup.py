@@ -66,7 +66,7 @@ ext_modules += [
                 ]
 
 # wind model c functions
-loc = 'smrf/utils/wind_model' # location of the folder
+loc = 'smrf/utils/wind' # location of the folder
 mname = os.path.join(loc, 'wind_c')
 mname = mname.replace('/', '.')
 
@@ -116,7 +116,7 @@ setup(
     author="Scott Havens",
     author_email='scotthavens@ars.usda.gov',
     url='https://gitlab.com/ars-snow/smrf',
-    packages=['smrf', 'smrf.data', 'smrf.distribute', 'smrf.envphys', 'smrf.envphys.core', 'smrf.framework', 'smrf.ipw', 'smrf.model', 'smrf.output', 'smrf.spatial', 'smrf.utils', 'smrf.spatial.dk'],
+    packages=['smrf', 'smrf.data', 'smrf.distribute', 'smrf.envphys', 'smrf.envphys.core', 'smrf.framework', 'smrf.ipw', 'smrf.model', 'smrf.output', 'smrf.spatial', 'smrf.utils', 'smrf.utils.wind', 'smrf.spatial.dk'],
 #     package_dir={'smrf':'smrf'},
     include_package_data=True,
     install_requires=requirements,

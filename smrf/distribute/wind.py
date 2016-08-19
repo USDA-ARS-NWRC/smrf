@@ -23,7 +23,7 @@ class wind(image_data.image_data):
     Winstral and Marks (2002) and Winstral et al. (2009) :cite:`Winstral&Marks:2002` :cite:`Winstral&al:2009`
     which parameterizes the terrain based on the upwind direction. The underlying method calulates
     the maximum upwind slope (maxus) within a search distance to determine if a cell is sheltered or exposed.
-    See :mod:`smrf.utils.wind_model.wind_model` for a more in depth description. A maxus file (library) is used
+    See :mod:`smrf.utils.wind.model` for a more in depth description. A maxus file (library) is used
     to load the upwind direction and maxus values over the dem. The following steps are performed when 
     estimating the wind speed:
     
