@@ -229,6 +229,10 @@ int startj, starti, endj, endi;
 	float hordeg;
 	short *X, *Y, nextX, nextY;
 	struct BreshenhamData *LineData, Initialize;
+	int dx, dy;
+
+	dy = 31;
+	dx = 4980;
 
 	FloatCell = &zz;
 	IntCell = &elev;
@@ -243,6 +247,12 @@ int startj, starti, endj, endi;
 	xcoords[0] = startj;
 	ycoords[0] = starti;
 	elevs[0] = *IntCell;
+	if (starti == dy && startj == dx) {
+		printf("x=%i, y=%i\n", startj, starti);
+		printf("x=%i, y=%i\n", endj, endi);
+		printf("%i\n", elevs[0]);
+	}
+
 	N = 1;
 	if (starti == endi && startj == endj)
 	{
@@ -257,8 +267,14 @@ int startj, starti, endj, endi;
 		xcoords[N] = nextX;
 		ycoords[N] = nextY;
 		elevs[N] = *IntCell;
+
+		if (starti == dy && startj == dx) {
+			printf("%i\n", elevs[N]);
+		}
+
 		++N;
 	}
+
 	if ( N == 500 ) N = 499;
 	H[N - 1] = N - 1;
 	i = N - 2;
@@ -290,6 +306,12 @@ int startj, starti, endj, endi;
 		--i;
 	}
 	hordeg = atan(SLOPE(0,H[0],height)) / PI * 180;
+//	hordeg = H[0];
+
+	if (starti == dy && startj == dx) {
+		printf("%i\n", H[0]);
+	}
+
 	end:	return (hordeg);
 }
 
@@ -324,29 +346,29 @@ main (int argc, char *argv[])
 			c = *++argv[0];
 			switch (c) {
 			case 'a':
-			++arg_count;
-			++argv;
-			--argc;
-			azim1 = atoi(*argv);
-			break;
+				++arg_count;
+				++argv;
+				--argc;
+				azim1 = atoi(*argv);
+				break;
 			case 'z':
-			++arg_count;
-			++argv;
-			--argc;
-			dmax = atoi(*argv);
-			break;
+				++arg_count;
+				++argv;
+				--argc;
+				dmax = atoi(*argv);
+				break;
 			case 'd':
-			++arg_count;
-			++argv;
-			--argc;
-			strcpy(dem_file, *argv);
-			break;
+				++arg_count;
+				++argv;
+				--argc;
+				strcpy(dem_file, *argv);
+				break;
 			case 'h':
-			++arg_count;
-			++argv;
-			--argc;
-			height = atoi(*argv);
-			break;
+				++arg_count;
+				++argv;
+				--argc;
+				height = atoi(*argv);
+				break;
 			default:
 				break;
 			}

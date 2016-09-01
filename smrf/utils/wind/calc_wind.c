@@ -83,6 +83,13 @@ double *maxus;				/* output maxus */
 			end_x = X_end[i];
 			end_y = Y_end[i];
 
+//			int dx, dy;
+//			dy = 31;
+//			dx = 4980;
+//			if (start_x == dx && start_y == dy) {
+//				printf("x=%i, y=%i\n", start_x, start_y);
+//				printf("x=%i, y=%i\n", end_x, end_y);
+//			}
 
 			// determine the points along the line
 			line_length = find_line(start_x, start_y, end_x, end_y, nx, ny, xcoords, ycoords);
@@ -92,10 +99,15 @@ double *maxus;				/* output maxus */
 			int n = 0;
 			for (j = 0; j < line_length; j++) {
 				// check to ensure that the points are within the modeling domain
-				if (xcoords[j] >= 0 && xcoords[j] <= nx && ycoords[j] >= 0 && ycoords[j] <= ny){
+				if (xcoords[j] >= 0 && xcoords[j] <= nx-1 && ycoords[j] >= 0 && ycoords[j] <= ny-1){
 					xl[j] = x[xcoords[j]];
 					yl[j] = y[ycoords[j]];
-					elev[j] = (int) z[ycoords[j]*nx + xcoords[j]];
+					elev[j] = z[ycoords[j]*nx + xcoords[j]];
+
+//					if (start_x == dx && start_y == dy) {
+//						printf("%f\n", elev[j]);
+//					}
+
 					n++;
 				}
 			}
@@ -103,6 +115,11 @@ double *maxus;				/* output maxus */
 
 			// calculate the maximum upwind slope along the line
 			maxus[i] = hord(n, xl, yl, elev, height);
+
+
+//			if (start_x == dx && start_y == dy) {
+//				printf("%f\n", maxus[i]);
+//			}
 
 		}
 	}
@@ -222,6 +239,7 @@ double height;		/* instrument height */
 
 	slope_hj = slope(x[0], y[0], z[0], x[H[0]], y[H[0]], z[H[0]], height);
 	hordeg = atan(slope_hj) / PI * 180;
+//	hordeg = H[0];
 	return hordeg;
 
 

@@ -33,6 +33,7 @@ class wind_model():
         self.dy = np.abs(y[1] - y[0])
         
         X,Y = np.meshgrid(np.arange(0, self.nx), np.arange(0, self.ny))
+#         X,Y = np.meshgrid(x, y)
         self.X = X
         self.Y = Y
         self.shape = X.shape
@@ -41,7 +42,7 @@ class wind_model():
     def maxus(self, dmax, sepdist, inc=5, inst=2, out_file='smrf_maxus.nc'):
         """
         Calculate the maxus values
-        
+                
         Args:
             dmax: length of outlying upwind search vector (meters)
             sepdist: length of local max upwind slope search vector (meters)
@@ -55,7 +56,7 @@ class wind_model():
                                
                 
         self.dmax = dmax
-        self.dmax_cell = dmax / self.dx # the number of cells that dmax covers
+        self.dmax_cell = dmax / self.dx + 1# the number of cells that dmax covers
         self.sepdist = sepdist
         self.inc = inc
         self.inst_hgt = inst
@@ -74,16 +75,26 @@ class wind_model():
         
         # run model over range in wind directions
         for i,angle in enumerate(swa):
-            
+            angle = 220
             self.maxus_val = self.maxus_angle(angle)
-            self.output(self.type, i)
+#             self.output(self.type, i)
                         
-            
+            break
             
             
     def maxus_angle(self, angle):
         """
         Calculate the maxus for a single direction
+        
+        Note:
+            This will produce different results than the original maxus program.
+            The differences are due to:
+            
+            1. Using dtype=double for the elevations
+            2. Using different type of search method to find the endpoints.
+            
+            However, if the elevations are rounded to integers, the cardinal
+            directions will reproduce the original results. 
         """
         
         print "Calculating maxus for direction: %i" % (angle)
@@ -92,28 +103,38 @@ class wind_model():
         
         # calculate the endpoints
                 
-        # adjust for quatrants for going from bearing to cos/sin
-        Xi = self.X + self.dmax_cell * np.cos(angle-np.pi/2)  
-        Yi = self.Y + self.dmax_cell * np.sin(angle-np.pi/2)
+#         # adjust for quatrants for going from bearing to cos/sin
+#         Xi = self.X + self.dmax_cell * np.cos(angle-np.pi/2)  
+#         Yi = self.Y + self.dmax_cell * np.sin(angle-np.pi/2)
+#                 
+#         self.Xi = np.round(Xi)
+#         self.Yi = np.round(Yi)
+
+        # accually use the distances to ensure that we are searching far enough
+        Xi = self.X*self.dx + self.dmax * np.cos(angle-np.pi/2)  
+        Yi = self.Y*self.dy + self.dmax * np.sin(angle-np.pi/2)
         
-        self.Xi = Xi.astype(np.int)
-        self.Yi = Yi.astype(np.int)
+        self.Xi = np.floor(Xi/self.dx + 0.5)
+        self.Yi = np.floor(Yi/self.dy + 0.5)
         
+        
+        
+        # underlying C code similar to Adams
         maxus = wind_c.call_maxus(self.x, self.y, self.dem, self.X, self.Y, 
                                self.Xi, self.Yi, self.inst_hgt, self.nthreads)
         
-#         plt.imshow(mx)
-#         plt.colorbar()
-#         plt.show()
-#         
+#         maxus = self.Yi
+        
+        
+#         # my interpretation of the calculations in Python form
 #         maxus = np.zeros((self.ngrid,))
 #         pbar = progressbar.ProgressBar(max_value=self.ngrid)
 #         j = 0
-#         for index in range(self.ngrid):
+#         for index in range(5000, self.ngrid):
 #             maxus[index] = self.find_maxus(index)
 #             j += 1
 #             pbar.update(j)
-#             if j > 100000:
+#             if j > 4999:
 #                 break
 #         pbar.finish()
 #         maxus = np.reshape(maxus, self.shape)
@@ -216,7 +237,24 @@ class wind_model():
         p = np.delete(p, np.where(p[:,1] > self.nx)[0], axis=0)
             
         # determine the relative heights along the path 
-        h = self.dem[p[:,1], p[:,0]] # - (self.inst_hgt + self.dem[index])
+        h = self.dem[p[:,0], p[:,1]] # - (self.inst_hgt + self.dem[index])
+        
+#         # determine the distrance along the path
+#         xpath = self.x[p[:,1]]
+#         ypath = self.y[p[:,0]]
+#         
+#         xstart = self.x[start_point[1]]
+#         ystart = self.y[start_point[0]]
+#         
+#         dpath = np.sqrt(np.power(xpath - xstart, 2) + np.power(ypath - ystart, 2))
+#         
+#         # calculate the slope to each cell
+#         rise = h - (h[0] + self.inst_hgt)
+#         
+#         slope = rise/dpath
+#         
+#         np.max(np.abs(slope[1:]))
+        
                     
         # find the horizon for each pixel along the path
         hord = self.hord(self.x[p[:,1]], self.y[p[:,0]], h)

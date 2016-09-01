@@ -22,10 +22,9 @@ m = nc.Dataset('/home/scotthavens/Documents/Projects/smrf/examples/maxus.nc')
 
 for i,d in enumerate(w.variables['direction'][:]):
 
+#     i = 3
 
     wmxs = w.variables['maxus'][i,:]
-
-    # i = 3
     
     mxs = m.variables['maxus'][i,:]
     
