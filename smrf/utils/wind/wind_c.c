@@ -234,8 +234,8 @@ static CYTHON_INLINE float __PYX_NAN() {
   #endif
 #endif
 
-#define __PYX_HAVE__smrf__utils__wind_model__wind_c
-#define __PYX_HAVE_API__smrf__utils__wind_model__wind_c
+#define __PYX_HAVE__smrf__utils__wind__wind_c
+#define __PYX_HAVE_API__smrf__utils__wind__wind_c
 #include "string.h"
 #include "stdio.h"
 #include "stdlib.h"
@@ -471,7 +471,7 @@ static const char *__pyx_filename;
 
 
 static const char *__pyx_f[] = {
-  "smrf/utils/wind_model/wind_c.pyx",
+  "smrf/utils/wind/wind_c.pyx",
   "__init__.pxd",
   "type.pxd",
 };
@@ -1123,12 +1123,12 @@ static PyTypeObject *__pyx_ptype_5numpy_ndarray = 0;
 static PyTypeObject *__pyx_ptype_5numpy_ufunc = 0;
 static CYTHON_INLINE char *__pyx_f_5numpy__util_dtypestring(PyArray_Descr *, char *, char *, int *); /*proto*/
 
-/* Module declarations from 'smrf.utils.wind_model.wind_c' */
+/* Module declarations from 'smrf.utils.wind.wind_c' */
 static __Pyx_TypeInfo __Pyx_TypeInfo_double = { "double", NULL, sizeof(double), { 0 }, 0, 'R', 0, 0 };
-#define __Pyx_MODULE_NAME "smrf.utils.wind_model.wind_c"
-int __pyx_module_is_main_smrf__utils__wind_model__wind_c = 0;
+#define __Pyx_MODULE_NAME "smrf.utils.wind.wind_c"
+int __pyx_module_is_main_smrf__utils__wind__wind_c = 0;
 
-/* Implementation of 'smrf.utils.wind_model.wind_c' */
+/* Implementation of 'smrf.utils.wind.wind_c' */
 static PyObject *__pyx_builtin_ValueError;
 static PyObject *__pyx_builtin_range;
 static PyObject *__pyx_builtin_RuntimeError;
@@ -1183,10 +1183,10 @@ static char __pyx_k_call_maxus[] = "call_maxus";
 static char __pyx_k_zeros_like[] = "zeros_like";
 static char __pyx_k_RuntimeError[] = "RuntimeError";
 static char __pyx_k_ascontiguousarray[] = "ascontiguousarray";
+static char __pyx_k_smrf_utils_wind_wind_c[] = "smrf.utils.wind.wind_c";
 static char __pyx_k_ndarray_is_not_C_contiguous[] = "ndarray is not C contiguous";
-static char __pyx_k_smrf_utils_wind_model_wind_c[] = "smrf.utils.wind_model.wind_c";
 static char __pyx_k_Cython_wrapper_to_the_underlyin[] = "\nCython wrapper to the underlying C code\n\n20160816\n";
-static char __pyx_k_home_scotthavens_Documents_Proj[] = "/home/scotthavens/Documents/Projects/smrf/smrf/utils/wind_model/wind_c.pyx";
+static char __pyx_k_home_scotthavens_Documents_Proj[] = "/home/scotthavens/Documents/Projects/smrf/smrf/utils/wind/wind_c.pyx";
 static char __pyx_k_unknown_dtype_code_in_numpy_pxd[] = "unknown dtype code in numpy.pxd (%d)";
 static char __pyx_k_Format_string_allocated_too_shor[] = "Format string allocated too short, see comment in numpy.pxd";
 static char __pyx_k_Non_native_byte_order_not_suppor[] = "Non-native byte order not supported";
@@ -1225,7 +1225,7 @@ static PyObject *__pyx_n_s_nx;
 static PyObject *__pyx_n_s_ny;
 static PyObject *__pyx_n_s_range;
 static PyObject *__pyx_n_s_shape;
-static PyObject *__pyx_n_s_smrf_utils_wind_model_wind_c;
+static PyObject *__pyx_n_s_smrf_utils_wind_wind_c;
 static PyObject *__pyx_n_s_test;
 static PyObject *__pyx_kp_u_unknown_dtype_code_in_numpy_pxd;
 static PyObject *__pyx_n_s_x;
@@ -1234,7 +1234,7 @@ static PyObject *__pyx_n_s_y;
 static PyObject *__pyx_n_s_y_arr;
 static PyObject *__pyx_n_s_z;
 static PyObject *__pyx_n_s_zeros_like;
-static PyObject *__pyx_pf_4smrf_5utils_10wind_model_6wind_c_call_maxus(CYTHON_UNUSED PyObject *__pyx_self, PyObject *__pyx_v_x, PyObject *__pyx_v_y, PyObject *__pyx_v_Z, PyObject *__pyx_v_X, PyObject *__pyx_v_Y, PyObject *__pyx_v_Xi, PyObject *__pyx_v_Yi, double __pyx_v_height, int __pyx_v_nthreads); /* proto */
+static PyObject *__pyx_pf_4smrf_5utils_4wind_6wind_c_call_maxus(CYTHON_UNUSED PyObject *__pyx_self, PyObject *__pyx_v_x, PyObject *__pyx_v_y, PyObject *__pyx_v_Z, PyObject *__pyx_v_X, PyObject *__pyx_v_Y, PyObject *__pyx_v_Xi, PyObject *__pyx_v_Yi, double __pyx_v_height, int __pyx_v_nthreads); /* proto */
 static int __pyx_pf_5numpy_7ndarray___getbuffer__(PyArrayObject *__pyx_v_self, Py_buffer *__pyx_v_info, int __pyx_v_flags); /* proto */
 static void __pyx_pf_5numpy_7ndarray_2__releasebuffer__(PyArrayObject *__pyx_v_self, Py_buffer *__pyx_v_info); /* proto */
 static PyObject *__pyx_tuple_;
@@ -1246,7 +1246,7 @@ static PyObject *__pyx_tuple__6;
 static PyObject *__pyx_tuple__7;
 static PyObject *__pyx_codeobj__8;
 
-/* "smrf/utils/wind_model/wind_c.pyx":25
+/* "smrf/utils/wind/wind_c.pyx":25
  * @cython.wraparound(False)
  * # https://github.com/cython/cython/wiki/tutorials-NumpyPointerToC
  * def call_maxus(x, y, Z, X, Y, Xi, Yi, double height=3, int nthreads=1):             # <<<<<<<<<<<<<<
@@ -1255,10 +1255,10 @@ static PyObject *__pyx_codeobj__8;
  */
 
 /* Python wrapper */
-static PyObject *__pyx_pw_4smrf_5utils_10wind_model_6wind_c_1call_maxus(PyObject *__pyx_self, PyObject *__pyx_args, PyObject *__pyx_kwds); /*proto*/
-static char __pyx_doc_4smrf_5utils_10wind_model_6wind_c_call_maxus[] = "\n    Call the function maxus_grid in calc_wind.c which will iterate over the grid\n    within the C code\n    \n    Args:\n        ad - [nsta x nsta] matrix of distances between stations\n        dgrid - [ngrid x nsta] matrix of distances between grid points and stations\n        elevations - [nsta] array of station elevations\n        weights (return) - [ngrid x nsta] matrix of kriging weights calculated\n        nthreads - number of threads to use in parallel processing\n        \n    Out:\n        weights changed in place\n    \n    20160222 Scott Havens\n    ";
-static PyMethodDef __pyx_mdef_4smrf_5utils_10wind_model_6wind_c_1call_maxus = {"call_maxus", (PyCFunction)__pyx_pw_4smrf_5utils_10wind_model_6wind_c_1call_maxus, METH_VARARGS|METH_KEYWORDS, __pyx_doc_4smrf_5utils_10wind_model_6wind_c_call_maxus};
-static PyObject *__pyx_pw_4smrf_5utils_10wind_model_6wind_c_1call_maxus(PyObject *__pyx_self, PyObject *__pyx_args, PyObject *__pyx_kwds) {
+static PyObject *__pyx_pw_4smrf_5utils_4wind_6wind_c_1call_maxus(PyObject *__pyx_self, PyObject *__pyx_args, PyObject *__pyx_kwds); /*proto*/
+static char __pyx_doc_4smrf_5utils_4wind_6wind_c_call_maxus[] = "\n    Call the function maxus_grid in calc_wind.c which will iterate over the grid\n    within the C code\n    \n    Args:\n        ad - [nsta x nsta] matrix of distances between stations\n        dgrid - [ngrid x nsta] matrix of distances between grid points and stations\n        elevations - [nsta] array of station elevations\n        weights (return) - [ngrid x nsta] matrix of kriging weights calculated\n        nthreads - number of threads to use in parallel processing\n        \n    Out:\n        weights changed in place\n    \n    20160222 Scott Havens\n    ";
+static PyMethodDef __pyx_mdef_4smrf_5utils_4wind_6wind_c_1call_maxus = {"call_maxus", (PyCFunction)__pyx_pw_4smrf_5utils_4wind_6wind_c_1call_maxus, METH_VARARGS|METH_KEYWORDS, __pyx_doc_4smrf_5utils_4wind_6wind_c_call_maxus};
+static PyObject *__pyx_pw_4smrf_5utils_4wind_6wind_c_1call_maxus(PyObject *__pyx_self, PyObject *__pyx_args, PyObject *__pyx_kwds) {
   PyObject *__pyx_v_x = 0;
   PyObject *__pyx_v_y = 0;
   PyObject *__pyx_v_Z = 0;
@@ -1379,18 +1379,18 @@ static PyObject *__pyx_pw_4smrf_5utils_10wind_model_6wind_c_1call_maxus(PyObject
   __pyx_L5_argtuple_error:;
   __Pyx_RaiseArgtupleInvalid("call_maxus", 0, 7, 9, PyTuple_GET_SIZE(__pyx_args)); {__pyx_filename = __pyx_f[0]; __pyx_lineno = 25; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
   __pyx_L3_error:;
-  __Pyx_AddTraceback("smrf.utils.wind_model.wind_c.call_maxus", __pyx_clineno, __pyx_lineno, __pyx_filename);
+  __Pyx_AddTraceback("smrf.utils.wind.wind_c.call_maxus", __pyx_clineno, __pyx_lineno, __pyx_filename);
   __Pyx_RefNannyFinishContext();
   return NULL;
   __pyx_L4_argument_unpacking_done:;
-  __pyx_r = __pyx_pf_4smrf_5utils_10wind_model_6wind_c_call_maxus(__pyx_self, __pyx_v_x, __pyx_v_y, __pyx_v_Z, __pyx_v_X, __pyx_v_Y, __pyx_v_Xi, __pyx_v_Yi, __pyx_v_height, __pyx_v_nthreads);
+  __pyx_r = __pyx_pf_4smrf_5utils_4wind_6wind_c_call_maxus(__pyx_self, __pyx_v_x, __pyx_v_y, __pyx_v_Z, __pyx_v_X, __pyx_v_Y, __pyx_v_Xi, __pyx_v_Yi, __pyx_v_height, __pyx_v_nthreads);
 
   /* function exit code */
   __Pyx_RefNannyFinishContext();
   return __pyx_r;
 }
 
-static PyObject *__pyx_pf_4smrf_5utils_10wind_model_6wind_c_call_maxus(CYTHON_UNUSED PyObject *__pyx_self, PyObject *__pyx_v_x, PyObject *__pyx_v_y, PyObject *__pyx_v_Z, PyObject *__pyx_v_X, PyObject *__pyx_v_Y, PyObject *__pyx_v_Xi, PyObject *__pyx_v_Yi, double __pyx_v_height, int __pyx_v_nthreads) {
+static PyObject *__pyx_pf_4smrf_5utils_4wind_6wind_c_call_maxus(CYTHON_UNUSED PyObject *__pyx_self, PyObject *__pyx_v_x, PyObject *__pyx_v_y, PyObject *__pyx_v_Z, PyObject *__pyx_v_X, PyObject *__pyx_v_Y, PyObject *__pyx_v_Xi, PyObject *__pyx_v_Yi, double __pyx_v_height, int __pyx_v_nthreads) {
   int __pyx_v_nx;
   int __pyx_v_ny;
   PyArrayObject *__pyx_v_x_arr = 0;
@@ -1489,7 +1489,7 @@ static PyObject *__pyx_pf_4smrf_5utils_10wind_model_6wind_c_call_maxus(CYTHON_UN
   __pyx_pybuffernd_maxus.data = NULL;
   __pyx_pybuffernd_maxus.rcbuffer = &__pyx_pybuffer_maxus;
 
-  /* "smrf/utils/wind_model/wind_c.pyx":44
+  /* "smrf/utils/wind/wind_c.pyx":44
  * 
  *     cdef int nx, ny
  *     ny, nx = X.shape[0], X.shape[1]             # <<<<<<<<<<<<<<
@@ -1513,7 +1513,7 @@ static PyObject *__pyx_pf_4smrf_5utils_10wind_model_6wind_c_call_maxus(CYTHON_UN
   __pyx_v_ny = __pyx_t_3;
   __pyx_v_nx = __pyx_t_4;
 
-  /* "smrf/utils/wind_model/wind_c.pyx":48
+  /* "smrf/utils/wind/wind_c.pyx":48
  *     # convert the x array to C
  *     cdef np.ndarray[double, mode="c", ndim=1] x_arr
  *     x_arr = np.ascontiguousarray(x, dtype=np.float64)             # <<<<<<<<<<<<<<
@@ -1566,7 +1566,7 @@ static PyObject *__pyx_pf_4smrf_5utils_10wind_model_6wind_c_call_maxus(CYTHON_UN
   __pyx_v_x_arr = ((PyArrayObject *)__pyx_t_7);
   __pyx_t_7 = 0;
 
-  /* "smrf/utils/wind_model/wind_c.pyx":52
+  /* "smrf/utils/wind/wind_c.pyx":52
  *     # convert the x array to C
  *     cdef np.ndarray[double, mode="c", ndim=1] y_arr
  *     y_arr = np.ascontiguousarray(y, dtype=np.float64)             # <<<<<<<<<<<<<<
@@ -1619,7 +1619,7 @@ static PyObject *__pyx_pf_4smrf_5utils_10wind_model_6wind_c_call_maxus(CYTHON_UN
   __pyx_v_y_arr = ((PyArrayObject *)__pyx_t_6);
   __pyx_t_6 = 0;
 
-  /* "smrf/utils/wind_model/wind_c.pyx":56
+  /* "smrf/utils/wind/wind_c.pyx":56
  *     # convert the z array to C
  *     cdef np.ndarray[double, mode="c", ndim=2] elev
  *     elev = np.ascontiguousarray(Z, dtype=np.float64)             # <<<<<<<<<<<<<<
@@ -1672,7 +1672,7 @@ static PyObject *__pyx_pf_4smrf_5utils_10wind_model_6wind_c_call_maxus(CYTHON_UN
   __pyx_v_elev = ((PyArrayObject *)__pyx_t_2);
   __pyx_t_2 = 0;
 
-  /* "smrf/utils/wind_model/wind_c.pyx":60
+  /* "smrf/utils/wind/wind_c.pyx":60
  *     # convert the X array to C
  *     cdef np.ndarray[double, mode="c", ndim=2] X_start
  *     X_start = np.ascontiguousarray(X, dtype=np.float64)             # <<<<<<<<<<<<<<
@@ -1725,7 +1725,7 @@ static PyObject *__pyx_pf_4smrf_5utils_10wind_model_6wind_c_call_maxus(CYTHON_UN
   __pyx_v_X_start = ((PyArrayObject *)__pyx_t_5);
   __pyx_t_5 = 0;
 
-  /* "smrf/utils/wind_model/wind_c.pyx":64
+  /* "smrf/utils/wind/wind_c.pyx":64
  *     # convert the Y array to C
  *     cdef np.ndarray[double, mode="c", ndim=2] Y_start
  *     Y_start = np.ascontiguousarray(Y, dtype=np.float64)             # <<<<<<<<<<<<<<
@@ -1778,7 +1778,7 @@ static PyObject *__pyx_pf_4smrf_5utils_10wind_model_6wind_c_call_maxus(CYTHON_UN
   __pyx_v_Y_start = ((PyArrayObject *)__pyx_t_1);
   __pyx_t_1 = 0;
 
-  /* "smrf/utils/wind_model/wind_c.pyx":68
+  /* "smrf/utils/wind/wind_c.pyx":68
  *     # convert the Xi array to C
  *     cdef np.ndarray[double, mode="c", ndim=2] X_end
  *     X_end = np.ascontiguousarray(Xi, dtype=np.float64)             # <<<<<<<<<<<<<<
@@ -1831,7 +1831,7 @@ static PyObject *__pyx_pf_4smrf_5utils_10wind_model_6wind_c_call_maxus(CYTHON_UN
   __pyx_v_X_end = ((PyArrayObject *)__pyx_t_7);
   __pyx_t_7 = 0;
 
-  /* "smrf/utils/wind_model/wind_c.pyx":72
+  /* "smrf/utils/wind/wind_c.pyx":72
  *     # convert the Yi array to C
  *     cdef np.ndarray[double, mode="c", ndim=2] Y_end
  *     Y_end = np.ascontiguousarray(Yi, dtype=np.float64)             # <<<<<<<<<<<<<<
@@ -1884,7 +1884,7 @@ static PyObject *__pyx_pf_4smrf_5utils_10wind_model_6wind_c_call_maxus(CYTHON_UN
   __pyx_v_Y_end = ((PyArrayObject *)__pyx_t_6);
   __pyx_t_6 = 0;
 
-  /* "smrf/utils/wind_model/wind_c.pyx":75
+  /* "smrf/utils/wind/wind_c.pyx":75
  * 
  *     # convert the dgrid to C
  *     z = np.zeros_like(X)             # <<<<<<<<<<<<<<
@@ -1924,7 +1924,7 @@ static PyObject *__pyx_pf_4smrf_5utils_10wind_model_6wind_c_call_maxus(CYTHON_UN
   __pyx_v_z = __pyx_t_6;
   __pyx_t_6 = 0;
 
-  /* "smrf/utils/wind_model/wind_c.pyx":77
+  /* "smrf/utils/wind/wind_c.pyx":77
  *     z = np.zeros_like(X)
  *     cdef np.ndarray[double, mode="c", ndim=2] maxus
  *     maxus = np.ascontiguousarray(z, dtype=np.float64)             # <<<<<<<<<<<<<<
@@ -1977,7 +1977,7 @@ static PyObject *__pyx_pf_4smrf_5utils_10wind_model_6wind_c_call_maxus(CYTHON_UN
   __pyx_v_maxus = ((PyArrayObject *)__pyx_t_2);
   __pyx_t_2 = 0;
 
-  /* "smrf/utils/wind_model/wind_c.pyx":79
+  /* "smrf/utils/wind/wind_c.pyx":79
  *     maxus = np.ascontiguousarray(z, dtype=np.float64)
  * 
  *     calc_maxus(nx, ny, &x_arr[0], &y_arr[0], &elev[0,0], &X_start[0,0], &Y_start[0,0],             # <<<<<<<<<<<<<<
@@ -1993,7 +1993,7 @@ static PyObject *__pyx_pf_4smrf_5utils_10wind_model_6wind_c_call_maxus(CYTHON_UN
   __pyx_t_25 = 0;
   __pyx_t_26 = 0;
 
-  /* "smrf/utils/wind_model/wind_c.pyx":80
+  /* "smrf/utils/wind/wind_c.pyx":80
  * 
  *     calc_maxus(nx, ny, &x_arr[0], &y_arr[0], &elev[0,0], &X_start[0,0], &Y_start[0,0],
  *                 &X_end[0,0], &Y_end[0,0], height, nthreads, &maxus[0,0])             # <<<<<<<<<<<<<<
@@ -2007,7 +2007,7 @@ static PyObject *__pyx_pf_4smrf_5utils_10wind_model_6wind_c_call_maxus(CYTHON_UN
   __pyx_t_31 = 0;
   __pyx_t_32 = 0;
 
-  /* "smrf/utils/wind_model/wind_c.pyx":79
+  /* "smrf/utils/wind/wind_c.pyx":79
  *     maxus = np.ascontiguousarray(z, dtype=np.float64)
  * 
  *     calc_maxus(nx, ny, &x_arr[0], &y_arr[0], &elev[0,0], &X_start[0,0], &Y_start[0,0],             # <<<<<<<<<<<<<<
@@ -2016,7 +2016,7 @@ static PyObject *__pyx_pf_4smrf_5utils_10wind_model_6wind_c_call_maxus(CYTHON_UN
  */
   calc_maxus(__pyx_v_nx, __pyx_v_ny, (&(*__Pyx_BufPtrCContig1d(double *, __pyx_pybuffernd_x_arr.rcbuffer->pybuffer.buf, __pyx_t_19, __pyx_pybuffernd_x_arr.diminfo[0].strides))), (&(*__Pyx_BufPtrCContig1d(double *, __pyx_pybuffernd_y_arr.rcbuffer->pybuffer.buf, __pyx_t_20, __pyx_pybuffernd_y_arr.diminfo[0].strides))), (&(*__Pyx_BufPtrCContig2d(double *, __pyx_pybuffernd_elev.rcbuffer->pybuffer.buf, __pyx_t_21, __pyx_pybuffernd_elev.diminfo[0].strides, __pyx_t_22, __pyx_pybuffernd_elev.diminfo[1].strides))), (&(*__Pyx_BufPtrCContig2d(double *, __pyx_pybuffernd_X_start.rcbuffer->pybuffer.buf, __pyx_t_23, __pyx_pybuffernd_X_start.diminfo[0].strides, __pyx_t_24, __pyx_pybuffernd_X_start.diminfo[1].strides))), (&(*__Pyx_BufPtrCContig2d(double *, __pyx_pybuffernd_Y_start.rcbuffer->pybuffer.buf, __pyx_t_25, __pyx_pybuffernd_Y_start.diminfo[0].strides, __pyx_t_26, __pyx_pybuffernd_Y_start.diminfo[1].strides))), (&(*__Pyx_BufPtrCContig2d(double *, __pyx_pybuffernd_X_end.rcbuffer->pybuffer.buf, __pyx_t_27, __pyx_pybuffernd_X_end.diminfo[0].strides, __pyx_t_28, __pyx_pybuffernd_X_end.diminfo[1].strides))), (&(*__Pyx_BufPtrCContig2d(double *, __pyx_pybuffernd_Y_end.rcbuffer->pybuffer.buf, __pyx_t_29, __pyx_pybuffernd_Y_end.diminfo[0].strides, __pyx_t_30, __pyx_pybuffernd_Y_end.diminfo[1].strides))), __pyx_v_height, __pyx_v_nthreads, (&(*__Pyx_BufPtrCContig2d(double *, __pyx_pybuffernd_maxus.rcbuffer->pybuffer.buf, __pyx_t_31, __pyx_pybuffernd_maxus.diminfo[0].strides, __pyx_t_32, __pyx_pybuffernd_maxus.diminfo[1].strides))));
 
-  /* "smrf/utils/wind_model/wind_c.pyx":86
+  /* "smrf/utils/wind/wind_c.pyx":86
  * #     krige_grid(nsta, ngrid, &ad_arr[0,0], &grid[0,0], &elevations[0], nthreads, &weights[0,0])
  * 
  *     return maxus             # <<<<<<<<<<<<<<
@@ -2026,7 +2026,7 @@ static PyObject *__pyx_pf_4smrf_5utils_10wind_model_6wind_c_call_maxus(CYTHON_UN
   __pyx_r = ((PyObject *)__pyx_v_maxus);
   goto __pyx_L0;
 
-  /* "smrf/utils/wind_model/wind_c.pyx":25
+  /* "smrf/utils/wind/wind_c.pyx":25
  * @cython.wraparound(False)
  * # https://github.com/cython/cython/wiki/tutorials-NumpyPointerToC
  * def call_maxus(x, y, Z, X, Y, Xi, Yi, double height=3, int nthreads=1):             # <<<<<<<<<<<<<<
@@ -2052,7 +2052,7 @@ static PyObject *__pyx_pf_4smrf_5utils_10wind_model_6wind_c_call_maxus(CYTHON_UN
     __Pyx_SafeReleaseBuffer(&__pyx_pybuffernd_x_arr.rcbuffer->pybuffer);
     __Pyx_SafeReleaseBuffer(&__pyx_pybuffernd_y_arr.rcbuffer->pybuffer);
   __Pyx_ErrRestore(__pyx_type, __pyx_value, __pyx_tb);}
-  __Pyx_AddTraceback("smrf.utils.wind_model.wind_c.call_maxus", __pyx_clineno, __pyx_lineno, __pyx_filename);
+  __Pyx_AddTraceback("smrf.utils.wind.wind_c.call_maxus", __pyx_clineno, __pyx_lineno, __pyx_filename);
   __pyx_r = NULL;
   goto __pyx_L2;
   __pyx_L0:;
@@ -4278,7 +4278,7 @@ static __Pyx_StringTabEntry __pyx_string_tab[] = {
   {&__pyx_n_s_ny, __pyx_k_ny, sizeof(__pyx_k_ny), 0, 0, 1, 1},
   {&__pyx_n_s_range, __pyx_k_range, sizeof(__pyx_k_range), 0, 0, 1, 1},
   {&__pyx_n_s_shape, __pyx_k_shape, sizeof(__pyx_k_shape), 0, 0, 1, 1},
-  {&__pyx_n_s_smrf_utils_wind_model_wind_c, __pyx_k_smrf_utils_wind_model_wind_c, sizeof(__pyx_k_smrf_utils_wind_model_wind_c), 0, 0, 1, 1},
+  {&__pyx_n_s_smrf_utils_wind_wind_c, __pyx_k_smrf_utils_wind_wind_c, sizeof(__pyx_k_smrf_utils_wind_wind_c), 0, 0, 1, 1},
   {&__pyx_n_s_test, __pyx_k_test, sizeof(__pyx_k_test), 0, 0, 1, 1},
   {&__pyx_kp_u_unknown_dtype_code_in_numpy_pxd, __pyx_k_unknown_dtype_code_in_numpy_pxd, sizeof(__pyx_k_unknown_dtype_code_in_numpy_pxd), 0, 1, 0, 0},
   {&__pyx_n_s_x, __pyx_k_x, sizeof(__pyx_k_x), 0, 0, 1, 1},
@@ -4368,7 +4368,7 @@ static int __Pyx_InitCachedConstants(void) {
   __Pyx_GOTREF(__pyx_tuple__6);
   __Pyx_GIVEREF(__pyx_tuple__6);
 
-  /* "smrf/utils/wind_model/wind_c.pyx":25
+  /* "smrf/utils/wind/wind_c.pyx":25
  * @cython.wraparound(False)
  * # https://github.com/cython/cython/wiki/tutorials-NumpyPointerToC
  * def call_maxus(x, y, Z, X, Y, Xi, Yi, double height=3, int nthreads=1):             # <<<<<<<<<<<<<<
@@ -4460,14 +4460,14 @@ PyMODINIT_FUNC PyInit_wind_c(void)
   #if PY_MAJOR_VERSION < 3 && (__PYX_DEFAULT_STRING_ENCODING_IS_ASCII || __PYX_DEFAULT_STRING_ENCODING_IS_DEFAULT)
   if (__Pyx_init_sys_getdefaultencoding_params() < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 1; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   #endif
-  if (__pyx_module_is_main_smrf__utils__wind_model__wind_c) {
+  if (__pyx_module_is_main_smrf__utils__wind__wind_c) {
     if (PyObject_SetAttrString(__pyx_m, "__name__", __pyx_n_s_main) < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 1; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   }
   #if PY_MAJOR_VERSION >= 3
   {
     PyObject *modules = PyImport_GetModuleDict(); if (unlikely(!modules)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 1; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
-    if (!PyDict_GetItemString(modules, "smrf.utils.wind_model.wind_c")) {
-      if (unlikely(PyDict_SetItemString(modules, "smrf.utils.wind_model.wind_c", __pyx_m) < 0)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 1; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+    if (!PyDict_GetItemString(modules, "smrf.utils.wind.wind_c")) {
+      if (unlikely(PyDict_SetItemString(modules, "smrf.utils.wind.wind_c", __pyx_m) < 0)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 1; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
     }
   }
   #endif
@@ -4499,7 +4499,7 @@ PyMODINIT_FUNC PyInit_wind_c(void)
   if (__Pyx_patch_abc() < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 1; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   #endif
 
-  /* "smrf/utils/wind_model/wind_c.pyx":7
+  /* "smrf/utils/wind/wind_c.pyx":7
  * """
  * import cython
  * import numpy as np             # <<<<<<<<<<<<<<
@@ -4511,7 +4511,7 @@ PyMODINIT_FUNC PyInit_wind_c(void)
   if (PyDict_SetItem(__pyx_d, __pyx_n_s_np, __pyx_t_1) < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 7; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
 
-  /* "smrf/utils/wind_model/wind_c.pyx":12
+  /* "smrf/utils/wind/wind_c.pyx":12
  * # Numpy must be initialized. When using numpy from C or Cython you must
  * # _always_ do that, or you will have segfaults
  * np.import_array()             # <<<<<<<<<<<<<<
@@ -4520,19 +4520,19 @@ PyMODINIT_FUNC PyInit_wind_c(void)
  */
   import_array();
 
-  /* "smrf/utils/wind_model/wind_c.pyx":25
+  /* "smrf/utils/wind/wind_c.pyx":25
  * @cython.wraparound(False)
  * # https://github.com/cython/cython/wiki/tutorials-NumpyPointerToC
  * def call_maxus(x, y, Z, X, Y, Xi, Yi, double height=3, int nthreads=1):             # <<<<<<<<<<<<<<
  *     '''
  *     Call the function maxus_grid in calc_wind.c which will iterate over the grid
  */
-  __pyx_t_1 = PyCFunction_NewEx(&__pyx_mdef_4smrf_5utils_10wind_model_6wind_c_1call_maxus, NULL, __pyx_n_s_smrf_utils_wind_model_wind_c); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 25; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_1 = PyCFunction_NewEx(&__pyx_mdef_4smrf_5utils_4wind_6wind_c_1call_maxus, NULL, __pyx_n_s_smrf_utils_wind_wind_c); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 25; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_1);
   if (PyDict_SetItem(__pyx_d, __pyx_n_s_call_maxus, __pyx_t_1) < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 25; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
 
-  /* "smrf/utils/wind_model/wind_c.pyx":1
+  /* "smrf/utils/wind/wind_c.pyx":1
  * """             # <<<<<<<<<<<<<<
  * Cython wrapper to the underlying C code
  * 
@@ -4557,11 +4557,11 @@ PyMODINIT_FUNC PyInit_wind_c(void)
   __Pyx_XDECREF(__pyx_t_1);
   if (__pyx_m) {
     if (__pyx_d) {
-      __Pyx_AddTraceback("init smrf.utils.wind_model.wind_c", __pyx_clineno, __pyx_lineno, __pyx_filename);
+      __Pyx_AddTraceback("init smrf.utils.wind.wind_c", __pyx_clineno, __pyx_lineno, __pyx_filename);
     }
     Py_DECREF(__pyx_m); __pyx_m = 0;
   } else if (!PyErr_Occurred()) {
-    PyErr_SetString(PyExc_ImportError, "init smrf.utils.wind_model.wind_c");
+    PyErr_SetString(PyExc_ImportError, "init smrf.utils.wind.wind_c");
   }
   __pyx_L0:;
   __Pyx_RefNannyFinishContext();

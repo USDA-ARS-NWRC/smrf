@@ -61,10 +61,10 @@ class wind_model():
         self.inst_hgt = inst
                 
         # All angles that model will consider.
-#         swa = np.arange(-inc/2, 360-inc/2, inc)
+#         swa = np.arange(-inc/2.0, 360-inc/2.0, inc)
         swa = np.arange(0, 360, inc)
         self.directions = swa    
-        swa = swa * np.pi / 180
+#         swa = swa * np.pi / 180
         
         # initialize the output file
         self.out_file = out_file
@@ -77,8 +77,7 @@ class wind_model():
             
             self.maxus_val = self.maxus_angle(angle)
             self.output(self.type, i)
-            
-            break
+                        
             
             
             
@@ -87,7 +86,9 @@ class wind_model():
         Calculate the maxus for a single direction
         """
         
-        print "Calculating maxus for direction: %i" % (angle*180/np.pi)
+        print "Calculating maxus for direction: %i" % (angle)
+        
+        angle *= np.pi / 180
         
         # calculate the endpoints
                 

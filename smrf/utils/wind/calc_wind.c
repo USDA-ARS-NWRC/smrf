@@ -63,14 +63,15 @@ double *maxus;				/* output maxus */
 	int i, j, ngrid, line_length;
 	int start_x, start_y, end_x, end_y;
 	int xcoords[MAX_SIZE], ycoords[MAX_SIZE];
+	double mxs;
 
 	ngrid = nx * ny;
 
-	omp_set_dynamic(0);     // Explicitly disable dynamic teams
+	omp_set_dynamic(100);			// give 100 cells to each processor at a time
 	omp_set_num_threads(nthreads); // Use N threads for all consecutive parallel regions
 
 #pragma omp parallel shared(nx, ny, x, y, z, X_start, Y_start, X_end, Y_end, height, maxus) \
-	private(i, j, start_x, start_y, end_x, end_y, xcoords, ycoords)
+		private(i, j, start_x, start_y, end_x, end_y, xcoords, ycoords, line_length, mxs)
 	{
 #pragma omp for
 
@@ -84,17 +85,17 @@ double *maxus;				/* output maxus */
 
 
 			// determine the points along the line
-			line_length = find_line(start_x, start_y, end_x, end_y, &xcoords, &ycoords);
+			line_length = find_line(start_x, start_y, end_x, end_y, nx, ny, xcoords, ycoords);
 
 			// determine the elevations along the line
-			double elev[line_length], xl[line_length], yl[line_length];
+			double xl[line_length], yl[line_length], elev[line_length];
 			int n = 0;
 			for (j = 0; j < line_length; j++) {
 				// check to ensure that the points are within the modeling domain
 				if (xcoords[j] >= 0 && xcoords[j] <= nx && ycoords[j] >= 0 && ycoords[j] <= ny){
 					xl[j] = x[xcoords[j]];
 					yl[j] = y[ycoords[j]];
-					elev[j] = z[ycoords[j]*nx + xcoords[j]];
+					elev[j] = (int) z[ycoords[j]*nx + xcoords[j]];
 					n++;
 				}
 			}
@@ -102,7 +103,6 @@ double *maxus;				/* output maxus */
 
 			// calculate the maximum upwind slope along the line
 			maxus[i] = hord(n, xl, yl, elev, height);
-
 
 		}
 	}
@@ -114,13 +114,15 @@ double *maxus;				/* output maxus */
 
 
 /* ------------------------------------------------------------------------- */
-int find_line(start_x, start_y, end_x, end_y, xcoords, ycoords)
+int find_line(start_x, start_y, end_x, end_y, nx, ny, xcoords, ycoords)
 int start_x;		/* start x coordinate */
 int start_y;		/* start y coordinate */
 int end_x;			/* end x coordinate */
 int end_y;			/* end y coordinate */
-int *xcoords;		/* array of x coordinates */
-int *ycoords;		/* array of y coordinates */
+int nx;				/* number of points in x coordinates */
+int ny;				/* number of points in y coordinates */
+int xcoords[];		/* array of x coordinates */
+int ycoords[];		/* array of y coordinates */
 {
 	int N;
 	short *X, *Y, nextX, nextY;
@@ -128,15 +130,13 @@ int *ycoords;		/* array of y coordinates */
 
 
 	// Initialize the bresham calculation
-	nextY = (short) start_x;
-	nextX = (short) start_y;
+	nextY = (short) start_y;
+	nextX = (short) start_x;
 	X = &nextX;
 	Y = &nextY;
 
 	LineData = &Initialize;
 	Initialize.SlopeType = 0;
-	//	insertArray(&xcoords, start_x);
-	//	insertArray(&ycoords, start_y);
 	xcoords[0] = start_x;
 	ycoords[0] = start_y;
 	N = 1;
@@ -145,10 +145,12 @@ int *ycoords;		/* array of y coordinates */
 
 	while (((int)*X != end_x || (int)*Y != end_y) && N < MAX_SIZE)
 	{
+		// Check to see if the values are within the boundaries
+		if (*X > nx || *X < 0 || *Y > ny || *Y < 0) {
+			break;
+		}
 		GetNextCellCoordinate((short)start_x, (short)start_y, (short)end_x,\
 				(short)end_y, X, Y, LineData);
-		//		insertArray(xcoords, nextX);
-		//		insertArray(ycoords, nextY);
 		xcoords[N] = nextX;
 		ycoords[N] = nextY;
 		++N;
@@ -176,9 +178,9 @@ double height;		/* instrument height */
 	int i, j, found;
 	int H[N]; // index to current points horizon
 	double slope_ij, slope_hj;
+	double hordeg;
 
 	H[N - 1] = N - 1;
-
 	i = N - 2;
 	while ( i >= 0 )
 	{
@@ -187,7 +189,11 @@ double height;		/* instrument height */
 		while (found == 0)
 		{
 			slope_ij = slope(x[i], y[i], z[i], x[j], y[j], z[j], height);
-			slope_hj = slope(x[i], y[i], z[i], x[H[j]], y[H[j]], z[H[j]], height);
+			slope_hj = slope(x[j], y[j], z[j], x[H[j]], y[H[j]], z[H[j]], height);
+
+			//			slope_ij = SLOPE(i, j, xcoords, ycoords, z, height);
+			//			slope_hj = SLOPE(j, H[j], xcoords, ycoords, z, height);
+
 			if (slope_ij < slope_hj)
 			{
 				if (j == N - 1)
@@ -196,22 +202,27 @@ double height;		/* instrument height */
 					H[i] = j;
 				}
 				else
+				{
 					j = H[j];
+				}
 			}
 			else
 			{
 				found = 1;
-				if (slope_ij > slope_hj)
+				if (slope_ij > slope_hj) {
 					H[i] = j;
-				else
+				} else {
 					H[i] = H[j];
+				}
 			}
 		}
 		--i;
 	}
 
+
 	slope_hj = slope(x[0], y[0], z[0], x[H[0]], y[H[0]], z[H[0]], height);
-	return atan(slope_hj) / PI * 180;
+	hordeg = atan(slope_hj) / PI * 180;
+	return hordeg;
 
 
 }
@@ -229,11 +240,30 @@ double height;
 
 	rise = z2 - ( height + z1 );
 	run = sqrt((x2 - x1) * (x2 - x1) + (y2 - y1) * (y2 - y1));
-	return rise/run;
+
+	return (rise/run);
 }
 
 
-
+//float SLOPE (l, m, xcoords, ycoords, elevs, height)
+//int l;
+//int m;
+//int xcoords[];
+//int ycoords[];
+//int elevs[];
+//int height;
+//{
+//	int rise;
+//	float run, slop, cellsize=30;
+//
+//	rise = elevs[m] - ( height + elevs[l] );
+//	//	rise = 10;
+//	//	run = 10.0;
+//	run = sqrt((xcoords[l] - xcoords[m]) * (xcoords[l] - xcoords[m]) + \
+//			(ycoords[l] - ycoords[m]) * (ycoords[l] - ycoords[m])) * cellsize;
+//	slop = rise/run;
+//	return slop;
+//}
 
 
 

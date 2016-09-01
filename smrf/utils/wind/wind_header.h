@@ -14,5 +14,7 @@ extern double hord(int N, double *x, double *y, double *z, double height);
 
 extern double slope (double x1, double y1, double z1, double x2, double y2, double z2, double height);
 
-//extern void find_line(int start_x, int start_y, int end_x, int end_y,
-//		Array *xcoords, Array *ycoords);
+//extern float SLOPE (int l, int m, int xcoords[], int ycoords[], int elevs[], int height);
+
+extern int find_line(int start_x, int start_y, int end_x, int end_y,
+		int nx, int ny, int xcoords[], int ycoords[]);
