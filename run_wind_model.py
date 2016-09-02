@@ -23,7 +23,7 @@ faulthandler.enable()
 # DEM file to read in
 dem_file = '../test_data/topo/dem30m.ipw'
 dem_file = '/home/scotthavens/Documents/Projects/smrf/test_data/topo/dem30m.ipw'
-dem_file = '/home/scotthavens/Documents/Projects/smrf/smrf/utils/wind/ned30m_brb.ipw'
+# dem_file = '/home/scotthavens/Documents/Projects/smrf/smrf/utils/wind/ned30m_brb.ipw'
 
 # # middle upwind direction around which to run model (degrees)
 # angle = 180
@@ -44,6 +44,7 @@ inst = 3
 windower = 30
 
 save_file = '/home/scotthavens/Documents/Projects/smrf/examples/smrf_maxus.nc'
+save_file2 = '/home/scotthavens/Documents/Projects/smrf/examples/smrf_tbreak.nc'
 
 #------------------------------------------------------------------------------
 # run the wind model
@@ -59,44 +60,14 @@ y = dem.bands[0].y
 w = wind_model(x, y, dem_data, nthreads=12)
 
 # calculate the maxus for the parameters and output to file
-w.maxus(dmax, sepdist, inc, inst, save_file)
+w.maxus(dmax, inc, inst, save_file)
+print datetime.now() - start
 
 # window the maxus values based on the maxus values in the file
-# w.windower(save_file, windower, 'maxus')
+w.windower(save_file, windower, 'maxus')
+
+# calculate the maxus for the parameters and output to file
+# w.tbreak(dmax, sepdist, inc, inst, save_file2)
 
 
-
-#------------------------------------------------------------------------------
-# compare with the original outputs
-print 'loading comparison...'
- 
- 
-# for i,d in enumerate(w.directions):
- 
-# i = 0
-# m = nc.Dataset('/home/scotthavens/Documents/Projects/smrf/examples/maxus.nc')
-# orig_mxs = m.variables['maxus'][i,:]
-# m.close()
- 
-
-mxs = np.loadtxt('/home/scotthavens/Documents/Projects/smrf/smrf/utils/wind/maxus_220.asc', skiprows=6)
- 
-   
-plt.imshow(w.maxus_val - mxs)#, clim=(-2,2))
-plt.colorbar()
-plt.show()
- 
-# plt.plot(w.maxus_val[1,:] - mxs[1,:])
-# plt.show()
-#  
-sz = (5000*5000)
-  
-H,xedges,yedges = np.histogram2d(np.reshape(w.maxus_val,sz), np.reshape(mxs,sz), bins=100)
-# H,xedges,yedges = np.histogram2d(np.reshape(mxs,sz), np.reshape(orig_mxs,sz), bins=100)
-Hm = np.ma.masked_where(H == 0, H)
-im = plt.imshow(Hm, interpolation='nearest', origin='low',
-                extent=[xedges[0], xedges[-1], yedges[0], yedges[-1]])
-plt.plot([-60,60],[-60,60],'r')
-plt.show()
-
-datetime.now() - start
+print datetime.now() - start

@@ -8,13 +8,16 @@ import numpy as np
 import os
 import netCDF4 as nc
 import matplotlib.pyplot as plt
-import progressbar
+# import progressbar
 from datetime import datetime
 
 import wind_c
 
 
 class wind_model():
+    """
+    A method for calculating the wind fields based on work by Adam Winstral.
+    """
     
     def __init__(self, x, y, dem, nthreads=1):
         """
@@ -33,39 +36,34 @@ class wind_model():
         self.dy = np.abs(y[1] - y[0])
         
         X,Y = np.meshgrid(np.arange(0, self.nx), np.arange(0, self.ny))
-#         X,Y = np.meshgrid(x, y)
         self.X = X
         self.Y = Y
         self.shape = X.shape
         
-                
-    def maxus(self, dmax, sepdist, inc=5, inst=2, out_file='smrf_maxus.nc'):
+       
+          
+    def maxus(self, dmax, inc=5, inst=2, out_file='smrf_maxus.nc'):
         """
         Calculate the maxus values
                 
         Args:
             dmax: length of outlying upwind search vector (meters)
-            sepdist: length of local max upwind slope search vector (meters)
-            angle: middle upwind direction around which to run model (degrees)
             inc: increment between direction calculations (degrees)
             inst: Anemometer height (meters)
+            out_file: NetCDF file for output results
         """
         
-        if (sepdist % self.dx != 0) | (dmax % self.dx != 0):
-            raise ValueError('sepdist and dmax must divide evenly into the DEM')
+        if (dmax % self.dx != 0):
+            raise ValueError('dmax must divide evenly into the DEM')
                                
                 
         self.dmax = dmax
-        self.dmax_cell = dmax / self.dx + 1# the number of cells that dmax covers
-        self.sepdist = sepdist
         self.inc = inc
         self.inst_hgt = inst
                 
         # All angles that model will consider.
-#         swa = np.arange(-inc/2.0, 360-inc/2.0, inc)
         swa = np.arange(0, 360, inc)
         self.directions = swa    
-#         swa = swa * np.pi / 180
         
         # initialize the output file
         self.out_file = out_file
@@ -75,16 +73,70 @@ class wind_model():
         
         # run model over range in wind directions
         for i,angle in enumerate(swa):
-            angle = 220
-            self.maxus_val = self.maxus_angle(angle)
-#             self.output(self.type, i)
-                        
-            break
+            
+            self.maxus_val = self.maxus_angle(angle, self.dmax)
+            self.output(self.type, i)
+                  
             
             
-    def maxus_angle(self, angle):
+    def tbreak(self, dmax, sepdist, inc=5, inst=2, out_file='smrf_tbreak.nc'):
         """
-        Calculate the maxus for a single direction
+        Calculate the topobreak values
+                
+        Args:
+            dmax: length of outlying upwind search vector (meters)
+            sepdist: length of local max upwind slope search vector (meters)
+            angle: middle upwind direction around which to run model (degrees)
+            inc: increment between direction calculations (degrees)
+            inst: Anemometer height (meters)
+            out_file: NetCDF file for output results
+        """
+        
+        if (sepdist % self.dx != 0) | (dmax % self.dx != 0):
+            raise ValueError('sepdist and dmax must divide evenly into the DEM')
+                               
+                
+        self.dmax = dmax
+        self.sepdist = sepdist
+        self.inc = inc
+        self.inst_hgt = inst
+                
+        # All angles that model will consider.
+        swa = np.arange(0, 360, inc)
+        self.directions = swa    
+        
+        # initialize the output file
+        self.out_file = out_file
+        self.type = 'tbreak'
+        self.output_init(self.type, out_file)        
+          
+        
+        # run model over range in wind directions
+        for i,angle in enumerate(swa):
+            
+            # calculate the maxus value
+            maxus = self.maxus_angle(angle, self.dmax)
+            
+            # calculate the local maxus value
+            tbreak = self.maxus_angle(angle, self.sepdist)
+            
+            self.maxus_val = maxus - tbreak
+            
+            self.output(self.type, i)
+            
+                  
+    
+    def maxus_angle(self, angle, dmax):
+        """
+        Calculate the maxus for a single direction for a search distance dmax
+        
+        Args:
+            angle: middle upwind direction around which to run model (degrees)
+            dmax: length of outlying upwind search vector (meters)
+            
+        Returns:
+            maxus: array of maximum upwind slope values within dmax
+            
         
         Note:
             This will produce different results than the original maxus program.
@@ -102,28 +154,17 @@ class wind_model():
         angle *= np.pi / 180
         
         # calculate the endpoints
-                
-#         # adjust for quatrants for going from bearing to cos/sin
-#         Xi = self.X + self.dmax_cell * np.cos(angle-np.pi/2)  
-#         Yi = self.Y + self.dmax_cell * np.sin(angle-np.pi/2)
-#                 
-#         self.Xi = np.round(Xi)
-#         self.Yi = np.round(Yi)
-
         # accually use the distances to ensure that we are searching far enough
-        Xi = self.X*self.dx + self.dmax * np.cos(angle-np.pi/2)  
-        Yi = self.Y*self.dy + self.dmax * np.sin(angle-np.pi/2)
+        Xi = self.X*self.dx + dmax * np.cos(angle-np.pi/2)  
+        Yi = self.Y*self.dy + dmax * np.sin(angle-np.pi/2)
         
         self.Xi = np.floor(Xi/self.dx + 0.5)
         self.Yi = np.floor(Yi/self.dy + 0.5)
         
         
-        
         # underlying C code similar to Adams
         maxus = wind_c.call_maxus(self.x, self.y, self.dem, self.X, self.Y, 
                                self.Xi, self.Yi, self.inst_hgt, self.nthreads)
-        
-#         maxus = self.Yi
         
         
 #         # my interpretation of the calculations in Python form
@@ -199,9 +240,7 @@ class wind_model():
             
             # put it into the output file
             self.output(wtype, i)
-            
-            break
-        
+                    
         n.close()
         
         
