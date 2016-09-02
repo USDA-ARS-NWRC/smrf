@@ -17,12 +17,11 @@ smrf.utils.utils module
     :undoc-members:
     :show-inheritance:
 
-smrf.utils.wind_model package
------------------------------
+smrf.utils.wind package
+-----------------------
 
-.. 
-  .. toctree::
-      smrf.utils.wind_model
+.. toctree::
+    smrf.utils.wind
 
 Module contents
 ---------------

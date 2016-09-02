@@ -1,13 +1,12 @@
-"""
-Cython implementation of Adam Winstral's wind model
-
-20160623
-"""
+__author__ = "Scott Havens"
+__maintainer__ = "Scott Havens"
+__email__ = "scott.havens@ars.usda.gov"
+__date__ = "2016-09-01"
 
 import numpy as np
 import os
 import netCDF4 as nc
-import matplotlib.pyplot as plt
+# import matplotlib.pyplot as plt
 # import progressbar
 from datetime import datetime
 
@@ -16,13 +15,34 @@ import wind_c
 
 class wind_model():
     """
-    A method for calculating the wind fields based on work by Adam Winstral.
+        
+    Estimating wind speed and direction is complex terrain can be difficult due to the interaction
+    of the local topography with the wind. The methods described here follow the work developed by
+    Winstral and Marks (2002) and Winstral et al. (2009) :cite:`Winstral&Marks:2002` :cite:`Winstral&al:2009`
+    which parameterizes the terrain based on the upwind direction. The underlying method calulates
+    the maximum upwind slope (maxus) within a search distance to determine if a cell is sheltered or exposed.
+    
+    The azimuth **A** is the direction of the prevailing wind for which the maxus value will be calculated
+    within a maximum search distance **dmax**. The maxus (**Sx**) parameter can then be estimated as the
+    maximum value of the slope from the cell of interest to all of the grid cells along the search vector.
+    The efficiency in selection of the maximum value can be increased by using the techniques from the
+    horizon functio which calculates the horizon for each pixel. Therefore, less calculations can
+    be performed. Negative **Sx** values indicate an exposed pixel location (shelter pixel was lower)
+    and positive **Sx** values indicate a sheltered pixel (shelter pixel was higher). 
+    
+    After all the upwind direction are calculated, the average **Sx** over a window is calculated.
+    The average **Sx** accounts for larger lanscape obsticles that may be adjacent to the upwind direction
+    and affect the flow. A window size in degrees takes the average of all **Sx**.
+    
+    Args:
+        x: array of x locations
+        y: array of y locations
+        dem: matrix of the dem elevation values
+        nthread: number of threads to use for maxus calculation
+    
     """
     
     def __init__(self, x, y, dem, nthreads=1):
-        """
-        Initialize with the dem
-        """
         
         self.x = x
         self.y = y
@@ -51,6 +71,9 @@ class wind_model():
             inc: increment between direction calculations (degrees)
             inst: Anemometer height (meters)
             out_file: NetCDF file for output results
+            
+        Returns:
+            None, outputs maxus array straight to file
         """
         
         if (dmax % self.dx != 0):
@@ -90,6 +113,10 @@ class wind_model():
             inc: increment between direction calculations (degrees)
             inst: Anemometer height (meters)
             out_file: NetCDF file for output results
+            
+        Returns:
+            None, outputs maxus array straight to file
+            
         """
         
         if (sepdist % self.dx != 0) | (dmax % self.dx != 0):
@@ -130,14 +157,6 @@ class wind_model():
         """
         Calculate the maxus for a single direction for a search distance dmax
         
-        Args:
-            angle: middle upwind direction around which to run model (degrees)
-            dmax: length of outlying upwind search vector (meters)
-            
-        Returns:
-            maxus: array of maximum upwind slope values within dmax
-            
-        
         Note:
             This will produce different results than the original maxus program.
             The differences are due to:
@@ -147,6 +166,16 @@ class wind_model():
             
             However, if the elevations are rounded to integers, the cardinal
             directions will reproduce the original results. 
+        
+        Args:
+            angle: middle upwind direction around which to run model (degrees)
+            dmax: length of outlying upwind search vector (meters)
+            
+        Returns:
+            maxus: array of maximum upwind slope values within dmax
+            
+        
+       
         """
         
         print "Calculating maxus for direction: %i" % (angle)
@@ -190,7 +219,7 @@ class wind_model():
         """
         Take the maxus output and average over the window width
         
-        Arg:
+        Args:
             maxus_file: location of the previously calculated maxus values
             window_width: window width about the wind direction
             wtype: type of wind calculation 'maxus' or 'tbreak'
@@ -258,9 +287,11 @@ class wind_model():
         """
         Calculate the maxus given the start and end point
         
-        Arg:
-            start_point: tuple index for the start point
-            end_point: tuple index for the end point
+        Args:
+            index: index to a point in the array
+            
+        Returns:
+            maxus value for the point
         """
         
         start_point = np.unravel_index(index, self.shape)
@@ -310,6 +341,17 @@ class wind_model():
         
         
     def bresenham(self, start, end):
+        """
+        Python implementation of the Bresenham algorthim to find
+        all the pixels that a line between start and end interscet
+        
+        Args:
+            start: list of start point
+            end: list of end point
+            
+        Returns:
+            Array path of all points between start and end
+        """
 #         start = list(start)
 #         end = list(end)
         path = []
@@ -369,12 +411,13 @@ class wind_model():
         the horizon
         
         Args:
+            x: x locations for the points
+            y: y locations for the points
             z: elevations for the points
         
         Returns:
-            h: index to the horizon point
+            array of the horizon index for each point
         
-        20150601 Scott Havens
         '''
         
         N = len(z)  # number of points to look at
@@ -419,7 +462,6 @@ class wind_model():
     def _slope(self, xi, zi, xj, zj):
         '''
         Slope between the two points
-        20150603 Scott Havens
         '''
         
         return (zj - zi) / (xj - float(xi))
@@ -427,7 +469,11 @@ class wind_model():
         
     def output_init(self, ptype, filename):
         """
-        Write the type out to netCDF
+        Initialize a NetCDF file for outputing the maxus values or tbreak
+        
+        Args:
+            ptype: type of calculation that will be saved, either 'maxus' or 'tbreak'
+            filename: filename to save the output into
         """
         
         if ptype == 'maxus':
@@ -473,6 +519,13 @@ class wind_model():
         
     
     def output(self, ptype, index):
+        """
+        Output the data into the out file that has previously been initialized.
+        
+        Args:
+            ptype: type of calculation that will be saved, either 'maxus' or 'tbreak'
+            index: index into the file for where to place the output
+        """
                  
         s = nc.Dataset(self.out_file, 'r+')
         
