@@ -1,8 +1,0 @@
-gcc -c breshen.c
-gcc -c grid_io.c
-gcc -c topobreak.c
-gcc -c maxus_v2.0.c
-gcc -c windower.c
-gcc breshen.o grid_io.o topobreak.o -lm -o topobreak
-gcc breshen.o grid_io.o maxus_v2.0.o -lm -o maxus
-gcc breshen.o grid_io.o windower.o -lm -o windower

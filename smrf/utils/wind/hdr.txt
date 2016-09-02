@@ -1,6 +1,0 @@
-ncols         5000
-nrows         5000
-xllcorner     550000
-yllcorner     4770000
-cellsize      30
-NODATA_value  -9999
