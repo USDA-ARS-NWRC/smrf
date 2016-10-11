@@ -72,6 +72,7 @@ class SMRF():
                         'albedo_vis', 'albedo_ir', 'net_solar', 'cloud_factor', 'thermal',
                         'output']
 
+
     def __init__(self, configFile):
         """
         Initialize the model, read config file, start and end date, and logging
@@ -125,6 +126,8 @@ class SMRF():
         self.date_time = [di.replace(tzinfo=tzinfo) for di in d]
         self.time_steps = len(self.date_time)    # number of time steps to model
         
+        # initialize the distribute dict
+        self.distribute = {}
                 
         # start logging
         
@@ -143,13 +146,20 @@ class SMRF():
             logfile = self.config['logging']['log_file']
 
         if logfile is not None:
-            logging.basicConfig(filename=logfile, filemode='w', level=numeric_level)
+            logging.basicConfig(filename=logfile, filemode='w', level=numeric_level, format='%(levelname)s:%(name)s:%(message)s')
         else:
             logging.basicConfig(level=numeric_level)
             
         self._loglevel = numeric_level
         
-        self._logger = logging.getLogger(__name__)        
+        self._logger = logging.getLogger(__name__)
+        
+        # add the title
+        title = self.title(2)
+        for line in title:
+            self._logger.info(line)
+        
+              
         self._logger.info('Started SMRF --> %s' % datetime.now())
         self._logger.info('Model start --> %s' % self.start_date)
         self._logger.info('Model end --> %s' % self.end_date)
@@ -207,7 +217,7 @@ class SMRF():
             * :func:`Soil Temperature <smrf.distribute.soil_temp.ts>`
         """
         
-        self.distribute = {}
+        
         
         # 1. Air temperature
         self.distribute['air_temp'] = distribute.air_temp.ta(self.config['air_temp'])  # get the class
@@ -648,6 +658,46 @@ class SMRF():
                 # output the time step
                 self.out_func.output(v['variable'], data, current_time_step)
                 
+                
+    def title(self, option):
+        """
+        A little title to go at the top of the logger file
+        """
+        
+        if option == 1:
+            title = ["  .----------------.  .----------------.  .----------------.  .----------------.", 
+                " | .--------------. || .--------------. || .--------------. || .--------------. |",
+                " | |    _______   | || | ____    ____ | || |  _______     | || |  _________   | |",
+                " | |   /  ___  |  | || ||_   \  /   _|| || | |_   __ \    | || | |_   ___  |  | |",
+                " | |  |  (__ \_|  | || |  |   \/   |  | || |   | |__) |   | || |   | |_  \_|  | |",
+                " | |   '.___`-.   | || |  | |\  /| |  | || |   |  __ /    | || |   |  _|      | |",
+                " | |  |`\____) |  | || | _| |_\/_| |_ | || |  _| |  \ \_  | || |  _| |_       | |",
+                " | |  |_______.'  | || ||_____||_____|| || | |____| |___| | || | |_____|      | |",
+                " | |              | || |              | || |              | || |              | |",
+                " | '--------------' || '--------------' || '--------------' || '--------------' |",
+                "  '----------------'  '----------------'  '----------------'  '----------------' ",
+                " "]
+ 
+        elif option == 2:
+            title = ["    SSSSSSSSSSSSSSS  MMMMMMMM               MMMMMMMM RRRRRRRRRRRRRRRRR    FFFFFFFFFFFFFFFFFFFFFF",
+                "  SS:::::::::::::::S M:::::::M             M:::::::M R::::::::::::::::R   F::::::::::::::::::::F",
+                " S:::::SSSSSS::::::S M::::::::M           M::::::::M R::::::RRRRRR:::::R  F::::::::::::::::::::F",
+                " S:::::S     SSSSSSS M:::::::::M         M:::::::::M RR:::::R     R:::::R FF::::::FFFFFFFFF::::F",
+                " S:::::S             M::::::::::M       M::::::::::M   R::::R     R:::::R   F:::::F       FFFFFF",
+                " S:::::S             M:::::::::::M     M:::::::::::M   R::::R     R:::::R   F:::::F",
+                "  S::::SSSS          M:::::::M::::M   M::::M:::::::M   R::::RRRRRR:::::R    F::::::FFFFFFFFFF", 
+                "   SS::::::SSSSS     M::::::M M::::M M::::M M::::::M   R:::::::::::::RR     F:::::::::::::::F",  
+                "     SSS::::::::SS   M::::::M  M::::M::::M  M::::::M   R::::RRRRRR:::::R    F:::::::::::::::F",  
+                "        SSSSSS::::S  M::::::M   M:::::::M   M::::::M   R::::R     R:::::R   F::::::FFFFFFFFFF",  
+                "             S:::::S M::::::M    M:::::M    M::::::M   R::::R     R:::::R   F:::::F",  
+                "             S:::::S M::::::M     MMMMM     M::::::M   R::::R     R:::::R   F:::::F",            
+                " SSSSSSS     S:::::S M::::::M               M::::::M RR:::::R     R:::::R FF:::::::FF",           
+                " S::::::SSSSSS:::::S M::::::M               M::::::M R::::::R     R:::::R F::::::::FF",
+                " S:::::::::::::::SS  M::::::M               M::::::M R::::::R     R:::::R F::::::::FF",          
+                "  SSSSSSSSSSSSSSS    MMMMMMMM               MMMMMMMM RRRRRRRR     RRRRRRR FFFFFFFFFFF",
+                " "]
+
+        return title
                 
 #     def output_thread(self, q):
 #         """
