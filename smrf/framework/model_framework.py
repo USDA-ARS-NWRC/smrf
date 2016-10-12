@@ -347,7 +347,7 @@ class SMRF():
             self.distributeData_single()
             
             
-    
+    @profile
     def distributeData_single(self):
         """
         Distribute the measurement point data for all variables in serial. Each

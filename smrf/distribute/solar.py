@@ -527,11 +527,11 @@ class solar(image_data.image_data):
         self._logger.debug('Calculating clear sky radiation, ir')
         
         ir_cmd = 'stoporad -z %i -t %s -w %s -g %s -x 0.7,2.8 -s %s'\
-            ' -d %s -f %i -y %i -A %s,%s -a %i -m %i -c %i -D %s > %s' \
+            ' -d %s -f %i -y %i -A %f,%f -a %i -m %i -c %i -D %s > %s' \
             % (self.config['clear_opt_depth'], str(self.config['clear_tau']), \
                str(self.config['clear_omega']), str(self.config['clear_gamma']), \
                str(min_storm_day), str(wy_day), tz_min_west, wyear, \
-               str(cosz), str(azimuth), self.albedoConfig['grain_size'], self.albedoConfig['max_grain'], \
+               cosz, azimuth, self.albedoConfig['grain_size'], self.albedoConfig['max_grain'], \
                self.albedoConfig['dirt'], self.stoporad_in, self.ir_file)
             
 #         self._logger.debug(ir_cmd)
@@ -565,11 +565,11 @@ class solar(image_data.image_data):
         self._logger.debug('Calculating clear sky radiation, visible')
         
         vis_cmd = 'stoporad -z %i -t %s -w %s -g %s -x 0.28,0.7 -s %s'\
-            ' -d %s -f %i -y %i -A %s,%s -a %i -m %i -c %i -D %s > %s' \
+            ' -d %s -f %i -y %i -A %f,%f -a %i -m %i -c %i -D %s > %s' \
             % (self.config['clear_opt_depth'], str(self.config['clear_tau']), \
                str(self.config['clear_omega']), str(self.config['clear_gamma']), \
                str(min_storm_day), str(wy_day), tz_min_west, wyear, \
-               str(cosz), str(azimuth), self.albedoConfig['grain_size'], self.albedoConfig['max_grain'], \
+               cosz, azimuth, self.albedoConfig['grain_size'], self.albedoConfig['max_grain'], \
                self.albedoConfig['dirt'], self.stoporad_in, self.vis_file)
 #         self._logger.debug(vis_cmd)
             
