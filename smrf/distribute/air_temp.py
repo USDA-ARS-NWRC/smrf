@@ -1,9 +1,7 @@
-"""
-20151230 Scott Havens
-
-Distribute air temperature
-
-"""
+__author__ = "Scott Havens"
+__maintainer__ = "Scott Havens"
+__email__ = "scott.havens@ars.usda.gov"
+__date__ = "2015-12-30"
 
 # import numpy as np
 import logging
@@ -13,14 +11,27 @@ from smrf.distribute import image_data
 
 class ta(image_data.image_data):
     """
-    ta extends the base class of image_data()
-    The ta() class allows for variable specific distributions that 
-    go beyond the base class
+    The :mod:`~smrf.distribute.air_temp.ta` class allows for variable specific distributions that 
+    go beyond the base class.
+    
+    Air temperature is a relatively simple variable to distribute as it does
+    not rely on any other variables, but has many variables that depend on it.
+    Air temperature typically has a negative trend with elevation and performs
+    best when detrended. However, even with a negative trend, it is possible to
+    have instances where the trend does not apply, for example a temperature
+    inversion or cold air pooling.  These types of conditions will have unintended
+    concequences on variables that use the distributed air temperature.
+    
+    Args:
+        taConfig: The [air_temp] section of the configuration file
     
     Attributes:
         config: configuration from [air_temp] section
-        air_temp: numpy matrix of the air temperature
+        air_temp: numpy array of the air temperature
         stations: stations to be used in alphabetical order
+        output_variables: Dictionary of the variables held within class :mod:`!smrf.distribute.air_temp.ta`
+            that specifies the ``units`` and ``long_name`` for creating the NetCDF output file.
+        variable: 'air_temp'
     
     """
     
@@ -47,12 +58,14 @@ class ta(image_data.image_data):
         
     def initialize(self, topo, metadata):
         """
-        Initialize the distribution, calls image_data.image_data._initialize()
+        Initialize the distribution, soley calls :mod:`smrf.distribute.image_data.image_data._initialize`.
         
         Args:
-            topo: smrf.data.loadTopo.topo instance contain topo data/info
-            metadata: metadata dataframe containing the station metadata
-                        
+            topo: :mod:`smrf.data.loadTopo.topo` instance contain topographic data
+                and infomation
+            metadata: metadata Pandas dataframe containing the station metadata,
+                from :mod:`smrf.data.loadData` or :mod:`smrf.data.loadGrid`
+                
         """
         
         self._logger.debug('Initializing distribute.air_temp')
@@ -62,10 +75,11 @@ class ta(image_data.image_data):
         
     def distribute(self, data):
         """
-        Distribute air temperature
+        Distribute air temperature given a Panda's dataframe for a single time step. Calls
+        :mod:`smrf.distribute.image_data.image_data._distribute`.
         
         Args:
-            data: air_temp data frame
+            data: Pandas dataframe for a single time step from air_temp
             
         """
     
@@ -76,14 +90,14 @@ class ta(image_data.image_data):
         
     def distribute_thread(self, queue, data):
         """
-        Distribute the data using threading and queue
+        Distribute the data using threading and queue. All data is provided and ``distribute_thread``
+        will go through each time step and call :mod:`smrf.distribute.air_temp.ta.distribute` then
+        puts the distributed data into ``queue['air_temp']``.
          
         Args:
-            queue: queue dict for all variables
-            data: pandas dataframe for all data required
+            queue: queue dictionary for all variables
+            data: pandas dataframe for all data, indexed by date time
          
-        Output:
-            Changes the queue air_temp for the given date
         """
          
         for t in data.index:

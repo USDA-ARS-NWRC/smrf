@@ -8,6 +8,16 @@ utm == 0.4.0
 cryptography == 1.2.2
 mysql_connector_repackaged == 0.3.1
 netCDF4 == 1.2.2
+<<<<<<< HEAD
+=======
+numpy == 1.11.0
+>>>>>>> 8e7698d3a0aa4b2eb9b3666fb9071f26ddd5c545
 pandas == 0.17.1
 PyYAML == 3.11
+<<<<<<< HEAD
 faulthandler == 2.4
+=======
+progressbar2 >= 3.6.2
+sphinxcontrib-bibtex == 0.3.4
+
+>>>>>>> 8e7698d3a0aa4b2eb9b3666fb9071f26ddd5c545

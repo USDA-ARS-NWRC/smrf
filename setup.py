@@ -45,31 +45,44 @@ ext_modules += [
                 Extension(mname,
                           sources=[os.path.join(loc, val) for val in ["detrended_kriging.pyx", "krige.c", "lusolv.c", "array.c"]],
                           include_dirs=[numpy.get_include()],
-                          extra_compile_args=['-fopenmp'],
-                          extra_link_args=['-fopenmp']
+                          extra_compile_args=['-fopenmp', '-O3'],
+                          extra_link_args=['-fopenmp', '-O3']
                           ),
                 ]
 cmdclass.update({ 'build_ext': build_ext })
 
 # envphys core c functions
-loc = 'smrf/envphys/core_c' # location of the dk folder
-mname = os.path.join(loc, 'core_c')
+loc = 'smrf/envphys/core' # location of the folder
+mname = os.path.join(loc, 'envphys_c')
 mname = mname.replace('/', '.')
 
 ext_modules += [
                 Extension(mname,
-                          sources=[os.path.join(loc, val) for val in ["core_c.pyx", "topotherm.c", "dewpt.c"]],
+                          sources=[os.path.join(loc, val) for val in ["envphys_c.pyx", "topotherm.c", "dewpt.c"]],
                           include_dirs=[numpy.get_include()],
-                          extra_compile_args=['-fopenmp'],
-                          extra_link_args=['-fopenmp']
+                          extra_compile_args=['-fopenmp', '-O3'],
+                          extra_link_args=['-fopenmp', '-O3']
                           ),
                 ]
-cmdclass.update({ 'build_ext': build_ext })
+
+# wind model c functions
+loc = 'smrf/utils/wind' # location of the folder
+mname = os.path.join(loc, 'wind_c')
+mname = mname.replace('/', '.')
+
+ext_modules += [
+                Extension(mname,
+                          sources=[os.path.join(loc, val) for val in ["wind_c.pyx", "breshen.c", "calc_wind.c"]],
+                          include_dirs=[numpy.get_include()],
+                          extra_compile_args=['-fopenmp', '-O3'],
+                          extra_link_args=['-fopenmp', '-O3']
+                          ),
+                ]
 
 
 
 
-with open('README.rst') as readme_file:
+with open('README.md') as readme_file:
     readme = readme_file.read()
 
 with open('HISTORY.rst') as history_file:
@@ -97,13 +110,13 @@ test_requirements = [
 
 setup(
     name='smrf',
-    version='0.1.0',
+    version='0.0.0',
     description="Distributed snow modeling for water resources",
     long_description=readme + '\n\n' + history,
     author="Scott Havens",
     author_email='scotthavens@ars.usda.gov',
     url='https://gitlab.com/ars-snow/smrf',
-    packages=['smrf', 'smrf.data', 'smrf.distribute', 'smrf.envphys', 'smrf.envphys.core_c', 'smrf.framework', 'smrf.ipw', 'smrf.model', 'smrf.output', 'smrf.spatial', 'smrf.utils', 'smrf.spatial.dk'],
+    packages=['smrf', 'smrf.data', 'smrf.distribute', 'smrf.envphys', 'smrf.envphys.core', 'smrf.framework', 'smrf.ipw', 'smrf.model', 'smrf.output', 'smrf.spatial', 'smrf.utils', 'smrf.utils.wind', 'smrf.spatial.dk'],
 #     package_dir={'smrf':'smrf'},
     include_package_data=True,
     install_requires=requirements,

@@ -6,4 +6,4 @@ __version__ = '0.1.0'
 
 from . import idw
 from . import grid
-from . import dk
+from .dk import dk

@@ -8,7 +8,7 @@ __version__ = '0.0.1'
 
 
 import numpy as np
-import matplotlib.pyplot as plt
+# import matplotlib.pyplot as plt
 # from isnobal import ipw
 
 
@@ -17,15 +17,25 @@ def mkprecip(precipitation, temperature):
     '''
     Follows the IPW command mkprecip
     
-    temperature         % snow    snow density
-
-          T < -5 C       100%        75 kg/m^3
-      -5 C <= T < -3 C   100%       100 kg/m^3
-      -3 C <= T < -1.5 C 100%       150 kg/m^3
-    -1.5 C <= T < -0.5 C 100%       175 kg/m^3
-    -0.5 C <= T < 0 C     75%       200 kg/m^3
-       0 C <= T < 0.5 C   25%       250 kg/m^3
-     0.5 C <= T            0%         0 kg/m^3
+    The precipitation phase, or the amount of precipitation falling as rain or snow, can significantly
+    alter the energy and mass balance of the snowpack, either leading to snow accumulation or inducing
+    melt :cite:`Marks&al:1998` :cite:`Kormos&al:2014`. The precipitation phase and initial snow density are
+    based on the precipitation temperature (the distributed dew point temperature) and are estimated 
+    after Susong et al (1999) :cite:`Susong&al:1999`. The table below shows the relationship to
+    precipitation temperature:
+    
+    ========= ======== ============ ===============
+    Min Temp  Max Temp Percent snow Snow density
+    [deg C]   [deg C]  [%]          [kg/m^3]
+    ========= ======== ============ ===============
+    -Inf      -5       100          75
+    -5        -3       100          100
+    -3        -1.5     100          150 
+    -1.5      -0.5     100          175 
+    -0.5      0        75           200 
+    0         0.5      25           250 
+    0.5       Inf      0            0 
+    ========= ======== ============ ===============
     
     Args:
     precipitation - array of precipitation values [mm]

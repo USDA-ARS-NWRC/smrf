@@ -18,7 +18,12 @@ import logging
 import pytz
 
 
-IPW = os.environ['IPW']     # IPW executables
+on_rtd = os.environ.get('READTHEDOCS') == 'True'
+if on_rtd:
+    IPW = '.' # placehold while building the docs
+else:
+    IPW = os.environ['IPW']     # IPW executables
+
 
 # define some constants
 MAXV = 1.0              # vis albedo when gsize = 0
@@ -228,9 +233,8 @@ def find_horizon(i, H, xr, yr, Z, mu):
 #     pbar.finish()
         
     
-        
 
-def hor1f_simple(x,z):
+def hord(z):
     '''
     Calculate the horizon pixel for all x,z
     This mimics the simple algorthim from Dozier 1981
@@ -250,7 +254,54 @@ def hor1f_simple(x,z):
     20150601 Scott Havens
     '''
     
-    N = len(x)  # number of points to look at
+    N = len(z)  # number of points to look at
+#     offset = 1      # offset from current point to start looking
+    
+    # preallocate the h array
+    h = np.zeros(N, dtype=int)
+    h[N-1] = N-1
+    i = N - 2
+    
+    # work backwarks from the end for the pixels
+    while i >= 0:
+        h[i] = i
+        j = i + 1   # looking forward
+        max_tan = -9999
+        
+        while j < N:
+            sij = _slope_all(i,z[i],j,z[j])
+            
+            if sij > max_tan:
+                h[i] = j
+                max_tan = sij
+            
+            j = j + 1
+        i = i - 1
+    
+    return h
+
+
+def hor1f_simple(z):
+    '''
+    Calculate the horizon pixel for all x,z
+    This mimics the simple algorthim from Dozier 1981
+    to help understand how it's working
+    
+    Works backwards from the end but looks forwards for
+    the horizon
+    90% faster than rad.horizon
+    
+    Inputs:
+    x - horizontal distances for points
+    z - elevations for the points
+    
+    Output:
+    h - index to the horizon point
+    
+    20150601 Scott Havens
+    '''
+    
+    N = len(z)  # number of points to look at
 #     offset = 1      # offset from current point to start looking
     
     # preallocate the h array
@@ -356,6 +407,15 @@ def _slope(xi,zi,xj,zj):
     '''
     
     return 0 if zj <= zi else (zj - zi) / (xj - float(xi))
+
+def _slope_all(xi,zi,xj,zj):
+    '''
+    Slope between the two points only if the pixel is higher
+    than the other
+    20150603 Scott Havens
+    '''
+    
+    return (zj - zi) / (xj - float(xi))
     
     
 def _cosz(x1,z1,x2,z2):

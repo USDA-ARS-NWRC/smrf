@@ -1,31 +1,44 @@
-"""
-20151231 Scott Havens
+__author__ = "Scott Havens"
+__maintainer__ = "Scott Havens"
+__email__ = "scott.havens@ars.usda.gov"
+__date__ = "2015-12-31"
 
-Base class for storing image data for distributing forcing data
-Anything done here will be available to all variables
-"""
 
-import pandas as pd
+# import pandas as pd
 import numpy as np
 from smrf.spatial import idw, dk, grid
 import logging
 
 class image_data():
-    """    
-    Base class for storing image data.
-    All other classes, i.e. air_temp(), will be a subclass of
-    image_data() so that they all have some common methods
+    """
+    A base distribution method in SMRF that will ensure all variables are distributed 
+    in the same manner.  Other classes will be initialized using this base class.
+    
+    .. code-block:: Python
+    
+        class ta(smrf.distribute.image_data):
+            '''
+            This is the ta class extending the image_data base class
+            '''
+    
+    Args:
+        variable (str): Variable name for the class
+        
+    Returns:
+        A :mod:`!smrf.distribute.image_data` class instance
     
     Attributes:
-        config: configuration section ofr the variable
-        'variable': numpy matrix for the variable
-        stations: stations to use for the distribution
-        metadata: metadata for the stations
-        
-    
-    
-    Methods:
-    
+        variable: The name of the variable that this class will become
+        [variable_name]: The :py:attr:`variable` will have the distributed data
+        [other_attribute]: The distributed data can also be stored as another attribute 
+            specified in :mod:`~smrf.distribute.image_data._distribute` 
+        config: Parsed dictionary from the configuration file for the variable
+        stations: The stations to be used for the variable, if set, in alphabetical order
+        metadata: The metadata Pandas dataframe containing the station information
+            from :mod:`smrf.data.loadData` or :mod:`smrf.data.loadGrid`
+        idw: Inverse distance weighting instance from :mod:`smrf.spatial.idw.IDW`
+        dk: Detrended kriging instance from :mod:`smrf.spatial.dk.dk.DK`
+        grid: Gridded interpolation instance from :mod:`smrf.spatial.grid.GRID`
     
     """
     
@@ -41,17 +54,14 @@ class image_data():
         
     def getConfig(self, config):
         """
-        Check the configuration that was set by the user.
-        
-        Checks for standard parameters and assign to the class
+        Check the configuration that was set by the user for the variable
+        that extended this class. Checks for standard distribution parameters
+        that are common across all variables and assigns to the class instance.
+        Sets the :py:attr:`config` and :py:attr:`stations` attributes. 
         
         Args:
-            config: dict from the [variable] section    
+            config (dict): dict from the [variable] `section <configuration.html#variable-configuration>`_
             
-        Sets:
-            config: parsed configuration
-            stations: stations to be used for the variable
-        
         """
         
         # check for inverse distance weighting
@@ -151,6 +161,12 @@ class image_data():
     
     
     def getStations(self, config):
+        """
+        Determines the stations from the [variable] section of the configuration file.
+        
+        Args:
+            config (dict): dict from the [variable] `section <configuration.html#variable-configuration>`_
+        """
         
         # determine the stations that will be used, alphabetical order
         if 'stations' in config:
@@ -165,17 +181,20 @@ class image_data():
     
     def _initialize(self, topo, metadata):
         """
-        Initialize the distribution
-        - Determine what distribution method to use
+        Initialize the distribution based on the parameters in :py:attr:`config`.
         
         Args:
-            topo: smrf.data.loadTopo.topo instance contain topo data/info
-            metadata: metadata dataframe containing the station metadata
-            
+            topo: :mod:`smrf.data.loadTopo.topo` instance contain topographic data
+                and infomation
+            metadata: metadata Pandas dataframe containing the station metadata,
+                from :mod:`smrf.data.loadData` or :mod:`smrf.data.loadGrid`
+                
+        Raises:
+            Exception: If the distribution method could not be determined, must be idw, dk, or grid
             
         To do:
             - make a single call to the distribution initialization
-            - each dist (idw, dk) takes the same inputs and returns the same
+            - each dist (idw, dk, grid) takes the same inputs and returns the same
         """
         
         # pull out the metadata subset
@@ -208,13 +227,16 @@ class image_data():
 
     def _distribute(self, data, other_attribute=None, zeros=None):
         """
-        Distribute the data using the defined distribution method
+        Distribute the data using the defined distribution method in :py:attr:`config`
         
         Args:
-            data: dataframe for a single time step
-            other_attribute: defult the matrix goes into self.variable
+            data: Pandas dataframe for a single time step
+            other_attribute (str): By defult, the distributed data matrix goes into self.variable
                 but this specifies another attribute in self
-            zeros: data values that should be treated as zeros
+            zeros: data values that should be treated as zeros (not used)
+            
+        Raises:
+            Exception: If all input data is NaN
         """
         
         

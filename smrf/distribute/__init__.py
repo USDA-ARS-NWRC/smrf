@@ -4,12 +4,12 @@ __author__ = 'Scott Havens'
 __email__ = 'scotthavens@ars.usda.gov'
 __version__ = '0.1.0'
 
-from smrf.distribute import image_data
-from smrf.distribute import air_temp
-from smrf.distribute import albedo
-from smrf.distribute import vapor_pressure
-from smrf.distribute import wind
-from smrf.distribute import precipitation
-from smrf.distribute import solar
-from smrf.distribute import thermal
-from smrf.distribute import soil_temp
+import image_data
+import air_temp
+import albedo
+import vapor_pressure
+import wind
+import precipitation
+import solar
+import thermal
+import soil_temp

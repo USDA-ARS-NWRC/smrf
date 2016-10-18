@@ -1,9 +1,7 @@
-"""
-20160105 Scott Havens
-
-Distribute precipitation
-
-"""
+__author__ = "Scott Havens"
+__maintainer__ = "Scott Havens"
+__email__ = "scott.havens@ars.usda.gov"
+__date__ = "2016-01-05"
 
 import numpy as np
 import logging
@@ -14,15 +12,61 @@ from smrf.utils import utils
 
 class ppt(image_data.image_data):
     """
-    ta extends the base class of image_data()
-    The ppt() class allows for variable specific distributions that 
+    The :mod:`~smrf.distribute.precip.ppt` class allows for variable specific distributions that 
     go beyond the base class
     
-    Attributes:
-        config: configuration from [air_temp] section
-        precip: numpy matrix of the precipitation
-        stations: stations to be used in alphabetical order
+    The instantaneous precipitation typically has a positive trend with elevation due to orographic
+    effects. However, the precipitation distribution can be further complicated for storms that 
+    have isolated impact at only a few measurement locations, for example thunderstorms or small
+    precipitation events. Some distirubtion methods may be better suited than others for
+    capturing the trend of these small events with multiple stations that record no precipitation may
+    have a negative impact on the distribution.
     
+    The precipitation phase, or the amount of precipitation falling as rain or snow, can significantly
+    alter the energy and mass balance of the snowpack, either leading to snow accumulation or inducing
+    melt :cite:`Marks&al:1998` :cite:`Kormos&al:2014`. The precipitation phase and initial snow density are
+    based on the precipitation temperature (the distributed dew point temperature) and are estimated 
+    after Susong et al (1999) :cite:`Susong&al:1999`. The table below shows the relationship to
+    precipitation temperature:
+    
+    ========= ======== ============ ===============
+    Min Temp  Max Temp Percent snow Snow density
+    [deg C]   [deg C]  [%]          [kg/m^3]
+    ========= ======== ============ ===============
+    -Inf      -5       100          75
+    -5        -3       100          100
+    -3        -1.5     100          150 
+    -1.5      -0.5     100          175 
+    -0.5      0        75           200 
+    0         0.5      25           250 
+    0.5       Inf      0            0 
+    ========= ======== ============ ===============
+    
+    After the precipitation phase is calculated, the storm infromation at each pixel can be determined. 
+    The time since last storm is based on an accumulated precipitation mass threshold, the time elapsed
+    since it last snowed, and the precipitation phase.  These factors determine the start and end time
+    of a storm that has produced enough precipitation as snow to change the surface albedo.
+    
+    Args:
+        pptConfig: The [precip] section of the configuration file
+        time_step: The time step in minutes of the data, defaults to 60
+    
+    Attributes:
+        config: configuration from [precip] section
+        precip: numpy array of the precipitation
+        percent_snow: numpy array of the percent of time step that was snow
+        snow_density: numpy array of the snow density
+        storm_days: numpy array of the days since last storm
+        storm_precip: numpy array of the precipitaiton mass for the storm
+        last_storm_day: numpy array of the day of the last storm (decimal day)
+        last_storm_day_basin: maximum value of last_storm day within the mask if specified
+        min: minimum value of precipitation is 0
+        max: maximum value of precipitation is infinite
+        stations: stations to be used in alphabetical order
+        output_variables: Dictionary of the variables held within class :mod:`!smrf.distribute.precipitation.ppt`
+            that specifies the ``units`` and ``long_name`` for creating the NetCDF output file.
+        variable: 'precip'
+        
     """
     
     variable = 'precip'
@@ -72,12 +116,20 @@ class ppt(image_data.image_data):
         
     def initialize(self, topo, metadata):
         """
-        Initialize the distribution, calls image_data.image_data._initialize()
+        Initialize the distribution, calls :mod:`smrf.distribute.image_data.image_data._initialize`.
+        Preallocates the following class attributes to zeros:
+        
+        * :py:attr:`percent_snow`
+        * :py:attr:`snow_density`
+        * :py:attr:`storm_days`
+        * :py:attr:`storm_precip`
+        * :py:attr:`last_storm_day`
         
         Args:
-            topo: smrf.data.loadTopo.topo instance contain topo data/info
-            metadata: metadata dataframe containing the station metadata
-                        
+            topo: :mod:`smrf.data.loadTopo.topo` instance contain topographic data
+                and infomation
+            metadata: metadata Pandas dataframe containing the station metadata,
+                from :mod:`smrf.data.loadData` or :mod:`smrf.data.loadGrid`        
         """
         
         self._logger.debug('Initializing distribute.precip')
@@ -96,12 +148,20 @@ class ppt(image_data.image_data):
         
     def distribute(self, data, dpt, mask=None):
         """
-        Distribute precipitation
+        Distribute given a Panda's dataframe for a single time step. Calls
+        :mod:`smrf.distribute.image_data.image_data._distribute`.
+        
+        The following steps are taken when distributing precip, if there is precipitation measured:
+        
+        1. Distribute the instaneous precipitation from the measurement data
+        2. Determine the distributed precipitation phase based on the precipitation temperature
+        3. Calculate the storms based on the accumulated mass, time since last storm, and precipitation phase threshold
+        
         
         Args:
-            data: precip data frame
-            dpt: dew point array
-            mask: basin mask to apply to the storm days
+            data: Pandas dataframe for a single time step from precip
+            dpt: dew point numpy array that will be used for the precipitaiton temperature
+            mask: basin mask to apply to the storm days for calculating the last storm day for the basin
         """
     
         self._logger.debug('%s Distributing precip' % data.name)
@@ -153,15 +213,18 @@ class ppt(image_data.image_data):
 
     def distribute_thread(self, queue, data, mask=None):
         """
-        Distribute the data using threading and queue
+        Distribute the data using threading and queue. All data is provided and ``distribute_thread``
+        will go through each time step and call :mod:`smrf.distribute.precip.ppt.distribute` then
+        puts the distributed data into the queue for:
         
+        * :py:attr:`percent_snow`
+        * :py:attr:`snow_density`
+        * :py:attr:`storm_days`
+        * :py:attr:`last_storm_day_basin`
+         
         Args:
-            queue: queue dict for all variables
-            data: pandas dataframe for all data required
-        
-        Output:
-            Changes the queue precip, percent_snow, snow_density, last_storm_day
-                for the given date
+            queue: queue dictionary for all variables
+            data: pandas dataframe for all data, indexed by date time
         """
         
         for t in data.index:

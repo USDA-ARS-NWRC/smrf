@@ -1,9 +1,7 @@
-"""
-20160107 Scott Havens
-
-Distribute soil temperature
-This class really doesn't do anything but sets a constant value for the soil temperature
-"""
+__author__ = "Scott Havens"
+__maintainer__ = "Scott Havens"
+__email__ = "scott.havens@ars.usda.gov"
+__date__ = "2016-01-07"
 
 import numpy as np
 import logging
@@ -11,11 +9,23 @@ from smrf.distribute import image_data
 
 class ts(image_data.image_data):
     """
-    ta extends the base class of image_data()
-    The ts() class allows for variable specific distributions that 
-    go beyond the base class
+    The :mod:`~smrf.distribute.soil_temp.ts` class allows for variable specific distributions that 
+    go beyond the base class.
+    
+    Soil temperature is simply set to a constant value during initialization.  If soil temperature
+    measurements are available, the values can be distributed using the distribution methods.
+    
+    Args:
+        soilConfig: The [soil] section of the configuration file
+        tempDir: location of temp/working directory (default=None)
     
     Attributes:
+        config: configuration from [soil] section
+        soil_temp: numpy array of the soil temperature
+        stations: stations to be used in alphabetical order
+        output_variables: Dictionary of the variables held within class :mod:`!smrf.distribute.soil_temp.ts`
+            that specifies the ``units`` and ``long_name`` for creating the NetCDF output file.
+        variable: 'soil_temp'
     
     """
     
@@ -29,15 +39,6 @@ class ts(image_data.image_data):
                         } 
     
     def __init__(self, soilConfig, tempDir=None):
-        """
-        Initialize ts()
-        
-        Args:
-            solarConfig: configuration from [solar] section
-            albedoConfig: configuration from [albedo] section
-            stoporad_in: file path to the stoporad_in file created from topo()
-            tempDir: location of temp/working directory
-        """
         
         # extend the base class
         image_data.image_data.__init__(self, self.variable)
@@ -50,11 +51,14 @@ class ts(image_data.image_data):
         
     def initialize(self, topo, metadata):
         """
-        Initialize the distribution, calls image_data.image_data._initialize()
+        Initialize the distribution and set the soil temperature to a constant value
+        based on the configuration file.
         
         Args:
-            topo: smrf.data.loadTopo.topo instance contain topo data/info
-            metadata: metadata dataframe containing the station metadata
+            topo: :mod:`smrf.data.loadTopo.topo` instance contain topographic data
+                and infomation
+            metadata: metadata Pandas dataframe containing the station metadata,
+                from :mod:`smrf.data.loadData` or :mod:`smrf.data.loadGrid`
             
         """
         
@@ -65,9 +69,11 @@ class ts(image_data.image_data):
     
     def distribute(self):
         """
-        Distribute soil temp
+        No distribution is performed on soil temperature at the moment, method simply
+        passes.
         
         Args:
+            None
         """
     
 #         self._logger.debug('Distributing soil temp')
