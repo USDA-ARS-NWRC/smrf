@@ -166,16 +166,21 @@ class SMRF():
         self._logger.info('Number of time steps --> %i' % self.time_steps)
          
         
-        
-    def __del__(self):
+    def __enter__(self):
+        return self
+     
+    def __exit__(self, exc_type, exc_value, traceback):
         """
         Provide some logging info about when SMRF was closed
         """
-        
+                
         # clean up the TMPDIR
-        os.remove(self.topo.stoporad_in_file)
-        os.remove(self.distribute['solar'].vis_file)
-        os.remove(self.distribute['solar'].ir_file)
+        if os.path.isfile(self.topo.stoporad_in_file):
+            os.remove(self.topo.stoporad_in_file)
+        if os.path.isfile(self.distribute['solar'].vis_file):
+            os.remove(self.distribute['solar'].vis_file)
+        if os.path.isfile(self.distribute['solar'].ir_file):
+            os.remove(self.distribute['solar'].ir_file)
         
         # close other files
 #         self.distribute['wind']._maxus_file.close()
@@ -186,7 +191,7 @@ class SMRF():
 #                 v['nc_file'].close()
 #                 self._logger.debug('Closed file: %s' % v['nc_file'])
         
-        self._logger.info('SMRF closed --> %s' % datetime.now())   
+        self._logger.info('SMRF closed --> %s' % datetime.now())
         
     
     def loadTopo(self):

@@ -38,47 +38,46 @@ try:
     # Once loaded, this shouldn't need to be re-ran except if something major changes
     
     # 1. initialize
-    s = smrf.framework.SMRF(configFile)
+    with smrf.framework.SMRF(configFile) as s:
     
-    # 2. load topo data
-    s.loadTopo()
-    
-    # 3. initialize the distribution
-    s.initializeDistribution()
-    
-    # initialize the outputs if desired
-    s.initializeOutput()
-    
-    # 4. Initialize the model
-    # s.initializeModel()
-    
-    
-    #===============================================================================
-    # Distribute data
-    #===============================================================================
-    #
-    # Once the framework is setup, we can load data and distribute the data
-    # This can be ran multiple times while the framework is running so that the
-    # intialization doesn't have to be re-ran, i.e. if this becomes a GUI
-    
-    
-    # 5. load weather data  and station metadata
-    s.loadData()
-    
-    # 6. distribute
-    s.distributeData()
-    
-    #===============================================================================
-    # Run model
-    #===============================================================================
-    
-    # 7. run the model
-    # s.runModel()
+        # 2. load topo data
+        s.loadTopo()
+        
+        # 3. initialize the distribution
+        s.initializeDistribution()
+        
+        # initialize the outputs if desired
+        s.initializeOutput()
+        
+        # 4. Initialize the model
+        # s.initializeModel()
+        
+        
+        #===============================================================================
+        # Distribute data
+        #===============================================================================
+        #
+        # Once the framework is setup, we can load data and distribute the data
+        # This can be ran multiple times while the framework is running so that the
+        # intialization doesn't have to be re-ran, i.e. if this becomes a GUI
+        
+        
+        # 5. load weather data  and station metadata
+        s.loadData()
+        
+        # 6. distribute
+        s.distributeData()
+        
+        #===============================================================================
+        # Run model
+        #===============================================================================
+        
+        # 7. run the model
+        # s.runModel()
 
 except Exception as e:
-    print 'Error: %s' % e
+    #print 'Error: %s' % e
     s._logger.error(e)
     
-
-
+    
 s._logger.info(datetime.now() - start)

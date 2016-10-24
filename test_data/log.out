@@ -1,11 +1,28 @@
-INFO:smrf.framework.model_framework:Started SMRF --> 2016-09-23 12:41:35.062460
-INFO:smrf.framework.model_framework:Model start --> 2008-10-01 01:00:00
-INFO:smrf.framework.model_framework:Model end --> 2009-09-30 00:00:00
-INFO:smrf.framework.model_framework:Number of time steps --> 8736
+INFO:smrf.framework.model_framework:    SSSSSSSSSSSSSSS  MMMMMMMM               MMMMMMMM RRRRRRRRRRRRRRRRR    FFFFFFFFFFFFFFFFFFFFFF
+INFO:smrf.framework.model_framework:  SS:::::::::::::::S M:::::::M             M:::::::M R::::::::::::::::R   F::::::::::::::::::::F
+INFO:smrf.framework.model_framework: S:::::SSSSSS::::::S M::::::::M           M::::::::M R::::::RRRRRR:::::R  F::::::::::::::::::::F
+INFO:smrf.framework.model_framework: S:::::S     SSSSSSS M:::::::::M         M:::::::::M RR:::::R     R:::::R FF::::::FFFFFFFFF::::F
+INFO:smrf.framework.model_framework: S:::::S             M::::::::::M       M::::::::::M   R::::R     R:::::R   F:::::F       FFFFFF
+INFO:smrf.framework.model_framework: S:::::S             M:::::::::::M     M:::::::::::M   R::::R     R:::::R   F:::::F
+INFO:smrf.framework.model_framework:  S::::SSSS          M:::::::M::::M   M::::M:::::::M   R::::RRRRRR:::::R    F::::::FFFFFFFFFF
+INFO:smrf.framework.model_framework:   SS::::::SSSSS     M::::::M M::::M M::::M M::::::M   R:::::::::::::RR     F:::::::::::::::F
+INFO:smrf.framework.model_framework:     SSS::::::::SS   M::::::M  M::::M::::M  M::::::M   R::::RRRRRR:::::R    F:::::::::::::::F
+INFO:smrf.framework.model_framework:        SSSSSS::::S  M::::::M   M:::::::M   M::::::M   R::::R     R:::::R   F::::::FFFFFFFFFF
+INFO:smrf.framework.model_framework:             S:::::S M::::::M    M:::::M    M::::::M   R::::R     R:::::R   F:::::F
+INFO:smrf.framework.model_framework:             S:::::S M::::::M     MMMMM     M::::::M   R::::R     R:::::R   F:::::F
+INFO:smrf.framework.model_framework: SSSSSSS     S:::::S M::::::M               M::::::M RR:::::R     R:::::R FF:::::::FF
+INFO:smrf.framework.model_framework: S::::::SSSSSS:::::S M::::::M               M::::::M R::::::R     R:::::R F::::::::FF
+INFO:smrf.framework.model_framework: S:::::::::::::::SS  M::::::M               M::::::M R::::::R     R:::::R F::::::::FF
+INFO:smrf.framework.model_framework:  SSSSSSSSSSSSSSS    MMMMMMMM               MMMMMMMM RRRRRRRR     RRRRRRR FFFFFFFFFFF
+INFO:smrf.framework.model_framework: 
+INFO:smrf.framework.model_framework:Started SMRF --> 2016-10-24 11:04:22.852363
+INFO:smrf.framework.model_framework:Model start --> 2008-10-21 06:00:00
+INFO:smrf.framework.model_framework:Model end --> 2008-10-21 07:00:00
+INFO:smrf.framework.model_framework:Number of time steps --> 2
 INFO:smrf.data.loadTopo:Reading [topo] and making stoporad input
-DEBUG:smrf.data.loadTopo:sky view file - /media/spindrift/test/sky_view.ipw
-DEBUG:smrf.data.loadTopo:gradient file - /media/spindrift/test/gradient.ipw
-DEBUG:smrf.data.loadTopo:stoporad in file - /media/spindrift/test/stoporad_in.ipw
+DEBUG:smrf.data.loadTopo:sky view file - /home/scotthavens/Documents/Projects/smrf/test_data/sky_view.ipw
+DEBUG:smrf.data.loadTopo:gradient file - /home/scotthavens/Documents/Projects/smrf/test_data/gradient.ipw
+DEBUG:smrf.data.loadTopo:stoporad in file - /home/scotthavens/Documents/Projects/smrf/test_data/stoporad_in.ipw
 DEBUG:smrf.distribute.air_temp:Created distribute.air_temp
 DEBUG:smrf.distribute.vapor_pressure:Created distribute.vapor_pressure
 DEBUG:smrf.distribute.wind:Read data from test_data/topo/maxus.nc
@@ -15,19 +32,7 @@ DEBUG:smrf.distribute.albedo:Created distribute.albedo
 DEBUG:smrf.distribute.solar:Created distribute.solar
 DEBUG:smrf.distribute.thermal:Created distribute.thermal
 DEBUG:smrf.distribute.soil_temp:Created distribute.soil_temp
-INFO:smrf.framework.model_framework:thermal, air_temp, vapor_pressure, wind_speed, net_solar, precip, percent_snow, snow_density, dew_point variables will be output
-WARNING:smrf.output.output_netcdf:Opening /media/spindrift/test/wind_speed.nc, data may be overwritten!
-WARNING:smrf.output.output_netcdf:Opening /media/spindrift/test/air_temp.nc, data may be overwritten!
-WARNING:smrf.output.output_netcdf:Opening /media/spindrift/test/dew_point.nc, data may be overwritten!
-WARNING:smrf.output.output_netcdf:Opening /media/spindrift/test/net_solar.nc, data may be overwritten!
-WARNING:smrf.output.output_netcdf:Opening /media/spindrift/test/percent_snow.nc, data may be overwritten!
-WARNING:smrf.output.output_netcdf:Opening /media/spindrift/test/snow_density.nc, data may be overwritten!
-WARNING:smrf.output.output_netcdf:Opening /media/spindrift/test/thermal.nc, data may be overwritten!
-WARNING:smrf.output.output_netcdf:Opening /media/spindrift/test/precip.nc, data may be overwritten!
-WARNING:smrf.output.output_netcdf:Opening /media/spindrift/test/vapor_pressure.nc, data may be overwritten!
-INFO:smrf.data.loadData:Reading data from MySQL database
-DEBUG:smrf.data.mysql_data:Connected to MySQL database
-DEBUG:smrf.data.loadData:Loading metadata from table tbl_metadata
-DEBUG:smrf.data.mysql_data:SELECT * FROM tbl_metadata WHERE primary_id IN ('ARAI1','ARKI1','ATAI1','ATLI1','BASI1','BCFI1','BNRI1','BOGI1','BOII','BRFI1','BSKI1','CCDI1','COZI1','DEHI1','DHDI1','FAFI','FLEI1','GAVI1','GLNI1','GLSI1','ITD36','ITD42','ITD51','ITD71','JKPI1','LTAI1','MRKI1','PNFI1','PRAI1','PRLI1','SLDMT','SRSI1','STNI1','SVT','TCFI1','TR216','TRMI1','TS718','TTSID','VNNI1')
-DEBUG:smrf.data.loadData:40 stations loaded
-DEBUG:smrf.data.mysql_data:SELECT date_time,station_id,air_temp,vapor_pressure,precip_accum,wind_speed,wind_direction,cloud_factor FROM tbl_level2 WHERE date_time BETWEEN '2008-10-01 01:00:00' AND '2009-09-30 00:00:00' AND station_id IN ('ARAI1','ARKI1','ATAI1','ATLI1','BASI1','BCFI1','BNRI1','BOGI1','BOII','BRFI1','BSKI1','CCDI1','COZI1','DEHI1','DHDI1','FAFI','FLEI1','GAVI1','GLNI1','GLSI1','ITD36','ITD42','ITD51','ITD71','JKPI1','LTAI1','MRKI1','PNFI1','PRAI1','PRLI1','SLDMT','SRSI1','STNI1','SVT','TCFI1','TR216','TRMI1','TS718','TTSID','VNNI1') ORDER BY date_time ASC
+INFO:smrf.framework.model_framework:SMRF closed --> 2016-10-24 11:04:29.292250
+ERROR:smrf.framework.model_framework:[Errno 13] Permission denied: '/data'
+INFO:smrf.framework.model_framework:SMRF closed --> 2016-10-24 11:04:29.294660
+INFO:smrf.framework.model_framework:0:00:06.444768
