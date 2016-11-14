@@ -194,14 +194,14 @@ class SMRF():
         self._logger.info('SMRF closed --> %s' % datetime.now())
         
     
-    def loadTopo(self):
+    def loadTopo(self, calcInput=True):
         """
         Load the information from the configFile in the ['topo'] section. See
         :func:`smrf.data.loadTopo.topo` for full description.
         """
     
         # load the topo 
-        self.topo = data.loadTopo.topo(self.config['topo'], tempDir=self.tempDir)     
+        self.topo = data.loadTopo.topo(self.config['topo'], calcInput, tempDir=self.tempDir)     
      
      
     def initializeDistribution(self):
@@ -330,7 +330,7 @@ class SMRF():
                         self.distribute[key].stations = sta_match.tolist()
                         setattr(self.data, key, d[sta_match])
                         
-                if 'cloud_factor' in self.data.variables:
+                if hasattr(self.data, 'cloud_factor'):
                     d = getattr(self.data, 'cloud_factor')
                     setattr(self.data, 'cloud_factor', d[self.distribute['solar'].stations])
             except:
@@ -614,11 +614,13 @@ class SMRF():
             variable_list = {}
             for v in output_variables:
                 for m in self.modules:
+                    
+                    if m in self.distribute.keys():
                 
-                    if v in self.distribute[m].output_variables.keys():
-                        fname = os.path.join(self.config['output']['out_location'], v)
-                        d = {'variable': v, 'module': m, 'out_location': fname, 'info': self.distribute[m].output_variables[v]}
-                        variable_list[v] = d
+                        if v in self.distribute[m].output_variables.keys():
+                            fname = os.path.join(self.config['output']['out_location'], v)
+                            d = {'variable': v, 'module': m, 'out_location': fname, 'info': self.distribute[m].output_variables[v]}
+                            variable_list[v] = d
 
             
             # determine what type of file to output    

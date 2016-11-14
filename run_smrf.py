@@ -25,7 +25,7 @@ start = datetime.now()
 # output if necessary
 
 try:
-    configFile = './test_data/testConfig_allData.ini'
+    configFile = './test_data/testConfig.ini'
     if len(sys.argv) > 1:
         configFile = sys.argv[1]
     

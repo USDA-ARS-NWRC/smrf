@@ -50,7 +50,7 @@ class topo():
     
     images = ['dem', 'mask', 'veg_type', 'veg_height', 'veg_k', 'veg_tau']
     
-    def __init__(self, topoConfig, tempDir=None):
+    def __init__(self, topoConfig, calcInput=True, tempDir=None):
         self.topoConfig = topoConfig
         
         if 'dem' not in topoConfig:
@@ -71,7 +71,8 @@ class topo():
         self.readImages()
         
         # calculate the necessary images for stoporad
-        self.stoporadInput()
+        if calcInput:
+            self.stoporadInput()
         
         
                 

@@ -15,7 +15,7 @@ INFO:smrf.framework.model_framework: S::::::SSSSSS:::::S M::::::M               
 INFO:smrf.framework.model_framework: S:::::::::::::::SS  M::::::M               M::::::M R::::::R     R:::::R F::::::::FF
 INFO:smrf.framework.model_framework:  SSSSSSSSSSSSSSS    MMMMMMMM               MMMMMMMM RRRRRRRR     RRRRRRR FFFFFFFFFFF
 INFO:smrf.framework.model_framework: 
-INFO:smrf.framework.model_framework:Started SMRF --> 2016-10-24 11:04:22.852363
+INFO:smrf.framework.model_framework:Started SMRF --> 2016-10-26 13:43:17.599959
 INFO:smrf.framework.model_framework:Model start --> 2008-10-21 06:00:00
 INFO:smrf.framework.model_framework:Model end --> 2008-10-21 07:00:00
 INFO:smrf.framework.model_framework:Number of time steps --> 2
@@ -32,7 +32,6 @@ DEBUG:smrf.distribute.albedo:Created distribute.albedo
 DEBUG:smrf.distribute.solar:Created distribute.solar
 DEBUG:smrf.distribute.thermal:Created distribute.thermal
 DEBUG:smrf.distribute.soil_temp:Created distribute.soil_temp
-INFO:smrf.framework.model_framework:SMRF closed --> 2016-10-24 11:04:29.292250
+INFO:smrf.framework.model_framework:SMRF closed --> 2016-10-26 13:43:23.830481
 ERROR:smrf.framework.model_framework:[Errno 13] Permission denied: '/data'
-INFO:smrf.framework.model_framework:SMRF closed --> 2016-10-24 11:04:29.294660
-INFO:smrf.framework.model_framework:0:00:06.444768
+INFO:smrf.framework.model_framework:0:00:06.233561

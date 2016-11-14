@@ -56,8 +56,9 @@ class wxdata():
         
         # correct for the timezone
         for v in self.variables:
-            d = getattr(self, v)
-            setattr(self, v, d.tz_localize(tz=self.time_zone))
+            if hasattr(self, v):
+                d = getattr(self, v)
+                setattr(self, v, d.tz_localize(tz=self.time_zone))
         
         
      
