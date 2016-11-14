@@ -143,8 +143,31 @@ class ppt(image_data.image_data):
         self.last_storm_day = np.zeros((topo.ny, topo.nx))
 #         self.albedo
             
+            
+    def distribute_precip(self, data):
+        """
+        Distribute given a Panda's dataframe for a single time step. Calls
+        :mod:`smrf.distribute.image_data.image_data._distribute`.
         
+        Soley distributes the precipitation data and does not calculate the other
+        dependent variables
+        """
         
+        self._logger.debug('%s Distributing precip' % data.name)
+        
+        # only need to distribute precip if there is any
+        data = data[self.stations]
+        if data.sum() > 0:
+            
+            # distribute data and set the min/max
+            self._distribute(data, zeros=None)
+            self.precip = utils.set_min_max(self.precip, self.min, self.max)
+         
+        else:
+            
+            # make everything else zeros
+            self.precip = np.zeros(self.storm_days.shape)   
+            
         
     def distribute(self, data, dpt, mask=None):
         """
@@ -164,7 +187,7 @@ class ppt(image_data.image_data):
             mask: basin mask to apply to the storm days for calculating the last storm day for the basin
         """
     
-        self._logger.debug('%s Distributing precip' % data.name)
+        self._logger.debug('%s Distributing all precip' % data.name)
         
         # only need to distribute precip if there is any
         data = data[self.stations]
