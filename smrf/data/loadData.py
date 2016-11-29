@@ -28,6 +28,9 @@ class wxdata():
     
     '''
     
+    variables = ['air_temp', 'vapor_pressure', 'precip', 'wind_speed', 'wind_direction', 'cloud_factor']
+    db_config_vars = ['user', 'password', 'host', 'database', 'metadata', 'data_table', 'station_table']
+    
     def __init__(self, dataConfig, start_date, end_date, time_zone='UTC', stations=None, dataType=None):
         
         if dataType is None:
@@ -39,7 +42,7 @@ class wxdata():
         self.end_date = end_date
         self.time_zone = time_zone
         self.stations = stations
-        self.variables = ['air_temp', 'vapor_pressure', 'precip', 'wind_speed', 'wind_direction', 'cloud_factor']
+        
         
         
         self._logger = logging.getLogger(__name__)
@@ -119,6 +122,8 @@ class wxdata():
         Load the data from a mysql database
         '''
         
+        
+        
         self._logger.info('Reading data from MySQL database')
         
         # open the database connection
@@ -156,11 +161,13 @@ class wxdata():
         station_ids = self.metadata.index.tolist()
         
         # get the correct column names if specified        
-        variables = []
-        for i in self.variables:
-            if i in self.dataConfig:
-                i = self.dataConfig[i]
-            variables.append(i)
+#         variables = []
+        variables = [x for x in self.dataConfig.keys() if x not in self.db_config_vars]
+
+#         for i in self.variables:
+#             if i in self.dataConfig:
+#                 i = self.dataConfig[i]
+#             variables.append(i)
         
         dp = data.get_data(self.dataConfig['data_table'], station_ids, self.start_date, self.end_date, variables)
         
