@@ -172,7 +172,7 @@ class wxdata():
         dp = data.get_data(self.dataConfig['data_table'], station_ids, self.start_date, self.end_date, variables)
         
         # go through and extract the data
-        for i,v in enumerate(self.variables):
+        for i,v in enumerate(variables):
             setattr(self, v, dp[self.dataConfig[v]])
                             
 
