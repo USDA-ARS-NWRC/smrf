@@ -4,6 +4,7 @@
 
 from smrf import ipw
 import numpy as np
+from netCDF4 import Dataset
 import subprocess as sp
 import utm
 # import threading
@@ -68,7 +69,10 @@ class topo():
         self.topoConfig['basin_lon'] = float(self.topoConfig['basin_lon'])
         
         # read images
-        self.readImages()
+        if type is 'ipw':
+            self.readImages()
+        elif type is 'netcdf':
+            self.readNetCDF()
         
         # calculate the necessary images for stoporad
         if calcInput:
@@ -111,6 +115,28 @@ class topo():
         self.x = self.v + self.dv*np.arange(self.nx)
         self.y = self.u + self.du*np.arange(self.ny)
         [self.X, self.Y] = np.meshgrid(self.x, self.y)
+    
+    def readNetCDF(self):
+        '''
+        Read in the images from the config file where the file listed is in netcdf format
+        '''
+        
+        # read in the images
+        f = Dataset("")
+        # get some general information about the model domain from the dem
+        self.ny = 
+        self.nx =
+        self.u = 
+        self.v = 
+        self.du = 
+        self.dv = 
+        self.units = 
+        self.coord_sys_ID = 
+
+        # create the x,y vectors
+        self.x = self.v + self.dv*np.arange(self.nx)
+        self.y = self.u + self.du*np.arange(self.ny)
+        [self.X, self.Y] = np.meshgrid(self.x, self.y)    
         
     def stoporadInput(self):
         '''
@@ -137,7 +163,6 @@ class topo():
         # wait for the processes to stop
         tg.join()
         ts.join()
-        
             
         # combine into a value
         sfile = os.path.abspath(os.path.expanduser(os.path.join(self.tempDir, 'stoporad_in.ipw')))
@@ -159,13 +184,9 @@ class topo():
         self.aspect = self.stoporad_in.bands[2].data.astype(np.float64)
         self.sky_view = self.stoporad_in.bands[3].data.astype(np.float64)
         
-        
         # clean up the TMPDIR
         os.remove(gfile)
         os.remove(svfile)
-        
-        
-        
         
     def _gradient(self, demFile, gradientFile):
         # calculate the gradient
