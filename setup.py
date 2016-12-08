@@ -8,10 +8,10 @@
 #    from distutils.core import setup
 
 
-from distutils.core import setup
-from distutils.extension import Extension
-#from setuptools import setup, Extension, find_packages
-#from setuptools import find_packages
+# from distutils.core import setup
+# from distutils.extension import Extension
+from setuptools import setup, Extension, find_packages
+from setuptools import find_packages
 
 #try:
 #    from Cython.Distutils import build_ext
