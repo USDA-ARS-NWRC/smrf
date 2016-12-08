@@ -54,48 +54,49 @@ class topo():
     def __init__(self, topoConfig, calcInput=True, tempDir=None):
         self.topoConfig = topoConfig
         
-        if 'dem' not in topoConfig:
-            raise ValueError('DEM file not specified')
+        
         
         if (tempDir is None) | (tempDir == 'TMPDIR'):
             tempDir = os.environ['TMPDIR']
         self.tempDir = tempDir
         
         self._logger = logging.getLogger(__name__)
-        self._logger.info('Reading [topo] and making stoporad input')
+        self._logger.info('Reading [TOPO] and making stoporad input')
         
         # convert lat/lon to float
         self.topoConfig['basin_lat'] = float(self.topoConfig['basin_lat'])
         self.topoConfig['basin_lon'] = float(self.topoConfig['basin_lon'])
         
         # read images
-        if type is 'ipw':
+        t = str(self.topoConfig['type'])
+        if t == 'ipw':
             self.readImages()
-        elif type is 'netcdf':
+        elif t == 'netcdf':
             self.readNetCDF()
         
         # calculate the necessary images for stoporad
         if calcInput:
             self.stoporadInput()
         
-        
-                
+
     def readImages(self):
         '''
         Read in the images from the config file
         '''
+        if 'dem' not in topoConfig:
+            raise ValueError('DEM file not specified')
         
         # read in the images
         for v in self.images:
             if v in self.topoConfig:
                 i = ipw.IPW(self.topoConfig[v])
                 
-                if v is 'veg_type':
+                if v == 'veg_type':
                     setattr(self, v, i.bands[0].data.astype(int))
                 else:
                     setattr(self, v, i.bands[0].data.astype(np.float64))
                 
-                if v is 'dem':
+                if v == 'dem':
                     # get some general information about the model domain from the dem
                     self.ny = i.nlines
                     self.nx = i.nsamps
@@ -106,8 +107,6 @@ class topo():
                     self.units = i.bands[0].geounits
                     self.coord_sys_ID = i.bands[0].coord_sys_ID
                     
-                
-                
             else:
                 setattr(self, v, None)
         
@@ -120,22 +119,27 @@ class topo():
         '''
         Read in the images from the config file where the file listed is in netcdf format
         '''
+        if 'filename' not in self.topoConfig:
+            raise ValueError('Filename was not specified. Please provide a netcdf filename in config file.')
         
         # read in the images
-        f = Dataset("")
+        f = Dataset(self.topoConfig['filename'],'r')
+        
+        # read in the images
+        for v in self.images:
+            if v in f.variables.keys():
+                setattr(self, v, f.variables[v][:])
+            else:
+                setattr(self, v, None)
+
+               
         # get some general information about the model domain from the dem
-        self.ny = 
-        self.nx =
-        self.u = 
-        self.v = 
-        self.du = 
-        self.dv = 
-        self.units = 
-        self.coord_sys_ID = 
+        self.ny = f.dimensions['x']
+        self.nx = f.dimensions['y']
 
         # create the x,y vectors
-        self.x = self.v + self.dv*np.arange(self.nx)
-        self.y = self.u + self.du*np.arange(self.ny)
+        self.x = f.variables['x'][:]
+        self.y = f.variables['y'][:]
         [self.X, self.Y] = np.meshgrid(self.x, self.y)    
         
     def stoporadInput(self):
@@ -143,6 +147,14 @@ class topo():
         Calculate the necessary input file for stoporad
         The IPW and TMPDIR environment variables must be set
         '''
+        if self.topoConfig['type'] != 'ipw':
+            
+            f = os.path.abspath(os.path.expanduser(os.path.join(self.tempDir, 'dem.ipw')))
+            i = ipw.IPW()
+            i.new_band(self.dem)
+            i.write(f, 16)   
+            
+            self.topoConfig['dem'] = f
             
         # calculate the skyview
         svfile = os.path.abspath(os.path.expanduser(os.path.join(self.tempDir, 'sky_view.ipw')))
@@ -187,6 +199,9 @@ class topo():
         # clean up the TMPDIR
         os.remove(gfile)
         os.remove(svfile)
+        
+        if self.topoConfig['type'] != 'ipw':
+            os.remove(self.topoConfig['dem'])
         
     def _gradient(self, demFile, gradientFile):
         # calculate the gradient
