@@ -175,12 +175,15 @@ class SMRF():
         """
                 
         # clean up the TMPDIR
-        if os.path.isfile(self.topo.stoporad_in_file):
-            os.remove(self.topo.stoporad_in_file)
-        if os.path.isfile(self.distribute['solar'].vis_file):
-            os.remove(self.distribute['solar'].vis_file)
-        if os.path.isfile(self.distribute['solar'].ir_file):
-            os.remove(self.distribute['solar'].ir_file)
+        if hasattr(self, 'topo'):
+            if os.path.isfile(self.topo.stoporad_in_file):
+                os.remove(self.topo.stoporad_in_file)
+        if hasattr(self, 'distribute'):
+            if 'solar' in self.distribute.keys():
+                if os.path.isfile(self.distribute['solar'].vis_file):
+                    os.remove(self.distribute['solar'].vis_file)
+                if os.path.isfile(self.distribute['solar'].ir_file):
+                    os.remove(self.distribute['solar'].ir_file)
         
         # close other files
 #         self.distribute['wind']._maxus_file.close()

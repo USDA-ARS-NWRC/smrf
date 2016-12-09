@@ -83,7 +83,7 @@ class topo():
         '''
         Read in the images from the config file
         '''
-        if 'dem' not in topoConfig:
+        if 'dem' not in self.topoConfig:
             raise ValueError('DEM file not specified')
         
         # read in the images
@@ -120,27 +120,34 @@ class topo():
         Read in the images from the config file where the file listed is in netcdf format
         '''
         if 'filename' not in self.topoConfig:
+#             self._logger.exception('Filename was not specified. Please provide a netcdf filename in config file.')
             raise ValueError('Filename was not specified. Please provide a netcdf filename in config file.')
         
         # read in the images
         f = Dataset(self.topoConfig['filename'],'r')
         
         # read in the images
+        # netCDF files are stored typically as 32-bit float, so convert to double or int
         for v in self.images:
             if v in f.variables.keys():
-                setattr(self, v, f.variables[v][:])
+                if v == 'veg_type':
+                    setattr(self, v, f.variables[v][:].astype(int))
+                else:
+                    setattr(self, v, f.variables[v][:].astype(np.float64))
             else:
                 setattr(self, v, None)
 
                
         # get some general information about the model domain from the dem
-        self.ny = f.dimensions['x']
-        self.nx = f.dimensions['y']
+        self.ny = f.dimensions['x'].size
+        self.nx = f.dimensions['y'].size
 
         # create the x,y vectors
         self.x = f.variables['x'][:]
         self.y = f.variables['y'][:]
-        [self.X, self.Y] = np.meshgrid(self.x, self.y)    
+        [self.X, self.Y] = np.meshgrid(self.x, self.y)  
+        
+        f.close()  
         
     def stoporadInput(self):
         '''
@@ -152,6 +159,8 @@ class topo():
             f = os.path.abspath(os.path.expanduser(os.path.join(self.tempDir, 'dem.ipw')))
             i = ipw.IPW()
             i.new_band(self.dem)
+            
+            i.add_geo_hdr([self.x[0], self.y[0]], [np.mean(np.diff(self.x)), np.mean(np.diff(self.y))], 'm', 'UTM')
             i.write(f, 16)   
             
             self.topoConfig['dem'] = f
