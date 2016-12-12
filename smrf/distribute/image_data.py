@@ -2,7 +2,7 @@ __author__ = "Scott Havens"
 __maintainer__ = "Scott Havens"
 __email__ = "scott.havens@ars.usda.gov"
 __date__ = "2015-12-31"
-__version__ = "0.0.1"
+__version__ = "0.1.0"
 
 
 # import pandas as pd
