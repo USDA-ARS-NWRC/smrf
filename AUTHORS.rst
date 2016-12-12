@@ -9,5 +9,10 @@ Development Lead
 
 Contributors
 ------------
+* Micah Johnson <micah.johnson150@gmail.com>
 
-None yet. Why not be the first?
+Only one contributor. Why not join in?
+
+Version
+-------
+0.0.1

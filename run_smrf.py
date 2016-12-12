@@ -1,4 +1,6 @@
 '''
+Version = 0.0.1
+
 20151222 Scott Havens
 
 run_smrf.py is a command line program meant to take a single

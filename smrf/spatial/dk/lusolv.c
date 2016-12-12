@@ -10,6 +10,8 @@
  *    Algorithms taken from:
  *    W. H. Press, B. P. Flannery, S. A. Teukolsky, and W. T. Vetterling
  *    (1988).  Numerical Recipes in C.  Cambridge University Press, pp. 43-44.
+ *
+ *    Version = 0.0.1
  */
 
 #include <stdlib.h>

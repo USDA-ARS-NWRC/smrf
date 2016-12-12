@@ -13,6 +13,8 @@
  *    William H. Press, Brian P. Flannery, Saul A. Teukolsky, and William T.
  *    Vetterling, Numerical Recipes in C:  The Art of Scientific Computing,
  *    Cambridge University Press, 1988, p. 705.
+ *   
+ *    Version = 0.0.1
  */
 
 double *vector(n)

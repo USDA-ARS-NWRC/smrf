@@ -5,6 +5,8 @@ Adapted from Roger Lew (rogerlew.gmail.com)isnobal.py
 
 @author: Scott Havens
 '''
+__version__ = '0.0.1'
+
 
 # __version__ = "0.0.1"
 
