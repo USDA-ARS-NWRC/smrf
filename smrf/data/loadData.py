@@ -160,16 +160,12 @@ class wxdata():
         # get a list of the stations
         station_ids = self.metadata.index.tolist()
         
-        # get the correct column names if specified        
-#         variables = []
+        # get the correct column names if specified, along with the variable names
+        db_var_names = [val for key,val in self.dataConfig.items() if key not in self.db_config_vars]
         variables = [x for x in self.dataConfig.keys() if x not in self.db_config_vars]
 
-#         for i in self.variables:
-#             if i in self.dataConfig:
-#                 i = self.dataConfig[i]
-#             variables.append(i)
-        
-        dp = data.get_data(self.dataConfig['data_table'], station_ids, self.start_date, self.end_date, variables)
+        # get the data        
+        dp = data.get_data(self.dataConfig['data_table'], station_ids, self.start_date, self.end_date, db_var_names)
         
         # go through and extract the data
         for i,v in enumerate(variables):
