@@ -13,6 +13,8 @@
  *    	on a grid. This is meant to be called from a Python function
  *    - Everything else is the same except the 2D arrays must now be indexed
  *    	with linear indexing
+ *
+ *    Version = 0.1.0
  */
 
 #include <stdio.h>

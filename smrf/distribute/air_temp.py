@@ -2,7 +2,7 @@ __author__ = "Scott Havens"
 __maintainer__ = "Scott Havens"
 __email__ = "scott.havens@ars.usda.gov"
 __date__ = "2015-12-30"
-
+__version = "0.1.0"
 # import numpy as np
 import logging
 from smrf.distribute import image_data

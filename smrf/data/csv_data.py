@@ -1,6 +1,6 @@
 '''
 Read in metadata and data from CSV files
-
+Version = 0.1.0
 20150810 Scott Havens
 '''
 

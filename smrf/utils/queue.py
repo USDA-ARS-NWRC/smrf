@@ -3,6 +3,7 @@ Create classes for running on multiple threads
 
 20160323 Scott Havens
 """
+__version__ = '0.1.0'
 from Queue import Queue, Empty, Full
 # from Queue import Empty, Full
 

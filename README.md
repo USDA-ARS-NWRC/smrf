@@ -1,4 +1,4 @@
-# Spatial Modeling for Resources Framework
+# Spatial Modeling for Resources Framework V 0.1.0
 
 Spatial Modeling for Resources Framework (SMRF) was developed by Dr. Scott Havens at
 the USDA Agricultural Research Service (ARS) in Boise, ID. SMRF was designed to

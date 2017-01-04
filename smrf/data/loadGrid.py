@@ -1,4 +1,5 @@
 '''
+Version = 0.1.0
 20160307 Scott Havens
 '''
 

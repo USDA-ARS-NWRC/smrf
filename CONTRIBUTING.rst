@@ -42,6 +42,11 @@ Snow Modeling Resources Framework could always use more documentation, whether a
 official Snow Modeling Resources Framework docs, in docstrings, or even on the web in blog posts,
 articles, and such.
 
+Versioning
+----------
+SMRF uses bumpversion to control version control. More about bumpversion can be found at https://pypi.python.org/pypi/bumpversion.
+Currently SMRF is version 0.1.0 
+
 Submit Feedback
 ~~~~~~~~~~~~~~~
 
