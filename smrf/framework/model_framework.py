@@ -2,7 +2,7 @@ __author__ = "Scott Havens"
 __maintainer__ = "Scott Havens"
 __email__ = "scott.havens@ars.usda.gov"
 __date__ = "2015-12-22"
-__version__ = '0.1.0'
+__version__ = '0.1.1'
 
 """
 The module :mod:`~smrf.framework.model_framework` contains functions and classes

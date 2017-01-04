@@ -2,7 +2,7 @@
 Functions to output as a netCDF
 """
 
-__version__ = '0.1.0'
+__version__ = '0.1.1'
 
 import netCDF4 as nc
 import numpy as np
