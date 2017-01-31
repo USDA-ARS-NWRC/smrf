@@ -225,7 +225,7 @@ class topo():
     def _viewf(self, demFile, viewfFile):
         # calculate the sky view file
         cmd = 'viewf %s > %s' % (demFile, viewfFile)
-        proc = sp.Popen(cmd, shell=True).wait()
+        proc = sp.Popen(cmd, shell=True, env=os.environ.copy()).wait()
         
         if proc != 0:
             raise OSError('viewf failed')   
