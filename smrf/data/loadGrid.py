@@ -31,8 +31,8 @@ class grid():
     def __init__(self, dataConfig, topo, start_date, end_date, time_zone='UTC', dataType='wrf', tempDir=None):
                 
                 
-        if (tempDir is None) | (tempDir == 'TMPDIR'):
-            tempDir = os.environ['TMPDIR']
+        if (tempDir is None) | (tempDir == 'WORKDIR'):
+            tempDir = os.environ['WORKDIR']
             
         self.tempDir = tempDir
         self.dataConfig = dataConfig

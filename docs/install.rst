@@ -21,7 +21,7 @@ Ubuntu
 2. Ensure the following environment variables are set and readable by Python
 
    * $IPW, and $IPW/bin environment variable is set
-   * TMPDIR, the location of the system's temporary files which is not default on Linux. Use /tmp for example
+   * WORKDIR, the location where temporary files are created and modified which is not default on Linux. Use /tmp for example
    * PATH, is set and readable by Python (mainly if running inside an IDE environment)
 
 3. Install SMRF

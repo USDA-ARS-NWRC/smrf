@@ -104,8 +104,8 @@ class wind(image_data.image_data):
         # check and assign the configuration
         self.getConfig(windConfig)
         
-        if (tempDir is None) | (tempDir == 'TMPDIR'):
-            tempDir = os.environ['TMPDIR']
+        if (tempDir is None) | (tempDir == 'WORKDIR'):
+            tempDir = os.environ['WORKDIR']
         self.tempDir = tempDir
         
         if windConfig['distribution'] == 'grid':

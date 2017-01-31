@@ -73,7 +73,7 @@ class solar(image_data.image_data):
         solarConfig: configuration from [solar] section
         albedoConfig: configuration from [albedo] section
         stoporad_in: file path to the stoporad_in file created from :mod:`smrf.data.loadTopo.topo`
-        tempDir: location of temp/working directory (default=None, which is the 'TMPDIR' environment variable)
+        tempDir: location of temp/working directory (default=None, which is the 'WORKDIR' environment variable)
     
     Attributes:
         config: configuration from [solar] section
@@ -95,7 +95,7 @@ class solar(image_data.image_data):
             that specifies the ``units`` and ``long_name`` for creating the NetCDF output file.
         stations: stations to be used in alphabetical order
         stoporad_in: file path to the stoporad_in file created from :mod:`smrf.data.loadTopo.topo` 
-        tempDir: temporary directory for ``stoporad``, will default to the ``TMPDIR`` environment variable
+        tempDir: temporary directory for ``stoporad``, will default to the ``WORKDIR`` environment variable
         variable: solar
         veg_height: numpy array of vegitation heights from :mod:`smrf.data.loadTopo.topo` 
         veg_ir_beam: numpy array vegitation adjusted infrared beam radiation
@@ -203,8 +203,8 @@ class solar(image_data.image_data):
         
         self.stoporad_in = stoporad_in
                 
-        if (tempDir is None) | (tempDir == 'TMPDIR'):
-            tempDir = os.environ['TMPDIR']
+        if (tempDir is None) | (tempDir == 'WORKDIR'):
+            tempDir = os.environ['WORKDIR']
         self.tempDir = tempDir        
         
         # stoporad file names
@@ -537,7 +537,7 @@ class solar(image_data.image_data):
             
 #         self._logger.debug(ir_cmd)
         
-        irp = sp.Popen(ir_cmd, shell=True, env={"PATH": os.environ['PATH'], "TMPDIR": os.environ['TMPDIR']})
+        irp = sp.Popen(ir_cmd, shell=True, env={"PATH": os.environ['PATH'], "WORKDIR": os.environ['WORKDIR']})
         
         stdoutdata, stderrdata = irp.communicate()
     
@@ -574,7 +574,7 @@ class solar(image_data.image_data):
                self.albedoConfig['dirt'], self.stoporad_in, self.vis_file)
 #         self._logger.debug(vis_cmd)
             
-        visp = sp.Popen(vis_cmd, shell=True, env={"PATH": os.environ['PATH'], "TMPDIR": os.environ['TMPDIR']})
+        visp = sp.Popen(vis_cmd, shell=True, env={"PATH": os.environ['PATH'], "WORKDIR": os.environ['WORKDIR']})
 
         stdoutdata, stderrdata = visp.communicate()
 

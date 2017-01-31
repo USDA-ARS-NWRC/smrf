@@ -623,7 +623,7 @@ System variables to specify some special options for SMRF.
 
 temp_dir
    Location to put working files, if not specified will attempt to use
-   the environment variable TMPDIR
+   the environment variable WORKDIR
    
 threading
    Whether or not to use threading and data queues to store variables. Each

@@ -83,7 +83,6 @@ class SMRF():
         if not os.path.isfile(configFile):
             raise Exception('Configuration file does not exist --> %s' % configFile)
 
-
         f = MyParser()
         f.read(configFile)
         self.config = f.as_dict()
@@ -100,11 +99,11 @@ class SMRF():
         # process the system variables
         if  os.path.isdir(self.config['system']['temp_dir']):
             tempDir = self.config['system']['temp_dir']
-            os.environ['TMPDIR'] = tempDir
-            self.tempDir = tempDir
+            self.tempDir = os.path.abspath(tempDir)
+            os.environ['WORKDIR'] = self.tempDir
         else:
             raise ValueError("Invalid system entry in Config file, temp_dir is either undefined or does not exist.")
-        
+
         self.threading = False
         if 'threading' in self.config['system']:
             if self.config['system']['threading'].lower() == 'true':
@@ -176,7 +175,7 @@ class SMRF():
         Provide some logging info about when SMRF was closed
         """
 
-        # clean up the TMPDIR
+        # clean up the WORKDIR
         if hasattr(self, 'topo'):
             if os.path.isfile(self.topo.stoporad_in_file):
                 os.remove(self.topo.stoporad_in_file)
@@ -598,8 +597,8 @@ class SMRF():
             pth = os.path.abspath(os.path.expanduser(self.config['output']['out_location']))
             if 'out_location' not in self.config['output']:
                 raise Exception('out_location must be specified for variable outputs')
-            elif self.config['output']['out_location'] == 'TMPDIR':
-                pth = os.environ['TMPDIR']
+            elif self.config['output']['out_location'] == 'WORKDIR':
+                pth = os.environ['WORKDIR']
             elif not os.path.isdir(pth):
                 os.makedirs(pth)
 

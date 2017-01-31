@@ -25,8 +25,8 @@ class isnobal():
         
         self.config = isnobalConfig
         
-        if (tempDir is None) | (tempDir == 'TMPDIR'):
-            tempDir = os.environ['TMPDIR']
+        if (tempDir is None) | (tempDir == 'WORKDIR'):
+            tempDir = os.environ['WORKDIR']
         self.tempDir = tempDir
         
         # create the initialization image

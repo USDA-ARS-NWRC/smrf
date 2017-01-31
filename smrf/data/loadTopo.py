@@ -25,7 +25,7 @@ class topo():
     - veg tau
     
     Inputs to topo() are the [topo] section of the config file
-    topo() will guess the location of the TMPDIR env variable
+    topo() will guess the location of the WORKDIR env variable
     and should work for *nix systems
     
     Attributes:
@@ -57,8 +57,8 @@ class topo():
         
         
         
-        if (tempDir is None) | (tempDir == 'TMPDIR'):
-            tempDir = os.environ['TMPDIR']
+        if (tempDir is None) | (tempDir == 'WORKDIR'):
+            tempDir = os.environ['WORKDIR']
         self.tempDir = tempDir
         
         self._logger = logging.getLogger(__name__)
@@ -153,7 +153,7 @@ class topo():
     def stoporadInput(self):
         '''
         Calculate the necessary input file for stoporad
-        The IPW and TMPDIR environment variables must be set
+        The IPW and WORKDIR environment variables must be set
         '''
         if self.topoConfig['type'] != 'ipw':
             
@@ -206,7 +206,7 @@ class topo():
         self.aspect = self.stoporad_in.bands[2].data.astype(np.float64)
         self.sky_view = self.stoporad_in.bands[3].data.astype(np.float64)
         
-        # clean up the TMPDIR
+        # clean up the WORKDIR
         os.remove(gfile)
         os.remove(svfile)
         
