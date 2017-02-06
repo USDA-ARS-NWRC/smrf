@@ -41,7 +41,7 @@ SMRF relies on the Image Processing Workbench (IPW), which must be installed fir
 
 
 ### Install IPW
-Clone IPW [here](https://gitlab.com/ars-snow/ipw) and follow the instruction
+Clone IPW [here](https://gitlab.com/ars-snow/ipw) and follow the instructions. Note that setting the WORKDIR environment variable and is replaced by setting the tmp_dir in the configuration file.
 
 ### Ubuntu
 
