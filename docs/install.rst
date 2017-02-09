@@ -2,12 +2,17 @@
 Installation
 ============
 
-SMRF relies on the Image Processing Workbench (IPW), which must be installed first. However, IPW currently has not been tested to run natively on Windows and must use Docker. Check the Windows section for how to run.
+SMRF relies on the Image Processing Workbench (IPW), which must be installed first. However, 
+IPW currently has not been tested to run natively on Windows and must use Docker. 
+Check the Windows section for how to run.
+
+The authors recommend using a Python `virtual environment <https://virtualenv.pypa.io/>`_ to reduce
+the possibility of a dependency issue. 
 
 Install IPW
 -----------
 
-Clone IPW here and follow the instruction
+Clone `IPW here <https://gitlab.com/ars-snow/ipw>`_ and follow the instruction
 
 
 Ubuntu
@@ -37,7 +42,9 @@ Ubuntu
 Mac OSX
 -------
 
-Mac OSX greater than 10.8 is required to run SMRF. Mac OSX comes standard with Python installed with the default compiler clang.  To utilize multi-threading and parallel processing, gcc must be installed with Python compiled with that gcc version.
+Mac OSX greater than 10.8 is required to run SMRF. Mac OSX comes standard with Python installed with the default 
+compiler clang.  To utilize multi-threading and parallel processing, gcc must be installed with Python compiled 
+with that gcc version.
 
 1. MacPorts Install system dependencies
 
@@ -76,4 +83,5 @@ Mac OSX greater than 10.8 is required to run SMRF. Mac OSX comes standard with P
 Windows
 -------
 
-Since IPW has not be tested to run in Window, Docker will have to be used to run SMRF.  The docker image can for SMRF can be found on docker hub [here](https://hub.docker.com/r/scotthavens/smrf/)
+Since IPW has not be tested to run in Window, Docker will have to be used to run SMRF.  The docker 
+image can for SMRF can be found on docker hub `here <https://hub.docker.com/r/scotthavens/smrf/>`_
