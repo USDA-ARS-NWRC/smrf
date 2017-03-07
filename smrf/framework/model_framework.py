@@ -419,43 +419,47 @@ class SMRF():
             self.distribute['precip'].distribute(self.data.precip.ix[t],
                                                 self.distribute['vapor_pressure'].dew_point,
                                                 self.topo.mask)
+            storms = self.distribute['precip'].storms
 
-            # 5. Albedo
-            self.distribute['albedo'].distribute(t, illum_ang, self.distribute['precip'].storm_days)
-
-            # 6. Solar
-            self.distribute['solar'].distribute(self.data.cloud_factor.ix[t],
-                                                illum_ang,
-                                                cosz,
-                                                azimuth,
-                                                self.distribute['precip'].last_storm_day_basin,
-                                                self.distribute['albedo'].albedo_vis,
-                                                self.distribute['albedo'].albedo_ir)
-
-            # 7. thermal radiation
-            if self.distribute['thermal'].gridded:
-                self.distribute['thermal'].distribute_thermal(self.data.thermal.ix[t],
-                                                              self.distribute['air_temp'].air_temp)
-            else:
-                self.distribute['thermal'].distribute(t, self.distribute['air_temp'].air_temp,
-                                                      self.distribute['vapor_pressure'].dew_point,
-                                                      self.distribute['solar'].cloud_factor)
-
-            # 8. Soil temperature
-            self.distribute['soil_temp'].distribute()
-
-
-            # output at the frequency and the last time step
-            if (output_count % self.config['output']['frequency'] == 0) or (output_count == len(self.date_time)):
-                self.output(t)
-
-#             plt.imshow(self.distribute['albedo'].albedo_vis), plt.colorbar(), plt.show()
-
-
-            # pull all the images together to create the input image
-#             d[t]['air_temp'] = self.distribute['air_temp'].image
-#             d[t]['vapor_pressure'] = self.distribute['vapor_pressure'].image
-
+            for s in storms:
+                print "Storm totals average  = {0} mm".format(s[2].mean())
+#
+#             # 5. Albedo
+#             self.distribute['albedo'].distribute(t, illum_ang, self.distribute['precip'].storm_days)
+#
+#             # 6. Solar
+#             self.distribute['solar'].distribute(self.data.cloud_factor.ix[t],
+#                                                 illum_ang,
+#                                                 cosz,
+#                                                 azimuth,
+#                                                 self.distribute['precip'].last_storm_day_basin,
+#                                                 self.distribute['albedo'].albedo_vis,
+#                                                 self.distribute['albedo'].albedo_ir)
+#
+#             # 7. thermal radiation
+#             if self.distribute['thermal'].gridded:
+#                 self.distribute['thermal'].distribute_thermal(self.data.thermal.ix[t],
+#                                                               self.distribute['air_temp'].air_temp)
+#             else:
+#                 self.distribute['thermal'].distribute(t, self.distribute['air_temp'].air_temp,
+#                                                       self.distribute['vapor_pressure'].dew_point,
+#                                                       self.distribute['solar'].cloud_factor)
+#
+#             # 8. Soil temperature
+#             self.distribute['soil_temp'].distribute()
+#
+#
+#             # output at the frequency and the last time step
+#             if (output_count % self.config['output']['frequency'] == 0) or (output_count == len(self.date_time)):
+#                 self.output(t)
+#
+# #             plt.imshow(self.distribute['albedo'].albedo_vis), plt.colorbar(), plt.show()
+#
+#
+#             # pull all the images together to create the input image
+# #             d[t]['air_temp'] = self.distribute['air_temp'].image
+# #             d[t]['vapor_pressure'] = self.distribute['vapor_pressure'].image
+#
 
             # check if out put is desired
 
