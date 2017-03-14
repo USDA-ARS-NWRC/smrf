@@ -7,7 +7,9 @@ __version__ = "0.1.1"
 import numpy as np
 import logging
 from smrf.distribute import image_data
-from smrf.envphys import precip
+from smrf.envphys import snow
+from smrf.envphys import storms
+
 from smrf.utils import utils
 # import matplotlib.pyplot as plt
 
@@ -101,7 +103,7 @@ class ppt(image_data.image_data):
 
 
     max = np.Inf
-
+    min = 0
     def __init__(self, pptConfig, time_step=60):
 
         # extend the base class
@@ -143,8 +145,8 @@ class ppt(image_data.image_data):
         self.storm_precip = np.zeros((topo.ny, topo.nx))
         self.last_storm_day = np.zeros((topo.ny, topo.nx))
         self.storms = []
-        self.storms.append([None,None,self.storm_precip])
         self.hours_since_ppt=0
+        self.storming = False
         #Note while we do idenfiy storms here the calculations do not require the storm info
         self.storm_dependent = False
 
@@ -198,14 +200,14 @@ class ppt(image_data.image_data):
             # distribute data and set the min/max
             self._distribute(data, zeros=None)
             self.precip = utils.set_min_max(self.precip, self.min, self.max)
-            precip.storm_tracking(self.precip, data.name, self.storms, self.hours_since_ppt)
+            self.storming = storms.tracking(self.precip, data.name, self.storms, self.hours_since_ppt)
             self.hours_since_ppt = 0
 
             # determine the precip phase
-            perc_snow, snow_den = precip.mkprecip(self.precip, dpt)
+            perc_snow, snow_den = snow.mkprecip(self.precip, dpt)
 
             # determine the time since last storm
-            stormDays, stormPrecip = precip.storms_time(self.precip, perc_snow,
+            stormDays, stormPrecip = storms.time_since_storm(self.precip, perc_snow,
                                                         time_step=self.time_step/60/24, mass=0.5, time=4,
                                                         stormDays=self.storm_days,
                                                         stormPrecip=self.storm_precip)
@@ -272,3 +274,10 @@ class ppt(image_data.image_data):
 
 #             self._logger.debug('Putting %s -- %s' % (t, 'storm_days'))
             queue['storm_days'].put( [t, self.storm_days] )
+
+        def post_process(self):
+            """
+            Calculates anything that is dependent on the distributed precip data
+            and outputs it
+            """
+            pass
