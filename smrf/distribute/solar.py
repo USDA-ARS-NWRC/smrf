@@ -444,7 +444,11 @@ class solar(image_data.image_data):
             queue[beam].put([t, val_beam])
             queue[diffuse].put([t, val_diffuse])
 
+    def post_processor(self):
+        """
 
+        """
+        pass
 
     def cloud_correct(self):
         """

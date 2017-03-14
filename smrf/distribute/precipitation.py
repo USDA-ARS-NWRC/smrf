@@ -275,9 +275,8 @@ class ppt(image_data.image_data):
 #             self._logger.debug('Putting %s -- %s' % (t, 'storm_days'))
             queue['storm_days'].put( [t, self.storm_days] )
 
-        def post_process(self):
-            """
-            Calculates anything that is dependent on the distributed precip data
-            and outputs it
-            """
-            pass
+    def post_processor(self):
+        """
+
+        """
+        pass
