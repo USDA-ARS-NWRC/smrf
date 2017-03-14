@@ -213,12 +213,19 @@ def storms_time(precipitation, perc_snow, time_step=1/24, mass=1, time=4,
 
 def storm_tracking(precipitation,time_step, storm_lst,hours_since_ppt, mass_thresh = 0.0, time_thresh=2):
     '''
-
     Args:
     precipitation - precipitation values
-    perc_snow - precent of precipitation that was snow
-    mass - threshold for the mass to end a new storm
-    time - threshold for the time to end a new storm
+    time_step - Time step passed from the main loop
+    hours_since_ppt - hours since the last precipitation
+    storm_lst - list that store the storm cycles in order. A storm is recorded by
+                its start, its end, and accumulated precip data frame. The list
+                is passed by reference and modified internally.
+                e.g. [[date_time1,date_time1, accum_precip1],
+                     [date_time2,date_time2, accum_precip2],
+                     ...
+                     ]
+    mass_thresh - mass amount that constitutes a real precip event, default = 0.0.
+    time_thresh - amount of hours that constitutes the end of a precip event, default = 2 hours
 
 
     Created March 3, 2017
@@ -226,30 +233,21 @@ def storm_tracking(precipitation,time_step, storm_lst,hours_since_ppt, mass_thre
     '''
     if precipitation.mean() > mass_thresh:
 
-        #First storm/ new storm
-        if storm_lst[-1] == [None,None,None]:
-            print "New Storm, Number = {0}".format(len(storm_lst))
-            total = precipitation
+        #First storm
+        if storm_lst[-1][0] == None:
+            storm_lst[0][0:1] = [time_step,None]
+
+        #new storm
+        if storm_lst[-1][1] != None:
             #Assign the start time and the initial precip data
-            storm_lst[-1] = [time_step,None,total]
+            storm_lst.append([time_step,None, precipitation])
 
-        #is the storm continuing?
+        #the storm is continuing
         else:
-
-            print "Hours since last precip = {0}".format(hours_since_ppt)
             total = storm_lst[-1][2]
             total  += precipitation
 
-            storm_lst[-1][1] = time_step
             storm_lst[-1][2] = total
 
-
             if hours_since_ppt > time_thresh:
-
-                print "Storm ended, ID = {0} \n Duration = {1} hours".format(-1, (storm_lst[-1][1] - storm_lst[-1][0])/60.0)
-
-                storm_lst.append([None,None,None])
-
-
-            else:
-                print "Storm, ID = {0} is continuing...".format(-1)
+                storm_lst[-1][1] = time_step

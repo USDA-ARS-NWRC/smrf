@@ -382,6 +382,8 @@ class SMRF():
         for v in self.distribute:
             self.distribute[v].initialize(self.topo, self.data.metadata)
 
+        sub_count = 0
+
         #------------------------------------------------------------------------------
         # Distribute the data
         for output_count,t in enumerate(self.date_time):
@@ -419,46 +421,60 @@ class SMRF():
             self.distribute['precip'].distribute(self.data.precip.ix[t],
                                                 self.distribute['vapor_pressure'].dew_point,
                                                 self.topo.mask)
+
             storms = self.distribute['precip'].storms
 
-            for s in storms:
-                print "Storm totals average  = {0} mm".format(s[2].mean())
+            # 5. Albedo
+            self.distribute['albedo'].distribute(t, illum_ang, self.distribute['precip'].storm_days)
+
+            # 6. Solar
+            self.distribute['solar'].distribute(self.data.cloud_factor.ix[t],
+                                                illum_ang,
+                                                cosz,
+                                                azimuth,
+                                                self.distribute['precip'].last_storm_day_basin,
+                                                self.distribute['albedo'].albedo_vis,
+                                                self.distribute['albedo'].albedo_ir)
+            #a storm cycle has ended.
+            if storms[-1][1] != None:
+                print "Storm Cycle completed, distributing rest of data"
+                print "Storm # {0} produced an average of {1} mm".format(len(storms),storms[-1][2].mean())
+                if len(storms) == 1:
+                    catchup_begin = 0
+                else:
+                    catchup_begin = self.date_time.index(storms[-2][1])
+
+                catchup_end = self.date_time.index(storms[-1][1])
+
+                sub_date = self.date_time[catchup_begin:catchup_end]
+
+                for count, sub_t in enumerate(sub_date):
+                    sub_count +=count
+
+
+                    # 7. thermal radiation
+                    if self.distribute['thermal'].gridded:
+                        self.distribute['thermal'].distribute_thermal(self.data.thermal.ix[sub_t],
+                                                                      self.distribute['air_temp'].air_temp)
+                    else:
+                        self.distribute['thermal'].distribute(sub_t, self.distribute['air_temp'].air_temp,
+                                                              self.distribute['vapor_pressure'].dew_point,
+                                                              self.distribute['solar'].cloud_factor)
+
+                    # 8. Soil temperature
+                    self.distribute['soil_temp'].distribute()
+
+
+                    # output at the frequency and the last time step
+                    if (output_count % self.config['output']['frequency'] == 0) or (output_count == len(self.date_time)):
+                        self.output(sub_t)
+
+#             plt.imshow(self.distribute['albedo'].albedo_vis), plt.colorbar(), plt.show()
 #
-#             # 5. Albedo
-#             self.distribute['albedo'].distribute(t, illum_ang, self.distribute['precip'].storm_days)
 #
-#             # 6. Solar
-#             self.distribute['solar'].distribute(self.data.cloud_factor.ix[t],
-#                                                 illum_ang,
-#                                                 cosz,
-#                                                 azimuth,
-#                                                 self.distribute['precip'].last_storm_day_basin,
-#                                                 self.distribute['albedo'].albedo_vis,
-#                                                 self.distribute['albedo'].albedo_ir)
-#
-#             # 7. thermal radiation
-#             if self.distribute['thermal'].gridded:
-#                 self.distribute['thermal'].distribute_thermal(self.data.thermal.ix[t],
-#                                                               self.distribute['air_temp'].air_temp)
-#             else:
-#                 self.distribute['thermal'].distribute(t, self.distribute['air_temp'].air_temp,
-#                                                       self.distribute['vapor_pressure'].dew_point,
-#                                                       self.distribute['solar'].cloud_factor)
-#
-#             # 8. Soil temperature
-#             self.distribute['soil_temp'].distribute()
-#
-#
-#             # output at the frequency and the last time step
-#             if (output_count % self.config['output']['frequency'] == 0) or (output_count == len(self.date_time)):
-#                 self.output(t)
-#
-# #             plt.imshow(self.distribute['albedo'].albedo_vis), plt.colorbar(), plt.show()
-#
-#
-#             # pull all the images together to create the input image
-# #             d[t]['air_temp'] = self.distribute['air_temp'].image
-# #             d[t]['vapor_pressure'] = self.distribute['vapor_pressure'].image
+            # pull all the images together to create the input image
+#             d[t]['air_temp'] = self.distribute['air_temp'].image
+#             d[t]['vapor_pressure'] = self.distribute['vapor_pressure'].image
 #
 
             # check if out put is desired
@@ -645,33 +661,36 @@ class SMRF():
             self.output_variables = None
 
 
-    def output(self, current_time_step):
+    def output(self, current_time_step, storm_end = False):
         """
         Output the forcing data or model outputs for the current_time_step.
 
         Args:
             current_time_step (date_time): the current time step datetime object
+            storm_end (bool): indicates which set of variables to output.
+                              Variables that are depended on the storm cycle
+                              ending are not outputted until the end of a new storm.
         """
 
         # get the output variables then pass to the function
-        for v in self.out_func.variable_list.values():
+            for v in self.out_func.variable_list.values():
 
-            # get the data desired
-            output_now = True
-            data = getattr(self.distribute[v['module']], v['variable'])
+                # get the data desired
+                output_now = True
+                data = getattr(self.distribute[v['module']], v['variable'])
 
-#             elif v['variable'] in q.keys():
-#                 data = q[v['variable']].get(current_time_step)
-#             else:
-#                 self._logger.warning('Output variable %s not in queue' % v['variable'])
-#                 output_now = False
+    #             elif v['variable'] in q.keys():
+    #                 data = q[v['variable']].get(current_time_step)
+    #             else:
+    #                 self._logger.warning('Output variable %s not in queue' % v['variable'])
+    #                 output_now = False
 
-            if output_now:
-                if data is None:
-                    data = np.zeros((self.topo.ny, self.topo.nx))
+                if output_now:
+                    if data is None:
+                        data = np.zeros((self.topo.ny, self.topo.nx))
 
-                # output the time step
-                self.out_func.output(v['variable'], data, current_time_step)
+                    # output the time step
+                    self.out_func.output(v['variable'], data, current_time_step)
 
 
     def title(self, option):

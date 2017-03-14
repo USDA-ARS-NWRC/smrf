@@ -99,7 +99,7 @@ class ppt(image_data.image_data):
                                   },
                         }
 
-    min = 0
+
     max = np.Inf
 
     def __init__(self, pptConfig, time_step=60):
@@ -143,10 +143,10 @@ class ppt(image_data.image_data):
         self.storm_precip = np.zeros((topo.ny, topo.nx))
         self.last_storm_day = np.zeros((topo.ny, topo.nx))
         self.storms = []
-        self.storms.append([None,None,None])
+        self.storms.append([None,None,self.storm_precip])
         self.hours_since_ppt=0
-#         self.albedo
-
+        #Note while we do idenfiy storms here the calculations do not require the storm info
+        self.storm_dependent = False
 
     def distribute_precip(self, data):
         """
