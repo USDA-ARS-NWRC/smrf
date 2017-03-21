@@ -130,6 +130,9 @@ class SMRF():
         # initialize the distribute dict
         self.distribute = {}
 
+        # initialize the post_processors dict
+        self.post_processors = {}
+
         # start logging
 
         if 'log_level' in self.config['logging']:
@@ -443,18 +446,6 @@ class SMRF():
                 for i,[time,precip] in enumerate(storms[1:]):
                     total += precip
                 print "Storm # {0} produced an average of {1} mm".format(len(self.distribute['precip'].storm_num),total.mean())
-                # if len(storms) == 1:
-                #     catchup_begin = 0
-                # else:
-                #     catchup_begin = self.date_time.index(storms[-2][1])
-                #
-                # catchup_end = self.date_time.index(storms[-1][1])
-                #
-                # sub_date = self.date_time[catchup_begin:catchup_end]
-                #
-                # for count, sub_t in enumerate(sub_date):
-                #     sub_count +=count
-
 
             # 7. thermal radiation
             if self.distribute['thermal'].gridded:
@@ -469,19 +460,9 @@ class SMRF():
             self.distribute['soil_temp'].distribute()
 
 
-            # output at the frequency and the last time step
+            # 9. output at the frequency and the last time step
             if (output_count % self.config['output']['frequency'] == 0) or (output_count == len(self.date_time)):
                 self.output(t)
-
-#             plt.imshow(self.distribute['albedo'].albedo_vis), plt.colorbar(), plt.show()
-#
-#
-            # pull all the images together to create the input image
-#             d[t]['air_temp'] = self.distribute['air_temp'].image
-#             d[t]['vapor_pressure'] = self.distribute['vapor_pressure'].image
-#
-
-            # check if out put is desired
 
             telapsed = datetime.now() - startTime
             self._logger.debug('%.1f seconds for time step' % telapsed.total_seconds())
@@ -608,12 +589,6 @@ class SMRF():
 
         self._logger.debug('DONE!!!!')
 
-    def post_process(self):
-        """
-        Execute all the post processors
-        """
-        for k,v in self.distribute:
-            v.post_processor()
 
     def initializeOutput(self):
         """
@@ -671,7 +646,7 @@ class SMRF():
             self.output_variables = None
 
 
-    def output(self, current_time_step, storm_end = False):
+    def output(self, current_time_step):
         """
         Output the forcing data or model outputs for the current_time_step.
 
@@ -701,6 +676,14 @@ class SMRF():
 
                 # output the time step
                 self.out_func.output(v['variable'], data, current_time_step)
+
+
+    def post_process(self):
+        """
+        Execute all the post processors
+        """
+        self.distribute['precip'].post_processor()
+        #self.out_func.output(v['variable'], data, current_time_step)
 
 
     def title(self, option):

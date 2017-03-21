@@ -131,7 +131,7 @@ def time_since_storm(precipitation, perc_snow, time_step=1/24, mass=1, time=4,
     return stormDays, stormPrecip
 
 
-def tracking(precipitation, dpt, time, storm_lst,hours_since_ppt, mass_thresh = 0.0, time_thresh=2):
+def tracking(precipitation, time, storm_lst, hours_since_ppt, mass_thresh = 0.0, time_thresh=2):
     '''
     Args:
     precipitation - precipitation values
@@ -165,14 +165,9 @@ def tracking(precipitation, dpt, time, storm_lst,hours_since_ppt, mass_thresh = 
     if precipitation.mean() > mass_thresh:
         #New storm
         if len(storm_lst)== 0 or storm_lst[-1]['storm_end'] != None:
-            storm_lst.append({'start':time,'end':None,'total_precip':precipitation, 'processed':False})
+            storm_lst.append({'start':time,'end':None})
             is_storming = True
-            np.savetxt(os.environ['WORKDIR'] + "/DPT_"+str(time),dpt, delimiter = ',')
 
-        #Assign the start time and the initial precip data
-        elif hours_since_ppt < time_thresh:
-            is_storming = True
-            storm_lst[-1]['total_precip'] += precipitation
         else:
             is_storming = False
             storm_lst[-1]['end'] = time

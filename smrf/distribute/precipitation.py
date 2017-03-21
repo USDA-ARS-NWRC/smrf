@@ -6,6 +6,7 @@ __version__ = "0.1.1"
 
 import numpy as np
 import logging
+from netCDF4 import Dataset
 from smrf.distribute import image_data
 from smrf.envphys import snow
 from smrf.envphys import storms
@@ -201,7 +202,7 @@ class ppt(image_data.image_data):
             # distribute data and set the min/max
             self._distribute(data, zeros=None)
             self.precip = utils.set_min_max(self.precip, self.min, self.max)
-            self.storming = storms.tracking(self.precip, dpt, time, self.storms, self.hours_since_ppt)
+            self.storming = storms.tracking(self.precip, time, self.storms, self.hours_since_ppt)
             self.hours_since_ppt = 0
 
             # determine the precip phase
@@ -276,14 +277,11 @@ class ppt(image_data.image_data):
 #             self._logger.debug('Putting %s -- %s' % (t, 'storm_days'))
             queue['storm_days'].put( [t, self.storm_days] )
 
-    def post_processor(self):
+    def post_processor(self,output_dir):
         """
         Process the snow density values
         """
-        for idx, storm_info in enumerate(self.storms):
-
-            #Calculate storm density for previous storm
-            if storm_info["processed"] == False:
-                for lag_time in [storm_info['start']:self.time_step,storm_info['end']]:
-                    snow.
-        pass
+        pds = Dataset(output_dir+'precip.nc')
+        precip = ds.variables['precip']
+        tds = Dataset(output_dir+'dew_point.nc')
+        dpt = tds.variables['dew_point']
