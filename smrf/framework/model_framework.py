@@ -420,6 +420,7 @@ class SMRF():
             # 4. Precipitation
             self.distribute['precip'].distribute(self.data.precip.ix[t],
                                                 self.distribute['vapor_pressure'].dew_point,
+                                                t,
                                                 self.topo.mask)
 
             storms = self.distribute['precip'].storms
@@ -611,7 +612,8 @@ class SMRF():
         """
         Execute all the post processors
         """
-        pass
+        for k,v in self.distribute:
+            v.post_processor()
 
     def initializeOutput(self):
         """

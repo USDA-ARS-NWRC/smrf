@@ -175,7 +175,7 @@ class ppt(image_data.image_data):
             self.precip = np.zeros(self.storm_days.shape)
 
 
-    def distribute(self, data, dpt, mask=None):
+    def distribute(self, data, dpt, time, mask=None):
         """
         Distribute given a Panda's dataframe for a single time step. Calls
         :mod:`smrf.distribute.image_data.image_data._distribute`.
@@ -190,6 +190,7 @@ class ppt(image_data.image_data):
         Args:
             data: Pandas dataframe for a single time step from precip
             dpt: dew point numpy array that will be used for the precipitaiton temperature
+            time: pass in the time were are currently on
             mask: basin mask to apply to the storm days for calculating the last storm day for the basin
         """
 
@@ -200,7 +201,7 @@ class ppt(image_data.image_data):
             # distribute data and set the min/max
             self._distribute(data, zeros=None)
             self.precip = utils.set_min_max(self.precip, self.min, self.max)
-            self.storming = storms.tracking(self.precip, data.name, self.storms, self.hours_since_ppt)
+            self.storming = storms.tracking(self.precip, dpt, time, self.storms, self.hours_since_ppt)
             self.hours_since_ppt = 0
 
             # determine the precip phase
@@ -277,6 +278,12 @@ class ppt(image_data.image_data):
 
     def post_processor(self):
         """
-
+        Process the snow density values
         """
+        for idx, storm_info in enumerate(self.storms):
+
+            #Calculate storm density for previous storm
+            if storm_info["processed"] == False:
+                for lag_time in [storm_info['start']:self.time_step,storm_info['end']]:
+                    snow.
         pass

@@ -8,6 +8,7 @@ __version__ = '0.1.1'
 
 
 import numpy as np
+import os
 
 def storms(precipitation, perc_snow, mass=1, time=4,
            stormDays=None, stormPrecip=None, ps_thresh=0.5):
@@ -130,19 +131,28 @@ def time_since_storm(precipitation, perc_snow, time_step=1/24, mass=1, time=4,
     return stormDays, stormPrecip
 
 
-def tracking(precipitation,time_step, storm_lst,hours_since_ppt, mass_thresh = 0.0, time_thresh=2):
+def tracking(precipitation, dpt, time, storm_lst,hours_since_ppt, mass_thresh = 0.0, time_thresh=2):
     '''
     Args:
     precipitation - precipitation values
-    time_step - Time step passed from the main loop
+    dpt - Numpy array of the dew point temperature for this timestep
+    time - Time step passed from the main loop
     hours_since_ppt - hours since the last precipitation
     storm_lst - list that store the storm cycles in order. A storm is recorded by
                 its start, its end, and accumulated precip data frame. The list
                 is passed by reference and modified internally.
-                e.g. [[date_time1,date_time1, accum_precip1],
-                     [date_time2,date_time2, accum_precip2],
-                     ...
+                Each storm entry should be in the format of:
+                [Storm Start, Storm End, Accum. Precip, has it been processed?]
+
+                e.g.
+                     [
+                     [date_time1,date_time2, accum_precip1, True],
+                     [date_time3,date_time4, accum_precip2, False],
                      ]
+
+                     #would be a two storms, one has been used to calculate density
+                     and the other has not
+
     mass_thresh - mass amount that constitutes a real precip event, default = 0.0.
     time_thresh - amount of hours that constitutes the end of a precip event, default = 2 hours
 
@@ -153,10 +163,18 @@ def tracking(precipitation,time_step, storm_lst,hours_since_ppt, mass_thresh = 0
     @author: Micah Johnson
     '''
     if precipitation.mean() > mass_thresh:
-        #Assign the start time and the initial precip data
-        if hours_since_ppt < time_thresh:
+        #New storm
+        if len(storm_lst)== 0 or storm_lst[-1]['storm_end'] != None:
+            storm_lst.append({'start':time,'end':None,'total_precip':precipitation, 'processed':False})
             is_storming = True
-            #storm_lst.append([time_step, precipitation])
+            np.savetxt(os.environ['WORKDIR'] + "/DPT_"+str(time),dpt, delimiter = ',')
+
+        #Assign the start time and the initial precip data
+        elif hours_since_ppt < time_thresh:
+            is_storming = True
+            storm_lst[-1]['total_precip'] += precipitation
         else:
             is_storming = False
+            storm_lst[-1]['end'] = time
+
     return is_storming
