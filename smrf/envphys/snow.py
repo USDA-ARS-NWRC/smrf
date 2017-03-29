@@ -84,10 +84,10 @@ def mkprecip(precipitation, temperature):
 
     return ps, sd
 
-def compacted_snow_density(accumulated_precip, temperature):
+def compacted_density(accumulated_precip, temperature):
     """
     Uses a new snow density model to calculate the snow density based on the
-    storm total, considers compaction, liquid water effects, temperature.
+    storm total and considers compaction, liquid water effects, temperature.
 
     Meant to be used after the fact when all the data is available.
 
@@ -96,107 +96,218 @@ def compacted_snow_density(accumulated_precip, temperature):
     accumulated_precip - the distributed total precip accumulated during a storm
 
     temperature - a single timestep of distributed temperature
+
+    returns:
+    snow_density - an array of snow density matching the domain size.
     """
-    x_len = len(precip[0][:])
-    y_len = len(precip[:][0])
+    x_len = len(accumulated_precip[0][:])
+    y_len = len(accumulated_precip[:][0])
     snow_density = np.zeros((y_len,x_len))
     for i in range(y_len):
         for j in range(x_len):
             pp = accumulated_precip[i][j]
             tpp  = temperature[i][j]
-            snow_density[i][j] = snow_rho(tpp,pp)
+            snow_density[i][j] = (snow_rho(tpp,pp))['rho_s']
 
     return snow_density
 
 def snow_rho(Tpp,pp):
-	ex_max = 1.75
-	exr = 0.75
-	ex_min = 1.0
-	c1_min = 0.026
-	c1_max = 0.069
-	c1r = 0.043
-	Tmin = -10.0
-	Tmax = +1.0
-	Tz = 0.0
-	Tr0 = 0.5
-	Pcr0 = 0.25
-	Pc0 = 0.75
+    """
+    New density model that takes into account the hourly temperature during precip
+    and the total storm accumulated_precip.
 
-	water = 1000.0
-	if Tpp < Tmin:
-		Tpp = Tmin
+    args:
+    Tpp - a single value of the hourly temperature during the storm
 
-	if Tpp <= -0.5:
-		pcs = 1.0
+    pp - a single value of the accumulated_precip precip during a storm
 
-	elif Tpp > -0.5 and Tpp <= 0.0:
-		pcs = (((-Tpp) / Tr0) * Pcr0) + Pc0
 
-	elif Tpp > 0.0 and Tpp <= 1.0:
-		pcs = Tpp * Pc0
+    returns:
+    Tpp, pp, swe, pcs, rho_ns, d_rho_c, d_rho_m, rho_s, rho, zs
 
-	else:
-		pcs = 0.0
+    Tpp - temperature during precip
+    pp - precipitation accumulated
+    swe - snow water equivalent
+    pcs - percent snow
+    rho_ns - density of new snow with out compaction
+    d_rho_c -
+    d_rho_m -
+    rho_s - density of the snow with compaction
+    rho - density of precip
+    zs - snow height
+    """
+    ex_max = 1.75
+    exr = 0.75
+    ex_min = 1.0
+    c1_min = 0.026
+    c1_max = 0.069
+    c1r = 0.043
+    c_min = 0.0067
+    cfac = 0.0013
+    Tmin = -10.0
+    Tmax = 0.0
+    Tz = 0.0
+    Tr0 = 0.5
+    Pcr0 = 0.25
+    Pc0 = 0.75
 
-	swe = pp * pcs
+    water = 1000.0
 
-	Trange = Tmax - Tmin
+    if pp >0.0:
+        # set precipitation temperature, % snow, and SWE
+        if Tpp < Tmin:
+            Tpp = Tmin
 
-	c1 = c1_min + (((Trange + (Tpp - Tmax)) / Trange) * c1r)
-	ex = ex_min + (((Trange + (Tpp - Tmax)) / Trange) * exr)
+        else :
+            if Tpp > Tmax:
+                tsnow = Tmax
+            else:
+                tsnow = Tpp
 
-	#exponentials in python are done using a double *
-	rho_ns = (50.0 + (1.7 * (((Tpp - Tz) + 15.0)**ex))) / water
+        if Tpp <= -0.5:
+            pcs = 1.0
 
-	d_rho_c = (0.026 * np.exp(-0.08 * (Tz - Tpp)) * swe * np.exp(-21.0 * rho_ns))
+        elif Tpp > -0.5 and Tpp <= 0.0:
+            pcs = (((-Tpp) / Tr0) * Pcr0) + Pc0
 
-	if rho_ns * water < 100.0:
-		c11 = 1.0
-	else:
-		c11 = np.exp(-0.046 * ((rho_ns * water) - 100.0))
+        elif Tpp > 0.0 and Tpp <= (Tmax +1.0):
+            pcs = (((-Tpp) / (Tmax + 1.0)) * Pc0) + Pc0
 
-	d_rho_m = 0.01 * c11 * np.exp(-0.04 * (Tz - Tpp))
+        else:
+            pcs = 0.0
 
-	rho_s = rho_ns +((d_rho_c + d_rho_m) * rho_ns)
-	zs = swe / rho_s
+        swe = pp * pcs
 
-	if swe < pp and zs != 0:
-		rho = pp / zs
-	else:
-		rho = rho_s
 
-	return rho
+
+        if swe > 0.0:
+            # new snow density - no compaction
+            Trange = Tmax - Tmin
+            ex = ex_min + (((Trange + (tsnow - Tmax)) / Trange) * exr)
+
+            if ex > ex_max:
+                ex = ex_max
+
+            rho_ns = (50.0 + (1.7 * (((Tpp - Tz) + 15.0)**ex))) / water
+
+            # proportional total storm mass compaction
+            d_rho_c = (0.026 * exp(-0.08 * (Tz - tsnow)) * swe * exp(-21.0 * rho_ns))
+
+            if rho_ns * water < 100.0:
+                c11 = 1.0
+            else:
+                #c11 = exp(-0.046 * ((rho_ns * water) - 100.0))
+			    c11 = (c_min + ((Tz - tsnow) * cfac)) + 1.0
+
+            d_rho_m = 0.01 * c11 * exp(-0.04 * (Tz - tsnow))
+
+            # compute snow denstiy, depth & combined liquid and snow density
+            rho_s = rho_ns +((d_rho_c + d_rho_m) * rho_ns)
+
+            zs = swe / rho_s
+
+            if swe < pp:
+                if pcs > 0.0:
+                    rho = (pcs * rho_s) + (1 - pcs)
+                if rho > 1.0:
+                    rho = water / water
+
+            else:
+                rho = rho_s
+
+        else:
+            rho_ns = 0.0
+            d_rho_m = 0.0
+            d_rho_c = 0.0
+            zs = 0.0
+            rho_s = 0.0
+            rho = water / water
+
+        # convert densities from proportions, to kg/m^3 or mm/m^2
+        rho_ns *= water
+        rho_s *= water
+        rho *= water
+
+    #No precip
+    else:
+        rho_ns = 0.0
+        d_rho_m = 0.0
+        d_rho_c = 0.0
+        zs = 0.0
+        rho_s = 0.0
+        rho = 0.0
+        swe = 0.0
+        pcs = 0.0
+
+
+    result = {'swe':swe, 'pcs':pcs,'rho_ns': rho_ns, 'd_rho_c' : d_rho_c, 'd_rho_m' : d_rho_m, 'rho_s' : rho_s, 'rho':rho, 'zs':zs}
+
+    return result
 
 
 if __name__ == '__main__':
-    from netCDF4 import Dataset
     from matplotlib import pyplot as plt
+    from netCDF4 import Dataset
+    from datetime import datetime
     import time
+    import numpy as np
 
-    start = time.time()
-    pds =Dataset('/home/micahjohnson/Desktop/test_output/precip.nc','r')
-    sds =Dataset('/home/micahjohnson/Desktop/test_output/snow_density.nc','r')
+    time_step = 60.0
 
-    dds =Dataset('/home/micahjohnson/Desktop/test_output/dew_point.nc','r')
-    precip = pds.variables['precip'][111]
-    dpt = dds.variables['dew_point'][111]
-    srho = sds.variables['snow_density'][111]
+    storms = [ {'start': datetime(2008,10,4,9),'end': datetime(2008,10,5,9)}]
+
+    pds = Dataset('/home/micahjohnson/Desktop/test_output/precip.nc','r')
+    dds = Dataset('/home/micahjohnson/Desktop/test_output/dew_point.nc','r')
+    storm_accum = np.zeros(pds.variables['precip'][0].shape)
+    #parse from file start time
+    sim_start = datetime.strptime((pds.variables['time'].units.split('since')[-1]).strip(),'%Y-%m-%d %H:%M')
+    for i,storm in enumerate(storms):
+        delta  = (storm['end']- storm['start'])
+        storm_span = delta.total_seconds()/(60.0*time_step)
+        print storm_span
+        #reset the accumulated array
+        storm_accum[:]= 0.0
+
+        #convert to seconds from epoch
+        seconds_start = (storm['start'] - sim_start).total_seconds()
+        steps_start = int(seconds_start/(60.0*time_step))
+
+        seconds_end = (storm['end'] - sim_start).total_seconds()
+        steps_end = int(seconds_end/(60.0*time_step))
+
+        steps = range(steps_start, steps_end)
+
+        print "Processinfg storm #{0}".format(i)
+        print "Accumulating precip..."
+        for t in steps:
+            storm_accum +=pds.variables['precip'][t][:][:]
+
+        print "Calculating snow density..."
+        for t in steps:
+            start = time.time()
+            dpt = dds.variables['dew_point'][t]
+            snow_density = compacted_density(storm_accum, dpt)
+            #visual
+            print "plotting timestep {0}".format(t)
+            fig = plt.figure()
+            a=fig.add_subplot(1,3,1)
+            a.set_title('New Snow Density')
+
+            plt.imshow(snow_density)
+            plt.colorbar()
+
+            b=fig.add_subplot(1,3,2)
+            plt.imshow(dpt)
+            plt.colorbar()
+            b.set_title('Dew Point')
+
+            c=fig.add_subplot(1,3,3)
+            plt.imshow(storm_accum)
+            c.set_title('Accum Precip in mm')
+            plt.colorbar()
+
+            print "Single time step took {0}s".format(time.time() - start)
+            plt.show()
 
     pds.close()
     dds.close()
-    sds.close()
-
-    snow_density = compacted_snow_density(precip,dpt)
-
-    #visual
-    fig = plt.figure()
-    a=fig.add_subplot(1,2,1)
-    plt.imshow(snow_density)
-    a.set_title('New Snow Density')
-
-    # a=fig.add_subplot(1,2,2)
-    # plt.imshow(srho)
-    # a.set_title('Original Snow density')
-    plt.colorbar()
-    print "Single time step took {0}s".format(time.time() - start)
-    plt.show()

@@ -185,10 +185,3 @@ class vp(image_data.image_data):
 
             queue[self.variable].put( [t, self.vapor_pressure] )
             queue['dew_point'].put( [t, self.dew_point] )
-
-
-    def post_processor(self):
-        """
-
-        """
-        pass

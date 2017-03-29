@@ -70,6 +70,9 @@ with smrf.framework.SMRF(configFile) as s:
     # 6. distribute
     s.distributeData()
 
+    #7. post process if necessary
+    s.post_process()
+
     #===============================================================================
     # Run model
     #===============================================================================

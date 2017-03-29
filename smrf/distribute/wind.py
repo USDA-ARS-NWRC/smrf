@@ -257,12 +257,6 @@ class wind(image_data.image_data):
 
             queue['wind_speed'].put( [t, self.wind_speed] )
 
-    def post_processor(self):
-        """
-
-        """
-        pass            
-
     def simulateWind(self, data_speed):
         """
         Calculate the simulated wind speed at each cell from flatwind and the distributed directions.

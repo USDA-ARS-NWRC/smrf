@@ -130,9 +130,6 @@ class SMRF():
         # initialize the distribute dict
         self.distribute = {}
 
-        # initialize the post_processors dict
-        self.post_processors = {}
-
         # start logging
 
         if 'log_level' in self.config['logging']:
@@ -390,7 +387,7 @@ class SMRF():
         #------------------------------------------------------------------------------
         # Distribute the data
         for output_count,t in enumerate(self.date_time):
-
+            print t
             # wait here for the model to catch up if needed
 
             startTime = datetime.now()
@@ -439,13 +436,6 @@ class SMRF():
                                                 self.distribute['precip'].last_storm_day_basin,
                                                 self.distribute['albedo'].albedo_vis,
                                                 self.distribute['albedo'].albedo_ir)
-            #a storm cycle has ended.
-            if not self.distribute['precip'].storming:
-                print "Storm Cycle completed, distributing rest of data"
-                total = storms[0][1]
-                for i,[time,precip] in enumerate(storms[1:]):
-                    total += precip
-                print "Storm # {0} produced an average of {1} mm".format(len(self.distribute['precip'].storm_num),total.mean())
 
             # 7. thermal radiation
             if self.distribute['thermal'].gridded:
@@ -461,8 +451,7 @@ class SMRF():
 
 
             # 9. output at the frequency and the last time step
-            if (output_count % self.config['output']['frequency'] == 0) or (output_count == len(self.date_time)):
-                self.output(t)
+            self.output(output_count, t)
 
             telapsed = datetime.now() - startTime
             self._logger.debug('%.1f seconds for time step' % telapsed.total_seconds())
@@ -646,44 +635,61 @@ class SMRF():
             self.output_variables = None
 
 
-    def output(self, current_time_step):
+    def output(self, output_count, current_time_step,  module = None, out_var = None):
         """
         Output the forcing data or model outputs for the current_time_step.
 
         Args:
             current_time_step (date_time): the current time step datetime object
-            storm_end (bool): indicates which set of variables to output.
-                              Variables that are depended on the storm cycle
-                              ending are not outputted until the end of a new storm.
+
+            module -
+            var_name -
+
         """
+        if (output_count % self.config['output']['frequency'] == 0) or (output_count == len(self.date_time)):
 
-        # get the output variables then pass to the function
-        for v in self.out_func.variable_list.values():
+            #Not requesting specific output, so output all
+            if module == None and out_var == None:
+                post_process = False
+            else:
+                post_process = True
 
-            # get the data desired
-            output_now = True
-            data = getattr(self.distribute[v['module']], v['variable'])
+            #add only one variable to the output list and preceed as normal
+            if post_process:
+                if module == None or out_var == None:
+                    raise ValueError(" Function requires an output module/variable name when outputting a specific variables")
+                else:
+                    var_vals = [(self.out_func.variable_list.values())[module]]
 
-#             elif v['variable'] in q.keys():
-#                 data = q[v['variable']].get(current_time_step)
-#             else:
-#                 self._logger.warning('Output variable %s not in queue' % v['variable'])
-#                 output_now = False
+            #Output all the variables
+            else:
+                var_vals = self.out_func.variable_list.values()
 
-            if output_now:
+            # get the output variables then pass to the function
+            for v in var_vals:
+                # get the data desired
+                if post_process:
+                    data = getattr(self.distribute[v['module']], v[var_name])
+
+                else:
+                    data = getattr(self.distribute[v['module']], v['variable'])
+
                 if data is None:
                     data = np.zeros((self.topo.ny, self.topo.nx))
 
                 # output the time step
-                self.out_func.output(v['variable'], data, current_time_step)
+                self._logger.debug("Outputting {0}".format(v['module']))
 
+                self.out_func.output(v['variable'], data, current_time_step)
 
     def post_process(self):
         """
         Execute all the post processors
         """
-        self.distribute['precip'].post_processor()
-        #self.out_func.output(v['variable'], data, current_time_step)
+        for output_count,t in enumerate(self.date_time):
+
+            for k in self.distribute.keys():
+                self.distribute[k].post_processor(self)
 
 
     def title(self, option):

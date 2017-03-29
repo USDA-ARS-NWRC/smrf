@@ -5,6 +5,8 @@ __date__ = "2016-01-05"
 __version__ = "0.1.1"
 
 import numpy as np
+import os
+from datetime import datetime
 import logging
 from netCDF4 import Dataset
 from smrf.distribute import image_data
@@ -101,7 +103,6 @@ class ppt(image_data.image_data):
                                   'long_name': 'day_of_last_storm'
                                   },
                         }
-
 
     max = np.Inf
     min = 0
@@ -213,7 +214,6 @@ class ppt(image_data.image_data):
                                                         time_step=self.time_step/60/24, mass=0.5, time=4,
                                                         stormDays=self.storm_days,
                                                         stormPrecip=self.storm_precip)
-
             # save the model state
             self.percent_snow = perc_snow
             self.snow_density = snow_den
@@ -245,8 +245,8 @@ class ppt(image_data.image_data):
         Distribute the data using threading and queue. All data is provided and ``distribute_thread``
         will go through each time step and call :mod:`smrf.distribute.precip.ppt.distribute` then
         puts the distributed data into the queue for:
-
         * :py:attr:`percent_snow`
+
         * :py:attr:`snow_density`
         * :py:attr:`storm_days`
         * :py:attr:`last_storm_day_basin`
@@ -277,11 +277,52 @@ class ppt(image_data.image_data):
 #             self._logger.debug('Putting %s -- %s' % (t, 'storm_days'))
             queue['storm_days'].put( [t, self.storm_days] )
 
-    def post_processor(self,output_dir):
+    def post_processor(self,main_obj):
         """
         Process the snow density values
         """
-        pds = Dataset(output_dir+'precip.nc')
-        precip = ds.variables['precip']
-        tds = Dataset(output_dir+'dew_point.nc')
-        dpt = tds.variables['dew_point']
+        self._logger.info("Post processing precip...")
+
+        #Open files
+        pp_fname = os.path.join(main_obj.config['output']['out_location'], 'precip.nc')
+        t_fname = os.path.join(main_obj.config['output']['out_location'], 'dew_point.nc')
+
+        pds = Dataset(pp_fname,'r')
+        tds = Dataset(t_fname,'r')
+
+        #initialize storm accum
+        storm_accum = np.zeros(pds.variables['precip'][0].shape)
+
+        #Calculate the start of the simulation for calculating count
+        sim_start = datetime.strptime((pds.variables['time'].units.split('since')[-1]).strip(),'%Y-%m-%d %H:%S')
+
+        #Cycle through all the storms
+        for i,storm in enumerate(self.storms):
+            delta  = (storm['end']- storm['start'])
+            storm_span = delta.total_seconds()/(60.0*time_step)
+
+            self._logger.debug("Processing storm #{0}, it lasted {0} hours".format(i,span))
+            #reset the accumulated array
+            storm_accum[:]= 0.0
+
+            #convert to seconds from epoch, calculate the count
+            seconds_start = (storm['start'] - sim_start).total_seconds()
+            steps_start = int(seconds_start/(60.0*time_step))
+
+            seconds_end = (storm['end'] - sim_start).total_seconds()
+            steps_end = int(seconds_end/(60.0*time_step))
+
+            steps = range(steps_start, steps_end)
+
+            self.logger.debug("Accumulating precip...")
+            for t in steps:
+                storm_accum +=pds.variables['precip'][t][:][:]
+
+            self._logger.debug("Calculating snow density...")
+            for t in steps:
+                print t
+                dpt = tds.variables['dew_point'][t]
+                self.snow_density = snow.compacted_density(storm_accum, dpt)
+                main.obj.output(count,t, module = 'precip', var_name = 'snow_density')
+        pds.close()
+        tds.close()

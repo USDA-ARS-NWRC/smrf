@@ -24,7 +24,7 @@ class solar(image_data.image_data):
 
     1. Terrain corrected clear sky radiation
     2. Distribute a cloud factor and adjust modeled clear sky
-    3. Adjust solar radiation for vegitation effects
+    3. Adjust solar radiation for vegetation effects
     4. Calculate net radiation using the albedo
 
     The Image Processing Workbench (IPW) includes a utility ``stoporad`` to model terrain corrected
@@ -45,7 +45,7 @@ class solar(image_data.image_data):
     be distributed without detrending to elevation. The modeled clear sky radiation (both beam and diffuse)
     are adjusted for clouds using :mod:`smrf.envphys.radiation.cf_cloud`.
 
-    The third step adjusts the cloud corrected solar radiation for vegitation affects, following the
+    The third step adjusts the cloud corrected solar radiation for vegetation affects, following the
     methods developed by Link and Marks (1999) :cite:`Link&Marks:1999`. The direct beam radiation
     is corrected by:
 
@@ -97,13 +97,13 @@ class solar(image_data.image_data):
         stoporad_in: file path to the stoporad_in file created from :mod:`smrf.data.loadTopo.topo`
         tempDir: temporary directory for ``stoporad``, will default to the ``WORKDIR`` environment variable
         variable: solar
-        veg_height: numpy array of vegitation heights from :mod:`smrf.data.loadTopo.topo`
-        veg_ir_beam: numpy array vegitation adjusted infrared beam radiation
-        veg_ir_diffuse: numpy array vegitation adjusted infrared diffuse radiation
-        veg_k: numpy array of vegitation extinction coefficient from :mod:`smrf.data.loadTopo.topo`
-        veg_tau: numpy array of vegitation optical transmissivity from :mod:`smrf.data.loadTopo.topo`
-        veg_vis_beam: numpy array vegitation adjusted visible beam radiation
-        veg_vis_diffuse: numpy array vegitation adjusted visible diffuse radiation
+        veg_height: numpy array of vegetation heights from :mod:`smrf.data.loadTopo.topo`
+        veg_ir_beam: numpy array vegetation adjusted infrared beam radiation
+        veg_ir_diffuse: numpy array vegetation adjusted infrared diffuse radiation
+        veg_k: numpy array of vegetation extinction coefficient from :mod:`smrf.data.loadTopo.topo`
+        veg_tau: numpy array of vegetation optical transmissivity from :mod:`smrf.data.loadTopo.topo`
+        veg_vis_beam: numpy array vegetation adjusted visible beam radiation
+        veg_vis_diffuse: numpy array vegetation adjusted visible diffuse radiation
         vis_file: temporary file from ``stoporad`` for visible clear sky radiation
 
     """
@@ -252,7 +252,7 @@ class solar(image_data.image_data):
         1. Distribute cloud factor
         2. Model clear sky radiation
         3. Cloud correct with :mod:`!smrf.distribute.solar.solar.cloud_correct`
-        4. Vegitation correct with :mod:`!smrf.distribute.solar.solar.veg_correct`
+        4. vegetation correct with :mod:`!smrf.distribute.solar.solar.veg_correct`
         5. Calculate net radiation with :mod:`!smrf.distribute.solar.solar.calc_net`
 
         If sun is down, then all calculated values will be set to ``None``, signaling the output functions
@@ -444,11 +444,6 @@ class solar(image_data.image_data):
             queue[beam].put([t, val_beam])
             queue[diffuse].put([t, val_diffuse])
 
-    def post_processor(self):
-        """
-
-        """
-        pass
 
     def cloud_correct(self):
         """
@@ -468,7 +463,7 @@ class solar(image_data.image_data):
 
     def veg_correct(self, illum_ang):
         """
-        Correct the cloud adjusted radiation for vegitation using :mod:`smrf.envphys.radiation.veg_beam`
+        Correct the cloud adjusted radiation for vegetation using :mod:`smrf.envphys.radiation.veg_beam`
         and :mod:`smrf.envphys.radiation.veg_diffuse`. Sets :py:attr:`veg_vis_beam`, :py:attr:`veg_vis_diffuse`
         :py:attr:`veg_ir_beam`, and :py:attr:`veg_ir_diffuse`.
 
@@ -477,7 +472,7 @@ class solar(image_data.image_data):
 
         """
 
-        self._logger.debug('Correcting radiation for vegitation')
+        self._logger.debug('Correcting radiation for vegetation')
 
         ### calculate for visible ###
         # correct beam
@@ -496,7 +491,7 @@ class solar(image_data.image_data):
 
     def calc_net(self, albedo_vis, albedo_ir):
         """
-        Calculate the net radiation using the vegitation adjusted radiation. Sets :py:attr:`net_solar`.
+        Calculate the net radiation using the vegetation adjusted radiation. Sets :py:attr:`net_solar`.
 
         Args:
             albedo_vis: numpy array for visible albedo, from :mod:`smrf.distribute.albedo.albedo.albedo_vis`

@@ -9,6 +9,7 @@ __version__ = '0.1.1'
 
 import numpy as np
 import os
+from datetime import datetime
 
 def storms(precipitation, perc_snow, mass=1, time=4,
            stormDays=None, stormPrecip=None, ps_thresh=0.5):
@@ -136,7 +137,7 @@ def tracking(precipitation, time, storm_lst, hours_since_ppt, mass_thresh = 0.0,
     Args:
     precipitation - precipitation values
     dpt - Numpy array of the dew point temperature for this timestep
-    time - Time step passed from the main loop
+    time - Time step that smrf is on
     hours_since_ppt - hours since the last precipitation
     storm_lst - list that store the storm cycles in order. A storm is recorded by
                 its start, its end, and accumulated precip data frame. The list
@@ -146,7 +147,7 @@ def tracking(precipitation, time, storm_lst, hours_since_ppt, mass_thresh = 0.0,
 
                 e.g.
                      [
-                     [date_time1,date_time2, accum_precip1, True],
+                     {start:date_time1,end:date_time2, accum_precip1, True],
                      [date_time3,date_time4, accum_precip2, False],
                      ]
 
@@ -164,12 +165,18 @@ def tracking(precipitation, time, storm_lst, hours_since_ppt, mass_thresh = 0.0,
     '''
     if precipitation.mean() > mass_thresh:
         #New storm
-        if len(storm_lst)== 0 or storm_lst[-1]['storm_end'] != None:
-            storm_lst.append({'start':time,'end':None})
+        dt = time.to_datetime()
+        if len(storm_lst)== 0 or storm_lst[-1]['end'] != None:
+            storm_lst.append({'start':dt,'end':None})
             is_storming = True
 
-        else:
-            is_storming = False
-            storm_lst[-1]['end'] = time
+        #always append the most recent timestep to avoid unended storms
+        storm_lst[-1]['end'] = dt
 
+    elif hours_since_ppt > time_thresh:
+        is_storming = False
+        storm_lst[-1]['end'] = dt
+
+    else:
+        hours_since_ppt+=1
     return is_storming

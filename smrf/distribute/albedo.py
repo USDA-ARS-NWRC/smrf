@@ -157,9 +157,3 @@ class albedo(image_data.image_data):
 
             self._logger.debug('Putting %s -- %s' % (t, 'albedo_ir'))
             queue['albedo_ir'].put( [t, self.albedo_ir] )
-
-    def post_processor(self):
-        """
-
-        """
-        pass

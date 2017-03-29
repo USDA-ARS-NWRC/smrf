@@ -228,9 +228,3 @@ class th(image_data.image_data):
             self.distribute_thermal(data.ix[t], air_temp)
 
             queue['thermal'].put( [t, self.thermal] )
-
-    def post_processor(self):
-        """
-
-        """
-        pass

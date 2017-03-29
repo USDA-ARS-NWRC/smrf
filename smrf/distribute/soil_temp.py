@@ -79,9 +79,3 @@ class ts(image_data.image_data):
 
 #         self._logger.debug('Distributing soil temp')
         pass
-
-    def post_processor(self):
-        """
-
-        """
-        pass
