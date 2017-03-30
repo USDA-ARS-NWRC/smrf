@@ -28,7 +28,7 @@ Example:
 
 """
 
-import ConfigParser
+    
 import logging, os
 from datetime import datetime, timedelta
 import pandas as pd
@@ -39,8 +39,9 @@ import pytz
 
 from smrf import data, distribute, output
 from smrf.envphys import radiation
-from smrf.utils import queue
+from smrf.utils import queue, io
 from threading import Thread
+
 # from multiprocessing import Process
 
 
@@ -83,9 +84,10 @@ class SMRF():
         if not os.path.isfile(configFile):
             raise Exception('Configuration file does not exist --> %s' % configFile)
 
-        f = MyParser()
-        f.read(configFile)
-        self.config = f.as_dict()
+#         f = MyParser()
+#         f.read(configFile)
+#         self.config = f.as_dict()
+        self.config = io.read_config(configFile)
 
         # check for the desired sections
         if 'stations' not in self.config:
@@ -106,7 +108,7 @@ class SMRF():
 
         self.threading = False
         if 'threading' in self.config['system']:
-            if self.config['system']['threading'].lower() == 'true':
+            if self.config['system']['threading']:
                 self.threading = True
 
         self.max_values = 1
@@ -786,38 +788,38 @@ class SMRF():
 
 
 
-class MyParser(ConfigParser.ConfigParser):
-    """
-    Custom configuration file parser to return the object
-    as a dictionary
-    """
-    def as_dict(self):
-        d = dict(self._sections)
-        for k in d:
-            d[k] = dict(self._defaults, **d[k])
-            d[k].pop('__name__', None)
-        d = self._make_lowercase(d)
-        return d
-
-    def _make_lowercase(self, obj):
-        if hasattr(obj,'iteritems'):
-            # dictionary
-            ret = {}
-            for k,v in obj.iteritems():
-                ret[self._make_lowercase(k)] = v
-            return ret
-        elif isinstance(obj,basestring):
-            # string
-            return obj.lower()
-        elif hasattr(obj,'__iter__'):
-            # list (or the like)
-            ret = []
-            for item in obj:
-                ret.append(self._make_lowercase(item))
-            return ret
-        else:
-            # anything else
-            return obj
+# class MyParser(ConfigParser):
+#     """
+#     Custom configuration file parser to return the object
+#     as a dictionary
+#     """
+#     def as_dict(self):
+#         d = dict(self._sections)
+#         for k in d:
+#             d[k] = dict(self._defaults, **d[k])
+#             d[k].pop('__name__', None)
+#         d = self._make_lowercase(d)
+#         return d
+# 
+#     def _make_lowercase(self, obj):
+#         if hasattr(obj,'iteritems'):
+#             # dictionary
+#             ret = {}
+#             for k,v in obj.iteritems():
+#                 ret[self._make_lowercase(k)] = v
+#             return ret
+#         elif isinstance(obj,basestring):
+#             # string
+#             return obj.lower()
+#         elif hasattr(obj,'__iter__'):
+#             # list (or the like)
+#             ret = []
+#             for item in obj:
+#                 ret.append(self._make_lowercase(item))
+#             return ret
+#         else:
+#             # anything else
+#             return obj
 
 
 

@@ -22,6 +22,8 @@ import pytz
 on_rtd = os.environ.get('READTHEDOCS') == 'True'
 if on_rtd:
     IPW = '.' # placehold while building the docs
+elif 'IPW' not in os.environ:
+    IPW = '/usr/local/bin'
 else:
     IPW = os.environ['IPW']     # IPW executables
 

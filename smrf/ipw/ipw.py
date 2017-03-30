@@ -369,7 +369,7 @@ class IPW:
         # prepare the headers        
         last_line = "!<header> image -1 $Revision: 1.5 $"
 
-        with open(fileName, 'wb') as f:
+        with open(fileName, 'w') as f:
             
             # write the global variables
             for l in self._write_basic_image_i():

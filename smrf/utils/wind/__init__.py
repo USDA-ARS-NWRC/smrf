@@ -8,5 +8,5 @@ __version__ = '0.1.1'
 # from .queue import *
 # from . import wind_model
 
-import model
-import wind_c
+from . import model
+from . import wind_c
