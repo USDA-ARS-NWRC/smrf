@@ -12,18 +12,14 @@ __version__ = '0.1.1'
 
 # from collections import namedtuple
 from glob import glob
-import os
+import os, sys
 # import time
 # import warnings
 
 # import h5py
 import numpy as np
-# from numpy.testing import assert_array_almost_equal
-from math import ceil
-# import matplotlib.pyplot as plt
-# from matplotlib.colors import Normalize, ListedColormap
 
-# from osgeo import gdal, gdalconst, ogr, osr
+from math import ceil
 
 in_db__vars = tuple('I_lw T_a e_a u T_g S_n'.split())
 out_em__vars = tuple('R_n H L_v_E G M delta_Q E_s '
@@ -34,6 +30,20 @@ _unpackindx  = lambda L: int(L.split()[2])
 _unpackint   = lambda L: int(L.split('=')[1].strip())
 _unpackfloat = lambda L: float(L.split('=')[1].strip())
 _unpackstr   = lambda L: L.split('=')[1].strip()
+_decode      = lambda s: s.decode('utf-8')
+
+
+# for reading binary files
+PY_VERSION = 2
+if sys.version_info > (3,0):
+    PY_VERSION = 3
+
+    
+def readline3(fid):
+    """
+    Read a line from a binary file in Python3 and decode
+    """
+    return fid.readline().decode('utf-8')
 
 
 class Band:
@@ -178,7 +188,10 @@ class IPW:
                             
         # read a file or create an empty object
         if fname is not None:
-            self.read(fname)
+            if PY_VERSION == 2:
+                self.read(fname)
+            else:
+                self.read3(fname)
             
         else:
             self.fname = None
@@ -212,7 +225,7 @@ class IPW:
         # size of the file we are reading in bytes
         st_size = os.fstat(fid.fileno()).st_size
         while 1:  # while 1 is faster than while True
-            line = readline()
+            line = _decode(readline())
 
             # fail safe, haven't needed it, but if this is running
             # on a server not a bad idea to have it here
@@ -226,7 +239,7 @@ class IPW:
                 nbands = _unpackint(readline())
 
                 # initialize the band instances in the bands list
-                bands = [Band(nlines, nsamps) for j in xrange(nbands)]
+                bands = [Band(nlines, nsamps) for j in range(nbands)]
 
             elif '!<header> basic_image' in line:
                 indx = _unpackindx(line)    # band number
@@ -262,7 +275,7 @@ class IPW:
 
             elif '!<header> geo' in line:
                 indx = _unpackindx(line)
-                bands[indx]._parse_geo_readline(*[readline() for i in xrange(6)])
+                bands[indx]._parse_geo_readline(*[readline() for i in range(6)])
                 geo = 1
 
             elif '!<header> lq' in line:
@@ -290,7 +303,7 @@ class IPW:
         elif 'snow.' in fname:
             varlist = out_snow__vars
         else:
-            varlist = ['band%02i'%i for i in xrange(nbands)]
+            varlist = ['band%02i'%i for i in range(nbands)]
 
         assert len(varlist) >= nbands
 
@@ -339,6 +352,157 @@ class IPW:
         self.geohdr = geo
 
         fid.close()
+        
+        
+    def read3(self, fname):
+        '''
+        Read the IPW file into the various bands
+        Turns the data into a numpy array of float32
+        This is meant for Python3 which has different ways
+        of ready binary files than Python2
+        '''
+        
+        # read the data to a list of lines
+        fid = open(fname, 'rb')
+
+        bands = []
+        byteorder = None
+        nlines = None
+        nsamps = None
+        nbands = None
+        geo = None
+
+        # size of the file we are reading in bytes
+        st_size = os.fstat(fid.fileno()).st_size
+        while 1:  # while 1 is faster than while True
+            line = readline3(fid)
+
+            # fail safe, haven't needed it, but if this is running
+            # on a server not a bad idea to have it here
+            if fid.tell() == st_size:
+                raise Exception('Unexpectedly reached EOF')
+
+            if '!<header> basic_image_i' in line:
+                byteorder = list(map(int, readline3(fid).split('=')[1].strip()))
+                nlines = _unpackint(readline3(fid))
+                nsamps = _unpackint(readline3(fid))
+                nbands = _unpackint(readline3(fid))
+
+                # initialize the band instances in the bands list
+                bands = [Band(nlines, nsamps) for j in range(nbands)]
+
+            elif '!<header> basic_image' in line:
+                indx = _unpackindx(line)    # band number
+                bytes = bands[indx].bytes = _unpackint(readline3(fid))
+#                 bands[indx].frmt = ('uint8', 'uint16')[bytes == 2]
+                bands[indx].frmt = 'uint' + str(bytes*8)
+                bands[indx].bits = _unpackint(readline3(fid))
+
+                # see if there is any other information
+                last_pos = fid.tell()
+                line = readline3(fid)
+                 
+                while line[0] != '!':
+                    
+                    key = line.split('=')[0].strip()
+                    val = line.split('=')[1].strip()
+                    
+                    if key == 'annot':
+                        bands[indx].annot = val
+                    elif key == 'history':
+                        bands[indx].history.append(val)
+                    elif key == 'fmt':
+                        bands[indx].fmt = val
+                        
+                    last_pos = fid.tell()
+                    line = readline3(fid)
+                    
+                    if len(line) == 0:
+                        break
+                 
+                # set pointer back one line
+                fid.seek(last_pos)
+
+            elif '!<header> geo' in line:
+                indx = _unpackindx(line)
+                bands[indx]._parse_geo_readline(*[readline3(fid) for i in range(6)])
+                geo = 1
+
+            elif '!<header> lq' in line:
+                indx = _unpackindx(line)
+                line1 = readline3(fid)
+                if 'units' in line1:
+                    bands[indx].units = _unpackstr(line1)
+
+                    bands[indx]._parse_lq(_unpackstr(readline3(fid)),
+                                          _unpackstr(readline3(fid)))
+                else:
+                    bands[indx]._parse_lq(_unpackstr(line1),
+                                          _unpackstr(readline3(fid)))
+
+            if '\f' in line:  # feed form character separates the
+                break         # image header from the binary data
+
+        # attempt to assign names to the bands
+        assert nbands == len(bands)
+
+        if 'in.' in fname:
+            varlist = in_db__vars
+        elif 'em.' in fname:
+            varlist = out_em__vars
+        elif 'snow.' in fname:
+            varlist = out_snow__vars
+        else:
+            varlist = ['band%02i'%i for i in range(nbands)]
+
+        assert len(varlist) >= nbands
+
+        for b, name in zip(bands, varlist[:nbands]):
+            b.name = name
+
+        # Unpack the binary data using numpy.fromfile
+        # because we have been reading line by line fid is at the
+        # first data byte, we will read it all as one big chunk
+        # and then put it into the appropriate bands
+        #
+        # np.types allow you to define heterogenous arrays of mixed
+        # types and reference them with keys, this helps us out here
+        dt = np.dtype([(b.name, b.frmt) for b in bands])
+
+        bip = sum([b.bytes for b in bands])  # bytes-in-pixel
+        required_bytes = bip * nlines * nsamps
+        assert (st_size - fid.tell()) >= required_bytes
+
+        # this is way faster than looping with struct.unpack
+        # struct.unpack also starts assuming there are pad bytes
+        # when format strings with different types are supplied
+        data = np.fromfile(fid, dt, count=nlines*nsamps)
+
+        # Separate into bands
+        data = data.reshape(nlines, nsamps)
+        for b in bands:
+#             if rescale:
+#                 b.data = np.array(data[b.name],dtype=np.float32)
+                b.data = np.array(b.transform(data[b.name]),
+                                dtype=np.float32)
+#             else:
+#                 b.data = np.array(data[b.name],
+#                                   dtype=np.dtype(b.frmt))
+
+        # clean things up
+        self.fname = fname
+#         self.rescale = rescale
+#         self.name_dict = dict(zip(varlist, range(nbands)))
+        self.bands = bands
+        self.bip = bip
+        self.byteorder = byteorder
+        self.nlines = nlines
+        self.nsamps = nsamps
+        self.nbands = nbands
+        self.geohdr = geo
+
+        fid.close()
+        
 
     def write(self, fileName, nbits=8):
         """
@@ -745,7 +909,7 @@ class IPW:
 #             ds.SetGeoTransform(gt0)
 # 
 #         # write data
-#         for i in xrange(4):
+#         for i in range(4):
 #             ds.GetRasterBand(i+1).WriteArray(rgba[:, :, i])
 # 
 #         ds = None  # Writes and closes file

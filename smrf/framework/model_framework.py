@@ -99,7 +99,7 @@ class SMRF():
             self.gridded = True
 
         # process the system variables
-        if  os.path.isdir(self.config['system']['temp_dir']):
+        if os.path.isdir(self.config['system']['temp_dir']):
             tempDir = self.config['system']['temp_dir']
             self.tempDir = os.path.abspath(tempDir)
             os.environ['WORKDIR'] = self.tempDir
@@ -613,8 +613,8 @@ class SMRF():
             # determine the variables to be output
             self._logger.info('%s variables will be output' % self.config['output']['variables'])
 
-            output_variables = self.config['output']['variables'].split(',')
-            output_variables = map(str.strip, output_variables)
+            output_variables = self.config['output']['variables']
+            output_variables = list(map(str.strip, output_variables))
 
             # determine which variables belong where
             variable_list = {}

@@ -482,7 +482,7 @@ def sunang(date, lat, lon, zone=0, slope=0, aspect=0):
     # get the results
     out, err = p.communicate()
     
-    c = out.rstrip().split(' ')
+    c = out.decode('utf-8').rstrip().split(' ')
     cosz = float(c[1])
     azimuth = float(c[3])
     
