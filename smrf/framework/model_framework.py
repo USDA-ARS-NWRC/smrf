@@ -87,7 +87,10 @@ class SMRF():
 #         f = MyParser()
 #         f.read(configFile)
 #         self.config = f.as_dict()
-        self.config = io.read_config(configFile)
+        try:
+            self.config = io.read_config(configFile)
+        except UnicodeDecodeError:
+            raise UnicodeDecodeError('The configuration file is not encoded in UTF-8, please change and retry')
 
         # check for the desired sections
         if 'stations' not in self.config:
