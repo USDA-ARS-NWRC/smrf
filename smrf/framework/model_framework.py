@@ -618,7 +618,9 @@ class SMRF():
             self._logger.info('%s variables will be output' % self.config['output']['variables'])
 
             output_variables = self.config['output']['variables']
-            output_variables = list(map(str.strip, output_variables))
+#             output_variables = list(map(str.strip, output_variables))
+            if not isinstance(output_variables, list):
+                output_variables = output_variables.split(',')
 
             # determine which variables belong where
             variable_list = {}

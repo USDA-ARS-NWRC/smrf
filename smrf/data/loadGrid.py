@@ -136,7 +136,8 @@ class grid():
                     df[g] = f.variables[v_file][time_ind, i[0], i[1]]
                     
                 # deal with any fillValues
-                
+                fv = f.variables[v_file].getncattr('_FillValue')
+                df.replace(fv, np.nan, inplace=True)
                 setattr(self, v, df)
         
         
