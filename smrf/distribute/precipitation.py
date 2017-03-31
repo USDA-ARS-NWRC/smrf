@@ -112,7 +112,7 @@ class ppt(image_data.image_data):
         self.getConfig(pptConfig)
         self.time_step = float(time_step)
         
-        self._logger.debug('Created distribute.air_temp')
+        self._logger.debug('Created distribute.ppt')
         
         
     def initialize(self, topo, metadata):

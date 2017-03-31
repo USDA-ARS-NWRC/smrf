@@ -303,7 +303,7 @@ class SMRF():
                                            self.start_date,
                                            self.end_date,
                                            time_zone=self.config['time']['time_zone'],
-                                           dataType='wrf',
+                                           dataType=self.config['gridded']['data_type'],
                                            tempDir=self.tempDir)
 
             # set the stations in the distribute

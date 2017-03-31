@@ -129,14 +129,14 @@ class image_data():
                     else:
                         config['slope'] = int(config['slope'])
                        
-                if 'detrend' in config:
-                    if config['detrend'].lower() == 'true':
-                        config['detrend'] = True
-                    elif config['detrend'].lower() == 'false':
-                        config['detrend'] = False
-                    else:
-                        raise ValueError('Detrended configuration setting must be either true/false')
-                else:
+                if 'detrend' not in config:
+#                     if config['detrend'].lower() == 'true':
+#                         config['detrend'] = True
+#                     elif config['detrend'].lower() == 'false':
+#                         config['detrend'] = False
+#                     else:
+#                         raise ValueError('Detrended configuration setting must be either true/false')
+#                 else:
                     config['detrend'] = False
                      
                 if 'method' in config:
