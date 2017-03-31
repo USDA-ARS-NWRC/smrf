@@ -182,8 +182,9 @@ class SMRF():
 
         # clean up the WORKDIR
         if hasattr(self, 'topo'):
-            if os.path.isfile(self.topo.stoporad_in_file):
-                os.remove(self.topo.stoporad_in_file)
+            if self.topo.stoporad_in_file is not None:
+                if os.path.isfile(self.topo.stoporad_in_file):
+                    os.remove(self.topo.stoporad_in_file)
         if hasattr(self, 'distribute'):
             if 'solar' in self.distribute.keys():
                 if os.path.isfile(self.distribute['solar'].vis_file):

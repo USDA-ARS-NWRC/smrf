@@ -100,7 +100,7 @@ class ppt(image_data.image_data):
                         } 
     
     min = 0
-    max = np.Inf
+    max = 1e6
     
     def __init__(self, pptConfig, time_step=60):
         

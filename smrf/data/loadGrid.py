@@ -41,6 +41,10 @@ class grid():
         self.end_date = end_date
         self.time_zone = time_zone
         
+        self.force_zone_number = None
+        if 'force_zone_number' in dataConfig:
+            self.force_zone_number = dataConfig['zone_number']
+        
         # The data that will be output
         self.variables = ['air_temp', 'vapor_pressure', 'precip', 'wind_speed', 'wind_direction', 'cloud_factor', 'thermal']
         
@@ -67,6 +71,7 @@ class grid():
 #             setattr(self, v, d.tz_localize(tz=self.time_zone))
         
     
+#     @profile
     def load_from_netcdf(self):
         '''
         Load the data from a generic netcdf file
@@ -77,6 +82,8 @@ class grid():
             elev: elevation field in file, 2D array
             variable: variable name in file, 3D array
         '''
+        
+        
         
         self._logger.info('Reading data coming from netcdf: {}'.format(self.dataConfig['file']))
         
@@ -103,9 +110,36 @@ class grid():
         metadata['latitude'] = mlat.flatten()
         metadata['longitude'] = mlon.flatten()
         metadata['elevation'] = mhgt.flatten()
-        metadata = metadata.apply(apply_utm, axis=1)
+        metadata = metadata.apply(apply_utm, args=(self.force_zone_number,), axis=1)
         
         self.metadata = metadata    
+        
+        ### GET THE TIMES ###
+        t = f.variables['time']
+        time = nc.num2date(t[:], t.getncattr('units'), t.getncattr('calendar'))
+        
+        # subset the times to only those needed
+        time_ind = (time >= pd.to_datetime(self.start_date)) & (time <= pd.to_datetime(self.end_date))
+        time = time[time_ind]
+        time_idx = np.where(time_ind)[0]
+        
+        ### GET THE DATA, ONE AT A TIME ###
+        for v in self.variables:
+            
+            if v in self.dataConfig:
+                v_file = self.dataConfig[v]
+                self._logger.debug('Loading {} from {}'.format(v, v_file))
+                
+                df = pd.DataFrame(index=time, columns=primary_id)
+                for i in a:
+                    g = 'grid_y%i_x%i' % (i[0], i[1])
+                    df[g] = f.variables[v_file][time_ind, i[0], i[1]]
+                    
+                # deal with any fillValues
+                
+                setattr(self, v, df)
+        
+        
      
     def load_from_wrf(self):
         '''
@@ -177,7 +211,7 @@ class grid():
         metadata['latitude'] = mlat.flatten()
         metadata['longitude'] = mlon.flatten()
         metadata['elevation'] = mhgt.flatten()
-        metadata = metadata.apply(apply_utm, axis=1)
+        metadata = metadata.apply(apply_utm, args=(self.force_zone_number,), axis=1)
             
         self.metadata = metadata
         
@@ -282,17 +316,18 @@ class grid():
             
         
                             
-def apply_utm(s):
+def apply_utm(s, force_zone_number):
     """
     Calculate the utm from lat/lon for a series
     
     Args:
         s: pandas series with fields latitude and longitude
+        force_zone_number: default None, zone number to force to
         
     Returns:
         s: pandas series with fields 'X' and 'Y' filled
     """
-    p = utm.from_latlon(s.latitude, s.longitude)
+    p = utm.from_latlon(s.latitude, s.longitude, force_zone_number=force_zone_number)
     s['X'] = p[0]
     s['Y'] = p[1]
     return s
