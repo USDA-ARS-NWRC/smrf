@@ -62,10 +62,7 @@ class output_hru():
         # process the time section
         self.out_frequency = int(config['frequency'])
         self.date_time = date_time
-        self.idx = 0
-        
-        self.float_format = '%.2f'
-        
+        self.idx = 0       
         
         # read in the HRU file
         self._logger.debug('Reading HRU ascii {}'.format(self.config['hru_file']))
@@ -169,8 +166,7 @@ class output_hru():
                 
             row.to_csv(f, self.delimiter, 
                        header=hdr, 
-                       index=False, 
-                       float_format=self.float_format)
+                       index=False)
             
             f.close()
         
