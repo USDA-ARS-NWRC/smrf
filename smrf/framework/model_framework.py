@@ -640,6 +640,11 @@ class SMRF():
                 self.out_func = output.output_netcdf(variable_list, self.topo,
                                                      self.config['time'],
                                                      self.config['output']['frequency'])
+                
+            elif self.config['output']['file_type'].lower() == 'hru':
+                self.out_func = output.output_hru(variable_list, self.topo,
+                                                     self.date_time,
+                                                     self.config['output'])
 
             else:
                 raise Exception('Could not determine type of file for output')
