@@ -140,8 +140,8 @@ class topo():
 
                
         # get some general information about the model domain from the dem
-        self.ny = f.dimensions['x'].size
-        self.nx = f.dimensions['y'].size
+        self.nx = f.dimensions['x'].size
+        self.ny = f.dimensions['y'].size
 
         # create the x,y vectors
         self.x = f.variables['x'][:]

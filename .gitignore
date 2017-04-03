@@ -5,6 +5,8 @@
 .DS_Store
 ._.*
 
+*.lprof
+
 test_data/wrfout_d02_2016-03-10.nc
 examples/*.nc
 
