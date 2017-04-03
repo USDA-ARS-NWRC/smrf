@@ -19,6 +19,7 @@ class output_hru():
     
     fmt = '%Y-%m-%d %H:%M:%S'
     
+    
     def __init__(self, variable_list, topo, date_time, config):
         """
         Initialize the output_hru() class
@@ -50,6 +51,11 @@ class output_hru():
         # go through the variable list and make full file names
         for v in variable_list:
             variable_list[v]['file_name'] = variable_list[v]['out_location'] + ext
+    
+            try:
+                os.remove(variable_list[v]['file_name'])
+            except OSError:
+                pass
             
         self.variable_list = variable_list
         
@@ -57,6 +63,8 @@ class output_hru():
         self.out_frequency = int(config['frequency'])
         self.date_time = date_time
         self.idx = 0
+        
+        self.float_format = '%.2f'
         
         
         # read in the HRU file
@@ -75,7 +83,7 @@ class output_hru():
         
         # create an empty dataframe
         if self.prms_flag:
-            cols = ["year","month","day","hour","minute","second"] + [str(i) for i in range(hru_max)]
+            cols = ["year","month","day","hour","minute","second"] + [str(i+1) for i in range(hru_max)]
             hru_data = pd.DataFrame(index=range(len(self.date_time)), columns=cols)
             
             yrs = np.array([[y.year, y.month, y.day, y.hour, y.minute, y.second] for y in self.date_time])
@@ -90,12 +98,11 @@ class output_hru():
             self.generate_prms_header()
             
         else:
-            cols = ["date_time"] + [str(i) for i in range(hru_max)]
+            cols = ["date_time"] + [str(i+1) for i in range(hru_max)]
             hru_data = pd.DataFrame(index=range(len(self.date_time)), columns=cols)
             hru_data['date_time'] = self.date_time
-            
-#             self.generate_csv_header(hru_data)
-            
+                    
+                              
         
         self.hru_data = hru_data
    
@@ -141,20 +148,16 @@ class output_hru():
             date_time: the date time object for the time step
         """
         
-#         hru_data.to_csv(f," ", header = False, index = False)
-        
         self._logger.debug('{} Writing variable {} to {} file'.format(date_time, variable, self.config['output_type']))
-        
-        # determine the location in the output dataframe
-        
         
         # loop through the HRU
         for h in range(self.hru_max):
             m_hru = np.nanmean(data[self.IND[h]])
             
-            self.hru_data.loc[self.idx, (str(h))] = m_hru
+            self.hru_data.loc[self.idx, (str(h+1))] = m_hru
         
         
+        # open the file and write the row of data
         with open(self.variable_list[variable]['file_name'], 'a') as f:
             
             row = self.hru_data.iloc[self.idx].to_frame().T
@@ -164,7 +167,10 @@ class output_hru():
                 hdr = True
                 
                 
-            row.to_csv(f, self.delimiter, header=hdr, index=False)
+            row.to_csv(f, self.delimiter, 
+                       header=hdr, 
+                       index=False, 
+                       float_format=self.float_format)
             
             f.close()
         

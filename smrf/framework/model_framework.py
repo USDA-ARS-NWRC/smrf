@@ -120,7 +120,7 @@ class SMRF():
 
         self.time_out = None
         if 'time_out' in self.config['system']:
-            self.max_values = float(self.config['system']['time_out'])
+            self.time_out = float(self.config['system']['time_out'])
 
 
         # get the time section
