@@ -37,12 +37,14 @@ class output_hru():
         self.prms_flag = False
         if config['output_type'] == 'csv':
             ext = '.csv'
+            self.delimiter = ','
             
         elif config['output_type'] == 'prms':
             ext = '.data'
             self.prms_flag = True
             if not os.path.isfile(self.config['hru_file']):
                 raise Exception('HRU file does not exist')
+            self.delimiter = ' '
             
             
         # go through the variable list and make full file names
@@ -67,12 +69,9 @@ class output_hru():
         self.hru = hru
         self.hru_max = hru_max
         
-        IND = {}
+        self.IND = {}
         for h in range(hru_max):
-            IND[h] = hru == h+1
-             
-        self.IND = IND
-            
+            self.IND[h] = hru == h+1          
         
         # create an empty dataframe
         if self.prms_flag:
@@ -88,20 +87,35 @@ class output_hru():
             hru_data['second'] = yrs[:,5]
             
             # lets start the output file
-            self.generate_prms_header(cols)
+            self.generate_prms_header()
             
         else:
             cols = ["date_time"] + [str(i) for i in range(hru_max)]
             hru_data = pd.DataFrame(index=range(len(self.date_time)), columns=cols)
             hru_data['date_time'] = self.date_time
             
+#             self.generate_csv_header(hru_data)
+            
         
         self.hru_data = hru_data
    
-            
+    
+#     def generate_csv_header(self, hru_data):
+#         """
+#         Generate the header for the csv file
+#         """
+#         
+#         for v in self.variable_list:
+#             
+#             with open(self.variable_list[v]['file_name'],'w') as f:
+#                 
+#                 
+#                 hdr.to_csv(f, self.delimiter, index=False, header=True)
+        
+                
             
         
-    def generate_prms_header(self, col_str):
+    def generate_prms_header(self):
         """
         Generate the header for the PRMS output file
         """
@@ -144,7 +158,13 @@ class output_hru():
         with open(self.variable_list[variable]['file_name'], 'a') as f:
             
             row = self.hru_data.iloc[self.idx].to_frame().T
-            row.to_csv(f, ' ', header=False, index=False)
+            
+            hdr = False
+            if (self.idx == 0) & (not self.prms_flag):
+                hdr = True
+                
+                
+            row.to_csv(f, self.delimiter, header=hdr, index=False)
             
             f.close()
         
