@@ -14,7 +14,7 @@ from smrf.envphys import snow
 from smrf.envphys import storms
 
 from smrf.utils import utils
-# import matplotlib.pyplot as plt
+import matplotlib.pyplot as plt
 
 class ppt(image_data.image_data):
     """
@@ -147,7 +147,7 @@ class ppt(image_data.image_data):
         self.storm_precip = np.zeros((topo.ny, topo.nx))
         self.last_storm_day = np.zeros((topo.ny, topo.nx))
         self.storms = []
-        self.hours_since_ppt=0
+        self.time_steps_since_precip = 0
         self.storming = False
         #Note while we do idenfiy storms here the calculations do not require the storm info
         self.storm_dependent = False
@@ -199,12 +199,12 @@ class ppt(image_data.image_data):
         self._logger.debug('%s Distributing all precip' % data.name)
         # only need to distribute precip if there is any
         data = data[self.stations]
+
         if data.sum() > 0:
+
             # distribute data and set the min/max
             self._distribute(data, zeros=None)
             self.precip = utils.set_min_max(self.precip, self.min, self.max)
-            self.storming = storms.tracking(self.precip, time, self.storms, self.hours_since_ppt)
-            self.hours_since_ppt = 0
 
             # determine the precip phase
             perc_snow, snow_den = snow.mkprecip(self.precip, dpt)
@@ -221,8 +221,6 @@ class ppt(image_data.image_data):
             self.storm_precip = stormPrecip
 
         else:
-            self.hours_since_ppt+=1
-
             self.storm_days += self.time_step/60/24
 
             # make everything else zeros
@@ -230,6 +228,7 @@ class ppt(image_data.image_data):
             self.percent_snow = np.zeros(self.storm_days.shape)
             self.snow_density = np.zeros(self.storm_days.shape)
 
+        self.storming = storms.tracking(self.precip, time, self.storms, self.time_steps_since_precip,self.storming)
 
         # day of last storm, this will be used in albedo
         self.last_storm_day = utils.water_day(data.name)[0] - self.storm_days - 0.001
@@ -281,7 +280,7 @@ class ppt(image_data.image_data):
         """
         Process the snow density values
         """
-        self._logger.info("Post processing precip...")
+        self._logger.info("Post processing snow_density...")
 
         #Open files
         pp_fname = os.path.join(main_obj.config['output']['out_location'], 'precip.nc')
@@ -293,36 +292,32 @@ class ppt(image_data.image_data):
         #initialize storm accum
         storm_accum = np.zeros(pds.variables['precip'][0].shape)
 
-        #Calculate the start of the simulation for calculating count
-        sim_start = datetime.strptime((pds.variables['time'].units.split('since')[-1]).strip(),'%Y-%m-%d %H:%S')
-
+        #Calculate the start of the simulation from file for calculating count
+        sim_start = (datetime.strptime((pds.variables['time'].units.split('since')[-1]).strip(),'%Y-%m-%d %H:%S'))
+        self._logger.debug("There were {0} total storms during this run".format(len(self.storms)))
         #Cycle through all the storms
         for i,storm in enumerate(self.storms):
             delta  = (storm['end']- storm['start'])
-            storm_span = delta.total_seconds()/(60.0*time_step)
+            storm_span = delta.total_seconds()/(60.0*self.time_step)
 
-            self._logger.debug("Processing storm #{0}, it lasted {0} hours".format(i,span))
+            self._logger.debug("Processing storm #{0}, it lasted {1} hours".format(i,storm_span))
             #reset the accumulated array
             storm_accum[:]= 0.0
+            start = main_obj.date_time.index(storm['start'])
+            end = main_obj.date_time.index(storm['end'])
 
-            #convert to seconds from epoch, calculate the count
-            seconds_start = (storm['start'] - sim_start).total_seconds()
-            steps_start = int(seconds_start/(60.0*time_step))
-
-            seconds_end = (storm['end'] - sim_start).total_seconds()
-            steps_end = int(seconds_end/(60.0*time_step))
-
-            steps = range(steps_start, steps_end)
-
-            self.logger.debug("Accumulating precip...")
-            for t in steps:
-                storm_accum +=pds.variables['precip'][t][:][:]
+            storm_time = main_obj.date_time[start:end]
+            self._logger.debug("Accumulating precip...")
+            for t in storm_time:
+                i  = main_obj.date_time.index(t)
+                storm_accum +=pds.variables['precip'][i][:][:]
 
             self._logger.debug("Calculating snow density...")
-            for t in steps:
-                print t
-                dpt = tds.variables['dew_point'][t]
-                self.snow_density = snow.compacted_density(storm_accum, dpt)
-                main.obj.output(count,t, module = 'precip', var_name = 'snow_density')
+            for t in storm_time:
+                i  = main_obj.date_time.index(t)
+                dpt = tds.variables['dew_point'][i]
+                self.snow_density = snow.calc_density(storm_accum, dpt)
+                main_obj.output(t, module = 'precip', out_var = 'snow_density')
+
         pds.close()
         tds.close()

@@ -387,7 +387,6 @@ class SMRF():
         #------------------------------------------------------------------------------
         # Distribute the data
         for output_count,t in enumerate(self.date_time):
-            print t
             # wait here for the model to catch up if needed
 
             startTime = datetime.now()
@@ -451,7 +450,7 @@ class SMRF():
 
 
             # 9. output at the frequency and the last time step
-            self.output(output_count, t)
+            self.output(t)
 
             telapsed = datetime.now() - startTime
             self._logger.debug('%.1f seconds for time step' % telapsed.total_seconds())
@@ -635,7 +634,7 @@ class SMRF():
             self.output_variables = None
 
 
-    def output(self, output_count, current_time_step,  module = None, out_var = None):
+    def output(self, current_time_step,  module = None, out_var = None):
         """
         Output the forcing data or model outputs for the current_time_step.
 
@@ -646,6 +645,8 @@ class SMRF():
             var_name -
 
         """
+        output_count = self.date_time.index(current_time_step)
+
         if (output_count % self.config['output']['frequency'] == 0) or (output_count == len(self.date_time)):
 
             #Not requesting specific output, so output all
@@ -657,9 +658,9 @@ class SMRF():
             #add only one variable to the output list and preceed as normal
             if post_process:
                 if module == None or out_var == None:
-                    raise ValueError(" Function requires an output module/variable name when outputting a specific variables")
+                    raise ValueError(" Function requires an output module and variable name when outputting a specific variables")
                 else:
-                    var_vals = [(self.out_func.variable_list.values())[module]]
+                    var_vals = [self.out_func.variable_list[out_var]]
 
             #Output all the variables
             else:
@@ -668,11 +669,7 @@ class SMRF():
             # get the output variables then pass to the function
             for v in var_vals:
                 # get the data desired
-                if post_process:
-                    data = getattr(self.distribute[v['module']], v[var_name])
-
-                else:
-                    data = getattr(self.distribute[v['module']], v['variable'])
+                data = getattr(self.distribute[v['module']], v['variable'])
 
                 if data is None:
                     data = np.zeros((self.topo.ny, self.topo.nx))
@@ -686,10 +683,9 @@ class SMRF():
         """
         Execute all the post processors
         """
-        for output_count,t in enumerate(self.date_time):
 
-            for k in self.distribute.keys():
-                self.distribute[k].post_processor(self)
+        for k in self.distribute.keys():
+            self.distribute[k].post_processor(self)
 
 
     def title(self, option):

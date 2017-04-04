@@ -132,51 +132,54 @@ def time_since_storm(precipitation, perc_snow, time_step=1/24, mass=1, time=4,
     return stormDays, stormPrecip
 
 
-def tracking(precipitation, time, storm_lst, hours_since_ppt, mass_thresh = 0.0, time_thresh=2):
+def tracking(precipitation, time, storm_lst, time_steps_since_precip, is_storming, mass_thresh = 0.0, steps_thresh=2):
     '''
     Args:
-    precipitation - precipitation values
-    dpt - Numpy array of the dew point temperature for this timestep
-    time - Time step that smrf is on
-    hours_since_ppt - hours since the last precipitation
-    storm_lst - list that store the storm cycles in order. A storm is recorded by
-                its start, its end, and accumulated precip data frame. The list
-                is passed by reference and modified internally.
-                Each storm entry should be in the format of:
-                [Storm Start, Storm End, Accum. Precip, has it been processed?]
+        precipitation - precipitation values
+        time - Time step that smrf is on
+        time_steps_since_precip - time steps since the last precipitation
+        storm_lst - list that store the storm cycles in order. A storm is recorded by
+                    its start and its end. The list
+                    is passed by reference and modified internally.
+                    Each storm entry should be in the format of:
+                    [{start:Storm Start, end:Storm End}]
 
-                e.g.
-                     [
-                     {start:date_time1,end:date_time2, accum_precip1, True],
-                     [date_time3,date_time4, accum_precip2, False],
-                     ]
+                    e.g.
+                         [
+                         {start:date_time1,end:date_time2},
+                         {start:date_time3,end:date_time4},
+                         ]
 
-                     #would be a two storms, one has been used to calculate density
-                     and the other has not
+                         #would be a two storms
 
-    mass_thresh - mass amount that constitutes a real precip event, default = 0.0.
-    time_thresh - amount of hours that constitutes the end of a precip event, default = 2 hours
+        mass_thresh - mass amount that constitutes a real precip event, default = 0.0.
+        steps_thresh - Number of time steps that constitutes the end of a precip event, default = 2 steps (typically 2 hours)
 
-    returns ture or fals whether the storm is on going or not
-
+    Returns:
+        True or False whether the storm is ongoing or not
 
     Created March 3, 2017
     @author: Micah Johnson
     '''
+    dt = time.to_datetime()
+
     if precipitation.mean() > mass_thresh:
+
         #New storm
-        dt = time.to_datetime()
-        if len(storm_lst)== 0 or storm_lst[-1]['end'] != None:
+        if len(storm_lst)== 0 or not is_storming :
             storm_lst.append({'start':dt,'end':None})
             is_storming = True
 
         #always append the most recent timestep to avoid unended storms
         storm_lst[-1]['end'] = dt
+        time_steps_since_precip = 0
 
-    elif hours_since_ppt > time_thresh:
-        is_storming = False
+    elif is_storming and time_steps_since_precip < steps_thresh:
         storm_lst[-1]['end'] = dt
+        time_steps_since_precip+=1
+
 
     else:
-        hours_since_ppt+=1
+        is_storming = False
+
     return is_storming

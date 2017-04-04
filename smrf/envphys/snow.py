@@ -84,7 +84,7 @@ def mkprecip(precipitation, temperature):
 
     return ps, sd
 
-def compacted_density(accumulated_precip, temperature):
+def calc_density(precip, temperature, use_compaction = True):
     """
     Uses a new snow density model to calculate the snow density based on the
     storm total and considers compaction, liquid water effects, temperature.
@@ -93,27 +93,36 @@ def compacted_density(accumulated_precip, temperature):
 
 
     args:
-    accumulated_precip - the distributed total precip accumulated during a storm
+    precip - netcdf array of precip across the whole basin. If compaction is
+            this array should be the accumulated precip, otherwise it should be
+            hourly precip.
 
     temperature - a single timestep of distributed temperature
 
+    use_compaction - determines whether the snow model will account for compaction
+                that could occur during a storm in addition to using the oringal
+                temperature based model.
     returns:
     snow_density - an array of snow density matching the domain size.
     """
-    x_len = len(accumulated_precip[0][:])
-    y_len = len(accumulated_precip[:][0])
+
+    x_len = len(precip[0][:])
+    y_len = len(precip[:][0])
     snow_density = np.zeros((y_len,x_len))
     for i in range(y_len):
         for j in range(x_len):
-            pp = accumulated_precip[i][j]
+            pp = precip[i][j]
             tpp  = temperature[i][j]
-            snow_density[i][j] = (snow_rho(tpp,pp))['rho_s']
+            if use_compaction:
+                snow_density[i][j] = (compacted_snow_density(tpp,pp))['rho_s']
+            else:
+                snow_density[i][j] = (fresh_snow_density(tpp,pp))['rho_ns']
 
     return snow_density
 
-def snow_rho(Tpp,pp):
+def compacted_snow_density(Tpp,pp):
     """
-    New density model that takes into account the hourly temperature during precip
+    Snow density point model that takes into account the hourly temperature during precip
     and the total storm accumulated_precip.
 
     args:
@@ -122,8 +131,8 @@ def snow_rho(Tpp,pp):
     pp - a single value of the accumulated_precip precip during a storm
 
 
-    returns:
-    Tpp, pp, swe, pcs, rho_ns, d_rho_c, d_rho_m, rho_s, rho, zs
+    Returns:
+    swe, pcs, rho_ns, d_rho_c, d_rho_m, rho_s, rho, zs
 
     Tpp - temperature during precip
     pp - precipitation accumulated
@@ -136,6 +145,7 @@ def snow_rho(Tpp,pp):
     rho - density of precip
     zs - snow height
     """
+
     ex_max = 1.75
     exr = 0.75
     ex_min = 1.0
@@ -153,7 +163,7 @@ def snow_rho(Tpp,pp):
 
     water = 1000.0
 
-    if pp >0.0:
+    if pp > 0.0:
         # set precipitation temperature, % snow, and SWE
         if Tpp < Tmin:
             Tpp = Tmin
@@ -178,8 +188,6 @@ def snow_rho(Tpp,pp):
 
         swe = pp * pcs
 
-
-
         if swe > 0.0:
             # new snow density - no compaction
             Trange = Tmax - Tmin
@@ -191,15 +199,15 @@ def snow_rho(Tpp,pp):
             rho_ns = (50.0 + (1.7 * (((Tpp - Tz) + 15.0)**ex))) / water
 
             # proportional total storm mass compaction
-            d_rho_c = (0.026 * exp(-0.08 * (Tz - tsnow)) * swe * exp(-21.0 * rho_ns))
+            d_rho_c = (0.026 * np.exp(-0.08 * (Tz - tsnow)) * swe * np.exp(-21.0 * rho_ns))
 
             if rho_ns * water < 100.0:
                 c11 = 1.0
             else:
-                #c11 = exp(-0.046 * ((rho_ns * water) - 100.0))
+                #c11 = np.exp(-0.046 * ((rho_ns * water) - 100.0))
 			    c11 = (c_min + ((Tz - tsnow) * cfac)) + 1.0
 
-            d_rho_m = 0.01 * c11 * exp(-0.04 * (Tz - tsnow))
+            d_rho_m = 0.01 * c11 * np.exp(-0.04 * (Tz - tsnow))
 
             # compute snow denstiy, depth & combined liquid and snow density
             rho_s = rho_ns +((d_rho_c + d_rho_m) * rho_ns)
@@ -240,74 +248,11 @@ def snow_rho(Tpp,pp):
         pcs = 0.0
 
 
+
     result = {'swe':swe, 'pcs':pcs,'rho_ns': rho_ns, 'd_rho_c' : d_rho_c, 'd_rho_m' : d_rho_m, 'rho_s' : rho_s, 'rho':rho, 'zs':zs}
 
     return result
 
 
 if __name__ == '__main__':
-    from matplotlib import pyplot as plt
-    from netCDF4 import Dataset
-    from datetime import datetime
-    import time
-    import numpy as np
-
-    time_step = 60.0
-
-    storms = [ {'start': datetime(2008,10,4,9),'end': datetime(2008,10,5,9)}]
-
-    pds = Dataset('/home/micahjohnson/Desktop/test_output/precip.nc','r')
-    dds = Dataset('/home/micahjohnson/Desktop/test_output/dew_point.nc','r')
-    storm_accum = np.zeros(pds.variables['precip'][0].shape)
-    #parse from file start time
-    sim_start = datetime.strptime((pds.variables['time'].units.split('since')[-1]).strip(),'%Y-%m-%d %H:%M')
-    for i,storm in enumerate(storms):
-        delta  = (storm['end']- storm['start'])
-        storm_span = delta.total_seconds()/(60.0*time_step)
-        print storm_span
-        #reset the accumulated array
-        storm_accum[:]= 0.0
-
-        #convert to seconds from epoch
-        seconds_start = (storm['start'] - sim_start).total_seconds()
-        steps_start = int(seconds_start/(60.0*time_step))
-
-        seconds_end = (storm['end'] - sim_start).total_seconds()
-        steps_end = int(seconds_end/(60.0*time_step))
-
-        steps = range(steps_start, steps_end)
-
-        print "Processinfg storm #{0}".format(i)
-        print "Accumulating precip..."
-        for t in steps:
-            storm_accum +=pds.variables['precip'][t][:][:]
-
-        print "Calculating snow density..."
-        for t in steps:
-            start = time.time()
-            dpt = dds.variables['dew_point'][t]
-            snow_density = compacted_density(storm_accum, dpt)
-            #visual
-            print "plotting timestep {0}".format(t)
-            fig = plt.figure()
-            a=fig.add_subplot(1,3,1)
-            a.set_title('New Snow Density')
-
-            plt.imshow(snow_density)
-            plt.colorbar()
-
-            b=fig.add_subplot(1,3,2)
-            plt.imshow(dpt)
-            plt.colorbar()
-            b.set_title('Dew Point')
-
-            c=fig.add_subplot(1,3,3)
-            plt.imshow(storm_accum)
-            c.set_title('Accum Precip in mm')
-            plt.colorbar()
-
-            print "Single time step took {0}s".format(time.time() - start)
-            plt.show()
-
-    pds.close()
-    dds.close()
+    print "\nNothing implemented here."
