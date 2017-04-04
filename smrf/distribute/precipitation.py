@@ -276,7 +276,45 @@ class ppt(image_data.image_data):
 #             self._logger.debug('Putting %s -- %s' % (t, 'storm_days'))
             queue['storm_days'].put( [t, self.storm_days] )
 
-    def post_processor(self,main_obj):
+
+    def post_process_snow_density(self,main_obj, pds, tds, storm):
+        """
+        Calculates the snow density for a single storm.
+
+        Arguments:
+            main_obj - the main smruf obj running everything
+            pds - netcdf object containing precip data
+            tds - netcdf object containing temp data
+            storm - a dictionary containing the start and end values of the storm.
+                    A single entry from the storm lst
+
+        returns: None, stores self.snow_density
+        """
+
+        storm_accum = np.zeros(pds.variables['precip'][0].shape)
+
+        delta  = (storm['end']- storm['start'])
+
+        storm_span = delta.total_seconds()/(60.0*self.time_step)
+        self._logger.debug("Processing storm #{0}, it lasted {1} hours".format(i,storm_span))
+
+        start = main_obj.date_time.index(storm['start'])
+        end = main_obj.date_time.index(storm['end'])
+
+        storm_time = main_obj.date_time[start:end]
+        self._logger.debug("Accumulating precip...")
+        for t in storm_time:
+            i  = main_obj.date_time.index(t)
+            storm_accum +=pds.variables['precip'][i][:][:]
+
+        self._logger.debug("Calculating snow density...")
+        for t in storm_time:
+            i  = main_obj.date_time.index(t)
+            dpt = tds.variables['dew_point'][i]
+            self.snow_density = snow.calc_density(storm_accum, dpt)
+            main_obj.output(t, module = 'precip', out_var = 'snow_density')
+
+    def post_processor(self,main_obj, threaded = False):
         """
         Process the snow density values
         """
@@ -289,35 +327,28 @@ class ppt(image_data.image_data):
         pds = Dataset(pp_fname,'r')
         tds = Dataset(t_fname,'r')
 
-        #initialize storm accum
-        storm_accum = np.zeros(pds.variables['precip'][0].shape)
-
         #Calculate the start of the simulation from file for calculating count
         sim_start = (datetime.strptime((pds.variables['time'].units.split('since')[-1]).strip(),'%Y-%m-%d %H:%S'))
         self._logger.debug("There were {0} total storms during this run".format(len(self.storms)))
+
+
         #Cycle through all the storms
         for i,storm in enumerate(self.storms):
-            delta  = (storm['end']- storm['start'])
-            storm_span = delta.total_seconds()/(60.0*self.time_step)
-
-            self._logger.debug("Processing storm #{0}, it lasted {1} hours".format(i,storm_span))
-            #reset the accumulated array
-            storm_accum[:]= 0.0
-            start = main_obj.date_time.index(storm['start'])
-            end = main_obj.date_time.index(storm['end'])
-
-            storm_time = main_obj.date_time[start:end]
-            self._logger.debug("Accumulating precip...")
-            for t in storm_time:
-                i  = main_obj.date_time.index(t)
-                storm_accum +=pds.variables['precip'][i][:][:]
-
-            self._logger.debug("Calculating snow density...")
-            for t in storm_time:
-                i  = main_obj.date_time.index(t)
-                dpt = tds.variables['dew_point'][i]
-                self.snow_density = snow.calc_density(storm_accum, dpt)
-                main_obj.output(t, module = 'precip', out_var = 'snow_density')
+            self.post_process_snow_density(main_obj,pds,tds,storm)
 
         pds.close()
         tds.close()
+
+    def post_processor_threaded(self, main_obj, queue):
+         self._logger.info("Post processing snow_density...")
+
+         #Open files
+         pp_fname = os.path.join(main_obj.config['output']['out_location'], 'precip.nc')
+         t_fname = os.path.join(main_obj.config['output']['out_location'], 'dew_point.nc')
+
+         pds = Dataset(pp_fname,'r')
+         tds = Dataset(t_fname,'r')
+
+        self.post_process_snow_density(data.ix[t])
+
+        queue[self.variable].put( [t, self.air_temp] )

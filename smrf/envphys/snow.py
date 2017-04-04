@@ -106,17 +106,15 @@ def calc_density(precip, temperature, use_compaction = True):
     snow_density - an array of snow density matching the domain size.
     """
 
-    x_len = len(precip[0][:])
-    y_len = len(precip[:][0])
-    snow_density = np.zeros((y_len,x_len))
-    for i in range(y_len):
-        for j in range(x_len):
-            pp = precip[i][j]
-            tpp  = temperature[i][j]
-            if use_compaction:
-                snow_density[i][j] = (compacted_snow_density(tpp,pp))['rho_s']
-            else:
-                snow_density[i][j] = (fresh_snow_density(tpp,pp))['rho_ns']
+    snow_density = np.zeros(precip.shape)
+    x_len = len(snow_density)
+    y_len = len(snow_density[0])
+    for (i,j), pp in np.ndenumerate(precip):
+        tpp  = temperature[i][j]
+        if use_compaction:
+            snow_density[i][j] = (compacted_snow_density(tpp,pp))['rho_s']
+        else:
+            snow_density[i][j] = (fresh_snow_density(tpp,pp))['rho_ns']
 
     return snow_density
 
@@ -167,7 +165,7 @@ def compacted_snow_density(Tpp,pp):
         # set precipitation temperature, % snow, and SWE
         if Tpp < Tmin:
             Tpp = Tmin
-
+            tsnow = Tmin
         else :
             if Tpp > Tmax:
                 tsnow = Tmax
