@@ -161,10 +161,7 @@ def tracking(precipitation, time, storm_lst, time_steps_since_precip, is_stormin
     Created March 3, 2017
     @author: Micah Johnson
     '''
-    print time
-    print type(time)
     if precipitation.mean() > mass_thresh:
-
         #New storm
         if len(storm_lst)== 0 or not is_storming :
             storm_lst.append({'start':time,'end':None})

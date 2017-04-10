@@ -647,6 +647,7 @@ class SMRF():
         """
         output_count = self.date_time.index(current_time_step)
 
+        #Only output according to the user specified value,  or if it is the end.
         if (output_count % self.config['output']['frequency'] == 0) or (output_count == len(self.date_time)):
 
             #Not requesting specific output, so output all
@@ -676,8 +677,9 @@ class SMRF():
 
                 # output the time step
                 self._logger.debug("Outputting {0}".format(v['module']))
-
-                self.out_func.output(v['variable'], data, current_time_step)
+                #Skip any post process variables
+                if v['variable'] not in self.distribute[v['module']].post_process_variables.keys():
+                    self.out_func.output(v['variable'], data, current_time_step)
 
     def post_process(self):
         """

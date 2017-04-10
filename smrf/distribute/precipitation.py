@@ -103,6 +103,12 @@ class ppt(image_data.image_data):
                                   'long_name': 'day_of_last_storm'
                                   },
                         }
+        # these are variables that are operate at the end only and do not need to be written during main distribute loop
+    post_process_variables = {'snow_density':{
+                                      'units': 'kg/m^3',
+                                      'long_name': 'snow_density'
+                                      },
+                            }
 
     max = np.Inf
     min = 0
@@ -276,13 +282,12 @@ class ppt(image_data.image_data):
 #             self._logger.debug('Putting %s -- %s' % (t, 'storm_days'))
             queue['storm_days'].put( [t, self.storm_days] )
 
-
     def post_process_snow_density(self,main_obj, pds, tds, storm):
         """
         Calculates the snow density for a single storm.
 
         Arguments:
-            main_obj - the main smruf obj running everything
+            main_obj - the main smrf obj running everything
             pds - netcdf object containing precip data
             tds - netcdf object containing temp data
             storm - a dictionary containing the start and end values of the storm.
@@ -296,29 +301,33 @@ class ppt(image_data.image_data):
         delta  = (storm['end']- storm['start'])
 
         storm_span = delta.total_seconds()/(60.0*self.time_step)
-        self._logger.debug("Processing storm #{0}, it lasted {1} hours".format(i,storm_span))
+        self._logger.debug("Storm Duration = {0} hours".format(storm_span))
 
         start = main_obj.date_time.index(storm['start'])
         end = main_obj.date_time.index(storm['end'])
 
         storm_time = main_obj.date_time[start:end]
-        self._logger.debug("Accumulating precip...")
+
         for t in storm_time:
             i  = main_obj.date_time.index(t)
             storm_accum +=pds.variables['precip'][i][:][:]
 
-        self._logger.debug("Calculating snow density...")
+        #self._logger.debug("Calculating snow density...")
         for t in storm_time:
             i  = main_obj.date_time.index(t)
             dpt = tds.variables['dew_point'][i]
+
+            #self._logger.debug("Calculating snow density at {0}".format(t))
             self.snow_density = snow.calc_density(storm_accum, dpt)
+
             main_obj.output(t, module = 'precip', out_var = 'snow_density')
 
     def post_processor(self,main_obj, threaded = False):
         """
         Process the snow density values
         """
-        self._logger.info("Post processing snow_density...")
+
+        self._logger.info("Post processing snow_density across {0} total storms...".format(len(self.storms)))
 
         #Open files
         pp_fname = os.path.join(main_obj.config['output']['out_location'], 'precip.nc')
@@ -334,12 +343,13 @@ class ppt(image_data.image_data):
 
         #Cycle through all the storms
         for i,storm in enumerate(self.storms):
+            self._logger.debug("Calculating snow density for Storm #{0}".format(i))
             self.post_process_snow_density(main_obj,pds,tds,storm)
 
         pds.close()
         tds.close()
 
-    def post_processor_threaded(self, main_obj, queue):
+    def post_processor_threaded(self, main_obj):
          self._logger.info("Post processing snow_density...")
 
          #Open files
@@ -349,6 +359,12 @@ class ppt(image_data.image_data):
          pds = Dataset(pp_fname,'r')
          tds = Dataset(t_fname,'r')
 
-        self.post_process_snow_density(data.ix[t])
 
-        queue[self.variable].put( [t, self.air_temp] )
+
+        #Create a queue
+
+        #calc data
+
+        #output
+
+        #clean
