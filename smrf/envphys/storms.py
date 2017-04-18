@@ -132,7 +132,7 @@ def time_since_storm(precipitation, perc_snow, time_step=1/24, mass=1, time=4,
     return stormDays, stormPrecip
 
 
-def tracking(precipitation, time, storm_lst, time_steps_since_precip, is_storming, mass_thresh = 0.0, steps_thresh=2):
+def tracking(precipitation, time, storm_lst, time_steps_since_precip, is_storming, mass_thresh = 0.01, steps_thresh=2):
     '''
     Args:
         precipitation - precipitation values

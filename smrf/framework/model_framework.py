@@ -422,8 +422,6 @@ class SMRF():
                                                 t,
                                                 self.topo.mask)
 
-            storms = self.distribute['precip'].storms
-
             # 5. Albedo
             self.distribute['albedo'].distribute(t, illum_ang, self.distribute['precip'].storm_days)
 
@@ -650,24 +648,24 @@ class SMRF():
         #Only output according to the user specified value,  or if it is the end.
         if (output_count % self.config['output']['frequency'] == 0) or (output_count == len(self.date_time)):
 
-            #Not requesting specific output, so output all
-            if module == None and out_var == None:
-                post_process = False
-            else:
-                post_process = True
 
-            #add only one variable to the output list and preceed as normal
-            if post_process:
-                if module == None or out_var == None:
-                    raise ValueError(" Function requires an output module and variable name when outputting a specific variables")
-                else:
-                    var_vals = [self.out_func.variable_list[out_var]]
+            #User is attempting to output single variable
+            if module != None and out_var != None:
+                #add only one variable to the output list and preceed as normal
+                var_vals = [self.out_func.variable_list[out_var]]
 
-            #Output all the variables
+            #Incomplete request
+            elif module != None or out_var != None:
+                raise ValueError(" Function requires an output module and variable name when outputting a specific variables")
+
             else:
+                #Output all the variables
                 var_vals = self.out_func.variable_list.values()
 
-            # get the output variables then pass to the function
+                #Remove any variables to be post processed.
+                #var_vals = [var for var in var_vals if var['variable'] not in self.distribute[var['module']].post_process_variables.keys()]
+
+            #Get the output variables then pass to the function
             for v in var_vals:
                 # get the data desired
                 data = getattr(self.distribute[v['module']], v['variable'])
@@ -677,9 +675,7 @@ class SMRF():
 
                 # output the time step
                 self._logger.debug("Outputting {0}".format(v['module']))
-                #Skip any post process variables
-                if v['variable'] not in self.distribute[v['module']].post_process_variables.keys():
-                    self.out_func.output(v['variable'], data, current_time_step)
+                self.out_func.output(v['variable'], data, current_time_step)
 
     def post_process(self):
         """

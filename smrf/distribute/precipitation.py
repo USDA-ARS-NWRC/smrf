@@ -222,7 +222,9 @@ class ppt(image_data.image_data):
                                                         stormPrecip=self.storm_precip)
             # save the model state
             self.percent_snow = perc_snow
-            self.snow_density = snow_den
+            #self.snow_density = snow_den
+            self.snow_density = np.zeros(self.storm_days.shape)
+
             self.storm_days = stormDays
             self.storm_precip = stormPrecip
 
