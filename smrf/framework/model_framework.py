@@ -648,7 +648,6 @@ class SMRF():
         #Only output according to the user specified value,  or if it is the end.
         if (output_count % self.config['output']['frequency'] == 0) or (output_count == len(self.date_time)):
 
-
             #User is attempting to output single variable
             if module != None and out_var != None:
                 #add only one variable to the output list and preceed as normal

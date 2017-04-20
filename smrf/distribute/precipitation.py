@@ -155,8 +155,7 @@ class ppt(image_data.image_data):
         self.storms = []
         self.time_steps_since_precip = 0
         self.storming = False
-        #Note while we do idenfiy storms here the calculations do not require the storm info
-        self.storm_dependent = False
+
 
     def distribute_precip(self, data):
         """
@@ -205,7 +204,6 @@ class ppt(image_data.image_data):
         self._logger.debug('%s Distributing all precip' % data.name)
         # only need to distribute precip if there is any
         data = data[self.stations]
-
         if data.sum() > 0:
 
             # distribute data and set the min/max
@@ -236,7 +234,8 @@ class ppt(image_data.image_data):
             self.percent_snow = np.zeros(self.storm_days.shape)
             self.snow_density = np.zeros(self.storm_days.shape)
 
-        self.storming = storms.tracking(self.precip, time, self.storms, self.time_steps_since_precip,self.storming)
+        #track storms for new snow density model
+        self.storms, self.time_steps_since_precip, self.storming = storms.tracking(self.precip, time, self.storms, self.time_steps_since_precip, self.storming)
 
         # day of last storm, this will be used in albedo
         self.last_storm_day = utils.water_day(data.name)[0] - self.storm_days - 0.001
@@ -329,7 +328,7 @@ class ppt(image_data.image_data):
         Process the snow density values
         """
 
-        self._logger.info("Post processing snow_density across {0} total storms...".format(len(self.storms)))
+        self._logger.info("Estimated total number of storms: {0} ...".format(len(self.storms)))
 
         #Open files
         pp_fname = os.path.join(main_obj.config['output']['out_location'], 'precip.nc')
@@ -345,7 +344,7 @@ class ppt(image_data.image_data):
 
         #Cycle through all the storms
         for i,storm in enumerate(self.storms):
-            self._logger.debug("Calculating snow density for Storm #{0}".format(i))
+            self._logger.debug("Calculating snow density for Storm #{0}".format(i+1))
             self.post_process_snow_density(main_obj,pds,tds,storm)
 
         pds.close()

@@ -161,22 +161,30 @@ def tracking(precipitation, time, storm_lst, time_steps_since_precip, is_stormin
     Created March 3, 2017
     @author: Micah Johnson
     '''
-    if precipitation.mean() > mass_thresh:
-        #New storm
+    # print  "--"*10 +"> Max precip = {0}".format(precipitation.max())
+    if precipitation.max() > mass_thresh:
+        #Start a new storm
         if len(storm_lst)== 0 or not is_storming :
             storm_lst.append({'start':time,'end':None})
             is_storming = True
+            # print "--"*10 + "> New storm!"
 
         #always append the most recent timestep to avoid unended storms
         storm_lst[-1]['end'] = time
         time_steps_since_precip = 0
+        #print "--"*10 + "> still storming!"
+
 
     elif is_storming and time_steps_since_precip < steps_thresh:
-        storm_lst[-1]['end'] = time
+        #storm_lst[-1]['end'] = time
         time_steps_since_precip+=1
+        # print  "--"*10 +"> Hours since precip = {0}".format(time_steps_since_precip)
+        # print "--"*10 + "> still storming but no precip!"
 
 
-    else:
+    if time_steps_since_precip >= steps_thresh:
         is_storming = False
+        # print "--"*10 + "> not storming!"
 
-    return is_storming
+
+    return storm_lst, time_steps_since_precip, is_storming
