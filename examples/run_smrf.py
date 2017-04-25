@@ -1,4 +1,6 @@
 '''
+Version = 0.1.1
+
 20151222 Scott Havens
 
 run_smrf.py is a command line program meant to take a single
@@ -24,24 +26,22 @@ start = datetime.now()
 # run the model
 # output if necessary
 
-try:
-    configFile = './test_data/testConfig_Grid.ini'
-    configFile = '/media/Drobo2/smrf_test/testConfig_allData.ini'
-    #configFile = '/home/scotthavens/working/BRB-wy16/data/data.11.forecast/BRB_wy2016_data.11.forecast.ini'
-    if len(sys.argv) > 1:
-        configFile = sys.argv[1]
-    
-    
-    #===============================================================================
-    # Model setup and initialize
-    #===============================================================================
-    #
-    # These are steps that will load the necessary data and initialize the framework
-    # Once loaded, this shouldn't need to be re-ran except if something major changes
-    
-    # 1. initialize
-    s = smrf.framework.SMRF(configFile)
-    
+# try:
+configFile = '../test_data/testConfig.ini'
+if len(sys.argv) > 1:
+    configFile = sys.argv[1]
+
+
+#===============================================================================
+# Model setup and initialize
+#===============================================================================
+#
+# These are steps that will load the necessary data and initialize the framework
+# Once loaded, this shouldn't need to be re-ran except if something major changes
+
+# 1. initialize
+with smrf.framework.SMRF(configFile) as s:
+
     # 2. load topo data
     s.loadTopo()
     
@@ -77,9 +77,9 @@ try:
     # 7. run the model
     # s.runModel()
 
-except Exception as e:
-    s._logger.error(e)
+# except Exception as e:
+#     #print 'Error: %s' % e
+#     s._logger.error(e)
     
-
-
+    
 s._logger.info(datetime.now() - start)
