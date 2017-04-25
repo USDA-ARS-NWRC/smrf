@@ -130,8 +130,41 @@ def time_since_storm(precipitation, perc_snow, time_step=1/24, mass=1, time=4,
 
     return stormDays, stormPrecip
 
+def tracking_by_station(precipitation, time, storm_lst, time_steps_since_precip, is_storming, mass_thresh = 0.01, steps_thresh=2):
+    '''
+    Args:
+        precipitation - precipitation values
+        time - Time step that smrf is on
+        time_steps_since_precip - time steps since the last precipitation
+        storm_lst - list that store the storm cycles in order. A storm is recorded by
+                    its start and its end. The list
+                    is passed by reference and modified internally.
+                    Each storm entry should be in the format of:
+                    [{start:Storm Start, end:Storm End}]
 
-def tracking(precipitation, time, storm_lst, time_steps_since_precip, is_storming, mass_thresh = 0.01, steps_thresh=2):
+                    e.g.
+                         [
+                         {start:date_time1,end:date_time2},
+                         {start:date_time3,end:date_time4},
+                         ]
+
+                         #would be a two storms
+
+        mass_thresh - mass amount that constitutes a real precip event, default = 0.0.
+        steps_thresh - Number of time steps that constitutes the end of a precip event, default = 2 steps (typically 2 hours)
+
+    Returns:
+        True or False whether the storm is ongoing or not
+
+    Created March 3, 2017
+    @author: Micah Johnson
+    '''
+
+
+
+    return storm_lst, time_steps_since_precip, is_storming
+
+def tracking_by_basin(precipitation, time, storm_lst, time_steps_since_precip, is_storming, mass_thresh = 0.01, steps_thresh=2):
     '''
     Args:
         precipitation - precipitation values
