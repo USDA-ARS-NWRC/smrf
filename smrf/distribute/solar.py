@@ -217,7 +217,7 @@ class solar(image_data.image_data):
         self._logger.debug('Created distribute.solar')
 
 
-    def initialize(self, topo, metadata):
+    def initialize(self, topo, data):
         """
         Initialize the distribution, soley calls :mod:`smrf.distribute.image_data.image_data._initialize`.
         Sets the following attributes:
@@ -229,7 +229,7 @@ class solar(image_data.image_data):
         Args:
             topo: :mod:`smrf.data.loadTopo.topo` instance contain topographic data
                 and infomation
-            metadata: metadata Pandas dataframe containing the station metadata,
+            data: data Pandas dataframe containing the station data,
                 from :mod:`smrf.data.loadData` or :mod:`smrf.data.loadGrid`
 
         """

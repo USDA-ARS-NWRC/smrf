@@ -151,7 +151,7 @@ class wind(image_data.image_data):
 
 
 
-    def initialize(self, topo, metadata):
+    def initialize(self, topo, data):
         """
         Initialize the distribution, calls :mod:`smrf.distribute.image_data.image_data._initialize`.
         Checks for the enhancement factors for the stations and vegetation.
@@ -159,14 +159,14 @@ class wind(image_data.image_data):
         Args:
             topo: :mod:`smrf.data.loadTopo.topo` instance contain topographic data
                 and infomation
-            metadata: metadata Pandas dataframe containing the station metadata,
+            data: data Pandas dataframe containing the station data,
                 from :mod:`smrf.data.loadData` or :mod:`smrf.data.loadGrid`
 
         """
 
         self._logger.debug('Initializing distribute.wind')
 
-        self._initialize(topo, metadata)
+        self._initialize(topo, data.metadata)
 
         if not self.gridded:
             self.veg_type = topo.veg_type

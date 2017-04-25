@@ -88,13 +88,13 @@ class albedo(image_data.image_data):
         self._logger.debug('Created distribute.albedo')
 
 
-    def initialize(self, topo, metadata):
+    def initialize(self, topo, data):
         """
         Initialize the distribution, calls image_data.image_data._initialize()
 
         Args:
             topo: smrf.data.loadTopo.topo instance contain topo data/info
-            metadata: metadata dataframe containing the station metadata
+            data: data dataframe containing the station data
 
         """
 

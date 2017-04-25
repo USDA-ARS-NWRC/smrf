@@ -53,7 +53,7 @@ class ts(image_data.image_data):
         self._logger.debug('Created distribute.soil_temp')
 
 
-    def initialize(self, topo, metadata):
+    def initialize(self, topo, data):
         """
         Initialize the distribution and set the soil temperature to a constant value
         based on the configuration file.
@@ -61,7 +61,7 @@ class ts(image_data.image_data):
         Args:
             topo: :mod:`smrf.data.loadTopo.topo` instance contain topographic data
                 and infomation
-            metadata: metadata Pandas dataframe containing the station metadata,
+            metadata: data Pandas dataframe containing the station data,
                 from :mod:`smrf.data.loadData` or :mod:`smrf.data.loadGrid`
 
         """

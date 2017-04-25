@@ -58,7 +58,7 @@ class ta(image_data.image_data):
         self._logger.debug('Created distribute.air_temp')
         
         
-    def initialize(self, topo, metadata):
+    def initialize(self, topo, data):
         """
         Initialize the distribution, soley calls :mod:`smrf.distribute.image_data.image_data._initialize`.
         
@@ -71,7 +71,7 @@ class ta(image_data.image_data):
         """
         
         self._logger.debug('Initializing distribute.air_temp')
-        self._initialize(topo, metadata)
+        self._initialize(topo, data.metadata)
         
                      
         

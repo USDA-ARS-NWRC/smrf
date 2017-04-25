@@ -102,7 +102,7 @@ class th(image_data.image_data):
         self._logger.debug('Created distribute.thermal')
 
 
-    def initialize(self, topo, metadata):
+    def initialize(self, topo, data):
         """
         Initialize the distribution, calls :mod:`smrf.distribute.image_data.image_data._initialize`
         for gridded distirbution. Sets the following from :mod:`smrf.data.loadTopo.topo`
@@ -116,14 +116,14 @@ class th(image_data.image_data):
         Args:
             topo: :mod:`smrf.data.loadTopo.topo` instance contain topographic data
                 and infomation
-            metadata: metadata Pandas dataframe containing the station metadata,
+            data: data Pandas dataframe containing the station data,
                 from :mod:`smrf.data.loadData` or :mod:`smrf.data.loadGrid`
 
         """
 
         self._logger.debug('Initializing distribute.thermal')
         if self.gridded:
-            self._initialize(topo, metadata)
+            self._initialize(topo, data.metadata)
 
         self.veg_height = topo.veg_height
         self.veg_tau = topo.veg_tau
