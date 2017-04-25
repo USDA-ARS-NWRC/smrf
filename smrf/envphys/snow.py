@@ -8,6 +8,97 @@ __version__ = '0.1.1'
 
 import numpy as np
 import pandas as pd
+
+def get_basin_perc_snow(temperature,Tmax = 0.0, Tmin = -10.0):
+    pcs = np.zeros(temperature.shape)
+
+    for (i,j), Tpp in np.ndenumerate(temperature):
+        pcs[i][j] = calc_perc_snow(Tpp,Tmin = Tmin, Tmax = Tmax)
+
+    return pcs
+    
+def calc_perc_snow(Tpp, Tmax = 0.0, Tmin = -10.0):
+    """
+    This method is a point model that calculates the percent snow based on the
+    temperature during precipitation
+
+    Args:
+        Tpp - temperature in Celcius during precipitation
+        Tmax - Max temperature in Celcius that effects the percent snow, default = 0.0 C
+        Tmin - Minimum temperature in Celcius that effects the percent snow, default = -10.0 C
+
+    Returns:
+        pcs - The decimal amount of the precip that is snow, e.g. 1.0 = 100 percent snow
+    """
+
+    #Coefficients for snow relationship
+    Tr0 = 0.5
+    Pcr0 = 0.25
+    Pc0 = 0.75
+
+    #Set a cap on temperature
+    Tpp, = check_temperature(Tpp, Tmax = Tmax, Tmin = Tmin)
+
+    if Tpp <= -0.5:
+        pcs = 1.0
+
+    elif Tpp > -0.5 and Tpp <= 0.0:
+        pcs = (((-Tpp) / Tr0) * Pcr0) + Pc0
+
+    elif Tpp > 0.0 and Tpp <= (Tmax +1.0):
+        pcs = (((-Tpp) / (Tmax + 1.0)) * Pc0) + Pc0
+
+    else:
+        pcs = 0.0
+    return pcs
+
+def fresh_snow_density(Tpp, Tmax = 0.0, Tmin = -10.0):
+    """
+    This method is a point model that calculates the newly fallen snow density based on the
+    temperature during precipitation.
+
+    Args:
+        Tpp - temperature in Celcius during precipitation
+        Tmax - Max temperature in Celcius that effects the percent snow, default = 0.0 C
+        Tmin - Minimum temperature in Celcius that effects the percent snow, default = -10.0 C
+
+    Returns:
+        rhow_ns - Density of snow freshly fallen in kg/m^3
+    """
+
+    ex_max = 1.75
+    exr = 0.75
+    ex_min = 1.0
+
+    Tz = 0.0
+
+
+    Tpp,tsnow = check_temperature(Tpp,Tmax = Tmax, Tmin = Tmin)
+
+    # new snow density - no compaction
+    Trange = Tmax - Tmin
+    ex = ex_min + (((Trange + (tsnow - Tmax)) / Trange) * exr)
+
+    if ex > ex_max:
+        ex = ex_max
+
+    rho_ns = (50.0 + (1.7 * (((Tpp - Tz) + 15.0)**ex)))
+    return rho_ns
+
+
+def check_temperature(Tpp, Tmax = 0.0, Tmin = -10.0):
+    # set precipitation temperature, % snow, and SWE
+    if Tpp < Tmin:
+        Tpp = Tmin
+        tsnow = Tmin
+    else:
+        if Tpp > Tmax:
+            tsnow = Tmax
+        else:
+            tsnow = Tpp
+    return Tpp, tsnow
+
+
 def mkprecip(precipitation, temperature):
     '''
     Follows the IPW command mkprecip
@@ -114,7 +205,7 @@ def calc_density(precip, temperature, use_compaction = True):
         if use_compaction:
             snow_density[i][j] = (compacted_snow_density(tpp,pp))['rho_s']
         else:
-            snow_density[i][j] = (fresh_snow_density(tpp,pp))['rho_ns']
+            snow_density[i][j] = fresh_snow_density(tpp,pp)
 
     return snow_density
 
@@ -163,39 +254,19 @@ def compacted_snow_density(Tpp,pp):
 
     if pp > 0.0:
         # set precipitation temperature, % snow, and SWE
-        if Tpp < Tmin:
-            Tpp = Tmin
-            tsnow = Tmin
-        else :
-            if Tpp > Tmax:
-                tsnow = Tmax
-            else:
-                tsnow = Tpp
+        Tpp, tsnow = check_temperature(Tpp, Tmax = Tmax, Tmin = Tmin)
 
-        if Tpp <= -0.5:
-            pcs = 1.0
-
-        elif Tpp > -0.5 and Tpp <= 0.0:
-            pcs = (((-Tpp) / Tr0) * Pcr0) + Pc0
-
-        elif Tpp > 0.0 and Tpp <= (Tmax +1.0):
-            pcs = (((-Tpp) / (Tmax + 1.0)) * Pc0) + Pc0
-
-        else:
-            pcs = 0.0
+        # Calculate the percent snow
+        pcs = calc_perc_snow(Tpp,Tmax = Tmax, Tmin = Tmin)
 
         swe = pp * pcs
 
         if swe > 0.0:
             # new snow density - no compaction
-            Trange = Tmax - Tmin
-            ex = ex_min + (((Trange + (tsnow - Tmax)) / Trange) * exr)
+            rho_ns = fresh_snow_density(Tpp, Tmax = Tmax, Tmin = Tmin)
 
-            if ex > ex_max:
-                ex = ex_max
-
-            rho_ns = (50.0 + (1.7 * (((Tpp - Tz) + 15.0)**ex))) / water
-
+            #Convert to a percentage of water
+            rho_ns /= water
             # proportional total storm mass compaction
             d_rho_c = (0.026 * np.exp(-0.08 * (Tz - tsnow)) * swe * np.exp(-21.0 * rho_ns))
 

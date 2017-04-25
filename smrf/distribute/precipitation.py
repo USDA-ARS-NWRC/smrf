@@ -155,7 +155,8 @@ class ppt(image_data.image_data):
         self.storms = []
         self.time_steps_since_precip = 0
         self.storming = False
-
+        self.ppt_threshold = 0.01 #mm
+        self.time_to_end_storm = 2 # Time steps it take to end a storm definition
 
     def distribute_precip(self, data):
         """
@@ -210,32 +211,48 @@ class ppt(image_data.image_data):
             self._distribute(data, zeros=None)
             self.precip = utils.set_min_max(self.precip, self.min, self.max)
 
-            # determine the precip phase
-            perc_snow, snow_den = snow.mkprecip(self.precip, dpt)
+            #TO DO: add this option to the configFile
+            use_compaction = True
 
-            # determine the time since last storm
-            stormDays, stormPrecip = storms.time_since_storm(self.precip, perc_snow,
-                                                        time_step=self.time_step/60/24, mass=0.5, time=4,
-                                                        stormDays=self.storm_days,
-                                                        stormPrecip=self.storm_precip)
-            # save the model state
-            self.percent_snow = perc_snow
-            #self.snow_density = snow_den
-            self.snow_density = np.zeros(self.storm_days.shape)
+            # If accounting for compaction snow density is calculated at the end
+            # of the simulated time in a post_process
+            if use_compaction:
+                perc_snow = snow.get_basin_perc_snow(Tpp)
+                snow_den = np.zeros(self.storm_days.shape)
 
-            self.storm_days = stormDays
-            self.storm_precip = stormPrecip
+            else:
+                perc_snow, snow_den = snow.mkprecip(self.precip, dpt)
+
+                # determine the time since last storm
+                stormDays, stormPrecip = storms.time_since_storm(self.precip, perc_snow,
+                                                            time_step=self.time_step/60/24, mass=0.5, time=4,
+                                                            stormDays=self.storm_days,
+                                                            stormPrecip=self.storm_precip)
+
 
         else:
-            self.storm_days += self.time_step/60/24
+            storm_days += self.time_step/60/24
 
             # make everything else zeros
-            self.precip = np.zeros(self.storm_days.shape)
-            self.percent_snow = np.zeros(self.storm_days.shape)
-            self.snow_density = np.zeros(self.storm_days.shape)
+            precip = np.zeros(self.storm_days.shape)
+            perc_snow = np.zeros(self.storm_days.shape)
+            snow_den = np.zeros(self.storm_days.shape)
 
         #track storms for new snow density model
-        self.storms, self.time_steps_since_precip, self.storming = storms.tracking(self.precip, time, self.storms, self.time_steps_since_precip, self.storming)
+        self.storms, self.time_steps_since_precip, self.storming = storms.tracking(self.precip,
+                                                                                    time,
+                                                                                    self.storms,
+                                                                                    self.time_steps_since_precip,
+                                                                                    self.storming,
+                                                                                    mass_thresh = self.ppt_threshold,
+                                                                                    steps_thresh=self.time_to_end_storm)
+        # save the model state
+        self.percent_snow = perc_snow
+        #self.snow_density = snow_den
+        self.snow_density = snow_den
+
+        self.storm_days = stormDays
+        self.storm_precip = stormPrecip
 
         # day of last storm, this will be used in albedo
         self.last_storm_day = utils.water_day(data.name)[0] - self.storm_days - 0.001

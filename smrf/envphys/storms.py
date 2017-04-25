@@ -48,7 +48,6 @@ def storms(precipitation, perc_snow, mass=1, time=4,
         stormPrecip = np.zeros(precipitation.shape)
         return stormDays, stormPrecip
 
-
     # determine locations where it has snowed
     idx = perc_snow >= ps_thresh
 
