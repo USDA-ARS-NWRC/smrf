@@ -236,7 +236,7 @@ class solar(image_data.image_data):
 
         self._logger.debug('Initializing distribute.solar')
 
-        self._initialize(topo, metadata)
+        self._initialize(topo, data.metadata)
         self.veg_height = topo.veg_height
         self.veg_tau = topo.veg_tau
         self.veg_k = topo.veg_k

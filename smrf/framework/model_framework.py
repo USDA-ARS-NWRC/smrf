@@ -380,7 +380,7 @@ class SMRF():
         #------------------------------------------------------------------------------
         # Initialize the distibution
         for v in self.distribute:
-            self.distribute[v].initialize(self.topo, self.data.metadata)
+            self.distribute[v].initialize(self.topo, self.data)
 
         sub_count = 0
 

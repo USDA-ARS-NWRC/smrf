@@ -158,6 +158,9 @@ class ppt(image_data.image_data):
         self.ppt_threshold = 0.01 #mm
         self.time_to_end_storm = 2 # Time steps it take to end a storm definition
 
+        self.storms = storms.tracking_by_station(data.precip)
+        self._logger.info("Estimated number of storms: {0}".format(len(self.storms)))
+
     def distribute_precip(self, data):
         """
         Distribute given a Panda's dataframe for a single time step. Calls
@@ -238,7 +241,7 @@ class ppt(image_data.image_data):
         self.snow_density = np.zeros(self.storm_days.shape)
 
         #track storms for new snow density model
-        self.storms, self.time_steps_since_precip, self.storming = storms.tracking(self.precip,
+        self.storms, self.time_steps_since_precip, self.storming = storms.tracking_by_basin(self.precip,
                                                                                     time,
                                                                                     self.storms,
                                                                                     self.time_steps_since_precip,

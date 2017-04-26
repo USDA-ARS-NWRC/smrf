@@ -130,7 +130,7 @@ def time_since_storm(precipitation, perc_snow, time_step=1/24, mass=1, time=4,
 
     return stormDays, stormPrecip
 
-def tracking_by_station(precipitation, time, storm_lst, time_steps_since_precip, is_storming, mass_thresh = 0.01, steps_thresh=2):
+def tracking_by_station(precip, mass_thresh =0.01, steps_thresh = 2):
     '''
     Args:
         precipitation - precipitation values
@@ -159,10 +159,42 @@ def tracking_by_station(precipitation, time, storm_lst, time_steps_since_precip,
     Created March 3, 2017
     @author: Micah Johnson
     '''
+    storm_lst = []
+    stations = list(precip)
+    is_storming = False
+    time_steps_since_precip= 0
+
+    for i,row in precip.iterrows():
+        if row.max() > mass_thresh:
+            #Start a new storm
+            if not is_storming :
+                storm_lst.append({'start':i,'end':None})
+                is_storming = True
+                print "New Storm"
+                for j,sta in enumerate(stations):
+                    storm_lst[-1][sta] = row[sta]
+                # print "--"*10 + "> New storm!"
+
+            for j,sta in enumerate(stations):
+                storm_lst[-1][sta] += row[sta]
+            #always append the most recent timestep to avoid unended storms
+            storm_lst[-1]['end'] = i
+            time_steps_since_precip = 0
+            #print "--"*10 + "> still storming!"
 
 
+        elif is_storming and time_steps_since_precip < steps_thresh:
+            #storm_lst[-1]['end'] = time
+            time_steps_since_precip+=1
+            # print  "--"*10 +"> Hours since precip = {0}".format(time_steps_since_precip)
+            print "--"*10 + "> still storming but no precip!"
 
-    return storm_lst, time_steps_since_precip, is_storming
+
+        if time_steps_since_precip >= steps_thresh:
+            is_storming = False
+            print "--"*10 + "> not storming!"
+
+    return storm_lst
 
 def tracking_by_basin(precipitation, time, storm_lst, time_steps_since_precip, is_storming, mass_thresh = 0.01, steps_thresh=2):
     '''
