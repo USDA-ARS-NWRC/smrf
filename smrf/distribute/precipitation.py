@@ -152,6 +152,8 @@ class ppt(image_data.image_data):
         self.storm_days = np.zeros((topo.ny, topo.nx))
         self.storm_precip = np.zeros((topo.ny, topo.nx))
         self.last_storm_day = np.zeros((topo.ny, topo.nx))
+        self.storm_total = np.zeros((topo.ny, topo.nx))
+
         self.storms = []
         self.time_steps_since_precip = 0
         self.storming = False
@@ -159,8 +161,8 @@ class ppt(image_data.image_data):
         self.time_to_end_storm = 2 # Time steps it take to end a storm definition
 
         self.storms = storms.tracking_by_station(data.precip)
-        self._logger.info("Estimated number of storms: {0}".format(len(self.storms)))
-
+        self._logger.info("Estimated number of storms: {0}".format(len(self.storms.index)))
+        print self.storms
     def distribute_precip(self, data):
         """
         Distribute given a Panda's dataframe for a single time step. Calls
@@ -212,11 +214,18 @@ class ppt(image_data.image_data):
 
             # distribute data and set the min/max
             self._distribute(data, zeros=None)
+
             self.precip = utils.set_min_max(self.precip, self.min, self.max)
+
+            for i in range(len(self.storms)):
+                if time >= self.storms.get_value(i,'start') and time <= self.storm.get_value(i,'end'):
+                    self._distribute(self.storm_lst.loc[i],other_attribute='storm_total')
+                    break
 
             # If accounting for compaction snow density is calculated at the end
             # of the simulated time in a post_process
-            perc_snow, snow_den = snow.mkprecip(self.precip, dpt)
+            #perc_snow, snow_den = snow.mkprecip(self.precip, dpt)
+
 
             # determine the time since last storm
             stormDays, stormPrecip = storms.time_since_storm(self.precip, perc_snow,

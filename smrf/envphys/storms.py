@@ -10,7 +10,7 @@ __version__ = '0.1.1'
 import numpy as np
 import os
 from datetime import datetime
-
+import pandas as pd
 def storms(precipitation, perc_snow, mass=1, time=4,
            stormDays=None, stormPrecip=None, ps_thresh=0.5):
     '''
@@ -156,10 +156,16 @@ def tracking_by_station(precip, mass_thresh =0.01, steps_thresh = 2):
     Returns:
         True or False whether the storm is ongoing or not
 
-    Created March 3, 2017
+    Created April 24, 2017
     @author: Micah Johnson
     '''
-    storm_lst = []
+    storm_columns = ['start','end']
+    stations = list(precip)
+    storm_columns+=stations
+    print storm_columns
+
+#    storms = pd.DataFrame(columns = storm_columns)
+    storms = []
     stations = list(precip)
     is_storming = False
     time_steps_since_precip= 0
@@ -167,21 +173,22 @@ def tracking_by_station(precip, mass_thresh =0.01, steps_thresh = 2):
     for i,row in precip.iterrows():
         if row.max() > mass_thresh:
             #Start a new storm
-            if not is_storming :
-                storm_lst.append({'start':i,'end':None})
+            if not is_storming:
+                new_storm = {}
+                new_storm['start'] = i
+                for sta,precip in row.iteritems():
+                    new_storm[sta]=0
+                #Create a new row
                 is_storming = True
-                print "New Storm"
-                for j,sta in enumerate(stations):
-                    storm_lst[-1][sta] = row[sta]
-                # print "--"*10 + "> New storm!"
+                print "--"*10 + "> New storm!"
 
-            for j,sta in enumerate(stations):
-                storm_lst[-1][sta] += row[sta]
-            #always append the most recent timestep to avoid unended storms
-            storm_lst[-1]['end'] = i
-            time_steps_since_precip = 0
-            #print "--"*10 + "> still storming!"
 
+            time_steps_since_precip=0
+            #Always add the latest end date to avoid unclosed storms
+            new_storm['end'] = i
+            #Accumulate precip for storm total
+            for sta,precip in row.iteritems():
+                new_storm[sta]+=precip
 
         elif is_storming and time_steps_since_precip < steps_thresh:
             #storm_lst[-1]['end'] = time
@@ -192,9 +199,11 @@ def tracking_by_station(precip, mass_thresh =0.01, steps_thresh = 2):
 
         if time_steps_since_precip >= steps_thresh:
             is_storming = False
+            storms.append(new_storm)
             print "--"*10 + "> not storming!"
 
-    return storm_lst
+    storms = pd.DataFrame(storms)
+    return storms
 
 def tracking_by_basin(precipitation, time, storm_lst, time_steps_since_precip, is_storming, mass_thresh = 0.01, steps_thresh=2):
     '''
