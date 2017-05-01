@@ -50,7 +50,10 @@ class output_hru():
             
         # go through the variable list and make full file names
         for v in variable_list:
-            variable_list[v]['file_name'] = variable_list[v]['out_location'] + ext
+            if not variable_list[v]['out_location'].endswith(ext):
+                variable_list[v]['file_name'] = variable_list[v]['out_location'] + ext
+            else:
+                variable_list[v]['file_name'] = variable_list[v]['out_location']
     
             try:
                 os.remove(variable_list[v]['file_name'])
@@ -76,11 +79,13 @@ class output_hru():
         
         self.IND = {}
         for h in range(hru_max):
-            self.IND[h] = hru == h+1          
+            self.IND[h] = hru == h+1
+            
+        self.hru_idx = [str(i+1) for i in range(self.hru_max)]
         
         # create an empty dataframe
         if self.prms_flag:
-            cols = ["year","month","day","hour","minute","second"] + [str(i+1) for i in range(hru_max)]
+            cols = ["year","month","day","hour","minute","second"] + self.hru_idx
             hru_data = pd.DataFrame(index=range(len(self.date_time)), columns=cols)
             
             yrs = np.array([[y.year, y.month, y.day, y.hour, y.minute, y.second] for y in self.date_time])
@@ -95,7 +100,7 @@ class output_hru():
             self.generate_prms_header()
             
         else:
-            cols = ["date_time"] + [str(i+1) for i in range(hru_max)]
+            cols = ["date_time"] + self.hru_idx
             hru_data = pd.DataFrame(index=range(len(self.date_time)), columns=cols)
             hru_data['date_time'] = self.date_time
                     
@@ -148,10 +153,13 @@ class output_hru():
         self._logger.debug('{} Writing variable {} to {} file'.format(date_time, variable, self.config['output_type']))
         
         # loop through the HRU
+        m_hru = np.zeros((self.hru_max,))
         for h in range(self.hru_max):
-            m_hru = np.nanmean(data[self.IND[h]])
+            m_hru[h] = np.nanmean(data[self.IND[h]])
             
-            self.hru_data.loc[self.idx, (str(h+1))] = m_hru
+#             self.hru_data.loc[self.idx, (str(h+1))] = m_hru[h]
+            
+        self.hru_data.loc[self.idx, self.hru_idx] = m_hru
         
         
         # open the file and write the row of data

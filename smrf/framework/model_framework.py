@@ -630,7 +630,14 @@ class SMRF():
                     if m in self.distribute.keys():
 
                         if v in self.distribute[m].output_variables.keys():
-                            fname = os.path.join(self.config['output']['out_location'], v)
+                            
+                            # if there is a key in the config file, then change the output file name
+                            if v in self.config['output'].keys():
+                                fname = os.path.join(self.config['output']['out_location'],
+                                                     self.config['output'][v])
+                            else:
+                                fname = os.path.join(self.config['output']['out_location'], v)
+                                
                             d = {'variable': v, 'module': m, 'out_location': fname, 'info': self.distribute[m].output_variables[v]}
                             variable_list[v] = d
 
