@@ -16,7 +16,7 @@ def get_basin_perc_snow(temperature,Tmax = 0.0, Tmin = -10.0):
         pcs[i][j] = calc_perc_snow(Tpp,Tmin = Tmin, Tmax = Tmax)
 
     return pcs
-    
+
 def calc_perc_snow(Tpp, Tmax = 0.0, Tmin = -10.0):
     """
     This method is a point model that calculates the percent snow based on the
@@ -37,7 +37,7 @@ def calc_perc_snow(Tpp, Tmax = 0.0, Tmin = -10.0):
     Pc0 = 0.75
 
     #Set a cap on temperature
-    Tpp, = check_temperature(Tpp, Tmax = Tmax, Tmin = Tmin)
+    Tpp, tsnow = check_temperature(Tpp, Tmax = Tmax, Tmin = Tmin)
 
     if Tpp <= -0.5:
         pcs = 1.0
@@ -198,16 +198,20 @@ def calc_density(precip, temperature, use_compaction = True):
     """
 
     snow_density = np.zeros(precip.shape)
+    perc_snow = np.zeros(precip.shape)
+
     x_len = len(snow_density)
     y_len = len(snow_density[0])
     for (i,j), pp in np.ndenumerate(precip):
         tpp  = temperature[i][j]
         if use_compaction:
-            snow_density[i][j] = (compacted_snow_density(tpp,pp))['rho_s']
+            result  = compacted_snow_density(tpp,pp)
+            snow_density[i][j] = result['rho_s']
+            perc_snow[i][j] = result['pcs']
         else:
             snow_density[i][j] = fresh_snow_density(tpp,pp)
 
-    return snow_density
+    return snow_density,perc_snow
 
 def compacted_snow_density(Tpp,pp):
     """

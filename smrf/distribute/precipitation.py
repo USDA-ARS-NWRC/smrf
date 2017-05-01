@@ -15,6 +15,7 @@ from smrf.envphys import storms
 
 from smrf.utils import utils
 import matplotlib.pyplot as plt
+import pytz
 
 class ppt(image_data.image_data):
     """
@@ -157,12 +158,16 @@ class ppt(image_data.image_data):
         self.storms = []
         self.time_steps_since_precip = 0
         self.storming = False
+
+        #TO DO put into config
         self.ppt_threshold = 0.01 #mm
         self.time_to_end_storm = 2 # Time steps it take to end a storm definition
 
         self.storms = storms.tracking_by_station(data.precip)
+        self.storm_id = 0
+
         self._logger.info("Estimated number of storms: {0}".format(len(self.storms.index)))
-        print self.storms
+
     def distribute_precip(self, data):
         """
         Distribute given a Panda's dataframe for a single time step. Calls
@@ -210,6 +215,7 @@ class ppt(image_data.image_data):
         self._logger.debug('%s Distributing all precip' % data.name)
         # only need to distribute precip if there is any
         data = data[self.stations]
+
         if data.sum() > 0:
 
             # distribute data and set the min/max
@@ -217,46 +223,60 @@ class ppt(image_data.image_data):
 
             self.precip = utils.set_min_max(self.precip, self.min, self.max)
 
-            for i in range(len(self.storms)):
-                if time >= self.storms.get_value(i,'start') and time <= self.storm.get_value(i,'end'):
-                    self._distribute(self.storm_lst.loc[i],other_attribute='storm_total')
-                    break
+            storm = self.storms.iloc[self.storm_id]
+            storm_start = storm['start']
+            storm_end = storm['end']
 
-            # If accounting for compaction snow density is calculated at the end
-            # of the simulated time in a post_process
-            #perc_snow, snow_den = snow.mkprecip(self.precip, dpt)
+            #During a storm?
 
+            if time >= storm_start and self.storming == False:
+                self.storming = True
+                self._distribute(storm[self.stations], other_attribute='storm_total')
+                snow_den, perc_snow = snow.calc_density(self.storm_total,dpt)
+
+            elif time >= storm_end and self.storming ==True:
+
+                if self.storm_id < self.storms['start'].count()-1:
+                    self.storm_id+=1
+                self.storming = False
+
+            if self.storming:
+                snow_den, perc_snow = snow.calc_density(self.storm_total,dpt)
+            else:
+                snow_den = np.zeros(self.precip.shape)
+                perc_snow = np.zeros(self.precip.shape)
 
             # determine the time since last storm
             stormDays, stormPrecip = storms.time_since_storm(self.precip, perc_snow,
                                                         time_step=self.time_step/60/24, mass=0.5, time=4,
                                                         stormDays=self.storm_days,
                                                         stormPrecip=self.storm_precip)
-            # save the model state
-            self.percent_snow = perc_snow
-            #self.snow_density = snow_den
-            self.snow_density = snow_den
-
             self.storm_days = stormDays
             self.storm_precip = stormPrecip
 
         else:
             self.storm_days += self.time_step/60/24
-
-            # make everything else zeros
             self.precip = np.zeros(self.storm_days.shape)
-            self.percent_snow = np.zeros(self.storm_days.shape)
+            perc_snow = np.zeros(self.storm_days.shape)
+            snow_den = np.zeros(self.storm_days.shape)
 
-        self.snow_density = np.zeros(self.storm_days.shape)
+        # save the model state
+        self.percent_snow = perc_snow
+        #self.snow_density = snow_den
+        self.snow_density = snow_den
 
-        #track storms for new snow density model
-        self.storms, self.time_steps_since_precip, self.storming = storms.tracking_by_basin(self.precip,
-                                                                                    time,
-                                                                                    self.storms,
-                                                                                    self.time_steps_since_precip,
-                                                                                    self.storming,
-                                                                                    mass_thresh = self.ppt_threshold,
-                                                                                    steps_thresh=self.time_to_end_storm)
+
+
+
+
+        # #track storms for new snow density model
+        # self.storms, self.time_steps_since_precip, self.storming = storms.tracking_by_basin(self.precip,
+        #                                                                             time,
+        #                                                                             self.storms,
+        #                                                                             self.time_steps_since_precip,
+        #                                                                             self.storming,
+        #                                                                             mass_thresh = self.ppt_threshold,
+        #                                                                             steps_thresh=self.time_to_end_storm)
 
         # day of last storm, this will be used in albedo
         self.last_storm_day = utils.water_day(data.name)[0] - self.storm_days - 0.001
@@ -348,39 +368,40 @@ class ppt(image_data.image_data):
         """
         Process the snow density values
         """
-
-        self._logger.info("Estimated total number of storms: {0} ...".format(len(self.storms)))
-
-        #Open files
-        pp_fname = os.path.join(main_obj.config['output']['out_location'], 'precip.nc')
-        t_fname = os.path.join(main_obj.config['output']['out_location'], 'dew_point.nc')
-
-        pds = Dataset(pp_fname,'r')
-        tds = Dataset(t_fname,'r')
-
-        #Calculate the start of the simulation from file for calculating count
-        sim_start = (datetime.strptime((pds.variables['time'].units.split('since')[-1]).strip(),'%Y-%m-%d %H:%S'))
-        self._logger.debug("There were {0} total storms during this run".format(len(self.storms)))
-
-
-        #Cycle through all the storms
-        for i,storm in enumerate(self.storms):
-            self._logger.debug("Calculating snow density for Storm #{0}".format(i+1))
-            self.post_process_snow_density(main_obj,pds,tds,storm)
-
-        pds.close()
-        tds.close()
+        pass
+        #
+        # self._logger.info("Estimated total number of storms: {0} ...".format(len(self.storms)))
+        #
+        # #Open files
+        # pp_fname = os.path.join(main_obj.config['output']['out_location'], 'precip.nc')
+        # t_fname = os.path.join(main_obj.config['output']['out_location'], 'dew_point.nc')
+        #
+        # pds = Dataset(pp_fname,'r')
+        # tds = Dataset(t_fname,'r')
+        #
+        # #Calculate the start of the simulation from file for calculating count
+        # sim_start = (datetime.strptime((pds.variables['time'].units.split('since')[-1]).strip(),'%Y-%m-%d %H:%S'))
+        # self._logger.debug("There were {0} total storms during this run".format(len(self.storms)))
+        #
+        #
+        # #Cycle through all the storms
+        # for i,storm in enumerate(self.storms):
+        #     self._logger.debug("Calculating snow density for Storm #{0}".format(i+1))
+        #     self.post_process_snow_density(main_obj,pds,tds,storm)
+        #
+        # pds.close()
+        # tds.close()
 
     def post_processor_threaded(self, main_obj):
-         self._logger.info("Post processing snow_density...")
-
-         #Open files
-         pp_fname = os.path.join(main_obj.config['output']['out_location'], 'precip.nc')
-         t_fname = os.path.join(main_obj.config['output']['out_location'], 'dew_point.nc')
-
-         pds = Dataset(pp_fname,'r')
-         tds = Dataset(t_fname,'r')
-
+        #  self._logger.info("Post processing snow_density...")
+         #
+        #  #Open files
+        #  pp_fname = os.path.join(main_obj.config['output']['out_location'], 'precip.nc')
+        #  t_fname = os.path.join(main_obj.config['output']['out_location'], 'dew_point.nc')
+         #
+        #  pds = Dataset(pp_fname,'r')
+        #  tds = Dataset(t_fname,'r')
+        pass
 
 
         #Create a queue

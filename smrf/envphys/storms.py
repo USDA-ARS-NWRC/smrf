@@ -11,6 +11,8 @@ import numpy as np
 import os
 from datetime import datetime
 import pandas as pd
+import pytz
+
 def storms(precipitation, perc_snow, mass=1, time=4,
            stormDays=None, stormPrecip=None, ps_thresh=0.5):
     '''
@@ -169,23 +171,24 @@ def tracking_by_station(precip, mass_thresh =0.01, steps_thresh = 2):
     stations = list(precip)
     is_storming = False
     time_steps_since_precip= 0
+    tzinfo = pytz.timezone('UTC')
 
     for i,row in precip.iterrows():
+        time = pd.Timestamp(i)
         if row.max() > mass_thresh:
             #Start a new storm
             if not is_storming:
                 new_storm = {}
-                new_storm['start'] = i
+                new_storm['start'] = time
                 for sta,precip in row.iteritems():
                     new_storm[sta]=0
                 #Create a new row
                 is_storming = True
-                print "--"*10 + "> New storm!"
-
+                #print "--"*10 + "> New storm!"
 
             time_steps_since_precip=0
             #Always add the latest end date to avoid unclosed storms
-            new_storm['end'] = i
+            new_storm['end'] = time
             #Accumulate precip for storm total
             for sta,precip in row.iteritems():
                 new_storm[sta]+=precip
@@ -194,15 +197,28 @@ def tracking_by_station(precip, mass_thresh =0.01, steps_thresh = 2):
             #storm_lst[-1]['end'] = time
             time_steps_since_precip+=1
             # print  "--"*10 +"> Hours since precip = {0}".format(time_steps_since_precip)
-            print "--"*10 + "> still storming but no precip!"
+            #print "--"*10 + "> still storming but no precip!"
 
 
         if time_steps_since_precip >= steps_thresh:
             is_storming = False
             storms.append(new_storm)
-            print "--"*10 + "> not storming!"
+            #print "--"*10 + "> not storming!"
 
     storms = pd.DataFrame(storms)
+    # storms.start = storms.start.tz_localize('UTC', level=0)
+    # storms.end = storms.end.tz_localize('UTC', level=0)
+
+    #print tzinfo
+    #
+    #storms['start'] = pd.Timestamp(storms['start'],tz = 'UTC')
+    # storms['start'] = pd.to_datetime(storms['start'],utc = True)
+    #
+    # # storms['end'] = pd.to_datetime(storms['end'],utc = True)
+    # storms['end'].tz_convert('UTC')
+    # storms['start'].tz_convert('UTC')
+
+
     return storms
 
 def tracking_by_basin(precipitation, time, storm_lst, time_steps_since_precip, is_storming, mass_thresh = 0.01, steps_thresh=2):
