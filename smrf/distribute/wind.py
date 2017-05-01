@@ -143,7 +143,7 @@ class wind(image_data.image_data):
                     self.config['peak'] = self.config['peak'].split(',')
             else:
                 self.config['peak'] = ''
-        
+
         self._logger.debug('Created distribute.wind')     
         
         
