@@ -132,7 +132,7 @@ def time_since_storm(precipitation, perc_snow, time_step=1/24, mass=1, time=4,
 
     return stormDays, stormPrecip
 
-def tracking_by_station(precip, mass_thresh =0.01, steps_thresh = 2):
+def tracking_by_station(precip, mass_thresh = 0.01, steps_thresh = 3):
     '''
     Args:
         precipitation - precipitation values
@@ -164,9 +164,7 @@ def tracking_by_station(precip, mass_thresh =0.01, steps_thresh = 2):
     storm_columns = ['start','end']
     stations = list(precip)
     storm_columns+=stations
-    print storm_columns
 
-#    storms = pd.DataFrame(columns = storm_columns)
     storms = []
     stations = list(precip)
     is_storming = False
@@ -196,11 +194,11 @@ def tracking_by_station(precip, mass_thresh =0.01, steps_thresh = 2):
         elif is_storming and time_steps_since_precip < steps_thresh:
             #storm_lst[-1]['end'] = time
             time_steps_since_precip+=1
-            # print  "--"*10 +"> Hours since precip = {0}".format(time_steps_since_precip)
+            #print  "--"*10 +"> Hours since precip = {0}".format(time_steps_since_precip)
             #print "--"*10 + "> still storming but no precip!"
 
 
-        if time_steps_since_precip >= steps_thresh:
+        if time_steps_since_precip >= steps_thresh and is_storming:
             is_storming = False
             storms.append(new_storm)
             #print "--"*10 + "> not storming!"

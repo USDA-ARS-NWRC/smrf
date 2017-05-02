@@ -249,7 +249,6 @@ class wind(image_data.image_data):
         Args:
             queue: queue dictionary for all variables
             data: pandas dataframe for all data, indexed by date time
-
         """
 
         for t in data_speed.index:

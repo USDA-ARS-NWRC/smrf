@@ -68,7 +68,7 @@ class SMRF():
     # These are the variables that will be queued
     thread_variables = ['cosz', 'azimuth', 'illum_ang',
                         'air_temp', 'dew_point', 'vapor_pressure', 'wind_speed',
-                        'precip', 'percent_snow', 'snow_density', 'last_storm_day_basin', 'storm_days',
+                        'precip', 'percent_snow', 'snow_density', 'last_storm_day_basin', 'storm_days', 'storm_total','storm_id',
                         'clear_vis_beam', 'clear_vis_diffuse', 'clear_ir_beam', 'clear_ir_diffuse',
                         'albedo_vis', 'albedo_ir', 'net_solar', 'cloud_factor', 'thermal',
                         'output']
@@ -471,7 +471,7 @@ class SMRF():
         #------------------------------------------------------------------------------
         # Initialize the distibutions
         for v in self.distribute:
-            self.distribute[v].initialize(self.topo, self.data.metadata)
+            self.distribute[v].initialize(self.topo, self.data)
 
         #------------------------------------------------------------------------------
         # Create Queues for all the variables
@@ -516,7 +516,7 @@ class SMRF():
         # 4. Precipitation
         t.append(Thread(target=self.distribute['precip'].distribute_thread,
                         name='precipitation',
-                        args=(q, self.data.precip,
+                        args=(q, self.data.precip, self.date_time,
                               self.topo.mask)))
 
         # 5. Albedo

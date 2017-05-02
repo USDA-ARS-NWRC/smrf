@@ -147,7 +147,6 @@ class ppt(image_data.image_data):
         self._logger.debug('Initializing distribute.precip')
 
         self._initialize(topo, data.metadata)
-
         self.percent_snow = np.zeros((topo.ny, topo.nx))
         self.snow_density = np.zeros((topo.ny, topo.nx))
         self.storm_days = np.zeros((topo.ny, topo.nx))
@@ -165,8 +164,8 @@ class ppt(image_data.image_data):
 
         self.storms = storms.tracking_by_station(data.precip)
         self.storm_id = 0
-
-        self._logger.info("Estimated number of storms: {0}".format(len(self.storms.index)))
+        #print self.storms
+        self._logger.info("Estimated number of storms: {0}".format(self.storms['start'].count()))
 
     def distribute_precip(self, data):
         """
@@ -223,23 +222,26 @@ class ppt(image_data.image_data):
 
             self.precip = utils.set_min_max(self.precip, self.min, self.max)
 
+            #establish storm info
             storm = self.storms.iloc[self.storm_id]
             storm_start = storm['start']
             storm_end = storm['end']
 
-            #During a storm?
-
-            if time >= storm_start and self.storming == False:
+            #Entered into a new storm period
+            if time >= storm_start and time <= storm_end and not self.storming:
                 self.storming = True
+                self._logger.debug('{0} Entering storm #{1}'.format(data.name,self.storm_id))
                 self._distribute(storm[self.stations], other_attribute='storm_total')
-                snow_den, perc_snow = snow.calc_density(self.storm_total,dpt)
 
-            elif time >= storm_end and self.storming ==True:
+            #Storm ends
+            elif time >= storm_end and self.storming == True:
+                self._logger.debug('{0} Leaving storm #{1}'.format(data.name,self.storm_id))
 
                 if self.storm_id < self.storms['start'].count()-1:
                     self.storm_id+=1
                 self.storming = False
 
+            #During a storm we only need to calc density but not distribute storm total
             if self.storming:
                 snow_den, perc_snow = snow.calc_density(self.storm_total,dpt)
             else:
@@ -248,7 +250,7 @@ class ppt(image_data.image_data):
 
             # determine the time since last storm
             stormDays, stormPrecip = storms.time_since_storm(self.precip, perc_snow,
-                                                        time_step=self.time_step/60/24, mass=0.5, time=4,
+                                                        time_step=self.time_step/60/24, mass=self.ppt_threshold, time=self.time_steps_since_precip,
                                                         stormDays=self.storm_days,
                                                         stormPrecip=self.storm_precip)
             self.storm_days = stormDays
@@ -265,19 +267,6 @@ class ppt(image_data.image_data):
         #self.snow_density = snow_den
         self.snow_density = snow_den
 
-
-
-
-
-        # #track storms for new snow density model
-        # self.storms, self.time_steps_since_precip, self.storming = storms.tracking_by_basin(self.precip,
-        #                                                                             time,
-        #                                                                             self.storms,
-        #                                                                             self.time_steps_since_precip,
-        #                                                                             self.storming,
-        #                                                                             mass_thresh = self.ppt_threshold,
-        #                                                                             steps_thresh=self.time_to_end_storm)
-
         # day of last storm, this will be used in albedo
         self.last_storm_day = utils.water_day(data.name)[0] - self.storm_days - 0.001
 
@@ -287,7 +276,7 @@ class ppt(image_data.image_data):
         else:
             self.last_storm_day_basin = np.max(self.last_storm_day)
 
-    def distribute_thread(self, queue, data, mask=None):
+    def distribute_thread(self, queue, data, date, mask=None):
         """
         Distribute the data using threading and queue. All data is provided and ``distribute_thread``
         will go through each time step and call :mod:`smrf.distribute.precip.ppt.distribute` then
@@ -303,11 +292,11 @@ class ppt(image_data.image_data):
             data: pandas dataframe for all data, indexed by date time
         """
 
-        for t in data.index:
+        for t,time in enumerate(date):
 
             dpt = queue['dew_point'].get(t)
 
-            self.distribute(data.ix[t], dpt, mask)
+            self.distribute(data.ix[i], dpt, time, mask = mask)
 
 #             self._logger.debug('Putting %s -- %s' % (t, 'precip'))
             queue[self.variable].put( [t, self.precip] )
@@ -324,7 +313,12 @@ class ppt(image_data.image_data):
 #             self._logger.debug('Putting %s -- %s' % (t, 'storm_days'))
             queue['storm_days'].put( [t, self.storm_days] )
 
-    def post_process_snow_density(self,main_obj, pds, tds, storm):
+            queue['storm_id'].put( [t, self.storm_id])
+
+            queue['storm_total'].put( [t, self.storm_total])
+
+
+    def post_process_snow_density(self, main_obj, pds, tds, storm):
         """
         Calculates the snow density for a single storm.
 

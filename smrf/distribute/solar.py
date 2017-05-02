@@ -240,9 +240,6 @@ class solar(image_data.image_data):
         self.veg_height = topo.veg_height
         self.veg_tau = topo.veg_tau
         self.veg_k = topo.veg_k
-        self.storm_dependent = False
-
-
 
     def distribute(self, data, illum_ang, cosz, azimuth, min_storm_day, albedo_vis, albedo_ir):
         """
