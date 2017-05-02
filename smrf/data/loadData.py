@@ -135,7 +135,7 @@ class wxdata():
         # determine if it's stations or client
         sta = None
         if 'stations' in self.stations:
-            sta = self.stations['stations'].split(',')
+            sta = self.stations['stations']
             
         c = None
         stable = None
