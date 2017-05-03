@@ -160,7 +160,7 @@ class ppt(image_data.image_data):
 
         #TO DO put into config
         self.ppt_threshold = 0.01 #mm
-        self.time_to_end_storm = 3 # Time steps it take to end a storm definition
+        self.time_to_end_storm = 4 # Time steps it take to end a storm definition
 
         self.storms, storm_count = storms.tracking_by_station(data.precip, mass_thresh = self.ppt_threshold, steps_thresh = self.time_to_end_storm)
 
@@ -215,7 +215,6 @@ class ppt(image_data.image_data):
         self._logger.debug('%s Distributing all precip' % data.name)
         # only need to distribute precip if there is any
         data = data[self.stations]
-        print data
 
         if data.sum() > 0:
 
@@ -230,19 +229,19 @@ class ppt(image_data.image_data):
                 storm_start = storm['start']
                 storm_end = storm['end']
 
-                print "="*10 + ">{0}".format(self.storm_id)
+                #print "="*10 + ">{0}".format(self.storm_id)
 
                 #Entered into a new storm period
                 if time >= storm_start and time <= storm_end and not self.storming:
                     self.storming = True
-                    self._logger.debug('{0} Entering storm #{1}'.format(data.name,self.storm_id))
+                    self._logger.debug('{0} Entering storm #{1}'.format(data.name,self.storm_id+1))
                     if dpt.min() < 2.0:
                         self._logger.debug(' Distributing Total Precip for Storm #{0}'.format(self.storm_id+1))
                         self._distribute(storm[self.stations], other_attribute='storm_total')
 
                 #Storm ends
                 elif time >= storm_end and self.storming == True:
-                    self._logger.debug('{0} Leaving storm #{1}'.format(data.name,self.storm_id))
+                    self._logger.debug('{0} Leaving storm #{1}'.format(data.name,self.storm_id+1))
 
                     if self.storm_id < self.storms['start'].count()-1:
                         self.storm_id+=1

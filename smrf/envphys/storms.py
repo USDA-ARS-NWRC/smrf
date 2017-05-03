@@ -182,7 +182,7 @@ def tracking_by_station(precip, mass_thresh = 0.01, steps_thresh = 3):
                     new_storm[sta] = 0
                 #Create a new row
                 is_storming = True
-                print "=="*10 + "> New storm!"
+                #print "=="*10 + "> New storm!"
 
             time_steps_since_precip = 0
             #Always add the latest end date to avoid unclosed storms
@@ -194,14 +194,14 @@ def tracking_by_station(precip, mass_thresh = 0.01, steps_thresh = 3):
         elif is_storming and time_steps_since_precip < steps_thresh:
             #storm_lst[-1]['end'] = time
             time_steps_since_precip+=1
-            print  "=="*10 +"> Hours since precip = {0}".format(time_steps_since_precip)
-            print "=="*10 + "> still storming but no precip!"
+            #print  "=="*10 +"> Hours since precip = {0}".format(time_steps_since_precip)
+            #print "=="*10 + "> still storming but no precip!"
 
 
         if time_steps_since_precip >= steps_thresh and is_storming:
             is_storming = False
             storms.append(new_storm)
-            print "=="*10 + "> not storming!"
+            #print "=="*10 + "> not storming!"
 
     #Append the last storm if we ended during a storm
     if is_storming:
