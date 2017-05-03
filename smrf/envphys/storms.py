@@ -166,6 +166,7 @@ def tracking_by_station(precip, mass_thresh = 0.01, steps_thresh = 3):
     storm_columns+=stations
 
     storms = []
+
     stations = list(precip)
     is_storming = False
     time_steps_since_precip= 0
@@ -173,6 +174,8 @@ def tracking_by_station(precip, mass_thresh = 0.01, steps_thresh = 3):
 
     for i,row in precip.iterrows():
         time = pd.Timestamp(i)
+
+        #Storm Idenificiation
         if row.max() > mass_thresh:
             #Start a new storm
             if not is_storming:
@@ -187,16 +190,16 @@ def tracking_by_station(precip, mass_thresh = 0.01, steps_thresh = 3):
             time_steps_since_precip = 0
             #Always add the latest end date to avoid unclosed storms
             new_storm['end'] = time
+
             #Accumulate precip for storm total
-            for sta,precip in row.iteritems():
-                new_storm[sta]+=precip
+            for sta,mass in row.iteritems():
+                new_storm[sta] += mass
 
         elif is_storming and time_steps_since_precip < steps_thresh:
             #storm_lst[-1]['end'] = time
             time_steps_since_precip+=1
             #print  "=="*10 +"> Hours since precip = {0}".format(time_steps_since_precip)
             #print "=="*10 + "> still storming but no precip!"
-
 
         if time_steps_since_precip >= steps_thresh and is_storming:
             is_storming = False
@@ -218,7 +221,7 @@ def tracking_by_station(precip, mass_thresh = 0.01, steps_thresh = 3):
     else:
         storms = pd.DataFrame(storms)
 
-    return storms, storm_count
+    return storms,storm_count
 
 def tracking_by_basin(precipitation, time, storm_lst, time_steps_since_precip, is_storming, mass_thresh = 0.01, steps_thresh=2):
     '''
@@ -276,3 +279,51 @@ def tracking_by_basin(precipitation, time, storm_lst, time_steps_since_precip, i
 
 
     return storm_lst, time_steps_since_precip, is_storming
+
+
+def clip_and_correct(precip,storms):
+    """
+    Meant to go along with the storm tracking, we correct the data here by adding in
+    the precip we would miss by ignoring it. This is mostly because will get rain on snow events
+    when there is snow because of the storm definitions and still try to distribute precip
+    data.
+    Created May 3, 2017
+    @author: Micah Johnson
+    """
+
+    #Specify zeros where were not storming
+
+    precip_clipped = precip.copy()
+
+    precip_clipped[:]=0
+
+    for j,storm in storms.iterrows():
+
+        storm_start = storm['start']
+        storm_end = storm['end']
+        my_slice= precip.ix[storm_start:storm_end]
+        precip_clipped.ix[storm_start:storm_end] =my_slice
+    print precip_clipped
+    #Determine how much precip we missed
+    missed_precip = precip-precip_clipped
+
+
+    correction = {}
+
+    #Correct the precip
+    print "Amount of Precip Missed:\n"
+    for station in missed_precip.columns:
+        missed = missed_precip[station].sum()
+        original = precip[station].sum()
+        if original == 0:
+            c = 0
+        else:
+            c = missed/original
+
+        correction[station] = c
+        precip_clipped[station]*=(1+correction[station])
+        print "{0}\t{1}".format(station,c)
+
+    print "Conservation of mass check (precip - precip_clipped):"
+    print precip.sum() - precip_clipped.sum()
+    return precip_clipped

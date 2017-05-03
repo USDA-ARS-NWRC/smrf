@@ -163,6 +163,7 @@ class ppt(image_data.image_data):
         self.time_to_end_storm = 2 # Time steps it take to end a storm definition
 
         self.storms, storm_count = storms.tracking_by_station(data.precip, mass_thresh = self.ppt_threshold, steps_thresh = self.time_to_end_storm)
+        self.corrected_precip = storms.clip_and_correct(data.precip,self.storms)
 
         self._logger.info("Identified Storms:\n{0}".format(self.storms))
         self.storm_id = 0
@@ -182,10 +183,10 @@ class ppt(image_data.image_data):
 
         # only need to distribute precip if there is any
         data = data[self.stations]
-        if data.sum() > 0:
+        if self.corrected_precip[time].sum() > 0:
 
             # distribute data and set the min/max
-            self._distribute(data, zeros=None)
+            self._distribute(self.corrected_precip[time], zeros=None)
             self.precip = utils.set_min_max(self.precip, self.min, self.max)
 
         else:
