@@ -158,6 +158,12 @@ class output_hru():
             m_hru[h] = np.nanmean(data[self.IND[h]])
             
 #             self.hru_data.loc[self.idx, (str(h+1))] = m_hru[h]
+
+        if self.func == 'mm2in':
+            m_hru /= 25.4
+        elif self.func == 'C2F':
+            m_hru = m_hru * 9/5 + 32
+
             
         self.hru_data.loc[self.idx, self.hru_idx] = m_hru
         

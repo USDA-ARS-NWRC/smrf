@@ -617,8 +617,7 @@ class SMRF():
 
             # frequency of outputs
             self.config['output']['frequency'] = int(self.config['output']['frequency'])
-
-
+            
             # determine the variables to be output
             self._logger.info('%s variables will be output' % self.config['output']['variables'])
 
@@ -660,6 +659,11 @@ class SMRF():
 
             else:
                 raise Exception('Could not determine type of file for output')
+            
+            # is there a function to apply?
+            self.out_func.func = None
+            if 'func' in self.config['output']:
+                self.out_func.func = self.config['output']['func']
 
         else:
             self._logger.info('No variables will be output')
