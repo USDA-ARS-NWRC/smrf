@@ -224,7 +224,7 @@ class ppt(image_data.image_data):
 
             self.precip = utils.set_min_max(self.precip, self.min, self.max)
 
-            if not self.storms.empty():
+            if not self.storms.empty:
                 #establish storm info
                 storm = self.storms.iloc[self.storm_id]
                 storm_start = storm['start']
@@ -248,12 +248,12 @@ class ppt(image_data.image_data):
                         self.storm_id+=1
                     self.storming = False
 
-                #During a storm we only need to calc density but not distribute storm total as well as when it is cold enough.
-                if self.storming and dpt.min() < 2.0:
-                    snow_den, perc_snow = snow.calc_density(self.storm_total,dpt)
-                else:
-                    snow_den = np.zeros(self.precip.shape)
-                    perc_snow = np.zeros(self.precip.shape)
+            #During a storm we only need to calc density but not distribute storm total as well as when it is cold enough.
+            if self.storming and dpt.min() < 2.0:
+                snow_den, perc_snow = snow.calc_density(self.storm_total,dpt)
+            else:
+                snow_den = np.zeros(self.precip.shape)
+                perc_snow = np.zeros(self.precip.shape)
 
             # determine the time since last storm
             stormDays, stormPrecip = storms.time_since_storm(self.precip, perc_snow,
