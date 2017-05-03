@@ -160,12 +160,14 @@ class ppt(image_data.image_data):
 
         #TO DO put into config
         self.ppt_threshold = 0.01 #mm
-        self.time_to_end_storm = 2 # Time steps it take to end a storm definition
+        self.time_to_end_storm = 3 # Time steps it take to end a storm definition
 
-        self.storms = storms.tracking_by_station(data.precip)
+        self.storms, storm_count = storms.tracking_by_station(data.precip, mass_thresh = self.ppt_threshold, steps_thresh = self.time_to_end_storm)
+
+        self._logger.info("Identified Storms:\n{0}".format(self.storms))
         self.storm_id = 0
         #print self.storms
-        self._logger.info("Estimated number of storms: {0}".format(self.storms['start'].count()))
+        self._logger.info("Estimated number of storms: {0}".format(storm_count))
 
     def distribute_precip(self, data):
         """
@@ -187,7 +189,6 @@ class ppt(image_data.image_data):
             self.precip = utils.set_min_max(self.precip, self.min, self.max)
 
         else:
-
             # make everything else zeros
             self.precip = np.zeros(self.storm_days.shape)
 
@@ -214,6 +215,7 @@ class ppt(image_data.image_data):
         self._logger.debug('%s Distributing all precip' % data.name)
         # only need to distribute precip if there is any
         data = data[self.stations]
+        print data
 
         if data.sum() > 0:
 
@@ -222,31 +224,36 @@ class ppt(image_data.image_data):
 
             self.precip = utils.set_min_max(self.precip, self.min, self.max)
 
-            #establish storm info
-            storm = self.storms.iloc[self.storm_id]
-            storm_start = storm['start']
-            storm_end = storm['end']
+            if not self.storms.empty():
+                #establish storm info
+                storm = self.storms.iloc[self.storm_id]
+                storm_start = storm['start']
+                storm_end = storm['end']
 
-            #Entered into a new storm period
-            if time >= storm_start and time <= storm_end and not self.storming:
-                self.storming = True
-                self._logger.debug('{0} Entering storm #{1}'.format(data.name,self.storm_id))
-                self._distribute(storm[self.stations], other_attribute='storm_total')
+                print "="*10 + ">{0}".format(self.storm_id)
 
-            #Storm ends
-            elif time >= storm_end and self.storming == True:
-                self._logger.debug('{0} Leaving storm #{1}'.format(data.name,self.storm_id))
+                #Entered into a new storm period
+                if time >= storm_start and time <= storm_end and not self.storming:
+                    self.storming = True
+                    self._logger.debug('{0} Entering storm #{1}'.format(data.name,self.storm_id))
+                    if dpt.min() < 2.0:
+                        self._logger.debug(' Distributing Total Precip for Storm #{0}'.format(self.storm_id+1))
+                        self._distribute(storm[self.stations], other_attribute='storm_total')
 
-                if self.storm_id < self.storms['start'].count()-1:
-                    self.storm_id+=1
-                self.storming = False
+                #Storm ends
+                elif time >= storm_end and self.storming == True:
+                    self._logger.debug('{0} Leaving storm #{1}'.format(data.name,self.storm_id))
 
-            #During a storm we only need to calc density but not distribute storm total
-            if self.storming:
-                snow_den, perc_snow = snow.calc_density(self.storm_total,dpt)
-            else:
-                snow_den = np.zeros(self.precip.shape)
-                perc_snow = np.zeros(self.precip.shape)
+                    if self.storm_id < self.storms['start'].count()-1:
+                        self.storm_id+=1
+                    self.storming = False
+
+                #During a storm we only need to calc density but not distribute storm total as well as when it is cold enough.
+                if self.storming and dpt.min() < 2.0:
+                    snow_den, perc_snow = snow.calc_density(self.storm_total,dpt)
+                else:
+                    snow_den = np.zeros(self.precip.shape)
+                    perc_snow = np.zeros(self.precip.shape)
 
             # determine the time since last storm
             stormDays, stormPrecip = storms.time_since_storm(self.precip, perc_snow,
@@ -264,7 +271,6 @@ class ppt(image_data.image_data):
 
         # save the model state
         self.percent_snow = perc_snow
-        #self.snow_density = snow_den
         self.snow_density = snow_den
 
         # day of last storm, this will be used in albedo

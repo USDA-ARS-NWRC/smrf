@@ -179,12 +179,12 @@ def tracking_by_station(precip, mass_thresh = 0.01, steps_thresh = 3):
                 new_storm = {}
                 new_storm['start'] = time
                 for sta,precip in row.iteritems():
-                    new_storm[sta]=0
+                    new_storm[sta] = 0
                 #Create a new row
                 is_storming = True
-                #print "--"*10 + "> New storm!"
+                print "=="*10 + "> New storm!"
 
-            time_steps_since_precip=0
+            time_steps_since_precip = 0
             #Always add the latest end date to avoid unclosed storms
             new_storm['end'] = time
             #Accumulate precip for storm total
@@ -194,30 +194,31 @@ def tracking_by_station(precip, mass_thresh = 0.01, steps_thresh = 3):
         elif is_storming and time_steps_since_precip < steps_thresh:
             #storm_lst[-1]['end'] = time
             time_steps_since_precip+=1
-            #print  "--"*10 +"> Hours since precip = {0}".format(time_steps_since_precip)
-            #print "--"*10 + "> still storming but no precip!"
+            print  "=="*10 +"> Hours since precip = {0}".format(time_steps_since_precip)
+            print "=="*10 + "> still storming but no precip!"
 
 
         if time_steps_since_precip >= steps_thresh and is_storming:
             is_storming = False
             storms.append(new_storm)
-            #print "--"*10 + "> not storming!"
+            print "=="*10 + "> not storming!"
 
-    storms = pd.DataFrame(storms)
-    # storms.start = storms.start.tz_localize('UTC', level=0)
-    # storms.end = storms.end.tz_localize('UTC', level=0)
+    #Append the last storm if we ended during a storm
+    if is_storming:
+        storms.append(new_storm)
 
-    #print tzinfo
-    #
-    #storms['start'] = pd.Timestamp(storms['start'],tz = 'UTC')
-    # storms['start'] = pd.to_datetime(storms['start'],utc = True)
-    #
-    # # storms['end'] = pd.to_datetime(storms['end'],utc = True)
-    # storms['end'].tz_convert('UTC')
-    # storms['start'].tz_convert('UTC')
+    storm_count = len(storms)
 
+    #Make sure we have storms
+    if storm_count == 0:
+        empty_data = {}
+        for col in storm_columns:
+            empty_data[col] = []
+        storms = pd.DataFrame(empty_data)
+    else:
+        storms = pd.DataFrame(storms)
 
-    return storms
+    return storms, storm_count
 
 def tracking_by_basin(precipitation, time, storm_lst, time_steps_since_precip, is_storming, mass_thresh = 0.01, steps_thresh=2):
     '''
