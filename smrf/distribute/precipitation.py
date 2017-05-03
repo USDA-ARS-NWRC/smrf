@@ -159,8 +159,8 @@ class ppt(image_data.image_data):
         self.storming = False
 
         #TO DO put into config
-        self.ppt_threshold = 0.01 #mm
-        self.time_to_end_storm = 4 # Time steps it take to end a storm definition
+        self.ppt_threshold = 0.1 #mm
+        self.time_to_end_storm = 2 # Time steps it take to end a storm definition
 
         self.storms, storm_count = storms.tracking_by_station(data.precip, mass_thresh = self.ppt_threshold, steps_thresh = self.time_to_end_storm)
 
