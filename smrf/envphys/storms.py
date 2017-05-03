@@ -303,7 +303,6 @@ def clip_and_correct(precip,storms):
         storm_end = storm['end']
         my_slice= precip.ix[storm_start:storm_end]
         precip_clipped.ix[storm_start:storm_end] =my_slice
-    print precip_clipped
     #Determine how much precip we missed
     missed_precip = precip-precip_clipped
 

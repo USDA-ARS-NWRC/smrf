@@ -217,11 +217,10 @@ class ppt(image_data.image_data):
         # only need to distribute precip if there is any
         data = data[self.stations]
 
-        if data.sum() > 0:
+        if self.corrected_precip.ix[time].sum() > 0:
 
             # distribute data and set the min/max
-            self._distribute(data, zeros=None)
-
+            self._distribute(self.corrected_precip.ix[time], zeros=None)
             self.precip = utils.set_min_max(self.precip, self.min, self.max)
 
             if not self.storms.empty:
