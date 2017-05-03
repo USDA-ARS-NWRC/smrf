@@ -171,7 +171,11 @@ class output_hru():
         # open the file and write the row of data
         with open(self.variable_list[variable]['file_name'], 'a') as f:
             
-            row = self.hru_data.iloc[self.idx].to_frame().T
+            row = self.hru_data.iloc[self.idx]
+            
+            # format the values, float_format doesn't seem to work
+            row.ix[self.hru_idx] = row[self.hru_idx].apply(lambda x: '{:.3f}'.format(x))
+            row = row.to_frame().T
             
             hdr = False
             if (self.idx == 0) & (not self.prms_flag):
