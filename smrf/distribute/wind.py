@@ -328,7 +328,7 @@ class wind(image_data.image_data):
         cellwind *= 1.07985;
         
         # preseve the measured values
-        cellwind[self.metadata.xi, self.metadata.xi] = data_speed
+        cellwind[self.metadata.yi, self.metadata.xi] = data_speed
         
         # check for NaN
         nans, x = utils.nan_helper(cellwind)
