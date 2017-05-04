@@ -18,7 +18,7 @@ class output_hru():
     """
     
     fmt = '%Y-%m-%d %H:%M:%S'
-    
+    date_cols = ["year","month","day","hour","minute","second"]
     
     def __init__(self, variable_list, topo, date_time, config):
         """
@@ -33,6 +33,7 @@ class output_hru():
         
         self._logger = logging.getLogger(__name__)
         self.config = config
+        
         
         # check some defaults based on the output type
         self.prms_flag = False
@@ -85,7 +86,7 @@ class output_hru():
         
         # create an empty dataframe
         if self.prms_flag:
-            cols = ["year","month","day","hour","minute","second"] + self.hru_idx
+            cols = self.date_cols + self.hru_idx
             hru_data = pd.DataFrame(index=range(len(self.date_time)), columns=cols)
             
             yrs = np.array([[y.year, y.month, y.day, y.hour, y.minute, y.second] for y in self.date_time])
@@ -95,6 +96,8 @@ class output_hru():
             hru_data['hour'] = yrs[:,3]
             hru_data['minute'] = yrs[:,4]
             hru_data['second'] = yrs[:,5]
+            
+            hru_data.loc[:,self.hru_idx] = hru_data.loc[:,self.hru_idx].apply(pd.to_numeric)
             
             # lets start the output file
             self.generate_prms_header()
@@ -171,20 +174,21 @@ class output_hru():
         # open the file and write the row of data
         with open(self.variable_list[variable]['file_name'], 'a') as f:
             
-            row = self.hru_data.iloc[self.idx]
+            row = self.hru_data.iloc[self.idx].to_frame().T
+ 
+            # change the dates columns back to int
+            if self.prms_flag:
+                row[self.date_cols] = row[self.date_cols].astype(int)
             
-            # format the values, float_format doesn't seem to work
-            row.ix[self.hru_idx] = row[self.hru_idx].apply(lambda x: '{:.3f}'.format(x))
-            row = row.to_frame().T
-            
-            hdr = False
+            hdr = None
             if (self.idx == 0) & (not self.prms_flag):
                 hdr = True
                 
                 
-            row.to_csv(f, self.delimiter, 
+            row.to_csv(f, sep=self.delimiter, 
                        header=hdr, 
-                       index=False)
+                       index=False, 
+                       float_format='%.3f')
             
             f.close()
         
