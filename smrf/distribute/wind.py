@@ -136,10 +136,14 @@ class wind(image_data.image_data):
     
             # peak value
             if 'peak' in self.config:
-                self.config['peak'] = self.config['peak'].split(',')
+                #Check to see if parsed as NoneType from config
+                if self.config['peak'] is None:
+                    self.config['peak'] = ''
+                else:
+                    self.config['peak'] = self.config['peak'].split(',')
             else:
-                self.config['peak'] = None
-        
+                self.config['peak'] = ''
+
         self._logger.debug('Created distribute.wind')     
         
         
