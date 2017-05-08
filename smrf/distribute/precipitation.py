@@ -171,7 +171,6 @@ class ppt(image_data.image_data):
 
         self._logger.info("Identified Storms:\n{0}".format(self.storms))
         self.storm_id = 0
-        #print self.storms
         self._logger.info("Estimated number of storms: {0}".format(storm_count))
 
     def distribute_precip(self, data):
@@ -220,6 +219,23 @@ class ppt(image_data.image_data):
         self._logger.debug('%s Distributing all precip' % data.name)
         # only need to distribute precip if there is any
         data = data[self.stations]
+        total = self.corrected_precip.ix[time].sum()
+                #establish storm info
+        storm = self.storms.iloc[self.storm_id]
+        storm_start = storm['start']
+        storm_end = storm['end']
+
+        self._logger.debug("Current Storm ID = {0}".format(self.storm_id))
+        self._logger.debug("Storming? {0}".format(self.storming))
+        self._logger.debug("During storm time? {0}".format(time >= storm_start and time <= storm_end))
+
+        #Check for storm end
+        if time > storm_end and self.storming == True:
+                self._logger.debug('{0} Leaving storm #{1}'.format(data.name,self.storm_id+1))
+                self.storming = False
+
+                if self.storm_id < self.storms['start'].count()-1:
+                    self.storm_id+=1
 
         if self.corrected_precip.ix[time].sum() > 0:
 
@@ -228,11 +244,6 @@ class ppt(image_data.image_data):
             self.precip = utils.set_min_max(self.precip, self.min, self.max)
 
             if not self.storms.empty:
-                #establish storm info
-                storm = self.storms.iloc[self.storm_id]
-                storm_start = storm['start']
-                storm_end = storm['end']
-
                 #Entered into a new storm period distribute the storm total
                 if time >= storm_start and time <= storm_end and self.storming == False:
                     self.storming = True
@@ -240,15 +251,6 @@ class ppt(image_data.image_data):
                     if dpt.min() < 2.0:
                         self._logger.debug(' Distributing Total Precip for Storm #{0}'.format(self.storm_id+1))
                         self._distribute(storm[self.stations], other_attribute='storm_total')
-
-                #Storm ends
-                elif time > storm_end and self.storming == True:
-                    self._logger.debug('{0} Leaving storm #{1}'.format(data.name,self.storm_id+1))
-                    self.storming = False
-
-                    if self.storm_id < self.storms['start'].count()-1:
-
-                        self.storm_id+=1
 
             #During a storm we only need to calc density but not distribute storm total as well as when it is cold enough.
             if self.storming and dpt.min() < 2.0:

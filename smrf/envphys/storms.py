@@ -195,8 +195,11 @@ def tracking_by_station(precip, mass_thresh = 0.01, steps_thresh = 3):
             for sta,mass in row.iteritems():
                 new_storm[sta] += mass
 
+
         elif is_storming and time_steps_since_precip < steps_thresh:
             #storm_lst[-1]['end'] = time
+            new_storm['end'] = time
+
             time_steps_since_precip+=1
             #print  "=="*10 +"> Hours since precip = {0}".format(time_steps_since_precip)
             #print "=="*10 + "> still storming but no precip!"
@@ -302,7 +305,7 @@ def clip_and_correct(precip,storms):
         storm_start = storm['start']
         storm_end = storm['end']
         my_slice= precip.ix[storm_start:storm_end]
-        precip_clipped.ix[storm_start:storm_end] =my_slice
+        precip_clipped.ix[storm_start:storm_end] = my_slice
 
     #Determine how much precip we missed from clipping
     missed_precip = precip-precip_clipped
@@ -322,7 +325,7 @@ def clip_and_correct(precip,storms):
 
         correction[station] = c
         precip_clipped[station]*=(1+correction[station])
-        print "{0}\t{1}".format(station,c)
+        #print "{0}\t{1}".format(station,c)
 
     #print "Conservation of mass check (precip - precip_clipped):"
     #print precip.sum() - precip_clipped.sum()
