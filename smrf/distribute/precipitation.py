@@ -103,6 +103,10 @@ class ppt(image_data.image_data):
                                   'units': 'decimal_day',
                                   'long_name': 'day_of_last_storm'
                                   },
+                        'storm_total':{
+                                  'units': 'mm',
+                                   'long_name': 'storm_total'
+                                    },
                         }
         # these are variables that are operate at the end only and do not need to be written during main distribute loop
     post_process_variables = {'snow_density':{
@@ -229,10 +233,8 @@ class ppt(image_data.image_data):
                 storm_start = storm['start']
                 storm_end = storm['end']
 
-                #print "="*10 + ">{0}".format(self.storm_id)
-
-                #Entered into a new storm period
-                if time >= storm_start and time <= storm_end and not self.storming:
+                #Entered into a new storm period distribute the storm total
+                if time >= storm_start and time <= storm_end and self.storming == False:
                     self.storming = True
                     self._logger.debug('{0} Entering storm #{1}'.format(data.name,self.storm_id+1))
                     if dpt.min() < 2.0:
@@ -240,18 +242,17 @@ class ppt(image_data.image_data):
                         self._distribute(storm[self.stations], other_attribute='storm_total')
 
                 #Storm ends
-                elif time >= storm_end and self.storming == True:
+                elif time > storm_end and self.storming == True:
                     self._logger.debug('{0} Leaving storm #{1}'.format(data.name,self.storm_id+1))
-
-                    if self.storm_id < self.storms['start'].count()-1:
-                        self.storm_id+=1
                     self.storming = False
 
+                    if self.storm_id < self.storms['start'].count()-1:
+
+                        self.storm_id+=1
 
             #During a storm we only need to calc density but not distribute storm total as well as when it is cold enough.
             if self.storming and dpt.min() < 2.0:
-
-                self._logger.debug('Calulating density for storm #{0}'.format(self.storm_id+1))
+                self._logger.debug('Calculating density for storm #{0}'.format(self.storm_id+1))
                 snow_den, perc_snow = snow.calc_density(self.storm_total,dpt)
             else:
                 snow_den = np.zeros(self.precip.shape)

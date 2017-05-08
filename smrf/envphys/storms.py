@@ -303,14 +303,15 @@ def clip_and_correct(precip,storms):
         storm_end = storm['end']
         my_slice= precip.ix[storm_start:storm_end]
         precip_clipped.ix[storm_start:storm_end] =my_slice
-    #Determine how much precip we missed
+
+    #Determine how much precip we missed from clipping
     missed_precip = precip-precip_clipped
 
 
     correction = {}
 
     #Correct the precip
-    print "Amount of Precip Missed:\n"
+    #print "Amount of Precip Missed:\n"
     for station in missed_precip.columns:
         missed = missed_precip[station].sum()
         original = precip[station].sum()
@@ -323,6 +324,6 @@ def clip_and_correct(precip,storms):
         precip_clipped[station]*=(1+correction[station])
         print "{0}\t{1}".format(station,c)
 
-    print "Conservation of mass check (precip - precip_clipped):"
-    print precip.sum() - precip_clipped.sum()
+    #print "Conservation of mass check (precip - precip_clipped):"
+    #print precip.sum() - precip_clipped.sum()
     return precip_clipped
