@@ -232,7 +232,7 @@ class ppt(image_data.image_data):
                 #print "="*10 + ">{0}".format(self.storm_id)
 
                 #Entered into a new storm period
-                if time >= storm_start and time <= storm_end:
+                if time >= storm_start and time <= storm_end and not self.storming:
                     self.storming = True
                     self._logger.debug('{0} Entering storm #{1}'.format(data.name,self.storm_id+1))
                     if dpt.min() < 2.0:
@@ -247,12 +247,11 @@ class ppt(image_data.image_data):
                         self.storm_id+=1
                     self.storming = False
 
-                else:
-                    self._logger.debug('Warning: Unaccounted for storming case!')
-
 
             #During a storm we only need to calc density but not distribute storm total as well as when it is cold enough.
             if self.storming and dpt.min() < 2.0:
+
+                self._logger.debug('Calulating density for storm #{0}'.format(self.storm_id+1))
                 snow_den, perc_snow = snow.calc_density(self.storm_total,dpt)
             else:
                 snow_den = np.zeros(self.precip.shape)
