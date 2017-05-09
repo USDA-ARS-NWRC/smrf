@@ -4,7 +4,7 @@ SMRF - Snow Modeling Resource Framework
 '''
 __author__ = 'Scott Havens'
 __email__ = 'scotthavens@ars.usda.gov'
-__version__ = '0.1.1'
+__version__ = '0.2.0'
 
 from . import data
 from . import distribute
