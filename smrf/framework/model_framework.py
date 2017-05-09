@@ -30,6 +30,7 @@ Example:
 
     
 import logging, os
+import coloredlogs
 from datetime import datetime, timedelta
 import pandas as pd
 # import itertools
@@ -145,25 +146,30 @@ class SMRF():
         if 'log_level' in self.config['logging']:
             loglevel = self.config['logging']['log_level'].upper()
         else:
-            loglevel='INFO'
+            loglevel = 'INFO'
 
         numeric_level = getattr(logging, loglevel, None)
         if not isinstance(numeric_level, int):
             raise ValueError('Invalid log level: %s' % loglevel)
 
 
-        logfile=None
+        # setup the logging
+        logfile = None
         if 'log_file' in self.config['logging']:
             logfile = self.config['logging']['log_file']
 
+        fmt = '%(levelname)s:%(name)s:%(message)s'
         if logfile is not None:
-            logging.basicConfig(filename=logfile, filemode='w', level=numeric_level, format='%(levelname)s:%(name)s:%(message)s')
+            logging.basicConfig(filename=logfile, filemode='w', level=numeric_level, format=fmt)
         else:
             logging.basicConfig(level=numeric_level)
 
         self._loglevel = numeric_level
 
         self._logger = logging.getLogger(__name__)
+        
+        # add a splash of color
+        coloredlogs.install(level=numeric_level, fmt=fmt) 
 
         # add the title
         title = self.title(2)

@@ -12,3 +12,4 @@ PyYAML >= 3.11
 progressbar2 >= 3.6.2
 #	faulthandler
 sphinxcontrib-bibtex >= 0.3.4
+coloredlogs >= 6.1
