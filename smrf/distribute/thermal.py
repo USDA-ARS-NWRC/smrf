@@ -137,6 +137,10 @@ class th(image_data.image_data):
         self.config['correct_veg'] = True
         if 'correct_veg' in self.config:
             self.correct_veg = self.config['correct_veg']
+            
+        self.config['correct_terrain'] = True
+        if 'correct_terrain' in self.config:
+            self.correct_terrain = self.config['correct_terrain']
                 
                 
         self._logger.debug('Created distribute.thermal')
@@ -169,6 +173,8 @@ class th(image_data.image_data):
         self.veg_tau = topo.veg_tau
         self.veg_k = topo.veg_k
         self.sky_view = topo.sky_view
+        if not self.correct_terrain:
+            self.sky_view = None
         self.dem = topo.dem
 
 
@@ -205,6 +211,10 @@ class th(image_data.image_data):
         elif self.method == 'Angstrom1918':
             cth = thermal_radiation.Angstrom1918(air_temp, vapor_pressure/1000)
             
+        # terrain factor correction
+        if (self.sky_view is not None) and (self.method != 'Marks1979'):
+            # apply (emiss * skvfac) + (1.0 - skvfac) to the longwave
+            cth = cth * self.sky_view + (1.0 - self.sky_view) * thermal_radiation.STEF_BOLTZ * air_temp**4
         
     
         # correct for the cloud factor based on Garen and Marks 2005
@@ -215,8 +225,9 @@ class th(image_data.image_data):
         
         # correct for vegetation
         if self.correct_veg:
-            self.thermal = thermal_radiation.thermal_correct_canopy(cth, air_temp, self.veg_tau, self.veg_height)
+            cth = thermal_radiation.thermal_correct_canopy(cth, air_temp, self.veg_tau, self.veg_height)
             
+        self.thermal = cth
     
     
     def distribute_thread(self, queue, date):

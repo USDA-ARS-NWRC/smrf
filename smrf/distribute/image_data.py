@@ -69,13 +69,6 @@ class image_data():
         if 'distribution' in config:
             if config['distribution'] == 'idw':
                 if 'detrend' not in config:
-#                     if config['detrend'].lower() == 'true':
-#                         config['detrend'] = True
-#                     elif config['detrend'].lower() == 'false':
-#                         config['detrend'] = False
-#                     else:
-#                         raise ValueError('Detrended configuration setting must be either true/false')
-#                 else:
                     config['detrend'] = False
                     
                 if 'slope' in config:
@@ -130,13 +123,6 @@ class image_data():
                         config['slope'] = int(config['slope'])
                        
                 if 'detrend' not in config:
-#                     if config['detrend'].lower() == 'true':
-#                         config['detrend'] = True
-#                     elif config['detrend'].lower() == 'false':
-#                         config['detrend'] = False
-#                     else:
-#                         raise ValueError('Detrended configuration setting must be either true/false')
-#                 else:
                     config['detrend'] = False
                      
                 if 'method' in config:
@@ -145,13 +131,6 @@ class image_data():
                     config['method'] = 'linear'
                     
                 if 'mask' not in config:
-#                     if config['mask'].lower() == 'true':
-#                         config['mask'] = True
-#                     elif config['mask'].lower() == 'false':
-#                         config['mask'] = False
-#                     else:
-#                         raise ValueError('Mask configuration setting must be either true/false')
-#                 else:
                     config['mask'] = False 
                         
                     
