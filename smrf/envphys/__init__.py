@@ -2,9 +2,9 @@
 
 __author__ = 'Scott Havens'
 __email__ = 'scotthavens@ars.usda.gov'
-__version__ = '0.1.1'
+__version__ = '0.2.0'
 
-import phys
-import precip
-import radiation
-import core
+from . import phys
+from . import precip
+from . import radiation
+from . import core

@@ -2,7 +2,7 @@ __author__ = "Scott Havens"
 __maintainer__ = "Scott Havens"
 __email__ = "scott.havens@ars.usda.gov"
 __date__ = "2016-01-04"
-__version__ = "0.1.1"
+__version__ = "0.2.0"
 
 
 
@@ -137,14 +137,19 @@ class wind(image_data.image_data):
 
             # peak value
             if 'peak' in self.config:
-                self.config['peak'] = self.config['peak'].split(',')
+                #Check to see if parsed as NoneType from config
+                if self.config['peak'] is None:
+                    self.config['peak'] = ''
+                else:
+                    self.config['peak'] = self.config['peak'].split(',')
             else:
-                self.config['peak'] = None
 
-        self._logger.debug('Created distribute.wind')
+                self.config['peak'] = ''
 
-
-
+        self._logger.debug('Created distribute.wind')     
+        
+        
+        
 #     def __del__(self):
 #         self._maxus_file.close()
 #         self._logger.debug('Closed %s' % self._maxus_file)
@@ -326,8 +331,8 @@ class wind(image_data.image_data):
         cellwind *= 1.07985;
 
         # preseve the measured values
-        cellwind[self.metadata.xi, self.metadata.xi] = data_speed
-
+        cellwind[self.metadata.yi, self.metadata.xi] = data_speed
+        
         # check for NaN
         nans, x = utils.nan_helper(cellwind)
 

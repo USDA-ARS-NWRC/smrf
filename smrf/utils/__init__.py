@@ -2,11 +2,11 @@
 
 __author__ = 'Scott Havens'
 __email__ = 'scotthavens@ars.usda.gov'
-__version__ = '0.1.1'
+__version__ = '0.2.0'
 
-import utils
-import queue
-import wind
+from . import utils
+from . import queue
+from . import wind
 
 # from .wind_model import wind_model
 # import wind_model

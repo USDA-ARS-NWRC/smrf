@@ -1,5 +1,5 @@
 '''
-Version = 0.1.1
+Version = 0.2.0
 20121229 Scott Havens
 '''
 
@@ -82,7 +82,7 @@ class wxdata():
         sta = None
         if self.stations is not None:
             if 'stations' in self.stations:
-                sta = self.stations['stations'].split(',')
+                sta = self.stations['stations']
                 self._logger.debug('Using only stations %s' % self.stations['stations'])
                 
         # load the data
@@ -98,7 +98,7 @@ class wxdata():
                     dp = pd.read_csv(self.dataConfig[i], index_col='date_time', parse_dates=[0])
                     
                     # check to see if pandas read in the date time correctly
-                    if isinstance(dp.index[0], basestring):
+                    if not isinstance(dp.index[0], pd.Timestamp):
                         raise Exception('Pandas could not convert date_time to timestamp. Try using %Y-%m-%d %H:%M:%S format')
                                        
                     if sta is not None:
@@ -135,7 +135,7 @@ class wxdata():
         # determine if it's stations or client
         sta = None
         if 'stations' in self.stations:
-            sta = self.stations['stations'].split(',')
+            sta = self.stations['stations']
             
         c = None
         stable = None

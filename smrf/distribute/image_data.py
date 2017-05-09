@@ -2,7 +2,7 @@ __author__ = "Scott Havens"
 __maintainer__ = "Scott Havens"
 __email__ = "scott.havens@ars.usda.gov"
 __date__ = "2015-12-31"
-__version__ = "0.1.1"
+__version__ = "0.2.0"
 
 
 # import pandas as pd
@@ -68,14 +68,14 @@ class image_data():
         # check for inverse distance weighting
         if 'distribution' in config:
             if config['distribution'] == 'idw':
-                if 'detrend' in config:
-                    if config['detrend'].lower() == 'true':
-                        config['detrend'] = True
-                    elif config['detrend'].lower() == 'false':
-                        config['detrend'] = False
-                    else:
-                        raise ValueError('Detrended configuration setting must be either true/false')
-                else:
+                if 'detrend' not in config:
+#                     if config['detrend'].lower() == 'true':
+#                         config['detrend'] = True
+#                     elif config['detrend'].lower() == 'false':
+#                         config['detrend'] = False
+#                     else:
+#                         raise ValueError('Detrended configuration setting must be either true/false')
+#                 else:
                     config['detrend'] = False
 
                 if 'slope' in config:
@@ -129,32 +129,31 @@ class image_data():
                     else:
                         config['slope'] = int(config['slope'])
 
-                if 'detrend' in config:
-                    if config['detrend'].lower() == 'true':
-                        config['detrend'] = True
-                    elif config['detrend'].lower() == 'false':
-                        config['detrend'] = False
-                    else:
-                        raise ValueError('Detrended configuration setting must be either true/false')
-                else:
+                if 'detrend' not in config:
+#                     if config['detrend'].lower() == 'true':
+#                         config['detrend'] = True
+#                     elif config['detrend'].lower() == 'false':
+#                         config['detrend'] = False
+#                     else:
+#                         raise ValueError('Detrended configuration setting must be either true/false')
+#                 else:
                     config['detrend'] = False
 
                 if 'method' in config:
                     config['method'] = config['method'].lower()
                 else:
                     config['method'] = 'linear'
-
-                if 'mask' in config:
-                    if config['mask'].lower() == 'true':
-                        config['mask'] = True
-                    elif config['mask'].lower() == 'false':
-                        config['mask'] = False
-                    else:
-                        raise ValueError('Mask configuration setting must be either true/false')
-                else:
-                    config['mask'] = False
-
-
+                    
+                if 'mask' not in config:
+#                     if config['mask'].lower() == 'true':
+#                         config['mask'] = True
+#                     elif config['mask'].lower() == 'false':
+#                         config['mask'] = False
+#                     else:
+#                         raise ValueError('Mask configuration setting must be either true/false')
+#                 else:
+                    config['mask'] = False 
+                        
         self.getStations(config)
 
 
@@ -171,8 +170,8 @@ class image_data():
 
         # determine the stations that will be used, alphabetical order
         if 'stations' in config:
-            stations = config['stations'].split(',')
-            stations = map(str.strip, stations)
+            stations = config['stations'] #.split(',')
+#             stations = map(str.strip, stations)
             stations.sort()
         else:
             stations = None
