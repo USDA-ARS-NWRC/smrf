@@ -6,7 +6,7 @@ The table columns will most likely be hardcoded for ease
 of development and users will require the specific table setup
 
 @author: scott
-Version = 0.1.1
+Version = 0.2.0
 '''
 
 import numpy as np

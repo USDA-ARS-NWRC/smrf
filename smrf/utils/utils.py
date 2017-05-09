@@ -3,7 +3,7 @@
 
 Collection of utility functions
 """
-__version__ = '0.1.1'
+__version__ = '0.2.0'
 
 import numpy as np
 from datetime import datetime
@@ -34,10 +34,15 @@ def set_min_max(data, min_val, max_val):
     Ensure that the data is in the bounds of min and max
     20150611 Scott Havens
     '''
-
+    
+    ind = np.isnan(data)
+    data[ind] = min_val
+    
     data[data <= min_val] = min_val
     data[data >= max_val] = max_val
-
+    
+    data[ind] = np.nan
+    
     return data
 
 

@@ -2,7 +2,7 @@ __author__ = "Scott Havens"
 __maintainer__ = "Scott Havens"
 __email__ = "scott.havens@ars.usda.gov"
 __date__ = "2015-12-22"
-__version__ = '0.1.1'
+__version__ = '0.2.0'
 
 """
 The module :mod:`~smrf.framework.model_framework` contains functions and classes
@@ -28,8 +28,9 @@ Example:
 
 """
 
-import ConfigParser
+    
 import logging, os
+import coloredlogs
 from datetime import datetime, timedelta
 import pandas as pd
 # import itertools
@@ -39,8 +40,9 @@ import pytz
 
 from smrf import data, distribute, output
 from smrf.envphys import radiation
-from smrf.utils import queue
+from smrf.utils import queue, io
 from threading import Thread
+
 # from multiprocessing import Process
 
 
@@ -83,9 +85,13 @@ class SMRF():
         if not os.path.isfile(configFile):
             raise Exception('Configuration file does not exist --> %s' % configFile)
 
-        f = MyParser()
-        f.read(configFile)
-        self.config = f.as_dict()
+#         f = MyParser()
+#         f.read(configFile)
+#         self.config = f.as_dict()
+        try:
+            self.config = io.read_config(configFile)
+        except UnicodeDecodeError:
+            raise UnicodeDecodeError('The configuration file is not encoded in UTF-8, please change and retry')
 
         # check for the desired sections
         if 'stations' not in self.config:
@@ -97,7 +103,7 @@ class SMRF():
             self.gridded = True
 
         # process the system variables
-        if  os.path.isdir(self.config['system']['temp_dir']):
+        if os.path.isdir(self.config['system']['temp_dir']):
             tempDir = self.config['system']['temp_dir']
             self.tempDir = os.path.abspath(tempDir)
             os.environ['WORKDIR'] = self.tempDir
@@ -106,7 +112,7 @@ class SMRF():
 
         self.threading = False
         if 'threading' in self.config['system']:
-            if self.config['system']['threading'].lower() == 'true':
+            if self.config['system']['threading']:
                 self.threading = True
 
         self.max_values = 1
@@ -115,12 +121,17 @@ class SMRF():
 
         self.time_out = None
         if 'time_out' in self.config['system']:
-            self.max_values = float(self.config['system']['time_out'])
+            self.time_out = float(self.config['system']['time_out'])
 
 
         # get the time section
         self.start_date = pd.to_datetime(self.config['time']['start_date'])
         self.end_date = pd.to_datetime(self.config['time']['end_date'])
+        if self.start_date > self.end_date:
+            raise ValueError("start_date cannot be larger than end_date.")
+        if self.start_date > datetime.now() or self.end_date > datetime.now():
+            raise ValueError("Date range cannot be in the future")
+
         d = data.mysql_data.date_range(self.start_date, self.end_date,
                                        timedelta(minutes=int(self.config['time']['time_step'])))
         tzinfo = pytz.timezone(self.config['time']['time_zone'])
@@ -135,25 +146,30 @@ class SMRF():
         if 'log_level' in self.config['logging']:
             loglevel = self.config['logging']['log_level'].upper()
         else:
-            loglevel='INFO'
+            loglevel = 'INFO'
 
         numeric_level = getattr(logging, loglevel, None)
         if not isinstance(numeric_level, int):
             raise ValueError('Invalid log level: %s' % loglevel)
 
 
-        logfile=None
+        # setup the logging
+        logfile = None
         if 'log_file' in self.config['logging']:
             logfile = self.config['logging']['log_file']
 
+        fmt = '%(levelname)s:%(name)s:%(message)s'
         if logfile is not None:
-            logging.basicConfig(filename=logfile, filemode='w', level=numeric_level, format='%(levelname)s:%(name)s:%(message)s')
+            logging.basicConfig(filename=logfile, filemode='w', level=numeric_level, format=fmt)
         else:
             logging.basicConfig(level=numeric_level)
 
         self._loglevel = numeric_level
 
         self._logger = logging.getLogger(__name__)
+        
+        # add a splash of color
+        coloredlogs.install(level=numeric_level, fmt=fmt) 
 
         # add the title
         title = self.title(2)
@@ -177,8 +193,9 @@ class SMRF():
 
         # clean up the WORKDIR
         if hasattr(self, 'topo'):
-            if os.path.isfile(self.topo.stoporad_in_file):
-                os.remove(self.topo.stoporad_in_file)
+            if self.topo.stoporad_in_file is not None:
+                if os.path.isfile(self.topo.stoporad_in_file):
+                    os.remove(self.topo.stoporad_in_file)
         if hasattr(self, 'distribute'):
             if 'solar' in self.distribute.keys():
                 if os.path.isfile(self.distribute['solar'].vis_file):
@@ -298,7 +315,7 @@ class SMRF():
                                            self.start_date,
                                            self.end_date,
                                            time_zone=self.config['time']['time_zone'],
-                                           dataType='wrf',
+                                           dataType=self.config['gridded']['data_type'],
                                            tempDir=self.tempDir)
 
             # set the stations in the distribute
@@ -597,13 +614,14 @@ class SMRF():
 
             # frequency of outputs
             self.config['output']['frequency'] = int(self.config['output']['frequency'])
-
-
+            
             # determine the variables to be output
             self._logger.info('%s variables will be output' % self.config['output']['variables'])
 
-            output_variables = self.config['output']['variables'].split(',')
-            output_variables = map(str.strip, output_variables)
+            output_variables = self.config['output']['variables']
+#             output_variables = list(map(str.strip, output_variables))
+            if not isinstance(output_variables, list):
+                output_variables = output_variables.split(',')
 
             # determine which variables belong where
             variable_list = {}
@@ -613,7 +631,14 @@ class SMRF():
                     if m in self.distribute.keys():
 
                         if v in self.distribute[m].output_variables.keys():
-                            fname = os.path.join(self.config['output']['out_location'], v)
+                            
+                            # if there is a key in the config file, then change the output file name
+                            if v in self.config['output'].keys():
+                                fname = os.path.join(self.config['output']['out_location'],
+                                                     self.config['output'][v])
+                            else:
+                                fname = os.path.join(self.config['output']['out_location'], v)
+                                
                             d = {'variable': v, 'module': m, 'out_location': fname, 'info': self.distribute[m].output_variables[v]}
                             variable_list[v] = d
 
@@ -623,9 +648,19 @@ class SMRF():
                 self.out_func = output.output_netcdf(variable_list, self.topo,
                                                      self.config['time'],
                                                      self.config['output']['frequency'])
+                
+            elif self.config['output']['file_type'].lower() == 'hru':
+                self.out_func = output.output_hru(variable_list, self.topo,
+                                                     self.date_time,
+                                                     self.config['output'])
 
             else:
                 raise Exception('Could not determine type of file for output')
+            
+            # is there a function to apply?
+            self.out_func.func = None
+            if 'func' in self.config['output']:
+                self.out_func.func = self.config['output']['func']
 
         else:
             self._logger.info('No variables will be output')
@@ -801,38 +836,38 @@ class SMRF():
 
 
 
-class MyParser(ConfigParser.ConfigParser):
-    """
-    Custom configuration file parser to return the object
-    as a dictionary
-    """
-    def as_dict(self):
-        d = dict(self._sections)
-        for k in d:
-            d[k] = dict(self._defaults, **d[k])
-            d[k].pop('__name__', None)
-        d = self._make_lowercase(d)
-        return d
-
-    def _make_lowercase(self, obj):
-        if hasattr(obj,'iteritems'):
-            # dictionary
-            ret = {}
-            for k,v in obj.iteritems():
-                ret[self._make_lowercase(k)] = v
-            return ret
-        elif isinstance(obj,basestring):
-            # string
-            return obj.lower()
-        elif hasattr(obj,'__iter__'):
-            # list (or the like)
-            ret = []
-            for item in obj:
-                ret.append(self._make_lowercase(item))
-            return ret
-        else:
-            # anything else
-            return obj
+# class MyParser(ConfigParser):
+#     """
+#     Custom configuration file parser to return the object
+#     as a dictionary
+#     """
+#     def as_dict(self):
+#         d = dict(self._sections)
+#         for k in d:
+#             d[k] = dict(self._defaults, **d[k])
+#             d[k].pop('__name__', None)
+#         d = self._make_lowercase(d)
+#         return d
+# 
+#     def _make_lowercase(self, obj):
+#         if hasattr(obj,'iteritems'):
+#             # dictionary
+#             ret = {}
+#             for k,v in obj.iteritems():
+#                 ret[self._make_lowercase(k)] = v
+#             return ret
+#         elif isinstance(obj,basestring):
+#             # string
+#             return obj.lower()
+#         elif hasattr(obj,'__iter__'):
+#             # list (or the like)
+#             ret = []
+#             for item in obj:
+#                 ret.append(self._make_lowercase(item))
+#             return ret
+#         else:
+#             # anything else
+#             return obj
 
 
 

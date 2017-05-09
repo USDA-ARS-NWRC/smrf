@@ -1,5 +1,5 @@
 '''
-Version = 0.1.1
+Version = 0.2.0
 20121224 Scott Havens
 '''
 
@@ -78,6 +78,8 @@ class topo():
         # calculate the necessary images for stoporad
         if calcInput:
             self.stoporadInput()
+        else:
+            self.stoporad_in_file = None
         
 
     def readImages(self):
@@ -116,10 +118,12 @@ class topo():
         self.y = self.u + self.du*np.arange(self.ny)
         [self.X, self.Y] = np.meshgrid(self.x, self.y)
     
+    
     def readNetCDF(self):
         '''
         Read in the images from the config file where the file listed is in netcdf format
         '''
+        
         if 'filename' not in self.topoConfig:
 #             self._logger.exception('Filename was not specified. Please provide a netcdf filename in config file.')
             raise ValueError('Filename was not specified. Please provide a netcdf filename in config file.')
@@ -129,14 +133,20 @@ class topo():
         
         # read in the images
         # netCDF files are stored typically as 32-bit float, so convert to double or int
-        for v in self.images:
-            if v in f.variables.keys():
-                if v == 'veg_type':
-                    setattr(self, v, f.variables[v][:].astype(int))
+        for v_file in self.images:
+                        
+            # check to see if the user defined any variables
+            v_smrf = v_file
+            if v_file in self.topoConfig:
+                v_file = self.topoConfig[v_file]
+            
+            if v_file in f.variables.keys():
+                if v_smrf == 'veg_type':
+                    setattr(self, v_smrf, f.variables[v_file][:].astype(int))
                 else:
-                    setattr(self, v, f.variables[v][:].astype(np.float64))
+                    setattr(self, v_smrf, f.variables[v_file][:].astype(np.float64))
             else:
-                setattr(self, v, None)
+                setattr(self, v_smrf, None)
 
                
         # get some general information about the model domain from the dem

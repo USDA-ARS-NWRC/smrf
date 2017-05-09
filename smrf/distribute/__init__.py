@@ -2,14 +2,14 @@
 
 __author__ = 'Scott Havens'
 __email__ = 'scotthavens@ars.usda.gov'
-__version__ = '0.1.1'
+__version__ = '0.2.0'
 
-import image_data
-import air_temp
-import albedo
-import vapor_pressure
-import wind
-import precipitation
-import solar
-import thermal
-import soil_temp
+from . import image_data
+from . import air_temp
+from . import albedo
+from . import vapor_pressure
+from . import wind
+from . import precipitation
+from . import solar
+from . import thermal
+from . import soil_temp

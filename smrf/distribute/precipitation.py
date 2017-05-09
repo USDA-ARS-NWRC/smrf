@@ -2,7 +2,7 @@ __author__ = "Scott Havens"
 __maintainer__ = "Scott Havens"
 __email__ = "scott.havens@ars.usda.gov"
 __date__ = "2016-01-05"
-__version__ = "0.1.1"
+__version__ = "0.2.0"
 
 import numpy as np
 import os
@@ -117,6 +117,7 @@ class ppt(image_data.image_data):
 
     max = np.Inf
     min = 0
+
     def __init__(self, pptConfig, time_step=60):
 
         # extend the base class
@@ -127,26 +128,9 @@ class ppt(image_data.image_data):
         self.getConfig(pptConfig)
         self.time_step = float(time_step)
 
-        self._logger.debug('Created distribute.air_temp')
 
 
     def initialize(self, topo, data):
-        """
-        Initialize the distribution, calls :mod:`smrf.distribute.image_data.image_data._initialize`.
-        Preallocates the following class attributes to zeros:
-
-        * :py:attr:`percent_snow`
-        * :py:attr:`snow_density`
-        * :py:attr:`storm_days`
-        * :py:attr:`storm_precip`
-        * :py:attr:`last_storm_day`
-
-        Args:
-            topo: :mod:`smrf.data.loadTopo.topo` instance contain topographic data
-                and infomation
-            data: data Pandas dataframe containing the station data,
-                from :mod:`smrf.data.loadData` or :mod:`smrf.data.loadGrid`
-        """
 
         self._logger.debug('Initializing distribute.precip')
 
@@ -181,9 +165,9 @@ class ppt(image_data.image_data):
         Soley distributes the precipitation data and does not calculate the other
         dependent variables
         """
-
-        self._logger.debug('%s Distributing precip' % data.name)
-
+        
+        self._logger.debug('{} Distributing precip'.format(data.name))
+        
         # only need to distribute precip if there is any
         data = data[self.stations]
         if self.corrected_precip[time].sum() > 0:
@@ -195,8 +179,29 @@ class ppt(image_data.image_data):
         else:
             # make everything else zeros
             self.precip = np.zeros(self.storm_days.shape)
-
-
+            
+    
+    def distribute_precip_thread(self,  queue, data):
+        """
+        Distribute the data using threading and queue. All data is provided and ``distribute_precip_thread``
+        will go through each time step and call :mod:`smrf.distribute.precip.ppt.distribute_precip` then
+        puts the distributed data into the queue for:
+        
+        * :py:attr:`precip`
+         
+        Args:
+            queue: queue dictionary for all variables
+            data: pandas dataframe for all data, indexed by date time
+        """
+        
+        for t in data.index:
+                                    
+            self.distribute_precip(data.ix[t])
+        
+            queue[self.variable].put( [t, self.precip] )
+        
+            
+        
     def distribute(self, data, dpt, time, mask=None):
         """
         Distribute given a Panda's dataframe for a single time step. Calls

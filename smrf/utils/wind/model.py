@@ -1,8 +1,13 @@
+from __future__ import print_function
+
 __author__ = "Scott Havens"
 __maintainer__ = "Scott Havens"
 __email__ = "scott.havens@ars.usda.gov"
 __date__ = "2016-09-01"
 __version__ = '0.0.1'
+
+
+
 
 import numpy as np
 import os
@@ -11,7 +16,7 @@ import netCDF4 as nc
 # import progressbar
 from datetime import datetime
 
-import wind_c
+from . import wind_c
 
 
 class wind_model():
@@ -179,7 +184,7 @@ class wind_model():
        
         """
         
-        print "Calculating maxus for direction: %i" % (angle)
+        print ("Calculating maxus for direction: {}".format(angle))
         
         angle *= np.pi / 180
         
@@ -251,7 +256,7 @@ class wind_model():
         
         for i,d in enumerate(directions):
             
-            print "Windowing direction %i" % d
+            print ("Windowing direction {}",format(d))
             
             # determine which directions to include
             window_start = d - window_width

@@ -2,8 +2,8 @@
 
 __author__ = 'Scott Havens'
 __email__ = 'scotthavens@ars.usda.gov'
-__version__ = '0.1.1'
+__version__ = '0.2.0'
 
 # from .dk import DK
 from . import dk
-import detrended_kriging
+from . import detrended_kriging
