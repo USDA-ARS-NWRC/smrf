@@ -261,18 +261,23 @@ class ppt(image_data.image_data):
                 perc_snow = np.zeros(self.precip.shape)
 
             # determine the time since last storm
-            stormDays, stormPrecip = storms.time_since_storm(self.precip, perc_snow,
-                                                        time_step=self.time_step/60/24, mass=self.ppt_threshold, time=self.time_steps_since_precip,
-                                                        stormDays=self.storm_days,
-                                                        stormPrecip=self.storm_precip)
-            self.storm_days = stormDays
-            self.storm_precip = stormPrecip
-
+            #stormDays, stormPrecip = storms.time_since_storm(self.precip, perc_snow,
+            #                                            time_step=self.time_step/60/24, mass=self.ppt_threshold, time=self.time_steps_since_precip,
+            #                                            stormDays=self.storm_days,
+            #                                            stormPrecip=self.storm_precip)
+            #self.storm_precip = stormPrecip
+        
         else:
-            self.storm_days += self.time_step/60/24
+            #self.storm_days += self.time_step/60/24
             self.precip = np.zeros(self.storm_days.shape)
             perc_snow = np.zeros(self.storm_days.shape)
             snow_den = np.zeros(self.storm_days.shape)
+
+        # determine time since last storm basin wide
+        stormDays = storms.time_since_storm_basin(self.precip, self.storms.iloc[self.storm_id], 
+                                                    self.storm_id, self.storming, time, time_step=self.time_step/60/24, stormDays=self.storm_days)
+
+        self.storm_days = stormDays
 
         # save the model state
         self.percent_snow = perc_snow
