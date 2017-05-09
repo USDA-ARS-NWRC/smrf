@@ -455,6 +455,7 @@ class SMRF():
                                                               self.distribute['air_temp'].air_temp)
             else:
                 self.distribute['thermal'].distribute(t, self.distribute['air_temp'].air_temp,
+                                                      self.distribute['vapor_pressure'].vapor_pressure,
                                                       self.distribute['vapor_pressure'].dew_point,
                                                       self.distribute['solar'].cloud_factor)
 
