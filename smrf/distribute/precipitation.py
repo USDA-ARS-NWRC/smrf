@@ -100,7 +100,7 @@ class ppt(image_data.image_data):
                         } 
     
     min = 0
-    max = np.Inf
+    max = 100000
     
     def __init__(self, pptConfig, time_step=60):
         
@@ -112,7 +112,7 @@ class ppt(image_data.image_data):
         self.getConfig(pptConfig)
         self.time_step = float(time_step)
         
-        self._logger.debug('Created distribute.air_temp')
+        self._logger.debug('Created distribute.ppt')
         
         
     def initialize(self, topo, metadata):
@@ -154,7 +154,7 @@ class ppt(image_data.image_data):
         dependent variables
         """
         
-        self._logger.debug('%s Distributing precip' % data.name)
+        self._logger.debug('{} Distributing precip'.format(data.name))
         
         # only need to distribute precip if there is any
         data = data[self.stations]
@@ -167,7 +167,28 @@ class ppt(image_data.image_data):
         else:
             
             # make everything else zeros
-            self.precip = np.zeros(self.storm_days.shape)   
+            self.precip = np.zeros(self.storm_days.shape)
+            
+    
+    def distribute_precip_thread(self,  queue, data):
+        """
+        Distribute the data using threading and queue. All data is provided and ``distribute_precip_thread``
+        will go through each time step and call :mod:`smrf.distribute.precip.ppt.distribute_precip` then
+        puts the distributed data into the queue for:
+        
+        * :py:attr:`precip`
+         
+        Args:
+            queue: queue dictionary for all variables
+            data: pandas dataframe for all data, indexed by date time
+        """
+        
+        for t in data.index:
+                                    
+            self.distribute_precip(data.ix[t])
+        
+            queue[self.variable].put( [t, self.precip] )
+        
             
         
     def distribute(self, data, dpt, mask=None):

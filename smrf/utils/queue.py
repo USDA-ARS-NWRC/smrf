@@ -4,7 +4,11 @@ Create classes for running on multiple threads
 20160323 Scott Havens
 """
 __version__ = '0.1.1'
-from Queue import Queue, Empty, Full
+
+try:
+    from Queue import Queue, Empty, Full
+except:
+    from queue import Queue, Empty, Full
 # from Queue import Empty, Full
 
 # from multiprocessing.queues import Queue

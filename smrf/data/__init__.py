@@ -5,8 +5,8 @@ __email__ = 'scotthavens@ars.usda.gov'
 __version__ = '0.1.1'
 
 # #from .csv_data import *
-import csv_data
-import mysql_data
-import loadTopo
-import loadData
-import loadGrid
+from . import csv_data
+from . import mysql_data
+from . import loadTopo
+from . import loadData
+from . import loadGrid

@@ -41,6 +41,10 @@ class grid():
         self.end_date = end_date
         self.time_zone = time_zone
         
+        self.force_zone_number = None
+        if 'force_zone_number' in dataConfig:
+            self.force_zone_number = dataConfig['zone_number']
+        
         # The data that will be output
         self.variables = ['air_temp', 'vapor_pressure', 'precip', 'wind_speed', 'wind_direction', 'cloud_factor', 'thermal']
         
@@ -56,6 +60,8 @@ class grid():
         # load the data        
         if dataType == 'wrf':
             self.load_from_wrf()
+        elif dataType == 'netcdf':
+            self.load_from_netcdf()
         else:
             raise Exception('Could not resolve dataType')
         
@@ -63,6 +69,76 @@ class grid():
 #         for v in self.variables:
 #             d = getattr(self, v)
 #             setattr(self, v, d.tz_localize(tz=self.time_zone))
+        
+    
+#     @profile
+    def load_from_netcdf(self):
+        '''
+        Load the data from a generic netcdf file
+        
+        Args:
+            lat: latitude field in file, 1D array
+            lon: longitude field in file, 1D array
+            elev: elevation field in file, 2D array
+            variable: variable name in file, 3D array
+        '''
+        
+        
+        
+        self._logger.info('Reading data coming from netcdf: {}'.format(self.dataConfig['file']))
+        
+        f = nc.Dataset(self.dataConfig['file'], 'r')
+        
+        
+        ### GET THE LAT, LON, ELEV FROM THE FILE ###
+        mlat = f.variables['lat'][:]
+        mlon = f.variables['lon'][:]
+        mhgt = f.variables['elev'][:]
+        
+        [mlon, mlat] = np.meshgrid(mlon, mlat)
+        
+        ### GET THE METADATA ###
+        # create some fake station names based on the index
+        a = np.argwhere(mlon)
+        primary_id = ['grid_y%i_x%i' % (i[0], i[1]) for i in a]
+        self._logger.debug('{} grid cells within model domain'.format(len(a)))
+        
+        # create a metadata dataframe to store all the grid info
+        metadata = pd.DataFrame(index=primary_id,
+                                columns=('X','Y','latitude','longitude','elevation'))
+        
+        metadata['latitude'] = mlat.flatten()
+        metadata['longitude'] = mlon.flatten()
+        metadata['elevation'] = mhgt.flatten()
+        metadata = metadata.apply(apply_utm, args=(self.force_zone_number,), axis=1)
+        
+        self.metadata = metadata    
+        
+        ### GET THE TIMES ###
+        t = f.variables['time']
+        time = nc.num2date(t[:], t.getncattr('units'), t.getncattr('calendar'))
+        
+        # subset the times to only those needed
+        time_ind = (time >= pd.to_datetime(self.start_date)) & (time <= pd.to_datetime(self.end_date))
+        time = time[time_ind]
+        time_idx = np.where(time_ind)[0]
+        
+        ### GET THE DATA, ONE AT A TIME ###
+        for v in self.variables:
+            
+            if v in self.dataConfig:
+                v_file = self.dataConfig[v]
+                self._logger.debug('Loading {} from {}'.format(v, v_file))
+                
+                df = pd.DataFrame(index=time, columns=primary_id)
+                for i in a:
+                    g = 'grid_y%i_x%i' % (i[0], i[1])
+                    df[g] = f.variables[v_file][time_ind, i[0], i[1]]
+                    
+                # deal with any fillValues
+                fv = f.variables[v_file].getncattr('_FillValue')
+                df.replace(fv, np.nan, inplace=True)
+                setattr(self, v, df)
         
         
      
@@ -92,7 +168,7 @@ class grid():
         # degree offset for a buffer around the model domain
         offset = 0.1
         
-        self._logger.info('Reading data coming from WRF output: %s' % self.dataConfig['file'])
+        self._logger.info('Reading data coming from WRF output: {}'.format(self.dataConfig['file']))
         f = nc.Dataset(self.dataConfig['file'])
         
         
@@ -127,19 +203,16 @@ class grid():
         # create some fake station names based on the index
         a = np.argwhere(ind)
         primary_id = ['grid_y%i_x%i' % (i[0], i[1]) for i in a]
-        self._logger.debug('%i grid cells within model domain' % len(a))
+        self._logger.debug('{} grid cells within model domain'.format(len(a)))
         
         # create a metadata dataframe to store all the grid info
         metadata = pd.DataFrame(index=primary_id,
                                 columns=('X','Y','latitude','longitude','elevation'))
-        for i,v in enumerate(mlat):
-            metadata.iloc[i]['latitude'] = mlat[i]
-            metadata.iloc[i]['longitude'] = mlon[i]
-            metadata.iloc[i]['elevation'] = mhgt[i]
-            
-            p = utm.from_latlon(mlat[i], mlon[i])
-            metadata.iloc[i]['X'] = p[0]
-            metadata.iloc[i]['Y'] = p[1]
+        
+        metadata['latitude'] = mlat.flatten()
+        metadata['longitude'] = mlon.flatten()
+        metadata['elevation'] = mhgt.flatten()
+        metadata = metadata.apply(apply_utm, args=(self.force_zone_number,), axis=1)
             
         self.metadata = metadata
         
@@ -244,8 +317,21 @@ class grid():
             
         
                             
-
-            
+def apply_utm(s, force_zone_number):
+    """
+    Calculate the utm from lat/lon for a series
+    
+    Args:
+        s: pandas series with fields latitude and longitude
+        force_zone_number: default None, zone number to force to
+        
+    Returns:
+        s: pandas series with fields 'X' and 'Y' filled
+    """
+    p = utm.from_latlon(s.latitude, s.longitude, force_zone_number=force_zone_number)
+    s['X'] = p[0]
+    s['Y'] = p[1]
+    return s
             
            
         

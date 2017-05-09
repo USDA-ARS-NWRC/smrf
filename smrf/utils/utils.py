@@ -33,8 +33,13 @@ def set_min_max(data, min_val, max_val):
     20150611 Scott Havens
     '''
     
+    ind = np.isnan(data)
+    data[ind] = min_val
+    
     data[data <= min_val] = min_val
     data[data >= max_val] = max_val
+    
+    data[ind] = np.nan
     
     return data
 

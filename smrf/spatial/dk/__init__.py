@@ -6,4 +6,4 @@ __version__ = '0.1.1'
 
 # from .dk import DK
 from . import dk
-import detrended_kriging
+from . import detrended_kriging

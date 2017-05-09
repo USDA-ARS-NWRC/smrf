@@ -5,3 +5,4 @@ __email__ = 'scotthavens@ars.usda.gov'
 __version__ = '0.1.1'
 
 from .output_netcdf import output_netcdf
+from .output_hru import output_hru

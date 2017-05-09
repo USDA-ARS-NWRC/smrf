@@ -6,12 +6,12 @@ __author__ = 'Scott Havens'
 __email__ = 'scotthavens@ars.usda.gov'
 __version__ = '0.1.1'
 
-import data
-import distribute
-import envphys
-import ipw
-import framework
-import spatial
-import utils
-import model
-import output
+from . import data
+from . import distribute
+from . import envphys
+from . import ipw
+from . import framework
+from . import spatial
+from . import utils
+from . import model
+from . import output

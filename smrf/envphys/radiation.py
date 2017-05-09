@@ -22,6 +22,8 @@ import pytz
 on_rtd = os.environ.get('READTHEDOCS') == 'True'
 if on_rtd:
     IPW = '.' # placehold while building the docs
+elif 'IPW' not in os.environ:
+    IPW = '/usr/local/bin'
 else:
     IPW = os.environ['IPW']     # IPW executables
 
@@ -480,7 +482,7 @@ def sunang(date, lat, lon, zone=0, slope=0, aspect=0):
     # get the results
     out, err = p.communicate()
     
-    c = out.rstrip().split(' ')
+    c = out.decode('utf-8').rstrip().split(' ')
     cosz = float(c[1])
     azimuth = float(c[3])
     

@@ -6,4 +6,4 @@ __version__ = '0.1.1'
 
 
 # from . import core_c
-import envphys_c
+from . import envphys_c
