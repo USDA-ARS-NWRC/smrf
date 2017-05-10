@@ -51,6 +51,14 @@ class th(image_data.image_data):
             \\epsilon_{clear} = 0.83 - 0.18 * 10^{-0.067 e_a}
         
         References: Angstrom (1918) :cite:`Angstrom:1918` as cityed by Niemela et al (2001) :cite:`Niemela&al:2001`
+        
+    .. figure:: _static/thermal_comparison.png
+       :scale: 50%
+       :alt: Comparing the 4 thermal methods.
+    
+       The 4 different methods for estimating clear sky thermal radiation for a single time step. As
+       compared to the Mark1979 method, the other methods provide a wide range in the estimated
+       value of thermal radiation.
     
     The topographic correct clear sky thermal radiation is further adjusted for canopy and cloud affects.
     Cloud correction is based on the relationship in Garen and Marks (2005) :cite:`Garen&Marks:2005` 
