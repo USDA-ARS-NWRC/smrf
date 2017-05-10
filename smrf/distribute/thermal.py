@@ -15,7 +15,7 @@ from smrf.envphys.core import envphys_c
 # from smrf.utils import utils
 # from smrf import ipw
 
-import matplotlib.pyplot as plt
+# import matplotlib.pyplot as plt
 
 class th(image_data.image_data):
     """
@@ -204,6 +204,7 @@ class th(image_data.image_data):
         Args:
             date_time: datetime object for the current step
             air_temp: distributed air temperature for the time step
+            vapor_pressure: distributed vapor pressure for the time step
             dew_point: distributed dew point for the time step
             cloud_factor: distributed cloud factor for the time step measured/modeled
         """
@@ -278,6 +279,7 @@ class th(image_data.image_data):
         
         Args:
             data: thermal values
+            air_temp: distributed air temperature values
             
         """
     

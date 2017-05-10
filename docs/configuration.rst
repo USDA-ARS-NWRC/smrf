@@ -548,10 +548,18 @@ clear_gamma (default = 0.3)
 Thermal
 ```````
 
-Thermal requires no distribution methods.
+If running with station data, thermal does not need a distribution method.
+
+method
+	Specify the methods for calcualting thermal radiation. The choices are:
+	
+	* Marks1979 :cite:`Marks&Dozier:1979`
+	* Dilley1998 :cite:`Dilley&OBrian:1998`
+    * Prata1996 :cite:`Prata:1996`
+    * Angstrom1918 :cite:`Angstrom:1918` :cite:`Niemela&al:2001`
 
 nthreads
-   Number of processors to calculate clear sky thermal radiation
+   Number of processors to calculate clear sky thermal radiation if method is Marks1979
    
 Example ::
 
