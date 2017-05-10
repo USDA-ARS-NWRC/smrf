@@ -34,6 +34,14 @@ smrf.envphys.radiation module
     :members:
     :undoc-members:
     :show-inheritance:
+    
+smrf.envphys.thermal_radiation module
+-----------------------------
+
+.. automodule:: smrf.envphys.thermal_radiation
+    :members:
+    :undoc-members:
+    :show-inheritance:
 
 
 Module contents

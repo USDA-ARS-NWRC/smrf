@@ -1,13 +1,13 @@
 '''
 The module contains various physics calculations needed for estimating 
 the thermal radition and associated values.
-
-Created on May 9, 2017
-
-@author: Scott Havens
 '''
 
-__version__ = '0.2.0'
+__author__ = "Scott Havens"
+__maintainer__ = "Scott Havens"
+__email__ = "scott.havens@ars.usda.gov"
+__date__ = "2017-05-09"
+__version__ = "0.2.0"
 
 import numpy as np
 import subprocess as sp
@@ -55,13 +55,13 @@ def thermal_correct_terrain(th, ta, viewf):
     the terrain is at the air temperature and the pixel and 
     a sky view
     
-    Inputs:
-    th - thermal radiation
-    ta - air temperature [C]
-    viewf - sky view factor from view_f
+    Args:
+        th: thermal radiation
+        ta: air temperature [C]
+        viewf: sky view factor from view_f
     
-    Outputs:
-    th_c - correct thermal radiation
+    Returns:
+        corrected thermal radiation
     
     20150611 Scott Havens
     '''
@@ -80,17 +80,18 @@ def thermal_correct_canopy(th, ta, tau, veg_height, height_thresh=2):
     that the open areas don't get this applied.  Vegitation temp
     is assumed to be at air temperature
     
-    Inputs:
-    th - thermal radiation
-    ta - air temperature [C]
-    tau - transmissivity of the canopy
-    veg_height - vegitation height for each pixel
-    height_thresh - threshold hold for height to say that there is veg in the pixel
+    Args:
+        th: thermal radiation
+        ta: air temperature [C]
+        tau: transmissivity of the canopy
+        veg_height: vegitation height for each pixel
+        height_thresh: threshold hold for height to say that there is veg in the pixel
     
-    Output:
-    th_c - corrected thermal radiation
+    Returns:
+        corrected thermal radiation
     
-    Equations from Links and Marks 1999
+    Equations from Link and Marks 1999 :cite:`Link&Marks:1999`
+    
     20150611 Scott Havens
     '''
     
@@ -115,22 +116,22 @@ def precipitable_water(ta, ea):
 
 def Dilly1998(ta, ea):
     """
-    Estimate clear-sky downwelling long wave radiation from Dilly & O'Brian (1998)
-    :cite:`Dilly&OBrian:1998` using the equation:
+    Estimate clear-sky downwelling long wave radiation from Dilley & O'Brian (1998)
+    :cite:`Dilley&OBrian:1998` using the equation:
     
     .. math::
-        L_{clear} = 59.38 + 113.7 * \frac{T_a}{273.16}^6 + 96.96 \sqrt{w/25}
+        L_{clear} = 59.38 + 113.7 * \\left( \\frac{T_a}{273.16} \\right)^6 + 96.96 \\sqrt{w/25}
             
     Where :math:`T_a` is the air temperature and :math:`w` is the amount of 
     precipitable water. The preipitable water is estimated as :math:`4650 e_o/T_o`
     from Prata (1996) :cite:`Prata:1996`.
     
     Args:
-        ta - distributed air temperature [degree C]
-        ea - distrubted vapor pressure [kPa]
+        ta: distributed air temperature [degree C]
+        ea: distrubted vapor pressure [kPa]
         
     Returns:
-        th - clear sky long wave radiation [W/m2]
+        clear sky long wave radiation [W/m2]
     
     20170509 Scott Havens
     """
@@ -155,17 +156,17 @@ def Prata1996(ta, ea):
     :cite:`Prata:1996` using the equation:
     
     .. math::
-        \epsilon_{clear} = 1 - (1 + w) exp(-1.2 + 3w)^(1/2)
+        \epsilon_{clear} = 1 - (1 + w) * exp(-1.2 + 3w)^{1/2}
         
     Where :math:`w` is the amount of precipitable water. The preipitable 
     water is estimated as :math:`4650 e_o/T_o` from Prata (1996) :cite:`Prata:1996`.
     
     Args:
-        ta - distributed air temperature [degree C]
-        ea - distrubted vapor pressure [kPa]
+        ta: distributed air temperature [degree C]
+        ea: distrubted vapor pressure [kPa]
         
     Returns:
-        th - clear sky long wave radiation [W/m2]
+        clear sky long wave radiation [W/m2]
     
     20170509 Scott Havens
     """
@@ -181,20 +182,20 @@ def Prata1996(ta, ea):
 
 def Angstrom1918(ta, ea):
     """
-    Estimate clear-sky downwelling long wave radiation from Prata (1996)
-    :cite:`Prata:1996` using the equation:
+    Estimate clear-sky downwelling long wave radiation from Angstrom (1918) :cite:`Angstrom:1918` 
+    as cityed by Niemela et al (2001) :cite:`Niemela&al:2001` using the equation:
     
     .. math::
-        \epsilon_{clear} = 0.83 - 0.18 * 10^{-0.067 e_a}
+        \\epsilon_{clear} = 0.83 - 0.18 * 10^{-0.067 e_a}
         
     Where :math:`e_a` is the vapor pressure.
     
     Args:
-    ta - distributed air temperature [degree C]
-        ea - distrubted vapor pressure [kPa]
+        ta: distributed air temperature [degree C]
+        ea: distrubted vapor pressure [kPa]
         
     Returns:
-        th - clear sky long wave radiation [W/m2]
+        clear sky long wave radiation [W/m2]
     
     20170509 Scott Havens
     """
@@ -209,17 +210,21 @@ def hysat(pb, tb, L, h, g, m):
     '''
     integral of hydrostatic equation over layer with linear temperature variation
     
-        pb = base level pressure
-        tb = base level temp (K)
-        L  = lapse rate (deg/km)
-        h  = layer thickness (km)
-        g  = grav accel (m/s^2)
-        m  = molec wt (kg/kmole)
+    Args:
+        pb: base level pressure
+        tb: base level temp [K]
+        L: lapse rate [deg/km]
+        h: layer thickness [km]
+        g: grav accel [m/s^2]
+        m: molec wt [kg/kmole]
+        
+    Returns:
+        hydrostatic results
     
-     (the factors 1.e-3 and 1.e3 are for units conversion)
-     20151027 Scott Havens
+    20151027 Scott Havens
      '''
     
+    # the factors 1.e-3 and 1.e3 are for units conversion
     if L == 0:
         return pb * np.exp(-g * m * h * 1.e3/(RGAS * tb))
     else:
@@ -229,6 +234,13 @@ def hysat(pb, tb, L, h, g, m):
 def satw(tk):
     '''
     Saturation vapor pressure of water. from IPW satw
+    
+    Args:
+        tk: temperature in Kelvin
+        
+    Returns:
+        saturated vapor pressure over water
+        
     20151027 Scott Havens
     '''
     
@@ -251,6 +263,13 @@ def satw(tk):
 def sati(tk):
     '''
     saturation vapor pressure over ice. From IPW sati
+        
+    Args:
+        tk: temperature in Kelvin
+        
+    Returns:
+        saturated vapor pressure over ice
+        
     20151027 Scott Havens
     '''
     
@@ -275,13 +294,17 @@ def sati(tk):
 
 def brutsaert(ta, l, ea, z, pa):
     '''
-    Calculate atmosphere emissivity
+    Calculate atmosphere emissivity from Brutsaert (1975) :cite:`Brutsaert:1975`
     
-    ta - air temp (K)
-    l - temperature lapse rate (deg/m)
-    ea - vapor pressure (Pa)
-    z - elevation (z)
-    pa - air pressure (Pa)
+    Args:
+        ta: air temp (K)
+        l: temperature lapse rate (deg/m)
+        ea: vapor pressure (Pa)
+        z: elevation (z)
+        pa: air pressure (Pa)
+        
+    Returns:
+        atmosphericy emissivity
     
     20151027 Scott Havens
     '''
@@ -305,7 +328,16 @@ def topotherm(ta, tw, z, skvfac):
     Calculate the clear sky thermal radiation.  topotherm calculates  thermal 
     radiation from the atmosphere corrected for topographic effects, from near 
     surface air temperature Ta, dew point temperature DPT, and elevation.  Based 
-    on a model by Marks and Dozier (1979).
+    on a model by Marks and Dozier (1979) :citeL`Marks&Dozier:1979`.
+    
+    Args:
+        ta: air temperature [C]
+        tw: dew point temperature [C]
+        z: elevation [m]
+        skvfac: sky view factor
+    
+    Returns:
+        Long wave (thermal) radiation corrected for terrain
     
     20151027 Scott Havens
     '''

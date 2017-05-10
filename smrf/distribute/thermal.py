@@ -25,8 +25,8 @@ class th(image_data.image_data):
     Thermal radiation, or long-wave radiation, is calculated based on the clear sky radiation emitted by
     the atmosphere. Multiple methods for calculating thermal radition exist and SMRF has 4 options for
     estimating clear sky thermal radiation. Selecting one of the options below will change the equations
-    used. The methods were chosen based on the study by Flerchinger et al (2009) who performed a model
-    comparison using 21 AmeriFlux sites from North America and China.
+    used. The methods were chosen based on the study by Flerchinger et al (2009) :cite:`Flerchinger&al:2009`
+    who performed a model comparison using 21 AmeriFlux sites from North America and China.
     
     Marks1979
         The methods follow those developed by Marks and Dozier (1979) :cite:`Marks&Dozier:1979` 
@@ -36,15 +36,21 @@ class th(image_data.image_data):
         
     Dilley1998
         .. math::
-            L_{clear} = 59.38 + 113.7 * \frac{T_a}{273.16}^6 + 96.96 \sqrt{w/25}
+            L_{clear} = 59.38 + 113.7 * \\left( \\frac{T_a}{273.16} \\right)^6 + 96.96 \\sqrt{w/25}
             
+        References: Dilley and O'Brian (1998) :cite:`Dilley&OBrian:1998`
+        
     Prata1996
         .. math::
-            \epsilon_{clear} = 1 - (1 + w) exp(-1.2 + 3w)^(1/2)
+            \epsilon_{clear} = 1 - (1 + w) * exp(-1.2 + 3w)^{1/2}
+        
+        References: Prata (1996) :cite:`Prata:1996`
             
     Angstrom1918
         .. math::
-            \epsilon_{clear} = 0.83 - 0.18 * 10^{-0.067 e_a}
+            \\epsilon_{clear} = 0.83 - 0.18 * 10^{-0.067 e_a}
+        
+        References: Angstrom (1918) :cite:`Angstrom:1918` as cityed by Niemela et al (2001) :cite:`Niemela&al:2001`
     
     The topographic correct clear sky thermal radiation is further adjusted for canopy and cloud affects.
     Cloud correction is based on the relationship in Garen and Marks (2005) :cite:`Garen&Marks:2005` 
@@ -59,7 +65,7 @@ class th(image_data.image_data):
     The thermal radiation is further adjusted for canopy cover after the work of Link and Marks (1999)
     :cite:`Link&Marks:1999`. The correction is based on the vegetation's transmissivity, with the canopy
     temperature assumed to be the air temperature for vegetation greater than 2 meters.  The thermal
-    radiation is adjusted by:
+    radiation is adjusted by
     
     .. math::
         L_{canopy} = \\tau_d * L_{cloud} + (1 - \\tau_d) \epsilon \sigma T_a^4
@@ -86,7 +92,6 @@ class th(image_data.image_data):
         veg_k: numpy array for the veg K, from :py:attr:`smrf.data.loadTopo.topo.veg_k`
         veg_tau: numpy array for the veg transmissivity, from :py:attr:`smrf.data.loadTopo.topo.veg_tau`
         sky_view: numpy array for the sky view factor, from :py:attr:`smrf.data.loadTopo.topo.sky_view`
-    
     """
     
     variable = 'thermal'
