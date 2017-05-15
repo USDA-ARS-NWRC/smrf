@@ -60,15 +60,53 @@ class th(image_data.image_data):
        compared to the Mark1979 method, the other methods provide a wide range in the estimated
        value of thermal radiation.
     
-    The topographic correct clear sky thermal radiation is further adjusted for canopy and cloud affects.
-    Cloud correction is based on the relationship in Garen and Marks (2005) :cite:`Garen&Marks:2005` 
-    between the cloud factor and measured long wave radiation using measurement stations in the Boise 
-    River Basin.  When no clouds are  present, or a cloud factor close to 1, there is little radiation 
-    added.  When clouds are present, or a cloud factor close to 0, then the multipler would add long 
-    wave radiation to account for the cloud cover.
+    The topographic correct clear sky thermal radiation is further adjusted for cloud affects. Cloud
+    correction is based on fraction of cloud cover, a cloud factor close to 1 meaning no clouds are 
+    present, there is little radiation added.  When clouds are present, or a cloud factor close to 0, 
+    then additional long wave radiation is added to account for the cloud cover. Selecting one of the 
+    options below will change the equations used. The methods were chosen based on the study by 
+    Flerchinger et al (2009) :cite:`Flerchinger&al:2009`, where :math:`c=1-cloud\_factor`.
     
-    .. math::
-        L_{cloud} = L_{clear} * (1.485 - 0.488 * cloud\_factor)
+    Garen2005
+        Cloud correction is based on the relationship in Garen and Marks (2005) :cite:`Garen&Marks:2005` 
+        between the cloud factor and measured long wave radiation using measurement stations in the Boise 
+        River Basin. 
+    
+        .. math::
+            L_{cloud} = L_{clear} * (1.485 - 0.488 * cloud\_factor)
+            
+    Unsworth1975
+        .. math::
+            \epsilon_a = (1 - 0.84) \epsilon_{clear} + 0.84c
+            
+        References: Unsworth and Monteith (1975) :cite:`Unsworth&Monteith:1975`
+        
+    Kimball1982
+        .. math::
+            L_d = L_{clear} + \\tau_8 c \sigma T^4_c
+            
+            \\tau_8 = 1 - \epsilon_{8z}(1.4 - 0.4 \epsilon_{8z})
+            
+            \epsilon_{8z} = 0.24 + 2.98 \\times 10^{-6} e^2_o exp(3000/T_o)
+            
+            f_8 = -0.6732 + 0.6240 \\times 10^{-2} T_c - 0.9140 \\times 10^{-5} T^2_c
+            
+        where the original Kimball et al. (1982) :cite:`Kimbal&al:1982` was for multiple cloud layers, which
+        was simplified to one layer. :math:`T_c` is the cloud temperature and is assumed to be 11 K cooler
+        than :math:`T_a`.
+        
+        References: Kimball et al. (1982) :cite:`Kimbal&al:1982`
+        
+    Crawford1999
+        .. math::
+            \epsilon_a = (1 - cloud\_factor) + cloud\_factor * \epsilon_{clear}
+            
+        References: Crawford and Dunchon (1999) :cite:`Crawford&Dunchon:1999` where :math:`cloud\_factor`
+        is the ratio of measured solar radiation to the clear sky irradiance.
+        
+    The results from Flerchinger et al (2009) :cite:`Flerchinger&al:2009` showed that the Kimball1982 cloud correction
+    with Dilley1998 clear sky algorthim had the lowest RMSD. The Crawford1999 worked best when combined with
+    Angstrom1918, Dilley1998, or Prata1996.
     
     The thermal radiation is further adjusted for canopy cover after the work of Link and Marks (1999)
     :cite:`Link&Marks:1999`. The correction is based on the vegetation's transmissivity, with the canopy
@@ -86,7 +124,7 @@ class th(image_data.image_data):
         thermalConfig: The [thermal] section of the configuration file
     
     Attributes:
-        config: configuration from [precip] section
+        config: configuration from [thermal] section
         thermal: numpy array of the precipitation
         min: minimum value of thermal is -600 W/m^2
         max: maximum value of thermal is 600 W/m^2
@@ -144,8 +182,22 @@ class th(image_data.image_data):
                 
         # correct for cloud and veg
         self.config['correct_cloud'] = True
+        cloud_method = 'Garen2005'
         if 'correct_cloud' in self.config:
             self.correct_cloud = self.config['correct_cloud']
+            
+            if 'cloud_method' not in self.config:
+                self.cloud_method = cloud_method
+            elif self.config['cloud_method'] == 'Garen2005':
+                self.cloud_method = method
+            elif self.config['cloud_method'] == 'Unsworth1975':
+                self.cloud_method = 'Unsworth1975'
+            elif self.config['cloud_method'] == 'Kimball1982':
+                self.cloud_method = 'Kimball1982'
+            elif self.config['cloud_method'] == 'Crawford1999':
+                self.cloud_method = 'Crawford1999'
+            
+            
             
         self.config['correct_veg'] = True
         if 'correct_veg' in self.config:
@@ -231,11 +283,21 @@ class th(image_data.image_data):
             cth = cth * self.sky_view + (1.0 - self.sky_view) * thermal_radiation.STEF_BOLTZ * air_temp**4
         
     
-        # correct for the cloud factor based on Garen and Marks 2005
+        # correct for the cloud factor
         # ratio of measured/modeled solar indicates the thermal correction
         if self.correct_cloud:
-            tc = 1.485 - 0.488 * cloud_factor
-            cth *= tc
+            if self.cloud_method == 'Garen2005':
+                cth = thermal_radiation.Garen2005(cth, cloud_factor)
+            
+            elif self.cloud_method == 'Unsworth1975':
+                cth = thermal_radiation.Unsworth1975(cth, air_temp, cloud_factor)
+                
+            elif self.cloud_method == 'Kimball1982':
+                cth = thermal_radiation.Kimball1982(cth, air_temp, vapor_pressure/1000, cloud_factor)
+                
+            elif self.cloud_method == 'Crawford1999':
+                cth = thermal_radiation.Crawford1999(cth, air_temp, cloud_factor)
+            
         
         # correct for vegetation
         if self.correct_veg:

@@ -89,17 +89,17 @@ with open('HISTORY.rst') as history_file:
     history = history_file.read()
 
 requirements = [
-    'Cython >= 0.23.4',
-    'pytz >= 2013.7',
-    'setuptools >= 19.6',
-    'utm >= 0.4.0',
-#     'cryptography >= 1.2.2',
-    'mysql_connector_repackaged >= 0.3.1',
-    'netCDF4 >= 1.2.1',
-    'numpy >= 1.10.4',
-    'pandas >= 0.17.1',
-    'scipy >= 0.16.0',
-    'faulthandler >= 2.4'
+#     'Cython >= 0.23.4',
+#     'pytz >= 2013.7',
+#     'setuptools >= 19.6',
+#     'utm >= 0.4.0',
+# #     'cryptography >= 1.2.2',
+#     'mysql_connector_repackaged >= 0.3.1',
+#     'netCDF4 >= 1.2.1',
+#     'numpy >= 1.10.4',
+#     'pandas >= 0.17.1',
+#     'scipy >= 0.16.0',
+#     'faulthandler >= 2.4'
 ]
 
 test_requirements = [
