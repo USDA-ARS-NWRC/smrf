@@ -14,7 +14,6 @@ from smrf.envphys import snow
 from smrf.envphys import storms
 
 from smrf.utils import utils
-import matplotlib.pyplot as plt
 import pytz
 
 class ppt(image_data.image_data):
@@ -165,9 +164,9 @@ class ppt(image_data.image_data):
         Soley distributes the precipitation data and does not calculate the other
         dependent variables
         """
-        
+
         self._logger.debug('{} Distributing precip'.format(data.name))
-        
+
         # only need to distribute precip if there is any
         data = data[self.stations]
         if self.corrected_precip[time].sum() > 0:
@@ -179,29 +178,29 @@ class ppt(image_data.image_data):
         else:
             # make everything else zeros
             self.precip = np.zeros(self.storm_days.shape)
-            
-    
+
+
     def distribute_precip_thread(self,  queue, data):
         """
         Distribute the data using threading and queue. All data is provided and ``distribute_precip_thread``
         will go through each time step and call :mod:`smrf.distribute.precip.ppt.distribute_precip` then
         puts the distributed data into the queue for:
-        
+
         * :py:attr:`precip`
-         
+
         Args:
             queue: queue dictionary for all variables
             data: pandas dataframe for all data, indexed by date time
         """
-        
+
         for t in data.index:
-                                    
+
             self.distribute_precip(data.ix[t])
-        
+
             queue[self.variable].put( [t, self.precip] )
-        
-            
-        
+
+
+
     def distribute(self, data, dpt, time, mask=None):
         """
         Distribute given a Panda's dataframe for a single time step. Calls
@@ -271,7 +270,7 @@ class ppt(image_data.image_data):
             #                                            stormDays=self.storm_days,
             #                                            stormPrecip=self.storm_precip)
             #self.storm_precip = stormPrecip
-        
+
         else:
             #self.storm_days += self.time_step/60/24
             self.precip = np.zeros(self.storm_days.shape)
@@ -279,7 +278,7 @@ class ppt(image_data.image_data):
             snow_den = np.zeros(self.storm_days.shape)
 
         # determine time since last storm basin wide
-        stormDays = storms.time_since_storm_basin(self.precip, self.storms.iloc[self.storm_id], 
+        stormDays = storms.time_since_storm_basin(self.precip, self.storms.iloc[self.storm_id],
                                                     self.storm_id, self.storming, time, time_step=self.time_step/60/24, stormDays=self.storm_days)
 
         self.storm_days = stormDays

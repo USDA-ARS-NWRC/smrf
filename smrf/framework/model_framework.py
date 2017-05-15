@@ -28,7 +28,7 @@ Example:
 
 """
 
-    
+
 import logging, os
 import coloredlogs
 from datetime import datetime, timedelta
@@ -163,19 +163,18 @@ class SMRF():
             logging.basicConfig(filename=logfile, filemode='w', level=numeric_level, format=fmt)
         else:
             logging.basicConfig(level=numeric_level)
+            coloredlogs.install(level=numeric_level, fmt=fmt)
 
         self._loglevel = numeric_level
 
         self._logger = logging.getLogger(__name__)
-        
+
         # add a splash of color
-        coloredlogs.install(level=numeric_level, fmt=fmt) 
 
         # add the title
         title = self.title(2)
         for line in title:
             self._logger.info(line)
-
 
         self._logger.info('Started SMRF --> %s' % datetime.now())
         self._logger.info('Model start --> %s' % self.start_date)
@@ -614,7 +613,7 @@ class SMRF():
 
             # frequency of outputs
             self.config['output']['frequency'] = int(self.config['output']['frequency'])
-            
+
             # determine the variables to be output
             self._logger.info('%s variables will be output' % self.config['output']['variables'])
 
@@ -631,14 +630,14 @@ class SMRF():
                     if m in self.distribute.keys():
 
                         if v in self.distribute[m].output_variables.keys():
-                            
+
                             # if there is a key in the config file, then change the output file name
                             if v in self.config['output'].keys():
                                 fname = os.path.join(self.config['output']['out_location'],
                                                      self.config['output'][v])
                             else:
                                 fname = os.path.join(self.config['output']['out_location'], v)
-                                
+
                             d = {'variable': v, 'module': m, 'out_location': fname, 'info': self.distribute[m].output_variables[v]}
                             variable_list[v] = d
 
@@ -648,7 +647,7 @@ class SMRF():
                 self.out_func = output.output_netcdf(variable_list, self.topo,
                                                      self.config['time'],
                                                      self.config['output']['frequency'])
-                
+
             elif self.config['output']['file_type'].lower() == 'hru':
                 self.out_func = output.output_hru(variable_list, self.topo,
                                                      self.date_time,
@@ -656,7 +655,7 @@ class SMRF():
 
             else:
                 raise Exception('Could not determine type of file for output')
-            
+
             # is there a function to apply?
             self.out_func.func = None
             if 'func' in self.config['output']:
@@ -848,7 +847,7 @@ class SMRF():
 #             d[k].pop('__name__', None)
 #         d = self._make_lowercase(d)
 #         return d
-# 
+#
 #     def _make_lowercase(self, obj):
 #         if hasattr(obj,'iteritems'):
 #             # dictionary
