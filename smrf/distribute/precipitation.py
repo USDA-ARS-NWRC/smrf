@@ -313,11 +313,13 @@ class ppt(image_data.image_data):
             data: pandas dataframe for all data, indexed by date time
         """
 
-        for t,time in enumerate(date):
+        #for t,time in enumerate(date):
+        for t in data.index:
 
             dpt = queue['dew_point'].get(t)
 
-            self.distribute(data.ix[i], dpt, time, mask = mask)
+            #self.distribute(data.ix[t], dpt, time, mask = mask)
+            self.distribute(data.ix[t], dpt, t, mask = mask)
 
 #             self._logger.debug('Putting %s -- %s' % (t, 'precip'))
             queue[self.variable].put( [t, self.precip] )
