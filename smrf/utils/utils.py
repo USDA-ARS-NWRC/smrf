@@ -3,7 +3,7 @@
 
 Collection of utility functions
 """
-__version__ = '0.2.1'
+__version__ = '0.2.2'
 
 import numpy as np
 from datetime import datetime

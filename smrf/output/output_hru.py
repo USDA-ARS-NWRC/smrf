@@ -2,7 +2,7 @@
 Functions to output the gridded data for a HRU
 """
 
-__version__ = '0.2.1'
+__version__ = '0.2.2'
 
 import netCDF4 as nc
 import numpy as np

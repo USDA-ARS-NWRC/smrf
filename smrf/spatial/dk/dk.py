@@ -4,7 +4,7 @@
 Distributed forcing data over a grid using detrended kriging
 '''
 
-__version__ = '0.2.1'
+__version__ = '0.2.2'
 
 import numpy as np
 from . import detrended_kriging
