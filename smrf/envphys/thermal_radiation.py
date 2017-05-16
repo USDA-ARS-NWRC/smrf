@@ -437,15 +437,19 @@ def Unsworth1975(th, ta, cloud_factor):
 
 def Kimball1982(th, ta, ea, cloud_factor):
     """
-    Cloud correction is based on Kimball et al. (1982) :cite:`Kimbal&al:1982`
+    Cloud correction is based on Kimball et al. (1982) :cite:`Kimball&al:1982`
      
-     .. math::
-            L_d= L_{clear} + \tau_8cf_8\sigmaT^4_c
-            \tau_8 = 1 - \epsilon_{8z}(1.4 - 0.4\epsilon_{8z})
-            \epsilon_{8z} = 0.24 + 2.98 \times 10^{-6} e^2_o exp(3000/T_o)
-            f_8 = -0.6732 + 0.6240 \times 10^{-2} T_c - 0.9140 \times 10^{-5} ^2_c
+    .. math::
+        
+        L_d &= L_{clear} + \\tau_8 c f_8 \sigma T^{4}_{c}
+        
+        \\tau_8 &= 1 - \epsilon_{8z} (1.4 - 0.4 \epsilon_{8z})
+        
+        \epsilon_{8z} &= 0.24 + 2.98 \\times 10^{-6} e^2_o exp(3000/T_o)
+        
+        f_8 &= -0.6732 + 0.6240 \\times 10^{-2} T_c - 0.9140 \\times 10^{-5} T^2_c
             
-    where the original Kimball et al. (1982) :cite:`Kimbal&al:1982` was for multiple cloud layers, which
+    where the original Kimball et al. (1982) :cite:`Kimball&al:1982` was for multiple cloud layers, which
     was simplified to one layer. :math:`T_c` is the cloud temperature and is assumed to be 11 K cooler
     than :math:`T_a`.
         
@@ -473,7 +477,7 @@ def Kimball1982(th, ta, ea, cloud_factor):
     
 def Crawford1999(th, ta, cloud_factor):
     """
-    Cloud correction is based on Crawford and Dunchon (1999) :cite:`Crawford&Dunchon:1999`
+    Cloud correction is based on Crawford and Duchon (1999) :cite:`Crawford&Duchon:1999`
     
     .. math::
             \epsilon_a = (1 - cloud\_factor) + cloud\_factor * \epsilon_{clear}
@@ -491,5 +495,5 @@ def Crawford1999(th, ta, cloud_factor):
     20170515 Scott Havens
     """
 
-    return calc_long_wave(1 - cloud_factor, ta) + cloud_factor * th
+    return calc_long_wave(1 - cloud_factor, ta + FREEZE) + cloud_factor * th
 

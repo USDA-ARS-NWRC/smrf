@@ -90,7 +90,7 @@ def main():
                 
             else:
                 d = D - s.distribute['thermal'].thermal
-                im = ax[idx].imshow(d, cmap='coolwarm', vmin=-100, vmax=50)
+                im = ax[idx].imshow(d, cmap='bwr', vmin=-50, vmax=50)
                 
                 if i == 3:
                     cbar_ax = fig.add_axes([0.95, 0.15, 0.01, 0.7])

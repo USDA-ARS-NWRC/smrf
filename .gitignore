@@ -4,6 +4,7 @@
 .pydevproject
 .DS_Store
 ._.*
+test_data/stoporad.ip
 
 *.lprof
 

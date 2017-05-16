@@ -77,36 +77,46 @@ class th(image_data.image_data):
             
     Unsworth1975
         .. math::
-            \epsilon_a = (1 - 0.84) \epsilon_{clear} + 0.84c
+        
+            L_d &= L_{clear} + \\tau_8 c f_8 \sigma T^{4}_{c}
+            
+            \\tau_8 &= 1 - \epsilon_{8z} (1.4 - 0.4 \epsilon_{8z})
+            
+            \epsilon_{8z} &= 0.24 + 2.98 \\times 10^{-6} e^2_o exp(3000/T_o)
+            
+            f_8 &= -0.6732 + 0.6240 \\times 10^{-2} T_c - 0.9140 \\times 10^{-5} T^2_c
             
         References: Unsworth and Monteith (1975) :cite:`Unsworth&Monteith:1975`
         
     Kimball1982
         .. math::
-            L_d = L_{clear} + \\tau_8 c \sigma T^4_c
+            L_d &= L_{clear} + \\tau_8 c \sigma T^4_c
+      
             
-            \\tau_8 = 1 - \epsilon_{8z}(1.4 - 0.4 \epsilon_{8z})
-            
-            \epsilon_{8z} = 0.24 + 2.98 \\times 10^{-6} e^2_o exp(3000/T_o)
-            
-            f_8 = -0.6732 + 0.6240 \\times 10^{-2} T_c - 0.9140 \\times 10^{-5} T^2_c
-            
-        where the original Kimball et al. (1982) :cite:`Kimbal&al:1982` was for multiple cloud layers, which
+        where the original Kimball et al. (1982) :cite:`Kimball&al:1982` was for multiple cloud layers, which
         was simplified to one layer. :math:`T_c` is the cloud temperature and is assumed to be 11 K cooler
         than :math:`T_a`.
         
-        References: Kimball et al. (1982) :cite:`Kimbal&al:1982`
+        References: Kimball et al. (1982) :cite:`Kimball&al:1982`
         
     Crawford1999
         .. math::
             \epsilon_a = (1 - cloud\_factor) + cloud\_factor * \epsilon_{clear}
             
-        References: Crawford and Dunchon (1999) :cite:`Crawford&Dunchon:1999` where :math:`cloud\_factor`
+        References: Crawford and Duchon (1999) :cite:`Crawford&Duchon:1999` where :math:`cloud\_factor`
         is the ratio of measured solar radiation to the clear sky irradiance.
         
     The results from Flerchinger et al (2009) :cite:`Flerchinger&al:2009` showed that the Kimball1982 cloud correction
     with Dilley1998 clear sky algorthim had the lowest RMSD. The Crawford1999 worked best when combined with
     Angstrom1918, Dilley1998, or Prata1996.
+    
+    .. figure:: _static/thermal_cloud_comparision.png
+       :scale: 50%
+       :alt: Comparing the 4 thermal cloud correction methods.
+    
+       The 4 different methods for correcting clear sky thermal radiation for cloud affects at a single time step. As
+       compared to the Garen2005 method, the other methods are typically higher where clouds are present (i.e. the lower
+       left) where the cloud factor is around 0.4.
     
     The thermal radiation is further adjusted for canopy cover after the work of Link and Marks (1999)
     :cite:`Link&Marks:1999`. The correction is based on the vegetation's transmissivity, with the canopy
