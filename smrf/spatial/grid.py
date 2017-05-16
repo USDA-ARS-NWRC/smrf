@@ -3,7 +3,7 @@
 
 Distributed forcing data over a grid using interpolation
 '''
-__version__ = '0.2.0'
+__version__ = '0.2.1'
 
 import numpy as np
 from scipy.interpolate import griddata

@@ -8,7 +8,7 @@ To install pysolar-0.6:
 @author: scott
 '''
 
-__version__ = '0.2.0'
+__version__ = '0.2.1'
 
 import numpy as np
 import subprocess as sp

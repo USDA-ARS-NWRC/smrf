@@ -5,7 +5,7 @@ updated 2015-12-31 Scott Havens
 
 Distributed forcing data over a grid using different methods
 '''
-__version__ = '0.2.0'
+__version__ = '0.2.1'
 
 import numpy as np
 # import sheppard

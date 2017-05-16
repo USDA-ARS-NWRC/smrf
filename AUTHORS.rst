@@ -15,4 +15,4 @@ Only one contributor. Why not join in?
 
 Version
 -------
-0.2.0
+0.2.1

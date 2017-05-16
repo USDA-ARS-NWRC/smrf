@@ -45,7 +45,7 @@ articles, and such.
 Versioning
 ----------
 SMRF uses bumpversion to control version control. More about bumpversion can be found at https://pypi.python.org/pypi/bumpversion.
-Currently SMRF is version 0.2.0 
+Currently SMRF is version 0.2.1 
 
 Submit Feedback
 ~~~~~~~~~~~~~~~
