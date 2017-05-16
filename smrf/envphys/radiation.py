@@ -618,7 +618,7 @@ def shade_thread(queue, date, slope, aspect, zenith=None):
     
     for t in date:
         
-        log.debug('%s Calculating illuminagion angle' % t)
+        log.debug('%s Calculating illumination angle' % t)
         
         mu = None
         cosz = queue['cosz'].get(t)

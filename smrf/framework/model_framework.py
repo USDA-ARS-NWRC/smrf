@@ -28,7 +28,7 @@ Example:
 
 """
 
-    
+
 import logging, os
 import coloredlogs
 from datetime import datetime, timedelta
@@ -70,7 +70,7 @@ class SMRF():
     # These are the variables that will be queued
     thread_variables = ['cosz', 'azimuth', 'illum_ang',
                         'air_temp', 'dew_point', 'vapor_pressure', 'wind_speed',
-                        'precip', 'percent_snow', 'snow_density', 'last_storm_day_basin', 'storm_days',
+                        'precip', 'percent_snow', 'snow_density', 'last_storm_day_basin', 'storm_days', 'storm_total','storm_id',
                         'clear_vis_beam', 'clear_vis_diffuse', 'clear_ir_beam', 'clear_ir_diffuse',
                         'albedo_vis', 'albedo_ir', 'net_solar', 'cloud_factor', 'thermal',
                         'output']
@@ -163,19 +163,18 @@ class SMRF():
             logging.basicConfig(filename=logfile, filemode='w', level=numeric_level, format=fmt)
         else:
             logging.basicConfig(level=numeric_level)
+            coloredlogs.install(level=numeric_level, fmt=fmt)
 
         self._loglevel = numeric_level
 
         self._logger = logging.getLogger(__name__)
-        
+
         # add a splash of color
-        coloredlogs.install(level=numeric_level, fmt=fmt) 
 
         # add the title
         title = self.title(2)
         for line in title:
             self._logger.info(line)
-
 
         self._logger.info('Started SMRF --> %s' % datetime.now())
         self._logger.info('Model start --> %s' % self.start_date)
@@ -397,12 +396,13 @@ class SMRF():
         #------------------------------------------------------------------------------
         # Initialize the distibution
         for v in self.distribute:
-            self.distribute[v].initialize(self.topo, self.data.metadata)
+            self.distribute[v].initialize(self.topo, self.data)
+
+        sub_count = 0
 
         #------------------------------------------------------------------------------
         # Distribute the data
         for output_count,t in enumerate(self.date_time):
-
             # wait here for the model to catch up if needed
 
             startTime = datetime.now()
@@ -435,6 +435,7 @@ class SMRF():
             # 4. Precipitation
             self.distribute['precip'].distribute(self.data.precip.ix[t],
                                                 self.distribute['vapor_pressure'].dew_point,
+                                                t,
                                                 self.topo.mask)
 
             # 5. Albedo
@@ -463,19 +464,8 @@ class SMRF():
             self.distribute['soil_temp'].distribute()
 
 
-            # output at the frequency and the last time step
-            if (output_count % self.config['output']['frequency'] == 0) or (output_count == len(self.date_time)):
-                self.output(t)
-
-#             plt.imshow(self.distribute['albedo'].albedo_vis), plt.colorbar(), plt.show()
-
-
-            # pull all the images together to create the input image
-#             d[t]['air_temp'] = self.distribute['air_temp'].image
-#             d[t]['vapor_pressure'] = self.distribute['vapor_pressure'].image
-
-
-            # check if out put is desired
+            # 9. output at the frequency and the last time step
+            self.output(t)
 
             telapsed = datetime.now() - startTime
             self._logger.debug('%.1f seconds for time step' % telapsed.total_seconds())
@@ -498,7 +488,7 @@ class SMRF():
         #------------------------------------------------------------------------------
         # Initialize the distibutions
         for v in self.distribute:
-            self.distribute[v].initialize(self.topo, self.data.metadata)
+            self.distribute[v].initialize(self.topo, self.data)
 
         #------------------------------------------------------------------------------
         # Create Queues for all the variables
@@ -543,7 +533,7 @@ class SMRF():
         # 4. Precipitation
         t.append(Thread(target=self.distribute['precip'].distribute_thread,
                         name='precipitation',
-                        args=(q, self.data.precip,
+                        args=(q, self.data.precip, self.date_time,
                               self.topo.mask)))
 
         # 5. Albedo
@@ -624,7 +614,7 @@ class SMRF():
 
             # frequency of outputs
             self.config['output']['frequency'] = int(self.config['output']['frequency'])
-            
+
             # determine the variables to be output
             self._logger.info('%s variables will be output' % self.config['output']['variables'])
 
@@ -641,14 +631,14 @@ class SMRF():
                     if m in self.distribute.keys():
 
                         if v in self.distribute[m].output_variables.keys():
-                            
+
                             # if there is a key in the config file, then change the output file name
                             if v in self.config['output'].keys():
                                 fname = os.path.join(self.config['output']['out_location'],
                                                      self.config['output'][v])
                             else:
                                 fname = os.path.join(self.config['output']['out_location'], v)
-                                
+
                             d = {'variable': v, 'module': m, 'out_location': fname, 'info': self.distribute[m].output_variables[v]}
                             variable_list[v] = d
 
@@ -658,7 +648,7 @@ class SMRF():
                 self.out_func = output.output_netcdf(variable_list, self.topo,
                                                      self.config['time'],
                                                      self.config['output']['frequency'])
-                
+
             elif self.config['output']['file_type'].lower() == 'hru':
                 self.out_func = output.output_hru(variable_list, self.topo,
                                                      self.date_time,
@@ -666,7 +656,7 @@ class SMRF():
 
             else:
                 raise Exception('Could not determine type of file for output')
-            
+
             # is there a function to apply?
             self.out_func.func = None
             if 'func' in self.config['output']:
@@ -677,33 +667,57 @@ class SMRF():
             self.output_variables = None
 
 
-    def output(self, current_time_step):
+    def output(self, current_time_step,  module = None, out_var = None):
         """
         Output the forcing data or model outputs for the current_time_step.
 
         Args:
             current_time_step (date_time): the current time step datetime object
+
+            module -
+            var_name -
+
         """
+        output_count = self.date_time.index(current_time_step)
 
-        # get the output variables then pass to the function
-        for v in self.out_func.variable_list.values():
+        #Only output according to the user specified value,  or if it is the end.
+        if (output_count % self.config['output']['frequency'] == 0) or (output_count == len(self.date_time)):
 
-            # get the data desired
-            output_now = True
-            data = getattr(self.distribute[v['module']], v['variable'])
+            #User is attempting to output single variable
+            if module != None and out_var != None:
+                #add only one variable to the output list and preceed as normal
+                var_vals = [self.out_func.variable_list[out_var]]
 
-#             elif v['variable'] in q.keys():
-#                 data = q[v['variable']].get(current_time_step)
-#             else:
-#                 self._logger.warning('Output variable %s not in queue' % v['variable'])
-#                 output_now = False
+            #Incomplete request
+            elif module != None or out_var != None:
+                raise ValueError(" Function requires an output module and variable name when outputting a specific variables")
 
-            if output_now:
+            else:
+                #Output all the variables
+                var_vals = self.out_func.variable_list.values()
+
+                #Remove any variables to be post processed.
+                #var_vals = [var for var in var_vals if var['variable'] not in self.distribute[var['module']].post_process_variables.keys()]
+
+            #Get the output variables then pass to the function
+            for v in var_vals:
+                # get the data desired
+                data = getattr(self.distribute[v['module']], v['variable'])
+
                 if data is None:
                     data = np.zeros((self.topo.ny, self.topo.nx))
 
                 # output the time step
+                self._logger.debug("Outputting {0}".format(v['module']))
                 self.out_func.output(v['variable'], data, current_time_step)
+
+    def post_process(self):
+        """
+        Execute all the post processors
+        """
+
+        for k in self.distribute.keys():
+            self.distribute[k].post_processor(self)
 
 
     def title(self, option):
@@ -834,7 +848,7 @@ class SMRF():
 #             d[k].pop('__name__', None)
 #         d = self._make_lowercase(d)
 #         return d
-# 
+#
 #     def _make_lowercase(self, obj):
 #         if hasattr(obj,'iteritems'):
 #             # dictionary
