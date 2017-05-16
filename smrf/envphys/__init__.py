@@ -5,6 +5,7 @@ __email__ = 'scotthavens@ars.usda.gov'
 __version__ = '0.2.1'
 
 from . import phys
-from . import precip
+from . import storms
+from . import snow
 from . import radiation
 from . import core

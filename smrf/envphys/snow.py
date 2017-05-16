@@ -278,7 +278,7 @@ def compacted_snow_density(Tpp,pp):
                 c11 = 1.0
             else:
                 #c11 = np.exp(-0.046 * ((rho_ns * water) - 100.0))
-			    c11 = (c_min + ((Tz - tsnow) * cfac)) + 1.0
+                c11 = (c_min + ((Tz - tsnow) * cfac)) + 1.0
 
             d_rho_m = 0.01 * c11 * np.exp(-0.04 * (Tz - tsnow))
 
@@ -328,4 +328,4 @@ def compacted_snow_density(Tpp,pp):
 
 
 if __name__ == '__main__':
-    print "\nNothing implemented here."
+    print("\nNothing implemented here.")
