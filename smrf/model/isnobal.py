@@ -3,7 +3,7 @@ Class for running iSnobal
 
 20160107 Scott Havens
 """
-__version__ = '0.2.1'
+__version__ = '0.2.0'
 
 from smrf import ipw
 import logging, os

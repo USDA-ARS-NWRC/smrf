@@ -1,6 +1,6 @@
 /*
  * Saturation function over ice and water
- * Version 0.2.1
+ * Version 0.2.0
  */
 
 #include <stdio.h>
