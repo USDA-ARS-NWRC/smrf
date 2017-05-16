@@ -4,7 +4,7 @@ Originally written by Scott Havens in 2015
 @author: Micah Johnson
 '''
 
-__version__ = '0.1.1'
+__version__ = '0.2.1'
 
 import numpy as np
 import pandas as pd
