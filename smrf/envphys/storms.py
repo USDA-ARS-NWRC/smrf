@@ -156,7 +156,7 @@ def time_since_storm_basin(precipitation, storm, stormid, storming, time, time_s
     # either preallocate or use the input
     if stormDays is None:
         stormDays = np.zeros(precipitation.shape)
-    
+
     #if before first storm, just add timestep
     if not storming and time <= storm['start'] and stormid == 0:
         stormDays += time_step
@@ -341,7 +341,7 @@ def clip_and_correct(precip,storms):
 
         storm_start = storm['start']
         storm_end = storm['end']
-        my_slice= precip.ix[storm_start:storm_end]
+        my_slice = precip.ix[storm_start:storm_end]
         precip_clipped.ix[storm_start:storm_end] = my_slice
 
     #Determine how much precip we missed from clipping
@@ -362,8 +362,5 @@ def clip_and_correct(precip,storms):
 
         correction[station] = c
         precip_clipped[station]*=(1+correction[station])
-        #print "{0}\t{1}".format(station,c)
-
-    #print "Conservation of mass check (precip - precip_clipped):"
-    #print precip.sum() - precip_clipped.sum()
+    #print "Max precip from the correction:{0}".format(precip_clipped.max())
     return precip_clipped
