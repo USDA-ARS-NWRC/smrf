@@ -150,7 +150,12 @@ class ppt(image_data.image_data):
         self.time_to_end_storm = 2 # Time steps it take to end a storm definition
 
         self.storms, storm_count = storms.tracking_by_station(data.precip, mass_thresh = self.ppt_threshold, steps_thresh = self.time_to_end_storm)
+
+        #Clip and adjust the precip data so that there is only precip during the storm
+        # and ad back in the missing data to conserve mass.
+
         self.corrected_precip = storms.clip_and_correct(data.precip,self.storms)
+        self._logger.debug("Conservation of mass check (precip - precip_clipped):\n{0}".format(data.precip.sum() - self.corrected_precip.sum()))
 
         self._logger.info("Identified Storms:\n{0}".format(self.storms))
         self.storm_id = 0
