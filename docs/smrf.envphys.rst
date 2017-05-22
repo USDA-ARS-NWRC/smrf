@@ -19,13 +19,22 @@ smrf.envphys.phys module
     :undoc-members:
     :show-inheritance:
 
-smrf.envphys.precip module
+smrf.envphys.snow module
 --------------------------
 
-.. automodule:: smrf.envphys.precip
+.. automodule:: smrf.envphys.snow
     :members:
     :undoc-members:
     :show-inheritance:
+
+smrf.envphys.storms module
+--------------------------
+
+.. automodule:: smrf.envphys.storms
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
 
 smrf.envphys.radiation module
 -----------------------------

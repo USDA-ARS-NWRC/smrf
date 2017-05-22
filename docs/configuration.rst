@@ -2,25 +2,25 @@
 Configuration
 =============
 
-SMRF is configured using a configuration file and an extention of Pythons 
-`ConfigParser`_ (:mod:`smrf.framework.model_framework.MyParser`). See 
+SMRF is configured using a configuration file and an extention of Pythons
+`ConfigParser`_ (:mod:`smrf.framework.model_framework.MyParser`). See
 ``test_data/testConfig.ini`` for an example and read below for more information
 on specific sections.
 
 A brief introduction to a configuration file from the `ConfigParser`_ documentation: ::
 
-   The configuration file consists of sections, led by a [section] header and followed 
-   by name: value entries, with continuations in the style of RFC 822 (see section 
-   3.1.1, “LONG HEADER FIELDS”); name=value is also accepted. Note that leading 
-   whitespace is removed from values. The optional values can contain format strings 
-   which refer to other values in the same section, or values in a special DEFAULT 
-   section. Additional defaults can be provided on initialization and retrieval. Lines 
+   The configuration file consists of sections, led by a [section] header and followed
+   by name: value entries, with continuations in the style of RFC 822 (see section
+   3.1.1, “LONG HEADER FIELDS”); name=value is also accepted. Note that leading
+   whitespace is removed from values. The optional values can contain format strings
+   which refer to other values in the same section, or values in a special DEFAULT
+   section. Additional defaults can be provided on initialization and retrieval. Lines
    beginning with '#' or ';' are ignored and may be used to provide comments.
-    
-   Configuration files may include comments, prefixed by specific characters (# and ;). 
-   Comments may appear on their own in an otherwise empty line, or may be entered in 
-   lines holding values or section names. In the latter case, they need to be preceded 
-   by a whitespace character to be recognized as a comment. (For backwards compatibility, 
+
+   Configuration files may include comments, prefixed by specific characters (# and ;).
+   Comments may appear on their own in an otherwise empty line, or may be entered in
+   lines holding values or section names. In the latter case, they need to be preceded
+   by a whitespace character to be recognized as a comment. (For backwards compatibility,
    only ; starts an inline comment, while # does not.)
 
 Section and keys are case insensitive.
@@ -33,28 +33,28 @@ Time
 ----
 
 The time sections provides SMRF with the information about when to run. The date time
-values can be anything that ``pandas.to_datetime()`` can parse. 
+values can be anything that ``pandas.to_datetime()`` can parse.
 
 time_step
    Time step in minutes to run the model, should be the same as the data's time step
-   
+
 start_date
    SMRF start time, data will be truncated to start date
-   
+
 end_date
    SMRF end time, data will be truncated to end date
-   
+
 time_zone (default = UTC)
    Time zone for all times provided and how the model will be run
    see `pytz docs <http://pytz.sourceforge.net/>`_ for information on what is accepted
 
 Example ::
-   
+
    [time]
    TiMe_SteP:  60
    start_date: 2008-10-21 06:00
    end_date:   2008-10-23 06:00
-   time_zone:  UTC   
+   time_zone:  UTC
 
 
 Topo
@@ -67,29 +67,29 @@ to create the coordinate system. All files should have the same domain size.
 
 dem
    The digital elevation model (DEM) for the basin
-   
+
 mask
    A mask of the water shed is used to calculate trends, not mask generated data
-   
+
 .. _veg_type:
 
 veg_type
    Vegetation type as an integer, can be from any source
-   
+
 veg_height
    Height of vegetation
-   
+
 veg_k
    Vegetation extenction coefficient, see Link and Marks 1999
-   
+
 veg_tau
    Vegetation transmissivity, see Link and Marks 1999
-   
+
 basin_lat
    The latitude of the middle of the basin, used for calculating sun angle
 
 basin_lon
-   The longitude of the middle of the basin, used for calculating sun angle   
+   The longitude of the middle of the basin, used for calculating sun angle
 
 Example ::
 
@@ -100,11 +100,11 @@ Example ::
    veg_height: test_data/topo/veg_height.ipw
    veg_k:      test_data/topo/veg_k.ipw
    veg_tau:    test_data/topo/veg_tau.ipw
-   
+
    basin_lat:  43.8639
    basin_lon:  -115.3333
-   
-   
+
+
 
 Data Import
 -----------
@@ -119,18 +119,18 @@ Stations
 ````````
 
 The stations section tells SMRF what stations to use when loading data. Stations
-will perform differently for each method.  
+will perform differently for each method.
 
 stations
    * Will always take precedence over client
    * Comma seperated list of the station ID (unique identifier)
    * For CSV files, the stations imported will be filtered to those specified
    * MySQL will only select data for these stations
-   
+
 client
    * Does not apply for CSV files
    * Will load all stations with client=value from the specified ``station_table`` below
-   
+
 Example ::
 
    [stations]
@@ -141,7 +141,7 @@ Example ::
 CSV Data
 ````````
 
-Each variable will have it's own CSV file with rows representing time and 
+Each variable will have it's own CSV file with rows representing time and
 columns representing the stations.  See `input data <input_data.html>`_ for
 a more in depth description for formulating the files.
 
@@ -150,22 +150,22 @@ metadata
 
 air_temp
    Air temperature file
-   
+
 vapor_pressure
    Vapor pressure file
-   
+
 precip
    Precipitation file
-   
+
 wind_speed
    Wind speed file
-   
+
 wind_direction
    Wind direction file
-   
+
 cloud_factor
    Cloud factor file
-   
+
 Example ::
 
    [csv]
@@ -181,49 +181,49 @@ Example ::
 MySQL Database
 ``````````````
 
-The MySQL section provides connection information for the database, 
+The MySQL section provides connection information for the database,
 the table to pull data from, and what the column names are for each variable.
 
 user
    MySQL database user
-   
+
 password
    MySQL database user password
-   
+
 host
    MySQL server IP address, typically localhost (127.0.0.1) if database
    is on the local computer
-   
+
 database
    MySQL database name
-   
+
 metadata
    Table name that contains the station metadata
-   
+
 data_table
    Table name that contains all the station data
-  
+
 station_table
    Station table only required if using [stations]client
-   
+
 air_temp
    Column name for air temperature variable
-   
+
 vapor_pressure
    Column name for vapor pressure variable
-   
+
 precip
    Column name for precipitation variable
-   
+
 wind_speed
    Column name for wind speed variable
-   
+
 wind_direction
    Column name for wind direction variable
-   
+
 cloud_factor
    Column name for cloud factor variable
-   
+
 Example ::
 
    [mysql]
@@ -247,17 +247,17 @@ Gridded Data
 Gridded data can be passed to SMRF. At the moment, only WRF model outputs
 are easily ingested. The required variables in the NetCDF file can be
 found in the `input data <input_data.html>`_ page and the ``test_data/testConfig_Grid.ini``
-sample configuration file. 
+sample configuration file.
 
 file
    File name for the NetCDF file
-   
+
 data_type
    What type of gridded data is expected, currently only WRF is implemented
-   
+
 zone_number
    For converting latitude and longitude to X and Y UTM coordinates
-  
+
 zone_letter
    For converting latitude and longitude to X and Y UTM coordinates
 
@@ -277,8 +277,8 @@ Distribution methods
 
 The distribution parameter will tell SMRF how to distribute each variable if
 required. Different options exist depending on the distribution selected.  Currently
-two distribution techniques are implemented, inverse distance weighting and 
-detrended kriging.  More information on the distribution methods can be 
+two distribution techniques are implemented, inverse distance weighting and
+detrended kriging.  More information on the distribution methods can be
 found in the `distribution methods <dist_methods.html>`_ page.
 
 
@@ -291,14 +291,14 @@ elevation. The slope can be specified to constrain the fit.
 
 distribution: idw
    idw for inverse distance weighting
-   
+
 detrend (default = false)
    defaults to false, true will detrend before distributing
-   
+
 slope (default = 0)
-   if detrend is true, constain the slope to positive (1), negative (-1), 
+   if detrend is true, constain the slope to positive (1), negative (-1),
    or no constraint (0, default)
-   
+
 Example ::
 
    distribution:  idw
@@ -310,23 +310,23 @@ Detrended Kriging
 `````````````````
 
 Select detrended kriging for the distribution method will follow the methods
-developed by Garen and Marks, 2005.  
+developed by Garen and Marks, 2005.
 
 distribution: dk
    dk for detrended kriging
-   
+
 slope (default = 0)
    Constain the slope to positive (1), negative (-1), or no constraint (0, default)
-   
+
 dk_nthreads (default = 1)
    Number of processors to use in the kriging calculation
-   
+
 Example ::
 
    distribution:  dk
    slope:         -1
    dk_nthreads:   12
-   
+
 
 Gridded
 ```````
@@ -340,20 +340,20 @@ to interpolate between the grid cells.
 
 distribution: grid
    grid for gridded interpolation
-   
+
 method:
    Interpolation method - nearest, linear, cubic 1-D, cubic 2-D
-   
+
 detrend (default = false)
    defaults to false, true will detrend before distributing
-   
+
 slope (default = 0)
-   if detrend is true, constain the slope to positive (1), negative (-1), 
+   if detrend is true, constain the slope to positive (1), negative (-1),
    or no constraint (0, default)
-   
+
 mask
    Use grid cells only within the mask for detrending
-   
+
 Example ::
 
    distribution:     grid
@@ -365,7 +365,7 @@ Example ::
 Variable configuration
 ----------------------
 
-Each variable can further filter the stations to use and with what method 
+Each variable can further filter the stations to use and with what method
 to use for distribution. More information on the variable calculations can
 be found in the `API documentation <api.html>`_ for that variables module.
 
@@ -386,7 +386,7 @@ distribution
 Example ::
 
    [air_temp]
-   
+
    stations:         ATAI1,BNRI1,VNNI1,TRMI1,BOGI1,TR216
    distribution:     idw
    detrend:          true
@@ -396,35 +396,35 @@ Example ::
 Vapor pressure
 ``````````````
 
-Distribute ``vapor_pressure`` data using :mod:`smrf.distribute.vapor_pressure`. 
-The module also calculates the dew point temperature for estimating 
+Distribute ``vapor_pressure`` data using :mod:`smrf.distribute.vapor_pressure`.
+The module also calculates the dew point temperature for estimating
 precipitation phase.
 
 distribution
    :ref:`Distribution method <dist-methods>` with other parameters
-   
+
 tolerance
    Convergence tolerance in dew point calculation
-   
+
 nthread
    Number of processors to use in dew point calculation
-   
+
 Example ::
    [vapor_pressure]
-   
+
    stations:         BNRI1,BOGI1,ATAI1,TR216
    distribution:     idw
-   detrend:          true  
+   detrend:          true
    slope:            -1
    tolerance:        0.01
-   nthreads:         6  
+   nthreads:         6
 
 
 Wind speed and direction
 ````````````````````````
 
 Distributes wind speed and direction using :mod:`smrf.distribute.wind`.
-The wind direction distributes the ``wind_direction`` data using the 
+The wind direction distributes the ``wind_direction`` data using the
 specified distribution method. Wind speed is estimated using the methods
 developed by Winstral et al, 2002. The maxus value at each station can be
 enhanced as well as specifying if the station is on a highpoint (peak) which
@@ -435,31 +435,31 @@ specified base on the integer value in the :ref:`veg_type<veg_type>` image.
 distribution
    :ref:`Distribution method <dist-methods>` with other parameters, distributes
    the wind direction
-   
+
 maxus_netcdf
    maxus NetCDF with 'maxus' variable, see :mod:`smrf.utils.wind_model`
-   
+
 station_id: enhancement_value
    Each station can have its own enhancement value specified as a name: value
-   pair.  
-   
+   pair.
+
 station_default
    Applies the value to all stations not specified.
-   
+
 peak
    Comma seperated list of stations that are on a peak or highpoint.  The
    minimum maxus  value of all directions will be used to ensure that the
    wind speeds are within reason
-   
+
 veg_default
    Applies the value to all vegetation not specified
-   
+
 veg_(integer)
    Integer represents the value in the :ref:`veg_type<veg_type>` image
- 
+
 reduction_factor
    If wind speeds are still off, here is a scaling factor
-   
+
 Example ::
 
    [wind]
@@ -467,22 +467,22 @@ Example ::
    distribution:     idw
    detrend:          false
    maxus_netcdf:     test_data/topo/maxus.nc
-   
+
    # enhancement for each site
    TR216:            0
-   VNNI1:            3.0   
+   VNNI1:            3.0
    ATAI1:            5.0
    station_default:  11.4
-   
-   peak:             TR216 
-            
+
+   peak:             TR216
+
    # enhancement for vegetation
    veg_default:      11.4
    veg_41:           11.4
    veg_42:           11.4
    veg_43:           3.3
-   
-   reduction_factor: 0.7   
+
+   reduction_factor: 0.7
 
 Precipitation
 `````````````
@@ -491,7 +491,7 @@ Distributes the ``precip`` data using :mod:`smrf.distribute.precipitation`.
 
 distribution
    :ref:`Distribution method <dist-methods>` with other parameters
-   
+
 Example::
 
    [precip]
@@ -509,10 +509,10 @@ parameters for the albedo calculation.
 
 grain_size (default = 300)
    Effective grain radius of snow after last storm (mu m)
-   
+
 max_grain (default = 2000)
    Maximum grain radius expected from grain growth (mu m)
-   
+
 dirt (default = 2.0)
    Effective contamination for adjustment to visible albedo (usually between 1.5-3.0)
 
@@ -532,13 +532,13 @@ Specify atmosphic parameters for calculating the clear sky radiation
 
 distribution
    :ref:`Distribution method <dist-methods>` with other parameters
-   
+
 clear_opt_depth (default = 100)
    Elevation of optical depth measurement
 
 clear_tau (default = 0.2)
    optical depth at z
-   
+
 clear_omega (default = 0.85)
    Single-scattering albedo
 
@@ -552,20 +552,20 @@ If running with station data, thermal does not need a distribution method.
 
 method
 	Specify the methods for calcualting thermal radiation. The choices are:
-	
+
 	* Marks1979 :cite:`Marks&Dozier:1979`
 	* Dilley1998 :cite:`Dilley&OBrian:1998`
-    * Prata1996 :cite:`Prata:1996`
-    * Angstrom1918 :cite:`Angstrom:1918` :cite:`Niemela&al:2001`
+  * Prata1996 :cite:`Prata:1996`
+  * Angstrom1918 :cite:`Angstrom:1918` :cite:`Niemela&al:2001`
 
 nthreads
    Number of processors to calculate clear sky thermal radiation if method is Marks1979
-   
+
 Example ::
 
    [thermal]
    nthreads:      4
-   
+
 
 Soil temperature
 ````````````````
@@ -574,7 +574,7 @@ Soil temperature requires no distribution methods.
 
 temp
    soil temperature value
-   
+
 Example ::
 
    [soil_temp]
@@ -588,21 +588,21 @@ Specify variable output frequency, variables, and what file type.
 
 frequency
    Frequency in time step that should be written to disk
-   
+
 out_location
    Location to put the files
-   
+
 variables
    Comma seperated list of variables to output
-   
+
 file_type
    Type of file to output, currently only netcdf is implemented
-   
+
 Example ::
 
    [output]
-   frequency:     1 
-   out_location:  ~/Desktop/test/   
+   frequency:     1
+   out_location:  ~/Desktop/test/
    variables:     thermal, air_temp, vapor_pressure, wind_speed, net_solar, precip
    file_type:     netcdf
 
@@ -614,10 +614,10 @@ to output relevant information about SMRF processes.
 
 log_level
    info, debug, warn, or error
-   
+
 log_file
    If specified, will log to a file, if not, then will log to console
-   
+
 Example ::
 
    [logging]
@@ -632,15 +632,15 @@ System variables to specify some special options for SMRF.
 temp_dir
    Location to put working files, if not specified will attempt to use
    the environment variable WORKDIR
-   
+
 threading
    Whether or not to use threading and data queues to store variables. Each
    variable will be on it's own thread operating independently of other threads
    but putting and getting data from the queue
-   
+
 max_values
    Maximum number of time steps to keep in the data queue
-   
+
 Example ::
 
    [system]

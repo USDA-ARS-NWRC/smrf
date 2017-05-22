@@ -10,6 +10,7 @@ Development Lead
 Contributors
 ------------
 * Micah Johnson <micah.johnson150@gmail.com>
+* Micah Johnson <micah.johnson150@gmail.com>
 
 Only one contributor. Why not join in?
 

@@ -15,7 +15,7 @@ Types of Contributions
 Report Bugs
 ~~~~~~~~~~~
 
-Report bugs at https://github.com/scotthavens/smrf/issues.
+Report bugs at https://gitlab.com/ars-snow/smrf/issues.
 
 If you are reporting a bug, please include:
 
@@ -26,13 +26,13 @@ If you are reporting a bug, please include:
 Fix Bugs
 ~~~~~~~~
 
-Look through the GitHub issues for bugs. Anything tagged with "bug"
+Look through the GitLab issues for bugs. Anything tagged with "bug"
 is open to whoever wants to implement it.
 
 Implement Features
 ~~~~~~~~~~~~~~~~~~
 
-Look through the GitHub issues for features. Anything tagged with "feature"
+Look through the GitLab issues for features. Anything tagged with "feature"
 is open to whoever wants to implement it.
 
 Write Documentation
@@ -50,7 +50,7 @@ Currently SMRF is version 0.2.2
 Submit Feedback
 ~~~~~~~~~~~~~~~
 
-The best way to send feedback is to file an issue at https://github.com/scotthavens/smrf/issues.
+The best way to send feedback is to file an issue at https://gitlab.com/ars-snow/smrf/issues.
 
 If you are proposing a feature:
 
@@ -64,7 +64,7 @@ Get Started!
 
 Ready to contribute? Here's how to set up `smrf` for local development.
 
-1. Fork the `smrf` repo on GitHub.
+1. Fork the `smrf` repo on GitLab.
 2. Clone your fork locally::
 
     $ git clone git@github.com:your_name_here/smrf.git
@@ -89,13 +89,13 @@ Ready to contribute? Here's how to set up `smrf` for local development.
 
    To get flake8 and tox, just pip install them into your virtualenv.
 
-6. Commit your changes and push your branch to GitHub::
+6. Commit your changes and push your branch to GitLab::
 
     $ git add .
     $ git commit -m "Your detailed description of your changes."
     $ git push origin name-of-your-bugfix-or-feature
 
-7. Submit a pull request through the GitHub website.
+7. Submit a pull request through the GitLab website.
 
 Pull Request Guidelines
 -----------------------
