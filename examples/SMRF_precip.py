@@ -18,7 +18,7 @@ def main():
         start = datetime.now()
         
         
-        configFile = 'testConfig.ini'
+        configFile = '../test_data/testConfig.ini'
         if len(sys.argv) > 1:
             configFile = sys.argv[1]
             

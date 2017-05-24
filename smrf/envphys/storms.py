@@ -218,7 +218,7 @@ def tracking_by_station(precip, mass_thresh = 0.01, steps_thresh = 3):
             if not is_storming:
                 new_storm = {}
                 new_storm['start'] = time
-                for sta,precip in row.iteritems():
+                for sta,p in row.iteritems():
                     new_storm[sta] = 0
                 #Create a new row
                 is_storming = True

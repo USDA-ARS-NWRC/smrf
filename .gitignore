@@ -7,6 +7,8 @@
 test_data/stoporad.ip
 
 *.lprof
+*.prof
+*.ipw
 
 test_data/wrfout_d02_2016-03-10.nc
 examples/*.nc

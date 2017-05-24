@@ -8,6 +8,8 @@ __version__ = '0.2.1'
 
 import numpy as np
 import pandas as pd
+import matplotlib.pyplot as plt
+from distutils.command.check import check
 
 def get_basin_perc_snow(temperature,Tmax = 0.0, Tmin = -10.0):
     pcs = np.zeros(temperature.shape)
@@ -52,6 +54,40 @@ def calc_perc_snow(Tpp, Tmax = 0.0, Tmin = -10.0):
         pcs = 0.0
     return pcs
 
+
+def calc_perc_snow_np(Tpp, Tmax=0.0, Tmin=-10.0):
+    """
+    Numpy implementation of the calc_perc_snow
+    """
+    
+    #Coefficients for snow relationship
+    Tr0 = 0.5
+    Pcr0 = 0.25
+    Pc0 = 0.75
+
+    # this shouldn't have to be done again unless it's outside this module
+    # We can set a flag later if it should be checked
+    #Set a cap on temperature
+#     Tpp, tsnow = check_temperature(Tpp, Tmax = Tmax, Tmin = Tmin)
+
+
+    pcs = np.zeros(Tpp.shape)
+    
+    pcs[Tpp <= -0.5] = 1.0
+    
+    ind = (Tpp > -0.5) & (Tpp <= 0.0)
+    if np.any(ind):
+        pcs[ind] = (-Tpp[ind] / Tr0) * Pcr0 + Pc0
+        
+    ind = (Tpp > 0.0) & (Tpp <= Tmax +1.0)
+    if np.any(ind):
+        pcs[ind] = (-Tpp[ind] / (Tmax + 1.0)) * Pc0 + Pc0
+
+    return pcs
+    
+
+
+
 def fresh_snow_density(Tpp, Tmax = 0.0, Tmin = -10.0):
     """
     This method is a point model that calculates the newly fallen snow density based on the
@@ -86,6 +122,34 @@ def fresh_snow_density(Tpp, Tmax = 0.0, Tmin = -10.0):
     return rho_ns
 
 
+def fresh_snow_density_np(Tpp, Tmax=0.0, Tmin=-10.0, check_temps=False):
+    """
+    Numpy implementation of the fresh_snow_density
+    """
+    
+    ex_max = 1.75
+    exr = 0.75
+    ex_min = 1.0
+
+    Tz = 0.0
+    
+    # again, this shouldn't be needed in this context
+    if check_temps:
+        Tpp,tsnow = check_temperature(Tpp, Tmax=Tmax, Tmin=Tmin)
+
+    # new snow density - no compaction
+    Trange = Tmax - Tmin
+    ex = ex_min + (((Trange + (Tpp - Tmax)) / Trange) * exr)
+
+    ex[ex > ex_max] = ex_max
+        
+    rho_ns = (50.0 + (1.7 * (((Tpp - Tz) + 15.0)**ex)))
+    
+    return rho_ns
+    
+    
+
+
 def check_temperature(Tpp, Tmax = 0.0, Tmin = -10.0):
     # set precipitation temperature, % snow, and SWE
     if Tpp < Tmin:
@@ -97,6 +161,20 @@ def check_temperature(Tpp, Tmax = 0.0, Tmin = -10.0):
         else:
             tsnow = Tpp
     return Tpp, tsnow
+
+
+def check_temperature_np(Tpp, Tmax = 0.0, Tmin = -10.0):
+    """
+    set precipitation temperature, % snow, and SWE
+    """
+    
+    Tpp[Tpp < Tmin] = Tmin
+    Tpp[Tpp > Tmax] = Tmax
+        
+    tsnow = Tpp.copy()
+    
+    return Tpp, tsnow
+
 
 
 def mkprecip(precipitation, temperature):
@@ -212,6 +290,189 @@ def calc_density(precip, temperature, use_compaction = True):
             snow_density[i][j] = fresh_snow_density(tpp,pp)
 
     return snow_density,perc_snow
+
+def calc_density_np(precip, temperature, use_compaction=True):
+    """
+    Numpy implementation of the above calc_density
+    
+    @author Scott Havens
+    """
+    
+    if use_compaction:
+        result = compacted_snow_density_np(temperature, precip)
+        snow_density = result['rho_s']
+        perc_snow = result['pcs']
+    else:
+        snow_density = fresh_snow_density_np(temperature, precip, check_temps=True)
+        
+        
+    return snow_density, perc_snow
+
+
+def compacted_snow_density_np(Tpp, pp):
+    """
+    Numpy implementation of the compacted_snow_density
+    """
+    
+    # TODO check that the Tpp==tsnow, the check_temperature seems to make
+    # them equal
+    
+    ex_max = 1.75
+    exr = 0.75
+    ex_min = 1.0
+    c1_min = 0.026
+    c1_max = 0.069
+    c1r = 0.043
+    c_min = 0.0067
+    cfac = 0.0013
+    Tmin = -10.0
+    Tmax = 0.0
+    Tz = 0.0
+    Tr0 = 0.5
+    Pcr0 = 0.25
+    Pc0 = 0.75
+
+    water = 1000.0
+    
+    
+    rho_ns = d_rho_m = d_rho_c = zs = rho_s = swe = pcs = np.zeros(Tpp.shape)
+    rho = np.ones(Tpp.shape)
+    
+    
+    if np.any(pp > 0):
+        
+        # check the precipitaiton temperature
+        Tpp, tsnow = check_temperature_np(Tpp, Tmax=Tmax, Tmin=Tmin)
+        
+        # Calculate the percent snow
+        pcs = calc_perc_snow_np(Tpp, Tmax=Tmax, Tmin=Tmin)
+        
+        swe = pp * pcs
+        
+        # calculate the density only where there is swe
+        swe_ind = swe > 0.0 
+        
+        if np.any(swe_ind):
+            s_pcs = pcs[swe_ind]
+            s_pp = pp[swe_ind]
+            s_swe = swe[swe_ind]
+            s_tpp = Tpp[swe_ind] # transforms to a 1D array, will put back later
+            
+            # new snow density - no compaction
+            s_rho_ns = fresh_snow_density_np(s_tpp, Tmax=Tmax, Tmin=Tmin)
+            
+            #Convert to a percentage of water
+            s_rho_ns /= water
+            
+            # proportional total storm mass compaction
+            s_d_rho_c = (0.026 * np.exp(-0.08 * (Tz - s_tpp)) * s_swe * np.exp(-21.0 * s_rho_ns))
+
+            ind = s_rho_ns * water >= 100.0
+            c11 = np.ones(s_rho_ns.shape)
+            c11[ind] = (c_min + ((Tz - s_tpp[ind]) * cfac)) + 1.0
+        
+            s_d_rho_m = 0.01 * c11 * np.exp(-0.04 * (Tz - s_tpp))
+        
+            # compute snow denstiy, depth & combined liquid and snow density
+            s_rho_s = s_rho_ns +((s_d_rho_c + s_d_rho_m) * s_rho_ns)
+
+            s_zs = s_swe / s_rho_s
+                    
+            # a mixture of snow and liquid
+            s_rho = s_rho_s.copy()
+            mix = (s_swe < s_pp) & (s_pcs > 0) 
+            if np.any(mix):
+                s_rho[mix] = (s_pcs[mix] * s_rho_s[mix]) + (1 - s_pcs[mix])
+            
+            s_rho[s_rho > 1.0] = water / water
+            
+            # put the values back into the larger array
+            rho_ns[swe_ind] = s_rho_ns
+            d_rho_m[swe_ind] = s_d_rho_m
+            d_rho_c[swe_ind] = s_d_rho_c
+            zs[swe_ind] = s_zs
+            rho_s[swe_ind]= s_rho_s
+            rho[swe_ind] = s_rho
+            
+    # convert densities from proportions, to kg/m^3 or mm/m^2
+    rho_ns *= water
+    rho_s *= water
+    rho *= water
+            
+            
+#     
+#     if pp > 0.0:
+#         # set precipitation temperature, % snow, and SWE
+#         Tpp, tsnow = check_temperature(Tpp, Tmax = Tmax, Tmin = Tmin)
+# 
+#         # Calculate the percent snow
+#         pcs = calc_perc_snow(Tpp,Tmax = Tmax, Tmin = Tmin)
+# 
+#         swe = pp * pcs
+# 
+#         if swe > 0.0:
+#             # new snow density - no compaction
+#             rho_ns = fresh_snow_density(Tpp, Tmax = Tmax, Tmin = Tmin)
+# 
+#             #Convert to a percentage of water
+#             rho_ns /= water
+#             # proportional total storm mass compaction
+#             d_rho_c = (0.026 * np.exp(-0.08 * (Tz - tsnow)) * swe * np.exp(-21.0 * rho_ns))
+# 
+#             if rho_ns * water < 100.0:
+#                 c11 = 1.0
+#             else:
+#                 #c11 = np.exp(-0.046 * ((rho_ns * water) - 100.0))
+#                 c11 = (c_min + ((Tz - tsnow) * cfac)) + 1.0
+# 
+#             d_rho_m = 0.01 * c11 * np.exp(-0.04 * (Tz - tsnow))
+# 
+#             # compute snow denstiy, depth & combined liquid and snow density
+#             rho_s = rho_ns +((d_rho_c + d_rho_m) * rho_ns)
+# 
+#             zs = swe / rho_s
+# 
+#             if swe < pp:
+#                 if pcs > 0.0:
+#                     rho = (pcs * rho_s) + (1 - pcs)
+#                 if rho > 1.0:
+#                     rho = water / water
+# 
+#             else:
+#                 rho = rho_s
+# 
+#         else:
+#             rho_ns = 0.0
+#             d_rho_m = 0.0
+#             d_rho_c = 0.0
+#             zs = 0.0
+#             rho_s = 0.0
+#             rho = water / water
+# 
+#         # convert densities from proportions, to kg/m^3 or mm/m^2
+#         rho_ns *= water
+#         rho_s *= water
+#         rho *= water
+# 
+#     #No precip
+#     else:
+#         rho_ns = 0.0
+#         d_rho_m = 0.0
+#         d_rho_c = 0.0
+#         zs = 0.0
+#         rho_s = 0.0
+#         rho = 0.0
+#         swe = 0.0
+#         pcs = 0.0
+
+
+
+    result = {'swe':swe, 'pcs':pcs,'rho_ns': rho_ns, 'd_rho_c' : d_rho_c, 'd_rho_m' : d_rho_m, 'rho_s' : rho_s, 'rho':rho, 'zs':zs}
+
+    return result
+
+
+
 
 def compacted_snow_density(Tpp,pp):
     """
