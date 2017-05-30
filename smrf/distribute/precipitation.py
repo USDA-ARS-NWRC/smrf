@@ -15,6 +15,7 @@ from smrf.envphys import storms
 
 from smrf.utils import utils
 import pytz
+import timeit
 
 class ppt(image_data.image_data):
     """
@@ -178,10 +179,10 @@ class ppt(image_data.image_data):
 
         # only need to distribute precip if there is any
         data = data[self.stations]
-        if self.corrected_precip[time].sum() > 0:
+        if self.corrected_precip[data.name].sum() > 0:
 
             # distribute data and set the min/max
-            self._distribute(self.corrected_precip[time], zeros=None)
+            self._distribute(self.corrected_precip[data.name], zeros=None)
             self.precip = utils.set_min_max(self.precip, self.min, self.max)
 
         else:
@@ -245,7 +246,7 @@ class ppt(image_data.image_data):
                 # remove very small precipitation
 
                 # determine the precip phase and den
-                snow_den, perc_snow = snow.calc_phase_and_density(self.precip, dpt, nasde_model=self.nasde_model)
+                snow_den, perc_snow = snow.calc_phase_and_density(dpt,self.precip, nasde_model=self.nasde_model)
 
                 # determine the time since last storm
                 stormDays, stormPrecip = storms.time_since_storm(self.precip, perc_snow,
@@ -315,12 +316,17 @@ class ppt(image_data.image_data):
                 self._logger.debug('{0} Entering storm #{1}'.format(data.name,self.storm_id+1))
                 if dpt.min() < 2.0:
                     self._logger.debug(' Distributing Total Precip for Storm #{0}'.format(self.storm_id+1))
-                    self._distribute(storm[self.stations], other_attribute='storm_total')
+                    self._distribute(storm[self.stations].astype(float),
+                                     other_attribute='storm_total')
+                    self.storm_total = utils.set_min_max(self.storm_total, self.min, self.max)
 
             #During a storm we only need to calc density but not distribute storm total as well as when it is cold enough.
+            # TODO calculating the snow density is only needed once per storm, so some speedup could be had there as well
             if self.storming and dpt.min() < 2.0:
                 self._logger.debug('Calculating new snow density for storm #{0}'.format(self.storm_id+1))
-                snow_den, perc_snow = snow.calc_phase_and_density(self.storm_total,dpt, nasde_model='marks2017')
+                # determine the precip phase and den
+                snow_den, perc_snow = snow.calc_phase_and_density(dpt, self.precip, nasde_model=self.nasde_model)
+
             else:
                 snow_den = np.zeros(self.precip.shape)
                 perc_snow = np.zeros(self.precip.shape)
