@@ -9,35 +9,94 @@ __version__ = '0.2.1'
 import numpy as np
 import pandas as pd
 
-def get_basin_perc_snow(temperature,Tmax = 0.0, Tmin = -10.0):
-    pcs = np.zeros(temperature.shape)
-
-    for (i,j), Tpp in np.ndenumerate(temperature):
-        pcs[i][j] = calc_perc_snow(Tpp,Tmin = Tmin, Tmax = Tmax)
-
-    return pcs
-
-def calc_perc_snow(Tpp, Tmax = 0.0, Tmin = -10.0):
-    """
-    This method is a point model that calculates the percent snow based on the
-    temperature during precipitation
+def calc_phase_and_density(precip, temperature, nasde_model):
+    '''
+    Uses various new accumulated snow density models to estimate the snow
+    density of precipitation that falls during sub-zero conditions.
+    The models all are based on the dew point temperature and the amount of
+    precipitation, All models used here must return a dictionary containing the
+    keywords pcs and rho_s for percent snow and snow density respectively.
 
     Args:
-        Tpp - temperature in Celcius during precipitation
-        Tmax - Max temperature in Celcius that effects the percent snow, default = 0.0 C
-        Tmin - Minimum temperature in Celcius that effects the percent snow, default = -10.0 C
+        precip - Numpy array of the distributed precipitation
+        temperature - a single timestep of the distributed dew point temperature
+
+        nasde_model - string value set in the configuration file representing the method
+                    for estimating density of new snow that has just fallen.
 
     Returns:
-        pcs - The decimal amount of the precip that is snow, e.g. 1.0 = 100 percent snow
-    """
+        snow_density - an numpy array of snow density matching the domain size.
 
-    #Coefficients for snow relationship
+    '''
+
+    snow_density = np.zeros(precip.shape)
+    perc_snow = np.zeros(precip.shape)
+
+    x_len = len(snow_density)
+    y_len = len(snow_density[0])
+    for (i,j), pp in np.ndenumerate(precip):
+        tpp  = temperature[i][j]
+
+        #New accumulated snow point models can go here.
+        if nasde_model == 'susong1999':
+            result = susong1999(tpp)
+
+        elif nasde_model == 'continuous_susong1999':
+            result = continuous_susong1999(tpp)
+
+        elif nasde_model == 'marks2017':
+            result = marks2017(tpp,pp)
+        else:
+            raise ValueError("{0} is not an implemented NASDE model!".format(nasde_model))
+
+        snow_density[i][j] = result['rho_s']
+        perc_snow[i][j] = result['pcs']
+
+    return snow_density,perc_snow
+
+def continuous_susong1999(Tpp, Tmax = 0.0, Tmin = -10.0):
+    '''
+    Follows method susong1999 but is the continuous form of table shown there.
+    The table was estimate by Danny Marks in 2017 which resulted in the
+    piecewise equations below:
+
+    Percent Snow:
+         *  -0.5C < temperature < 0.0, percent snow = (((-temperature) / Tr0) * Pcr0) + Pc0
+         *  0.0C < temperature < Max temperature + 1.0, percent snow = -(((-Tpp) / (Tmax + 1.0)) * Pc0) + Pc0
+
+    Snow rho_s:
+        *  (50.0 + (1.7 * ((temperature + 15.0) ^ ex)))
+        Where:
+        *  ex = ex_min + (((temperature_range + (temperature of snow - Max temperature)) / temperature range) * exr)
+        *  ex > 1.75, ex = 1.75
+
+    Args:
+        temperature - point value of temperature, use dew point temperature
+        if available [degree C]
+
+    Returns:
+        result - A dictionary that containing the percent snow (0.0-1.0) and the new snow density (kg/m^3),
+                which are labelled as pcs and rho_s respectively
+    '''
+    #Snow Model constants
+    ex_max = 1.75
+    exr = 0.75
+    ex_min = 1.0
+    c1_min = 0.026
+    c1_max = 0.069
+    c1r = 0.043
+    c_min = 0.0067
+    cfac = 0.0013
+    Tmin = -10.0
+    Tmax = 0.0
+    Tz = 0.0
     Tr0 = 0.5
     Pcr0 = 0.25
     Pc0 = 0.75
 
-    #Set a cap on temperature
-    Tpp, tsnow = check_temperature(Tpp, Tmax = Tmax, Tmin = Tmin)
+    Tz = 0.0
+
+    Tpp,tsnow = check_temperature(Tpp,Tmax = Tmax, Tmin = Tmin)
 
     if Tpp <= -0.5:
         pcs = 1.0
@@ -50,30 +109,6 @@ def calc_perc_snow(Tpp, Tmax = 0.0, Tmin = -10.0):
 
     else:
         pcs = 0.0
-    return pcs
-
-def fresh_snow_density(Tpp, Tmax = 0.0, Tmin = -10.0):
-    """
-    This method is a point model that calculates the newly fallen snow density based on the
-    temperature during precipitation.
-
-    Args:
-        Tpp - temperature in Celcius during precipitation
-        Tmax - Max temperature in Celcius that effects the percent snow, default = 0.0 C
-        Tmin - Minimum temperature in Celcius that effects the percent snow, default = -10.0 C
-
-    Returns:
-        rhow_ns - Density of snow freshly fallen in kg/m^3
-    """
-
-    ex_max = 1.75
-    exr = 0.75
-    ex_min = 1.0
-
-    Tz = 0.0
-
-
-    Tpp,tsnow = check_temperature(Tpp,Tmax = Tmax, Tmin = Tmin)
 
     # new snow density - no compaction
     Trange = Tmax - Tmin
@@ -83,7 +118,7 @@ def fresh_snow_density(Tpp, Tmax = 0.0, Tmin = -10.0):
         ex = ex_max
 
     rho_ns = (50.0 + (1.7 * (((Tpp - Tz) + 15.0)**ex)))
-    return rho_ns
+    return {'pcs':pcs, 'rho_s':rho_ns}
 
 
 def check_temperature(Tpp, Tmax = 0.0, Tmin = -10.0):
@@ -99,9 +134,9 @@ def check_temperature(Tpp, Tmax = 0.0, Tmin = -10.0):
     return Tpp, tsnow
 
 
-def mkprecip(precipitation, temperature):
+def susong1999(temperature):
     '''
-    Follows the IPW command mkprecip
+    Follows the IPW command mkprecip except this is a point model version.
 
     The precipitation phase, or the amount of precipitation falling as rain or snow, can significantly
     alter the energy and mass balance of the snowpack, either leading to snow accumulation or inducing
@@ -124,105 +159,43 @@ def mkprecip(precipitation, temperature):
     ========= ======== ============ ===============
 
     Args:
-    precipitation - array of precipitation values [mm]
-    temperature - array of temperature values, use dew point temperature
+        temperature - point value of temperature, use dew point temperature
         if available [degree C]
 
-    Output:
-    - returns the percent snow and estimated snow density
+    Returns:
+        result - A dictionary that containing the percent snow (0.0-1.0) and the new snow density (kg/m^3)
     '''
-
-    # convert the inputs to numpy arrays
-    precipitation = np.array(precipitation)
-    temperature = np.array(temperature)
 
     # create a list from the table above
     t = []
-    t.append( {'temp_min': -1e309,  'temp_max': -5,     'snow': 1,    'density':75} )
-    t.append( {'temp_min': -5,      'temp_max': -3,     'snow': 1,    'density':100} )
-    t.append( {'temp_min': -3,      'temp_max': -1.5,    'snow': 1,    'density':150} )
-    t.append( {'temp_min': -1.5,    'temp_max': -0.5,   'snow': 1,    'density':175} )
-    t.append( {'temp_min': -0.5,    'temp_max': 0.0,    'snow': 0.75, 'density':200} )
-    t.append( {'temp_min': 0.0,     'temp_max': 0.5,    'snow': 0.25, 'density':250} )
-    t.append( {'temp_min': 0.5,     'temp_max': 1e309,  'snow': 0,    'density':0} )
 
-
-    # preallocate the percent snow (ps) and snow density (sd)
-    ps = np.zeros(precipitation.shape)
-    sd = np.zeros(ps.shape)
-
-    # if no precipitation return all zeros
-    if np.sum(precipitation) == 0:
-        return ps, sd
+    t.append( {'temp_min': -1e309,  'temp_max': -5,     'pcs': 1.0,    'rho_s':75.0} )
+    t.append( {'temp_min': -5,      'temp_max': -3,     'pcs': 1.0,    'rho_s':100.0} )
+    t.append( {'temp_min': -3,      'temp_max': -1.5,    'pcs': 1.0,    'rho_s':150.0} )
+    t.append( {'temp_min': -1.5,    'temp_max': -0.5,   'pcs': 1.0,    'rho_s':175.0} )
+    t.append( {'temp_min': -0.5,    'temp_max': 0.0,    'pcs': 0.75, 'rho_s':200.0} )
+    t.append( {'temp_min': 0.0,     'temp_max': 0.5,    'pcs': 0.25, 'rho_s':250.0} )
+    t.append( {'temp_min': 0.5,     'temp_max': 1e309,  'pcs': 0.0,    'rho_s':0.0} )
 
     # determine the indicies and allocate based on the table above
     for row in t:
 
         # get the values between the temperature ranges that have precip
-        ind = [(temperature >= row['temp_min']) & (temperature < row['temp_max'])]
+        if temperature >= row['temp_min'] and temperature < row['temp_max']:
+            result = row
+            break
 
-        # set the percent snow
-        ps[ind] = row['snow']
+    return result
 
-        # set the density
-        sd[ind] = row['density']
-
-
-    # if there is no precipitation at a pixel, don't report a value
-    # this may make isnobal crash, I'm not really sure
-    ps[precipitation == 0] = 0
-    sd[precipitation == 0] = 0
-
-    return ps, sd
-
-def calc_density(precip, temperature, use_compaction = True):
+def marks2017(Tpp,pp):
     """
-    Uses a new snow density model to calculate the snow density based on the
-    storm total and considers compaction, liquid water effects, temperature.
-
-    Meant to be used after the fact when all the data is available.
-
-
-    args:
-    precip - netcdf array of precip across the whole basin. If compaction is
-            this array should be the accumulated precip, otherwise it should be
-            hourly precip.
-
-    temperature - a single timestep of distributed temperature
-
-    use_compaction - determines whether the snow model will account for compaction
-                that could occur during a storm in addition to using the oringal
-                temperature based model.
-    returns:
-    snow_density - an array of snow density matching the domain size.
-    """
-
-    snow_density = np.zeros(precip.shape)
-    perc_snow = np.zeros(precip.shape)
-
-    x_len = len(snow_density)
-    y_len = len(snow_density[0])
-    for (i,j), pp in np.ndenumerate(precip):
-        tpp  = temperature[i][j]
-        if use_compaction:
-            result  = compacted_snow_density(tpp,pp)
-            snow_density[i][j] = result['rho_s']
-            perc_snow[i][j] = result['pcs']
-        else:
-            snow_density[i][j] = fresh_snow_density(tpp,pp)
-
-    return snow_density,perc_snow
-
-def compacted_snow_density(Tpp,pp):
-    """
-    Snow density point model that takes into account the hourly temperature during precip
+    New accumulated Snow density point model that takes into account the hourly temperature during precip
     and the total storm accumulated_precip.
 
-    args:
+    Args:
     Tpp - a single value of the hourly temperature during the storm
 
     pp - a single value of the accumulated_precip precip during a storm
-
 
     Returns:
     swe, pcs, rho_ns, d_rho_c, d_rho_m, rho_s, rho, zs
@@ -260,15 +233,14 @@ def compacted_snow_density(Tpp,pp):
         # set precipitation temperature, % snow, and SWE
         Tpp, tsnow = check_temperature(Tpp, Tmax = Tmax, Tmin = Tmin)
 
-        # Calculate the percent snow
-        pcs = calc_perc_snow(Tpp,Tmax = Tmax, Tmin = Tmin)
+        # Calculate the percent snow and new snow without compaction
+        snow = continuous_susong1999(Tpp, Tmax = Tmax, Tmin = Tmin)
+        pcs = snow['pcs']
+        rho_ns = snow['rho_s']
 
         swe = pp * pcs
 
         if swe > 0.0:
-            # new snow density - no compaction
-            rho_ns = fresh_snow_density(Tpp, Tmax = Tmax, Tmin = Tmin)
-
             #Convert to a percentage of water
             rho_ns /= water
             # proportional total storm mass compaction
@@ -319,8 +291,6 @@ def compacted_snow_density(Tpp,pp):
         rho = 0.0
         swe = 0.0
         pcs = 0.0
-
-
 
     result = {'swe':swe, 'pcs':pcs,'rho_ns': rho_ns, 'd_rho_c' : d_rho_c, 'd_rho_m' : d_rho_m, 'rho_s' : rho_s, 'rho':rho, 'zs':zs}
 

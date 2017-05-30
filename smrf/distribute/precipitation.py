@@ -102,17 +102,10 @@ class ppt(image_data.image_data):
                                   'units': 'decimal_day',
                                   'long_name': 'day_of_last_storm'
                                   },
-                        'storm_total':{
-                                  'units': 'mm',
-                                   'long_name': 'storm_total'
-                                    },
+
                         }
         # these are variables that are operate at the end only and do not need to be written during main distribute loop
-    post_process_variables = {'snow_density':{
-                                      'units': 'kg/m^3',
-                                      'long_name': 'snow_density'
-                                      },
-                            }
+    post_process_variables = { }
 
     max = np.Inf
     min = 0
@@ -145,21 +138,32 @@ class ppt(image_data.image_data):
         self.time_steps_since_precip = 0
         self.storming = False
 
-        #TO DO put into config
-        self.ppt_threshold = 0.1 #mm
-        self.time_to_end_storm = 2 # Time steps it take to end a storm definition
+        if 'storm_mass_thresh' in self.config:
+            self.ppt_threshold = self.config['storm_mass_thresh']
+        else:
+            self.ppt_threshold = 0.1 #mm
+        if 'time_steps_to_end_storms' in self.config:
+            self.time_to_end_storm = self.config['time_steps_to_end_storms']
+        else:
+                self.time_to_end_storm = 2 # Time steps it take to end a storm definition
 
-        self.storms, storm_count = storms.tracking_by_station(data.precip, mass_thresh = self.ppt_threshold, steps_thresh = self.time_to_end_storm)
+        if 'nasde_model' in self.config:
+            self.nasde_model= self.config['nasde_model']
+        else:
+            self.nasde_model = 'susong1999'
 
-        #Clip and adjust the precip data so that there is only precip during the storm
-        # and ad back in the missing data to conserve mass.
+        if self.nasde_model == 'marks2017':
+            #Clip and adjust the precip data so that there is only precip during the storm
+            # and ad back in the missing data to conserve mass.
+            self.storms, storm_count = storms.tracking_by_station(data.precip, mass_thresh = self.ppt_threshold, steps_thresh = self.time_to_end_storm)
+            self.corrected_precip = storms.clip_and_correct(data.precip,self.storms)
+            self._logger.debug("Conservation of mass check (precip - precip_clipped):\n{0}".format(data.precip.sum() - self.corrected_precip.sum()))
 
-        self.corrected_precip = storms.clip_and_correct(data.precip,self.storms)
-        self._logger.debug("Conservation of mass check (precip - precip_clipped):\n{0}".format(data.precip.sum() - self.corrected_precip.sum()))
+            self._logger.info("Identified Storms:\n{0}".format(self.storms))
+            self.storm_id = 0
+            self._logger.info("Estimated number of storms: {0}".format(storm_count))
 
-        self._logger.info("Identified Storms:\n{0}".format(self.storms))
-        self.storm_id = 0
-        self._logger.info("Estimated number of storms: {0}".format(storm_count))
+        self._logger.info("Using {0} for the new accumulated snow density model...".format(self.nasde_model))
 
     def distribute_precip(self, data):
         """
@@ -204,8 +208,6 @@ class ppt(image_data.image_data):
 
             queue[self.variable].put( [t, self.precip] )
 
-
-
     def distribute(self, data, dpt, time, mask=None):
         """
         Distribute given a Panda's dataframe for a single time step. Calls
@@ -230,6 +232,61 @@ class ppt(image_data.image_data):
         data = data[self.stations]
 
 
+        if self.nasde_model == 'marks2017':
+            self.distribute_for_marks2017(data,dpt,time,mask=mask)
+
+        else:
+            if data.sum() > 0:
+
+                # distribute data and set the min/max
+                self._distribute(data, zeros=None)
+                self.precip = utils.set_min_max(self.precip, self.min, self.max)
+
+                # remove very small precipitation
+
+                # determine the precip phase and den
+                snow_den, perc_snow = snow.calc_phase_and_density(self.precip, dpt, nasde_model=self.nasde_model)
+
+                # determine the time since last storm
+                stormDays, stormPrecip = storms.time_since_storm(self.precip, perc_snow,
+                                                            time_step=self.time_step/60/24, mass=0.5, time=4,
+                                                            stormDays=self.storm_days,
+                                                            stormPrecip=self.storm_precip)
+
+                # save the model state
+                self.percent_snow = perc_snow
+                self.snow_density = snow_den
+                self.storm_days = stormDays
+                self.storm_precip = stormPrecip
+
+            else:
+
+                self.storm_days += self.time_step/60/24
+
+                # make everything else zeros
+                self.precip = np.zeros(self.storm_days.shape)
+                self.percent_snow = np.zeros(self.storm_days.shape)
+                self.snow_density = np.zeros(self.storm_days.shape)
+
+
+            # day of last storm, this will be used in albedo
+            self.last_storm_day = utils.water_day(data.name)[0] - self.storm_days - 0.001
+
+            # get the time since most recent storm
+            if mask is not None:
+                self.last_storm_day_basin = np.max(mask * self.last_storm_day)
+            else:
+                self.last_storm_day_basin = np.max(self.last_storm_day)
+
+
+    def distribute_for_marks2017(self, data, dpt, time, mask=None):
+        '''
+        Specialized distribute function for working with the new accumulated snow
+        density model Marks2017 requires storm total  and a corrected precipitation
+        as to avoid precip between storms.
+
+        '''
+
         if self.corrected_precip.ix[time].sum() > 0:
 
             #Check for time in every storm
@@ -249,7 +306,6 @@ class ppt(image_data.image_data):
                 else:
                     self.storming  = False
 
-
             # distribute data and set the min/max
             self._distribute(self.corrected_precip.ix[time], zeros=None)
             self.precip = utils.set_min_max(self.precip, self.min, self.max)
@@ -264,17 +320,10 @@ class ppt(image_data.image_data):
             #During a storm we only need to calc density but not distribute storm total as well as when it is cold enough.
             if self.storming and dpt.min() < 2.0:
                 self._logger.debug('Calculating new snow density for storm #{0}'.format(self.storm_id+1))
-                snow_den, perc_snow = snow.calc_density(self.storm_total,dpt)
+                snow_den, perc_snow = snow.calc_phase_and_density(self.storm_total,dpt, nasde_model='marks2017')
             else:
                 snow_den = np.zeros(self.precip.shape)
                 perc_snow = np.zeros(self.precip.shape)
-
-            # determine the time since last storm
-            #stormDays, stormPrecip = storms.time_since_storm(self.precip, perc_snow,
-            #                                            time_step=self.time_step/60/24, mass=self.ppt_threshold, time=self.time_steps_since_precip,
-            #                                            stormDays=self.storm_days,
-            #                                            stormPrecip=self.storm_precip)
-            #self.storm_precip = stormPrecip
 
         else:
             #self.storm_days += self.time_step/60/24
@@ -340,9 +389,10 @@ class ppt(image_data.image_data):
 #             self._logger.debug('Putting %s -- %s' % (t, 'storm_days'))
             queue['storm_days'].put( [t, self.storm_days] )
 
-            queue['storm_id'].put( [t, self.storm_id])
+            if self.nasde_model == "marks2017":
+                queue['storm_id'].put( [t, self.storm_id])
 
-            queue['storm_total'].put( [t, self.storm_total])
+                queue['storm_total'].put( [t, self.storm_total])
 
 
     def post_process_snow_density(self, main_obj, pds, tds, storm):
@@ -381,7 +431,7 @@ class ppt(image_data.image_data):
             dpt = tds.variables['dew_point'][i]
 
             #self._logger.debug("Calculating snow density at {0}".format(t))
-            self.snow_density = snow.calc_density(storm_accum, dpt)
+            self.snow_density = snow.calc_phase_and_density(storm_accum, dpt)
 
             main_obj.output(t, module = 'precip', out_var = 'snow_density')
 
