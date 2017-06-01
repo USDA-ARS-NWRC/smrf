@@ -31,25 +31,14 @@ class ppt(image_data.image_data):
 
     The precipitation phase, or the amount of precipitation falling as rain or snow, can significantly
     alter the energy and mass balance of the snowpack, either leading to snow accumulation or inducing
-    melt :cite:`Marks&al:1998` :cite:`Kormos&al:2014`. The precipitation phase and initial snow density are
-    based on the precipitation temperature (the distributed dew point temperature) and are estimated
-    after Susong et al (1999) :cite:`Susong&al:1999`. The table below shows the relationship to
-    precipitation temperature:
+    melt :cite:`Marks&al:1998` :cite:`Kormos&al:2014`. The precipitation phase and initial snow density
+    estimated using a variety of models that can be set in the configuration file.
 
-    ========= ======== ============ ===============
-    Min Temp  Max Temp Percent snow Snow density
-    [deg C]   [deg C]  [%]          [kg/m^3]
-    ========= ======== ============ ===============
-    -Inf      -5       100          75
-    -5        -3       100          100
-    -3        -1.5     100          150
-    -1.5      -0.5     100          175
-    -0.5      0        75           200
-    0         0.5      25           250
-    0.5       Inf      0            0
-    ========= ======== ============ ===============
+    For more information on the available models, checkout :mod:`~smrf.envphys.snow`.
 
-    After the precipitation phase is calculated, the storm infromation at each pixel can be determined.
+    After the precipitation phase is calculated, the storm infromation can be determined. The spatial
+    resolution for which storm definitions are applied is based on the snow model thats selected.
+
     The time since last storm is based on an accumulated precipitation mass threshold, the time elapsed
     since it last snowed, and the precipitation phase.  These factors determine the start and end time
     of a storm that has produced enough precipitation as snow to change the surface albedo.
@@ -64,7 +53,7 @@ class ppt(image_data.image_data):
         percent_snow: numpy array of the percent of time step that was snow
         snow_density: numpy array of the snow density
         storm_days: numpy array of the days since last storm
-        storm_precip: numpy array of the precipitaiton mass for the storm
+        storm_precip: numpy array of the precipitation mass for the storm
         last_storm_day: numpy array of the day of the last storm (decimal day)
         last_storm_day_basin: maximum value of last_storm day within the mask if specified
         min: minimum value of precipitation is 0
@@ -121,8 +110,6 @@ class ppt(image_data.image_data):
         self.getConfig(pptConfig)
         self.time_step = float(time_step)
 
-
-
     def initialize(self, topo, data):
 
         self._logger.debug('Initializing distribute.precip')
@@ -164,7 +151,8 @@ class ppt(image_data.image_data):
             self.storm_id = 0
             self._logger.info("Estimated number of storms: {0}".format(storm_count))
 
-        self._logger.info("Using {0} for the new accumulated snow density model...".format(self.nasde_model))
+
+        self._logger.info("Using {0} for the new accumulated snow density model:  ".format(self.nasde_model))
 
     def distribute_precip(self, data):
         """

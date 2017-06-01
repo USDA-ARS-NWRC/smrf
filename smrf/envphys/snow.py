@@ -12,15 +12,13 @@ import matplotlib.pyplot as plt
 from distutils.command.check import check
 
 '''
-When creating a new NASDE model make sure you adhere to the follow here:
+When creating a new NASDE model make sure you adhere to the following:
 
 1. Add a new method here with a unique name.
 2. Add your method to the available_models dictionary using the format of the
 expected config file string followed by your function name
 3. Document and run smrf!
 '''
-
-
 
 def calc_phase_and_density(temperature, precipitation, nasde_model):
     '''
@@ -98,9 +96,9 @@ def check_temperature(Tpp, Tmax = 0.0, Tmin = -10.0):
     """
 
     Tpp[Tpp < Tmin] = Tmin
-    Tpp[Tpp > Tmax] = Tmax
 
     tsnow = Tpp.copy()
+    tsnow[Tpp > Tmax] = Tmax
 
     return Tpp, tsnow
 
@@ -179,7 +177,7 @@ def susong1999(temperature, precipitation):
 
     return {'pcs':ps, 'rho_s':sd}
 
-def continuous_susong1999(Tpp, precip, Tmax = 0.0, Tmin = -10.0, check_temps=False):
+def continuous_susong1999(Tpp, precip, Tmax = 0.0, Tmin = -10.0, check_temps=True):
     '''
     Follows method susong1999 but is the continuous form of table shown there.
     The table was estimate by Danny Marks in 2017 which resulted in the
@@ -211,17 +209,17 @@ def continuous_susong1999(Tpp, precip, Tmax = 0.0, Tmin = -10.0, check_temps=Fal
 
     # again, this shouldn't be needed in this context
     if check_temps:
-        Tpp,tsnow = check_temperature(Tpp, Tmax=Tmax, Tmin=Tmin)
+        Tpp, tsnow = check_temperature(Tpp, Tmax=Tmax, Tmin=Tmin)
 
     pcs = calc_perc_snow(Tpp,Tmin=Tmin, Tmax = Tmax)
 
     # new snow density - no compaction
     Trange = Tmax - Tmin
-    ex = ex_min + (((Trange + (Tpp - Tmax)) / Trange) * exr)
+    ex = ex_min + (((Trange + (tsnow - Tmax)) / Trange) * exr)
 
     ex[ex > ex_max] = ex_max
 
-    rho_ns = (50.0 + (1.7 * (((Tpp - Tz) + 15.0)**ex)))
+    rho_ns = 50.0 + (1.7 * ((Tpp-Tz) + 15.0)**ex)
 
     return {'pcs':pcs, 'rho_s':rho_ns}
 
@@ -257,17 +255,17 @@ def marks2017(Tpp,pp):
 
     if np.any(pp > 0):
 
-        # check the precipitaiton temperature
+        # check the precipitation temperature
         Tpp, tsnow = check_temperature(Tpp, Tmax=Tmax, Tmin=Tmin)
 
-        # Calculate the percent snow
+        # Calculate the percent snow and initial uncompacted density
         result = continuous_susong1999(Tpp,pp,Tmax=Tmax, Tmin=Tmin)
         pcs = result['pcs']
         rho_orig = result['rho_s']
 
         swe = pp * pcs
 
-        # calculate the density only where there is swe
+        # Calculate the density only where there is swe
         swe_ind = swe > 0.0
         if np.any(swe_ind):
 
@@ -275,22 +273,24 @@ def marks2017(Tpp,pp):
             s_pp = pp[swe_ind]
             s_swe = swe[swe_ind]
             s_tpp = Tpp[swe_ind] # transforms to a 1D array, will put back later
-            s_rho_ns = rho_orig[swe_ind] # transforms to a 1D array, will put back later
+            s_tsnow = tsnow[swe_ind] # transforms to a 1D array, will put back later
 
+            s_rho_ns = rho_orig[swe_ind] # transforms to a 1D array, will put back later
 
             #Convert to a percentage of water
             s_rho_ns /= water
 
             # proportional total storm mass compaction
-            s_d_rho_c = (0.026 * np.exp(-0.08 * (Tz - s_tpp)) * s_swe * np.exp(-21.0 * s_rho_ns))
+            s_d_rho_c = (0.026 * np.exp(-0.08 * (Tz - s_tsnow)) * s_swe * np.exp(-21.0 * s_rho_ns))
 
-            ind = s_rho_ns * water >= 100.0
+            ind = s_rho_ns * water > 100.0
             c11 = np.ones(s_rho_ns.shape)
-            c11[ind] = (c_min + ((Tz - s_tpp[ind]) * cfac)) + 1.0
 
-            s_d_rho_m = 0.01 * c11 * np.exp(-0.04 * (Tz - s_tpp))
+            c11[ind] = (c_min + ((Tz - s_tsnow[ind]) * cfac)) + 1.0
 
-            # compute snow denstiy, depth & combined liquid and snow density
+            s_d_rho_m = 0.01 * c11 * np.exp(-0.04 * (Tz - s_tsnow))
+
+            # compute snow density, depth & combined liquid and snow density
             s_rho_s = s_rho_ns +((s_d_rho_c + s_d_rho_m) * s_rho_ns)
 
             s_zs = s_swe / s_rho_s
@@ -311,10 +311,12 @@ def marks2017(Tpp,pp):
             rho_s[swe_ind]= s_rho_s
             rho[swe_ind] = s_rho
             pcs[swe_ind] = s_pcs
-    # convert densities from proportions, to kg/m^3 or mm/m^2
-    rho_ns *= water
-    rho_s *= water
-    rho *= water
+
+    # # convert densities from proportions, to kg/m^3 or mm/m^2
+    rho_ns = rho_ns * water
+    rho_s = rho_s * water
+    rho = rho * water
+
 
     return {'swe':swe, 'pcs':pcs,'rho_ns': rho_ns, 'd_rho_c' : d_rho_c, 'd_rho_m' : d_rho_m, 'rho_s' : rho_s, 'rho':rho, 'zs':zs}
 
