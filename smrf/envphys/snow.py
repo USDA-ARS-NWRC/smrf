@@ -8,8 +8,8 @@ __version__ = '0.2.1'
 
 import numpy as np
 import pandas as pd
-import matplotlib.pyplot as plt
-from distutils.command.check import check
+# import matplotlib.pyplot as plt
+
 
 '''
 When creating a new NASDE model make sure you adhere to the following:
@@ -103,7 +103,9 @@ def check_temperature(Tpp, Tmax = 0.0, Tmin = -10.0):
     return Tpp, tsnow
 
 
-#BEGIN NASDE MODELS HERE AND BELOW
+#===============================================================================
+# BEGIN NASDE MODELS HERE AND BELOW
+#===============================================================================
 
 def susong1999(temperature, precipitation):
     '''
@@ -177,6 +179,7 @@ def susong1999(temperature, precipitation):
 
     return {'pcs':ps, 'rho_s':sd}
 
+
 def continuous_susong1999(Tpp, precip, Tmax = 0.0, Tmin = -10.0, check_temps=True):
     '''
     Follows method susong1999 but is the continuous form of table shown there.
@@ -224,7 +227,7 @@ def continuous_susong1999(Tpp, precip, Tmax = 0.0, Tmin = -10.0, check_temps=Tru
     return {'pcs':pcs, 'rho_s':rho_ns}
 
 
-def marks2017(Tpp,pp):
+def marks2017(Tpp, pp):
 
     """
     Numpy implementation of the compacted_snow_density

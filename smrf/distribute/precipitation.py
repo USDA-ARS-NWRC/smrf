@@ -135,10 +135,16 @@ class ppt(image_data.image_data):
         else:
                 self.time_to_end_storm = 2 # Time steps it take to end a storm definition
 
-        if 'nasde_model' in self.config:
-            self.nasde_model= self.config['nasde_model']
-        else:
+        if 'nasde_model' not in self.config:
             self.nasde_model = 'susong1999'
+        elif self.config['nasde_model'] == 'susong1999':
+            self.nasde_model = 'susong1999'
+        elif self.config['nasde_model'] == 'marks2017':
+            self.nasde_model = 'marks2017'
+        else:
+            self._logger.error('Could not determine method for new accumulation density model')
+
+        self._logger.info("Using {0} for the new accumulated snow density model:  ".format(self.nasde_model))
 
         if self.nasde_model == 'marks2017':
             #Clip and adjust the precip data so that there is only precip during the storm
@@ -152,7 +158,7 @@ class ppt(image_data.image_data):
             self._logger.info("Estimated number of storms: {0}".format(storm_count))
 
 
-        self._logger.info("Using {0} for the new accumulated snow density model:  ".format(self.nasde_model))
+        
 
     def distribute_precip(self, data):
         """
@@ -222,50 +228,11 @@ class ppt(image_data.image_data):
 
 
         if self.nasde_model == 'marks2017':
-            self.distribute_for_marks2017(data,dpt,time,mask=mask)
+            self.distribute_for_marks2017(data, dpt, time, mask=mask)
 
         else:
-            if data.sum() > 0:
-
-                # distribute data and set the min/max
-                self._distribute(data, zeros=None)
-                self.precip = utils.set_min_max(self.precip, self.min, self.max)
-
-                # remove very small precipitation
-
-                # determine the precip phase and den
-                snow_den, perc_snow = snow.calc_phase_and_density(dpt,self.precip, nasde_model=self.nasde_model)
-
-                # determine the time since last storm
-                stormDays, stormPrecip = storms.time_since_storm(self.precip, perc_snow,
-                                                            time_step=self.time_step/60/24, mass=0.5, time=4,
-                                                            stormDays=self.storm_days,
-                                                            stormPrecip=self.storm_precip)
-
-                # save the model state
-                self.percent_snow = perc_snow
-                self.snow_density = snow_den
-                self.storm_days = stormDays
-                self.storm_precip = stormPrecip
-
-            else:
-
-                self.storm_days += self.time_step/60/24
-
-                # make everything else zeros
-                self.precip = np.zeros(self.storm_days.shape)
-                self.percent_snow = np.zeros(self.storm_days.shape)
-                self.snow_density = np.zeros(self.storm_days.shape)
-
-
-            # day of last storm, this will be used in albedo
-            self.last_storm_day = utils.water_day(data.name)[0] - self.storm_days - 0.001
-
-            # get the time since most recent storm
-            if mask is not None:
-                self.last_storm_day_basin = np.max(mask * self.last_storm_day)
-            else:
-                self.last_storm_day_basin = np.max(self.last_storm_day)
+            self.distribute_for_susong1999(data, dpt, time, mask=mask)
+            
 
 
     def distribute_for_marks2017(self, data, dpt, time, mask=None):
@@ -343,6 +310,55 @@ class ppt(image_data.image_data):
             self.last_storm_day_basin = np.max(mask * self.last_storm_day)
         else:
             self.last_storm_day_basin = np.max(self.last_storm_day)
+
+
+    def distribute_for_susong1999(self, data, dpt, time, mask=None):
+        """
+        Docs for susong1999
+        """
+        
+        if data.sum() > 0:
+
+            # distribute data and set the min/max
+            self._distribute(data, zeros=None)
+            self.precip = utils.set_min_max(self.precip, self.min, self.max)
+
+            # remove very small precipitation
+
+            # determine the precip phase and den
+            snow_den, perc_snow = snow.calc_phase_and_density(dpt, self.precip, nasde_model=self.nasde_model)
+
+            # determine the time since last storm
+            stormDays, stormPrecip = storms.time_since_storm(self.precip, perc_snow,
+                                                        time_step=self.time_step/60/24, mass=0.5, time=4,
+                                                        stormDays=self.storm_days,
+                                                        stormPrecip=self.storm_precip)
+
+            # save the model state
+            self.percent_snow = perc_snow
+            self.snow_density = snow_den
+            self.storm_days = stormDays
+            self.storm_precip = stormPrecip
+
+        else:
+
+            self.storm_days += self.time_step/60/24
+
+            # make everything else zeros
+            self.precip = np.zeros(self.storm_days.shape)
+            self.percent_snow = np.zeros(self.storm_days.shape)
+            self.snow_density = np.zeros(self.storm_days.shape)
+
+
+        # day of last storm, this will be used in albedo
+        self.last_storm_day = utils.water_day(data.name)[0] - self.storm_days - 0.001
+
+        # get the time since most recent storm
+        if mask is not None:
+            self.last_storm_day_basin = np.max(mask * self.last_storm_day)
+        else:
+            self.last_storm_day_basin = np.max(self.last_storm_day)
+            
 
     def distribute_thread(self, queue, data, date, mask=None):
         """
@@ -429,6 +445,7 @@ class ppt(image_data.image_data):
 
             main_obj.output(t, module = 'precip', out_var = 'snow_density')
 
+
     def post_processor(self,main_obj, threaded = False):
         """
         Process the snow density values
@@ -459,11 +476,11 @@ class ppt(image_data.image_data):
 
     def post_processor_threaded(self, main_obj):
         #  self._logger.info("Post processing snow_density...")
-         #
+        
         #  #Open files
         #  pp_fname = os.path.join(main_obj.config['output']['out_location'], 'precip.nc')
         #  t_fname = os.path.join(main_obj.config['output']['out_location'], 'dew_point.nc')
-         #
+        
         #  pds = Dataset(pp_fname,'r')
         #  tds = Dataset(t_fname,'r')
         pass
