@@ -41,7 +41,7 @@ class topo():
         sky_view:
         ny: number of columns in DEM
         nx: number of rows in DEM
-        u,v: 
+        u,v:
  location of upper left corner
         du, dv: step size of grid
         unit: geo header units of grid
