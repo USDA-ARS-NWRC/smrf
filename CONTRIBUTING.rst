@@ -38,8 +38,8 @@ is open to whoever wants to implement it.
 Write Documentation
 ~~~~~~~~~~~~~~~~~~~
 
-Snow Modeling Resources Framework could always use more documentation, whether as part of the
-official Snow Modeling Resources Framework docs, in docstrings, or even on the web in blog posts,
+SMRF could always use more documentation, whether as part of the
+official SMRF docs, in docstrings, or even on the web in blog posts,
 articles, and such.
 
 Versioning
@@ -67,7 +67,7 @@ Ready to contribute? Here's how to set up `smrf` for local development.
 1. Fork the `smrf` repo on GitLab.
 2. Clone your fork locally::
 
-    $ git clone git@github.com:your_name_here/smrf.git
+    $ git clone git@gitlab.com:your_name_here/smrf.git
 
 3. Install your local copy into a virtualenv. Assuming you have virtualenvwrapper installed, this is how you set up your fork for local development::
 
