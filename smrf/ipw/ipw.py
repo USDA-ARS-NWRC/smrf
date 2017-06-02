@@ -45,8 +45,9 @@ def _decode(s):
     return s.decode('utf-8')
 
 
-def map_fn(self, x, float_min, float_max, int_min, int_max):
-    return np.round(((x - float_min) * (int_max - int_min))/(float_max - float_min))
+def map_fn(x, float_min, float_max, int_min, int_max):
+    return np.round(((x - float_min) * (int_max - int_min)) /
+                    (float_max - float_min))
 
 
 # _unpackindx  = lambda L: int(L.split()[2])

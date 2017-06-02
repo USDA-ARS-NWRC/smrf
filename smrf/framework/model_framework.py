@@ -508,7 +508,7 @@ class SMRF():
             self.output(t)
 
             telapsed = datetime.now() - startTime
-            self._logger.debug('{.1f} seconds for time step'
+            self._logger.debug('{0:.2f} seconds for time step'
                                .format(telapsed.total_seconds()))
 
         self.forcing_data = 1

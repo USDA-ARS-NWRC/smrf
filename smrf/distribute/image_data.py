@@ -216,7 +216,7 @@ class image_data():
             raise Exception('''Could not determine the distribution
                                 method for {}'''.format(self.variable))
 
-    def distribute(self, data, other_attribute=None, zeros=None):
+    def _distribute(self, data, other_attribute=None, zeros=None):
         """
         Distribute the data using the defined distribution method in
         :py:attr:`config`
