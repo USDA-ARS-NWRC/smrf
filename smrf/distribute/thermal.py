@@ -1,12 +1,6 @@
-__author__ = "Scott Havens"
-__maintainer__ = "Scott Havens"
-__email__ = "scott.havens@ars.usda.gov"
-__date__ = "2016-01-07"
-__version__ = "0.2.2"
-
 
 import numpy as np
-import logging, os
+import logging
 # import subprocess as sp
 # from multiprocessing import Process
 from smrf.distribute import image_data
@@ -17,22 +11,33 @@ from smrf.envphys.core import envphys_c
 
 # import matplotlib.pyplot as plt
 
+__author__ = "Scott Havens"
+__maintainer__ = "Scott Havens"
+__email__ = "scott.havens@ars.usda.gov"
+__date__ = "2016-01-07"
+__version__ = "0.2.2"
+
+
 class th(image_data.image_data):
     """
-    The :mod:`~smrf.distribute.thermal.th` class allows for variable specific distributions that
-    go beyond the base class
+    The :mod:`~smrf.distribute.thermal.th` class allows for variable specific
+    distributions that go beyond the base class.
 
-    Thermal radiation, or long-wave radiation, is calculated based on the clear sky radiation emitted by
-    the atmosphere. Multiple methods for calculating thermal radition exist and SMRF has 4 options for
-    estimating clear sky thermal radiation. Selecting one of the options below will change the equations
-    used. The methods were chosen based on the study by Flerchinger et al (2009) :cite:`Flerchinger&al:2009`
-    who performed a model comparison using 21 AmeriFlux sites from North America and China.
+    Thermal radiation, or long-wave radiation, is calculated based on the clear
+    sky radiation emitted by the atmosphere. Multiple methods for calculating
+    thermal radition exist and SMRF has 4 options for estimating clear sky
+    thermal radiation. Selecting one of the options below will change the
+    equations used. The methods were chosen based on the study by Flerchinger
+    et al (2009) :cite:`Flerchinger&al:2009` who performed a model comparison
+    using 21 AmeriFlux sites from North America and China.
 
     Marks1979
-        The methods follow those developed by Marks and Dozier (1979) :cite:`Marks&Dozier:1979`
-        that calculates the effective clear sky atmospheric emissivity using the distributed air temperature,
-        distributed dew point temperature, and the elevation. The clear sky radiation is further adjusted for
-        topographic affects based on the percent of the sky visible at any given point.
+        The methods follow those developed by Marks and Dozier (1979)
+        :cite:`Marks&Dozier:1979` that calculates the effective clear sky
+        atmospheric emissivity using the distributed air temperature,
+        distributed dew point temperature, and the elevation. The clear sky
+        radiation is further adjusted for topographic affects based on the
+        percent of the sky visible at any given point.
 
     Dilley1998
         .. math::
@@ -50,28 +55,31 @@ class th(image_data.image_data):
         .. math::
             \\epsilon_{clear} = 0.83 - 0.18 * 10^{-0.067 e_a}
 
-        References: Angstrom (1918) :cite:`Angstrom:1918` as cityed by Niemela et al (2001) :cite:`Niemela&al:2001`
+        References: Angstrom (1918) :cite:`Angstrom:1918` as cityed by Niemela
+        et al (2001) :cite:`Niemela&al:2001`
 
     .. figure:: _static/thermal_comparison.png
        :scale: 50%
        :alt: Comparing the 4 thermal methods.
 
-       The 4 different methods for estimating clear sky thermal radiation for a single time step. As
-       compared to the Mark1979 method, the other methods provide a wide range in the estimated
-       value of thermal radiation.
+       The 4 different methods for estimating clear sky thermal radiation for a
+       single time step. As compared to the Mark1979 method, the other methods
+       provide a wide range in the estimated value of thermal radiation.
 
 
-    The topographic correct clear sky thermal radiation is further adjusted for cloud affects. Cloud
-    correction is based on fraction of cloud cover, a cloud factor close to 1 meaning no clouds are
-    present, there is little radiation added.  When clouds are present, or a cloud factor close to 0,
-    then additional long wave radiation is added to account for the cloud cover. Selecting one of the
-    options below will change the equations used. The methods were chosen based on the study by
-    Flerchinger et al (2009) :cite:`Flerchinger&al:2009`, where :math:`c=1-cloud\_factor`.
+    The topographic correct clear sky thermal radiation is further adjusted for
+    cloud affects. Cloud correction is based on fraction of cloud cover, a
+    cloud factor close to 1 meaning no clouds are present, there is little
+    radiation added.  When clouds are present, or a cloud factor close to 0,
+    then additional long wave radiation is added to account for the cloud
+    cover. Selecting one of the options below will change the equations used.
+    The methods were chosen based on the study by Flerchinger et al (2009)
+    :cite:`Flerchinger&al:2009`, where :math:`c=1-cloud\_factor`.
 
     Garen2005
-        Cloud correction is based on the relationship in Garen and Marks (2005) :cite:`Garen&Marks:2005`
-        between the cloud factor and measured long wave radiation using measurement stations in the Boise
-        River Basin.
+        Cloud correction is based on the relationship in Garen and Marks (2005)
+        :cite:`Garen&Marks:2005` between the cloud factor and measured long
+        wave radiation using measurement stations in the Boise River Basin.
 
         .. math::
             L_{cloud} = L_{clear} * (1.485 - 0.488 * cloud\_factor)
@@ -94,8 +102,9 @@ class th(image_data.image_data):
             L_d &= L_{clear} + \\tau_8 c \sigma T^4_c
 
 
-        where the original Kimball et al. (1982) :cite:`Kimball&al:1982` was for multiple cloud layers, which
-        was simplified to one layer. :math:`T_c` is the cloud temperature and is assumed to be 11 K cooler
+        where the original Kimball et al. (1982) :cite:`Kimball&al:1982` was
+        for multiple cloud layers, which was simplified to one layer.
+        :math:`T_c` is the cloud temperature and is assumed to be 11 K cooler
         than :math:`T_a`.
 
         References: Kimball et al. (1982) :cite:`Kimball&al:1982`
@@ -104,32 +113,37 @@ class th(image_data.image_data):
         .. math::
             \epsilon_a = (1 - cloud\_factor) + cloud\_factor * \epsilon_{clear}
 
-        References: Crawford and Duchon (1999) :cite:`Crawford&Duchon:1999` where :math:`cloud\_factor`
-        is the ratio of measured solar radiation to the clear sky irradiance.
+        References: Crawford and Duchon (1999) :cite:`Crawford&Duchon:1999`
+        where :math:`cloud\_factor` is the ratio of measured solar radiation to
+        the clear sky irradiance.
 
-    The results from Flerchinger et al (2009) :cite:`Flerchinger&al:2009` showed that the Kimball1982 cloud correction
-    with Dilley1998 clear sky algorthim had the lowest RMSD. The Crawford1999 worked best when combined with
+    The results from Flerchinger et al (2009) :cite:`Flerchinger&al:2009`
+    showed that the Kimball1982 cloud correction with Dilley1998 clear sky
+    algorthim had the lowest RMSD. The Crawford1999 worked best when combined with
     Angstrom1918, Dilley1998, or Prata1996.
 
     .. figure:: _static/thermal_cloud_comparision.png
        :scale: 50%
        :alt: Comparing the 4 thermal cloud correction methods.
 
-       The 4 different methods for correcting clear sky thermal radiation for cloud affects at a single time step. As
-       compared to the Garen2005 method, the other methods are typically higher where clouds are present (i.e. the lower
-       left) where the cloud factor is around 0.4.
+       The 4 different methods for correcting clear sky thermal radiation for
+       cloud affects at a single time step. As compared to the Garen2005
+       method, the other methods are typically higher where clouds are present
+       (i.e. the lower left) where the cloud factor is around 0.4.
 
-    The thermal radiation is further adjusted for canopy cover after the work of Link and Marks (1999)
-    :cite:`Link&Marks:1999`. The correction is based on the vegetation's transmissivity, with the canopy
-    temperature assumed to be the air temperature for vegetation greater than 2 meters.  The thermal
+    The thermal radiation is further adjusted for canopy cover after the work
+    of Link and Marks (1999) :cite:`Link&Marks:1999`. The correction is based
+    on the vegetation's transmissivity, with the canopy temperature assumed to
+    be the air temperature for vegetation greater than 2 meters.  The thermal
     radiation is adjusted by
 
     .. math::
         L_{canopy} = \\tau_d * L_{cloud} + (1 - \\tau_d) \epsilon \sigma T_a^4
 
-    where :math:`\\tau_d` is the optical transmissivity, :math:`L_{cloud}` is the cloud corrected thermal
-    radiation, :math:`\epsilon` is the emissivity of the canopy (0.96), :math:`\sigma` is the Stephan-Boltzmann
-    constant, and :math:`T_a` is the distributed air temperature.
+    where :math:`\\tau_d` is the optical transmissivity, :math:`L_{cloud}` is
+    the cloud corrected thermal radiation, :math:`\epsilon` is the emissivity
+    of the canopy (0.96), :math:`\sigma` is the Stephan-Boltzmann constant, and
+    :math:`T_a` is the distributed air temperature.
 
     Args:
         thermalConfig: The [thermal] section of the configuration file
@@ -140,15 +154,22 @@ class th(image_data.image_data):
         min: minimum value of thermal is -600 W/m^2
         max: maximum value of thermal is 600 W/m^2
         stations: stations to be used in alphabetical order
-        output_variables: Dictionary of the variables held within class :mod:`!smrf.distribute.thermal.ta`
-            that specifies the ``units`` and ``long_name`` for creating the NetCDF output file.
+        output_variables: Dictionary of the variables held within class
+            :mod:`!smrf.distribute.thermal.ta` that specifies the ``units``
+            and ``long_name`` for creating the NetCDF output file.
         variable: 'thermal'
-        dem: numpy array for the DEM, from :py:attr:`smrf.data.loadTopo.topo.dem`
-        veg_type: numpy array for the veg type, from :py:attr:`smrf.data.loadTopo.topo.veg_type`
-        veg_height: numpy array for the veg height, from :py:attr:`smrf.data.loadTopo.topo.veg_height`
-        veg_k: numpy array for the veg K, from :py:attr:`smrf.data.loadTopo.topo.veg_k`
-        veg_tau: numpy array for the veg transmissivity, from :py:attr:`smrf.data.loadTopo.topo.veg_tau`
-        sky_view: numpy array for the sky view factor, from :py:attr:`smrf.data.loadTopo.topo.sky_view`
+        dem: numpy array for the DEM, from
+            :py:attr:`smrf.data.loadTopo.topo.dem`
+        veg_type: numpy array for the veg type, from
+            :py:attr:`smrf.data.loadTopo.topo.veg_type`
+        veg_height: numpy array for the veg height, from
+            :py:attr:`smrf.data.loadTopo.topo.veg_height`
+        veg_k: numpy array for the veg K, from
+            :py:attr:`smrf.data.loadTopo.topo.veg_k`
+        veg_tau: numpy array for the veg transmissivity, from
+            :py:attr:`smrf.data.loadTopo.topo.veg_tau`
+        sky_view: numpy array for the sky view factor, from
+            :py:attr:`smrf.data.loadTopo.topo.sky_view`
     """
 
     variable = 'thermal'
@@ -156,14 +177,14 @@ class th(image_data.image_data):
     max = 600
 
     # these are variables that can be output
-    output_variables = {'thermal':{
+    output_variables = {'thermal': {
                                   'units': 'W/m^2',
                                   'long_name': 'thermal_radiation'
                                   }
                         }
-    # these are variables that are operate at the end only and do not need to be written during main distribute loop
+    # these are variables that are operate at the end only and do not need to
+    # be written during main distribute loop
     post_process_variables = {}
-
 
     def __init__(self, thermalConfig):
 
@@ -192,7 +213,7 @@ class th(image_data.image_data):
         elif self.config['method'] == 'Angstrom1918':
             self.method = 'Angstrom1918'
         else:
-            self._logger.error('Could not determine method specifies for thermal')
+            self._logger.error('Could not determine method for thermal')
 
         # correct for cloud and veg
         self.config['correct_cloud'] = True
@@ -211,8 +232,6 @@ class th(image_data.image_data):
             elif self.config['cloud_method'] == 'Crawford1999':
                 self.cloud_method = 'Crawford1999'
 
-
-
         self.config['correct_veg'] = True
         if 'correct_veg' in self.config:
             self.correct_veg = self.config['correct_veg']
@@ -221,14 +240,13 @@ class th(image_data.image_data):
         if 'correct_terrain' in self.config:
             self.correct_terrain = self.config['correct_terrain']
 
-
         self._logger.debug('Created distribute.thermal')
-
 
     def initialize(self, topo, data):
         """
-        Initialize the distribution, calls :mod:`smrf.distribute.image_data.image_data._initialize`
-        for gridded distirbution. Sets the following from :mod:`smrf.data.loadTopo.topo`
+        Initialize the distribution, calls
+        :mod:`smrf.distribute.image_data.image_data._initialize` for gridded
+        distirbution. Sets the following from :mod:`smrf.data.loadTopo.topo`
 
         * :py:attr:`veg_height`
         * :py:attr:`veg_tau`
@@ -237,8 +255,8 @@ class th(image_data.image_data):
         * :py:attr:`dem`
 
         Args:
-            topo: :mod:`smrf.data.loadTopo.topo` instance contain topographic data
-                and infomation
+            topo: :mod:`smrf.data.loadTopo.topo` instance contain topographic
+                data and infomation
             data: data Pandas dataframe containing the station data,
                 from :mod:`smrf.data.loadData` or :mod:`smrf.data.loadGrid`
 
@@ -256,14 +274,15 @@ class th(image_data.image_data):
             self.sky_view = None
         self.dem = topo.dem
 
-
-    def distribute(self, date_time, air_temp, vapor_pressure=None, dew_point=None, cloud_factor=None):
+    def distribute(self, date_time, air_temp, vapor_pressure=None,
+                   dew_point=None, cloud_factor=None):
         """
         Distribute for a single time step.
 
         The following steps are taken when distributing thermal:
 
-        1. Calculate the clear sky thermal radiation from :mod:`smrf.envphys.core.envphys_c.ctopotherm`
+        1. Calculate the clear sky thermal radiation from
+            :mod:`smrf.envphys.core.envphys_c.ctopotherm`
         2. Correct the clear sky thermal for the distributed cloud factor
         3. Correct for canopy affects
 
@@ -272,7 +291,8 @@ class th(image_data.image_data):
             air_temp: distributed air temperature for the time step
             vapor_pressure: distributed vapor pressure for the time step
             dew_point: distributed dew point for the time step
-            cloud_factor: distributed cloud factor for the time step measured/modeled
+            cloud_factor: distributed cloud factor for the time step
+                measured/modeled
         """
 
         self._logger.debug('%s Distributing thermal' % date_time)
@@ -280,7 +300,8 @@ class th(image_data.image_data):
         # calculate clear sky thermal
         if self.method == 'Marks1979':
             cth = np.zeros_like(air_temp, dtype=np.float64)
-            envphys_c.ctopotherm(air_temp, dew_point, self.dem, self.sky_view, cth, self.config['nthreads'])
+            envphys_c.ctopotherm(air_temp, dew_point, self.dem, self.sky_view,
+                                 cth, self.config['nthreads'])
 
         elif self.method == 'Dilley1998':
             cth = thermal_radiation.Dilly1998(air_temp, vapor_pressure/1000)
@@ -294,37 +315,47 @@ class th(image_data.image_data):
         # terrain factor correction
         if (self.sky_view is not None) and (self.method != 'Marks1979'):
             # apply (emiss * skvfac) + (1.0 - skvfac) to the longwave
-            cth = cth * self.sky_view + (1.0 - self.sky_view) * thermal_radiation.STEF_BOLTZ * air_temp**4
-
+            cth = cth * self.sky_view + (1.0 - self.sky_view) * \
+                thermal_radiation.STEF_BOLTZ * air_temp**4
 
         # correct for the cloud factor
         # ratio of measured/modeled solar indicates the thermal correction
         if self.correct_cloud:
             if self.cloud_method == 'Garen2005':
-                cth = thermal_radiation.Garen2005(cth, cloud_factor)
+                cth = thermal_radiation.Garen2005(cth,
+                                                  cloud_factor)
 
             elif self.cloud_method == 'Unsworth1975':
-                cth = thermal_radiation.Unsworth1975(cth, air_temp, cloud_factor)
+                cth = thermal_radiation.Unsworth1975(cth,
+                                                     air_temp,
+                                                     cloud_factor)
 
             elif self.cloud_method == 'Kimball1982':
-                cth = thermal_radiation.Kimball1982(cth, air_temp, vapor_pressure/1000, cloud_factor)
+                cth = thermal_radiation.Kimball1982(cth,
+                                                    air_temp,
+                                                    vapor_pressure/1000,
+                                                    cloud_factor)
 
             elif self.cloud_method == 'Crawford1999':
-                cth = thermal_radiation.Crawford1999(cth, air_temp, cloud_factor)
-
+                cth = thermal_radiation.Crawford1999(cth,
+                                                     air_temp,
+                                                     cloud_factor)
 
         # correct for vegetation
         if self.correct_veg:
-            cth = thermal_radiation.thermal_correct_canopy(cth, air_temp, self.veg_tau, self.veg_height)
+            cth = thermal_radiation.thermal_correct_canopy(cth,
+                                                           air_temp,
+                                                           self.veg_tau,
+                                                           self.veg_height)
 
         self.thermal = cth
 
-
     def distribute_thread(self, queue, date):
         """
-        Distribute the data using threading and queue. All data is provided and ``distribute_thread``
-        will go through each time step and call :mod:`smrf.distribute.thermal.th.distribute` then
-        puts the distributed data into the queue for :py:attr:`thermal`.
+        Distribute the data using threading and queue. All data is provided and
+        ``distribute_thread`` will go through each time step and call
+        :mod:`smrf.distribute.thermal.th.distribute` then puts the distributed
+        data into the queue for :py:attr:`thermal`.
 
         Args:
             queue: queue dictionary for all variables
@@ -339,16 +370,16 @@ class th(image_data.image_data):
             vapor_pressure = queue['vapor_pressure'].get(t)
             cloud_factor = queue['cloud_factor'].get(t)
 
-            self.distribute(t, air_temp, vapor_pressure, dew_point, cloud_factor)
+            self.distribute(t, air_temp, vapor_pressure,
+                            dew_point, cloud_factor)
 
-            queue['thermal'].put( [t, self.thermal] )
-
+            queue['thermal'].put([t, self.thermal])
 
     def distribute_thermal(self, data, air_temp):
         """
         Distribute given a Panda's dataframe for a single time step. Calls
-        :mod:`smrf.distribute.image_data.image_data._distribute`. Used when thermal is given
-        (i.e. gridded datasets from WRF). Follows these steps:
+        :mod:`smrf.distribute.image_data.image_data._distribute`. Used when
+        thermal is given (i.e. gridded datasets from WRF). Follows these steps:
 
         1. Distribute the thermal radiation from point values
         2. Correct for vegetation
@@ -364,15 +395,18 @@ class th(image_data.image_data):
         self._distribute(data)
 
         # correct for vegetation
-        self.thermal = thermal_radiation.thermal_correct_canopy(self.thermal, air_temp, self.veg_tau, self.veg_height)
-
+        self.thermal = thermal_radiation.thermal_correct_canopy(self.thermal,
+                                                                air_temp,
+                                                                self.veg_tau,
+                                                                self.veg_height)
 
     def distribute_thermal_thread(self, queue, data):
         """
-        Distribute the data using threading and queue. All data is provided and ``distribute_thread``
-        will go through each time step and call :mod:`smrf.distribute.thermal.th.distribute_thermal` then
-        puts the distributed data into the queue for :py:attr:`thermal`. Used when thermal is given
-        (i.e. gridded datasets from WRF).
+        Distribute the data using threading and queue. All data is provided and
+        ``distribute_thread`` will go through each time step and call
+        :mod:`smrf.distribute.thermal.th.distribute_thermal` then puts the
+        distributed data into the queue for :py:attr:`thermal`. Used when
+        thermal is given (i.e. gridded datasets from WRF).
 
         Args:
             queue: queue dictionary for all variables
@@ -386,4 +420,4 @@ class th(image_data.image_data):
 
             self.distribute_thermal(data.ix[t], air_temp)
 
-            queue['thermal'].put( [t, self.thermal] )
+            queue['thermal'].put([t, self.thermal])

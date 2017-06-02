@@ -1,20 +1,23 @@
+
+import numpy as np
+import logging
+from smrf.distribute import image_data
+
 __author__ = "Scott Havens"
 __maintainer__ = "Scott Havens"
 __email__ = "scott.havens@ars.usda.gov"
 __date__ = "2016-01-07"
 __version__ = "0.2.2"
 
-import numpy as np
-import logging
-from smrf.distribute import image_data
 
 class ts(image_data.image_data):
     """
-    The :mod:`~smrf.distribute.soil_temp.ts` class allows for variable specific distributions that
-    go beyond the base class.
+    The :mod:`~smrf.distribute.soil_temp.ts` class allows for variable specific
+    distributions that go beyond the base class.
 
-    Soil temperature is simply set to a constant value during initialization.  If soil temperature
-    measurements are available, the values can be distributed using the distribution methods.
+    Soil temperature is simply set to a constant value during initialization.
+    If soil temperature measurements are available, the values can be
+    distributed using the distribution methods.
 
     Args:
         soilConfig: The [soil] section of the configuration file
@@ -24,8 +27,9 @@ class ts(image_data.image_data):
         config: configuration from [soil] section
         soil_temp: numpy array of the soil temperature
         stations: stations to be used in alphabetical order
-        output_variables: Dictionary of the variables held within class :mod:`!smrf.distribute.soil_temp.ts`
-            that specifies the ``units`` and ``long_name`` for creating the NetCDF output file.
+        output_variables: Dictionary of the variables held within class
+            :mod:`!smrf.distribute.soil_temp.ts` that specifies the ``units``
+            and ``long_name`` for creating the NetCDF output file.
         variable: 'soil_temp'
 
     """
@@ -39,7 +43,8 @@ class ts(image_data.image_data):
                                   }
                         }
 
-    # these are variables that are operate at the end only and do not need to be written during main distribute loop
+    # these are variables that are operate at the end only and do not need to
+    # be written during main distribute loop
     post_process_variables = {}
 
     def __init__(self, soilConfig, tempDir=None):
@@ -52,15 +57,14 @@ class ts(image_data.image_data):
 
         self._logger.debug('Created distribute.soil_temp')
 
-
     def initialize(self, topo, data):
         """
-        Initialize the distribution and set the soil temperature to a constant value
-        based on the configuration file.
+        Initialize the distribution and set the soil temperature to a constant
+        value based on the configuration file.
 
         Args:
-            topo: :mod:`smrf.data.loadTopo.topo` instance contain topographic data
-                and infomation
+            topo: :mod:`smrf.data.loadTopo.topo` instance contain topographic
+                data and infomation
             metadata: data Pandas dataframe containing the station data,
                 from :mod:`smrf.data.loadData` or :mod:`smrf.data.loadGrid`
 
@@ -70,11 +74,10 @@ class ts(image_data.image_data):
 #         self._initialize(topo, metadata)
         self.soil_temp = float(self.config['temp']) * np.ones(topo.dem.shape)
 
-
     def distribute(self):
         """
-        No distribution is performed on soil temperature at the moment, method simply
-        passes.
+        No distribution is performed on soil temperature at the moment, method
+        simply passes.
 
         Args:
             None
