@@ -4,12 +4,11 @@ Originally written by Scott Havens in 2015
 @author: Micah Johnson
 '''
 
-__version__ = '0.2.1'
-
 import numpy as np
 import pandas as pd
 # import matplotlib.pyplot as plt
 
+__version__ = '0.2.2'
 
 '''
 When creating a new NASDE model make sure you adhere to the following:
