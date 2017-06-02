@@ -5,4 +5,3 @@ __email__ = 'scotthavens@ars.usda.gov'
 __version__ = '0.2.2'
 
 # from .isnobal import isnobal
-

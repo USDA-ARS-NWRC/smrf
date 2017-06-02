@@ -1,22 +1,17 @@
-__author__ = "Scott Havens"
-__maintainer__ = "Scott Havens"
-__email__ = "scott.havens@ars.usda.gov"
-__date__ = "2015-12-22"
-__version__ = '0.2.2'
-
 """
-The module :mod:`~smrf.framework.model_framework` contains functions and classes
-that act as a major wrapper to the underlying packages and modules contained with SMRF.
-A class instance of :class:`~smrf.framework.model_framework.SMRF` is initialized with
-a configuration file indicating where data is located, what variables to distribute and
-how, where to output the distributed data, or run as a threaded application. See the
-help on the configuration file to learn more about how to control the actions of
-:class:`~smrf.framework.model_framework.SMRF`.
+The module :mod:`~smrf.framework.model_framework` contains functions and
+classes that act as a major wrapper to the underlying packages and modules
+contained with SMRF. A class instance of
+:class:`~smrf.framework.model_framework.SMRF` is initialized with a
+configuration file indicating where data is located, what variables to
+distribute and how, where to output the distributed data, or run as a threaded
+application. See the help on the configuration file to learn more about how to
+control the actions of :class:`~smrf.framework.model_framework.SMRF`.
 
 Example:
-    The following examples shows the most generic method of running SMRF. These commands
-    will generate all the forcing data required to run iSnobal.  A complete example can
-    be found in run_smrf.py
+    The following examples shows the most generic method of running SMRF. These
+    commands will generate all the forcing data required to run iSnobal.  A
+    complete example can be found in run_smrf.py
 
     >>> import smrf
     >>> s = smrf.framework.SMRF(configFile) # initialize SMRF
@@ -28,8 +23,8 @@ Example:
 
 """
 
-
-import logging, os
+import logging
+import os
 import coloredlogs
 from datetime import datetime, timedelta
 import pandas as pd
@@ -45,6 +40,12 @@ from threading import Thread
 
 # from multiprocessing import Process
 
+__author__ = "Scott Havens"
+__maintainer__ = "Scott Havens"
+__email__ = "scott.havens@ars.usda.gov"
+__date__ = "2015-12-22"
+__version__ = '0.2.2'
+
 
 class SMRF():
     """
@@ -59,22 +60,35 @@ class SMRF():
     Attributes:
         start_date: start_date read from configFile
         end_date: end_date read from configFile
-        date_time: Numpy array of date_time objects between start_date and end_date
+        date_time: Numpy array of date_time objects between start_date and
+            end_date
         config: Configuration file read in as dictionary
-        distribute: Dictionary the contains all the desired variables to distribute and is initialized in :func:`~smrf.framework.model_framework.initializeDistirbution`
+        distribute: Dictionary the contains all the desired variables to
+            distribute and is initialized in
+            :func:`~smrf.framework.model_framework.initializeDistirbution`
     """
 
     # These are the modules that the user can modify and use different methods
-    modules = ['air_temp', 'albedo', 'precip', 'soil_temp', 'solar', 'thermal', 'vapor_pressure', 'wind']
+    modules = ['air_temp',
+               'albedo',
+               'precip',
+               'soil_temp',
+               'solar',
+               'thermal',
+               'vapor_pressure',
+               'wind']
 
     # These are the variables that will be queued
     thread_variables = ['cosz', 'azimuth', 'illum_ang',
-                        'air_temp', 'dew_point', 'vapor_pressure', 'wind_speed',
-                        'precip', 'percent_snow', 'snow_density', 'last_storm_day_basin', 'storm_days', 'storm_total','storm_id',
-                        'clear_vis_beam', 'clear_vis_diffuse', 'clear_ir_beam', 'clear_ir_diffuse',
-                        'albedo_vis', 'albedo_ir', 'net_solar', 'cloud_factor', 'thermal',
+                        'air_temp', 'dew_point', 'vapor_pressure',
+                        'wind_speed', 'precip', 'percent_snow',
+                        'snow_density', 'last_storm_day_basin',
+                        'storm_days', 'storm_total', 'storm_id',
+                        'clear_vis_beam', 'clear_vis_diffuse',
+                        'clear_ir_beam', 'clear_ir_diffuse',
+                        'albedo_vis', 'albedo_ir', 'net_solar',
+                        'cloud_factor', 'thermal',
                         'output']
-
 
     def __init__(self, configFile):
         """
@@ -83,7 +97,8 @@ class SMRF():
 
         # read the config file and store
         if not os.path.isfile(configFile):
-            raise Exception('Configuration file does not exist --> %s' % configFile)
+            raise Exception('Configuration file does not exist --> {}'
+                            .format(configFile))
 
 #         f = MyParser()
 #         f.read(configFile)
@@ -91,7 +106,8 @@ class SMRF():
         try:
             self.config = io.read_config(configFile)
         except UnicodeDecodeError:
-            raise UnicodeDecodeError('The configuration file is not encoded in UTF-8, please change and retry')
+            raise UnicodeDecodeError('''The configuration file is not encoded in
+                                    UTF-8, please change and retry''')
 
         # check for the desired sections
         if 'stations' not in self.config:
@@ -108,7 +124,8 @@ class SMRF():
             self.tempDir = os.path.abspath(tempDir)
             os.environ['WORKDIR'] = self.tempDir
         else:
-            raise ValueError("Invalid system entry in Config file, temp_dir is either undefined or does not exist.")
+            raise ValueError('''Invalid system entry in Config file, temp_dir is
+                            either undefined or does not exist.''')
 
         self.threading = False
         if 'threading' in self.config['system']:
@@ -123,7 +140,6 @@ class SMRF():
         if 'time_out' in self.config['system']:
             self.time_out = float(self.config['system']['time_out'])
 
-
         # get the time section
         self.start_date = pd.to_datetime(self.config['time']['start_date'])
         self.end_date = pd.to_datetime(self.config['time']['end_date'])
@@ -136,7 +152,7 @@ class SMRF():
                                        timedelta(minutes=int(self.config['time']['time_step'])))
         tzinfo = pytz.timezone(self.config['time']['time_zone'])
         self.date_time = [di.replace(tzinfo=tzinfo) for di in d]
-        self.time_steps = len(self.date_time)    # number of time steps to model
+        self.time_steps = len(self.date_time)   # number of time steps to model
 
         # initialize the distribute dict
         self.distribute = {}
@@ -152,7 +168,6 @@ class SMRF():
         if not isinstance(numeric_level, int):
             raise ValueError('Invalid log level: %s' % loglevel)
 
-
         # setup the logging
         logfile = None
         if 'log_file' in self.config['logging']:
@@ -160,7 +175,10 @@ class SMRF():
 
         fmt = '%(levelname)s:%(name)s:%(message)s'
         if logfile is not None:
-            logging.basicConfig(filename=logfile, filemode='w', level=numeric_level, format=fmt)
+            logging.basicConfig(filename=logfile,
+                                filemode='w',
+                                level=numeric_level,
+                                format=fmt)
         else:
             logging.basicConfig(level=numeric_level)
             coloredlogs.install(level=numeric_level, fmt=fmt)
@@ -180,7 +198,6 @@ class SMRF():
         self._logger.info('Model start --> %s' % self.start_date)
         self._logger.info('Model end --> %s' % self.end_date)
         self._logger.info('Number of time steps --> %i' % self.time_steps)
-
 
     def __enter__(self):
         return self
@@ -213,7 +230,6 @@ class SMRF():
 
         self._logger.info('SMRF closed --> %s' % datetime.now())
 
-
     def loadTopo(self, calcInput=True):
         """
         Load the information from the configFile in the ['topo'] section. See
@@ -221,15 +237,18 @@ class SMRF():
         """
 
         # load the topo
-        self.topo = data.loadTopo.topo(self.config['topo'], calcInput, tempDir=self.tempDir)
-
+        self.topo = data.loadTopo.topo(self.config['topo'],
+                                       calcInput,
+                                       tempDir=self.tempDir)
 
     def initializeDistribution(self):
         """
-        This initializes the distirbution classes based on the configFile sections
-        for each variable. :func:`~smrf.framework.model_framework.SMRF.initializeDistribution`
-        will initialize the variables within the :func:`smrf.distribute` package
-        and insert into a dictionary 'distribute' with variable names as the keys.
+        This initializes the distirbution classes based on the configFile
+        sections for each variable.
+        :func:`~smrf.framework.model_framework.SMRF.initializeDistribution`
+        will initialize the variables within the :func:`smrf.distribute`
+        package and insert into a dictionary 'distribute' with variable names
+        as the keys.
 
         Variables that are intialized are:
             * :func:`Air temperature <smrf.distribute.air_temp.ta>`
@@ -242,50 +261,55 @@ class SMRF():
             * :func:`Soil Temperature <smrf.distribute.soil_temp.ts>`
         """
 
-
-
         # 1. Air temperature
-        self.distribute['air_temp'] = distribute.air_temp.ta(self.config['air_temp'])  # get the class
+        self.distribute['air_temp'] = \
+            distribute.air_temp.ta(self.config['air_temp'])
 
         # 2. Vapor pressure
-        self.distribute['vapor_pressure'] = distribute.vapor_pressure.vp(self.config['vapor_pressure'])
+        self.distribute['vapor_pressure'] = \
+            distribute.vapor_pressure.vp(self.config['vapor_pressure'])
 
         # 3. Wind
-        self.distribute['wind'] = distribute.wind.wind(self.config['wind'],
-                                                       self.config['system']['temp_dir'])
+        self.distribute['wind'] = \
+            distribute.wind.wind(self.config['wind'],
+                                 self.config['system']['temp_dir'])
 
         # 4. Precipitation
-        self.distribute['precip'] = distribute.precipitation.ppt(self.config['precip'],
-                                                                 self.config['time']['time_step'])
+        self.distribute['precip'] = \
+            distribute.precipitation.ppt(self.config['precip'],
+                                         self.config['time']['time_step'])
 
         # 5. Albedo
-        self.distribute['albedo'] = distribute.albedo.albedo(self.config['albedo'])
+        self.distribute['albedo'] = \
+            distribute.albedo.albedo(self.config['albedo'])
 
         # 6. Solar radiation
-        self.distribute['solar'] = distribute.solar.solar(self.config['solar'],
-                                                          self.distribute['albedo'].config,
-                                                          self.topo.stoporad_in_file,
-                                                          self.config['system']['temp_dir'])
+        self.distribute['solar'] = \
+            distribute.solar.solar(self.config['solar'],
+                                   self.distribute['albedo'].config,
+                                   self.topo.stoporad_in_file,
+                                   self.config['system']['temp_dir'])
 
         # 7. thermal radiation
-        self.distribute['thermal'] = distribute.thermal.th(self.config['thermal'])
+        self.distribute['thermal'] = \
+            distribute.thermal.th(self.config['thermal'])
 
         # 8. soil temperature
-        self.distribute['soil_temp'] = distribute.soil_temp.ts(self.config['soil_temp'])
-
+        self.distribute['soil_temp'] = \
+            distribute.soil_temp.ts(self.config['soil_temp'])
 
     def loadData(self):
         """
         Load the measurement point data for distributing to the DEM,
-        must be called after the distributions are initialized. Currently, data can
-        be loaded from three different sources:
+        must be called after the distributions are initialized. Currently, data
+        can be loaded from three different sources:
             * :func:`CSV files <smrf.data.loadData.wxdata>`
             * :func:`MySQL database <smrf.data.loadData.wxdata>`
             * :func:`Gridded data source (WRF) <smrf.data.loadGrid.grid>`
-        After loading, :func:`~smrf.framework.mode_framework.SMRF.loadData` will call
-        :func:`smrf.framework.model_framework.find_pixel_location` to determine the pixel
-        locations of the point measurements and filter the data to the desired stations if CSV
-        files are used.
+        After loading, :func:`~smrf.framework.mode_framework.SMRF.loadData`
+        will call :func:`smrf.framework.model_framework.find_pixel_location`
+        to determine the pixel locations of the point measurements and filter
+        the data to the desired stations if CSV files are used.
         """
 
         # get the start date and end date requested
@@ -293,19 +317,19 @@ class SMRF():
         flag = True
         if 'csv' in self.config:
             self.data = data.loadData.wxdata(self.config['csv'],
-                                           self.start_date,
-                                           self.end_date,
-                                           time_zone=self.config['time']['time_zone'],
-                                           stations=self.config['stations'],
-                                           dataType='csv')
+                                             self.start_date,
+                                             self.end_date,
+                                             time_zone=self.config['time']['time_zone'],
+                                             stations=self.config['stations'],
+                                             dataType='csv')
 
         elif 'mysql' in self.config:
             self.data = data.loadData.wxdata(self.config['mysql'],
-                                           self.start_date,
-                                           self.end_date,
-                                           time_zone=self.config['time']['time_zone'],
-                                           stations=self.config['stations'],
-                                           dataType='mysql')
+                                             self.start_date,
+                                             self.end_date,
+                                             time_zone=self.config['time']['time_zone'],
+                                             stations=self.config['stations'],
+                                             dataType='mysql')
 
         elif 'gridded' in self.config:
             flag = False
@@ -320,9 +344,12 @@ class SMRF():
             # set the stations in the distribute
             try:
                 for key in self.distribute.keys():
-                    setattr(self.distribute[key], 'stations', self.data.metadata.index.tolist())
+                    setattr(self.distribute[key],
+                            'stations',
+                            self.data.metadata.index.tolist())
             except:
-                self._logger.warn('Distribution not initialized, grid stations could not be set')
+                self._logger.warn(''''Distribution not initialized,
+                                    grid stations could not be set''')
 
         else:
             raise KeyError('Could not determine where station data is located')
@@ -331,8 +358,14 @@ class SMRF():
 #         t = date_range(start_date, end_date, timedelta(minutes=m))
 
         # determine the locations of the stations on the grid
-        self.data.metadata['xi'] = self.data.metadata.apply(lambda row: find_pixel_location(row, self.topo.x, 'X'), axis=1)
-        self.data.metadata['yi'] = self.data.metadata.apply(lambda row: find_pixel_location(row, self.topo.y, 'Y'), axis=1)
+        self.data.metadata['xi'] = \
+            self.data.metadata.apply(lambda row: find_pixel_location(row,
+                                                                     self.topo.x,
+                                                                     'X'), axis=1)
+        self.data.metadata['yi'] = \
+            self.data.metadata.apply(lambda row: find_pixel_location(row,
+                                                                     self.topo.y,
+                                                                     'Y'), axis=1)
 
         # pre filter the data to only the desired stations
         if flag:
@@ -352,18 +385,20 @@ class SMRF():
 
                 if hasattr(self.data, 'cloud_factor'):
                     d = getattr(self.data, 'cloud_factor')
-                    setattr(self.data, 'cloud_factor', d[self.distribute['solar'].stations])
+                    setattr(self.data,
+                            'cloud_factor',
+                            d[self.distribute['solar'].stations])
             except:
-                self._logger.warn('Distribution not initialized, data not filtered to desired stations')
-
-
-
+                self._logger.warn('''Distribution not initialized, data not
+                                    filtered to desired stations''')
 
     def distributeData(self):
         """
-        Wrapper for various distribute methods. If threading was set in configFile, then
-        :func:`~smrf.framework.model_framework.SMRF.distributeData_threaded` will be called.
-        Default will call :func:`~smrf.framework.model_framework.SMRF.distributeData_single`.
+        Wrapper for various distribute methods. If threading was set in
+        configFile, then
+        :func:`~smrf.framework.model_framework.SMRF.distributeData_threaded`
+        will be called. Default will call
+        :func:`~smrf.framework.model_framework.SMRF.distributeData_single`.
         """
 
         if self.threading:
@@ -371,13 +406,12 @@ class SMRF():
         else:
             self.distributeData_single()
 
-
-
     def distributeData_single(self):
         """
         Distribute the measurement point data for all variables in serial. Each
         variable is initialized first using the :func:`smrf.data.loadTopo.topo`
-        instance and the metadata loaded from :func:`~smrf.framework.model_framework.SMRF.loadData`.
+        instance and the metadata loaded from
+        :func:`~smrf.framework.model_framework.SMRF.loadData`.
         The function distributes over each time step, all the variables below.
 
         Steps performed:
@@ -393,16 +427,16 @@ class SMRF():
             10. Output time step if needed
         """
 
-        #------------------------------------------------------------------------------
+        # -------------------------------------
         # Initialize the distibution
         for v in self.distribute:
             self.distribute[v].initialize(self.topo, self.data)
 
-        sub_count = 0
+#         sub_count = 0
 
-        #------------------------------------------------------------------------------
+        # -------------------------------------
         # Distribute the data
-        for output_count,t in enumerate(self.date_time):
+        for output_count, t in enumerate(self.date_time):
             # wait here for the model to catch up if needed
 
             startTime = datetime.now()
@@ -411,15 +445,19 @@ class SMRF():
 
             # 0.1 sun angle for time step
             cosz, azimuth = radiation.sunang(t.astimezone(pytz.utc),
-                                            self.topo.topoConfig['basin_lat'],
-                                            self.topo.topoConfig['basin_lon'],
-                                            zone=0, slope=0, aspect=0)
+                                             self.topo.topoConfig['basin_lat'],
+                                             self.topo.topoConfig['basin_lon'],
+                                             zone=0,
+                                             slope=0,
+                                             aspect=0)
 
             # 0.2 illumination angle
             illum_ang = None
             if cosz > 0:
-                illum_ang = radiation.shade(self.topo.slope, self.topo.aspect, azimuth, cosz)
-
+                illum_ang = radiation.shade(self.topo.slope,
+                                            self.topo.aspect,
+                                            azimuth,
+                                            cosz)
 
             # 1. Air temperature
             self.distribute['air_temp'].distribute(self.data.air_temp.ix[t])
@@ -439,7 +477,9 @@ class SMRF():
                                                 self.topo.mask)
 
             # 5. Albedo
-            self.distribute['albedo'].distribute(t, illum_ang, self.distribute['precip'].storm_days)
+            self.distribute['albedo'].distribute(t,
+                                                 illum_ang,
+                                                 self.distribute['precip'].storm_days)
 
             # 6. Solar
             self.distribute['solar'].distribute(self.data.cloud_factor.ix[t],
@@ -455,7 +495,8 @@ class SMRF():
                 self.distribute['thermal'].distribute_thermal(self.data.thermal.ix[t],
                                                               self.distribute['air_temp'].air_temp)
             else:
-                self.distribute['thermal'].distribute(t, self.distribute['air_temp'].air_temp,
+                self.distribute['thermal'].distribute(t,
+                                                      self.distribute['air_temp'].air_temp,
                                                       self.distribute['vapor_pressure'].vapor_pressure,
                                                       self.distribute['vapor_pressure'].dew_point,
                                                       self.distribute['solar'].cloud_factor)
@@ -463,41 +504,45 @@ class SMRF():
             # 8. Soil temperature
             self.distribute['soil_temp'].distribute()
 
-
             # 9. output at the frequency and the last time step
             self.output(t)
 
             telapsed = datetime.now() - startTime
-            self._logger.debug('%.1f seconds for time step' % telapsed.total_seconds())
+            self._logger.debug('{.1f} seconds for time step'
+                               .format(telapsed.total_seconds()))
 
         self.forcing_data = 1
-
 
     def distributeData_threaded(self):
         """
         Distribute the measurement point data for all variables using threading
-        and queues. Each variable is initialized first using the :func:`smrf.data.loadTopo.topo`
-        instance and the metadata loaded from :func:`~smrf.framework.model_framework.SMRF.loadData`.
-        A :func:`DateQueue <smrf.utils.queue.DateQueue_Threading>` is initialized for :attr:`all threading
-        variables <smrf.framework.model_framework.SMRF.thread_variables>`. Each variable in
-        :func:`smrf.distribute` is passed all the required point data at once using the distribute_thread
-        function.  The distribute_thread function iterates over :attr:`~smrf.framework.model_framework.SMRF.date_time`
-        and places the distributed values into the :func:`DateQueue <smrf.utils.queue.DateQueue_Threading>`.
+        and queues. Each variable is initialized first using the
+        :func:`smrf.data.loadTopo.topo` instance and the metadata loaded from
+        :func:`~smrf.framework.model_framework.SMRF.loadData`. A
+        :func:`DateQueue <smrf.utils.queue.DateQueue_Threading>` is initialized
+        for :attr:`all threading
+        variables <smrf.framework.model_framework.SMRF.thread_variables>`. Each
+        variable in :func:`smrf.distribute` is passed all the required point
+        data at once using the distribute_thread function.  The
+        distribute_thread function iterates over
+        :attr:`~smrf.framework.model_framework.SMRF.date_time` and places the
+        distributed values into the
+        :func:`DateQueue <smrf.utils.queue.DateQueue_Threading>`.
         """
 
-        #------------------------------------------------------------------------------
+        # -------------------------------------
         # Initialize the distibutions
         for v in self.distribute:
             self.distribute[v].initialize(self.topo, self.data)
 
-        #------------------------------------------------------------------------------
+        # -------------------------------------
         # Create Queues for all the variables
         q = {}
         t = []
         for v in self.thread_variables:
             q[v] = queue.DateQueue_Threading(self.max_values, self.time_out)
 
-        #------------------------------------------------------------------------------
+        # -------------------------------------
         # Distribute the data
 
         # 0.1 sun angle for time step
@@ -516,13 +561,13 @@ class SMRF():
 
         # 1. Air temperature
         t.append(Thread(target=self.distribute['air_temp'].distribute_thread,
-                   name='air_temp',
-                   args=(q, self.data.air_temp)))
+                        name='air_temp',
+                        args=(q, self.data.air_temp)))
 
         # 2. Vapor pressure
         t.append(Thread(target=self.distribute['vapor_pressure'].distribute_thread,
-                   name='vapor_pressure',
-                   args=(q, self.data.vapor_pressure)))
+                        name='vapor_pressure',
+                        args=(q, self.data.vapor_pressure)))
 
         # 3. Wind_speed and wind_direction
         t.append(Thread(target=self.distribute['wind'].distribute_thread,
@@ -592,19 +637,20 @@ class SMRF():
 
         self._logger.debug('DONE!!!!')
 
-
     def initializeOutput(self):
         """
-        Initialize the output files based on the configFile section ['output']. Currently
-        only :func:`NetCDF files <smrf.output.output_netcdf>` is supported.
+        Initialize the output files based on the configFile section ['output'].
+        Currently only :func:`NetCDF files <smrf.output.output_netcdf>` is supported.
         """
 
         if self.config['output']['frequency'] is not None:
 
             # check the out location
-            pth = os.path.abspath(os.path.expanduser(self.config['output']['out_location']))
+            pth = os.path.abspath(os.path.expanduser(
+                self.config['output']['out_location']))
             if 'out_location' not in self.config['output']:
-                raise Exception('out_location must be specified for variable outputs')
+                raise Exception('''out_location must be specified
+                                for variable outputs''')
             elif self.config['output']['out_location'] == 'WORKDIR':
                 pth = os.environ['WORKDIR']
             elif not os.path.isdir(pth):
@@ -613,10 +659,12 @@ class SMRF():
             self.config['output']['out_location'] = pth
 
             # frequency of outputs
-            self.config['output']['frequency'] = int(self.config['output']['frequency'])
+            self.config['output']['frequency'] = \
+                int(self.config['output']['frequency'])
 
             # determine the variables to be output
-            self._logger.info('%s variables will be output' % self.config['output']['variables'])
+            self._logger.info('{} variables will be output'
+                              .format(self.config['output']['variables']))
 
             output_variables = self.config['output']['variables']
 #             output_variables = list(map(str.strip, output_variables))
@@ -632,16 +680,20 @@ class SMRF():
 
                         if v in self.distribute[m].output_variables.keys():
 
-                            # if there is a key in the config file, then change the output file name
+                            # if there is a key in the config file,
+                            # then change the output file name
                             if v in self.config['output'].keys():
                                 fname = os.path.join(self.config['output']['out_location'],
                                                      self.config['output'][v])
                             else:
-                                fname = os.path.join(self.config['output']['out_location'], v)
+                                fname = os.path.join(self.config['output']['out_location'],
+                                                     v)
 
-                            d = {'variable': v, 'module': m, 'out_location': fname, 'info': self.distribute[m].output_variables[v]}
+                            d = {'variable': v,
+                                 'module': m,
+                                 'out_location':fname,
+                                 'info': self.distribute[m].output_variables[v]}
                             variable_list[v] = d
-
 
             # determine what type of file to output
             if self.config['output']['file_type'].lower() == 'netcdf':
@@ -651,8 +703,8 @@ class SMRF():
 
             elif self.config['output']['file_type'].lower() == 'hru':
                 self.out_func = output.output_hru(variable_list, self.topo,
-                                                     self.date_time,
-                                                     self.config['output'])
+                                                  self.date_time,
+                                                  self.config['output'])
 
             else:
                 raise Exception('Could not determine type of file for output')
@@ -666,8 +718,7 @@ class SMRF():
             self._logger.info('No variables will be output')
             self.output_variables = None
 
-
-    def output(self, current_time_step,  module = None, out_var = None):
+    def output(self, current_time_step,  module=None, out_var=None):
         """
         Output the forcing data or model outputs for the current_time_step.
 
@@ -680,26 +731,27 @@ class SMRF():
         """
         output_count = self.date_time.index(current_time_step)
 
-        #Only output according to the user specified value,  or if it is the end.
-        if (output_count % self.config['output']['frequency'] == 0) or (output_count == len(self.date_time)):
+        # Only output according to the user specified value,
+        # or if it is the end.
+        if (output_count % self.config['output']['frequency'] == 0) or \
+           (output_count == len(self.date_time)):
 
-            #User is attempting to output single variable
-            if module != None and out_var != None:
-                #add only one variable to the output list and preceed as normal
+            # User is attempting to output single variable
+            if module is not None and out_var is not None:
+                # add only one variable to the output list and preceed as normal
                 var_vals = [self.out_func.variable_list[out_var]]
 
-            #Incomplete request
-            elif module != None or out_var != None:
-                raise ValueError(" Function requires an output module and variable name when outputting a specific variables")
+            # Incomplete request
+            elif module is not None or out_var is not None:
+                raise ValueError('''Function requires an output module and
+                                variable name when outputting a specific
+                                variables''')
 
             else:
-                #Output all the variables
+                # Output all the variables
                 var_vals = self.out_func.variable_list.values()
 
-                #Remove any variables to be post processed.
-                #var_vals = [var for var in var_vals if var['variable'] not in self.distribute[var['module']].post_process_variables.keys()]
-
-            #Get the output variables then pass to the function
+            # Get the output variables then pass to the function
             for v in var_vals:
                 # get the data desired
                 data = getattr(self.distribute[v['module']], v['variable'])
@@ -719,7 +771,6 @@ class SMRF():
         for k in self.distribute.keys():
             self.distribute[k].post_processor(self)
 
-
     def title(self, option):
         """
         A little title to go at the top of the logger file
@@ -727,36 +778,36 @@ class SMRF():
 
         if option == 1:
             title = ["  .----------------.  .----------------.  .----------------.  .----------------.",
-                " | .--------------. || .--------------. || .--------------. || .--------------. |",
-                " | |    _______   | || | ____    ____ | || |  _______     | || |  _________   | |",
-                " | |   /  ___  |  | || ||_   \  /   _|| || | |_   __ \    | || | |_   ___  |  | |",
-                " | |  |  (__ \_|  | || |  |   \/   |  | || |   | |__) |   | || |   | |_  \_|  | |",
-                " | |   '.___`-.   | || |  | |\  /| |  | || |   |  __ /    | || |   |  _|      | |",
-                " | |  |`\____) |  | || | _| |_\/_| |_ | || |  _| |  \ \_  | || |  _| |_       | |",
-                " | |  |_______.'  | || ||_____||_____|| || | |____| |___| | || | |_____|      | |",
-                " | |              | || |              | || |              | || |              | |",
-                " | '--------------' || '--------------' || '--------------' || '--------------' |",
-                "  '----------------'  '----------------'  '----------------'  '----------------' ",
-                " "]
+                     " | .--------------. || .--------------. || .--------------. || .--------------. |",
+                     " | |    _______   | || | ____    ____ | || |  _______     | || |  _________   | |",
+                     " | |   /  ___  |  | || ||_   \  /   _|| || | |_   __ \    | || | |_   ___  |  | |",
+                     " | |  |  (__ \_|  | || |  |   \/   |  | || |   | |__) |   | || |   | |_  \_|  | |",
+                     " | |   '.___`-.   | || |  | |\  /| |  | || |   |  __ /    | || |   |  _|      | |",
+                     " | |  |`\____) |  | || | _| |_\/_| |_ | || |  _| |  \ \_  | || |  _| |_       | |",
+                     " | |  |_______.'  | || ||_____||_____|| || | |____| |___| | || | |_____|      | |",
+                     " | |              | || |              | || |              | || |              | |",
+                     " | '--------------' || '--------------' || '--------------' || '--------------' |",
+                     "  '----------------'  '----------------'  '----------------'  '----------------' ",
+                     " "]
 
         elif option == 2:
             title = ["    SSSSSSSSSSSSSSS  MMMMMMMM               MMMMMMMM RRRRRRRRRRRRRRRRR    FFFFFFFFFFFFFFFFFFFFFF",
-                "  SS:::::::::::::::S M:::::::M             M:::::::M R::::::::::::::::R   F::::::::::::::::::::F",
-                " S:::::SSSSSS::::::S M::::::::M           M::::::::M R::::::RRRRRR:::::R  F::::::::::::::::::::F",
-                " S:::::S     SSSSSSS M:::::::::M         M:::::::::M RR:::::R     R:::::R FF::::::FFFFFFFFF::::F",
-                " S:::::S             M::::::::::M       M::::::::::M   R::::R     R:::::R   F:::::F       FFFFFF",
-                " S:::::S             M:::::::::::M     M:::::::::::M   R::::R     R:::::R   F:::::F",
-                "  S::::SSSS          M:::::::M::::M   M::::M:::::::M   R::::RRRRRR:::::R    F::::::FFFFFFFFFF",
-                "   SS::::::SSSSS     M::::::M M::::M M::::M M::::::M   R:::::::::::::RR     F:::::::::::::::F",
-                "     SSS::::::::SS   M::::::M  M::::M::::M  M::::::M   R::::RRRRRR:::::R    F:::::::::::::::F",
-                "        SSSSSS::::S  M::::::M   M:::::::M   M::::::M   R::::R     R:::::R   F::::::FFFFFFFFFF",
-                "             S:::::S M::::::M    M:::::M    M::::::M   R::::R     R:::::R   F:::::F",
-                "             S:::::S M::::::M     MMMMM     M::::::M   R::::R     R:::::R   F:::::F",
-                " SSSSSSS     S:::::S M::::::M               M::::::M RR:::::R     R:::::R FF:::::::FF",
-                " S::::::SSSSSS:::::S M::::::M               M::::::M R::::::R     R:::::R F::::::::FF",
-                " S:::::::::::::::SS  M::::::M               M::::::M R::::::R     R:::::R F::::::::FF",
-                "  SSSSSSSSSSSSSSS    MMMMMMMM               MMMMMMMM RRRRRRRR     RRRRRRR FFFFFFFFFFF",
-                " "]
+                     "  SS:::::::::::::::S M:::::::M             M:::::::M R::::::::::::::::R   F::::::::::::::::::::F",
+                     " S:::::SSSSSS::::::S M::::::::M           M::::::::M R::::::RRRRRR:::::R  F::::::::::::::::::::F",
+                     " S:::::S     SSSSSSS M:::::::::M         M:::::::::M RR:::::R     R:::::R FF::::::FFFFFFFFF::::F",
+                     " S:::::S             M::::::::::M       M::::::::::M   R::::R     R:::::R   F:::::F       FFFFFF",
+                     " S:::::S             M:::::::::::M     M:::::::::::M   R::::R     R:::::R   F:::::F",
+                     "  S::::SSSS          M:::::::M::::M   M::::M:::::::M   R::::RRRRRR:::::R    F::::::FFFFFFFFFF",
+                     "   SS::::::SSSSS     M::::::M M::::M M::::M M::::::M   R:::::::::::::RR     F:::::::::::::::F",
+                     "     SSS::::::::SS   M::::::M  M::::M::::M  M::::::M   R::::RRRRRR:::::R    F:::::::::::::::F",
+                     "        SSSSSS::::S  M::::::M   M:::::::M   M::::::M   R::::R     R:::::R   F::::::FFFFFFFFFF",
+                     "             S:::::S M::::::M    M:::::M    M::::::M   R::::R     R:::::R   F:::::F",
+                     "             S:::::S M::::::M     MMMMM     M::::::M   R::::R     R:::::R   F:::::F",
+                     " SSSSSSS     S:::::S M::::::M               M::::::M RR:::::R     R:::::R FF:::::::FF",
+                     " S::::::SSSSSS:::::S M::::::M               M::::::M R::::::R     R:::::R F::::::::FF",
+                     " S:::::::::::::::SS  M::::::M               M::::::M R::::::R     R:::::R F::::::::FF",
+                     "  SSSSSSSSSSSSSSS    MMMMMMMM               MMMMMMMM RRRRRRRR     RRRRRRR FFFFFFFFFFF",
+                     " "]
 
         return title
 
@@ -833,42 +884,6 @@ class SMRF():
 #             d[k] = dict(b)
 #
 #         return d
-
-
-
-# class MyParser(ConfigParser):
-#     """
-#     Custom configuration file parser to return the object
-#     as a dictionary
-#     """
-#     def as_dict(self):
-#         d = dict(self._sections)
-#         for k in d:
-#             d[k] = dict(self._defaults, **d[k])
-#             d[k].pop('__name__', None)
-#         d = self._make_lowercase(d)
-#         return d
-#
-#     def _make_lowercase(self, obj):
-#         if hasattr(obj,'iteritems'):
-#             # dictionary
-#             ret = {}
-#             for k,v in obj.iteritems():
-#                 ret[self._make_lowercase(k)] = v
-#             return ret
-#         elif isinstance(obj,basestring):
-#             # string
-#             return obj.lower()
-#         elif hasattr(obj,'__iter__'):
-#             # list (or the like)
-#             ret = []
-#             for item in obj:
-#                 ret.append(self._make_lowercase(item))
-#             return ret
-#         else:
-#             # anything else
-#             return obj
-
 
 
 def find_pixel_location(row, vec, a):
