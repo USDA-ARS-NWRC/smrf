@@ -3,9 +3,12 @@
 
 Adapted from the UW-Hydro tonic project
 """
+
 import os
 from collections import Sequence
 from .pycompat import OrderedDict, SafeConfigParser, basestring, unicode_type
+
+__version__ = "0.2.2"
 
 
 # -------------------------------------------------------------------- #
