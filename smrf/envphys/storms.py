@@ -1,8 +1,8 @@
-'''
+"""
 Created on March 14, 2017
 Originally written by Scott Havens in 2015
 @author: Micah Johnson
-'''
+"""
 
 __version__ = '0.2.1'
 
@@ -15,7 +15,7 @@ import pytz
 
 def storms(precipitation, perc_snow, mass=1, time=4,
            stormDays=None, stormPrecip=None, ps_thresh=0.5):
-    '''
+    """
     Calculate the decimal days since the last storm given a precip time series,
     percent snow, mass threshold, and time threshold
 
@@ -24,16 +24,28 @@ def storms(precipitation, perc_snow, mass=1, time=4,
          limit, this ensures that the enough has accumulated
 
     Args:
-    precipitation - precipitation values
-    perc_snow - precent of precipitation that was snow
-    mass - threshold for the mass to start a new storm
-    time - threshold for the time to start a new storm
-    stormDays - if specified, this is the output from a previous run of storms
-    stormPrecip - keeps track of the total storm precip
+        precipitation: Precipitation values
+
+        perc_snow: Precent of precipitation that was snow
+
+        mass: Threshold for the mass to start a new storm
+
+        time: Threshold for the time to start a new storm
+
+        stormDays: If specified, this is the output from a previous run of storms
+
+        stormPrecip: Keeps track of the total storm precip
+
+    Returns:
+        tuple:
+            - **stormDays** - Array representing the days since the last storm at
+             a pixel
+            - **stormPrecip** - Array representing the precip accumulated during
+             the most recent storm
 
     Created April 17, 2015
     @author: Scott Havens
-    '''
+    """
 
     # either preallocate or use the input
     if stormDays is None:
@@ -73,7 +85,7 @@ def storms(precipitation, perc_snow, mass=1, time=4,
 
 def time_since_storm(precipitation, perc_snow, time_step=1/24, mass=1, time=4,
                 stormDays=None, stormPrecip=None, ps_thresh=0.5):
-    '''
+    """
     Calculate the decimal days since the last storm given a precip time series,
     percent snow, mass threshold, and time threshold
 
@@ -82,18 +94,31 @@ def time_since_storm(precipitation, perc_snow, time_step=1/24, mass=1, time=4,
          limit, this ensures that the enough has accumulated
 
     Args:
-        precipitation - precipitation values
-        perc_snow - precent of precipitation that was snow
-        time_step: step in days of the model run
-        mass - threshold for the mass to start a new storm
-        time - threshold for the time to start a new storm
-        stormDays - if specified, this is the output from a previous run of storms
-            else it will be set to the date_time value
-        stormPrecip - keeps track of the total storm precip
+        precipitation: Precipitation values
+
+        perc_snow: Percent of precipitation that was snow
+
+        time_step: Step in days of the model run
+
+        mass: Threshold for the mass to start a new storm
+
+        time: Threshold for the time to start a new storm
+
+        stormDays: If specified, this is the output from a previous run of storms
+        else it will be set to the date_time value
+
+        stormPrecip: Keeps track of the total storm precip
+
+    Returns:
+        tuple:
+            - **stormDays** - Array representing the days since the last storm at
+             a pixel
+            - **stormPrecip** - Array representing the precip accumulated during
+             the most recent storm
 
     Created Janurary 5, 2016
     @author: Scott Havens
-    '''
+    """
 
     # either preallocate or use the input
     if stormDays is None:
@@ -133,25 +158,32 @@ def time_since_storm(precipitation, perc_snow, time_step=1/24, mass=1, time=4,
     return stormDays, stormPrecip
 
 def time_since_storm_basin(precipitation, storm, stormid, storming, time, time_step=1/24, stormDays=None):
-    '''
+    """
     Calculate the decimal days since the last storm given a precip time series,
     days since last storm in basin, and if it is currently storming
 
      - Will assign uniform decimal days since last storm to every pixel
 
     Args:
-        precipitation - precipitation values
-        storm - current or most recent storm
+        precipitation: Precipitation values
+
+        storm: current or most recent storm
+
         time_step: step in days of the model run
-        last_storm_day_basin - time since last storm for the basin
-        stormid - ID of current storm
-        storming - if it is currently storming
-        time - current time
-        stormDays - unifrom days since last storm on pixel basis
+
+        last_storm_day_basin: time since last storm for the basin
+
+        stormid: ID of current storm
+
+        storming: if it is currently storming
+
+        time: current time
+
+        stormDays: unifrom days since last storm on pixel basis
 
     Created May 9, 2017
     @author: Scott Havens modified by Micah Sandusky
-    '''
+    """
 
     # either preallocate or use the input
     if stormDays is None:
@@ -170,12 +202,16 @@ def time_since_storm_basin(precipitation, storm, stormid, storming, time, time_s
     return stormDays
 
 def tracking_by_station(precip, mass_thresh = 0.01, steps_thresh = 3):
-    '''
+    """
+    Processes the vector station data thebrings in
     Args:
-        precipitation - precipitation values
-        time - Time step that smrf is on
-        time_steps_since_precip - time steps since the last precipitation
-        storm_lst - list that store the storm cycles in order. A storm is recorded by
+        precipitation: precipitation values
+
+        time: Time step that smrf is on
+
+        time_steps_since_precip: time steps since the last precipitation
+
+        storm_lst: list that store the storm cycles in order. A storm is recorded by
                     its start and its end. The list
                     is passed by reference and modified internally.
                     Each storm entry should be in the format of:
@@ -183,21 +219,28 @@ def tracking_by_station(precip, mass_thresh = 0.01, steps_thresh = 3):
 
                     e.g.
                          [
-                         {start:date_time1,end:date_time2},
-                         {start:date_time3,end:date_time4},
+                         {start:date_time1,end:date_time2,'BOG1':100, 'ATL1':85},
+                         {start:date_time3,end:date_time4,'BOG1':50, 'ATL1':45},
                          ]
 
-                         #would be a two storms
+                         #would be a two storms at stations BOG1 and ATL1
 
-        mass_thresh - mass amount that constitutes a real precip event, default = 0.0.
-        steps_thresh - Number of time steps that constitutes the end of a precip event, default = 2 steps (typically 2 hours)
+        mass_thresh: mass amount that constitutes a real precip event,
+        default = 0.01.
+
+        steps_thresh: Number of time steps that constitutes the end of a precip
+        event, default = 2 steps (typically 2 hours)
 
     Returns:
-        True or False whether the storm is ongoing or not
+        tuple:
+            -**storms** - A list of dictionaries containing storm start,stop,
+             mass accumulated.
+             of given storm.
+            -**storm_count** - A total number of storms found
 
     Created April 24, 2017
     @author: Micah Johnson
-    '''
+    """
     storm_columns = ['start','end']
     stations = list(precip)
     storm_columns+=stations
@@ -264,12 +307,12 @@ def tracking_by_station(precip, mass_thresh = 0.01, steps_thresh = 3):
     return storms,storm_count
 
 def tracking_by_basin(precipitation, time, storm_lst, time_steps_since_precip, is_storming, mass_thresh = 0.01, steps_thresh=2):
-    '''
+    """
     Args:
-        precipitation - precipitation values
-        time - Time step that smrf is on
-        time_steps_since_precip - time steps since the last precipitation
-        storm_lst - list that store the storm cycles in order. A storm is recorded by
+        precipitation: precipitation values
+        time: Time step that smrf is on
+        time_steps_since_precip: time steps since the last precipitation
+        storm_lst: list that store the storm cycles in order. A storm is recorded by
                     its start and its end. The list
                     is passed by reference and modified internally.
                     Each storm entry should be in the format of:
@@ -283,15 +326,15 @@ def tracking_by_basin(precipitation, time, storm_lst, time_steps_since_precip, i
 
                          #would be a two storms
 
-        mass_thresh - mass amount that constitutes a real precip event, default = 0.0.
-        steps_thresh - Number of time steps that constitutes the end of a precip event, default = 2 steps (typically 2 hours)
+        mass_thresh: mass amount that constitutes a real precip event, default = 0.0.
+        steps_thresh: Number of time steps that constitutes the end of a precip event, default = 2 steps (typically 2 hours)
 
     Returns:
         True or False whether the storm is ongoing or not
 
     Created March 3, 2017
     @author: Micah Johnson
-    '''
+    """
     # print  "--"*10 +"> Max precip = {0}".format(precipitation.max())
     if precipitation.max() > mass_thresh:
         #Start a new storm
@@ -327,6 +370,17 @@ def clip_and_correct(precip,storms):
     the precip we would miss by ignoring it. This is mostly because will get rain on snow events
     when there is snow because of the storm definitions and still try to distribute precip
     data.
+
+    Args:
+        precip: Vector station data representing the measured precipitation
+        storms: Storm list with dictionaries as defined in
+        :func:`~smrf.envphys.storms.tracking_by_station`
+
+    Returns:
+        The correct precip that ensures there is no precip outside of the defined
+        storms with the clipped amount of precip proportionally added back to
+        storms.
+
     Created May 3, 2017
     @author: Micah Johnson
     """

@@ -2,6 +2,17 @@
 Created on March 14, 2017
 Originally written by Scott Havens in 2015
 @author: Micah Johnson
+
+**Custom NASDE Models**:
+    When creating a new NASDE model make sure you adhere to the following:
+
+    1. Add a new method with the other models with a unique name.
+
+    2. Add your method to the available_models dictionary using the format of the
+       expected config file string followed by your function name.
+
+    3. Update documentation and run smrf!
+
 """
 
 __version__ = '0.2.1'
@@ -11,14 +22,6 @@ import pandas as pd
 import matplotlib.pyplot as plt
 from distutils.command.check import check
 
-"""
-When creating a new NASDE model make sure you adhere to the following:
-
-1. Add a new method here with a unique name.
-2. Add your method to the available_models dictionary using the format of the
-expected config file string followed by your function name
-3. Document and run smrf!
-"""
 
 def calc_phase_and_density(temperature, precipitation, nasde_model):
     """
@@ -221,6 +224,7 @@ def susong1999(temperature, precipitation):
 
     return {'pcs':ps, 'rho_s':sd}
 
+
 def piecewise_susong1999(Tpp, precip, Tmax = 0.0, Tmin = -10.0, check_temps=True):
     """
     Follows :func:`~smrf.envphys.snow.piecewise_susong1999` but is the piecewise form of table shown there.
@@ -306,6 +310,25 @@ def marks2017(Tpp,pp):
     Once this is determined the final snow density is applied through the entire storm
     only varying with hourly temperature.
 
+    Snow Density:
+        .. math::
+            \\rho_{s} = \\rho_{ns} + (\\Delta \\rho_{c} + \\Delta \\rho_{m}) \\rho_{ns}
+
+    Overburden Proportionality:
+        .. math::
+            \\Delta \\rho_{c} = 0.026 e^{-0.08 (T_{z} - T_{snow})}  SWE*  e^{-21.0 \\rho_{ns}}
+
+    Metmorphosism Proportionality:
+        .. math::
+            \\Delta \\rho_{m} = 0.01 c11 e^{-0.04 (T_{z} - T_{snow})}
+
+            c11 = c_min + (T_{z} - T_{snow}) C_{factor} + 1.0
+
+    Constants:
+                C_{factor} = 0.0013
+                Tz = 0.0
+
+
     Args:
         Tpp: Numpy array of a single hour of temperature, use dew point if available [degrees C].
 
@@ -341,7 +364,6 @@ def marks2017(Tpp,pp):
             - **zs** (*numpy.array*) - Snow height added from the precipitation.
 
     """
-
 
     ex_max = 1.75
     exr = 0.75
@@ -428,14 +450,6 @@ def marks2017(Tpp,pp):
     rho *= water
 
     return {'swe':swe, 'pcs':pcs,'rho_ns': rho_ns, 'd_rho_c' : d_rho_c, 'd_rho_m' : d_rho_m, 'rho_s' : rho_s, 'rho':rho, 'zs':zs}
-
-
-#Add NASDE models here to ensure smrf visibility.
-available_models = {
-        'susong1999':susong1999,
-        'piecewise_susong1999':piecewise_susong1999,
-        'marks2017':marks2017
-        }
 
 if __name__ == '__main__':
     print("\nNothing implemented here.")
