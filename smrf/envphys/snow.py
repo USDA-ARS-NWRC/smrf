@@ -1,27 +1,27 @@
-'''
+"""
 Created on March 14, 2017
 Originally written by Scott Havens in 2015
 @author: Micah Johnson
-'''
+"""
 
 __version__ = '0.2.1'
 
 import numpy as np
 import pandas as pd
-# import matplotlib.pyplot as plt
+import matplotlib.pyplot as plt
+from distutils.command.check import check
 
-
-'''
+"""
 When creating a new NASDE model make sure you adhere to the following:
 
 1. Add a new method here with a unique name.
 2. Add your method to the available_models dictionary using the format of the
 expected config file string followed by your function name
 3. Document and run smrf!
-'''
+"""
 
 def calc_phase_and_density(temperature, precipitation, nasde_model):
-    '''
+    """
     Uses various new accumulated snow density models to estimate the snow
     density of precipitation that falls during sub-zero conditions.
     The models all are based on the dew point temperature and the amount of
@@ -29,17 +29,27 @@ def calc_phase_and_density(temperature, precipitation, nasde_model):
     keywords pcs and rho_s for percent snow and snow density respectively.
 
     Args:
-        temperature - a single timestep of the distributed dew point temperature
+        temperature: a single timestep of the distributed dew point temperature
 
-        precip - Numpy array of the distributed precipitation
+        precipitation: a numpy array of the distributed precipitation
 
-        nasde_model - string value set in the configuration file representing the method
+        nasde_model: string value set in the configuration file representing the method
                     for estimating density of new snow that has just fallen.
 
-    Returns:
-        snow_density - an numpy array of snow density matching the domain size.
+                    Available Options:
+                        * susong1999, see :func:`~smrf.envphys.snow.susong1999`
+                        * piecewise_susong1999, see :func:`~smrf.envphys.snow.piecewise_susong1999`
+                        * marks2017, see :func:`~smrf.envphys.snow.marks2017`
 
-    '''
+    Returns:
+        tuple:
+           - **snow_density** (*numpy.array*) - Snow density values in kg/m^3
+            estimated by the selelected nasde_model.
+
+           - **perc_snow** (*numpy.array*) - Percent of the precip that is snow
+            in values 0.0-1.0, which are estimated by the selelected nasde_model.
+
+    """
     # convert the inputs to numpy arrays
     precip = np.array(precipitation)
     temperature = np.array(temperature)
@@ -61,7 +71,19 @@ def calc_phase_and_density(temperature, precipitation, nasde_model):
 
 def calc_perc_snow(Tpp, Tmax=0.0, Tmin=-10.0):
     """
-    Numpy implementation of the calc_perc_snow
+    Calculates the percent snow for the nasde_models piecewise_susong1999 and marks2017.
+
+    Args:
+        Tpp: A numpy array of temperature, use dew point temperature
+        if available [degree C].
+
+        Tmax: Max temperature that the percent snow is estimated. Default is 0.0 Degrees C.
+
+        Tmin: Minimum temperature that percent snow is changed. Default is -10.0 Degrees C.
+
+    Returns:
+        numpy.array:
+        A fraction of the precip at each pixel that is snow provided by Tpp.
     """
 
     #Coefficients for snow relationship
@@ -92,7 +114,24 @@ def calc_perc_snow(Tpp, Tmax=0.0, Tmin=-10.0):
 
 def check_temperature(Tpp, Tmax = 0.0, Tmin = -10.0):
     """
-    set precipitation temperature, % snow, and SWE
+    Sets  the precipitation temperature and snow temperature.
+
+    Args:
+        Tpp: A numpy array of temperature, use dew point temperature
+        if available [degrees C].
+
+        Tmax: Caps the temperature of the snow [degrees C].
+
+        Tmin: Minimum temperature that the precipitation temperature [degrees C].
+
+    Returns:
+        tuple:
+           - **Tpp** (*numpy.array*) - Modified precipitation temperature that
+            is thresholded with a minimum set by tmin.
+
+           - **tsnow** (*numpy.array*) - Temperature of the surface of the snow
+            set by the precipitation temperature and thresholded by tmax where
+            tsnow > tmax = tmax.
     """
 
     Tpp[Tpp < Tmin] = Tmin
@@ -103,12 +142,10 @@ def check_temperature(Tpp, Tmax = 0.0, Tmin = -10.0):
     return Tpp, tsnow
 
 
-#===============================================================================
-# BEGIN NASDE MODELS HERE AND BELOW
-#===============================================================================
+#BEGIN NASDE MODELS HERE AND BELOW
 
 def susong1999(temperature, precipitation):
-    '''
+    """
     Follows the IPW command mkprecip
 
     The precipitation phase, or the amount of precipitation falling as rain or snow, can significantly
@@ -132,13 +169,18 @@ def susong1999(temperature, precipitation):
     ========= ======== ============ ===============
 
     Args:
-    precipitation - array of precipitation values [mm]
+    precipitation - numpy array of precipitation values [mm]
     temperature - array of temperature values, use dew point temperature
-        if available [degree C]
+        if available [degrees C]
 
-    Output:
-    - returns the percent snow and estimated snow density
-    '''
+    Returns:
+        dictionary:
+           - **perc_snow** (*numpy.array*) - Percent of the precipitation that is snow
+            in values 0.0-1.0.
+
+           - **rho_s** (*numpy.array*) - Snow density values in kg/m^3.
+
+    """
 
     # create a list from the table above
     t = []
@@ -179,31 +221,55 @@ def susong1999(temperature, precipitation):
 
     return {'pcs':ps, 'rho_s':sd}
 
+def piecewise_susong1999(Tpp, precip, Tmax = 0.0, Tmin = -10.0, check_temps=True):
+    """
+    Follows :func:`~smrf.envphys.snow.piecewise_susong1999` but is the piecewise form of table shown there.
+    This model adds to the former by accounting for liquid water effect near 0.0 Degrees C.
 
-def continuous_susong1999(Tpp, precip, Tmax = 0.0, Tmin = -10.0, check_temps=True):
-    '''
-    Follows method susong1999 but is the continuous form of table shown there.
-    The table was estimate by Danny Marks in 2017 which resulted in the
+    The table was estimated by Danny Marks in 2017 which resulted in the
     piecewise equations below:
 
     Percent Snow:
-         *  -0.5C < temperature < 0.0, percent snow = (((-temperature) / Tr0) * Pcr0) + Pc0
-         *  0.0C < temperature < Max temperature + 1.0, percent snow = -(((-Tpp) / (Tmax + 1.0)) * Pc0) + Pc0
 
-    Snow rho_s:
-        *  (50.0 + (1.7 * ((temperature + 15.0) ^ ex)))
-        Where:
-        *  ex = ex_min + (((temperature_range + (temperature of snow - Max temperature)) / temperature range) * exr)
-        *  ex > 1.75, ex = 1.75
+    .. math::
 
+        \\%_{snow} = \\Bigg \\lbrace{
+            \\frac{-T}{T_{r0}} P_{cr0} + P_{c0}, \\hfill -0.5^{\\circ} C \\leq T \\leq 0.0^{\\circ} C
+             \\atop
+             \\frac{-T_{pp}}{T_{max} + 1.0} P_{c0} + P_{c0}, \\hfill 0.0^\\circ C \\leq T \\leq T_{max}
+            }
+
+    Snow Density:
+        .. math::
+            \\rho_{s} = 50.0 + 1.7 * (T_{pp} + 15.0)^{ex}
+
+
+            ex = \\Bigg \\lbrace{
+                ex_min + \\frac{T_{range} + T_{snow} - T_{max}}{T_{range}} * ex_{r}, \\hfill ex < 1.75
+                \\atop
+                1.75, \\hfill, ex > 1.75
+                }
     Args:
-        temperature - point value of temperature, use dew point temperature
-        if available [degree C]
+        Tpp: A numpy array of temperature, use dew point temperature
+        if available [degree C].
+
+        precip: A numpy array of precip in millimeters.
+
+        Tmax: Max temperature that snow density is modeled. Default is 0.0 Degrees C.
+
+        Tmin: Minimum temperature that snow density is changing. Default is -10.0 Degrees C.
+
+        check_temps: A boolean value check to apply special temperature constraints,
+            this is done using :func:`~smrf.envphys.snow.check_temperature`. Default is True.
 
     Returns:
-        result - A dictionary that containing the percent snow (0.0-1.0) and the new snow density (kg/m^3),
-                which are labelled as pcs and rho_s respectively
-    '''
+        dictionary:
+           - **pcs** (*numpy.array*) - Percent of the precipitation that is snow
+            in values 0.0-1.0.
+
+           - **rho_s** (*numpy.array*) - Density of the fresh snow in kg/m^3.
+
+    """
     ex_max = 1.75
     exr = 0.75
     ex_min = 1.0
@@ -227,14 +293,55 @@ def continuous_susong1999(Tpp, precip, Tmax = 0.0, Tmin = -10.0, check_temps=Tru
     return {'pcs':pcs, 'rho_s':rho_ns}
 
 
-def marks2017(Tpp, pp):
+def marks2017(Tpp,pp):
 
     """
-    Numpy implementation of the compacted_snow_density
+    A new accumulated snow density model that accounts for compaction. The model
+    builds upon :func:`~smrf.envphys.snow.piecewise_susong1999` by adding effects
+    from compaction. Of four mechanisms for compaction, this model accounts for
+    compaction by destructive metmorphosism and overburden. These two processes are
+    accounted for by calculating a proportionalility using data from Kojima,
+    Yosida and Mellor. The overburden is in part estimated using total storm deposition,
+    where storms are defined in :func:`~smrf.envphys.storms.tracking_by_station`.
+    Once this is determined the final snow density is applied through the entire storm
+    only varying with hourly temperature.
+
+    Args:
+        Tpp: Numpy array of a single hour of temperature, use dew point if available [degrees C].
+
+        pp: Numpy array representing the total amount of precip deposited during a storm
+            in millimeters
+
+    Returns:
+        dictionary:
+
+            - **rho_s** (*numpy.array*) - Density of the fresh snow in kg/m^3.
+
+            - **swe** (*numpy.array*) - Snow water equivalent.
+
+            - **pcs** (*numpy.array*) - Percent of the precipitation that is
+             snow in values 0.0-1.0.
+
+            - **rho_ns** (*numpy.array*) - Density of the uncompacted snow, which
+             is equivalent to the output from
+             :func:`~smrf.envphys.snow.piecewise_susong1999`.
+
+            - **d_rho_c** (*numpy.array*) - Prportional coefficient for
+            compaction from overburden.
+
+            - **d_rho_m** (*numpy.array*) - Prportional coefficient for
+             compaction from melt.
+
+            - **rho_s** (*numpy.array*) - Final density of the snow [kg/m^3].
+
+            - **rho** (*numpy.array*) - Density of the precipitation, which
+             continuously ranges from low density snow to pure liquid water
+             (50-1000 kg/m^3).
+
+            - **zs** (*numpy.array*) - Snow height added from the precipitation.
+
     """
 
-    # TODO check that the Tpp==tsnow, the check_temperature seems to make
-    # them equal
 
     ex_max = 1.75
     exr = 0.75
@@ -262,7 +369,7 @@ def marks2017(Tpp, pp):
         Tpp, tsnow = check_temperature(Tpp, Tmax=Tmax, Tmin=Tmin)
 
         # Calculate the percent snow and initial uncompacted density
-        result = continuous_susong1999(Tpp,pp,Tmax=Tmax, Tmin=Tmin)
+        result = piecewise_susong1999(Tpp,pp,Tmax=Tmax, Tmin=Tmin)
         pcs = result['pcs']
         rho_orig = result['rho_s']
 
@@ -315,11 +422,10 @@ def marks2017(Tpp, pp):
             rho[swe_ind] = s_rho
             pcs[swe_ind] = s_pcs
 
-    # # convert densities from proportions, to kg/m^3 or mm/m^2
-    rho_ns = rho_ns * water
-    rho_s = rho_s * water
-    rho = rho * water
-
+    # convert densities from proportions, to kg/m^3 or mm/m^2
+    rho_ns *= water
+    rho_s *= water
+    rho *= water
 
     return {'swe':swe, 'pcs':pcs,'rho_ns': rho_ns, 'd_rho_c' : d_rho_c, 'd_rho_m' : d_rho_m, 'rho_s' : rho_s, 'rho':rho, 'zs':zs}
 
@@ -327,7 +433,7 @@ def marks2017(Tpp, pp):
 #Add NASDE models here to ensure smrf visibility.
 available_models = {
         'susong1999':susong1999,
-        'continuous_susong1999':continuous_susong1999,
+        'piecewise_susong1999':piecewise_susong1999,
         'marks2017':marks2017
         }
 
