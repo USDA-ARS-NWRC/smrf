@@ -19,8 +19,8 @@ def storms(precipitation, perc_snow, mass=1, time=4,
     Calculate the decimal days since the last storm given a precip time series,
     percent snow, mass threshold, and time threshold
 
-     - Will look for pixels where perc_snow > 50% as storm locations
-     - A new storm will start if the mass at the pixel has exceeded the mass
+    - Will look for pixels where perc_snow > 50% as storm locations
+    - A new storm will start if the mass at the pixel has exceeded the mass
          limit, this ensures that the enough has accumulated
 
     Args:
@@ -38,10 +38,11 @@ def storms(precipitation, perc_snow, mass=1, time=4,
 
     Returns:
         tuple:
-            - **stormDays** - Array representing the days since the last storm at
-             a pixel
-            - **stormPrecip** - Array representing the precip accumulated during
-             the most recent storm
+        - **stormDays** - Array representing the days since the last storm at
+            a pixel
+
+        - **stormPrecip** - Array representing the precip accumulated during
+            the most recent storm
 
     Created April 17, 2015
     @author: Scott Havens
@@ -105,16 +106,16 @@ def time_since_storm(precipitation, perc_snow, time_step=1/24, mass=1, time=4,
         time: Threshold for the time to start a new storm
 
         stormDays: If specified, this is the output from a previous run of storms
-        else it will be set to the date_time value
+            else it will be set to the date_time value
 
         stormPrecip: Keeps track of the total storm precip
 
     Returns:
         tuple:
-            - **stormDays** - Array representing the days since the last storm at
-             a pixel
-            - **stormPrecip** - Array representing the precip accumulated during
-             the most recent storm
+        - **stormDays** - Array representing the days since the last storm at
+            a pixel
+        - **stormPrecip** - Array representing the precip accumulated during
+            the most recent storm
 
     Created Janurary 5, 2016
     @author: Scott Havens
@@ -181,6 +182,9 @@ def time_since_storm_basin(precipitation, storm, stormid, storming, time, time_s
 
         stormDays: unifrom days since last storm on pixel basis
 
+    Returns:
+        stormDays: unifrom days since last storm on pixel basis
+
     Created May 9, 2017
     @author: Scott Havens modified by Micah Sandusky
     """
@@ -203,7 +207,8 @@ def time_since_storm_basin(precipitation, storm, stormid, storming, time, time_s
 
 def tracking_by_station(precip, mass_thresh = 0.01, steps_thresh = 3):
     """
-    Processes the vector station data thebrings in
+    Processes the vector station data prior to the data being distributed
+
     Args:
         precipitation: precipitation values
 
@@ -226,17 +231,17 @@ def tracking_by_station(precip, mass_thresh = 0.01, steps_thresh = 3):
                          #would be a two storms at stations BOG1 and ATL1
 
         mass_thresh: mass amount that constitutes a real precip event,
-        default = 0.01.
+            default = 0.01.
 
         steps_thresh: Number of time steps that constitutes the end of a precip
-        event, default = 2 steps (typically 2 hours)
+            event, default = 2 steps (typically 2 hours)
 
     Returns:
         tuple:
-            -**storms** - A list of dictionaries containing storm start,stop,
-             mass accumulated.
-             of given storm.
-            -**storm_count** - A total number of storms found
+            - **storms** - A list of dictionaries containing storm start,stop,
+                mass accumulated, of given storm.
+
+            - **storm_count** - A total number of storms found
 
     Created April 24, 2017
     @author: Micah Johnson
@@ -330,7 +335,10 @@ def tracking_by_basin(precipitation, time, storm_lst, time_steps_since_precip, i
         steps_thresh: Number of time steps that constitutes the end of a precip event, default = 2 steps (typically 2 hours)
 
     Returns:
-        True or False whether the storm is ongoing or not
+        tuple:
+            storm_lst - updated storm_lst
+            time_steps_since_precip - updated time_steps_since_precip
+            is_storming - True or False whether the storm is ongoing or not
 
     Created March 3, 2017
     @author: Micah Johnson
@@ -374,7 +382,7 @@ def clip_and_correct(precip,storms):
     Args:
         precip: Vector station data representing the measured precipitation
         storms: Storm list with dictionaries as defined in
-        :func:`~smrf.envphys.storms.tracking_by_station`
+            :func:`~smrf.envphys.storms.tracking_by_station`
 
     Returns:
         The correct precip that ensures there is no precip outside of the defined

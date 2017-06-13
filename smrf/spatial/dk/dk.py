@@ -1,8 +1,8 @@
-'''
+"""
 2016-02-22 Scott Havens
 
 Distributed forcing data over a grid using detrended kriging
-'''
+"""
 
 __version__ = '0.2.2'
 
@@ -13,9 +13,9 @@ import pandas as pd
 import matplotlib.pyplot as plt
 
 class DK:
-    '''
+    """
     Detrended kriging class
-    '''
+    """
 
     def __init__(self, mx, my, mz, GridX, GridY, GridZ, config):
 
@@ -62,16 +62,16 @@ class DK:
 
 
     def calculate(self, data):
-        '''
+        """
         Calcluate the deternded kriging for the data and config
 
         Arg:
             data: numpy array same length as m*
             config: configuration for dk
 
-        Out:
+        Returns:
             v: returns the distributed and calculated value
-        '''
+        """
 
         nan_val = pd.isnull(data)
 
@@ -160,9 +160,9 @@ class DK:
 
 
     def calculateWeights(self):
-        '''
+        """
         Calculate the weights given those stations with nan values for data
-        '''
+        """
 
         nsta = np.sum(~self.nan_val)
         mx = self.mx[~self.nan_val]
@@ -200,11 +200,11 @@ class DK:
 
 
     def detrendData(self, data):
-        '''
+        """
         Detrend the data in val using the heights zmeas
         data    - is the same size at mx,my
         flag     - 1 for positive, -1 for negative, 0 for any trend imposed
-        '''
+        """
 
         # calculate the trend on any real data
         if self.config['regression_method'] == 1:
@@ -225,9 +225,9 @@ class DK:
 
 
     def retrendData(self, r):
-        '''
+        """
         Retrend the residual values
-        '''
+        """
 
         # retrend the data
         return r + self.pv[0]*self.GridZ + self.pv[1]
