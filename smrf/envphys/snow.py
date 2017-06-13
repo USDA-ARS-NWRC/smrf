@@ -431,12 +431,12 @@ def marks2017(Tpp,pp):
             s_rho_ns = rho_orig[swe_ind] # transforms to a 1D array, will put back later
 
             #Convert to a percentage of water
-            s_rho_ns /= water
+            s_rho_ns = s_rho_ns/water
 
             # proportional total storm mass compaction
             s_d_rho_c = (0.026 * np.exp(-0.08 * (Tz - s_tsnow)) * s_swe * np.exp(-21.0 * s_rho_ns))
 
-            ind = s_rho_ns * water > 100.0
+            ind = (s_rho_ns * water) >= 100.0
             c11 = np.ones(s_rho_ns.shape)
 
             c11[ind] = (c_min + ((Tz - s_tsnow[ind]) * cfac)) + 1.0
@@ -450,7 +450,7 @@ def marks2017(Tpp,pp):
 
             # a mixture of snow and liquid
             s_rho = s_rho_s.copy()
-            mix = (s_swe < s_pp) & (s_pcs > 0)
+            mix = (s_swe < s_pp) & (s_pcs > 0.0)
             if np.any(mix):
                 s_rho[mix] = (s_pcs[mix] * s_rho_s[mix]) + (1.0 - s_pcs[mix])
 
@@ -466,16 +466,16 @@ def marks2017(Tpp,pp):
             pcs[swe_ind] = s_pcs
 
     # convert densities from proportions, to kg/m^3 or mm/m^2
-    rho_ns *= water
-    rho_s *= water
-    rho *= water
+    rho_ns = rho_ns * water
+    rho_s = rho_s * water
+    rho = rho * water
 
     return {'swe':swe, 'pcs':pcs,'rho_ns': rho_ns, 'd_rho_c' : d_rho_c, 'd_rho_m' : d_rho_m, 'rho_s' : rho_s, 'rho':rho, 'zs':zs}
 
 #Available NASDE Models should be put in this dictionary as well:
 available_models = {"susong1999":susong1999,
                     "piecewise_susong1999": piecewise_susong1999,
-                    "markrs2017":marks2017}
+                    "marks2017":marks2017}
 
 if __name__ == '__main__':
     print("\nNothing implemented here.")
