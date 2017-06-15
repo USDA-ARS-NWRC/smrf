@@ -279,9 +279,11 @@ class SMRF():
         Load the measurement point data for distributing to the DEM,
         must be called after the distributions are initialized. Currently, data can
         be loaded from three different sources:
+
             * :func:`CSV files <smrf.data.loadData.wxdata>`
             * :func:`MySQL database <smrf.data.loadData.wxdata>`
             * :func:`Gridded data source (WRF) <smrf.data.loadGrid.grid>`
+
         After loading, :func:`~smrf.framework.mode_framework.SMRF.loadData` will call
         :func:`smrf.framework.model_framework.find_pixel_location` to determine the pixel
         locations of the point measurements and filter the data to the desired stations if CSV

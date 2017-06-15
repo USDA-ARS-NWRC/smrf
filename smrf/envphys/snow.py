@@ -7,13 +7,13 @@ Originally written by Scott Havens in 2015
 --------------------------------
     When creating a new NASDE model make sure you adhere to the following:
 
-    #. Add a new method with the other models with a unique name, ideally with
-    some reference to the origin of the model. For example see
-    :func:`~smrf.envphys.snow.susong1999`.
+    1. Add a new method with the other models with a unique name ideally with
+       some reference to the origin of the model. For example see
+       :func:`~smrf.envphys.snow.susong1999`.
 
     #. Add the new model to the dictionary
-    :data:`~smrf.envphys.snow.available_models` at the bottom of this module
-    so that :func:`~smrf.envphys.snow.calc_phase_and_density` can see it.
+       :data:`~smrf.envphys.snow.available_models` at the bottom of this module
+       so that :func:`~smrf.envphys.snow.calc_phase_and_density` can see it.
 
     #. Create a custom distribution function with a unique in
        :func:`~smrf.distribute.precipitation.distribute` to create the structure
@@ -223,7 +223,7 @@ def susong1999(temperature, precipitation):
 
 def piecewise_susong1999(Tpp, precip, Tmax = 0.0, Tmin = -10.0, check_temps=True):
     """
-    Follows :func:`~smrf.envphys.snow.piecewise_susong1999` but is the piecewise form of table shown there.
+    Follows :func:`~smrf.envphys.snow.susong1999` but is the piecewise form of table shown there.
     This model adds to the former by accounting for liquid water effect near 0.0 Degrees C.
 
     The table was estimated by Danny Marks in 2017 which resulted in the
