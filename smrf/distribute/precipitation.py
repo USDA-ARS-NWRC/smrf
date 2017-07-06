@@ -238,8 +238,8 @@ class ppt(image_data.image_data):
     def distribute_for_marks2017(self, data, dpt, time, mask=None):
         '''
         Specialized distribute function for working with the new accumulated snow
-        density model Marks2017 requires storm total  and a corrected precipitation
-        as to avoid precip between storms.
+        density model Marks2017 requires storm total and a corrected precipitation
+        to avoid precip between storms.
 
         '''
 

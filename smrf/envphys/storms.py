@@ -394,7 +394,6 @@ def clip_and_correct(precip,storms):
     """
 
     #Specify zeros where were not storming
-
     precip_clipped = precip.copy()
 
     precip_clipped[:]=0
@@ -406,23 +405,17 @@ def clip_and_correct(precip,storms):
         my_slice = precip.ix[storm_start:storm_end]
         precip_clipped.ix[storm_start:storm_end] = my_slice
 
-    #Determine how much precip we missed from clipping
-    missed_precip = precip-precip_clipped
-
-
     correction = {}
 
-    #Correct the precip
-    #print "Amount of Precip Missed:\n"
-    for station in missed_precip.columns:
-        missed = missed_precip[station].sum()
+    #Correct the precip to be equal to the sum.
+    for station in precip.columns:
         original = precip[station].sum()
+        clipped = precip_clipped[station].sum()
         if original == 0:
             c = 0
         else:
-            c = missed/original
+            c = original/clipped
 
         correction[station] = c
-        precip_clipped[station]*=(1+correction[station])
     #print "Max precip from the correction:{0}".format(precip_clipped.max())
     return precip_clipped
