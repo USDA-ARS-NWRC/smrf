@@ -9,7 +9,7 @@ from datetime import datetime
 import pytz
 # from netCDF4 import Dataset
 
-__version__ = '0.2.3'
+__version__ = '0.2.4'
 
 
 def nan_helper(y):

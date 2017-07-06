@@ -8,7 +8,7 @@ __author__ = "Scott Havens"
 __maintainer__ = "Scott Havens"
 __email__ = "scott.havens@ars.usda.gov"
 __date__ = "2015-12-31"
-__version__ = "0.2.3"
+__version__ = "0.2.4"
 
 
 class image_data():

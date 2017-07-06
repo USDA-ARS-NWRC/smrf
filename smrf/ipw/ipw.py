@@ -17,7 +17,7 @@ import sys
 import numpy as np
 from math import ceil
 
-__version__ = '0.2.3'
+__version__ = '0.2.4'
 
 in_db__vars = tuple('I_lw T_a e_a u T_g S_n'.split())
 out_em__vars = tuple('R_n H L_v_E G M delta_Q E_s '

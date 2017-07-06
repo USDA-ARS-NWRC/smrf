@@ -8,7 +8,7 @@ Collection of functions to calculate various physical parameters
 
 import numpy as np
 
-__version__ = '0.2.3'
+__version__ = '0.2.4'
 
 def idewpt(vp):
     """

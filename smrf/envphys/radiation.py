@@ -16,7 +16,7 @@ import datetime
 import logging
 import pytz
 
-__version__ = '0.2.3'
+__version__ = '0.2.4'
 
 
 on_rtd = os.environ.get('READTHEDOCS') == 'True'

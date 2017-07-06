@@ -8,7 +8,7 @@ import logging
 import os
 import pandas as pd
 
-__version__ = '0.2.3'
+__version__ = '0.2.4'
 
 
 class output_hru():

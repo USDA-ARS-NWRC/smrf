@@ -21,7 +21,7 @@ import logging
 # import time
 
 
-__version__ = '0.2.3'
+__version__ = '0.2.4'
 
 
 class DateQueue_Threading(Queue):

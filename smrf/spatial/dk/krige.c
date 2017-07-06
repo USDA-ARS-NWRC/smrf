@@ -14,7 +14,7 @@
  *    - Everything else is the same except the 2D arrays must now be indexed
  *    	with linear indexing
  *
- *    Version = 0.2.3
+ *    Version = 0.2.4
  */
 
 #include <stdio.h>

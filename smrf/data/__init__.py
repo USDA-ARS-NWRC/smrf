@@ -2,7 +2,7 @@
 
 __author__ = 'Scott Havens'
 __email__ = 'scotthavens@ars.usda.gov'
-__version__ = '0.2.3'
+__version__ = '0.2.4'
 
 # #from .csv_data import *
 from . import csv_data
