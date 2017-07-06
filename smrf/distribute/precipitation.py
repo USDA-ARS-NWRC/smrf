@@ -133,7 +133,7 @@ class ppt(image_data.image_data):
         if 'time_steps_to_end_storms' in self.config:
             self.time_to_end_storm = self.config['time_steps_to_end_storms']
         else:
-                self.time_to_end_storm = 2 # Time steps it take to end a storm definition
+            self.time_to_end_storm = 2 # Time steps it take to end a storm definition
 
         if 'nasde_model' not in self.config:
             self.nasde_model = 'susong1999'
@@ -158,7 +158,7 @@ class ppt(image_data.image_data):
             self._logger.info("Estimated number of storms: {0}".format(storm_count))
 
 
-        
+
 
     def distribute_precip(self, data):
         """
@@ -232,7 +232,7 @@ class ppt(image_data.image_data):
 
         else:
             self.distribute_for_susong1999(data, dpt, time, mask=mask)
-            
+
 
 
     def distribute_for_marks2017(self, data, dpt, time, mask=None):
@@ -316,7 +316,7 @@ class ppt(image_data.image_data):
         """
         Docs for susong1999
         """
-        
+
         if data.sum() > 0:
 
             # distribute data and set the min/max
@@ -358,7 +358,7 @@ class ppt(image_data.image_data):
             self.last_storm_day_basin = np.max(mask * self.last_storm_day)
         else:
             self.last_storm_day_basin = np.max(self.last_storm_day)
-            
+
 
     def distribute_thread(self, queue, data, date, mask=None):
         """
@@ -476,11 +476,11 @@ class ppt(image_data.image_data):
 
     def post_processor_threaded(self, main_obj):
         #  self._logger.info("Post processing snow_density...")
-        
+
         #  #Open files
         #  pp_fname = os.path.join(main_obj.config['output']['out_location'], 'precip.nc')
         #  t_fname = os.path.join(main_obj.config['output']['out_location'], 'dew_point.nc')
-        
+
         #  pds = Dataset(pp_fname,'r')
         #  tds = Dataset(t_fname,'r')
         pass
