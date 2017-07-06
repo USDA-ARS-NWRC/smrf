@@ -109,6 +109,36 @@ class SMRF():
             raise UnicodeDecodeError('''The configuration file is not encoded in
                                     UTF-8, please change and retry''')
 
+        # start logging
+
+        if 'log_level' in self.config['logging']:
+            loglevel = self.config['logging']['log_level'].upper()
+        else:
+            loglevel = 'INFO'
+
+        numeric_level = getattr(logging, loglevel, None)
+        if not isinstance(numeric_level, int):
+            raise ValueError('Invalid log level: %s' % loglevel)
+
+        # setup the logging
+        logfile = None
+        if 'log_file' in self.config['logging']:
+            logfile = self.config['logging']['log_file']
+
+        fmt = '%(levelname)s:%(name)s:%(message)s'
+        if logfile is not None:
+            logging.basicConfig(filename=logfile,
+                                filemode='w',
+                                level=numeric_level,
+                                format=fmt)
+        else:
+            logging.basicConfig(level=numeric_level)
+            coloredlogs.install(level=numeric_level, fmt=fmt)
+
+        self._loglevel = numeric_level
+
+        self._logger = logging.getLogger(__name__)
+
         # check for the desired sections
         if 'stations' not in self.config:
             self.config['stations'] = None
@@ -146,7 +176,7 @@ class SMRF():
         if self.start_date > self.end_date:
             raise ValueError("start_date cannot be larger than end_date.")
         if self.start_date > datetime.now() or self.end_date > datetime.now():
-            raise ValueError("Date range cannot be in the future")
+            self._logger.warning("A date set in the future will only work with WRF generated data!")
 
         d = data.mysql_data.date_range(self.start_date, self.end_date,
                                        timedelta(minutes=int(self.config['time']['time_step'])))
@@ -156,36 +186,6 @@ class SMRF():
 
         # initialize the distribute dict
         self.distribute = {}
-
-        # start logging
-
-        if 'log_level' in self.config['logging']:
-            loglevel = self.config['logging']['log_level'].upper()
-        else:
-            loglevel = 'INFO'
-
-        numeric_level = getattr(logging, loglevel, None)
-        if not isinstance(numeric_level, int):
-            raise ValueError('Invalid log level: %s' % loglevel)
-
-        # setup the logging
-        logfile = None
-        if 'log_file' in self.config['logging']:
-            logfile = self.config['logging']['log_file']
-
-        fmt = '%(levelname)s:%(name)s:%(message)s'
-        if logfile is not None:
-            logging.basicConfig(filename=logfile,
-                                filemode='w',
-                                level=numeric_level,
-                                format=fmt)
-        else:
-            logging.basicConfig(level=numeric_level)
-            coloredlogs.install(level=numeric_level, fmt=fmt)
-
-        self._loglevel = numeric_level
-
-        self._logger = logging.getLogger(__name__)
 
         # add a splash of color
 
