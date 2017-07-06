@@ -492,6 +492,14 @@ Distributes the ``precip`` data using :mod:`smrf.distribute.precipitation`.
 distribution
    :ref:`Distribution method <dist-methods>` with other parameters
 
+nasde_model
+   :ref:`New accumulated snow density model`
+        Available Options -
+
+        * susong1999, see :func:`~smrf.envphys.snow.susong1999`
+        * piecewise_susong1999, see :func:`~smrf.envphys.snow.piecewise_susong1999`
+        * marks2017, see :func:`~smrf.envphys.snow.marks2017`
+
 Example::
 
    [precip]
@@ -499,6 +507,7 @@ Example::
    distribution:     dk
    slope:            -1
    dk_nthreads:      12
+   nasde_model:      susong1999
 
 Albedo
 ``````
@@ -551,12 +560,12 @@ Thermal
 If running with station data, thermal does not need a distribution method.
 
 method
-	Specify the methods for calcualting thermal radiation. The choices are:
+	Specify the methods for calculating thermal radiation. The choices are:
 
-	* Marks1979 :cite:`Marks&Dozier:1979`
-	* Dilley1998 :cite:`Dilley&OBrian:1998`
-  * Prata1996 :cite:`Prata:1996`
-  * Angstrom1918 :cite:`Angstrom:1918` :cite:`Niemela&al:2001`
+    * Marks1979 :cite:`Marks&Dozier:1979`
+    * Dilley1998 :cite:`Dilley&OBrian:1998`
+    * Prata1996 :cite:`Prata:1996`
+    * Angstrom1918 :cite:`Angstrom:1918` :cite:`Niemela&al:2001`
 
 nthreads
    Number of processors to calculate clear sky thermal radiation if method is Marks1979

@@ -45,7 +45,7 @@ smrf.envphys.radiation module
     :show-inheritance:
     
 smrf.envphys.thermal_radiation module
------------------------------
+-------------------------------------
 
 .. automodule:: smrf.envphys.thermal_radiation
     :members:

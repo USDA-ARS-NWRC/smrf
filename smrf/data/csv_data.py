@@ -8,19 +8,18 @@ Version = 0.2.2
 import numpy as np
 import csv
 from smrf import ipw
-# import pandas as pd
 
 
 def read_metadata(mFile, dem):
     """
     Read the metadata csv file
     Args:
-        mFile - metadata file
-        dem - dem IPW file, if co-location of stations is required
+        mFile: metadata file
+        dem: dem IPW file, if co-location of stations is required
 
-    Out:
-        metadata - metadata array
-        dem - opened IPW file
+    Returns:
+        metadata: metadata array
+        dem: opened IPW file
     """
 
 #     print('Reading metadata file...')
@@ -46,16 +45,16 @@ def read_metadata(mFile, dem):
 def read_csv(csvFile):
     """
     Args:
-        csvFile - csv file to read
-    Out:
-        data - data from csv file
+        csvFile: csv file to read
+    Returns:
+        data: data from csv file
     """
 
 #     print('Reading data file...')
 
     data = []
     if csvFile:
-        f = open(csvFile, 'rU')
+        f = open(csvFile,'rU')
 
         for row in csv.DictReader(f):
             data.append(row)

@@ -78,7 +78,7 @@ def albedo(telapsed, cosz, gsize, maxgsz, dirt=2):
         dirt - dirt is effective contamination for adjustment to visible
             albedo (usually between 1.5-3.0)
 
-    Output
+    Returns:
 
     Created April 17, 2015
     Modified July 23, 2015 - take image of cosz and calculate albedo for
@@ -141,7 +141,7 @@ def ihorizon(x, y, Z, azm, mu=0, offset=2, ncores=0):
 
     Assumes that the step size is constant
 
-    Inputs:
+    Args:
         X - vector of x-coordinates
         Y - vector of y-coordinates
         Z - matrix of elevation data
@@ -149,7 +149,7 @@ def ihorizon(x, y, Z, azm, mu=0, offset=2, ncores=0):
         mu - 0 -> calculate cos(z)
              - >0 -> calculate a mask whether or not the point can see the sun
 
-    Outputs:
+    Returns:
         H   - if mask=0 cosine of the local horizonal angles
             - if mask=1 index along line to the point
 
@@ -163,7 +163,7 @@ def ihorizon(x, y, Z, azm, mu=0, offset=2, ncores=0):
     # transform the x,y into the azm direction xr,yr
     xi, yi = np.arange(-n/2, n/2), np.arange(-m/2, m/2)
     X, Y = np.meshgrid(xi, yi)
-    xr = X*np.cos(azm) - Y*np.sin(azm)
+    xr = X*np.cos(azm) -  Y*np.sin(azm)
     yr = X*np.sin(azm) + Y*np.cos(azm)
 
     # xr is the "new" column index for the profiles
@@ -245,14 +245,13 @@ def hord(z):
     to help understand how it's working
 
     Works backwards from the end but looks forwards for
-    the horizon
-    90% faster than rad.horizon
+    the horizon 90% faster than rad.horizon
 
-    Inputs:
+    Args::
         x - horizontal distances for points
         z - elevations for the points
 
-    Output:
+    Returns:
         h - index to the horizon point
 
     20150601 Scott Havens
@@ -292,14 +291,13 @@ def hor1f_simple(z):
     to help understand how it's working
 
     Works backwards from the end but looks forwards for
-    the horizon
-    90% faster than rad.horizon
+    the horizon 90% faster than rad.horizon
 
-    Inputs:
+    Args:
         x - horizontal distances for points
         z - elevations for the points
 
-    Output:
+    Returns:
         h - index to the horizon point
 
     20150601 Scott Havens
@@ -345,11 +343,11 @@ def hor1f(x, z, offset=1):
 
     xrange stops one index before [stop]
 
-    Inputs:
+    Args:
         x - horizontal distances for points
         z - elevations for the points
 
-    Output:
+    Returns:
         h - index to the horizon point
 
     20150601 Scott Havens
@@ -372,6 +370,7 @@ def hor1f(x, z, offset=1):
         # direction, depending on which way loop is running. Note that we
         # don't consider the adjacent point; this seems to help reduce noise.
         k = i + offset
+
         if k >= N:
             k -= 1
 
@@ -457,7 +456,7 @@ def sunang(date, lat, lon, zone=0, slope=0, aspect=0):
         slope (default=0) - slope of surface
         aspect (default=0) - aspect of surface
 
-    Output:
+    Returns:
         cosz - cosine of the zeinith angle
         azimuth - solar azimuth
 
@@ -572,7 +571,7 @@ def shade(slope, aspect, azimuth, cosz=None, zenith=None):
         if (zenith < 0) or (zenith >= 90):
             raise Exception('Zenith must be >= 0 and < 90')
 
-        zenith *= np.pi/180  # in radians
+        zenith *= np.pi/180.0  # in radians
         ctheta = np.cos(zenith)
         stheta = np.sin(zenith)
 
@@ -645,8 +644,13 @@ def deg_to_dms(deg):
 def cf_cloud(beam, diffuse, cf):
     """
     Correct beam and diffuse irradiance for cloud attenuation at a single
+<<<<<<< HEAD
+    time, using input clear-sky global and diffuse radiation calculations supplied by
+    locally modified toporad or locally modified stoporad
+=======
     time, using input clear-sky global and diffuse radiation calculations
     supplied by locally modified toporad or locally modified stoporad
+>>>>>>> develop
 
     Args:
         beam: global irradiance
@@ -725,7 +729,7 @@ def twostream(mu0, S0, tau=0.2, omega=0.85, g=0.3, R0=0.5, d=False):
     delta-Eddington  method, if the -d flag is set (see: Wiscombe & Joseph
     1977).
 
-    Inputs:
+    Args:
         mu0 - The cosine of the incidence angle is cos (from program sunang).
         0 - Do not force an error if mu0 is <= 0.0; set all outputs to 0.0 and
             go on. Program will fail if incidence angle is <= 0.0, unless -0
@@ -741,7 +745,7 @@ def twostream(mu0, S0, tau=0.2, omega=0.85, g=0.3, R0=0.5, d=False):
             negative, it will be set to 1/cos, or 1 if cos is not specified.
         d - The delta-Eddington method will be used.
 
-    Output:
+    Returns:
         R[0] - reflectance
         R[1] - transmittance
         R[2] - direct transmittance
@@ -794,7 +798,7 @@ def solar_ipw(d, w=[0.28, 2.8]):
         d - date object, This is used to calculate the solar radius vector
             which divides the result
 
-    Outputs:
+    Returns:
         s - direct solar irradiance
 
     20151002 Scott Havens
@@ -823,14 +827,14 @@ def model_solar(dt, lat, lon, tau=0.2, tzone=0):
     Model solar radiation at a point
     Combines sun angle, solar and two stream
 
-    Inputs:
+    Args:
         dt - datetime object
         lat - latitude
         lon - longitude
         tau - optical depth
         tzone - time zone
 
-    Outputs:
+    Returns:
         corrected solar radiation
     """
 

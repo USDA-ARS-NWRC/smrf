@@ -144,7 +144,7 @@ class ppt(image_data.image_data):
         if 'time_steps_to_end_storms' in self.config:
             self.time_to_end_storm = self.config['time_steps_to_end_storms']
         else:
-            self.time_to_end_storm = 2
+            self.time_to_end_storm = 2 # Time steps it take to end a storm definition
 
         if 'nasde_model' not in self.config:
             self.nasde_model = 'susong1999'
@@ -174,8 +174,10 @@ class ppt(image_data.image_data):
 
             self._logger.info("Identified Storms:\n{0}".format(self.storms))
             self.storm_id = 0
-            self._logger.info("Estimated number of storms: {0}"
-                              .format(storm_count))
+            self._logger.info("Estimated number of storms: {0}".format(storm_count))
+
+
+
 
     def distribute_precip(self, data):
         """
@@ -397,6 +399,7 @@ class ppt(image_data.image_data):
             self.last_storm_day_basin = np.max(mask * self.last_storm_day)
         else:
             self.last_storm_day_basin = np.max(self.last_storm_day)
+
 
     def distribute_thread(self, queue, data, date, mask=None):
         """

@@ -69,7 +69,7 @@ class DK:
             data: numpy array same length as m*
             config: configuration for dk
 
-        Out:
+        Returns:
             v: returns the distributed and calculated value
         """
 
