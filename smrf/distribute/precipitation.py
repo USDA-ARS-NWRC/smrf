@@ -12,7 +12,7 @@ __author__ = "Scott Havens"
 __maintainer__ = "Scott Havens"
 __email__ = "scott.havens@ars.usda.gov"
 __date__ = "2016-01-05"
-__version__ = "0.2.2"
+__version__ = "0.2.3"
 
 
 class ppt(image_data.image_data):

@@ -8,7 +8,7 @@ import numpy as np
 from scipy.interpolate import griddata
 import matplotlib.pyplot as plt
 
-__version__ = '0.2.2'
+__version__ = '0.2.3'
 
 
 class GRID:

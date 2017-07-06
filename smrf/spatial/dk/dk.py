@@ -10,7 +10,7 @@ import logging
 import pandas as pd
 # import matplotlib.pyplot as plt
 
-__version__ = '0.2.2'
+__version__ = '0.2.3'
 
 
 class DK:
