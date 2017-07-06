@@ -5,11 +5,13 @@ updated 2015-12-31 Scott Havens
 
 Distributed forcing data over a grid using different methods
 '''
-__version__ = '0.2.2'
 
 import numpy as np
 # import sheppard
-import matplotlib.pyplot as plt
+# import matplotlib.pyplot as plt
+
+__version__ = '0.2.2'
+
 
 class IDW:
     '''
@@ -17,7 +19,8 @@ class IDW:
     - Standard IDW
     - Detrended IDW
     '''
-    def __init__(self, mx, my, GridX, GridY, mz=None, GridZ=None, power=2, zeroVal=-1):
+    def __init__(self, mx, my, GridX, GridY, mz=None, GridZ=None,
+                 power=2, zeroVal=-1):
 
         """
         Args:
@@ -47,13 +50,11 @@ class IDW:
         self.power = power
         self.zeroVal = zeroVal
 
-
         # calculate the distances
         self.calculateDistances()
 
         # calculate the weights
         self.calculateWeights()
-
 
     def calculateDistances(self):
         '''
@@ -62,13 +63,16 @@ class IDW:
         '''
 
         # preallocate
-        self.distance = np.empty((self.GridX.shape[0], self.GridX.shape[1], self.npoints))
+        self.distance = np.empty((self.GridX.shape[0],
+                                  self.GridX.shape[1],
+                                  self.npoints))
 
         for i in range(self.npoints):
-            self.distance[:,:,i] = np.sqrt((self.GridX - self.mx[i])**2 + (self.GridY - self.my[i])**2)
+            self.distance[:, :, i] = np.sqrt((self.GridX - self.mx[i])**2 +
+                                             (self.GridY - self.my[i])**2)
 
-        self.distance[np.where(self.distance == 0)] = np.min(self.distance) # remove any zero values
-
+        # remove any zero values
+        self.distance[np.where(self.distance == 0)] = np.min(self.distance)
 
     def calculateWeights(self):
         '''
@@ -79,8 +83,7 @@ class IDW:
         self.weights = 1/(np.power(self.distance, self.power))
 
         # if there are Inf values, set to 1 as the distance was 0
-        #self.weights[np.isinf(self.weights)] = 100
-
+        # self.weights[np.isinf(self.weights)] = 100
 
     def calculateIDW(self, data, local=False):
         '''
@@ -89,40 +92,12 @@ class IDW:
         data    - is the same size at mx,my
         '''
         nan_val = ~np.isnan(data)
-        w = self.weights[:,:,nan_val]
+        w = self.weights[:, :, nan_val]
         data = data[nan_val]
 
-#         if local:
-#             # apply the modified Sheppards algorthim
-#             N = len(data)
-#             nq = 13
-#             nw = 19
-#             nr = np.ceil(np.sqrt(N/3))
-#             mx = self.mx[nan_val]
-#             my = self.my[nan_val]
-#
-#             # Create the Q(x,y) surface for data interpolation
-#             # out = sheppard.qshep2(mx, my, d, nq ,nw, lcell, lnext, xmin, ymin, dx, dy, rmax, rsq, a, status, [N,nr])
-#             lcell, lnext, xmin, ymin, dx, dy, rmax, rsq, a, status = sheppard.qshep2(self.mx, self.my, \
-#                                                                                      data, nq , nw, nr)
-#
-# #             IER = ERROR INDICATOR --                                    */
-# #     /*           IER = 0 IF NO ERRORS WERE ENCOUNTERED.                */
-# #     /*           IER = 1 IF N, NQ, NW, OR NR IS OUT OF RANGE.            */
-# #     /*           IER = 2 IF DUPLICATE NODES WERE ENCOUNTERED.            */
-# #     /*           IER = 3 IF ALL NODES ARE COLLINEAR.
-#
-#             # the the cell value
-#             v = np.zeros(self.GridX.shape)
-#             for index,val in np.ndenumerate(v):
-#                 v[index] = sheppard.qs2val(self.GridX[index], self.GridY[index], mx, my,\
-#                                            data, lcell, lnext, xmin, ymin, dx, dy, rmax, rsq, a)
-
-#         else:
         v = np.nansum(w * data, 2) / np.sum(w, 2)
 
         return v
-
 
     def detrendedIDW(self, data, flag=0, zeros=None, local=False):
         '''
@@ -197,11 +172,9 @@ class IDW:
 #         plt.tight_layout()
 #         plt.show()
 
-
         if zeros is not None:
-            v[v<0] = 0
+            v[v < 0] = 0
         return v
-
 
     def detrendData(self, data, flag=0, zeros=None):
         '''
@@ -216,13 +189,11 @@ class IDW:
 
         # apply trend constraints
         if flag == 1 and pv[0] < 0:
-            pv = np.array([0,0])
+            pv = np.array([0, 0])
         elif (flag == -1 and pv[0] > 0):
-            pv = np.array([0,0])
+            pv = np.array([0, 0])
 
         self.pv = pv
-
-
 
         # detrend the data
         el_trend = self.mz * pv[0] + pv[1]
@@ -230,7 +201,6 @@ class IDW:
         if zeros is not None:
             data[zeros] = self.zeroVal
         self.dtrend = data - el_trend
-
 
     def retrendData(self, idw):
         '''

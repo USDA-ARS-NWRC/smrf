@@ -3,22 +3,23 @@
 
 Collection of utility functions
 """
-__version__ = '0.2.2'
 
 import numpy as np
 from datetime import datetime
 import pytz
-from netCDF4 import Dataset
+# from netCDF4 import Dataset
+
+__version__ = '0.2.2'
 
 
-def nan_helper( y):
+def nan_helper(y):
         """Helper to handle indices and logical indices of NaNs.
 
         Input:
             - y, 1d numpy array with possible NaNs
         Output:
             - nans, logical indices of NaNs
-            - index, a function, with signature indices= index(logical_indices),
+            - index, a function, with signature indices=index(logical_indices)
               to convert logical indices of NaNs to 'equivalent' indices
         Example:
             >>> # linear interpolation of NaNs
@@ -30,19 +31,19 @@ def nan_helper( y):
 
 
 def set_min_max(data, min_val, max_val):
-    '''
+    """
     Ensure that the data is in the bounds of min and max
     20150611 Scott Havens
-    '''
-    
+    """
+
     ind = np.isnan(data)
     data[ind] = min_val
-    
+
     data[data <= min_val] = min_val
     data[data >= max_val] = max_val
-    
+
     data[ind] = np.nan
-    
+
     return data
 
 
@@ -79,6 +80,7 @@ def water_day(indate):
     dd = d.days + d.seconds/86400.0
 
     return dd, wy
+
 
 def is_leap_year(year):
     return (year % 4 == 0 and year % 100 != 0) or year % 400 == 0

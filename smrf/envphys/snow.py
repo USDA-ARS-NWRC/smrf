@@ -23,11 +23,10 @@ Originally written by Scott Havens in 2015
 
 """
 
-__version__ = '0.2.1'
-
 import numpy as np
 import pandas as pd
 
+__version__ = '0.2.2'
 
 def calc_phase_and_density(temperature, precipitation, nasde_model):
     """

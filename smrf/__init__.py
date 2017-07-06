@@ -6,7 +6,7 @@ __author__ = 'Scott Havens'
 __email__ = 'scotthavens@ars.usda.gov'
 __version__ = '0.2.2'
 
-from . import data
+from smrf import data
 from . import distribute
 from . import envphys
 from . import ipw

@@ -13,3 +13,4 @@ sphinxcontrib-bibtex >= 0.3.4
 sphinx_rtd_theme >= 0.2.4
 coloredlogs >= 6.1
 mock >= 2.0.0
+flake8 == 3.3.0

@@ -8,7 +8,6 @@ Version = 0.2.2
 import numpy as np
 import csv
 from smrf import ipw
-import pandas as pd
 
 
 def read_metadata(mFile, dem):
@@ -62,8 +61,3 @@ def read_csv(csvFile):
         f.close()
 
     return data
-
-def pandas_csv(csvFile):
-    """
-    Read a csvFile into a pandas dataframe
-    """
