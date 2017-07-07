@@ -93,7 +93,7 @@ class wxdata():
         if self.stations is not None:
             if 'stations' in self.stations:
                 sta = self.stations['stations']
-                self._logger.debug('Using only stations %s'.format(
+                self._logger.debug('Using only stations {0}'.format(
                     self.stations['stations']
                     ))
 

@@ -60,17 +60,18 @@ class database:
             client: client to read from the station_table, default None
             station_table: table name that contains the clients and
                 list of stations, default None
-
+        Returns:
+            d: Pandas DataFrame of station information
         """
 
         # form the query
         if station_ids is not None:
-            qry = "SELECT * FROM {} WHERE primary_id IN ('{}')".format(
+            qry = "SELECT * FROM {0} WHERE primary_id IN ('{1}')".format(
                 table, "','".join(station_ids))
 
         else:
-            qry = """SELECT %s.* FROM tbl_metadata INNER JOIN %s
-                 ON %s.primary_id=%s.station_id WHERE %s.client='%s'""".format(
+            qry = """SELECT {0}.* FROM tbl_metadata INNER JOIN {1}
+                 ON {2}.primary_id={3}.station_id WHERE {4}.client='{5}'""".format(
                     table, station_table, table, station_table,
                     station_table, client)
 
@@ -105,9 +106,9 @@ class database:
 
         sta = "','".join(station_ids)
 
-        qry = """SELECT date_time,station_id,%s FROM %s
-             WHERE date_time BETWEEN '%s' AND '%s' AND
-             station_id IN ('%s') ORDER BY date_time ASC""".format(
+        qry = """SELECT date_time,station_id,{0} FROM {1}
+             WHERE date_time BETWEEN '{2}' AND '{3}' AND
+             station_id IN ('{4}') ORDER BY date_time ASC""".format(
                 variables, table, start_date, end_date, sta)
 
         self._logger.debug(qry)

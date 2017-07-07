@@ -154,7 +154,7 @@ class ppt(image_data.image_data):
             self.nasde_model = 'marks2017'
         else:
             self._logger.error('''Could not determine method for new
-                                accumulation density model''')
+                                accumulated snow density model''')
 
         self._logger.info('''Using {0} for the new accumulated snow
                             density model:  '''.format(self.nasde_model))

@@ -91,8 +91,7 @@ class wind(image_data.image_data):
     """
 
     variable = 'wind'
-    min = 0.447
-    max = 35
+
 
     # these are variables that can be output
     output_variables = {'flatwind': {
@@ -152,7 +151,20 @@ class wind(image_data.image_data):
                     v[ms[1]] = float(self.config[m])
             self.config['veg'] = v
 
-            # peak value
+
+            #Set max and min values
+            if "min_wind" in self.config:
+                self.min = self.config['min_wind']
+            else:
+                self.min = 0.447
+
+            #Set max and min values and/opr defaults
+            if "max_wind" in self.config:
+                self.max = self.config['max_wind']
+            else:
+                self.max = 35.0
+
+            # Mountain peak values
             if 'peak' in self.config:
                 # Check to see if parsed as NoneType from config
                 if self.config['peak'] is None:
