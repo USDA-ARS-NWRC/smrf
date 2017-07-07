@@ -11,7 +11,7 @@
  *    W. H. Press, B. P. Flannery, S. A. Teukolsky, and W. T. Vetterling
  *    (1988).  Numerical Recipes in C.  Cambridge University Press, pp. 43-44.
  *
- *    Version = 0.2.4
+ *    Version = 0.2.5
  */
 
 #include <stdlib.h>

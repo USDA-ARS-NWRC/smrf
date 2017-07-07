@@ -8,7 +8,7 @@ import numpy as np
 # import matplotlib.pyplot as plt
 # from isnobal import ipw
 
-__version__ = '0.2.4'
+__version__ = '0.2.5'
 
 
 def mkprecip(precipitation, temperature):

@@ -1,5 +1,5 @@
 '''
-Version = 0.2.4
+Version = 0.2.5
 
 20151222 Scott Havens
 

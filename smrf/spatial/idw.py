@@ -10,7 +10,7 @@ import numpy as np
 # import sheppard
 # import matplotlib.pyplot as plt
 
-__version__ = '0.2.4'
+__version__ = '0.2.5'
 
 
 class IDW:

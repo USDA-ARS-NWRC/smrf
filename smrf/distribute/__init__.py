@@ -2,7 +2,7 @@
 
 __author__ = 'Scott Havens'
 __email__ = 'scotthavens@ars.usda.gov'
-__version__ = '0.2.4'
+__version__ = '0.2.5'
 
 from . import image_data
 from . import air_temp

@@ -11,7 +11,7 @@ __author__ = "Scott Havens"
 __maintainer__ = "Scott Havens"
 __email__ = "scott.havens@ars.usda.gov"
 __date__ = "2016-01-04"
-__version__ = "0.2.4"
+__version__ = "0.2.5"
 
 
 class wind(image_data.image_data):

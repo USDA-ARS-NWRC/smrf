@@ -14,7 +14,7 @@
  *    Vetterling, Numerical Recipes in C:  The Art of Scientific Computing,
  *    Cambridge University Press, 1988, p. 705.
  *   
- *    Version = 0.2.4
+ *    Version = 0.2.5
  */
 
 double *vector(n)
