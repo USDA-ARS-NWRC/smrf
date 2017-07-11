@@ -129,11 +129,6 @@ class ppt(image_data.image_data):
         self.storm_days = np.zeros((topo.ny, topo.nx))
         self.storm_precip = np.zeros((topo.ny, topo.nx))
         self.last_storm_day = np.zeros((topo.ny, topo.nx))
-        self.storm_total = np.zeros((topo.ny, topo.nx))
-
-        self.storms = []
-        self.time_steps_since_precip = 0
-        self.storming = False
 
         if 'storm_mass_thresh' in self.config:
             self.ppt_threshold = self.config['storm_mass_thresh']
@@ -148,18 +143,25 @@ class ppt(image_data.image_data):
 
         if 'nasde_model' not in self.config:
             self.nasde_model = 'susong1999'
+
         elif self.config['nasde_model'] == 'susong1999':
             self.nasde_model = 'susong1999'
+
         elif self.config['nasde_model'] == 'marks2017':
             self.nasde_model = 'marks2017'
+
         else:
             self._logger.error('''Could not determine method for new
                                 accumulated snow density model''')
 
-        self._logger.info('''Using {0} for the new accumulated snow
-                            density model:  '''.format(self.nasde_model))
+        self._logger.info('''Using {0} for the new accumulated snow density model:  '''.format(self.nasde_model))
 
         if self.nasde_model == 'marks2017':
+            self.storm_total = np.zeros((topo.ny, topo.nx))
+
+            self.storms = []
+            self.time_steps_since_precip = 0
+            self.storming = False
             # Clip and adjust the precip data so that there is only precip
             # during the storm and ad back in the missing data to conserve mass
             self.storms, storm_count = storms.tracking_by_station(data.precip,
@@ -175,8 +177,6 @@ class ppt(image_data.image_data):
             self._logger.info("Identified Storms:\n{0}".format(self.storms))
             self.storm_id = 0
             self._logger.info("Estimated number of storms: {0}".format(storm_count))
-
-
 
 
     def distribute_precip(self, data):
@@ -263,8 +263,7 @@ class ppt(image_data.image_data):
         precipitation as to avoid precip between storms.
         """
 
-        if self.corrected_precip.ix[time].sum() > 0:
-
+        if self.corrected_precip.ix[time].sum() > 0.0:
             # Check for time in every storm
             for i, s in self.storms.iterrows():
                 if time >= s['start'] and time <= s['end']:
@@ -302,10 +301,6 @@ class ppt(image_data.image_data):
                                                          self.min,
                                                          self.max)
 
-            # During a storm we only need to calc density but not distribute
-            # storm total as well as when it is cold enough.
-            # TODO calculating the snow density is only needed once per storm,
-            # so some speedup could be had there as well
             if self.storming and dpt.min() < 2.0:
                 self._logger.debug('''Calculating new snow density for
                                     storm #{0}'''.format(self.storm_id+1))
@@ -317,22 +312,19 @@ class ppt(image_data.image_data):
             else:
                 snow_den = np.zeros(self.precip.shape)
                 perc_snow = np.zeros(self.precip.shape)
+                # determine time since last storm basin wide
+                self.stormDays = storms.time_since_storm_basin(self.precip,
+                                                          self.storms.iloc[self.storm_id],
+                                                          self.storm_id,
+                                                          self.storming, time,
+                                                          time_step=self.time_step/60.0/24.0,
+                                                          stormDays=self.storm_days)
 
         else:
-            # self.storm_days += self.time_step/60/24
+            self.storm_days += self.time_step/60.0/24.0
             self.precip = np.zeros(self.storm_days.shape)
             perc_snow = np.zeros(self.storm_days.shape)
             snow_den = np.zeros(self.storm_days.shape)
-
-        # determine time since last storm basin wide
-        stormDays = storms.time_since_storm_basin(self.precip,
-                                                  self.storms.iloc[self.storm_id],
-                                                  self.storm_id,
-                                                  self.storming, time,
-                                                  time_step=self.time_step/60/24,
-                                                  stormDays=self.storm_days)
-
-        self.storm_days = stormDays
 
         # save the model state
         self.percent_snow = perc_snow
@@ -400,7 +392,6 @@ class ppt(image_data.image_data):
         else:
             self.last_storm_day_basin = np.max(self.last_storm_day)
 
-
     def distribute_thread(self, queue, data, date, mask=None):
         """
         Distribute the data using threading and queue. All data is provided and
@@ -437,7 +428,6 @@ class ppt(image_data.image_data):
 
             if self.nasde_model == "marks2017":
                 queue['storm_id'].put([t, self.storm_id])
-
                 queue['storm_total'].put([t, self.storm_total])
 
     def post_process_snow_density(self, main_obj, pds, tds, storm):

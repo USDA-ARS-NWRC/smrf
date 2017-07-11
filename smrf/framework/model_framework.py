@@ -83,7 +83,7 @@ class SMRF():
                         'air_temp', 'dew_point', 'vapor_pressure',
                         'wind_speed', 'precip', 'percent_snow',
                         'snow_density', 'last_storm_day_basin',
-                        'storm_days', 'storm_total', 'storm_id',
+                        'storm_days',
                         'clear_vis_beam', 'clear_vis_diffuse',
                         'clear_ir_beam', 'clear_ir_diffuse',
                         'albedo_vis', 'albedo_ir', 'net_solar',
@@ -539,6 +539,10 @@ class SMRF():
         # Create Queues for all the variables
         q = {}
         t = []
+
+        if self.distribute['precip'].nasde_model == 'marks2017':
+            self.thread_variables += ['storm_total', 'storm_id']
+
         for v in self.thread_variables:
             q[v] = queue.DateQueue_Threading(self.max_values, self.time_out)
 
