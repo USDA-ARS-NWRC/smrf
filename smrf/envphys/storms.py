@@ -412,10 +412,10 @@ def clip_and_correct(precip,storms):
         original = precip[station].sum()
         clipped = precip_clipped[station].sum()
         if original == 0:
-            c = 0
+            c = 1.0
         else:
             c = original/clipped
 
         correction[station] = c
     #print "Max precip from the correction:{0}".format(precip_clipped.max())
-    return precip_clipped
+    return precip_clipped * c
