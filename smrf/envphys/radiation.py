@@ -15,6 +15,7 @@ import os
 import datetime
 import logging
 import pytz
+from smrf.utils import utils
 
 __version__ = '0.2.5'
 
@@ -133,6 +134,64 @@ def albedo(telapsed, cosz, gsize, maxgsz, dirt=2):
 
     return alb_v, alb_ir
 
+def decay_alb_power(self, start_decay, end_decay, t_curr, pwr, alb_v, alb_ir):
+    """
+    Find a decrease in albedo due to litter acccumulation
+
+    Args:
+        start_decay: date to start albedo decay (datetime)
+        end_decay: date at which to end albedo decay curve (datetime)
+        t_curr: datetime object of current timestep
+        pwr: power for power law decay
+        alb_v: numpy array of albedo for visibile spectrum
+        alb_ir: numpy array of albedo for IR spectrum
+
+    Returns:
+        corrected albedo arrays based on date, veg type
+
+    Created July 18, 2017
+    Micah Sandusky
+    """
+    # Calculate hour past start of decay
+    t_diff_hr = t_curr - start_decay
+    t_diff_hr = t_diff_hr.days*24.0 + t_diff_hr.seconds/3600.0 #only need hours here
+    # Calculate total time of decay
+    t_decay_hr = (end_decay - start_decay)
+    t_decay_hr = t_decay_hr.days*24.0 + t_decay_hr.seconds/3600.0 #only need hours here
+    # correct for veg
+    alb_dec = np.zeros_like(alb_v)
+
+    # Don't decay if before start
+    if t_diff_hr <= 0.0:
+        alb_dec = alb_dec * 0.0
+
+    # Use max decay if after start
+    elif t_diff_hr > t_decay_hr:
+        # Use default
+        alb_dec = alb_dec + self.config['veg_default']
+        # Decay based on veg type
+        for i, v in enumerate(self.config['veg']):
+            alb_dec[self.veg_type == int(v)] = self.config['veg'][v]
+
+    # Power function decay if during decay period
+    else:
+        # Use defaults
+        max_dec = self.config['veg_default']
+        tao = (t_decay_hr) / (max_dec**(1.0/pwr))
+        # Add default decay to array of zeros
+        alb_dec = alb_dec + ((t_diff_hr) / tao)**pwr
+        # Decay based on veg type
+        for i, v in enumerate(self.config['veg']):
+            max_dec = self.config['veg'][v]
+            tao = (t_decay_hr) / (max_dec**(1.0/pwr))
+            # Set albedo decay at correct veg types
+            alb_dec[self.veg_type == int(v)] = ((t_diff_hr) / tao)**pwr
+            # self._logger.debug('Type {0}, decay {1}'.format(int(v), self.config['veg'][v]))
+
+    alb_v_d = alb_v - alb_dec
+    alb_ir_d = alb_ir - alb_dec
+
+    return alb_v_d, alb_ir_d
 
 def ihorizon(x, y, Z, azm, mu=0, offset=2, ncores=0):
     """

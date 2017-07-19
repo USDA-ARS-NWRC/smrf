@@ -1,6 +1,9 @@
 
 import numpy as np
 import logging
+import pandas as pd
+import datetime
+import pytz
 from smrf.distribute import image_data
 from smrf.envphys import radiation
 # import smrf.utils as utils
@@ -88,6 +91,30 @@ class albedo(image_data.image_data):
         else:
             albedoConfig['dirt'] = float(albedoConfig['dirt'])
 
+        if 'veg_default' not in albedoConfig:
+                albedoConfig['veg_default'] = 0.25
+        # get the veg values for max litter decay
+        matching = [s for s in albedoConfig.keys() if "veg_" in s]
+        v = {}
+        for m in matching:
+            if m != 'veg_default':
+                ms = m.split('_')
+                v[ms[1]] = float(albedoConfig[m])
+        albedoConfig['veg'] = v
+
+        # assign albedo decay config options
+        if 'start_decay' not in albedoConfig:
+            albedoConfig['start_decay'] = None
+            albedoConfig['end_decay'] = None
+            albedoConfig['pwr'] = None
+        else:
+            albedoConfig['start_decay'] = pd.to_datetime(albedoConfig['start_decay'])
+            albedoConfig['end_decay'] = pd.to_datetime(albedoConfig['end_decay'])
+            tzinfo = pytz.timezone(albedoConfig['time_zone'])
+            albedoConfig['start_decay'] = albedoConfig['start_decay'].replace(tzinfo=tzinfo)
+            albedoConfig['end_decay'] = albedoConfig['end_decay'].replace(tzinfo=tzinfo)
+            albedoConfig['pwr'] = float(albedoConfig['pwr'])
+
         self.config = albedoConfig
 
         self._logger.debug('Created distribute.albedo')
@@ -104,6 +131,7 @@ class albedo(image_data.image_data):
 
 #         self._initialize(topo, metadata)
         self._logger.debug('Initializing distribute.albedo')
+        self.veg_type = topo.veg_type
 
     def distribute(self, current_time_step, cosz, storm_day):
         """
@@ -128,6 +156,19 @@ class albedo(image_data.image_data):
                                              self.config['grain_size'],
                                              self.config['max_grain'],
                                              self.config['dirt'])
+
+            # Perform litter decay
+            if (self.config['start_decay'] is not None and
+                    self.config['end_decay'] is not None and
+                    self.config['end_decay'] > self.config['start_decay']):
+
+                alb_v_d, alb_ir_d = radiation.decay_alb_power(self,
+                                        self.config['start_decay'],
+                                        self.config['end_decay'],
+                                        current_time_step,
+                                        self.config['pwr'], alb_v, alb_ir)
+                alb_v = alb_v_d
+                alb_ir = alb_ir_d
 
             self.albedo_vis = alb_v
             self.albedo_ir = alb_ir
