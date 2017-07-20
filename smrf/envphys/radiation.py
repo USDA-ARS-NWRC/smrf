@@ -193,6 +193,45 @@ def decay_alb_power(self, start_decay, end_decay, t_curr, pwr, alb_v, alb_ir):
 
     return alb_v_d, alb_ir_d
 
+def decay_alb_hardy(self, storm_day, alb_v, alb_ir, alb_litter = 0.2):
+    """
+    Find a decrease in albedo due to litter acccumulation
+    using method from (Hardy 2000) with storm_day as input
+
+    Args:
+        storm_day: numpy array of decimal day since last storm
+        alb_v: numpy array of albedo for visibile spectrum
+        alb_ir: numpy array of albedo for IR spectrum
+        alb_litter: albedo of pure litter
+
+        Note: uses input of l_rate (litter rate) from config
+        which is based on veg type. This is decimal percent litter
+        coverage per day
+
+    Returns:
+        corrected albedo arrays
+
+    Created July 19, 2017
+    Micah Sandusky
+    """
+    # array for decimal percent snow coverage
+    sc = np.zeros_like(alb_v)
+    # calculate snow coverage default veg type
+    l_rate = self.config['litter_default']
+    sc = sc + (1.0-l_rate)**(storm_day)
+    # calculate snow coverage based on veg type
+    for i, v in enumerate(self.config['litter']):
+        #self._logger.debug('litter {0}: {1}'.format(v, self.config['litter'][v] ) )
+        l_rate = self.config['litter'][v]
+        sc[self.veg_type == int(v)] = (1.0 - l_rate)**(storm_day[self.veg_type == int(v)])
+    # calculate litter coverage
+    lc = np.ones_like(alb_v) - sc
+    # weighted average to find decayed albedo
+    alb_v_d = alb_v*sc + alb_litter*lc
+    alb_ir_d = alb_ir*sc + alb_litter*lc
+
+    return alb_v_d, alb_ir_d
+
 def ihorizon(x, y, Z, azm, mu=0, offset=2, ncores=0):
     """
     Calculate the horizon values for an entire DEM image

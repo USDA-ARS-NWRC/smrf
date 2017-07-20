@@ -91,29 +91,56 @@ class albedo(image_data.image_data):
         else:
             albedoConfig['dirt'] = float(albedoConfig['dirt'])
 
-        if 'veg_default' not in albedoConfig:
-                albedoConfig['veg_default'] = 0.25
-        # get the veg values for max litter decay
-        matching = [s for s in albedoConfig.keys() if "veg_" in s]
-        v = {}
-        for m in matching:
-            if m != 'veg_default':
-                ms = m.split('_')
-                v[ms[1]] = float(albedoConfig[m])
-        albedoConfig['veg'] = v
 
-        # assign albedo decay config options
-        if 'start_decay' not in albedoConfig:
-            albedoConfig['start_decay'] = None
-            albedoConfig['end_decay'] = None
-            albedoConfig['pwr'] = None
-        else:
-            albedoConfig['start_decay'] = pd.to_datetime(albedoConfig['start_decay'])
-            albedoConfig['end_decay'] = pd.to_datetime(albedoConfig['end_decay'])
-            tzinfo = pytz.timezone(albedoConfig['time_zone'])
-            albedoConfig['start_decay'] = albedoConfig['start_decay'].replace(tzinfo=tzinfo)
-            albedoConfig['end_decay'] = albedoConfig['end_decay'].replace(tzinfo=tzinfo)
-            albedoConfig['pwr'] = float(albedoConfig['pwr'])
+        decay_method = 'None'
+        if 'decay_method' not in albedoConfig:
+            albedoConfig['decay_method'] = decay_method
+
+        elif albedoConfig['decay_method'] == 'date_method':
+
+            if 'veg_default' not in albedoConfig:
+                albedoConfig['veg_default'] = 0.25
+
+            # get the veg values for max litter decay
+            matching = [s for s in albedoConfig.keys() if "veg_" in s]
+            v = {}
+            for m in matching:
+                if m != 'veg_default':
+                    ms = m.split('_')
+                    v[ms[1]] = float(albedoConfig[m])
+            albedoConfig['veg'] = v
+
+            # assign albedo decay config options
+            if 'start_decay' not in albedoConfig:
+                self._logger.debug('No albedo decay will take place, dates not specified!')
+                albedoConfig['start_decay'] = None
+                albedoConfig['end_decay'] = None
+                albedoConfig['pwr'] = None
+            else:
+                albedoConfig['start_decay'] = pd.to_datetime(albedoConfig['start_decay'])
+                albedoConfig['end_decay'] = pd.to_datetime(albedoConfig['end_decay'])
+                tzinfo = pytz.timezone(albedoConfig['time_zone'])
+                albedoConfig['start_decay'] = albedoConfig['start_decay'].replace(tzinfo=tzinfo)
+                albedoConfig['end_decay'] = albedoConfig['end_decay'].replace(tzinfo=tzinfo)
+                albedoConfig['pwr'] = float(albedoConfig['pwr'])
+
+        elif albedoConfig['decay_method'] == 'Hardy2000':
+
+            if 'litter_albedo' not in albedoConfig:
+                albedoConfig['litter_albedo'] = 0.2
+                self._logger.debug('Setting default litter albedo to {0}'.format(albedoConfig['litter_albedo']))
+            # find and read in litter rates
+            if 'litter_default' not in albedoConfig:
+                albedoConfig['litter_default'] = 0.002
+                self._logger.debug('Setting default litter rate to {0}'.format(albedoConfig['litter_default']))
+            # get the veg values for max litter decay
+            matching = [s for s in albedoConfig.keys() if "litter_" in s]
+            v = {}
+            for m in matching:
+                if (m != 'litter_default' and m != 'litter_albedo'):
+                    ms = m.split('_')
+                    v[ms[1]] = float(albedoConfig[m])
+            albedoConfig['litter'] = v
 
         self.config = albedoConfig
 
@@ -158,17 +185,28 @@ class albedo(image_data.image_data):
                                              self.config['dirt'])
 
             # Perform litter decay
-            if (self.config['start_decay'] is not None and
-                    self.config['end_decay'] is not None and
-                    self.config['end_decay'] > self.config['start_decay']):
+            if self.config['decay_method'] == 'date_method':
+                if (self.config['start_decay'] is not None and
+                        self.config['end_decay'] is not None and
+                        self.config['end_decay'] > self.config['start_decay']):
 
-                alb_v_d, alb_ir_d = radiation.decay_alb_power(self,
-                                        self.config['start_decay'],
-                                        self.config['end_decay'],
-                                        current_time_step,
-                                        self.config['pwr'], alb_v, alb_ir)
+                    alb_v_d, alb_ir_d = radiation.decay_alb_power(self,
+                                            self.config['start_decay'],
+                                            self.config['end_decay'],
+                                            current_time_step,
+                                            self.config['pwr'], alb_v, alb_ir)
+                    alb_v = alb_v_d
+                    alb_ir = alb_ir_d
+                else:
+                    self._logger.error('Need correct inputs for decay method: {0}'.format(self.config['decay_method']))
+
+            elif self.config['decay_method'] == 'Hardy2000':
+                alb_v_d, alb_ir_d = radiation.decay_alb_hardy(self, storm_day,
+                                                                alb_v, alb_ir,
+                                                                self.config['litter_albedo'])
                 alb_v = alb_v_d
                 alb_ir = alb_ir_d
+
 
             self.albedo_vis = alb_v
             self.albedo_ir = alb_ir
