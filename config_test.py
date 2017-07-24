@@ -25,11 +25,14 @@ def parse_lst_options(option_lst_str):
     """
     available = {}
     #check to see if it is a lists
-    if "," in option_lst_str:
-        for entry in option_lst_str.split(','):
-            name,option_lst = parse_str_setting(entry)
-            options = (option_lst.strip(['[',']'])).split(" ")
-            available[name] = options
+    if not None:
+        if "," in option_lst_str:
+            for entry in option_lst_str.split(','):
+                name,option_lst = parse_str_setting(entry)
+                options = (option_lst.strip(['[',']'])).split(" ")
+                available[name] = options
+    else:
+        available = [None]
 
     return available
 
@@ -43,13 +46,12 @@ def check_config_file(user_config_fname, control_fname):
     #Compare user config file to our master config
     for section,configured in users_cfg.items():
         print section,configured
-        #Are these valid sections
+        #Are these valid sections?
         if section not in config.keys():
             errors.append("Section {0} is not a valid section in smrf config files".format(section))
 
         #Parse the possible options
         else:
-
             available = parse_lst_options(config[section]['available_options'])
 
         #In the section check the values and options
