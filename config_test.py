@@ -5,7 +5,7 @@ def parse_str_setting(str_option):
     Parses a single string where options are separated by =
     returns tuple of string
     """
-    if "=" in option_lst_str:
+    if "=" in str_option:
         name,option = str_option.split("=")
         name = (name.lower()).strip()
         option = (option.lower()).strip()
@@ -25,14 +25,21 @@ def parse_lst_options(option_lst_str):
     """
     available = {}
     #check to see if it is a lists
-    if not None:
-        if "," in option_lst_str:
-            for entry in option_lst_str.split(','):
-                name,option_lst = parse_str_setting(entry)
-                options = (option_lst.strip(['[',']'])).split(" ")
-                available[name] = options
-    else:
-        available = [None]
+    print option_lst_str
+    if option_lst_str is not None:
+        if type(option_lst_str) != list:
+            options_parseable = [option_lst_str]
+        else:
+            options_parseable = option_lst_str
+        for entry in options_parseable:
+            name,option_lst = parse_str_setting(entry)
+            if '[' in option_lst and " " in option_lst:
+                options = (''.join(c for c in option_lst if c not in '[]')).split(" ")
+
+            else:
+                options = option_lst
+
+            available[name] = options
 
     return available
 
@@ -42,26 +49,26 @@ def check_config_file(user_config_fname, control_fname):
 
     users_cfg = read_config(user_config_fname)
     errors = []
-
     #Compare user config file to our master config
     for section,configured in users_cfg.items():
-        print section,configured
+        print "section = {0}".format(section)
         #Are these valid sections?
         if section not in config.keys():
             errors.append("Section {0} is not a valid section in smrf config files".format(section))
 
         #Parse the possible options
         else:
-            available = parse_lst_options(config[section]['available_options'])
-
+            available =  parse_lst_options(config[section]['available_options'])
+            print "Available Options = {0}".format(available)
         #In the section check the values and options
         for item,value in configured.items():
             #Is the item known as a configurable
-            if item not in config[section]["configurable"]:
-                errors.append("Section: {0}, item {1} is not a checkable item in smrf config files".format(section,item))
-
-                if value not in available[item]:
-                    errors.append("Value {0} is not a value option item {1} in section {2}".format(value,item,section))
+            if item in config[section]["configurable"]:
+                if item in available.keys():
+                    if value not in available[item]:
+                        errors.append("Value {0} is not a valid option for item {1} in section {2}.".format(value,item,section))
+            else:
+                errors.append("Section: {0}, item {1} is not a configurable item in smrf config files.".format(section,item))
 
     print "Configuration Status Report:"
     print "="*100
