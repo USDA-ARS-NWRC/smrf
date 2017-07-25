@@ -10,6 +10,52 @@ from .pycompat import OrderedDict, SafeConfigParser, basestring, unicode_type
 
 __version__ = "0.2.2"
 
+def parse_str_setting(str_option):
+    """
+    Parses a single string where options are separated by =
+    returns tuple of string
+    Require users specfies settings with an equals sign
+    """
+    if "=" in str_option:
+        name,option = str_option.split("=")
+        name = (name.lower()).strip()
+        option = (option.lower()).strip()
+    else:
+        raise ValueError("Config file string does not have options with = to parse.")
+
+    return name,option
+
+
+def parse_lst_options(option_lst_str):
+    """
+    Parse options that can be lists form the master config file and returns a dict
+    e.g.
+    available_options = distribution=[idw,dk,grid],slope=[-1 0 1]...
+    returns
+    available_options_dict = {"distribution":[dk grid idw],
+              "slope":[-1 0 1]}
+    """
+    available = {}
+    #check to see if it is a lists
+    if option_lst_str is not None:
+        if type(option_lst_str) != list:
+            options_parseable = [option_lst_str]
+        else:
+            options_parseable = option_lst_str
+
+        for entry in options_parseable:
+            name,option_lst = parse_str_setting(entry)
+
+            if '[' in option_lst and " " in option_lst:
+                #Account for special syntax for providing a list answer
+                options = (''.join(c for c in option_lst if c not in '[]'))
+                options = (options.replace('\n'," ")).split(' ')
+            else:
+                options = option_lst
+
+            available[name] = options
+
+    return available
 
 # -------------------------------------------------------------------- #
 def read_config(config_file, default_config=None):
@@ -36,8 +82,15 @@ def read_config(config_file, default_config=None):
                         dict1[name][option] = key
 
     return dict1
-# -------------------------------------------------------------------- #
 
+
+def read_master_config(master_config_file):
+    config = read_config(master_config_file)
+    sections = config.keys()
+    for section in sections:
+        config[section]["available_options"] =  parse_lst_options(config[section]['available_options'])
+
+    return config
 
 # -------------------------------------------------------------------- #
 def type_configobj(d):

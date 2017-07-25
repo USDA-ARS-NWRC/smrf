@@ -1,7 +1,9 @@
-from smrf.utils.io import read_config
+from smrf.utils.io import read_config, read_master_config
 import subprocess
 import smrf
-def generate_config(config):
+from datetime import date
+
+def generate_config(config,fname):
     """
     Generates a list of strings to be written in the ini file
     """
@@ -24,8 +26,7 @@ def generate_config(config):
                   'system'
                   ]
 
-
-    #Dictionary of commented sectino titles
+    #Dictionary of commented section titles
     titles = {'topo': "Files for DEM and vegetation",
                   'time': "Dates to run model",
                   'stations': "Stations to use",
@@ -41,14 +42,14 @@ def generate_config(config):
                   'system': "System variables"
                   }
 
-    label = subprocess.check_output(['git', 'rev-parse', '--short', 'HEAD'])
-
     #Construct the str
     config_str="#"*80
     config_str += """
 #
 # Configuration file for SMRF V{0}
-# git commit hash: {1}
+# Git commit hash: {1}
+# Date generated: {2}
+#
 # For details on configuration syntax see:
 # https://docs.python.org/2/library/configparser.html
 #
@@ -58,7 +59,8 @@ def generate_config(config):
 # they need to be preceded by a whitespace character to be recognized as a
 # comment. (For backwards compatibility, only ; starts an inline comment,
 # while # does not.)
-""".format(smrf.__version__,label)
+""".format(smrf.__version__,smrf.__gitHash__, date.today())
+
     for section in order_lst:
         #Add the header
         config_str+='\n'*2
@@ -67,55 +69,13 @@ def generate_config(config):
         config_str+='\n[{0}]\n'.format(section)
         #Add section items and values
         for k,v in config.get(section).items():
-            config_str+="{0:<30} {1:<10}\n".format((k+':'),v)
+            if type(v) == list:
+                astr = ", ".join(str(c.strip()) for c in v)
+            else:
+                astr = v
+            config_str+="{0:<30} {1:<10}\n".format((k+':'),astr)
 
     print config_str
-
-
-def parse_str_setting(str_option):
-    """
-    Parses a single string where options are separated by =
-    returns tuple of string
-    """
-    if "=" in str_option:
-        name,option = str_option.split("=")
-        name = (name.lower()).strip()
-        option = (option.lower()).strip()
-    else:
-        raise ValueError("Config file string does not have options with = to parse.")
-
-    return name,option
-
-def parse_lst_options(option_lst_str):
-    """
-    parse options that can be lists form the config file and returns a dict
-    e.g.
-    available_options = distribution=[idw,dk,grid],slope=[-1 0 1]...
-    returns
-    available_options_dict = {"distribution":[dk grid idw],
-              "slope":[-1 0 1]}
-    """
-    available = {}
-    #check to see if it is a lists
-    if option_lst_str is not None:
-        if type(option_lst_str) != list:
-            options_parseable = [option_lst_str]
-        else:
-            options_parseable = option_lst_str
-
-        for entry in options_parseable:
-            name,option_lst = parse_str_setting(entry)
-
-            if '[' in option_lst and " " in option_lst:
-                #Account for special syntax for providing a list answer
-                options = (''.join(c for c in option_lst if c not in '[]'))
-                options = (options.replace('\n'," ")).split(' ')
-            else:
-                options = option_lst
-
-            available[name] = options
-
-    return available
 
 def check_config_file(user_cfg, config):
     """
@@ -136,7 +96,7 @@ def check_config_file(user_cfg, config):
 
         #Parse the possible options
         else:
-            available =  parse_lst_options(config[section]['available_options'])
+            available =  config[section]['available_options']
 
         #In the section check the values and options
         for item,value in configured.items():
@@ -177,12 +137,20 @@ def check_config_file(user_cfg, config):
         for e in errors:
             print e
         print "\n"
+        
+def generate_default_config(control_fname):
+    """
+    Looks at the master config file and generates a config file of all the
+    sections and options that have defaults.
+    """
 
 def test_process(user_config_fname,control_fname):
     user_cfg = read_config(user_config_fname)
-    config = read_config(control_fname)
+    config = read_master_config(control_fname)
+    #user_cfg = add_defaults(user_cfg,config)
     check_config_file(user_cfg,config)
-    generate_config(user_cfg)
+    generate_config(user_cfg,'fuke')
+
 
 if __name__ == "__main__":
     test_process('./test_data/testConfig.ini','./smrf/framework/CoreConfig.ini')
