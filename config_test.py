@@ -1,4 +1,76 @@
 from smrf.utils.io import read_config
+import subprocess
+import smrf
+def generate_config(config):
+    """
+    Generates a list of strings to be written in the ini file
+    """
+    #Header surround each commented titles in the ini file
+    section_header = ('#'*80) + '\n' + ('# {0}\n') +('#'*80)
+
+    #Dictionaries do not go in order so we provide the order here
+    order_lst = ['topo',
+                  'time',
+                  'stations',
+                  'air_temp',
+                  'vapor_pressure',
+                  'wind',
+                  'precip',
+                  'albedo',
+                  'solar',
+                  'thermal',
+                  'soil_temp',
+                  'logging',
+                  'system'
+                  ]
+
+
+    #Dictionary of commented sectino titles
+    titles = {'topo': "Files for DEM and vegetation",
+                  'time': "Dates to run model",
+                  'stations': "Stations to use",
+                  'air_temp': "Air temperature distribution",
+                  'vapor_pressure': "Vapor pressure distribution",
+                  'wind': "Wind speed and wind direction distribution",
+                  'precip': "Precipitation distribution",
+                  'albedo': "Albedo distribution",
+                  'solar': "Solar radiation distribution",
+                  'thermal': "Thermal radiation distribution",
+                  'soil_temp': " Soil temperature",
+                  'logging': "Logging",
+                  'system': "System variables"
+                  }
+
+    label = subprocess.check_output(['git', 'rev-parse', '--short', 'HEAD'])
+
+    #Construct the str
+    config_str="#"*80
+    config_str += """
+#
+# Configuration file for SMRF V{0}
+# git commit hash: {1}
+# For details on configuration syntax see:
+# https://docs.python.org/2/library/configparser.html
+#
+# Configuration files may include comments, prefixed by specific characters
+# (# and ;). Comments may appear on their own in an otherwise empty line, or
+# may be entered in lines holding values or section names. In the latter case,
+# they need to be preceded by a whitespace character to be recognized as a
+# comment. (For backwards compatibility, only ; starts an inline comment,
+# while # does not.)
+""".format(smrf.__version__,label)
+    for section in order_lst:
+        #Add the header
+        config_str+='\n'*2
+        config_str+=section_header.format(titles[section])
+        config_str+='\n'
+        config_str+='\n[{0}]\n'.format(section)
+        #Add section items and values
+        for k,v in config.get(section).items():
+            config_str+="{0:<30} {1:<10}\n".format((k+':'),v)
+
+    print config_str
+
 
 def parse_str_setting(str_option):
     """
@@ -45,17 +117,19 @@ def parse_lst_options(option_lst_str):
 
     return available
 
-def check_config_file(user_config_fname, control_fname):
+def check_config_file(user_cfg, config):
+    """
+    looks at the users provided config file and checks it to a master config file
+    looking at correctness and missing info.
+    """
 
-    config = read_config(control_fname)
-
-    users_cfg = read_config(user_config_fname)
+    print "\nChecking config file for issues..."
     errors = []
     warnings = []
     msg = "{: >10} {: >25} {: >60}"
 
     #Compare user config file to our master config
-    for section,configured in users_cfg.items():
+    for section,configured in user_cfg.items():
         #Are these valid sections?
         if section not in config.keys():
             errors.append(msg.format(section,item, "Not a valid section."))
@@ -63,7 +137,7 @@ def check_config_file(user_config_fname, control_fname):
         #Parse the possible options
         else:
             available =  parse_lst_options(config[section]['available_options'])
-            print available
+
         #In the section check the values and options
         for item,value in configured.items():
             #Did the user provide a list value
@@ -77,7 +151,6 @@ def check_config_file(user_config_fname, control_fname):
                 if item in config[section]["configurable"]:
                     #Are there known options for this item
                     if item in available.keys():
-                        print section,item,value,v
 
                         if str(v).lower() not in available[item]:
                             warn_str = "Caution: Unable to check {0} against anything".format(item)
@@ -105,6 +178,11 @@ def check_config_file(user_config_fname, control_fname):
             print e
         print "\n"
 
+def test_process(user_config_fname,control_fname):
+    user_cfg = read_config(user_config_fname)
+    config = read_config(control_fname)
+    check_config_file(user_cfg,config)
+    generate_config(user_cfg)
+
 if __name__ == "__main__":
-    check_config_file('./test_data/testConfig.ini','./smrf/framework/CoreConfig.ini')
-    check_config_file('./test_data/testConfig.ini','./smrf/framework/CoreConfig.ini')
+    test_process('./test_data/testConfig.ini','./smrf/framework/CoreConfig.ini')
