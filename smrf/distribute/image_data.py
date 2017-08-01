@@ -48,7 +48,7 @@ class image_data():
         grid: Gridded interpolation instance from :mod:`smrf.spatial.grid.GRID`
 
     """
-
+    
     def __init__(self, variable):
 
         self.variable = variable

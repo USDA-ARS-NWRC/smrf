@@ -135,6 +135,7 @@ class database:
         df = {}
         variables = variables.split(',')
         for v in variables:
+            self._logger.debug('Creating dataframe for {}'.format(v))
 
             # create an empty dataframe
             dp = pd.DataFrame(index=t, columns=station_ids)
