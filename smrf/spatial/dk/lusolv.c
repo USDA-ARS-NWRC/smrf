@@ -29,17 +29,11 @@ int lusolv(
 	double **a, 								/* input matrix */
 	double *x										/* vector of equation solutions */
 )
-//int n;                          /* number of rows and columns in matrix a */
-//double **a;                     /* input matrix */
-//double *x;                      /* vector of equation solutions */
 {
 	double d;                     /* +/- 1 for even or odd number of
                                    row interchanges */
 	int i;                       /* looping index */
 	int *indx;                   /* row permutation from pivoting */
-	//int *ivector();              /* int vector space allocation function */
-	//int ludcmp();                /* lu decomposition function */
-	//void lubksb();               /* lu backsubstitution function */
 //	void free();
 	int ret;                     /* function return value */
 
@@ -68,11 +62,6 @@ int ludcmp(
 	double *d										/* +/- 1 for even or odd number of
 																row interchanges */
 )
-//double **a;                     /* input matrix */
-//int n;                          /* number of rows and columns in matrix a */
-//int *indx;                      /* row permutation from pivoting */
-//double *d;                       /* +/- 1 for even or odd number of
-//                                   row interchanges */
 {
 	double big;                  /* largest array element */
 	double dum;                  /* dummy variable */
@@ -177,9 +166,6 @@ void lubksb(
 	int n, 											/* number of rows and columns in matrix a */
 	int *indx										/* row permutation from pivoting */
 )
-//double **a;                     /* input matrix */
-//int n;                          /* number of rows and columns in matrix a */
-//int *indx;                      /* row permutation from pivoting */
 {
 	int i, j;                    /* looping indexes */
 	int ii = -1;                 /* index of first nonzero r.h.s. value */

@@ -45,7 +45,6 @@ double *vector(int n)
  */
 
 double *dvector(int n)
-//int n;
 {
    double *v = (double *) NULL;
 
@@ -72,7 +71,6 @@ double *dvector(int n)
  */
 
 int *ivector(int n)
-//int n;
 {
    int *v = (int *) NULL;
 
@@ -99,7 +97,6 @@ int *ivector(int n)
  */
 
 double **matrix(int nr, int nc)
-//int nr, nc;
 {
    int i;
    double **m = (double **) NULL;
@@ -144,7 +141,6 @@ double **matrix(int nr, int nc)
  */
 
 double **dmatrix(int nr, int nc)
-//int nr, nc;
 {
    int i;
    double **m = (double **) NULL;
@@ -189,7 +185,6 @@ double **dmatrix(int nr, int nc)
  */
 
 int **imatrix(int nr, int nc)
-//int nr, nc;
 {
    int i, **m = (int **) NULL;
 
@@ -229,7 +224,6 @@ int **imatrix(int nr, int nc)
  */
 
 double ***cube(int nr, int nc, int nd)
-//int nr, nc, nd;
 {
    int i, j;
    double ***m = (double ***) NULL;
