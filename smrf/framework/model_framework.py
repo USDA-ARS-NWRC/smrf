@@ -28,24 +28,19 @@ import os
 import coloredlogs
 from datetime import datetime, timedelta
 import pandas as pd
-# import itertools
 import numpy as np
 import pytz
-# import matplotlib.pyplot as plt
 
 from smrf import data, distribute, output
 from smrf.envphys import radiation
 from smrf.utils import queue, io
 from threading import Thread
 
-# from multiprocessing import Process
-
 __author__ = "Scott Havens"
 __maintainer__ = "Scott Havens"
 __email__ = "scott.havens@ars.usda.gov"
 __date__ = "2015-12-22"
 __version__ = '0.2.5'
-
 
 class SMRF():
     """
@@ -94,15 +89,11 @@ class SMRF():
         """
         Initialize the model, read config file, start and end date, and logging
         """
-
         # read the config file and store
         if not os.path.isfile(configFile):
             raise Exception('Configuration file does not exist --> {}'
                             .format(configFile))
 
-#         f = MyParser()
-#         f.read(configFile)
-#         self.config = f.as_dict()
         try:
             self.config = io.read_config(configFile)
         except UnicodeDecodeError:

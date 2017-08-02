@@ -16,12 +16,16 @@ def parse_str_setting(str_option):
     returns tuple of string
     Require users specfies settings with an equals sign
     """
+
     if "=" in str_option:
         name,option = str_option.split("=")
         name = (name.lower()).strip()
         option = (option.lower()).strip()
+
     else:
-        raise ValueError("Config file string does not have options with = to parse.")
+        msg = "Config file string does not have any options with = to parse."
+        msg+= "\nError occurred parsing:\n {0}".format(str_option)
+        raise ValueError(msg)
 
     return name,option
 
@@ -57,6 +61,85 @@ def parse_lst_options(option_lst_str):
 
     return available
 
+
+def check_config_file(user_cfg, master_config):
+    """
+    looks at the users provided config file and checks it to a master config file
+    looking at correctness and missing info.
+    """
+
+    print "\nChecking config file for issues..."
+    errors = []
+    warnings = []
+    msg = "{: <20} {: <30} {: <60}"
+
+    #Compare user config file to our master config
+    for section,configured in user_cfg.items():
+        #Are these valid sections?
+        if section not in master_config.keys():
+            errors.append(msg.format(section,item, "Not a valid section."))
+
+        #Parse the possible options
+        else:
+            available =  master_config[section]['available_options']
+
+        #In the section check the values and options
+        for item,value in configured.items():
+            #Did the user provide a list value or single value
+            if type(value) != list:
+                val_lst = [value]
+            else:
+                val_lst = value
+
+            for v in val_lst:
+                #Is the item known as a configurable item
+                if item in master_config[section]["configurable"]:
+                    #Are there known options for this item
+                    if item in available.keys():
+                        v_str = str(v).lower()
+                        if v_str not in available[item]:
+                            err_str = "Invalid option: {0} ".format(str(v))
+                            err_str+="\n available_options were {0}".format(available[item])
+                            errors.append(msg.format(section,item, err_str))
+                else:
+                    wrn = "Not a registered option."
+                    if section.lower() == 'wind':
+                        wrn +=  " Common for station names."
+
+                    warnings.append(msg.format(section,item, wrn))
+
+    msg_len = 110
+    print "\n"*2
+    print "Configuration Status Report:"
+    print "="*msg_len
+    if len(warnings)>0:
+        print "WARNINGS:"
+        print msg.format("Section","Item", "Message")
+        print "_"*msg_len
+        for w in warnings:
+            print w
+        print "\n"
+
+    if len(errors)>0:
+        print "ERRORS:"
+        print msg.format("Section","Item", "Message")
+        print "_"*msg_len
+        for e in errors:
+            print e
+        print "\n"
+
+def add_defaults(user_config,master_config):
+    """
+    Look through the users config file and section by section add in missing
+    parameters to add defaults
+    """
+    print "\nAdding default values to config file..."
+    for section,configured in user_config.items():
+            for k,v in master_config[section]["defaults"].items():
+                if k not in configured.keys():
+                    user_config[section][k]=v
+    return user_config
+
 # -------------------------------------------------------------------- #
 def read_config(config_file, default_config=None):
     """
@@ -89,6 +172,7 @@ def read_master_config(master_config_file):
     sections = config.keys()
     for section in sections:
         config[section]["available_options"] =  parse_lst_options(config[section]['available_options'])
+        config[section]["defaults"] =  parse_lst_options(config[section]['defaults'])
 
     return config
 
