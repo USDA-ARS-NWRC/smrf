@@ -125,8 +125,8 @@ setup(
         'smrf.utils.wind',
         'smrf.spatial.dk'
         ],
-    #     package_dir={'smrf':'smrf'},
     include_package_data=True,
+    package_data={'smrf':['./framework/CoreConfig.ini']},
     install_requires=requirements,
     license="ISCL",
     zip_safe=False,

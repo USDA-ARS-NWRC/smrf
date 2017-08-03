@@ -31,7 +31,8 @@ import pandas as pd
 import numpy as np
 import pytz
 
-from smrf import data, distribute, output
+from smrf import data, distribute, output, __core_config__
+print(__core_config__)
 from smrf.envphys import radiation
 from smrf.utils import queue, io
 from threading import Thread
@@ -95,7 +96,9 @@ class SMRF():
                             .format(configFile))
 
         try:
+            #Read in the original users config
             self.config = io.read_config(configFile)
+
         except UnicodeDecodeError:
             raise UnicodeDecodeError('''The configuration file is not encoded in
                                     UTF-8, please change and retry''')
@@ -130,6 +133,24 @@ class SMRF():
 
         self._logger = logging.getLogger(__name__)
 
+        # add the title
+        title = self.title(2)
+        for line in title:
+            self._logger.info(line)
+
+        #Bring the the master config file
+        mconfig = io.read_master_config(__core_config__)
+
+        #Add defaults.
+        self._logger.info("\nAdding defaults to config...")
+        self.config = io.add_defaults(self.config,mconfig)
+
+        #Check the user config file for errors and report issues if any
+        self._logger.info("\nChecking config file for issues...")
+        warnings, errors = io.check_config_file(self.config,mconfig)
+        io.print_config_report(warnings, errors,logger = self._logger)
+
+
         # check for the desired sections
         if 'stations' not in self.config:
             self.config['stations'] = None
@@ -148,22 +169,16 @@ class SMRF():
             raise ValueError('''Invalid system entry in Config file, temp_dir is
                             either undefined or does not exist.''')
 
-        self.threading = False
-        if 'threading' in self.config['system']:
-            if self.config['system']['threading']:
-                self.threading = True
+        self.threading = self.config['system']['threading']
 
-        self.max_values = 1
-        if 'max_values' in self.config['system']:
-            self.max_values = int(self.config['system']['max_values'])
+        self.max_values = self.config['system']['max_values']
 
-        self.time_out = None
-        if 'time_out' in self.config['system']:
-            self.time_out = float(self.config['system']['time_out'])
+        self.time_out = float(self.config['system']['time_out'])
 
         # get the time section
         self.start_date = pd.to_datetime(self.config['time']['start_date'])
         self.end_date = pd.to_datetime(self.config['time']['end_date'])
+
         if self.start_date > self.end_date:
             raise ValueError("start_date cannot be larger than end_date.")
         if self.start_date > datetime.now() or self.end_date > datetime.now():
@@ -177,13 +192,6 @@ class SMRF():
 
         # initialize the distribute dict
         self.distribute = {}
-
-        # add a splash of color
-
-        # add the title
-        title = self.title(2)
-        for line in title:
-            self._logger.info(line)
 
         self._logger.info('Started SMRF --> %s' % datetime.now())
         self._logger.info('Model start --> %s' % self.start_date)
