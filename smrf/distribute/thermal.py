@@ -173,8 +173,6 @@ class th(image_data.image_data):
     """
 
     variable = 'thermal'
-    min = -600
-    max = 600
 
     # these are variables that can be output
     output_variables = {'thermal': {

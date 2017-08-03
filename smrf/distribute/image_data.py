@@ -122,6 +122,9 @@ class image_data():
                 same
         """
 
+        self.min = self.config['min']
+        self.max = self.config['max']
+
         # pull out the metadata subset
         if self.stations is not None:
             metadata = metadata.ix[self.stations]

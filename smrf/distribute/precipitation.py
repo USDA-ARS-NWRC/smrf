@@ -130,29 +130,13 @@ class ppt(image_data.image_data):
         self.storm_precip = np.zeros((topo.ny, topo.nx))
         self.last_storm_day = np.zeros((topo.ny, topo.nx))
 
-        if 'storm_mass_thresh' in self.config:
-            self.ppt_threshold = self.config['storm_mass_thresh']
-        else:
-            self.ppt_threshold = 0.1  # mm
+        self.ppt_threshold = self.config['storm_mass_threshold']
+
 
         # Time steps needed to end a storm definition
-        if 'time_steps_to_end_storms' in self.config:
-            self.time_to_end_storm = self.config['time_steps_to_end_storms']
-        else:
-            self.time_to_end_storm = 2 # Time steps it take to end a storm definition
+        self.time_to_end_storm = self.config['time_steps_to_end_storms']
 
-        if 'nasde_model' not in self.config:
-            self.nasde_model = 'susong1999'
-
-        elif self.config['nasde_model'] == 'susong1999':
-            self.nasde_model = 'susong1999'
-
-        elif self.config['nasde_model'] == 'marks2017':
-            self.nasde_model = 'marks2017'
-
-        else:
-            self._logger.error('''Could not determine method for new
-                                accumulated snow density model''')
+        self.nasde_model = self.config['nasde_model']
 
         self._logger.info('''Using {0} for the new accumulated snow density model:  '''.format(self.nasde_model))
 
