@@ -3,8 +3,6 @@ import numpy as np
 import logging
 from smrf.distribute import image_data
 from smrf.envphys import radiation
-# import smrf.utils as utils
-# import matplotlib.pyplot as plt
 
 __author__ = "Scott Havens"
 __maintainer__ = "Scott Havens"

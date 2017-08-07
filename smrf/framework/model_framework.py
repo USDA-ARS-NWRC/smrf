@@ -32,7 +32,6 @@ import numpy as np
 import pytz
 
 from smrf import data, distribute, output, __core_config__
-print(__core_config__)
 from smrf.envphys import radiation
 from smrf.utils import queue, io
 from threading import Thread

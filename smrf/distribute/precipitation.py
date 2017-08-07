@@ -132,7 +132,6 @@ class ppt(image_data.image_data):
 
         self.ppt_threshold = self.config['storm_mass_threshold']
 
-
         # Time steps needed to end a storm definition
         self.time_to_end_storm = self.config['time_steps_to_end_storms']
 
@@ -332,10 +331,9 @@ class ppt(image_data.image_data):
         if data.sum() > 0:
 
             # distribute data and set the min/max
-            self._distribute(data, zeros=None)
+            self._distribute(data)
+            # see if the mass threshold has been passed
             self.precip = utils.set_min_max(self.precip, self.min, self.max)
-
-            # remove very small precipitation
 
             # determine the precip phase and den
             snow_den, perc_snow = snow.calc_phase_and_density(dpt,
@@ -346,8 +344,8 @@ class ppt(image_data.image_data):
             stormDays, stormPrecip = storms.time_since_storm(self.precip,
                                                              perc_snow,
                                                              time_step=self.time_step/60/24,
-                                                             mass=0.5,
-                                                             time=4,
+                                                             mass=self.ppt_threshold,
+                                                             time=self.time_to_end_storm,
                                                              stormDays=self.storm_days,
                                                              stormPrecip=self.storm_precip)
 

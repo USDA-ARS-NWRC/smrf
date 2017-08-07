@@ -1,15 +1,9 @@
 
 import numpy as np
 import logging
-# import subprocess as sp
-# from multiprocessing import Process
 from smrf.distribute import image_data
 from smrf.envphys import thermal_radiation
 from smrf.envphys.core import envphys_c
-# from smrf.utils import utils
-# from smrf import ipw
-
-# import matplotlib.pyplot as plt
 
 __author__ = "Scott Havens"
 __maintainer__ = "Scott Havens"

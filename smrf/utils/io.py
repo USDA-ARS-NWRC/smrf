@@ -75,7 +75,8 @@ def parse_lst_options(option_lst_str):
                     value = str(o).lower()
 
                 options[i] = value
-
+            if len(options) == 1:
+                options = options[0]
             available[name] = options
 
     return available
@@ -321,13 +322,6 @@ def read_config(config_file, default_config=None):
         for option in options:
             dict2[option.lower()] = config_type(config.get(section, option))
         dict1[section.lower()] = dict2
-
-    if default_config is not None:
-        for name, section in dict1.items():
-            if name in default_config.keys():
-                for option, key in default_config[name].items():
-                    if option not in section.keys():
-                        dict1[name][option] = key
 
     return dict1
 
