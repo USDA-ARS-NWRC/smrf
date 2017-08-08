@@ -177,8 +177,7 @@ class SMRF():
             self.tempDir = os.path.abspath(tempDir)
             os.environ['WORKDIR'] = self.tempDir
         else:
-            raise ValueError('''Invalid system entry in Config file, temp_dir is
-                            either undefined or does not exist.''')
+            raise IOError('''The temp_dir provided in the config file does not exist.\n{0}'''.format(os.path.abspath(os.path.expanduser(self.config['system']['temp_dir']))))
 
         self.threading = self.config['system']['threading']
 
