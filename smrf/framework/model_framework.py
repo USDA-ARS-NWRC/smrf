@@ -25,6 +25,7 @@ Example:
 
 import logging
 import os
+import sys
 import coloredlogs
 from datetime import datetime, timedelta
 import pandas as pd
@@ -103,7 +104,6 @@ class SMRF():
                                     UTF-8, please change and retry''')
 
         # start logging
-
         if 'log_level' in self.config['logging']:
             loglevel = self.config['logging']['log_level'].upper()
         else:
@@ -141,13 +141,25 @@ class SMRF():
         mconfig = io.read_master_config(__core_config__)
 
         #Add defaults.
-        self._logger.info("\nAdding defaults to config...")
+        self._logger.info("Adding defaults to config...")
         self.config = io.add_defaults(self.config,mconfig)
 
         #Check the user config file for errors and report issues if any
-        self._logger.info("\nChecking config file for issues...")
+        self._logger.info("Checking config file for issues...")
         warnings, errors = io.check_config_file(self.config,mconfig)
         io.print_config_report(warnings, errors,logger = self._logger)
+
+        #Exit SMRF if config file has errors
+        if len(errors) > 0:
+            self._logger.error("Errors in the config file. See configuration status report above.")
+            sys.exit()
+        else:
+
+            #write the config file to the output dir
+            fname = 'config.ini'
+            full_config_out = self.config['output']['out_location'] + '/'+fname
+            self._logger.info("Writing config file with full options.")
+            io.generate_config(self.config,full_config_out)
 
 
         # check for the desired sections
@@ -178,10 +190,12 @@ class SMRF():
         self.start_date = pd.to_datetime(self.config['time']['start_date'])
         self.end_date = pd.to_datetime(self.config['time']['end_date'])
 
+        #Check to see if user specified a real end time.
         if self.start_date > self.end_date:
             raise ValueError("start_date cannot be larger than end_date.")
-        if self.start_date > datetime.now() or self.end_date > datetime.now():
-            self._logger.warning("A date set in the future will only work with WRF generated data!")
+
+        if self.start_date > datetime.now() and not self.gridded or self.end_date > datetime.now() and not self.gridded:
+            raise ValueError("A date set in the future can only be used with WRF generated data!")
 
         d = data.mysql_data.date_range(self.start_date, self.end_date,
                                        timedelta(minutes=int(self.config['time']['time_step'])))
