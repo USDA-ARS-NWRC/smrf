@@ -12,13 +12,13 @@ __version__ = "0.2.2"
 
 
 # -------------------------------------------------------------------- #
-def read_config(config_file, default_config=None):
+def read_config(config_file, default_config=None, encoding='utf-8'):
     """
     Return a dictionary with subdictionaries of all configFile options/values
     """
     config = SafeConfigParser()
     config.optionxform = str
-    config.read(config_file)
+    config.read(config_file, encoding=encoding)
     sections = config.sections()
     dict1 = OrderedDict()
     for section in sections:

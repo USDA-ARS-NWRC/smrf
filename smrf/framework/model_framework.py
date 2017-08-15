@@ -106,8 +106,8 @@ class SMRF():
         try:
             self.config = io.read_config(configFile)
         except UnicodeDecodeError:
-            raise UnicodeDecodeError('''The configuration file is not encoded in
-                                    UTF-8, please change and retry''')
+            raise Exception(('The configuration file is not encoded in '
+                                    'UTF-8, please change and retry'))
 
         # start logging
 
@@ -154,8 +154,8 @@ class SMRF():
             self.tempDir = os.path.abspath(tempDir)
             os.environ['WORKDIR'] = self.tempDir
         else:
-            raise ValueError('''Invalid system entry in Config file, temp_dir is
-                            either undefined or does not exist.''')
+            raise ValueError(('Invalid system entry in Config file, temp_dir is'
+                            'either undefined or does not exist.'))
 
         self.threading = False
         if 'threading' in self.config['system']:
