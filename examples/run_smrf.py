@@ -35,52 +35,52 @@ if len(sys.argv) > 1:
 # Once loaded, this shouldn't need to be re-ran except if something major changes
 
 # 1. initialize
-try:
-    with smrf.framework.SMRF(configFile) as s:
-        try:
+# try:
+with smrf.framework.SMRF(configFile) as s:
+    try:
 
-            # 2. load topo data
-            s.loadTopo()
+        # 2. load topo data
+        s.loadTopo()
 
-            # 3. initialize the distribution
-            s.initializeDistribution()
+        # 3. initialize the distribution
+        s.initializeDistribution()
 
-            # initialize the outputs if desired
-            s.initializeOutput()
+        # initialize the outputs if desired
+        s.initializeOutput()
 
-            # 4. Initialize the model
-            # s.initializeModel()
-
-
-            #===============================================================================
-            # Distribute data
-            #===============================================================================
-            #
-            # Once the framework is setup, we can load data and distribute the data
-            # This can be ran multiple times while the framework is running so that the
-            # intialization doesn't have to be re-ran, i.e. if this becomes a GUI
+        # 4. Initialize the model
+        # s.initializeModel()
 
 
-            # 5. load weather data  and station metadata
-            s.loadData()
+        #===============================================================================
+        # Distribute data
+        #===============================================================================
+        #
+        # Once the framework is setup, we can load data and distribute the data
+        # This can be ran multiple times while the framework is running so that the
+        # intialization doesn't have to be re-ran, i.e. if this becomes a GUI
 
-            # 6. distribute
-            s.distributeData()
 
-            #7. post process if necessary
-            s.post_process()
+        # 5. load weather data  and station metadata
+        s.loadData()
 
-            #===============================================================================
-            # Run model
-            #===============================================================================
+        # 6. distribute
+        s.distributeData()
 
-            # 7. run the model
-            # s.runModel()
-            s._logger.info(datetime.now() - start)
+        #7. post process if necessary
+        s.post_process()
 
-        except Exception as e:
-            #print 'Error: %s' % e
-            s._logger.error(e)
+        #===============================================================================
+        # Run model
+        #===============================================================================
 
-except Exception as e:
-    print e
+        # 7. run the model
+        # s.runModel()
+        s._logger.info(datetime.now() - start)
+
+    except Exception as e:
+        #print 'Error: %s' % e
+        s._logger.error(e)
+
+# except Exception as e:
+#     print(e)

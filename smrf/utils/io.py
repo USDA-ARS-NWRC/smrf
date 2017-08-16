@@ -367,7 +367,7 @@ def generate_config(config,fname):
         f.close()
 
 
-def read_config(config_file):
+def read_config(config_file, encoding='utf-8'):
     """
     Returns a dictionary with subdictionaries of all configFile options/values
 
@@ -379,7 +379,7 @@ def read_config(config_file):
     """
     config = SafeConfigParser()
     config.optionxform = str
-    config.read(config_file)
+    config.read(config_file, encoding=encoding)
     sections = config.sections()
     dict1 = OrderedDict()
     for section in sections:

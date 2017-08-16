@@ -100,8 +100,8 @@ class SMRF():
             self.config = io.read_config(configFile)
 
         except UnicodeDecodeError:
-            raise UnicodeDecodeError('''The configuration file is not encoded in
-                                    UTF-8, please change and retry''')
+            raise Exception(('The configuration file is not encoded in '
+                                    'UTF-8, please change and retry'))
 
         # start logging
         if 'log_level' in self.config['logging']:
