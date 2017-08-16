@@ -160,5 +160,5 @@ setup(
     tests_require=test_requirements,
     cmdclass=cmdclass,
     ext_modules=ext_modules,
-    scripts=['scripts/inicheck.py']
+    scripts=['scripts/inicheck']
 )
