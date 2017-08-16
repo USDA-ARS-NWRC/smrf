@@ -379,7 +379,15 @@ def read_config(config_file, encoding='utf-8'):
     """
     config = SafeConfigParser()
     config.optionxform = str
-    config.read(config_file, encoding=encoding)
+
+
+    PY3 = sys.version_info[0] >= 3
+
+    if PY3:
+        config.read(config_file, encoding=encoding)
+    else:
+        config.read(config_file)
+
     sections = config.sections()
     dict1 = OrderedDict()
     for section in sections:
