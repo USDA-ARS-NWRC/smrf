@@ -58,7 +58,7 @@ class image_data():
 
         self._base_logger = logging.getLogger(__name__)
 
-    def getConfig(self, config):
+    def getConfig(self, cfg):
         """
         Check the configuration that was set by the user for the variable
         that extended this class. Checks for standard distribution parameters
@@ -66,20 +66,18 @@ class image_data():
         Sets the :py:attr:`config` and :py:attr:`stations` attributes.
 
         Args:
-            config (dict): dict from the [variable]
-                `section <configuration.html#variable-configuration>`_
-
+            cfg (dict): dict from the [variable]
         """
 
         # check of gridded interpolation
-        if 'distribution' in config.keys():
-            if config['distribution'] == 'grid':
+        if 'distribution' in cfg.keys():
+            if cfg['distribution'] == 'grid':
                 self.gridded = True
             else:
                 self.gridded = False
 
-        self.getStations(config)
-        self.config = config
+        self.getStations(cfg)
+        self.config = cfg
 
     def getStations(self, config):
         """
@@ -88,7 +86,6 @@ class image_data():
 
         Args:
             config (dict): dict from the [variable]
-            `section <configuration.html#variable-configuration>`_
         """
 
         # determine the stations that will be used, alphabetical order

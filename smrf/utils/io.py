@@ -20,14 +20,13 @@ def parse_str_setting(str_option):
     Require users specfies settings with an equals sign
 
     Args:
-        str_option: the string line that was received from the config file
+        str_option - the string line that was received from the config file
 
     Returns:
         tuple:
-            Returns a tuple of the name and values parsed in the config file.
-
-            - **name**: the string name value of the option parsed.
-            - **option**: the string value of the option parsed.
+            Returns the name and values parsed in the config file.
+            - **name** - the string name value of the option parsed.
+            - **option** - the string value of the option parsed.
     """
 
     if "=" in str_option:
@@ -53,7 +52,7 @@ def parse_lst_options(option_lst_str):
               "slope":[-1 0 1]}
 
     Args:
-        option_lst_str: string value of the lined parsed potentiall containing a list.
+        option_lst_str -  string value of the lined parsed potentiall containing a list.
 
     Returns:
         available: A dictionary with keys as the names of the entries and values are lists of the options
@@ -108,13 +107,14 @@ def check_config_file(user_cfg, master_config):
     looking at correctness and missing info.
 
     Args:
-        user_cfg: Config file dictionary created by :func:`~smrf.utils.io.read_config'.
+        user_cfg - Config file dictionary created by :func:`~smrf.utils.io.read_config'.
         master_config: Config file dictionary created by :func:`~smrf.utils.io.read_master_config'
 
     Returns:
-        warnings: Returns a list of string messages that are consider non-critical issues with config file.
+        tuple:
+        - **warnings** - Returns a list of string messages that are consider non-critical issues with config file.
 
-        errors: Returns a list of string messages that are consider critical issues with the config file.
+        - **errors** - Returns a list of string messages that are consider critical issues with the config file.
     """
     msg = "{: <20} {: <30} {: <60}"
     errors = []
@@ -188,9 +188,9 @@ def print_config_report(warnings, errors, logger= None):
     print out in a pretty format the issues
 
     Args:
-        warnings: List of non-critical messages returned from :func:`~smrf.utils.io.check_config'.
-        errors: List of critical messages returned from :func:`~smrf.utils.io.check_config'.
-        logger: pass in the logger function being used. If no logger is provided, print is used. Default = None
+        warnings - List of non-critical messages returned from :func:`~smrf.utils.io.check_config'.
+        errors - List of critical messages returned from :func:`~smrf.utils.io.check_config'.
+        logger - pass in the logger function being used. If no logger is provided, print is used. Default = None
 
     Returns:
         None
@@ -247,8 +247,8 @@ def add_defaults(user_config,master_config):
     parameters to add defaults
 
     Args:
-        user_cfg: Config file dictionary created by :func:`~smrf.utils.io.read_config'.
-        master_config: Config file dictionary created by :func:`~smrf.utils.io.read_master_config'
+        user_cfg - Config file dictionary created by :func:`~smrf.utils.io.read_config'.
+        master_config - Config file dictionary created by :func:`~smrf.utils.io.read_master_config'
 
     Returns:
         user_cfg: User config dictionary with defaults added.
@@ -265,8 +265,8 @@ def generate_config(config,fname):
     Generates a list of strings to be written and then writes them in the ini file
 
     Args:
-        config: Config file dictionary created by :func:`~smrf.utils.io.read_config'.
-        fname: String path to the output location for the new config file.
+        config - Config file dictionary created by :func:`~smrf.utils.io.read_config'.
+        fname - String path to the output location for the new config file.
 
     Returns:
         None
@@ -369,10 +369,10 @@ def generate_config(config,fname):
 
 def read_config(config_file):
     """
-    Return a dictionary with subdictionaries of all configFile options/values
+    Returns a dictionary with subdictionaries of all configFile options/values
 
     Args:
-        config_file: String path to the config file to be opened.
+        config_file - String path to the config file to be opened.
 
     Returns:
         dict1: A dictionary of dictionaires representing the config file.

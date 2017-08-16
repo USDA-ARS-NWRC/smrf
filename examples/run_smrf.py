@@ -14,10 +14,6 @@ class to change things or whatever
 import smrf
 from datetime import datetime
 import sys
-import faulthandler
-
-faulthandler.enable()
-
 start = datetime.now()
 
 # read config file

@@ -2,7 +2,7 @@
 Configuration
 =============
 
-SMRF is configured using a configuration file and an extention of Pythons
+SMRF is configured using a configuration file and an extension of Pythons
 `ConfigParser`_ (:mod:`smrf.framework.model_framework.MyParser`). See
 ``test_data/testConfig.ini`` for an example and read below for more information
 on specific sections.
@@ -25,7 +25,7 @@ A brief introduction to a configuration file from the `ConfigParser`_ documentat
 
 Section and keys are case insensitive.
 
-*All values below are required exept those with default values, shown in
+*All values below are required except those with default values, shown in
 parenthesis next to the variable.*
 
 
@@ -51,7 +51,7 @@ time_zone (default = UTC)
 Example ::
 
    [time]
-   TiMe_SteP:  60
+   time_step:  60
    start_date: 2008-10-21 06:00
    end_date:   2008-10-23 06:00
    time_zone:  UTC
@@ -62,7 +62,7 @@ Topo
 
 All files that SMRF reads in the topo section are IPW images, for now.
 You can convert an ASCII grid to an IPW image using the IPW command
-``text2ipw``.  The DEM must have geoheadrs set as SMRF reads in the headers
+``text2ipw``.  The DEM must have geoheaders set as SMRF reads in the headers
 to create the coordinate system. All files should have the same domain size.
 
 dem
@@ -80,7 +80,7 @@ veg_height
    Height of vegetation
 
 veg_k
-   Vegetation extenction coefficient, see Link and Marks 1999
+   Vegetation extension coefficient, see Link and Marks 1999
 
 veg_tau
    Vegetation transmissivity, see Link and Marks 1999
@@ -123,7 +123,7 @@ will perform differently for each method.
 
 stations
    * Will always take precedence over client
-   * Comma seperated list of the station ID (unique identifier)
+   * Comma separated list of the station ID (unique identifier)
    * For CSV files, the stations imported will be filtered to those specified
    * MySQL will only select data for these stations
 
@@ -537,7 +537,7 @@ Solar
 `````
 
 Distributes the ``cloud_factor`` data using :mod:`smrf.distribute.solar`.
-Specify atmosphic parameters for calculating the clear sky radiation
+Specify atmospheric parameters for calculating the clear sky radiation
 
 distribution
    :ref:`Distribution method <dist-methods>` with other parameters
@@ -602,7 +602,7 @@ out_location
    Location to put the files
 
 variables
-   Comma seperated list of variables to output
+   Comma separated list of variables to output
 
 file_type
    Type of file to output, currently only netcdf is implemented
@@ -661,3 +661,33 @@ Example ::
 
 .. _ConfigParser: https://docs.python.org/2/library/configparser.html
 .. _logging: https://docs.python.org/2/library/logging.html
+
+
+
+Core Configuration
+==================
+Adding variables and options to the SMRF configuration file is now easily managed
+by a single master configuration file stored in the repo under ./smrf/framework/CoreConfig.ini.
+Through this the users config file can now be checked against all the options available.
+
+When developing and adding features to SMRF please follow this convention.
+* Each configuration added should be added under its respective section.
+* Every variable that is changeable should be listed in the configurable item as comma separated.
+This is required if the user wants to use it.
+* If the has specific string options, they should be provided under the available_options item.
+The options should already exist in the configurable item and it options should be listed in a bracketed space separated list.
+* If you have provided a new option it should be provided a default. They are described by the configurable separated by a =.
+
+See the following example.
+
+Example ::
+
+  [precipitation]
+    configurable: my_rain_model, new_snow_parameter
+    available_options: my_rain_model = [curly mo larry], new_snow_parameter= [sharknado antman]
+    default: new_rain_model=Larry, new_snow_parameter=sharknado
+
+This would add two new configurable options called my_rain_model and new snow_parameter.
+They would only be able to be set to  curly,mo and larry for the my_rain_model and for the
+the new_snow_parameter sharknado and antman. Each has a default in the event it is
+not specified by the user which in this case is Larry and sharknado respectively.

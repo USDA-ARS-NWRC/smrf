@@ -372,7 +372,7 @@ def marks2017(Tpp,pp):
             - **d_rho_c** (*numpy.array*) - Prportional coefficient for
                 compaction from overburden.
 
-            - **d_rho_m** (*numpy.array*) - Prportional coefficient for
+            - **d_rho_m** (*numpy.array*) - Proportional coefficient for
                 compaction from melt.
 
             - **rho_s** (*numpy.array*) - Final density of the snow [kg/m^3].
