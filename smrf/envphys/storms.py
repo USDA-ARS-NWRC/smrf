@@ -84,7 +84,7 @@ def storms(precipitation, perc_snow, mass=1, time=4,
     return stormDays, stormPrecip
 
 
-def time_since_storm(precipitation, perc_snow, time_step=1/24, mass=1, time=4,
+def time_since_storm(precipitation, perc_snow, time_step=1/24, mass=1.0, time=4,
                 stormDays=None, stormPrecip=None, ps_thresh=0.5):
     """
     Calculate the decimal days since the last storm given a precip time series,
@@ -120,14 +120,12 @@ def time_since_storm(precipitation, perc_snow, time_step=1/24, mass=1, time=4,
     Created Janurary 5, 2016
     @author: Scott Havens
     """
-
     # either preallocate or use the input
     if stormDays is None:
         stormDays = np.zeros(precipitation.shape)
 
     if stormPrecip is None:
         stormPrecip = np.zeros(precipitation.shape)
-
 
     # if there is no snow, don't reset the counter
     # This ensures that the albedo won't be reset
@@ -136,7 +134,6 @@ def time_since_storm(precipitation, perc_snow, time_step=1/24, mass=1, time=4,
 #         stormDays = np.add(stormDays, 1)
         stormPrecip = np.zeros(precipitation.shape)
         return stormDays, stormPrecip
-
 
     # determine locations where it has snowed
     idx = perc_snow >= ps_thresh
@@ -149,7 +146,7 @@ def time_since_storm(precipitation, perc_snow, time_step=1/24, mass=1, time=4,
     # add the values to the stormPrecip
     stormPrecip[idx] =+ precipitation[idx]
 
-    # see if the mass threshold has been passed
+
     idx_mass = stormPrecip >= mass
 
     # reset the stormDays to zero where the storm is present

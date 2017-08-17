@@ -1,14 +1,8 @@
-"""
-Version = 0.2.5
-20121224 Scott Havens
-"""
 
 from smrf import ipw
 import numpy as np
 from netCDF4 import Dataset
 import subprocess as sp
-# import utm
-# import threading
 from multiprocessing import Process
 import os
 import logging
@@ -16,8 +10,7 @@ import logging
 
 class topo():
     """
-    Class for topo images and processing those images
-    Images are:
+    Class for topo images and processing those images. Images are:
     - DEM
     - Mask
     - veg type
@@ -25,9 +18,9 @@ class topo():
     - veg k
     - veg tau
 
-    Inputs to topo() are the [topo] section of the config file
-    topo() will guess the location of the WORKDIR env variable
-    and should work for *nix systems
+    Inputs to topo are the topo section of the config file
+    topo will guess the location of the WORKDIR env variable
+    and should work for unix systems.
 
     Attributes:
         topoConfig: configuration for topo
@@ -41,8 +34,7 @@ class topo():
         sky_view:
         ny: number of columns in DEM
         nx: number of rows in DEM
-        u,v:
- location of upper left corner
+        u,v: location of upper left corner
         du, dv: step size of grid
         unit: geo header units of grid
         coord_sys_ID: coordinate syste,

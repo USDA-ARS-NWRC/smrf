@@ -1,14 +1,6 @@
-"""
-Read in metadata and data from CSV files
-Version = 0.2.5
-20150810 Scott Havens
-"""
-
-
 import numpy as np
 import csv
 from smrf import ipw
-
 
 def read_metadata(mFile, dem):
     """
@@ -22,7 +14,6 @@ def read_metadata(mFile, dem):
         dem: opened IPW file
     """
 
-#     print('Reading metadata file...')
     f = open(mFile, 'rU')
     metadata = []
 

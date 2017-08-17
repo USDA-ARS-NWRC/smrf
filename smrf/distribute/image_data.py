@@ -58,7 +58,7 @@ class image_data():
 
         self._base_logger = logging.getLogger(__name__)
 
-    def getConfig(self, config):
+    def getConfig(self, cfg):
         """
         Check the configuration that was set by the user for the variable
         that extended this class. Checks for standard distribution parameters
@@ -66,85 +66,18 @@ class image_data():
         Sets the :py:attr:`config` and :py:attr:`stations` attributes.
 
         Args:
-            config (dict): dict from the [variable]
-                `section <configuration.html#variable-configuration>`_
-
+            cfg (dict): dict from the [variable]
         """
 
-        # check for inverse distance weighting
-        if 'distribution' in config:
-            if config['distribution'] == 'idw':
-                if 'detrend' not in config:
-                    config['detrend'] = False
-
-                if 'slope' in config:
-                    if int(config['slope']) not in [-1, 0, 1]:
-                        raise ValueError('''Slope value for detrending
-                                            must be in [-1, 0, 1]''')
-                    else:
-                        config['slope'] = int(config['slope'])
-
-                if 'power' in config:
-                    if float(config['power']) < 0:
-                        raise ValueError('IDW power must be greater than zero')
-                    else:
-                        config['power'] = float(config['power'])
-                else:
-                    config['power'] = 2
-
-                if 'zeroValue' in config:
-                    config['zeroValue'] = float(config['zeroValue'])
-                else:
-                    config['zeroValue'] = None
-
-            # check of detrended kriging
-            elif config['distribution'] == 'dk':
-                if 'slope' in config:
-                    if int(config['slope']) not in [-1, 0, 1]:
-                        raise ValueError('''Slope value for detrending
-                                            must be in [-1, 0, 1]''')
-                    else:
-                        config['slope'] = int(config['slope'])
-
-                if 'nthreads' in config:
-                    config['nthreads'] = int(config['nthreads'])
-                else:
-                    config['nthreads'] = 1
-
-                if 'dk_nthreads' in config:
-                    config['dk_nthreads'] = int(config['dk_nthreads'])
-                else:
-                    config['dk_nthreads'] = 1
-
-                if 'regression_method' in config:
-                    config['regression_method'] = \
-                        int(config['regression_method'])
-                else:
-                    config['regression_method'] = 1
-
-            # check of gridded interpolation
-            elif config['distribution'] == 'grid':
+        # check of gridded interpolation
+        if 'distribution' in cfg.keys():
+            if cfg['distribution'] == 'grid':
                 self.gridded = True
-                if 'slope' in config:
-                    if int(config['slope']) not in [-1, 0, 1]:
-                        raise ValueError('''Slope value for detrending
-                                            must be in [-1, 0, 1]''')
-                    else:
-                        config['slope'] = int(config['slope'])
+            else:
+                self.gridded = False
 
-                if 'detrend' not in config:
-                    config['detrend'] = False
-
-                if 'method' in config:
-                    config['method'] = config['method'].lower()
-                else:
-                    config['method'] = 'linear'
-
-                if 'mask' not in config:
-                    config['mask'] = False
-
-        self.getStations(config)
-        self.config = config
+        self.getStations(cfg)
+        self.config = cfg
 
     def getStations(self, config):
         """
@@ -153,7 +86,6 @@ class image_data():
 
         Args:
             config (dict): dict from the [variable]
-            `section <configuration.html#variable-configuration>`_
         """
 
         # determine the stations that will be used, alphabetical order
@@ -186,6 +118,12 @@ class image_data():
             - each dist (idw, dk, grid) takes the same inputs and returns the
                 same
         """
+
+        if 'min' in  self.config:
+            self.min = self.config['min']
+
+        if 'max' in  self.config:
+            self.max = self.config['max']
 
         # pull out the metadata subset
         if self.stations is not None:
