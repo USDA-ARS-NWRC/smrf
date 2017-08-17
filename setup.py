@@ -37,7 +37,7 @@ with open(fname,'r') as f:
 	f.close()
 
 with open(fname,'w') as f:
-	lines[7] = "__gitHash__={0}\n".format(gitHash.decode())
+	lines[7] = "__gitHash__='{0}'\n".format(gitHash.decode())
 	f.writelines(lines)
 	f.close()
 
