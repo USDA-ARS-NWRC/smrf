@@ -30,14 +30,14 @@ import os
 import subprocess
 
 #Grab and write the gitHash.
-gitHash= (subprocess.check_output(['git', 'rev-parse', '--short', 'HEAD'])).strip()
+gitHash= ((subprocess.check_output(['git', 'rev-parse', '--short', 'HEAD'])).strip())
 fname = os.path.abspath(os.path.expanduser('./smrf/__init__.py'))
 with open(fname,'r') as f:
 	lines = f.readlines()
 	f.close()
 
 with open(fname,'w') as f:
-	lines[7] = "__gitHash__='{0}'\n".format(gitHash)
+	lines[7] = "__gitHash__={0}\n".format(gitHash.decode())
 	f.writelines(lines)
 	f.close()
 
