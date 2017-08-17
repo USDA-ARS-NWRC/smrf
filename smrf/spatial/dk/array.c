@@ -13,12 +13,12 @@
  *    William H. Press, Brian P. Flannery, Saul A. Teukolsky, and William T.
  *    Vetterling, Numerical Recipes in C:  The Art of Scientific Computing,
  *    Cambridge University Press, 1988, p. 705.
- *   
+ *
  *    Version = 0.2.5
  */
 
-double *vector(n)
-int n;
+double *vector(int n)
+//int n;
 {
    double *v = (double *) NULL;
 
@@ -44,8 +44,7 @@ int n;
  *    Cambridge University Press, 1988, p. 706.
  */
 
-double *dvector(n)
-int n;
+double *dvector(int n)
 {
    double *v = (double *) NULL;
 
@@ -71,8 +70,7 @@ int n;
  *    Cambridge University Press, 1988, p. 706.
  */
 
-int *ivector(n)
-int n;
+int *ivector(int n)
 {
    int *v = (int *) NULL;
 
@@ -98,8 +96,7 @@ int n;
  *    Cambridge University Press, 1988, p. 706.
  */
 
-double **matrix(nr, nc)
-int nr, nc;
+double **matrix(int nr, int nc)
 {
    int i;
    double **m = (double **) NULL;
@@ -143,8 +140,7 @@ int nr, nc;
  *    Cambridge University Press, 1988, p. 706.
  */
 
-double **dmatrix(nr, nc)
-int nr, nc;
+double **dmatrix(int nr, int nc)
 {
    int i;
    double **m = (double **) NULL;
@@ -188,8 +184,7 @@ int nr, nc;
  *    Cambridge University Press, 1988, p. 707.
  */
 
-int **imatrix(nr, nc)
-int nr, nc;
+int **imatrix(int nr, int nc)
 {
    int i, **m = (int **) NULL;
 
@@ -228,8 +223,7 @@ int nr, nc;
  *    and nd elements deep.
  */
 
-double ***cube(nr, nc, nd)
-int nr, nc, nd;
+double ***cube(int nr, int nc, int nd)
 {
    int i, j;
    double ***m = (double ***) NULL;
@@ -265,4 +259,3 @@ int nr, nc, nd;
 
    return(m);
 }
-
