@@ -55,7 +55,7 @@ class solar(image_data.image_data):
     :mod:`smrf.envphys.radiation.cf_cloud`.
 
     The third step adjusts the cloud corrected solar radiation for vegetation
-    affects, following the methods developed by Link and Marks (1999) 
+    affects, following the methods developed by Link and Marks (1999)
     :cite:`Link&Marks:1999`. The direct beam radiation  is corrected by:
 
     .. math::
@@ -136,8 +136,6 @@ class solar(image_data.image_data):
     """
 
     variable = 'solar'
-    min = 0
-    max = 1200
 
     # these are variables that can be output
     output_variables = {'clear_ir_beam': {
@@ -207,28 +205,6 @@ class solar(image_data.image_data):
         image_data.image_data.__init__(self, self.variable)
         self._logger = logging.getLogger(__name__)
 
-        # check and assign the configuration
-        if 'clear_opt_depth' not in solarConfig:
-            solarConfig['clear_opt_depth'] = 100
-        else:
-            solarConfig['clear_opt_depth'] = \
-                float(solarConfig['clear_opt_depth'])
-
-        if 'clear_tau' not in solarConfig:
-            solarConfig['clear_tau'] = 0.2
-        else:
-            solarConfig['clear_tau'] = float(solarConfig['clear_tau'])
-
-        if 'clear_omega' not in solarConfig:
-            solarConfig['clear_omega'] = 0.85
-        else:
-            solarConfig['clear_omega'] = float(solarConfig['clear_omega'])
-
-        if 'clear_gamma' not in solarConfig:
-            solarConfig['clear_gamma'] = 0.3
-        else:
-            solarConfig['clear_gamma'] = float(solarConfig['clear_gamma'])
-
         self.getConfig(solarConfig)
         self.albedoConfig = albedoConfig
 
@@ -275,7 +251,7 @@ class solar(image_data.image_data):
         Distribute air temperature given a Panda's dataframe for a single time
         step. Calls :mod:`smrf.distribute.image_data.image_data._distribute`.
 
-        If the sun is up, i.e. ``cosz > 0``, then the following steps are 
+        If the sun is up, i.e. ``cosz > 0``, then the following steps are
         performed:
 
         1. Distribute cloud factor

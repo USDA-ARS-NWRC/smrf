@@ -1,15 +1,9 @@
 
 import numpy as np
 import logging
-# import subprocess as sp
-# from multiprocessing import Process
 from smrf.distribute import image_data
 from smrf.envphys import thermal_radiation
 from smrf.envphys.core import envphys_c
-# from smrf.utils import utils
-# from smrf import ipw
-
-# import matplotlib.pyplot as plt
 
 __author__ = "Scott Havens"
 __maintainer__ = "Scott Havens"
@@ -173,8 +167,6 @@ class th(image_data.image_data):
     """
 
     variable = 'thermal'
-    min = -600
-    max = 600
 
     # these are variables that can be output
     output_variables = {'thermal': {
@@ -191,54 +183,13 @@ class th(image_data.image_data):
         # extend the base class
         image_data.image_data.__init__(self, self.variable)
         self._logger = logging.getLogger(__name__)
-
-#         self.config = thermalConfig
         self.getConfig(thermalConfig)
 
-        nthreads = 1
-        if 'nthreads' in self.config:
-            nthreads = int(self.config['nthreads'])
-        self.config['nthreads'] = nthreads
-
-        # determine the method
-        method = 'Marks1979'
-        if 'method' not in self.config:
-            self.method = method
-        elif self.config['method'] == 'Marks1979':
-            self.method = method
-        elif self.config['method'] == 'Dilley1998':
-            self.method = 'Dilley1998'
-        elif self.config['method'] == 'Prata1996':
-            self.method = 'Prata1996'
-        elif self.config['method'] == 'Angstrom1918':
-            self.method = 'Angstrom1918'
-        else:
-            self._logger.error('Could not determine method for thermal')
-
-        # correct for cloud and veg
-        self.config['correct_cloud'] = True
-        cloud_method = 'Garen2005'
-        if 'correct_cloud' in self.config:
-            self.correct_cloud = self.config['correct_cloud']
-
-            if 'cloud_method' not in self.config:
-                self.cloud_method = cloud_method
-            elif self.config['cloud_method'] == 'Garen2005':
-                self.cloud_method = method
-            elif self.config['cloud_method'] == 'Unsworth1975':
-                self.cloud_method = 'Unsworth1975'
-            elif self.config['cloud_method'] == 'Kimball1982':
-                self.cloud_method = 'Kimball1982'
-            elif self.config['cloud_method'] == 'Crawford1999':
-                self.cloud_method = 'Crawford1999'
-
-        self.config['correct_veg'] = True
-        if 'correct_veg' in self.config:
-            self.correct_veg = self.config['correct_veg']
-
-        self.config['correct_terrain'] = True
-        if 'correct_terrain' in self.config:
-            self.correct_terrain = self.config['correct_terrain']
+        self.method = self.config['method']
+        self.correct_cloud = self.config['correct_cloud']
+        self.cloud_method = self.config['cloud_method']
+        self.correct_veg = self.config['correct_veg']
+        self.correct_terrain = self.config['correct_terrain']
 
         self._logger.debug('Created distribute.thermal')
 

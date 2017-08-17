@@ -49,8 +49,6 @@ class vp(image_data.image_data):
     """
 
     variable = 'vapor_pressure'
-    min = 10
-    max = 7500
 
     # these are variables that can be output
     output_variables = {'vapor_pressure': {
@@ -75,9 +73,6 @@ class vp(image_data.image_data):
 
         # check and assign the configuration
         self.getConfig(vpConfig)
-
-        if 'nthreads' not in self.config:
-            self.config['nthreads'] = '1'
 
         self._logger.debug('Created distribute.vapor_pressure')
 

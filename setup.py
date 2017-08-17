@@ -27,6 +27,19 @@ from Cython.Distutils import build_ext
 
 import numpy
 import os
+import subprocess
+
+#Grab and write the gitHash.
+gitHash= ((subprocess.check_output(['git', 'rev-parse', '--short', 'HEAD'])).strip())
+fname = os.path.abspath(os.path.expanduser('./smrf/__init__.py'))
+with open(fname,'r') as f:
+	lines = f.readlines()
+	f.close()
+
+with open(fname,'w') as f:
+	lines[7] = "__gitHash__='{0}'\n".format(gitHash.decode())
+	f.writelines(lines)
+	f.close()
 
 # force the compiler to use gcc
 os.environ["CC"] = "gcc"
@@ -58,7 +71,6 @@ cmdclass.update({'build_ext': build_ext})
 loc = 'smrf/envphys/core'  # location of the folder
 mname = os.path.join(loc, 'envphys_c')
 mname = mname.replace('/', '.')
-
 ext_modules += [
                 Extension(mname,
                           sources=[os.path.join(loc, val) for val in [
@@ -125,8 +137,8 @@ setup(
         'smrf.utils.wind',
         'smrf.spatial.dk'
         ],
-    #     package_dir={'smrf':'smrf'},
     include_package_data=True,
+    package_data={'smrf':['./framework/CoreConfig.ini']},
     install_requires=requirements,
     license="ISCL",
     zip_safe=False,
@@ -148,4 +160,5 @@ setup(
     tests_require=test_requirements,
     cmdclass=cmdclass,
     ext_modules=ext_modules,
+    scripts=['scripts/inicheck']
 )

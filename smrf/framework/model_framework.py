@@ -25,27 +25,23 @@ Example:
 
 import logging
 import os
+import sys
 import coloredlogs
 from datetime import datetime, timedelta
 import pandas as pd
-# import itertools
 import numpy as np
 import pytz
-# import matplotlib.pyplot as plt
 
-from smrf import data, distribute, output
+from smrf import data, distribute, output, __core_config__
 from smrf.envphys import radiation
 from smrf.utils import queue, io
 from threading import Thread
-
-# from multiprocessing import Process
 
 __author__ = "Scott Havens"
 __maintainer__ = "Scott Havens"
 __email__ = "scott.havens@ars.usda.gov"
 __date__ = "2015-12-22"
 __version__ = '0.2.5'
-
 
 class SMRF():
     """
@@ -94,23 +90,20 @@ class SMRF():
         """
         Initialize the model, read config file, start and end date, and logging
         """
-
         # read the config file and store
         if not os.path.isfile(configFile):
             raise Exception('Configuration file does not exist --> {}'
                             .format(configFile))
 
-#         f = MyParser()
-#         f.read(configFile)
-#         self.config = f.as_dict()
         try:
+            #Read in the original users config
             self.config = io.read_config(configFile)
+
         except UnicodeDecodeError:
             raise Exception(('The configuration file is not encoded in '
                                     'UTF-8, please change and retry'))
 
         # start logging
-
         if 'log_level' in self.config['logging']:
             loglevel = self.config['logging']['log_level'].upper()
         else:
@@ -139,6 +132,36 @@ class SMRF():
 
         self._logger = logging.getLogger(__name__)
 
+        # add the title
+        title = self.title(2)
+        for line in title:
+            self._logger.info(line)
+
+        #Bring the the master config file
+        mconfig = io.read_master_config(__core_config__)
+
+        #Add defaults.
+        self._logger.info("Adding defaults to config...")
+        self.config = io.add_defaults(self.config,mconfig)
+
+        #Check the user config file for errors and report issues if any
+        self._logger.info("Checking config file for issues...")
+        warnings, errors = io.check_config_file(self.config,mconfig)
+        io.print_config_report(warnings, errors,logger = self._logger)
+
+        #Exit SMRF if config file has errors
+        if len(errors) > 0:
+            self._logger.error("Errors in the config file. See configuration status report above.")
+            sys.exit()
+        else:
+
+            #write the config file to the output dir
+            fname = 'config.ini'
+            full_config_out = self.config['output']['out_location'] + '/'+fname
+            self._logger.info("Writing config file with full options.")
+            io.generate_config(self.config,full_config_out)
+
+
         # check for the desired sections
         if 'stations' not in self.config:
             self.config['stations'] = None
@@ -154,29 +177,24 @@ class SMRF():
             self.tempDir = os.path.abspath(tempDir)
             os.environ['WORKDIR'] = self.tempDir
         else:
-            raise ValueError(('Invalid system entry in Config file, temp_dir is'
-                            'either undefined or does not exist.'))
+            raise IOError('''The temp_dir provided in the config file does not exist.\n{0}'''.format(os.path.abspath(os.path.expanduser(self.config['system']['temp_dir']))))
 
-        self.threading = False
-        if 'threading' in self.config['system']:
-            if self.config['system']['threading']:
-                self.threading = True
+        self.threading = self.config['system']['threading']
 
-        self.max_values = 1
-        if 'max_values' in self.config['system']:
-            self.max_values = int(self.config['system']['max_values'])
+        self.max_values = self.config['system']['max_values']
 
-        self.time_out = None
-        if 'time_out' in self.config['system']:
-            self.time_out = float(self.config['system']['time_out'])
+        self.time_out = float(self.config['system']['time_out'])
 
         # get the time section
         self.start_date = pd.to_datetime(self.config['time']['start_date'])
         self.end_date = pd.to_datetime(self.config['time']['end_date'])
+
+        #Check to see if user specified a real end time.
         if self.start_date > self.end_date:
             raise ValueError("start_date cannot be larger than end_date.")
-        if self.start_date > datetime.now() or self.end_date > datetime.now():
-            self._logger.warning("A date set in the future will only work with WRF generated data!")
+
+        if self.start_date > datetime.now() and not self.gridded or self.end_date > datetime.now() and not self.gridded:
+            raise ValueError("A date set in the future can only be used with WRF generated data!")
 
         d = data.mysql_data.date_range(self.start_date, self.end_date,
                                        timedelta(minutes=int(self.config['time']['time_step'])))
@@ -186,13 +204,6 @@ class SMRF():
 
         # initialize the distribute dict
         self.distribute = {}
-
-        # add a splash of color
-
-        # add the title
-        title = self.title(2)
-        for line in title:
-            self._logger.info(line)
 
         self._logger.info('Started SMRF --> %s' % datetime.now())
         self._logger.info('Model start --> %s' % self.start_date)
