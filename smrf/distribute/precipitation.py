@@ -134,32 +134,28 @@ class ppt(image_data.image_data):
 
         # Assign storm_days array if given
         if self.config["storm_days_restart"] != None:
-            if os.path.isfile(self.config['storm_days_restart']):
-                self._logger.debug('Reading {} from {}'.format('storm_days', self.config['storm_days_restart']))
-                f = nc.Dataset(self.config['storm_days_restart'],'r')
+            self._logger.debug('Reading {} from {}'.format('storm_days', self.config['storm_days_restart']))
+            f = nc.Dataset(self.config['storm_days_restart'],'r')
 
-                if 'storm_days' in f.variables:
-                    time = f.variables['time'][:]
-                    t = f.variables['time']
-                    time = nc.num2date(t[:], t.getncattr('units'), t.getncattr('calendar'))
+            if 'storm_days' in f.variables:
+                time = f.variables['time'][:]
+                t = f.variables['time']
+                time = nc.num2date(t[:], t.getncattr('units'), t.getncattr('calendar'))
 
-                    # start at index of storm_days - 1
-                    time_ind = np.where(time == self.start_date)[0] - 1
+                # start at index of storm_days - 1
+                time_ind = np.where(time == self.start_date)[0] - 1
 
-                    if not time_ind:
-                        self._logger.warning('Invalid storm_days input! Setting to 0.0')
-                        self.storm_days = np.zeros((topo.ny, topo.nx))
-
-                    else:
-                        self.storm_days = f.variables['storm_days'][time_ind,:,:][0]
-                else:
-                    self._logger.warning('Variable {} not in {}, setting to 0.0'.format('storm_days', self.config['storm_days_restart']))
+                if not time_ind:
+                    self._logger.warning('Invalid storm_days input! Setting to 0.0')
                     self.storm_days = np.zeros((topo.ny, topo.nx))
 
-                f.close()
-
+                else:
+                    self.storm_days = f.variables['storm_days'][time_ind,:,:][0]
             else:
+                self._logger.warning('Variable {} not in {}, setting to 0.0'.format('storm_days', self.config['storm_days_restart']))
                 self.storm_days = np.zeros((topo.ny, topo.nx))
+
+            f.close()
 
 
         self.ppt_threshold = self.config['storm_mass_threshold']

@@ -71,6 +71,24 @@ class albedo(image_data.image_data):
         image_data.image_data.__init__(self, self.variable)
         self._logger = logging.getLogger(__name__)
 
+        # get the veg values for max litter decay - date method
+        matching = [s for s in albedoConfig.keys() if "veg_" in s]
+        v = {}
+        for m in matching:
+            if m != 'veg_default':
+                ms = m.split('_')
+                v[ms[1]] = float(albedoConfig[m])
+        albedoConfig['veg'] = v
+
+        # get the veg values for max litter decay - hardy 2000 method
+        matching = [s for s in albedoConfig.keys() if "litter_" in s]
+        v = {}
+        for m in matching:
+            if (m != 'litter_default' and m != 'litter_albedo'):
+                ms = m.split('_')
+                v[ms[1]] = float(albedoConfig[m])
+        albedoConfig['litter'] = v
+
         self.config = albedoConfig
 
         self._logger.debug('Created distribute.albedo')
@@ -123,7 +141,7 @@ class albedo(image_data.image_data):
                                             self.config['start_decay'],
                                             self.config['end_decay'],
                                             current_time_step,
-                                            self.config['decay_pwr'], alb_v, alb_ir)
+                                            self.config['decay_power'], alb_v, alb_ir)
                     alb_v = alb_v_d
                     alb_ir = alb_ir_d
                 else:
