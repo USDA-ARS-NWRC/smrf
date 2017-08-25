@@ -19,6 +19,7 @@ class IDW:
     - Standard IDW
     - Detrended IDW
     '''
+    
     def __init__(self, mx, my, GridX, GridY, mz=None, GridZ=None,
                  power=2, zeroVal=-1):
 
@@ -55,6 +56,7 @@ class IDW:
 
         # calculate the weights
         self.calculateWeights()
+
 
     def calculateDistances(self):
         '''

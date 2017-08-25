@@ -1,17 +1,6 @@
-"""
-Version = 0.2.5
-20121229 Scott Havens
-"""
-
-# from smrf import ipw
 from smrf.data import mysql_data
-# import numpy as np
 import logging
 import pandas as pd
-
-# logging message start
-# logmsg = 'loadData: %s'
-
 
 class wxdata():
     """
@@ -78,13 +67,13 @@ class wxdata():
     def load_from_csv(self):
         """
         Load the data from a csv file
-        Fields:
+        Fields that are operated on
         - metadata -> dictionary, one for each station,
-            must have at least the following:
-            - primary_id, X, Y, elevation
+        must have at least the following:
+        primary_id, X, Y, elevation
         - csv data files -> dictionary, one for each time step,
-            must have at least the following columns:
-            - date_time, column names matching metadata.primary_id
+        must have at least the following columns:
+        date_time, column names matching metadata.primary_id
         """
 
         self._logger.info('Reading data coming from CSV files')

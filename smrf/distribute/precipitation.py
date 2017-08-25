@@ -8,7 +8,7 @@ from smrf.envphys import snow
 from smrf.envphys import storms
 
 from smrf.utils import utils
-
+import os
 __author__ = "Scott Havens"
 __maintainer__ = "Scott Havens"
 __email__ = "scott.havens@ars.usda.gov"
@@ -132,57 +132,42 @@ class ppt(image_data.image_data):
         self.storm_precip = np.zeros((topo.ny, topo.nx))
         self.last_storm_day = np.zeros((topo.ny, topo.nx))
 
-        # assign storm_days array if given
-        if 'storm_days' in self.config:
-            self._logger.debug('Reading {} from {}'.format('storm_days', self.config['storm_days']))
-            f = nc.Dataset(self.config['storm_days'],'r')
+        # Assign storm_days array if given
+        if self.config["storm_days_restart"] != None:
+            if os.path.isfile(self.config['storm_days_restart']):
+                self._logger.debug('Reading {} from {}'.format('storm_days', self.config['storm_days_restart']))
+                f = nc.Dataset(self.config['storm_days_restart'],'r')
 
-            if 'storm_days' in f.variables:
-                time = f.variables['time'][:]
-                t = f.variables['time']
-                time = nc.num2date(t[:], t.getncattr('units'), t.getncattr('calendar'))
+                if 'storm_days' in f.variables:
+                    time = f.variables['time'][:]
+                    t = f.variables['time']
+                    time = nc.num2date(t[:], t.getncattr('units'), t.getncattr('calendar'))
 
-                # start at index of storm_days - 1
-                time_ind = np.where(time == self.start_date)[0] - 1
+                    # start at index of storm_days - 1
+                    time_ind = np.where(time == self.start_date)[0] - 1
 
-                if not time_ind:
-                    self._logger.warning('Invalid storm_days input! Setting to 0.0')
+                    if not time_ind:
+                        self._logger.warning('Invalid storm_days input! Setting to 0.0')
+                        self.storm_days = np.zeros((topo.ny, topo.nx))
+
+                    else:
+                        self.storm_days = f.variables['storm_days'][time_ind,:,:][0]
+                else:
+                    self._logger.warning('Variable {} not in {}, setting to 0.0'.format('storm_days', self.config['storm_days_restart']))
                     self.storm_days = np.zeros((topo.ny, topo.nx))
 
-                else:
-                    self.storm_days = f.variables['storm_days'][time_ind,:,:][0]
+                f.close()
+
             else:
-                self._logger.warning('Variable {} not in {}, setting to 0.0'.format('storm_days', self.config['storm_days']))
                 self.storm_days = np.zeros((topo.ny, topo.nx))
 
-            f.close()
 
-        else:
-            self.storm_days = np.zeros((topo.ny, topo.nx))
-
-        if 'storm_mass_thresh' in self.config:
-            self.ppt_threshold = self.config['storm_mass_thresh']
-        else:
-            self.ppt_threshold = 0.1  # mm
+        self.ppt_threshold = self.config['storm_mass_threshold']
 
         # Time steps needed to end a storm definition
-        if 'time_steps_to_end_storms' in self.config:
-            self.time_to_end_storm = self.config['time_steps_to_end_storms']
-        else:
-            self.time_to_end_storm = 2 # Time steps it take to end a storm definition
+        self.time_to_end_storm = self.config['time_steps_to_end_storms']
 
-        if 'nasde_model' not in self.config:
-            self.nasde_model = 'susong1999'
-
-        elif self.config['nasde_model'] == 'susong1999':
-            self.nasde_model = 'susong1999'
-
-        elif self.config['nasde_model'] == 'marks2017':
-            self.nasde_model = 'marks2017'
-
-        else:
-            self._logger.error('''Could not determine method for new
-                                accumulated snow density model''')
+        self.nasde_model = self.config['nasde_model']
 
         self._logger.info('''Using {0} for the new accumulated snow density model:  '''.format(self.nasde_model))
 
@@ -378,10 +363,9 @@ class ppt(image_data.image_data):
         if data.sum() > 0:
 
             # distribute data and set the min/max
-            self._distribute(data, zeros=None)
+            self._distribute(data)
+            # see if the mass threshold has been passed
             self.precip = utils.set_min_max(self.precip, self.min, self.max)
-
-            # remove very small precipitation
 
             # determine the precip phase and den
             snow_den, perc_snow = snow.calc_phase_and_density(dpt,
@@ -392,8 +376,8 @@ class ppt(image_data.image_data):
             stormDays, stormPrecip = storms.time_since_storm(self.precip,
                                                              perc_snow,
                                                              time_step=self.time_step/60/24,
-                                                             mass=0.5,
-                                                             time=4,
+                                                             mass=self.ppt_threshold,
+                                                             time=self.time_to_end_storm,
                                                              stormDays=self.storm_days,
                                                              stormPrecip=self.storm_precip)
 

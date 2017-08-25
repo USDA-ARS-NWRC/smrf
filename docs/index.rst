@@ -35,10 +35,12 @@ and utilized.
    :maxdepth: 4
    
    install
+   CONTRIBUTING
    configuration
    input_data
    dist_methods
    api
+   AUTHORS
    zreferences
 
 

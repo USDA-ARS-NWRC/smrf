@@ -24,18 +24,16 @@
 
 /* #define TINY 1.0e-20; */
 
-int lusolv(n, a, x)
-int n;                          /* number of rows and columns in matrix a */
-double **a;                     /* input matrix */
-double *x;                      /* vector of equation solutions */
+int lusolv(
+	int n, 											/* number of rows and columns in matrix a */
+	double **a, 								/* input matrix */
+	double *x										/* vector of equation solutions */
+)
 {
 	double d;                     /* +/- 1 for even or odd number of
                                    row interchanges */
 	int i;                       /* looping index */
 	int *indx;                   /* row permutation from pivoting */
-	int *ivector();              /* int vector space allocation function */
-	int ludcmp();                /* lu decomposition function */
-	void lubksb();               /* lu backsubstitution function */
 //	void free();
 	int ret;                     /* function return value */
 
@@ -57,12 +55,13 @@ double *x;                      /* vector of equation solutions */
  *    of a rowwise permutation of itself.
  */
 
-int ludcmp(a, n, indx, d)
-double **a;                     /* input matrix */
-int n;                          /* number of rows and columns in matrix a */
-int *indx;                      /* row permutation from pivoting */
-double *d;                       /* +/- 1 for even or odd number of
-                                   row interchanges */
+int ludcmp(
+	double **a, 								/* input matrix */
+	int n, 											/* number of rows and columns in matrix a */
+	int *indx, 									/* row permutation from pivoting */
+	double *d										/* +/- 1 for even or odd number of
+																row interchanges */
+)
 {
 	double big;                  /* largest array element */
 	double dum;                  /* dummy variable */
@@ -162,10 +161,11 @@ double *d;                       /* +/- 1 for even or odd number of
  *    matrix a.
  */
 
-void lubksb(a, n, indx)
-double **a;                     /* input matrix */
-int n;                          /* number of rows and columns in matrix a */
-int *indx;                      /* row permutation from pivoting */
+void lubksb(
+	double **a, 								/* input matrix */
+	int n, 											/* number of rows and columns in matrix a */
+	int *indx										/* row permutation from pivoting */
+)
 {
 	int i, j;                    /* looping indexes */
 	int ii = -1;                 /* index of first nonzero r.h.s. value */
