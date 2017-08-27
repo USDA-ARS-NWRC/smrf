@@ -77,27 +77,33 @@ class ppt(image_data.image_data):
     # these are variables that can be output
     output_variables = {'precip': {
                                   'units': 'mm',
-                                  'long_name': 'precipitation_mass'
+                                  'standard_name': 'precipitation_mass',
+                                  'long_name': 'Precipitation mass'
                                   },
                         'percent_snow': {
                                   'units': '%',
-                                  'long_name': 'percent_snow'
+                                  'standard_name': 'percent_snow',
+                                  'long_name': 'Percent of precipitation as snow'
                                   },
                         'snow_density': {
-                                  'units': 'kg/m^3',
-                                  'long_name': 'snow_density'
+                                  'units': 'kg/m3',
+                                  'standard_name': 'snow_density',
+                                  'long_name': 'Precipitation snow density'
                                   },
                         'storm_days': {
-                                  'units': 'decimal_day',
-                                  'long_name': 'days_since_last_storm'
+                                  'units': 'day',
+                                  'standard_name': 'days_since_last_storm',
+                                  'long_name': 'Days since the last storm'
                                   },
                         'storm_precip': {
                                   'units': 'mm',
-                                  'long_name': 'precipitation_mass_storm'
+                                  'standard_name': 'precipitation_mass_storm',
+                                  'long_name': 'Precipitation mass for the storm period'
                                   },
                         'last_storm_day': {
-                                  'units': 'decimal_day',
-                                  'long_name': 'day_of_last_storm'
+                                  'units': 'day',
+                                  'standard_name': 'day_of_last_storm',
+                                  'long_name': 'Decimal day of the last storm since Oct 1'
                                   },
 
                         }

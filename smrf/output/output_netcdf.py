@@ -10,8 +10,7 @@ import os
 from datetime import datetime
 # import pandas as pd
 
-__version__ = '0.2.5'
-
+from smrf import __gitHash__, __version__
 
 class output_netcdf():
     """
@@ -91,18 +90,33 @@ class output_netcdf():
                 setattr(s.variables['time'],
                         'time_zone',
                         time['time_zone'])
+                setattr(s.variables['time'],
+                        'long_name',
+                        'time')
+                
+                # the y variable attributes
                 setattr(s.variables['y'],
                         'units',
                         'meters')
                 setattr(s.variables['y'],
                         'description',
                         'UTM, north south')
+                setattr(s.variables['y'],
+                        'long_name',
+                        'y coordinate')
+                
+                # the x variable attributes
                 setattr(s.variables['x'],
                         'units',
                         'meters')
                 setattr(s.variables['x'],
                         'description',
                         'UTM, east west')
+                setattr(s.variables['x'],
+                        'long_name',
+                        'x coordinate')
+                
+                # the variable attributes
                 setattr(s.variables[f['variable']],
                         'module',
                         f['module'])
@@ -116,9 +130,15 @@ class output_netcdf():
                 # define some global attributes
                 setattr(s, 'Conventions', 'CF-1.6')
                 setattr(s, 'dateCreated', datetime.now().strftime(self.fmt))
-                setattr(s, 'title', 'Distirbuted data from SMRF')
+                setattr(s, 'title', 'Distirbuted {} data from SMRF'.format(f['info']['long_name']))
                 setattr(s, 'history', '[{}] Create netCDF4 file'
                         .format(datetime.now().strftime(self.fmt)))
+                setattr(s, 'institution', 
+                        'USDA Agricultural Research Service, Northwest Watershed Research Center')
+                setattr(s, 'source',
+                        'SMRF v{} ({})'.format(__version__, __gitHash__))
+                setattr(s, 'references',
+                        'Online documentation smrf.readthedocs.io')
 
                 s.variables['y'][:] = y
                 s.variables['x'][:] = x

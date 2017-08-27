@@ -96,15 +96,18 @@ class wind(image_data.image_data):
     # these are variables that can be output
     output_variables = {'flatwind': {
                                   'units': 'm/s',
-                                  'long_name': 'flatwind_wind_speed'
+                                  'standard_name': 'flatwind_wind_speed',
+                                  'long_name': 'Simulated wind on a flat surface'
                                   },
                         'wind_speed': {
                                   'units': 'm/s',
-                                  'long_name': 'wind_speed'
+                                  'standard_name': 'wind_speed',
+                                  'long_name': 'Wind speed'
                                   },
                         'wind_direction': {
                                   'units': 'degrees',
-                                  'long_name': 'wind_direction'
+                                  'standard_name': 'wind_direction',
+                                  'long_name': 'Wind direction'
                                   }
                         }
     # these are variables that are operate at the end only and do not need to
