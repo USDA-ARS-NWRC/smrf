@@ -99,6 +99,10 @@ class ppt(image_data.image_data):
                                   'units': 'decimal_day',
                                   'long_name': 'day_of_last_storm'
                                   },
+                        'storm_total': {
+                                 'units': 'mm',
+                                 'long_name': 'storm_total_mass'
+                                        }
 
                         }
 
@@ -140,6 +144,11 @@ class ppt(image_data.image_data):
         self._logger.info('''Using {0} for the new accumulated snow density model:  '''.format(self.nasde_model))
 
         if self.nasde_model == 'marks2017':
+            self.output_variables["storm_total"] = {
+                                          'units': 'mm',
+                                          'long_name': 'total_storm_mass'
+                                          }
+
             self.storm_total = np.zeros((topo.ny, topo.nx))
 
             self.storms = []

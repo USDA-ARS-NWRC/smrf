@@ -249,22 +249,22 @@ class th(image_data.image_data):
         self._logger.debug('%s Distributing thermal' % date_time)
 
         # calculate clear sky thermal
-        if self.method == 'Marks1979':
+        if self.method == 'marks1979':
             cth = np.zeros_like(air_temp, dtype=np.float64)
             envphys_c.ctopotherm(air_temp, dew_point, self.dem, self.sky_view,
                                  cth, self.config['nthreads'])
 
-        elif self.method == 'Dilley1998':
+        elif self.method == 'dilley1998':
             cth = thermal_radiation.Dilly1998(air_temp, vapor_pressure/1000)
 
-        elif self.method == 'Prata1996':
+        elif self.method == 'prata1996':
             cth = thermal_radiation.Prata1996(air_temp, vapor_pressure/1000)
 
-        elif self.method == 'Angstrom1918':
+        elif self.method == 'angstrom1918':
             cth = thermal_radiation.Angstrom1918(air_temp, vapor_pressure/1000)
 
         # terrain factor correction
-        if (self.sky_view is not None) and (self.method != 'Marks1979'):
+        if (self.sky_view is not None) and (self.method != 'marks1979'):
             # apply (emiss * skvfac) + (1.0 - skvfac) to the longwave
             cth = cth * self.sky_view + (1.0 - self.sky_view) * \
                 thermal_radiation.STEF_BOLTZ * air_temp**4
@@ -272,22 +272,22 @@ class th(image_data.image_data):
         # correct for the cloud factor
         # ratio of measured/modeled solar indicates the thermal correction
         if self.correct_cloud:
-            if self.cloud_method == 'Garen2005':
+            if self.cloud_method == 'garen2005':
                 cth = thermal_radiation.Garen2005(cth,
                                                   cloud_factor)
 
-            elif self.cloud_method == 'Unsworth1975':
+            elif self.cloud_method == 'unsworth1975':
                 cth = thermal_radiation.Unsworth1975(cth,
                                                      air_temp,
                                                      cloud_factor)
 
-            elif self.cloud_method == 'Kimball1982':
+            elif self.cloud_method == 'kimball1982':
                 cth = thermal_radiation.Kimball1982(cth,
                                                     air_temp,
                                                     vapor_pressure/1000,
                                                     cloud_factor)
 
-            elif self.cloud_method == 'Crawford1999':
+            elif self.cloud_method == 'crawford1999':
                 cth = thermal_radiation.Crawford1999(cth,
                                                      air_temp,
                                                      cloud_factor)
