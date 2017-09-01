@@ -7,6 +7,8 @@ Collection of utility functions
 import numpy as np
 from datetime import datetime
 import pytz
+from .gitinfo import __gitVersion__, __gitPath__
+
 # from netCDF4 import Dataset
 
 __version__ = '0.2.5'
@@ -87,3 +89,16 @@ def water_day(indate):
 
 def is_leap_year(year):
     return (year % 4 == 0 and year % 100 != 0) or year % 400 == 0
+
+
+def getgitinfo():
+    """gitignored file that contains specific SMRF version and path
+
+    Input:
+        - none
+    Output:
+        - path to base SMRF directory
+        - git version from 'git describe'
+    """
+
+    return __gitPath__, __gitVersion__

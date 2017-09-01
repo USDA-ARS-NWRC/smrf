@@ -8,7 +8,8 @@ from __future__ import print_function
 import os
 from collections import Sequence
 from .pycompat import OrderedDict, SafeConfigParser, basestring, unicode_type
-from smrf import __core_config__, __gitHash__, __version__
+from smrf import __core_config__, __version__
+from smrf.utils import utils
 import sys
 from datetime import date
 
@@ -272,6 +273,9 @@ def generate_config(config,fname, inicheck = False):
     Returns:
         None
     """
+    # find output of 'git describe'
+    smrfdir, __gitHash__ = utils.gitgetinfo()
+
     #Header surround each commented titles in the ini file
     section_header = ('#'*80) + '\n' + ('# {0}\n') +('#'*80)
 
@@ -322,7 +326,7 @@ def generate_config(config,fname, inicheck = False):
     config_str += """
 #
 # Configuration file for SMRF V{0}
-# Git commit hash: {1}
+# Git specific version: {1}
 # Date generated: {2}
 """.format(__version__,__gitHash__, date.today())
 
