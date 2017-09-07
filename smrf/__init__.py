@@ -5,8 +5,6 @@ SMRF - Snow Modeling Resource Framework
 __author__ = 'Scott Havens'
 __email__ = 'scotthavens@ars.usda.gov'
 __version__ = '0.2.5'
-__gitHash__='066ab4e'
-
 import os
 __core_config__ = os.path.abspath(os.path.dirname(__file__)+'/framework/CoreConfig.ini')
 from . import data

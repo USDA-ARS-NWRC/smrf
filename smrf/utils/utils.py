@@ -7,9 +7,16 @@ Collection of utility functions
 import numpy as np
 from datetime import datetime
 import pytz
+<<<<<<< HEAD
 import os
 import io
 from shutil import copyfile
+=======
+from .gitinfo import __gitVersion__, __gitPath__
+from smrf import __version__
+
+# from netCDF4 import Dataset
+>>>>>>> develop
 
 __version__ = '0.2.5'
 
@@ -133,3 +140,21 @@ def backup_input(data, config):
     config['output']['input_backup'] = False
     #output inifile
     io.generate_config(config,os.path.join(backup_dir,'backup_config.ini'))
+
+def getgitinfo():
+    """gitignored file that contains specific SMRF version and path
+
+    Input:
+        - none
+    Output:
+        - path to base SMRF directory
+        - git version from 'git describe'
+    """
+    # return git describe if in git tracked SMRF
+    if len(__gitVersion__) > 1:
+        return __gitVersion__
+
+    # return overarching version if not in git tracked SMRF
+    else:
+        version = 'v'+__version__
+        return version

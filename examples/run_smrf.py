@@ -35,52 +35,43 @@ if len(sys.argv) > 1:
 # Once loaded, this shouldn't need to be re-ran except if something major changes
 
 # 1. initialize
-# try:
 with smrf.framework.SMRF(configFile) as s:
+    # 2. load topo data
+    s.loadTopo()
+
+    # 3. initialize the distribution
+    s.initializeDistribution()
+
+    # initialize the outputs if desired
+    s.initializeOutput()
+
+    # 4. Initialize the model
+    # s.initializeModel()
 
 
-        # 2. load topo data
-        s.loadTopo()
-
-        # 3. initialize the distribution
-        s.initializeDistribution()
-
-        # initialize the outputs if desired
-        s.initializeOutput()
-
-        # 4. Initialize the model
-        # s.initializeModel()
+    #===============================================================================
+    # Distribute data
+    #===============================================================================
+    #
+    # Once the framework is setup, we can load data and distribute the data
+    # This can be ran multiple times while the framework is running so that the
+    # intialization doesn't have to be re-ran, i.e. if this becomes a GUI
 
 
-        #===============================================================================
-        # Distribute data
-        #===============================================================================
-        #
-        # Once the framework is setup, we can load data and distribute the data
-        # This can be ran multiple times while the framework is running so that the
-        # intialization doesn't have to be re-ran, i.e. if this becomes a GUI
+    # 5. load weather data  and station metadata
+    s.loadData()
 
+    # 6. distribute
+    s.distributeData()
 
-        # 5. load weather data  and station metadata
-        s.loadData()
+    #7. post process if necessary
+    s.post_process()
 
-        # 6. distribute
-        s.distributeData()
+    #===============================================================================
+    # Run model
+    #===============================================================================
 
-        #7. post process if necessary
-        s.post_process()
+    # 7. run the model
+    # s.runModel()
+    s._logger.info(datetime.now() - start)
 
-        #===============================================================================
-        # Run model
-        #===============================================================================
-
-        # 7. run the model
-        # s.runModel()
-        s._logger.info(datetime.now() - start)
-
-
-
-
-
-# except Exception as e:
-#     print(e)

@@ -29,16 +29,30 @@ import numpy
 import os
 import subprocess
 
-#Grab and write the gitHash.
-gitHash= ((subprocess.check_output(['git', 'rev-parse', '--short', 'HEAD'])).strip())
-fname = os.path.abspath(os.path.expanduser('./smrf/__init__.py'))
-with open(fname,'r') as f:
-	lines = f.readlines()
-	f.close()
+from subprocess import Popen, PIPE
+
+#Grab and write the gitVersion from 'git describe'.
+gitVersion = ''
+gitPath = ''
+
+# get git describe if in git repository
+ls_proc = Popen("git describe", stdout=PIPE, stderr=PIPE, shell=True)
+out, err = ls_proc.communicate()
+if len(str(err)) > 1:
+	gitVersion = ''
+else:
+	gitVersion = out
+
+# get current working directory to define git path
+gitPath = os.getcwd()
+
+# git untracked file to store version and path
+fname = os.path.abspath(os.path.expanduser('./smrf/utils/gitinfo.py'))
 
 with open(fname,'w') as f:
-	lines[7] = "__gitHash__='{0}'\n".format(gitHash.decode())
-	f.writelines(lines)
+	nchars = len(gitVersion) - 1
+	f.write("__gitPath__='{0}'\n".format(gitPath))
+	f.write("__gitVersion__='{0}'\n".format(gitVersion[:nchars]))
 	f.close()
 
 # force the compiler to use gcc
