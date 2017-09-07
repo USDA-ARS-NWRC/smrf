@@ -8,6 +8,7 @@ import numpy as np
 from datetime import datetime
 import pytz
 from .gitinfo import __gitVersion__, __gitPath__
+from smrf import __version__
 
 # from netCDF4 import Dataset
 
@@ -100,5 +101,10 @@ def getgitinfo():
         - path to base SMRF directory
         - git version from 'git describe'
     """
-
-    return __gitPath__, __gitVersion__
+    # return git describe if in git tracked SMRF
+    if len(__gitVersion__) > 1:
+        return __gitVersion__
+        
+    # return overarching version if not in git tracked SMRF
+    else:
+        return __version__

@@ -274,7 +274,7 @@ def generate_config(config,fname, inicheck = False):
         None
     """
     # find output of 'git describe'
-    smrfdir, __gitHash__ = utils.gitgetinfo()
+    gitVersion = utils.getgitinfo()
 
     #Header surround each commented titles in the ini file
     section_header = ('#'*80) + '\n' + ('# {0}\n') +('#'*80)
@@ -325,10 +325,9 @@ def generate_config(config,fname, inicheck = False):
     #File header
     config_str += """
 #
-# Configuration file for SMRF V{0}
-# Git specific version: {1}
-# Date generated: {2}
-""".format(__version__,__gitHash__, date.today())
+# Configuration file for SMRF {0}
+# Date generated: {1}
+""".format(gitVersion, date.today())
 
     if inicheck:
         config_str+= "# Generated using: inicheck <filename> -w \n# "
