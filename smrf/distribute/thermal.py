@@ -170,8 +170,9 @@ class th(image_data.image_data):
 
     # these are variables that can be output
     output_variables = {'thermal': {
-                                  'units': 'W/m^2',
-                                  'long_name': 'thermal_radiation'
+                                  'units': 'watt/m2',
+                                  'standard_name': 'thermal_radiation',
+                                  'long_name': 'Thermal (longwave) radiation'
                                   }
                         }
     # these are variables that are operate at the end only and do not need to

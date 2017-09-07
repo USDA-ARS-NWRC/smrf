@@ -96,15 +96,18 @@ class wind(image_data.image_data):
     # these are variables that can be output
     output_variables = {'flatwind': {
                                   'units': 'm/s',
-                                  'long_name': 'flatwind_wind_speed'
+                                  'standard_name': 'flatwind_wind_speed',
+                                  'long_name': 'Simulated wind on a flat surface'
                                   },
                         'wind_speed': {
                                   'units': 'm/s',
-                                  'long_name': 'wind_speed'
+                                  'standard_name': 'wind_speed',
+                                  'long_name': 'Wind speed'
                                   },
                         'wind_direction': {
                                   'units': 'degrees',
-                                  'long_name': 'wind_direction'
+                                  'standard_name': 'wind_direction',
+                                  'long_name': 'Wind direction'
                                   }
                         }
     # these are variables that are operate at the end only and do not need to
@@ -265,8 +268,8 @@ class wind(image_data.image_data):
             self.stationMaxus(data_speed, data_direction)
 
             # distribute the flatwind
-            self._distribute(self.flatwind,
-                             other_attribute='flatwind_distributed')
+            self._distribute(self.flatwind_point,
+                             other_attribute='flatwind')
 
             # distribute u_direction and v_direction
             self._distribute(self.u_direction,
@@ -339,32 +342,32 @@ class wind(image_data.image_data):
         # determine wind
         factor = float(self.config['reduction_factor'])
         ind = cellmaxus < -30.10
-        cellwind[ind] = factor * self.flatwind_distributed[ind] * 4.211
+        cellwind[ind] = factor * self.flatwind[ind] * 4.211
 
         ind = (cellmaxus > -30.10) & (cellmaxus < -21.3)
         c = np.abs(cellmaxus[ind])
-        cellwind[ind] = factor * self.flatwind_distributed[ind] * \
+        cellwind[ind] = factor * self.flatwind[ind] * \
             (1.756507 - 0.1678945 * c + 0.01927844 * np.power(c, 2) -
              0.0003651592 * np.power(c, 3))
 
         ind = (cellmaxus > -21.3) & (cellmaxus < 0)
         c = np.abs(cellmaxus[ind])
-        cellwind[ind] = factor * self.flatwind_distributed[ind] * \
+        cellwind[ind] = factor * self.flatwind[ind] * \
             (1.0 + 0.1031717 * c - 0.008003561 * np.power(c, 2) +
              0.0003996581 * np.power(c, 3))
 
         ind = cellmaxus > 30.10
-        cellwind[ind] = self.flatwind_distributed[ind] / 4.211
+        cellwind[ind] = self.flatwind[ind] / 4.211
 
         ind = (cellmaxus < 30.10) & (cellmaxus > 21.3)
         c = cellmaxus[ind]
-        cellwind[ind] = self.flatwind_distributed[ind] / \
+        cellwind[ind] = self.flatwind[ind] / \
             (1.756507 - 0.1678945 * c + 0.01927844 * np.power(c, 2) -
              0.0003651592 * np.power(c, 3))
 
         ind = (cellmaxus < 21.3) & (cellmaxus >= 0)
         c = cellmaxus[ind]
-        cellwind[ind] = self.flatwind_distributed[ind] / \
+        cellwind[ind] = self.flatwind[ind] / \
             (1.0 + 0.1031717 * c - 0.008003561 * np.power(c, 2) +
              0.0003996581 * np.power(c, 3))
 
@@ -459,7 +462,7 @@ class wind(image_data.image_data):
             else:
                 flatwind.loc[m] = np.NaN
 
-        self.flatwind = flatwind
+        self.flatwind_point = flatwind
 
         # wind direction components at the station
         self.u_direction = np.sin(data_direction * np.pi/180)    # u
