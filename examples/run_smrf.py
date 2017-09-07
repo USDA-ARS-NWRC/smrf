@@ -37,7 +37,7 @@ if len(sys.argv) > 1:
 # 1. initialize
 # try:
 with smrf.framework.SMRF(configFile) as s:
-    try:
+
 
         # 2. load topo data
         s.loadTopo()
@@ -78,9 +78,9 @@ with smrf.framework.SMRF(configFile) as s:
         # s.runModel()
         s._logger.info(datetime.now() - start)
 
-    except Exception as e:
-        #print 'Error: %s' % e
-        s._logger.error(e)
+
+
+
 
 # except Exception as e:
 #     print(e)

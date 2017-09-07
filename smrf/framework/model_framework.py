@@ -35,6 +35,7 @@ import pytz
 from smrf import data, distribute, output, __core_config__
 from smrf.envphys import radiation
 from smrf.utils import queue, io
+from smrf.utils.utils import backup_input
 from threading import Thread
 
 __author__ = "Scott Havens"
@@ -185,7 +186,7 @@ class SMRF():
 
         self.time_out = float(self.config['system']['time_out'])
 
-        # get the time section
+        # get the time sectionutils
         self.start_date = pd.to_datetime(self.config['time']['start_date'])
         self.end_date = pd.to_datetime(self.config['time']['end_date'])
 
@@ -402,6 +403,10 @@ class SMRF():
             except:
                 self._logger.warn('''Distribution not initialized, data not
                                     filtered to desired stations''')
+
+        if self.config["output"]['input_backup'] == True:
+            self._logger.info('Backing up input data...')
+            backup_input(self.data, self.config)
 
     def distributeData(self):
         """
