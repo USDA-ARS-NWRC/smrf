@@ -8,6 +8,7 @@ import numpy as np
 import logging
 import os
 from datetime import datetime
+from smrf.utils import utils
 # import pandas as pd
 
 from smrf import __gitHash__, __version__
@@ -130,9 +131,8 @@ class output_netcdf():
                 # define some global attributes
                 s.setncattr_string('Conventions', 'CF-1.6')
                 s.setncattr_string('dateCreated', datetime.now().strftime(self.fmt))
-                s.setncattr_string('title', 'Distirbuted {} data from SMRF'.format(f['info']['long_name']))
-                s.setncattr_string('history', '[{}] Create netCDF4 file'
-                        .format(datetime.now().strftime(self.fmt)))
+                s.setncattr_string('title', 'Distirbuted {0} data from SMRF {1}'.format(f['info']['long_name'], utils.getgitinfo()))
+                s.setncattr_string('history', '[{}] Create netCDF4 file'.format(datetime.now().strftime(self.fmt)))
                 s.setncattr_string('institution', 
                         'USDA Agricultural Research Service, Northwest Watershed Research Center')
                 s.setncattr_string('source',
