@@ -8,10 +8,10 @@ import numpy as np
 import logging
 import os
 from datetime import datetime
+from smrf.utils import utils
 # import pandas as pd
 
-__version__ = '0.2.5'
-
+from smrf import __version__
 
 class output_netcdf():
     """
@@ -82,47 +82,68 @@ class output_netcdf():
                                  (dimensions[0], dimensions[1], dimensions[2]))
 
                 # define some attributes
-                setattr(s.variables['time'],
+                s.variables['time'].setncattr(
                         'units',
                         'hours since {}'.format(time['start_date']))
-                setattr(s.variables['time'],
+                s.variables['time'].setncattr(
                         'calendar',
                         'standard')
-                setattr(s.variables['time'],
+                s.variables['time'].setncattr(
                         'time_zone',
                         time['time_zone'])
-                setattr(s.variables['y'],
+                s.variables['time'].setncattr(
+                        'long_name',
+                        'time')
+
+                # the y variable attributes
+                s.variables['y'].setncattr(
                         'units',
                         'meters')
-                setattr(s.variables['y'],
+                s.variables['y'].setncattr(
                         'description',
                         'UTM, north south')
-                setattr(s.variables['x'],
+                s.variables['y'].setncattr(
+                        'long_name',
+                        'y coordinate')
+
+                # the x variable attributes
+                s.variables['x'].setncattr(
                         'units',
                         'meters')
-                setattr(s.variables['x'],
+                s.variables['x'].setncattr(
                         'description',
                         'UTM, east west')
-                setattr(s.variables[f['variable']],
+                s.variables['x'].setncattr(
+                        'long_name',
+                        'x coordinate')
+
+                # the variable attributes
+                s.variables[f['variable']].setncattr(
                         'module',
                         f['module'])
-                setattr(s.variables[f['variable']],
+                s.variables[f['variable']].setncattr(
                         'units',
                         f['info']['units'])
-                setattr(s.variables[f['variable']],
+                s.variables[f['variable']].setncattr(
                         'long_name',
                         f['info']['long_name'])
 
                 # define some global attributes
-                setattr(s, 'Conventions', 'CF-1.6')
-                setattr(s, 'dateCreated', datetime.now().strftime(self.fmt))
-                setattr(s, 'title', 'Distirbuted data from SMRF')
-                setattr(s, 'history', '[{}] Create netCDF4 file'
-                        .format(datetime.now().strftime(self.fmt)))
+                s.setncattr_string('Conventions', 'CF-1.6')
+                s.setncattr_string('dateCreated', datetime.now().strftime(self.fmt))
+                s.setncattr_string('title', 'Distirbuted {0} data from SMRF'.format(f['info']['long_name']))
+                s.setncattr_string('history', '[{}] Create netCDF4 file'.format(datetime.now().strftime(self.fmt)))
+                s.setncattr_string('institution',
+                        'USDA Agricultural Research Service, Northwest Watershed Research Center')
+
+                s.setncattr_string('references',
+                        'Online documentation smrf.readthedocs.io; https://doi.org/10.1016/j.cageo.2017.08.016')
 
                 s.variables['y'][:] = y
                 s.variables['x'][:] = x
 
+            s.setncattr_string('source',
+                    'SMRF {}'.format(utils.getgitinfo()))
             s.close()
 
     def output(self, variable, data, date_time):

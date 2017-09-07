@@ -52,12 +52,14 @@ class vp(image_data.image_data):
 
     # these are variables that can be output
     output_variables = {'vapor_pressure': {
-                                  'units': 'Pa',
-                                  'long_name': 'vapor_pressure'
+                                  'units': 'pascal',
+                                  'standard_name': 'vapor_pressure',
+                                  'long_name': 'Vapor pressure'
                                   },
                         'dew_point': {
-                                  'units': 'degree Celcius',
-                                  'long_name': 'dew_point_temperature'
+                                  'units': 'degree_Celcius',
+                                  'standard_name': 'dew_point_temperature',
+                                  'long_name': 'Dew point temperature'
                                   }
                         }
 

@@ -48,11 +48,13 @@ class albedo(image_data.image_data):
     # these are variables that can be output
     output_variables = {'albedo_vis': {
                                        'units': 'None',
-                                       'long_name': 'visible_albedo'
+                                       'standard_name': 'visible_albedo',
+                                       'long_name': 'Visible wavelength albedo'
                                        },
                         'albedo_ir': {
                                        'units': 'None',
-                                       'long_name': 'infrared_albedo'
+                                       'standard_name': 'infrared_albedo',
+                                       'long_name': 'Infrared wavelength albedo'
                                        }
                         }
     # these are variables that are operate at the end only and do not need to

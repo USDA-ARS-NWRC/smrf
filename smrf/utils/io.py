@@ -8,7 +8,8 @@ from __future__ import print_function
 import os
 from collections import Sequence
 from .pycompat import OrderedDict, SafeConfigParser, basestring, unicode_type
-from smrf import __core_config__, __gitHash__, __version__
+from smrf import __core_config__, __version__
+from smrf.utils import utils
 import sys
 from datetime import date
 
@@ -260,17 +261,21 @@ def add_defaults(user_config,master_config):
     return user_config
 
 
-def generate_config(config,fname):
+def generate_config(config,fname, inicheck = False):
     """
     Generates a list of strings to be written and then writes them in the ini file
 
     Args:
         config - Config file dictionary created by :func:`~smrf.utils.io.read_config'.
         fname - String path to the output location for the new config file.
+        inicheck - Boolean value that adds the line generated using inicheck to config, Default = False
 
     Returns:
         None
     """
+    # find output of 'git describe'
+    gitVersion = utils.getgitinfo()
+
     #Header surround each commented titles in the ini file
     section_header = ('#'*80) + '\n' + ('# {0}\n') +('#'*80)
 
@@ -320,17 +325,20 @@ def generate_config(config,fname):
     #File header
     config_str += """
 #
-# Configuration file for SMRF V{0}
-# Git commit hash: {1}
-# Date generated: {2}
-#
+# Configuration file for SMRF {0}
+# Date generated: {1}
+""".format(gitVersion, date.today())
+
+    if inicheck:
+        config_str+= "# Generated using: inicheck <filename> -w \n# "
+
+    config_str+="""
 # For details on configuration file syntax see:
 # https://docs.python.org/2/library/configparser.html
 #
 # For more SMRF related help see:
 # http://smrf.readthedocs.io/en/latest/
-
-""".format(__version__,__gitHash__, date.today())
+"""
 
     #Check for one of the three data set options
     user_sections = config.keys()

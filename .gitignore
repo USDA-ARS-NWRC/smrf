@@ -78,3 +78,6 @@ target/
 #misc
 *.py~
 *.swp
+
+# git version stuff:
+smrf/utils/gitinfo.py

@@ -139,60 +139,74 @@ class solar(image_data.image_data):
 
     # these are variables that can be output
     output_variables = {'clear_ir_beam': {
-                                  'units': 'W/m^2',
-                                  'long_name': 'clear_sky_infrared_beam'
+                                  'units': 'watt/m2',
+                                  'standard_name': 'clear_sky_infrared_beam',
+                                  'long_name': 'Clear sky infrared beam solar radiation'
                                   },
                         'clear_ir_diffuse': {
-                                  'units': 'W/m^2',
-                                  'long_name': 'clear_sky_infrared_diffuse'
+                                  'units': 'watt/m2',
+                                  'standard_name': 'clear_sky_infrared_diffuse',
+                                  'long_name': 'Clear sky infrared diffuse solar radiation'
                                   },
                         'clear_vis_beam': {
-                                  'units': 'W/m^2',
-                                  'long_name': 'clear_sky_visible_beam'
+                                  'units': 'watt/m2',
+                                  'standard_name': 'clear_sky_visible_beam',
+                                  'long_name': 'Clear sky visible beam solar radiation'
                                   },
                         'clear_vis_diffuse': {
-                                  'units': 'W/m^2',
-                                  'long_name': 'clear_sky_visible_diffuse'
+                                  'units': 'watt/m2',
+                                  'standard_name': 'clear_sky_visible_diffuse',
+                                  'long_name': 'Clear sky visible diffuse solar radiation'
                                   },
                         'cloud_factor': {
                                   'units': 'None',
-                                  'long_name': 'cloud_factor'
+                                  'standard_name': 'cloud_factor',
+                                  'long_name': 'Cloud factor'
                                   },
                         'cloud_ir_beam': {
-                                  'units': 'W/m^2',
-                                  'long_name': 'cloud_infrared_beam'
+                                  'units': 'watt/m2',
+                                  'standard_name': 'cloud_infrared_beam',
+                                  'long_name': 'Cloud corrected infrared beam solar radiation'
                                   },
                         'cloud_ir_diffuse': {
-                                  'units': 'W/m^2',
-                                  'long_name': 'cloud_infrared_diffuse'
+                                  'units': 'watt/m2',
+                                  'standard_name': 'cloud_infrared_diffuse',
+                                  'long_name': 'Cloud corrected infrared diffuse solar radiation'
                                   },
                         'cloud_vis_beam': {
-                                  'units': 'W/m^2',
-                                  'long_name': 'cloud_visible_beam'
+                                  'units': 'watt/m2',
+                                  'standard_name': 'cloud_visible_beam',
+                                  'long_name': 'Cloud corrected visible beam solar radiation'
                                   },
                         'cloud_vis_diffuse': {
-                                  'units': 'W/m^2',
-                                  'long_name': 'cloud_visible_diffuse'
+                                  'units': 'watt/m2',
+                                  'standard_name': 'cloud_visible_diffuse',
+                                  'long_name': 'Cloud corrected visible diffuse solar radiation'
                                   },
                         'net_solar': {
-                                  'units': 'W/m^2',
-                                  'long_name': 'net_solar_radiation'
+                                  'units': 'watt/m2',
+                                  'standard_name': 'net_solar_radiation',
+                                  'long_name': 'Net solar radiation'
                                   },
                         'veg_ir_beam': {
-                                  'units': 'W/m^2',
-                                  'long_name': 'vegetation_infrared_beam'
+                                  'units': 'watt/m2',
+                                  'standard_name': 'vegetation_infrared_beam',
+                                  'long_name': 'Vegetation corrected infrared beam solar radiation'
                                   },
                         'veg_ir_diffuse': {
-                                  'units': 'W/m^2',
-                                  'long_name': 'vegetation_infrared_diffuse'
+                                  'units': 'watt/m2',
+                                  'standard_name': 'vegetation_infrared_diffuse',
+                                  'long_name': 'Vegetation corrected infrared diffuse solar radiation'
                                   },
                         'veg_vis_beam': {
-                                  'units': 'W/m^2',
-                                  'long_name': 'vegetation_visible_beam'
+                                  'units': 'watt/m2',
+                                  'standard_name': 'vegetation_visible_beam',
+                                  'long_name': 'Vegetation corrected visible beam solar radiation'
                                   },
                         'veg_vis_diffuse': {
-                                  'units': 'W/m^2',
-                                  'long_name': 'vegetation_visible_diffuse'
+                                  'units': 'watt/m2',
+                                  'standard_name': 'vegetation_visible_diffuse',
+                                  'long_name': 'Vegetation corrected visible diffuse solar radiation'
                                   }
                         }
     # these are variables that are operate at the end only and do not need to

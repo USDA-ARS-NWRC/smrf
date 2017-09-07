@@ -38,8 +38,9 @@ class ts(image_data.image_data):
 
     # these are variables that can be output
     output_variables = {'soil_temp': {
-                                  'units': 'degree Celcius',
-                                  'long_name': 'soil_temperature'
+                                  'units': 'degree_Celcius',
+                                  'standard_name': 'soil_temperature',
+                                  'long_name': 'Soil temperature'
                                   }
                         }
 
