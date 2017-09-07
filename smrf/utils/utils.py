@@ -95,8 +95,6 @@ def backup_input(data, config):
     Backs up input data files so a user can rerun a run with the exact data used
     for a run.
     """
-    print config['topo']
-
     #Make the output dir
     backup_dir = os.path.join(config['output']['out_location'], 'input_backup')
     if not os.path.isdir(backup_dir):
@@ -125,13 +123,13 @@ def backup_input(data, config):
     #Copy topo files over to backup
     ignore = ['basin_lon','basin_lat','type']
     for s in config['topo']:
-        print  config['topo'][s]
         if s not in ignore:
             src = config['topo'][s]
             dst =  os.path.join(backup_dir,os.path.split(src)[-1])
-            print src,dst
             config["topo"][s] = dst
             copyfile(src, dst)
 
+    #We dont want to backup the backup
+    config['output']['input_backup'] = False
     #output inifile
     io.generate_config(config,os.path.join(backup_dir,'backup_config.ini'))
