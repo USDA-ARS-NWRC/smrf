@@ -104,7 +104,8 @@ def getgitinfo():
     # return git describe if in git tracked SMRF
     if len(__gitVersion__) > 1:
         return __gitVersion__
-        
+
     # return overarching version if not in git tracked SMRF
     else:
-        return __version__
+        version = 'v'+__version__
+        return version
