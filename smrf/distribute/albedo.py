@@ -1,6 +1,9 @@
 
 import numpy as np
 import logging
+import pandas as pd
+import datetime
+import pytz
 from smrf.distribute import image_data
 from smrf.envphys import radiation
 
@@ -42,7 +45,6 @@ class albedo(image_data.image_data):
 
     variable = 'albedo'
 
-
     # these are variables that can be output
     output_variables = {'albedo_vis': {
                                        'units': 'None',
@@ -71,6 +73,24 @@ class albedo(image_data.image_data):
         image_data.image_data.__init__(self, self.variable)
         self._logger = logging.getLogger(__name__)
 
+        # get the veg values for max litter decay - date method
+        matching = [s for s in albedoConfig.keys() if "veg_" in s]
+        v = {}
+        for m in matching:
+            if m != 'veg_default':
+                ms = m.split('_')
+                v[ms[1]] = float(albedoConfig[m])
+        albedoConfig['veg'] = v
+
+        # get the veg values for max litter decay - hardy 2000 method
+        matching = [s for s in albedoConfig.keys() if "litter_" in s]
+        v = {}
+        for m in matching:
+            if (m != 'litter_default' and m != 'litter_albedo'):
+                ms = m.split('_')
+                v[ms[1]] = float(albedoConfig[m])
+        albedoConfig['litter'] = v
+
         self.config = albedoConfig
 
         self._logger.debug('Created distribute.albedo')
@@ -87,6 +107,7 @@ class albedo(image_data.image_data):
 
 #         self._initialize(topo, metadata)
         self._logger.debug('Initializing distribute.albedo')
+        self.veg_type = topo.veg_type
 
     def distribute(self, current_time_step, cosz, storm_day):
         """
@@ -111,6 +132,29 @@ class albedo(image_data.image_data):
                                              self.config['grain_size'],
                                              self.config['max_grain'],
                                              self.config['dirt'])
+
+            # Perform litter decay
+            if self.config['decay_method'] == 'date_method':
+                if (self.config['start_decay'] is not None and
+                        self.config['end_decay'] is not None and
+                        self.config['end_decay'] > self.config['start_decay']):
+
+                    alb_v_d, alb_ir_d = radiation.decay_alb_power(self,
+                                            self.config['start_decay'],
+                                            self.config['end_decay'],
+                                            current_time_step,
+                                            self.config['decay_power'], alb_v, alb_ir)
+                    alb_v = alb_v_d
+                    alb_ir = alb_ir_d
+                else:
+                    self._logger.error('Need correct inputs for decay method: {0}'.format(self.config['decay_method']))
+
+            elif self.config['decay_method'] == 'Hardy2000':
+                alb_v_d, alb_ir_d = radiation.decay_alb_hardy(self, storm_day,
+                                                                alb_v, alb_ir,
+                                                                self.config['litter_albedo'])
+                alb_v = alb_v_d
+                alb_ir = alb_ir_d
 
             self.albedo_vis = alb_v
             self.albedo_ir = alb_ir

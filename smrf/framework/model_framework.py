@@ -288,6 +288,7 @@ class SMRF():
         # 4. Precipitation
         self.distribute['precip'] = \
             distribute.precipitation.ppt(self.config['precip'],
+                                         self.start_date,
                                          self.config['time']['time_step'])
 
         # 5. Albedo
