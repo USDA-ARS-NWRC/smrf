@@ -9,7 +9,7 @@ import os
 from collections import Sequence
 from .pycompat import OrderedDict, SafeConfigParser, basestring, unicode_type
 from smrf import __core_config__, __version__
-from smrf.utils import utils
+import utils
 import sys
 from datetime import date
 

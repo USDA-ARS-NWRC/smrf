@@ -7,18 +7,11 @@ Collection of utility functions
 import numpy as np
 from datetime import datetime
 import pytz
-<<<<<<< HEAD
 import os
 import io
 from shutil import copyfile
-=======
 from .gitinfo import __gitVersion__, __gitPath__
 from smrf import __version__
-
-# from netCDF4 import Dataset
->>>>>>> develop
-
-__version__ = '0.2.5'
 
 
 def nan_helper(y):

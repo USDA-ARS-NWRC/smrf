@@ -8,9 +8,6 @@ import numpy as np
 from . import detrended_kriging
 import logging
 import pandas as pd
-# import matplotlib.pyplot as plt
-
-__version__ = '0.2.5'
 
 
 class DK:

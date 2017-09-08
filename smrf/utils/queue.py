@@ -8,20 +8,11 @@ try:
     from Queue import Queue, Empty, Full
 except:
     from queue import Queue, Empty, Full
-# from Queue import Empty, Full
-
-# from multiprocessing.queues import Queue
-# from multiprocessing.util import debug, Finalize
 
 import numpy as np
 import threading
 from time import time as _time
 import logging
-# import weakref
-# import time
-
-
-__version__ = '0.2.5'
 
 
 class DateQueue_Threading(Queue):

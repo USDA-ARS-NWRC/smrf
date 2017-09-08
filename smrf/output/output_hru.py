@@ -8,8 +8,6 @@ import logging
 import os
 import pandas as pd
 
-__version__ = '0.2.5'
-
 
 class output_hru():
     """

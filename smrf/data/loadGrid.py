@@ -1,9 +1,3 @@
-"""
-Version = 0.2.5
-20160307 Scott Havens
-"""
-
-# from smrf import ipw
 import numpy as np
 import netCDF4 as nc
 import pandas as pd
@@ -11,8 +5,6 @@ import logging
 import os
 import utm
 import subprocess as sp
-
-# import matplotlib.pyplot as plt
 
 
 class grid():

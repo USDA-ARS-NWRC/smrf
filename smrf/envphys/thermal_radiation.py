@@ -3,21 +3,8 @@ The module contains various physics calculations needed for estimating
 the thermal radition and associated values.
 """
 
-# from smrf.distribute import vapor_pressure
-
 import numpy as np
-# import subprocess as sp
-# import math
 import os
-# import datetime
-# import logging
-# import pytz
-
-__author__ = "Scott Havens"
-__maintainer__ = "Scott Havens"
-__email__ = "scott.havens@ars.usda.gov"
-__date__ = "2017-05-09"
-__version__ = "0.2.5"
 
 
 on_rtd = os.environ.get('READTHEDOCS') == 'True'

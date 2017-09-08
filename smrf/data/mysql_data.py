@@ -4,9 +4,6 @@ Created on Dec 22, 2015
 Read in metadata and data from a MySQL database
 The table columns will most likely be hardcoded for ease
 of development and users will require the specific table setup
-
-@author: scott
-Version = 0.2.5
 """
 
 import numpy as np
@@ -14,9 +11,7 @@ import scipy.stats as stats
 import pandas as pd
 import utm
 import mysql.connector
-# from mysql.connector import errorcode
 from datetime import datetime, timedelta
-
 import logging
 
 

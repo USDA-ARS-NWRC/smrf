@@ -7,10 +7,6 @@ Distributed forcing data over a grid using different methods
 '''
 
 import numpy as np
-# import sheppard
-# import matplotlib.pyplot as plt
-
-__version__ = '0.2.5'
 
 
 class IDW:

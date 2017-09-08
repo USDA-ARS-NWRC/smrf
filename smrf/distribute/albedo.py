@@ -1,4 +1,3 @@
-
 import numpy as np
 import logging
 import pandas as pd
@@ -6,12 +5,6 @@ import datetime
 import pytz
 from smrf.distribute import image_data
 from smrf.envphys import radiation
-
-__author__ = "Scott Havens"
-__maintainer__ = "Scott Havens"
-__email__ = "scott.havens@ars.usda.gov"
-__date__ = "2016-01-06"
-__version__ = "0.2.5"
 
 
 class albedo(image_data.image_data):
