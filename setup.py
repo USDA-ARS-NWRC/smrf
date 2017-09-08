@@ -36,7 +36,7 @@ gitVersion = ''
 gitPath = ''
 
 # get git describe if in git repository
-ls_proc = Popen("git describe", stdout=PIPE, stderr=PIPE, shell=True)
+ls_proc = Popen("git describe --tags", stdout=PIPE, stderr=PIPE, shell=True)
 out, err = ls_proc.communicate()
 if len(str(err)) > 1:
 	gitVersion = ''
