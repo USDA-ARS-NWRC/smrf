@@ -142,7 +142,7 @@ class albedo(image_data.image_data):
                 else:
                     self._logger.error('Need correct inputs for decay method: {0}'.format(self.config['decay_method']))
 
-            elif self.config['decay_method'] == 'Hardy2000':
+            elif self.config['decay_method'] == 'hardy2000':
                 alb_v_d, alb_ir_d = radiation.decay_alb_hardy(self, storm_day,
                                                                 alb_v, alb_ir,
                                                                 self.config['litter_albedo'])
