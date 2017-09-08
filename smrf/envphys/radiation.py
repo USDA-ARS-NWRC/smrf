@@ -80,6 +80,12 @@ def albedo(telapsed, cosz, gsize, maxgsz, dirt=2):
             albedo (usually between 1.5-3.0)
 
     Returns:
+        tuple:
+        Returns a tuple containing the visible and IR spectral albedo
+
+        - **alb_v** (*numpy.array*) - albedo for visible specturm
+
+        - **alb_ir** (*numpy.array*) -  albedo for ir spectrum
 
     Created April 17, 2015
     Modified July 23, 2015 - take image of cosz and calculate albedo for
@@ -147,7 +153,13 @@ def decay_alb_power(self, start_decay, end_decay, t_curr, pwr, alb_v, alb_ir):
         alb_ir: numpy array of albedo for IR spectrum
 
     Returns:
-        corrected albedo arrays based on date, veg type
+        tuple:
+        Returns a tuple containing the corrected albedo arrays
+            based on date, veg type
+        - **alb_v** (*numpy.array*) - albedo for visible specturm
+
+        - **alb_ir** (*numpy.array*) -  albedo for ir spectrum
+
 
     Created July 18, 2017
     Micah Sandusky
@@ -209,7 +221,12 @@ def decay_alb_hardy(self, storm_day, alb_v, alb_ir, alb_litter = 0.2):
         coverage per day
 
     Returns:
-        corrected albedo arrays
+        tuple:
+        Returns a tuple containing the corrected albedo arrays
+            based on date, veg type
+        - **alb_v** (*numpy.array*) - albedo for visible specturm
+
+        - **alb_ir** (*numpy.array*) -  albedo for ir spectrum
 
     Created July 19, 2017
     Micah Sandusky
@@ -742,13 +759,8 @@ def deg_to_dms(deg):
 def cf_cloud(beam, diffuse, cf):
     """
     Correct beam and diffuse irradiance for cloud attenuation at a single
-<<<<<<< HEAD
-    time, using input clear-sky global and diffuse radiation calculations supplied by
-    locally modified toporad or locally modified stoporad
-=======
     time, using input clear-sky global and diffuse radiation calculations
     supplied by locally modified toporad or locally modified stoporad
->>>>>>> develop
 
     Args:
         beam: global irradiance
