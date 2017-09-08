@@ -1,14 +1,6 @@
-
-# import pandas as pd
 import numpy as np
 from smrf.spatial import idw, dk, grid
 import logging
-
-__author__ = "Scott Havens"
-__maintainer__ = "Scott Havens"
-__email__ = "scott.havens@ars.usda.gov"
-__date__ = "2015-12-31"
-__version__ = "0.2.5"
 
 
 class image_data():

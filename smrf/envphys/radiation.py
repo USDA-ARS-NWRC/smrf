@@ -1,10 +1,5 @@
 """
 Created on Apr 17, 2015
-
-To install pysolar-0.6:
-1. Download https://github.com/pingswept/pysolar/archive/0.6.tar.gz
-2. sudo python setup.py install
-
 @author: scott
 """
 
@@ -16,8 +11,6 @@ import datetime
 import logging
 import pytz
 from smrf.utils import utils
-
-__version__ = '0.2.5'
 
 
 on_rtd = os.environ.get('READTHEDOCS') == 'True'

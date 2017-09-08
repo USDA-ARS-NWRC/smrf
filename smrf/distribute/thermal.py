@@ -5,12 +5,6 @@ from smrf.distribute import image_data
 from smrf.envphys import thermal_radiation
 from smrf.envphys.core import envphys_c
 
-__author__ = "Scott Havens"
-__maintainer__ = "Scott Havens"
-__email__ = "scott.havens@ars.usda.gov"
-__date__ = "2016-01-07"
-__version__ = "0.2.5"
-
 
 class th(image_data.image_data):
     """

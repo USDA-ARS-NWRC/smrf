@@ -7,12 +7,11 @@ Collection of utility functions
 import numpy as np
 from datetime import datetime
 import pytz
+import os
+import io
+from shutil import copyfile
 from .gitinfo import __gitVersion__, __gitPath__
 from smrf import __version__
-
-# from netCDF4 import Dataset
-
-__version__ = '0.2.5'
 
 
 def nan_helper(y):
@@ -91,6 +90,49 @@ def water_day(indate):
 def is_leap_year(year):
     return (year % 4 == 0 and year % 100 != 0) or year % 400 == 0
 
+def backup_input(data, config):
+    """
+    Backs up input data files so a user can rerun a run with the exact data used
+    for a run.
+    """
+    #Make the output dir
+    backup_dir = os.path.join(config['output']['out_location'], 'input_backup')
+    if not os.path.isdir(backup_dir):
+        os.mkdir(backup_dir)
+    csv_names = {}
+
+    #Check config file for csv section and remove alternate data sets form config
+    if 'csv' not in config.keys():
+        config['csv'] = {}
+
+    if 'mysql' in config.keys():
+        config.pop('mysql', None)
+
+    if 'gridded' in config.keys():
+        raise ValueError("Micah_o was unsure how to handle this scenario... please advise")
+
+    #Output station data to CSV
+    for k in data.variables:
+        fname = os.path.join(backup_dir,k+'.csv')
+        v = getattr(data,k)
+        v.to_csv(fname)
+
+        #Adjust and output the inifile
+        config['csv'][k] = fname
+
+    #Copy topo files over to backup
+    ignore = ['basin_lon','basin_lat','type']
+    for s in config['topo']:
+        if s not in ignore:
+            src = config['topo'][s]
+            dst =  os.path.join(backup_dir,os.path.split(src)[-1])
+            config["topo"][s] = dst
+            copyfile(src, dst)
+
+    #We dont want to backup the backup
+    config['output']['input_backup'] = False
+    #output inifile
+    io.generate_config(config,os.path.join(backup_dir,'backup_config.ini'))
 
 def getgitinfo():
     """gitignored file that contains specific SMRF version and path

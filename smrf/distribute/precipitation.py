@@ -2,18 +2,11 @@
 import numpy as np
 import logging
 import netCDF4 as nc
-# from netCDF4 import Dataset
 from smrf.distribute import image_data
 from smrf.envphys import snow
 from smrf.envphys import storms
-
 from smrf.utils import utils
 import os
-__author__ = "Scott Havens"
-__maintainer__ = "Scott Havens"
-__email__ = "scott.havens@ars.usda.gov"
-__date__ = "2016-01-05"
-__version__ = "0.2.5"
 
 
 class ppt(image_data.image_data):

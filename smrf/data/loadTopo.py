@@ -226,6 +226,7 @@ class topo():
 
         if self.topoConfig['type'] != 'ipw':
             os.remove(self.topoConfig['dem'])
+            self.topoConfig.pop('dem', None)
 
     def _gradient(self, demFile, gradientFile):
         # calculate the gradient
