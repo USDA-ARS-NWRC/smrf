@@ -14,32 +14,37 @@ import sys
 from datetime import date
 
 
-def parse_config_type(str):
+def parse_config_type(options):
     """
     Parses out the type of a config file available options entry, types are identified
     by < > and type string is the default.
     Types parseable
     datetime
     filename
+    directory
+    bool
     integer
     float
     string
     """
 
-    type_options = ['datetime','filename','integer','float','string']
-    if '<' in options:
+    type_options = ['datetime','filename','directory','bool','integer','float','string']
+    if '<' in options and '>' in options:
         start = options.index('<')
         end = options.index('>')
+
         option_type = options[start+1:end]
-        option = options[end:]
+        option = options[end+1:]
     else:
         option_type='string'
+        option = options
 
-        #Recognize the options.
-        if option_type in type_options:
-            return option_type, option
-        else:
-            raise ValueError("Unrecognized type in CoreConfig file ---> '{0}'".format(options))
+    #Recognize the options.
+    if option_type in type_options:
+        #print option_type, option
+        return option_type, option
+    else:
+        raise ValueError("Unrecognized type in CoreConfig file ---> '{0}'".format(options))
 
 
 def parse_str_setting(str_option):
@@ -107,25 +112,26 @@ def parse_lst_options(option_lst_str,types=False):
 
             #Get correct data type
             for i,o in enumerate(options):
-                if option_type == 'datetime':
-                    value = datetime.datetime(o)
-                elif option_type == 'bool':
-                    value = bool(o)
-                elif option_type == 'integer':
-                    value = int(o)
-                elif option_type == 'float':
-                    value = float(o)
-                elif option_type == 'filename':
-                    value = str(o)
-                elif option_type == 'string':
-                    value = str(o.lower())
-                elif o.lower() in ['none']:  # None
-                    value = None
+                if o:
+                    if option_type == 'datetime':
+                        value = datetime.datetime(o)
+                    elif option_type == 'bool':
+                        value = bool(o)
+                    elif option_type == 'integer':
+                        value = int(o)
+                    elif option_type == 'float':
+                        value = float(o)
+                    elif option_type == 'filename':
+                        value = str(o)
+                    elif option_type == 'string':
+                        value = str(o.lower())
+                    elif o.lower() in ['none']:  # None
+                        value = None
+                    else:
+                        value = str(o).lower()
                 else:
-                    value = str(o).lower()
-
+                    value = ""
                 options[i] = value
-
 
             #Change it back from being a list
             if len(options) == 1:
@@ -133,7 +139,7 @@ def parse_lst_options(option_lst_str,types=False):
             if types:
                 available[name] = option_type,options
             else:
-                available[name] = option_type,options
+                available[name] = options
 
     return available
 
@@ -194,21 +200,69 @@ def check_config_file(user_cfg, master_config):
                 val_lst = value
 
             litem = item.lower()
+            #If type are provided
+            if len(available) > 1:
+                avail = available[item][-1]
+                option_type = available[item][0]
+                types = True
+            else:
+
+                avail = available[item]
+                types = False
             for v in val_lst:
 
                 #Is the item known as a configurable item
                 if litem in master_config[section]["configurable"]:
-                    #Are there known options for this item
+
                     if litem in available.keys():
                         #Make our strings case insensitive
-                        if type(v) == str:
+                        if avail not in ['filename','directory'] and type(v)==str:
                             vr = v.lower()
                         else:
                             vr = v
-                        if vr not in available[item]:
+
+                        if vr not in avail:
                             err_str = "Invalid option: {0} ".format(v)
                             #err_str+="\n available_options were {0}".format(available[item])
                             errors.append(msg.format(section,item, err_str))
+
+                        if types:
+                            if options_type == 'datetime':
+                                try:
+                                    #Format should be 2008-12-02 12:00
+                                    dt = (','.join(c for c in v if c in '- :'))
+                                    dt = dt.split(',')
+                                    datetime(dt)
+                                except:
+                                    errors.append(msg.formt(section,item,'Format not datetime'))
+
+                            elif available[item][0] == 'bool':
+                                try:
+                                    bool(v)
+                                except:
+                                    errors.append(msg.formt(section,item,'Expecting a boolean'))
+
+                            elif available[item][0] == 'float':
+                                try:
+                                    float(v)
+                                except:
+                                    errors.append(msg.formt(section,item,'Expecting a float'))
+
+                            elif available[item][0] == 'integer':
+                                try:
+                                    int(v)
+                                except:
+                                    errors.append(msg.formt(section,item,'Expecting a integer'))
+
+                            elif available[item][0] == 'filename':
+                                if not os.path.isfile(v):
+                                    errors.append(msg.formt(section,item,'Path does not exist'))
+
+                            elif available[item][0] == 'directory':
+                                if not os.path.isdir(v):
+                                    errors.append(msg.formt(section,item,'Directory does not exist'))
+
+
                 else:
                     wrn = "Not a registered option."
                     if section.lower() == 'wind':
@@ -461,7 +515,7 @@ def read_master_config(master_config_file):
 
     #Add the other two keys which have specialized syntaxes
     for section in sections:
-        config[section]["available_options"] =  parse_lst_options(config[section]['available_options'])
+        config[section]["available_options"] =  parse_lst_options(config[section]['available_options'],types=True)
         config[section]["defaults"] =  parse_lst_options(config[section]['defaults'])
 
     return config
