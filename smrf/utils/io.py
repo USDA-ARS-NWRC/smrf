@@ -189,7 +189,7 @@ def check_config_file(user_cfg, master_config):
 
         #Parse the possible options
         else:
-            available =  master_config[section]['available_options']
+            available = master_config[section]['available_options']
 
         #In the section check the values and options
         for item,value in configured.items():
@@ -200,67 +200,54 @@ def check_config_file(user_cfg, master_config):
                 val_lst = value
 
             litem = item.lower()
-            #If type are provided
-            if len(available) > 1:
-                avail = available[item][-1]
-                option_type = available[item][0]
-                types = True
-            else:
 
-                avail = available[item]
-                types = False
             for v in val_lst:
 
                 #Is the item known as a configurable item
                 if litem in master_config[section]["configurable"]:
 
                     if litem in available.keys():
-                        #Make our strings case insensitive
-                        if avail not in ['filename','directory'] and type(v)==str:
+                        options_type = available[litem][0]
+                        #Make our strings case insensitive, except for filesnames
+                        if available[litem][0] not in ['filename','directory'] and type(v)==str:
                             vr = v.lower()
                         else:
                             vr = v
+                        print(litem,vr,options_type)
+                        if options_type == 'datetime':
+                            try:
+                                #Format should be 2008-12-02 12:00
+                                dt = (','.join(c for c in v if c in '- :'))
+                                dt = dt.split(',')
+                                datetime(dt)
+                            except:
+                                errors.append(msg.format(section,item,'Format not datetime'))
 
-                        if vr not in avail:
+                        elif options_type == 'bool' and type(vr)!='bool':
+                                errors.append(msg.format(section,item,'Expecting a boolean'))
+
+                        elif options_type == 'float' and type(vr)!='float':
+                                errors.append(msg.format(section,item,'Expecting a float'))
+
+                        elif options_type == 'integer' and type(vr)!='int':
+                                errors.append(msg.format(section,item,'Expecting a integer'))
+
+                        elif options_type == 'filename':
+                            if vr !=None:
+                                if not os.path.isfile(v):
+                                    errors.append(msg.format(section,item,'Path does not exist'))
+
+                        elif options_type == 'directory':
+                            if vr != None:
+                                if not os.path.isdir(v):
+                                    errors.append(msg.format(section,item,'Directory does not exist'))
+
+                        elif options_type == 'string' and vr not in available[litem][-1]:
                             err_str = "Invalid option: {0} ".format(v)
                             #err_str+="\n available_options were {0}".format(available[item])
                             errors.append(msg.format(section,item, err_str))
 
-                        if types:
-                            if options_type == 'datetime':
-                                try:
-                                    #Format should be 2008-12-02 12:00
-                                    dt = (','.join(c for c in v if c in '- :'))
-                                    dt = dt.split(',')
-                                    datetime(dt)
-                                except:
-                                    errors.append(msg.formt(section,item,'Format not datetime'))
 
-                            elif available[item][0] == 'bool':
-                                try:
-                                    bool(v)
-                                except:
-                                    errors.append(msg.formt(section,item,'Expecting a boolean'))
-
-                            elif available[item][0] == 'float':
-                                try:
-                                    float(v)
-                                except:
-                                    errors.append(msg.formt(section,item,'Expecting a float'))
-
-                            elif available[item][0] == 'integer':
-                                try:
-                                    int(v)
-                                except:
-                                    errors.append(msg.formt(section,item,'Expecting a integer'))
-
-                            elif available[item][0] == 'filename':
-                                if not os.path.isfile(v):
-                                    errors.append(msg.formt(section,item,'Path does not exist'))
-
-                            elif available[item][0] == 'directory':
-                                if not os.path.isdir(v):
-                                    errors.append(msg.formt(section,item,'Directory does not exist'))
 
 
                 else:
