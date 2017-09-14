@@ -11,7 +11,7 @@ from .pycompat import OrderedDict, SafeConfigParser, basestring, unicode_type
 from smrf import __core_config__, __version__
 import utils
 import sys
-from datetime import date
+from datetime import date, datetime
 
 
 def parse_config_type(options):
@@ -28,7 +28,7 @@ def parse_config_type(options):
     string
     """
 
-    type_options = ['datetime','filename','directory','bool','integer','float','string']
+    type_options = ['datetime','filename','directory','bool','int','float','string']
     if '<' in options and '>' in options:
         start = options.index('<')
         end = options.index('>')
@@ -117,7 +117,7 @@ def parse_lst_options(option_lst_str,types=False):
                         value = datetime.datetime(o)
                     elif option_type == 'bool':
                         value = bool(o)
-                    elif option_type == 'integer':
+                    elif option_type == 'int':
                         value = int(o)
                     elif option_type == 'float':
                         value = float(o)
@@ -203,9 +203,9 @@ def check_config_file(user_cfg, master_config):
 
             for v in val_lst:
 
-                #Is the item known as a configurable item
+                #Is the item known as a configurable item?
                 if litem in master_config[section]["configurable"]:
-
+                    #Do we have an idea os what to expect?
                     if litem in available.keys():
                         options_type = available[litem][0]
                         #Make our strings case insensitive, except for filesnames
@@ -213,42 +213,39 @@ def check_config_file(user_cfg, master_config):
                             vr = v.lower()
                         else:
                             vr = v
-                        print(litem,vr,options_type)
+                        print(litem,type(vr),options_type)
                         if options_type == 'datetime':
                             try:
                                 #Format should be 2008-12-02 12:00
-                                dt = (','.join(c for c in v if c in '- :'))
-                                dt = dt.split(',')
-                                datetime(dt)
+                                #date=vr.split(['-',' ',':'])
+                                # dt+=dt
+                                dt = (''.join(c if c not in ': -' else ',' for c in v))
+
+                                dt = [int(c) for c in dt.split(',')]
+                                datetime(dt[0],dt[1],dt[2],dt[3],dt[4])
                             except:
                                 errors.append(msg.format(section,item,'Format not datetime'))
 
-                        elif options_type == 'bool' and type(vr)!='bool':
-                                errors.append(msg.format(section,item,'Expecting a boolean'))
-
-                        elif options_type == 'float' and type(vr)!='float':
-                                errors.append(msg.format(section,item,'Expecting a float'))
-
-                        elif options_type == 'integer' and type(vr)!='int':
-                                errors.append(msg.format(section,item,'Expecting a integer'))
-
                         elif options_type == 'filename':
                             if vr !=None:
-                                if not os.path.isfile(v):
+                                if not os.path.isfile(vr):
                                     errors.append(msg.format(section,item,'Path does not exist'))
 
                         elif options_type == 'directory':
                             if vr != None:
-                                if not os.path.isdir(v):
+                                if not os.path.isdir(vr):
                                     errors.append(msg.format(section,item,'Directory does not exist'))
 
-                        elif options_type == 'string' and vr not in available[litem][-1]:
-                            err_str = "Invalid option: {0} ".format(v)
-                            #err_str+="\n available_options were {0}".format(available[item])
-                            errors.append(msg.format(section,item, err_str))
+                        #Check int, bools, float
+                        elif options_type not in str(type(vr)):
+                                errors.append(msg.format(section,item,'Expecting a {0}'.format(options_type)))
+                        elif options_type == 'string':
+                            if type(vr) != str:
+                                errors.append(msg.format(section,item,'Expecting string'))
 
-
-
+                            elif available[litem][-1] !='' and vr not in available[litem][-1]:
+                                err_str = "Invalid option: {0} ".format(v)
+                                errors.append(msg.format(section,item, err_str))
 
                 else:
                     wrn = "Not a registered option."
