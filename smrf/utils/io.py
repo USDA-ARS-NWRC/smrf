@@ -28,7 +28,7 @@ def parse_config_type(options):
     string
     """
 
-    type_options = ['datetime','filename','directory','bool','int','float','string']
+    type_options = ['datetime','filename','directory','bool','int','float','str']
     if '<' in options and '>' in options:
         start = options.index('<')
         end = options.index('>')
@@ -36,13 +36,14 @@ def parse_config_type(options):
         option_type = options[start+1:end]
         option = options[end+1:]
     else:
-        option_type='string'
+        option_type='str'
         option = options
 
     #Recognize the options.
     if option_type in type_options:
         #print option_type, option
         return option_type, option
+
     else:
         raise ValueError("Unrecognized type in CoreConfig file ---> '{0}'".format(options))
 
@@ -144,14 +145,15 @@ def parse_lst_options(option_lst_str,types=False):
     return available
 
 
-def check_config_file(user_cfg, master_config):
+def check_config_file(user_cfg, master_config,user_cfg_path=None):
     """
     looks at the users provided config file and checks it to a master config file
     looking at correctness and missing info.
 
     Args:
         user_cfg - Config file dictionary created by :func:`~smrf.utils.io.read_config'.
-        master_config: Config file dictionary created by :func:`~smrf.utils.io.read_master_config'
+        master_config - Config file dictionary created by :func:`~smrf.utils.io.read_master_config'
+        user_cfg_path - Path to the config file that is being checked. Useful for relative file paths. If none assumes relative paths from CWD.
 
     Returns:
         tuple:
@@ -213,13 +215,13 @@ def check_config_file(user_cfg, master_config):
                             vr = v.lower()
                         else:
                             vr = v
-                        print(litem,type(vr),options_type)
+                        #print(litem,type(vr),options_type)
                         if options_type == 'datetime':
                             try:
                                 #Format should be 2008-12-02 12:00
                                 #date=vr.split(['-',' ',':'])
                                 # dt+=dt
-                                dt = (''.join(c if c not in ': -' else ',' for c in v))
+                                dt = (''.join(c if c not in ': -' else ',' for c in vr))
 
                                 dt = [int(c) for c in dt.split(',')]
                                 datetime(dt[0],dt[1],dt[2],dt[3],dt[4])
@@ -228,17 +230,27 @@ def check_config_file(user_cfg, master_config):
 
                         elif options_type == 'filename':
                             if vr !=None:
-                                if not os.path.isfile(vr):
-                                    errors.append(msg.format(section,item,'Path does not exist'))
+                                if user_cfg_path != None:
+                                    p = os.path.split(user_cfg_path)
+
+                                    p = os.path.join(p[0],vr)
+                                    vr = p
+
+                                    if not os.path.isfile(os.path.abspath(vr)):
+                                        print(os.path.abspath(vr))
+                                        errors.append(msg.format(section,item,'Path does not exist'))
 
                         elif options_type == 'directory':
+                            if user_cfg_path != None:
+                                vr = os.path.abspath(os.split(user_cfg_path)[:-1]+vr)
                             if vr != None:
                                 if not os.path.isdir(vr):
                                     errors.append(msg.format(section,item,'Directory does not exist'))
 
                         #Check int, bools, float
                         elif options_type not in str(type(vr)):
-                                errors.append(msg.format(section,item,'Expecting a {0}'.format(options_type)))
+                                errors.append(msg.format(section,item,'Expecting a {0} recieved {1}'.format(options_type,type(vr))))
+
                         elif options_type == 'string':
                             if type(vr) != str:
                                 errors.append(msg.format(section,item,'Expecting string'))
