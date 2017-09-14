@@ -229,26 +229,26 @@ def check_config_file(user_cfg, master_config,user_cfg_path=None):
                                 errors.append(msg.format(section,item,'Format not datetime'))
 
                         elif options_type == 'filename':
-                            if vr !=None:
+                            if vr != None:
                                 if user_cfg_path != None:
                                     p = os.path.split(user_cfg_path)
-
-                                    p = os.path.join(p[0],vr)
-                                    vr = p
+                                    vr = os.path.join(p[0],vr)
 
                                     if not os.path.isfile(os.path.abspath(vr)):
-                                        print(os.path.abspath(vr))
                                         errors.append(msg.format(section,item,'Path does not exist'))
 
                         elif options_type == 'directory':
-                            if user_cfg_path != None:
-                                vr = os.path.abspath(os.split(user_cfg_path)[:-1]+vr)
                             if vr != None:
-                                if not os.path.isdir(vr):
-                                    errors.append(msg.format(section,item,'Directory does not exist'))
+                                if user_cfg_path != None:
+                                    p = os.path.split(user_cfg_path)
+                                    vr = os.path.join(p[0],vr)
+
+                                    if not os.path.isdir(os.path.abspath(vr)):
+                                        errors.append(msg.format(section,item,'Directory does not exist'))
 
                         #Check int, bools, float
                         elif options_type not in str(type(vr)):
+                            if vr:
                                 errors.append(msg.format(section,item,'Expecting a {0} recieved {1}'.format(options_type,type(vr))))
 
                         elif options_type == 'string':
@@ -257,7 +257,7 @@ def check_config_file(user_cfg, master_config,user_cfg_path=None):
 
                             elif available[litem][-1] !='' and vr not in available[litem][-1]:
                                 err_str = "Invalid option: {0} ".format(v)
-                                errors.append(msg.format(section,item, err_str))
+                                errors.append(msg.format(section, item, err_str))
 
                 else:
                     wrn = "Not a registered option."
