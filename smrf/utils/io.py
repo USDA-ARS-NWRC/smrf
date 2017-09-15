@@ -11,7 +11,8 @@ from .pycompat import OrderedDict, SafeConfigParser, basestring, unicode_type
 from smrf import __core_config__, __version__
 import utils
 import sys
-from datetime import date, datetime
+from datetime import date
+import pandas as pd
 
 
 def parse_config_type(options):
@@ -20,19 +21,28 @@ def parse_config_type(options):
     by < > and type string is the default.
     Types parseable
     datetime
-    filename
-    directory
     bool
     integer
     float
-    string
+    str
+    filename
+    directory
+
+    Args:
+        options - Parsed lines from the master config file.
+
+    Returns:
+        tuple:
+            Returns the type and the rest of the line in the config file.
+            - **option_type** - the string name of the expected type.
+            - **option** - the string value of the option parsed.
+
     """
 
     type_options = ['datetime','filename','directory','bool','int','float','str']
     if '<' in options and '>' in options:
         start = options.index('<')
         end = options.index('>')
-
         option_type = options[start+1:end]
         option = options[end+1:]
     else:
@@ -115,7 +125,7 @@ def parse_lst_options(option_lst_str,types=False):
             for i,o in enumerate(options):
                 if o:
                     if option_type == 'datetime':
-                        value = datetime.datetime(o)
+                        value = pd.to_datetime(o)
                     elif option_type == 'bool':
                         value = bool(o)
                     elif option_type == 'int':
@@ -215,16 +225,10 @@ def check_config_file(user_cfg, master_config,user_cfg_path=None):
                             vr = v.lower()
                         else:
                             vr = v
-                        #print(litem,type(vr),options_type)
+
                         if options_type == 'datetime':
                             try:
-                                #Format should be 2008-12-02 12:00
-                                #date=vr.split(['-',' ',':'])
-                                # dt+=dt
-                                dt = (''.join(c if c not in ': -' else ',' for c in vr))
-
-                                dt = [int(c) for c in dt.split(',')]
-                                datetime(dt[0],dt[1],dt[2],dt[3],dt[4])
+                                pd.to_datetime(vr)
                             except:
                                 errors.append(msg.format(section,item,'Format not datetime'))
 

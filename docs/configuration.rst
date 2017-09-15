@@ -684,10 +684,31 @@ Example ::
 
   [precipitation]
     configurable: my_rain_model, new_snow_parameter
-    available_options: my_rain_model = [curly mo larry], new_snow_parameter= [sharknado antman]
+    available_options: my_rain_model = [curly mo larry], new_snow_parameter=[sharknado antman]
     default: new_rain_model=Larry, new_snow_parameter=sharknado
 
 This would add two new configurable options called my_rain_model and new snow_parameter.
 They would only be able to be set to  curly,mo and larry for the my_rain_model and for the
 the new_snow_parameter sharknado and antman. Each has a default in the event it is
 not specified by the user which in this case is Larry and sharknado respectively.
+The CoreConfiguration also allows the user to specify the type to further constrain the inputs.
+For example:
+Example ::
+
+  [precipitation]
+    configurable: min, storm_days_restart
+    available_options: min = <float>, storm_days_restart=<filename>
+    
+This would force the user to put in a type float for the min and a real filename for the storm_days_restart.
+Even though a real list of options was not provided SMRF will check to make sure the the user adheres to 
+the specified requirements. If no type if provided at all, SMRF will assume it is a string. 
+Available types are:
+* datetime
+* str
+* bool
+* int
+* float
+* filename
+* directory
+
+
