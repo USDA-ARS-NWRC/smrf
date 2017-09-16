@@ -1,0 +1,53 @@
+#!/usr/bin/env python
+
+import smrf
+import argparse
+import os
+from datetime import datetime
+import sys
+
+def run():
+    '''
+    run_smrf is a command line program meant to take a single
+    argument for the config file.  From this program, smrf.framework
+    will be loaded to run the full program.
+
+    Users can also run the model as they want by using the smrf.framework.SMRF
+    class to change things or whatever
+    '''
+    parser = argparse.ArgumentParser(description='Examines SMRF config files for issues.')
+    parser.add_argument('config_file', metavar='F', type=str,
+                        help='Path to SMRF config file that needs checking')
+
+    args = parser.parse_args()
+
+    if os.path.isfile(args.config_file):
+        start = datetime.now()
+        # initialize
+        with smrf.framework.SMRF(args.config_file) as s:
+            # load topo data
+            s.loadTopo()
+
+            # initialize the distribution
+            s.initializeDistribution()
+
+            # initialize the outputs if desired
+            s.initializeOutput()
+
+            # load weather data  and station metadata
+            s.loadData()
+
+            # distribute
+            s.distributeData()
+
+            #post process if necessary
+            s.post_process()
+
+            s._logger.info(datetime.now() - start)
+
+    else:
+        raise IOError('File does not exist.')
+
+
+if __name__ == '__main__':
+    run()
