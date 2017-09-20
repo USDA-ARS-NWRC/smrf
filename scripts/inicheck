@@ -16,7 +16,7 @@ def main():
         user_cfg = io.read_config(args.config_file)
         config = io.get_master_config()
         user_cfg = io.add_defaults(user_cfg,config)
-        warnings, errors = io.check_config_file(user_cfg,config,args.config_file)
+        warnings, errors = io.check_config_file(user_cfg,config)
         io.print_config_report(warnings,errors)
     else:
         raise IOError('File does not exist.')
