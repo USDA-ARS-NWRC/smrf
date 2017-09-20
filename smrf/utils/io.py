@@ -12,6 +12,50 @@ from smrf import __core_config__, __version__
 import utils
 import sys
 from datetime import date
+import pandas as pd
+
+
+def parse_config_type(options):
+    """
+    Parses out the type of a config file available options entry, types are identified
+    by < > and type string is the default.
+    Types parseable
+    datetime
+    bool
+    integer
+    float
+    str
+    filename
+    directory
+
+    Args:
+        options - Parsed lines from the master config file.
+
+    Returns:
+        tuple:
+            Returns the type and the rest of the line in the config file.
+            - **option_type** - the string name of the expected type.
+            - **option** - the string value of the option parsed.
+
+    """
+
+    type_options = ['datetime','filename','directory','bool','int','float','str']
+    if '<' in options and '>' in options:
+        start = options.index('<')
+        end = options.index('>')
+        option_type = options[start+1:end]
+        option = options[end+1:]
+    else:
+        option_type='str'
+        option = options
+
+    #Recognize the options.
+    if option_type in type_options:
+        #print option_type, option
+        return option_type, option
+
+    else:
+        raise ValueError("Unrecognized type in CoreConfig file ---> '{0}'".format(options))
 
 
 def parse_str_setting(str_option):
@@ -34,16 +78,16 @@ def parse_str_setting(str_option):
         name,option = str_option.split("=")
         name = (name.lower()).strip()
         option = (option.lower()).strip()
-
+        option_type, option = parse_config_type(option)
     else:
         msg = "Config file string does not have any options with = to parse."
         msg+= "\nError occurred parsing in config file:\n {0}".format(str_option)
         raise ValueError(msg)
 
-    return name,option
+    return name,option_type,option
 
 
-def parse_lst_options(option_lst_str):
+def parse_lst_options(option_lst_str,types=False):
     """
     Parse options that can be lists form the master config file and returns a dict
     e.g.
@@ -69,7 +113,7 @@ def parse_lst_options(option_lst_str):
             options_parseable = option_lst_str
 
         for entry in options_parseable:
-            name,option_lst = parse_str_setting(entry)
+            name,option_type,option_lst = parse_str_setting(entry)
 
             #Account for special syntax for providing a list answer
             options = (''.join(c for c in option_lst if c not in '[]'))
@@ -79,37 +123,47 @@ def parse_lst_options(option_lst_str):
 
             #Get correct data type
             for i,o in enumerate(options):
-                if o.lower() in ['true', 't']:  # True
-                    value = True
-                elif o.lower() in ['false', 'f']:  # False
-                    value = False
-                elif o.lower() in ['none']:  # None
-                    value = None
-                elif isint(o):  # int
-                    value = int(o)
-                elif isfloat(o):  # float
-                    value = float(o)
+                if o:
+                    if option_type == 'datetime':
+                        value = pd.to_datetime(o)
+                    elif option_type == 'bool':
+                        value = bool(o)
+                    elif option_type == 'int':
+                        value = int(o)
+                    elif option_type == 'float':
+                        value = float(o)
+                    elif option_type == 'filename':
+                        value = str(o)
+                    elif option_type == 'string':
+                        value = str(o.lower())
+                    elif o.lower() in ['none']:  # None
+                        value = None
+                    else:
+                        value = str(o).lower()
                 else:
-                    value = str(o).lower()
-
+                    value = ""
                 options[i] = value
 
             #Change it back from being a list
             if len(options) == 1:
                 options = options[0]
-            available[name] = options
+            if types:
+                available[name] = option_type,options
+            else:
+                available[name] = options
 
     return available
 
 
-def check_config_file(user_cfg, master_config):
+def check_config_file(user_cfg, master_config,user_cfg_path=None):
     """
     looks at the users provided config file and checks it to a master config file
     looking at correctness and missing info.
 
     Args:
         user_cfg - Config file dictionary created by :func:`~smrf.utils.io.read_config'.
-        master_config: Config file dictionary created by :func:`~smrf.utils.io.read_master_config'
+        master_config - Config file dictionary created by :func:`~smrf.utils.io.read_master_config'
+        user_cfg_path - Path to the config file that is being checked. Useful for relative file paths. If none assumes relative paths from CWD.
 
     Returns:
         tuple:
@@ -147,7 +201,7 @@ def check_config_file(user_cfg, master_config):
 
         #Parse the possible options
         else:
-            available =  master_config[section]['available_options']
+            available = master_config[section]['available_options']
 
         #In the section check the values and options
         for item,value in configured.items():
@@ -158,21 +212,57 @@ def check_config_file(user_cfg, master_config):
                 val_lst = value
 
             litem = item.lower()
+
             for v in val_lst:
 
-                #Is the item known as a configurable item
+                #Is the item known as a configurable item?
                 if litem in master_config[section]["configurable"]:
-                    #Are there known options for this item
+                    #Do we have an idea os what to expect?
                     if litem in available.keys():
-                        #Make our strings case insensitive
-                        if type(v) == str:
+                        options_type = available[litem][0]
+                        #Make our strings case insensitive, except for filesnames
+                        if available[litem][0] not in ['filename','directory'] and type(v)==str:
                             vr = v.lower()
                         else:
                             vr = v
-                        if vr not in available[item]:
-                            err_str = "Invalid option: {0} ".format(v)
-                            #err_str+="\n available_options were {0}".format(available[item])
-                            errors.append(msg.format(section,item, err_str))
+
+                        if options_type == 'datetime':
+                            try:
+                                pd.to_datetime(vr)
+                            except:
+                                errors.append(msg.format(section,item,'Format not datetime'))
+
+                        elif options_type == 'filename':
+                            if vr != None:
+                                if user_cfg_path != None:
+                                    p = os.path.split(user_cfg_path)
+                                    vr = os.path.abspath(os.path.join(p[0],vr))
+
+                                    if not os.path.isfile(os.path.abspath(vr)):
+                                        errors.append(msg.format(section,item,'Path does not exist'))
+
+                        elif options_type == 'directory':
+                            if vr != None:
+                                if user_cfg_path != None:
+                                    p = os.path.split(user_cfg_path)
+                                    vr = os.path.join(p[0],vr)
+
+                                    if not os.path.isdir(os.path.abspath(vr)):
+                                        warnings.append(msg.format(section,item,'Directory does not exist'))
+
+                        #Check int, bools, float
+                        elif options_type not in str(type(vr)):
+                            if vr:
+                                errors.append(msg.format(section,item,'Expecting a {0} recieved {1}'.format(options_type,type(vr))))
+
+                        elif options_type == 'string':
+                            if type(vr) != str:
+                                errors.append(msg.format(section,item,'Expecting string'))
+
+                            elif available[litem][-1] !='' and vr not in available[litem][-1]:
+                                err_str = "Invalid option: {0} ".format(v)
+                                errors.append(msg.format(section, item, err_str))
+
                 else:
                     wrn = "Not a registered option."
                     if section.lower() == 'wind':
@@ -190,7 +280,7 @@ def print_config_report(warnings, errors, logger= None):
 
     Args:
         warnings - List of non-critical messages returned from :func:`~smrf.utils.io.check_config'.
-        errors - List of critical messages returned from :func:`~smrf.utils.io.check_config'.
+        errors - List of criticacheck_config_file messages returned from :func:`~smrf.utils.io.check_config'.
         logger - pass in the logger function being used. If no logger is provided, print is used. Default = None
 
     Returns:
@@ -425,7 +515,7 @@ def read_master_config(master_config_file):
 
     #Add the other two keys which have specialized syntaxes
     for section in sections:
-        config[section]["available_options"] =  parse_lst_options(config[section]['available_options'])
+        config[section]["available_options"] =  parse_lst_options(config[section]['available_options'],types=True)
         config[section]["defaults"] =  parse_lst_options(config[section]['defaults'])
 
     return config
