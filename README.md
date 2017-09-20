@@ -1,7 +1,7 @@
 # Spatial Modeling for Resources Framework
 
 [![GitHub version](https://badge.fury.io/gh/USDA-ARS-NWRC%2Fsmrf.svg)](https://badge.fury.io/gh/USDA-ARS-NWRC%2Fsmrf)
-[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.898158.svg)](https://doi.org/10.5281/zenodo.89815)
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.898158.svg)](https://doi.org/10.5281/zenodo.898158)
 [![DOI](https://readthedocs.org/projects/smrf/badge/)](https://smrf.readthedocs.io)
 
 
