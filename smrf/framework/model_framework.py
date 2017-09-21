@@ -444,8 +444,6 @@ class SMRF():
         for v in self.distribute:
             self.distribute[v].initialize(self.topo, self.data)
 
-#         sub_count = 0
-
         # -------------------------------------
         # Distribute the data
         for output_count, t in enumerate(self.date_time):
@@ -481,11 +479,13 @@ class SMRF():
             # 3. Wind_speed and wind_direction
             self.distribute['wind'].distribute(self.data.wind_speed.ix[t],
                                                self.data.wind_direction.ix[t])
-
+#self, data, dpt, time, wind, temp, mask=None
             # 4. Precipitation
             self.distribute['precip'].distribute(self.data.precip.ix[t],
                                                 self.distribute['vapor_pressure'].dew_point,
                                                 t,
+                                                self.distribute['wind'].wind_speed,
+                                                self.distribute['air_temp'].air_temp,
                                                 self.topo.mask)
 
             # 5. Albedo

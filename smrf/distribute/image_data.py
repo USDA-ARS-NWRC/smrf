@@ -40,7 +40,7 @@ class image_data():
         grid: Gridded interpolation instance from :mod:`smrf.spatial.grid.GRID`
 
     """
-    
+
     def __init__(self, variable):
 
         self.variable = variable
@@ -124,22 +124,22 @@ class image_data():
             self.stations = metadata.index.values
         self.metadata = metadata
 
-        mx = metadata.X.values
-        my = metadata.Y.values
-        mz = metadata.elevation.values
+        self.mx = metadata.X.values
+        self.my = metadata.Y.values
+        self.mz = metadata.elevation.values
 
         if self.config['distribution'] == 'idw':
             # inverse distance weighting
-            self.idw = idw.IDW(mx, my, topo.X, topo.Y, mz=mz,
+            self.idw = idw.IDW(self.mx, self.my, topo.X, topo.Y, mz=self.mz,
                                GridZ=topo.dem, power=self.config['power'])
 
         elif self.config['distribution'] == 'dk':
             # detrended kriging
-            self.dk = dk.DK(mx, my, mz, topo.X, topo.Y, topo.dem, self.config)
+            self.dk = dk.DK(self.mx, self.my, self.mz, topo.X, topo.Y, topo.dem, self.config)
 
         elif self.config['distribution'] == 'grid':
             # linear interpolation between points
-            self.grid = grid.GRID(self.config, mx, my, topo.X, topo.Y, mz=mz,
+            self.grid = grid.GRID(self.config, self.mx, self.my, topo.X, topo.Y, mz=self.mz,
                                   GridZ=topo.dem, mask=topo.mask)
 
         else:

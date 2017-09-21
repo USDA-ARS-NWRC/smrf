@@ -3,8 +3,7 @@ import numpy as np
 import logging
 import netCDF4 as nc
 from smrf.distribute import image_data
-from smrf.envphys import snow
-from smrf.envphys import storms
+from smrf.envphys import snow,storms,precip
 from smrf.utils import utils
 import os
 
@@ -241,7 +240,8 @@ class ppt(image_data.image_data):
 
             queue[self.variable].put([t, self.precip])
 
-    def distribute(self, data, dpt, time, mask=None):
+
+    def distribute(self, data, dpt, time, wind, temp, mask=None):
         """
         Distribute given a Panda's dataframe for a single time step. Calls
         :mod:`smrf.distribute.image_data.image_data._distribute`.
@@ -269,11 +269,15 @@ class ppt(image_data.image_data):
         # only need to distribute precip if there is any
         data = data[self.stations]
 
+        #Adjust the precip for undercatchment
+        data = precip.adjust_for_under_catch(data,wind,temp,self.config,self.metadata)
+
         if self.nasde_model == 'marks2017':
             self.distribute_for_marks2017(data, dpt, time, mask=mask)
 
         else:
             self.distribute_for_susong1999(data, dpt, time, mask=mask)
+
 
     def distribute_for_marks2017(self, data, dpt, time, mask=None):
         """
