@@ -7,12 +7,132 @@ from __future__ import print_function
 
 import os
 from collections import Sequence
-from .pycompat import OrderedDict, SafeConfigParser, basestring, unicode_type
 from smrf import __core_config__, __version__
 import utils
+from .pycompat import OrderedDict, SafeConfigParser, basestring, unicode_type
 import sys
 from datetime import date
 import pandas as pd
+
+
+class MasterConfig():
+    def __init__(self,filename):
+        self.cfg = self._read_master_config(filename)
+
+    def _read_master_config(self, master_config_file):
+        """
+        Reads in the core config file which has special syntax for specifying options
+
+        Args:
+            master_config_file: String path to the master config file.
+
+        Returns:
+            config: Dictionary of dictionaries representing the defaults and available
+                    options in SMRF. Based on the Core Config file.
+        """
+
+        cfg = {}
+        #Read in will automatically get the configurable key added
+        raw_config = read_config(master_config_file)
+        for section in raw_config.keys():
+            sec = {}
+            for item in raw_config[section]:
+                sec[item] = ConfigEntry(name = item, parseable_line=raw_config[section][item])
+            cfg[section] = sec
+
+        return cfg
+
+
+class ConfigEntry():
+    def __init__(self, name=None, value=None, default = None, entry_type='str', options=[], parseable_line=None):
+        self.name = name
+        self.value = value
+        self.default = default
+        self.options = options
+        self.description = ''
+        self.type = entry_type
+
+        if parseable_line != None:
+            self.parse_info(parseable_line)
+
+        self.default = self.convert_type(self.default)
+
+    def parse_info(self,info):
+        if type(info) != list:
+            info = [info]
+        for s in info:
+            if '=' in s:
+                a = s.split('=')
+            else:
+                raise ValueError('Master Config file missing an equals sign in entry {0}\n or missing a comma above this entry'.format(info))
+            name = (a[0].lower()).strip()
+            if not hasattr(self,name):
+                raise ValueError("Invalid option set in the Master Config File ----->{0}".format(name))
+
+            value = a[1].strip()
+
+            result = []
+            # Is there a list?
+            if '[' in value:
+                if ']' not in value:
+                    raise ValueError("Missing bracket in Master Config file under {0}".format(name))
+                else:
+                    value = (''.join(c for c in value if c not in '[]'))
+                    value = (value.replace('\n'," ")).split(' ')
+                    if ' ' in value:
+                        for v in value.split(' '):
+                            result.append(v)
+            else:
+                result = value
+
+            setattr(self,name,result)
+
+
+    def convert_type(self,value):
+        #print(self.name, self.default,self.type,type(self.default[0]))
+
+        if str(value).lower() == 'none':
+            value = None
+
+        else:
+            if self.type not in str(type(value)):
+                value = cast_variable(value,self.type)
+        return value
+
+def cast_variable(variable,type_value):
+    """
+    Casts an object to the spectified type value
+    Args:
+        variable - some variable to be casted
+        type_value - string value indicating type to cast.
+    Returns:
+        value - The original variable now casted in type_value
+    """
+    if type(variable) != list:
+        variable = [variable]
+    type_value = str(type_value)
+    value = []
+    for v in variable:
+        if 'datetime' in type_value:
+            value.append(pd.to_datetime(v))
+        elif 'bool' in type_value:
+            value.append(bool(v))
+        elif 'int' in type_value:
+            value.append(int(v))
+        elif 'float' in type_value:
+            value.append(v)
+        elif type_value == 'filename' or type_value == 'directory':
+            value.append(v)
+        elif v.lower() in ['none']:  # None
+            value.append(None)
+        elif 'str' in type_value:
+            value.append(str(v.lower()))
+        else:
+            raise ValueError("Unknown type_value prescribed. ----> {0}".format(type_value))
+
+    if len(value) == 1:
+        value = value[0]
+    return value
 
 
 def parse_config_type(options):
@@ -103,6 +223,7 @@ def parse_lst_options(option_lst_str,types=False):
         available: A dictionary with keys as the names of the entries and values are lists of the options
 
     """
+
     available = {}
     #check to see if it is a lists
     if option_lst_str is not None:
@@ -124,22 +245,7 @@ def parse_lst_options(option_lst_str,types=False):
             #Get correct data type
             for i,o in enumerate(options):
                 if o:
-                    if option_type == 'datetime':
-                        value = pd.to_datetime(o)
-                    elif option_type == 'bool':
-                        value = bool(o)
-                    elif option_type == 'int':
-                        value = int(o)
-                    elif option_type == 'float':
-                        value = float(o)
-                    elif option_type == 'filename':
-                        value = str(o)
-                    elif option_type == 'string':
-                        value = str(o.lower())
-                    elif o.lower() in ['none']:  # None
-                        value = None
-                    else:
-                        value = str(o).lower()
+                    value = cast_variable(o,option_type)
                 else:
                     value = ""
                 options[i] = value
@@ -148,9 +254,9 @@ def parse_lst_options(option_lst_str,types=False):
             if len(options) == 1:
                 options = options[0]
             if types:
-                available[name] = option_type,options
+                available[name] = ConfigEntry(name=name, entry_type = option_type, available_options = options)
             else:
-                available[name] = options
+                available[name] = ConfigEntry(name=name, available_options = options)
 
     return available
 
@@ -171,6 +277,7 @@ def check_config_file(user_cfg, master_config,user_cfg_path=None):
 
         - **errors** - Returns a list of string messages that are consider critical issues with the config file.
     """
+
     msg = "{: <20} {: <30} {: <60}"
     errors = []
     warnings = []
@@ -199,76 +306,57 @@ def check_config_file(user_cfg, master_config,user_cfg_path=None):
         if section not in master_config.keys():
             errors.append(msg.format(section,item, "Not a valid section."))
 
-        #Parse the possible options
-        else:
-            available = master_config[section]['available_options']
-
         #In the section check the values and options
         for item,value in configured.items():
-            #Did the user provide a list value or single value
-            if type(value) != list:
-                val_lst = [value]
-            else:
-                val_lst = value
-
             litem = item.lower()
+            #Is the item known as a configurable item?
+            if litem not in master_config[section].keys():
+                wrn = "Not a registered option."
+                if section.lower() == 'wind':
+                    wrn +=  " Common for station names."
+                warnings.append(msg.format(section,item, wrn))
+            else:
+                if litem != 'stations':
+                    #Did the user provide a list value or single value
+                    if type(value) != list:
+                        val_lst = [value]
+                    else:
+                        val_lst = value
 
-            for v in val_lst:
+                    for v in val_lst:
+                        if v != None:
 
-                #Is the item known as a configurable item?
-                if litem in master_config[section]["configurable"]:
-                    #Do we have an idea os what to expect?
-                    if litem in available.keys():
-                        options_type = available[litem][0]
-                        #Make our strings case insensitive, except for filesnames
-                        if available[litem][0] not in ['filename','directory'] and type(v)==str:
-                            vr = v.lower()
-                        else:
-                            vr = v
+                            # Do we have an idea os what to expect (type and options)?
+                            options_type = master_config[section][item].type
 
-                        if options_type == 'datetime':
-                            try:
-                                pd.to_datetime(vr)
-                            except:
-                                errors.append(msg.format(section,item,'Format not datetime'))
+                            if options_type == 'datetime':
+                                try:
+                                    pd.to_datetime(v)
+                                except:
+                                    errors.append(msg.format(section,item,'Format not datetime'))
 
-                        elif options_type == 'filename':
-                            if vr != None:
+                            elif options_type == 'filename':
                                 if user_cfg_path != None:
                                     p = os.path.split(user_cfg_path)
-                                    vr = os.path.abspath(os.path.join(p[0],vr))
-
-                                    if not os.path.isfile(os.path.abspath(vr)):
+                                    v = os.path.abspath(os.path.join(p[0],v))
+                                    if not os.path.isfile(os.path.abspath(v)):
                                         errors.append(msg.format(section,item,'Path does not exist'))
 
-                        elif options_type == 'directory':
-                            if vr != None:
+                            elif options_type == 'directory':
                                 if user_cfg_path != None:
-                                    p = os.path.split(user_cfg_path)
-                                    vr = os.path.join(p[0],vr)
 
-                                    if not os.path.isdir(os.path.abspath(vr)):
+                                    p = os.path.split(user_cfg_path)
+                                    v = os.path.join(p[0],v)
+                                    if not os.path.isdir(os.path.abspath(v)):
                                         warnings.append(msg.format(section,item,'Directory does not exist'))
 
-                        #Check int, bools, float
-                        elif options_type not in str(type(vr)):
-                            if vr:
-                                errors.append(msg.format(section,item,'Expecting a {0} recieved {1}'.format(options_type,type(vr))))
+                            #Check int, bools, float, str
+                            elif options_type == 'str' and type(v) != str:
+                                errors.append(msg.format(section,item,'Expecting a {0} recieved {1}'.format(options_type,type(v))))
 
-                        elif options_type == 'string':
-                            if type(vr) != str:
-                                errors.append(msg.format(section,item,'Expecting string'))
-
-                            elif available[litem][-1] !='' and vr not in available[litem][-1]:
+                            if master_config[section][item].options and v not in master_config[section][item].options:
                                 err_str = "Invalid option: {0} ".format(v)
                                 errors.append(msg.format(section, item, err_str))
-
-                else:
-                    wrn = "Not a registered option."
-                    if section.lower() == 'wind':
-                        wrn +=  " Common for station names."
-
-                    warnings.append(msg.format(section,item, wrn))
 
     return warnings,errors
 
@@ -286,6 +374,7 @@ def print_config_report(warnings, errors, logger= None):
     Returns:
         None
     """
+
     msg = "{: <20} {: <25} {: <60}"
 
     #Check to see if user wants the logger or stdout
@@ -345,9 +434,9 @@ def add_defaults(user_config,master_config):
         user_cfg: User config dictionary with defaults added.
     """
     for section,configured in user_config.items():
-            for k,v in master_config[section]["defaults"].items():
-                if k not in configured.keys():
-                    user_config[section][k]=v
+            for k,v in master_config[section].items():
+                if v.name not in configured.keys():
+                    user_config[section][k]=v.default
     return user_config
 
 
@@ -363,6 +452,7 @@ def generate_config(config,fname, inicheck = False):
     Returns:
         None
     """
+
     # find output of 'git describe'
     gitVersion = utils.getgitinfo()
 
@@ -475,6 +565,7 @@ def read_config(config_file, encoding='utf-8'):
     Returns:
         dict1: A dictionary of dictionaires representing the config file.
     """
+
     config = SafeConfigParser()
     config.optionxform = str
 
@@ -497,35 +588,12 @@ def read_config(config_file, encoding='utf-8'):
 
     return dict1
 
-
-def read_master_config(master_config_file):
-    """
-    Reads in the core config file which has special syntax for specifying options
-
-    Args:
-        master_config_file: String path to the master config file.
-
-    Returns:
-        config: Dictionary of dictionaires representing the defaults and available
-                options in SMRF. Based on the Core Config file.
-    """
-    #Read in will automatically get the configurable key added
-    config = read_config(master_config_file)
-    sections = config.keys()
-
-    #Add the other two keys which have specialized syntaxes
-    for section in sections:
-        config[section]["available_options"] =  parse_lst_options(config[section]['available_options'],types=True)
-        config[section]["defaults"] =  parse_lst_options(config[section]['defaults'])
-
-    return config
-
-
 def get_master_config():
     """
     Returns the master config file dictionary
     """
-    return read_master_config(__core_config__)
+    cfg = MasterConfig(__core_config__).cfg
+    return cfg
 
 
 def type_configobj(d):

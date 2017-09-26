@@ -134,7 +134,7 @@ class SMRF():
             self._logger.info(line)
 
         #Bring the the master config file
-        mconfig = io.read_master_config(__core_config__)
+        mconfig = io.get_master_config()
 
         #Add defaults.
         self._logger.info("Adding defaults to config...")
