@@ -138,7 +138,7 @@ class SMRF():
 
         #Add defaults.
         self._logger.info("Adding defaults to config...")
-        self.config = io.add_defaults(self.config,mconfig)
+        self.config = io.add_defaults(self.config, mconfig)
 
         #Check the user config file for errors and report issues if any
         self._logger.info("Checking config file for issues...")
@@ -484,8 +484,8 @@ class SMRF():
             self.distribute['precip'].distribute(self.data.precip.ix[t],
                                                 self.distribute['vapor_pressure'].dew_point,
                                                 t,
-                                                self.distribute['wind'].wind_speed,
-                                                self.distribute['air_temp'].air_temp,
+                                                self.data.wind_speed.ix[t],
+                                                self.data.air_temp.ix[t],
                                                 self.topo.mask)
 
             # 5. Albedo

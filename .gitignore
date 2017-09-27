@@ -81,3 +81,9 @@ target/
 
 # git version stuff:
 smrf/utils/gitinfo.py
+
+#Auto generate config files
+*config_full.ini
+
+#Auto backup 
+*/input_backup/*

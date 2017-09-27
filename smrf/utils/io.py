@@ -339,6 +339,7 @@ def check_config_file(user_cfg, master_config,user_cfg_path=None):
                                 if user_cfg_path != None:
                                     p = os.path.split(user_cfg_path)
                                     v = os.path.abspath(os.path.join(p[0],v))
+                                    print(v)
                                     if not os.path.isfile(os.path.abspath(v)):
                                         errors.append(msg.format(section,item,'Path does not exist'))
 
@@ -436,7 +437,8 @@ def add_defaults(user_config,master_config):
     for section,configured in user_config.items():
             for k,v in master_config[section].items():
                 if v.name not in configured.keys():
-                    user_config[section][k]=v.default
+                    if v.default != None:
+                        user_config[section][k]=v.default
     return user_config
 
 

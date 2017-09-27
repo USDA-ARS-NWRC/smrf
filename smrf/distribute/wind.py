@@ -147,30 +147,6 @@ class wind(image_data.image_data):
                     v[ms[1]] = float(self.config[m])
             self.config['veg'] = v
 
-
-            #Set max and min values
-            if "min_wind" in self.config:
-                self.min = self.config['min_wind']
-            else:
-                self.min = 0.447
-
-            #Set max and min values and/opr defaults
-            if "max_wind" in self.config:
-                self.max = self.config['max_wind']
-            else:
-                self.max = 35.0
-
-            # Mountain peak values
-            if 'peak' in self.config:
-                # Check to see if parsed as NoneType from config
-                if self.config['peak'] is None:
-                    self.config['peak'] = ''
-                else:
-                    self.config['peak'] = self.config['peak'].split(',')
-            else:
-
-                self.config['peak'] = ''
-
         self._logger.debug('Created distribute.wind')
 
     def initialize(self, topo, data):

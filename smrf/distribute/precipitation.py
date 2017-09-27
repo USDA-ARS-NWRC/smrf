@@ -270,7 +270,8 @@ class ppt(image_data.image_data):
         data = data[self.stations]
 
         #Adjust the precip for undercatchment
-        data = precip.adjust_for_under_catch(data,wind,temp,self.config,self.metadata)
+        if self.config['adjust_for_undercatch']:
+            data = precip.adjust_for_undercatch(data,wind,temp,self.config,self.metadata)
 
         if self.nasde_model == 'marks2017':
             self.distribute_for_marks2017(data, dpt, time, mask=mask)
@@ -414,6 +415,7 @@ class ppt(image_data.image_data):
         else:
             self.last_storm_day_basin = np.max(self.last_storm_day)
 
+
     def distribute_thread(self, queue, data, date, mask=None):
         """
         Distribute the data using threading and queue. All data is provided and
@@ -435,8 +437,9 @@ class ppt(image_data.image_data):
         for t in data.index:
 
             dpt = queue['dew_point'].get(t)
-
-            self.distribute(data.ix[t], dpt, t, mask=mask)
+            temp = queue['air_temp'].get(t)
+            wind = queue['wind_speed'].get(t)
+            self.distribute(data.ix[t], dpt, t, wind,temp, mask=mask)
 
             queue[self.variable].put([t, self.precip])
 

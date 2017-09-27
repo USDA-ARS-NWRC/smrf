@@ -206,7 +206,7 @@ def storms_time(precipitation, perc_snow, time_step=1/24, mass=1, time=4,
 
     return stormDays, stormPrecip
 
-def catchment_ratios(ws, snowing, gauge_type):
+def catchment_ratios(ws, gauge_type, snowing):
     """
     Point models for catchment ratios of the
     """
@@ -245,16 +245,17 @@ def catchment_ratios(ws, snowing, gauge_type):
     #     else:
     #          CR =  96.99 - 4.46 *Ws + 0.88 * Tmax + 0.22*Tmin
 
+    return CR
 
-def adjust_for_under_catch(p_vec,wind, temp, sta_type, metadata):
+def adjust_for_undercatch(p_vec,wind, temp, sta_type, metadata):
     """
     Adjusts the vector precip station data for undercatchment. Relationships
     should be added to :func:`~smrf.envphys.precip.catchment_ratio`.
 
     Args:
-        p_vec - The station vector data in pandas dataframe
-        wind -  The distributed wind data
-        temp - The distributed air_temp data
+        p_vec - The station vector data in pandas sereies
+        wind -  The vector wind data
+        temp - The vector air_temp data
         sta_type - A dictionary of station names and the type of correction to apply
         station_metadata - station metadata TODO merge in the station_dict info to metadata
 
@@ -262,20 +263,23 @@ def adjust_for_under_catch(p_vec,wind, temp, sta_type, metadata):
         adj_precip - Adjust precip accoding to the corrections applied.
     """
     adj_precip = p_vec.copy()
-    print("metadata keys:\n{0}".format(metadata.index))
-    print("p_vec keys :\n".format(p_vec))
-    for sta in p_vec.keys():
-        ws = wind[metadata[sta].yi,metadata[sta].xi]
-        T = temp[metadata[sta].yi,metadata[sta].xi]
-        if T< -0.5:
-            snowing=True
-        else:
-            snowing=False
+    for sta in p_vec.index:
+        # ws = wind[metadata['yi'][sta],metadata['xi'][sta]]
+        # T = temp[metadata['yi'][sta],metadata['xi'][sta]]
+        T = temp[sta]
+        if sta in wind.keys():
+            ws = wind[sta]
+            
+            if T < -0.5:
+                snowing=True
+            else:
+                snowing=False
 
-        if sta in sta_type.keys():
-            if sta_type[sta] != None:
+            if sta in sta_type.keys():
                 gauge_type = sta_type[sta]
-                cr = catchment_ratio(ws,gauge_type,snowing)
-                adj_precip[sta] = p_vec[sta]*cr
+            else:
+                gauge_type = "us_nws_8_unshielded"
 
+        cr = catchment_ratios(ws,gauge_type,snowing)
+        adj_precip[sta] = p_vec[sta]*cr
     return adj_precip
