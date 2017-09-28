@@ -211,7 +211,6 @@ def catchment_ratios(ws, gauge_type, snowing):
     Point models for catchment ratios of the
     """
 
-
     if gauge_type == "us_nws_8_shielded":
         if snowing:
              CR =  np.exp(4.61 - 0.04*ws**1.75)
@@ -244,16 +243,17 @@ def catchment_ratios(ws, gauge_type, snowing):
     #          CR = 103.11 - 8.67 * Ws + 0.30 * Tmax
     #     else:
     #          CR =  96.99 - 4.46 *Ws + 0.88 * Tmax + 0.22*Tmin
-
+    #CR is in percent.
+    CR = CR/100.0
     return CR
 
-def adjust_for_undercatch(p_vec,wind, temp, sta_type, metadata):
+def adjust_for_undercatch(p_vec, wind, temp, sta_type, metadata):
     """
     Adjusts the vector precip station data for undercatchment. Relationships
     should be added to :func:`~smrf.envphys.precip.catchment_ratio`.
 
     Args:
-        p_vec - The station vector data in pandas sereies
+        p_vec - The station vector data in pandas series
         wind -  The vector wind data
         temp - The vector air_temp data
         sta_type - A dictionary of station names and the type of correction to apply
@@ -265,11 +265,14 @@ def adjust_for_undercatch(p_vec,wind, temp, sta_type, metadata):
     adj_precip = p_vec.copy()
     for sta in p_vec.index:
         # ws = wind[metadata['yi'][sta],metadata['xi'][sta]]
-        # T = temp[metadata['yi'][sta],metadata['xi'][sta]]
+        # T = temp[metadata['yi'][sta],metadata['xi'][sta]]n
         T = temp[sta]
         if sta in wind.keys():
             ws = wind[sta]
-            
+
+            if ws > 6.0:
+                ws = 6.0
+
             if T < -0.5:
                 snowing=True
             else:
@@ -280,6 +283,6 @@ def adjust_for_undercatch(p_vec,wind, temp, sta_type, metadata):
             else:
                 gauge_type = "us_nws_8_unshielded"
 
-        cr = catchment_ratios(ws,gauge_type,snowing)
-        adj_precip[sta] = p_vec[sta]*cr
+            cr = catchment_ratios(ws,gauge_type,snowing)
+            adj_precip[sta] = p_vec[sta]/cr
     return adj_precip

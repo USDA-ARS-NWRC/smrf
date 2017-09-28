@@ -220,6 +220,7 @@ class ppt(image_data.image_data):
             # make everything else zeros
             self.precip = np.zeros(self.storm_days.shape)
 
+
     def distribute_precip_thread(self,  queue, data):
         """
         Distribute the data using threading and queue. All data is provided and
@@ -434,12 +435,11 @@ class ppt(image_data.image_data):
             data: pandas dataframe for all data, indexed by date time
         """
 
-        for t in data.index:
+        for t in data.precip.index:
 
             dpt = queue['dew_point'].get(t)
-            temp = queue['air_temp'].get(t)
-            wind = queue['wind_speed'].get(t)
-            self.distribute(data.ix[t], dpt, t, wind,temp, mask=mask)
+
+            self.distribute(data.precip.ix[t], dpt, t, data.wind_speed.ix[t],data.air_temp.ix[t], mask=mask)
 
             queue[self.variable].put([t, self.precip])
 
@@ -455,51 +455,9 @@ class ppt(image_data.image_data):
                 queue['storm_id'].put([t, self.storm_id])
                 queue['storm_total'].put([t, self.storm_total])
 
-    def post_process_snow_density(self, main_obj, pds, tds, storm):
-        """
-        Calculates the snow density for a single storm.
-
-        Args:
-            main_obj - the main smrf obj running everything
-            pds - netcdf object containing precip data
-            tds - netcdf object containing temp data
-            storm - a dictionary containing the start and end values of the
-                    storm. A single entry from the storm lst
-
-        Returns:
-            None, stores self.snow_density
-        """
-
-        storm_accum = np.zeros(pds.variables['precip'][0].shape)
-
-        delta = (storm['end'] - storm['start'])
-
-        storm_span = delta.total_seconds()/(60.0*self.time_step)
-        self._logger.debug("Storm Duration = {0} hours".format(storm_span))
-
-        start = main_obj.date_time.index(storm['start'])
-        end = main_obj.date_time.index(storm['end'])
-
-        storm_time = main_obj.date_time[start:end]
-
-        for t in storm_time:
-            i = main_obj.date_time.index(t)
-            storm_accum += pds.variables['precip'][i][:][:]
-
-        # self._logger.debug("Calculating snow density...")
-        for t in storm_time:
-            i = main_obj.date_time.index(t)
-            dpt = tds.variables['dew_point'][i]
-
-            # self._logger.debug("Calculating snow density at {0}".format(t))
-            self.snow_density = snow.calc_phase_and_density(storm_accum, dpt)
-
-            main_obj.output(t, module='precip', out_var='snow_density')
 
     def post_processor(self, main_obj, threaded=False):
-        """
-        Process the snow density values
-        """
+
         pass
         #
         # self._logger.info("Estimated total number of storms: {0} ...".format(len(self.storms)))

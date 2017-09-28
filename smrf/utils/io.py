@@ -89,8 +89,6 @@ class ConfigEntry():
 
 
     def convert_type(self,value):
-        #print(self.name, self.default,self.type,type(self.default[0]))
-
         if str(value).lower() == 'none':
             value = None
 
@@ -113,20 +111,21 @@ def cast_variable(variable,type_value):
     type_value = str(type_value)
     value = []
     for v in variable:
+        vl = v
         if 'datetime' in type_value:
-            value.append(pd.to_datetime(v))
+            value.append(pd.to_datetime(vl))
         elif 'bool' in type_value:
-            value.append(bool(v))
+            value.append(bool(vl))
         elif 'int' in type_value:
-            value.append(int(v))
+            value.append(int(vl))
         elif 'float' in type_value:
-            value.append(v)
+            value.append(vl)
         elif type_value == 'filename' or type_value == 'directory':
             value.append(v)
-        elif v.lower() in ['none']:  # None
+        elif vl in ['none']:  # None
             value.append(None)
         elif 'str' in type_value:
-            value.append(str(v.lower()))
+            value.append(str(vl))
         else:
             raise ValueError("Unknown type_value prescribed. ----> {0}".format(type_value))
 
@@ -325,7 +324,7 @@ def check_config_file(user_cfg, master_config,user_cfg_path=None):
 
                     for v in val_lst:
                         if v != None:
-
+                            v = master_config[section][litem].convert_type(v)
                             # Do we have an idea os what to expect (type and options)?
                             options_type = master_config[section][item].type
 
@@ -359,7 +358,7 @@ def check_config_file(user_cfg, master_config,user_cfg_path=None):
                                 err_str = "Invalid option: {0} ".format(v)
                                 errors.append(msg.format(section, item, err_str))
 
-    return warnings,errors
+    return warnings,errors,
 
 
 def print_config_report(warnings, errors, logger= None):

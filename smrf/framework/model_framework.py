@@ -179,7 +179,7 @@ class SMRF():
 
         self.max_values = self.config['system']['max_values']
 
-        self.time_out = float(self.config['system']['time_out'])
+        self.time_out = self.config['system']['time_out']
 
         # get the time sectionutils
         self.start_date = pd.to_datetime(self.config['time']['start_date'])
@@ -400,6 +400,7 @@ class SMRF():
                 self._logger.warn('''Distribution not initialized, data not
                                     filtered to desired stations''')
 
+        #Does the user want to create a CSV copy of the station data used.
         if self.config["output"]['input_backup'] == True:
             self._logger.info('Backing up input data...')
             backup_input(self.data, self.config)
@@ -452,7 +453,6 @@ class SMRF():
             startTime = datetime.now()
 
             self._logger.info('Distributing time step %s' % t)
-
             # 0.1 sun angle for time step
             cosz, azimuth = radiation.sunang(t.astimezone(pytz.utc),
                                              self.topo.topoConfig['basin_lat'],
@@ -594,8 +594,8 @@ class SMRF():
         # 4. Precipitation
         t.append(Thread(target=self.distribute['precip'].distribute_thread,
                         name='precipitation',
-                        args=(q, self.data.precip, self.date_time,
-                              self.topo.mask)))
+                        args=(q, self.data, self.date_time,
+                                self.topo.mask)))
 
         # 5. Albedo
         t.append(Thread(target=self.distribute['albedo'].distribute_thread,
