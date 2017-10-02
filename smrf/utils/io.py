@@ -56,6 +56,8 @@ class ConfigEntry():
             self.parse_info(parseable_line)
 
         self.default = self.convert_type(self.default)
+        self.options = self.convert_type(self.options)
+
 
     def parse_info(self,info):
         if type(info) != list:
@@ -65,6 +67,7 @@ class ConfigEntry():
                 a = s.split('=')
             else:
                 raise ValueError('Master Config file missing an equals sign in entry {0}\n or missing a comma above this entry'.format(info))
+
             name = (a[0].lower()).strip()
             if not hasattr(self,name):
                 raise ValueError("Invalid option set in the Master Config File ----->{0}".format(name))
@@ -79,12 +82,8 @@ class ConfigEntry():
                 else:
                     value = (''.join(c for c in value if c not in '[]'))
                     value = (value.replace('\n'," ")).split(' ')
-                    if ' ' in value:
-                        for v in value.split(' '):
-                            result.append(v)
-            else:
-                result = value
 
+            result = value
             setattr(self,name,result)
 
 
