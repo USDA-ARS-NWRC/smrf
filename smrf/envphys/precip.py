@@ -243,7 +243,7 @@ def catchment_ratios(ws, gauge_type, snowing):
     #          CR = 103.11 - 8.67 * Ws + 0.30 * Tmax
     #     else:
     #          CR =  96.99 - 4.46 *Ws + 0.88 * Tmax + 0.22*Tmin
-    #CR is in percent.
+    # CR is in percent.
     CR = CR/100.0
     return CR
 

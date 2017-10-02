@@ -5,30 +5,28 @@ from smrf.utils import io
 from datetime import date
 import os
 import sys
+import shutil
 
 def create_project(summary):
+    if summary['overwrite']:
+            print('\tRemoving existing project...')
+            shutil.rmtree(summary['path'])
+
+    #Create file structure
     summary['out location'] = os.path.join(summary['path'],'output')
     summary['temp_dir'] = os.path.join(summary['path'],'tmp')
-    print('Creating the directories for the project...')
-
+    print('\tCreating the directories for the project...')
     os.mkdir(summary['path'])
     os.mkdir(summary['out location'])
     os.mkdir(summary['temp_dir'])
 
-    print("Making Project README...")
-    with open(os.path.join(summary['path'],'README'),'w+') as f:
-        f.write("SMRF RUN Project Summary:\n")
-        for k,v in summary.items():
-            f.write('{0: <20} {1: <30}\n'.format(k.lower(),v))
-        f.close()
-
-    print('Making default config file for SMRF...')
+    #Creare the default config
+    print('\tMaking default config file for SMRF...')
     config = io.get_master_config()
-
     cfg = {}
+    #We only need one data section per user request
     unneeded_sections = ['csv','mysql','gridded']
     unneeded_sections.remove(summary['input data type'])
-
     for name,section in config.items():
         if name not in unneeded_sections:
             sec = {}
@@ -38,7 +36,20 @@ def create_project(summary):
     cfg['output']['out_location'] = summary['out location']
     cfg['system']['temp_dir'] = summary['temp_dir']
     io.generate_config(cfg,os.path.join(summary['path'],'config.ini'), inicheck=True)
-    print("Project Setup Complete.")
+
+    #Create a README for the run.
+    print("\tMaking Project README...")
+    with open(os.path.join(summary['path'],'README'),'w+') as f:
+        f.write("SMRF RUN SUMMARY:\n")
+        f.write("=================\n")
+        f.write("\n")
+
+        order_keys = ['project name', 'date created','author', 'path', 'description' ]
+        for k in order_keys:
+            f.write('{0: <20} {1: <30}\n'.format((k.upper())+':',summary[k]))
+        f.close()
+
+    print("\nProject Setup Complete.")
 
 
 def ask(question):
@@ -79,30 +90,43 @@ def main():
     print('========================\n')
     summary = {}
     state = 0
-    while state != 7:
+    while state <= 7:
         #New project
         if state == 0:
             positive = ask_yes_no("Would you like to create a new project for a SMRF run?")
             if positive:
                 state +=1
 
-        #Project name
-        elif state == 1:
-            summary['project name'] = ask("Whats the project name (this will be the folder name)?")
-            state +=1
         #Author name
-
-        elif state == 2:
+        elif state == 1:
             summary['author'] = ask("Who is the author of this project?")
-            summary['date created'] = date.today()
+            summary['date created'] = str(date.today())
+            state +=1
+
+        #Project name
+        elif state == 2:
+            summary['project name'] = ask("Whats the project name (this will be the folder name)?")
             state +=1
 
         #Project path
         elif state == 3:
+                summary['overwrite'] = False
                 project_path = ask("Whats the project path?")
                 if os.path.isdir(os.path.abspath(project_path)):
                     summary['path'] = os.path.abspath(os.path.join(project_path,summary['project name']))
-                    state +=1
+                    if os.path.isdir(summary['path']):
+                        print("\nWARNING: There is already a project named {0} in the folder:\n{1}".format(summary['project name'],os.path.abspath(project_path)))
+                        overwrite = ask_yes_no("Do you want to overwrite the entire folder?")
+                        summary['overwrite'] = overwrite
+                        #Go back to renaming
+                        if not overwrite:
+                            state = 2
+                            print("Please choose a different project name or different path.")
+                        else:
+                            state +=1
+                    else:
+                        state+=1
+
                 else:
                     print("\nProject path does not exist.")
 
@@ -115,7 +139,7 @@ def main():
         #Project description
         elif state == 5:
                 description = ask("Briefly describe what you are doing with this run.")
-                summary['Description'] = description
+                summary['description'] = description
                 state +=1
 
             #Overview
@@ -123,7 +147,7 @@ def main():
                 print("\nPROJECT SUMMARY")
                 print('===============\n')
                 for k,v in summary.items():
-                    print('{0: <20} {1: <30}\n'.format(k,v))
+                    print('{0: <20} {1: <30}\n'.format(k,str(v)))
 
                 positive = ask_yes_no("Does everything look correct?")
                 if positive:
