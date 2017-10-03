@@ -15,7 +15,7 @@ class IDW:
     - Standard IDW
     - Detrended IDW
     '''
-    
+
     def __init__(self, mx, my, GridX, GridY, mz=None, GridZ=None,
                  power=2, zeroVal=-1):
 
@@ -78,7 +78,7 @@ class IDW:
         '''
 
         # calculate the weights
-        self.weights = 1/(np.power(self.distance, self.power))
+        self.weights = 1.0/(np.power(self.distance, self.power))
 
         # if there are Inf values, set to 1 as the distance was 0
         # self.weights[np.isinf(self.weights)] = 100

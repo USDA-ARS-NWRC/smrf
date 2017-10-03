@@ -93,7 +93,7 @@ class SMRF():
 
         try:
             #Read in the original users config
-            self.config = io.read_config(configFile)
+            self.config = io.get_user_config(configFile)
 
         except UnicodeDecodeError:
             raise Exception(('The configuration file is not encoded in '
@@ -143,7 +143,7 @@ class SMRF():
         #Check the user config file for errors and report issues if any
         self._logger.info("Checking config file for issues...")
         warnings, errors = io.check_config_file(self.config,mconfig)
-        io.print_config_report(warnings, errors,logger = self._logger)
+        io.print_config_report(warnings, errors, logger = self._logger)
 
         #Exit SMRF if config file has errors
         if len(errors) > 0:

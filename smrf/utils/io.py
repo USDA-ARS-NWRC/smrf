@@ -94,6 +94,7 @@ class ConfigEntry():
         else:
             if self.type not in str(type(value)):
                 value = cast_variable(value,self.type)
+
         return value
 
 def cast_variable(variable,type_value):
@@ -118,7 +119,7 @@ def cast_variable(variable,type_value):
         elif 'int' in type_value:
             value.append(int(vl))
         elif 'float' in type_value:
-            value.append(vl)
+            value.append(float(vl))
         elif type_value == 'filename' or type_value == 'directory':
             value.append(v)
         elif vl in ['none']:  # None
@@ -337,7 +338,7 @@ def check_config_file(user_cfg, master_config,user_cfg_path=None):
                                 if user_cfg_path != None:
                                     p = os.path.split(user_cfg_path)
                                     v = os.path.abspath(os.path.join(p[0],v))
-                                    print(v)
+
                                     if not os.path.isfile(os.path.abspath(v)):
                                         errors.append(msg.format(section,item,'Path does not exist'))
 
@@ -349,8 +350,8 @@ def check_config_file(user_cfg, master_config,user_cfg_path=None):
                                     if not os.path.isdir(os.path.abspath(v)):
                                         warnings.append(msg.format(section,item,'Directory does not exist'))
 
-                            #Check int, bools, float, str
-                            elif options_type == 'str' and type(v) != str:
+                            #Check int, bools, float
+                            elif options_type not in str(type(v)):
                                 errors.append(msg.format(section,item,'Expecting a {0} recieved {1}'.format(options_type,type(v))))
 
                             if master_config[section][item].options and v not in master_config[section][item].options:
@@ -593,6 +594,18 @@ def get_master_config():
     Returns the master config file dictionary
     """
     cfg = MasterConfig(__core_config__).cfg
+    return cfg
+
+
+def get_user_config(fname):
+    mcfg = get_master_config()
+    cfg = read_config(fname)
+
+    for section in cfg.keys():
+        for item in cfg[section]:
+            if item in mcfg[section]:
+                cfg[section][item] = mcfg[section][item].convert_type(cfg[section][item])
+
     return cfg
 
 

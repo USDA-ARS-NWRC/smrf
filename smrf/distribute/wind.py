@@ -164,7 +164,8 @@ class wind(image_data.image_data):
         """
 
         self._logger.debug('Initializing distribute.wind')
-
+        if type(self.config['peak']) != list:
+            self.config['peak'] = [self.config['peak']]
         self._initialize(topo, data.metadata)
 
         if not self.gridded:
