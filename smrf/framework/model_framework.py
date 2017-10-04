@@ -142,25 +142,24 @@ class SMRF():
 
         #Check the user config file for errors and report issues if any
         self._logger.info("Checking config file for issues...")
-        warnings, errors = io.check_config_file(self.config,mconfig)
+        warnings, errors = io.check_config_file(self.config,mconfig,user_cfg_path=configFile)
         io.print_config_report(warnings, errors, logger = self._logger)
 
         #Exit SMRF if config file has errors
         if len(errors) > 0:
             self._logger.error("Errors in the config file. See configuration status report above.")
             sys.exit()
-        else:
 
-            #write the config file to the output dir
-            fname = 'config.ini'
-            full_config_out = self.config['output']['out_location'] + '/'+fname
-            self._logger.info("Writing config file with full options.")
-            io.generate_config(self.config,full_config_out)
+        #write the config file to the output dir no matter where the project was ran
+        fname = 'config.ini'
+        full_config_out = self.config['output']['out_location']
+        full_config_out = os.path.abspath(os.path.join(os.path.split(configFile)[0],full_config_out,fname))
+        self._logger.info("Writing config file with full options.")
+        io.generate_config(self.config,full_config_out)
 
+        #Paths should be either relative to where the config is or absolute
+        self.config = io.update_config_paths(self.config,configFile)
 
-        # check for the desired sections
-        if 'stations' not in self.config:
-            self.config['stations'] = None
 
         # if a gridded dataset will be used
         self.gridded = False

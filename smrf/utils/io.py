@@ -57,7 +57,9 @@ class ConfigEntry():
 
         self.default = self.convert_type(self.default)
         self.options = self.convert_type(self.options)
-
+        #Options should always be a list
+        if type(self.options) != list:
+            self.options = [self.options]
 
     def parse_info(self,info):
         if type(info) != list:
@@ -70,7 +72,7 @@ class ConfigEntry():
 
             name = (a[0].lower()).strip()
             if not hasattr(self,name):
-                raise ValueError("Invalid option set in the Master Config File ----->{0}".format(name))
+                raise ValueError("Invalid option set in the Master Config File for item ----->{0}".format(name))
 
             value = a[1].strip()
 
@@ -550,7 +552,7 @@ def generate_config(config,fname, inicheck = False):
             config_str+="{0:<30} {1:<10}\n".format((k+':'),astr)
 
     #Write out the string generated
-    with open(os.path.abspath(os.path.expanduser(fname)),'w') as f:
+    with open(os.path.abspath(fname),'w') as f:
         f.writelines(config_str)
         f.close()
 
@@ -588,6 +590,7 @@ def read_config(config_file, encoding='utf-8'):
 
     return dict1
 
+
 def get_master_config():
     """
     Returns the master config file dictionary
@@ -596,10 +599,31 @@ def get_master_config():
     return cfg
 
 
+def update_config_paths(cfg,user_cfg_path):
+    """
+    Paths should always be relative to the config file or
+    absolute.
+    """
+    mcfg = get_master_config()
+    #Cycle thru users config
+    for section in cfg.keys():
+        for item in cfg[section].keys():
+            d = cfg[section][item]
+            #Does master have this and is it not none
+            if item in mcfg[section].keys() and d != None:
+                m = mcfg[section][item]
+                #Any paths
+                if m.type == 'filename' or  m.type == 'directory':
+                    if not os.path.isabs(cfg[section][item]):
+                        path = os.path.abspath(os.path.join(os.path.split(user_cfg_path)[0],cfg[section][item]))
+                        cfg[section][item] = path
+    return cfg
+
 def get_user_config(fname):
     mcfg = get_master_config()
     cfg = read_config(fname)
 
+    #Convert the types
     for section in cfg.keys():
         for item in cfg[section]:
             if item in mcfg[section]:
