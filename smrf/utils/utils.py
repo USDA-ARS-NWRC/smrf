@@ -151,3 +151,29 @@ def getgitinfo():
     else:
         version = 'v'+__version__
         return version
+
+def config_documentation():
+    mcfg = io.get_master_config()
+    config_doc ="Configuration File\n"
+    config_doc+="==================\n"
+    for section in mcfg.keys():
+        config_doc += "{0}\n".format(section)
+        config_doc += "-"*len(section)+'\n'
+        config_doc+="\n"
+
+        for item,v in sorted(mcfg[section].items()):
+            config_doc+="{0}\n".format(item)
+            #Add the description
+            config_doc+="\t{0}\n".format(v.description)
+
+            config_doc+="\tType: {0}\n".format(v.type)
+
+            if v.options:
+                config_doc+="\tAvailable Options: {0}\n".format(v.options)
+
+            if v.default != None:
+                config_doc+="\tDefault: {0}\n".format(v.default)
+            config_doc+="\n"
+    with open('./docs/auto_config.rst','w+') as f:
+        f.writelines(config_doc)
+    f.close()

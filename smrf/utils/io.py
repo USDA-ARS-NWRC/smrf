@@ -111,21 +111,20 @@ def cast_variable(variable,type_value):
     type_value = str(type_value)
     value = []
     for v in variable:
-        vl = v
         if 'datetime' in type_value:
-            value.append(pd.to_datetime(vl))
+            value.append(pd.to_datetime(v))
         elif 'bool' in type_value:
-            value.append(bool(vl))
+            value.append(bool(v))
         elif 'int' in type_value:
-            value.append(int(vl))
+            value.append(int(v))
         elif 'float' in type_value:
-            value.append(float(vl))
+            value.append(float(v))
         elif type_value == 'filename' or type_value == 'directory':
             value.append(v)
-        elif vl in ['none']:  # None
+        elif v in ['none']:  # None
             value.append(None)
         elif 'str' in type_value:
-            value.append(str(vl))
+            value.append(str(v))
         else:
             raise ValueError("Unknown type_value prescribed. ----> {0}".format(type_value))
 
@@ -337,18 +336,18 @@ def check_config_file(user_cfg, master_config,user_cfg_path=None):
                             elif options_type == 'filename':
                                 if user_cfg_path != None:
                                     p = os.path.split(user_cfg_path)
-                                    v = os.path.abspath(os.path.join(p[0],v))
+                                    v = os.path.join(p[0],v)
 
-                                    if not os.path.isfile(os.path.abspath(v)):
-                                        errors.append(msg.format(section,item,'Path does not exist'))
+                                if not os.path.isfile(os.path.abspath(v)):
+                                    errors.append(msg.format(section,item,'Path does not exist'))
 
                             elif options_type == 'directory':
                                 if user_cfg_path != None:
-
                                     p = os.path.split(user_cfg_path)
                                     v = os.path.join(p[0],v)
-                                    if not os.path.isdir(os.path.abspath(v)):
-                                        warnings.append(msg.format(section,item,'Directory does not exist'))
+
+                                if not os.path.isdir(os.path.abspath(v)):
+                                    warnings.append(msg.format(section,item,'Directory does not exist'))
 
                             #Check int, bools, float
                             elif options_type not in str(type(v)):
@@ -368,7 +367,7 @@ def print_config_report(warnings, errors, logger= None):
 
     Args:
         warnings - List of non-critical messages returned from :func:`~smrf.utils.io.check_config'.
-        errors - List of criticacheck_config_file messages returned from :func:`~smrf.utils.io.check_config'.
+        errors - List of critical messages returned from :func:`~smrf.utils.io.check_config'.
         logger - pass in the logger function being used. If no logger is provided, print is used. Default = None
 
     Returns:
