@@ -77,13 +77,17 @@ class ConfigEntry():
             value = a[1].strip()
 
             result = []
+            value = value.replace('\n'," ")
+            value = value.replace('\t',"")
+
             # Is there a list?
             if '[' in value:
                 if ']' not in value:
                     raise ValueError("Missing bracket in Master Config file under {0}".format(name))
                 else:
                     value = (''.join(c for c in value if c not in '[]'))
-                    value = (value.replace('\n'," ")).split(' ')
+                    value = value.split(' ')
+                    #value = [v for v in value if v == ' ' ]
 
             result = value
             setattr(self,name,result)
