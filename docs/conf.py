@@ -18,6 +18,9 @@
 
 import os
 import sys
+from smrf.utils import utils
+
+utils.config_documentation()
 # sys.path.insert(0, os.path.abspath('.'))
 
 if os.environ.get('READTHEDOCS') == 'True':

@@ -154,26 +154,56 @@ def getgitinfo():
 
 def config_documentation():
     mcfg = io.get_master_config()
-    config_doc ="Configuration File\n"
-    config_doc+="==================\n"
+
+    #RST header
+    config_doc ="Config Sections\n"
+    config_doc+="=================\n"
+
+    #Sections
     for section in mcfg.keys():
         config_doc += "{0}\n".format(section)
         config_doc += "-"*len(section)+'\n'
         config_doc+="\n"
+        dist_modules = ['air_temp','vapor_pressure','precip','wind', 'albedo','thermal','solar']
+        data_modules = ['csv','gridded','mysql']
 
+        if section == 'precip':
+            sec = 'precipitation'
+        else:
+            sec = section
+
+        #If distributed module link api
+        if section in dist_modules:
+            m = "distribute.{0}".format(sec)
+            config_doc+=":mod:`smrf.{0}`\n".format(m)
+            config_doc+="\n"
+
+        #Auto document config file according to master config contents
         for item,v in sorted(mcfg[section].items()):
-            config_doc+="{0}\n".format(item)
-            #Add the description
+            #Check for attributes that are lists
+            for att in ['default','options']:
+                z = getattr(v,att)
+                if type(z) == list:
+                    doc_s = ','.join([str(s) for s in z])
+                    setattr(v,att,doc_s)
+
+            #Bold item with definition
+            config_doc+="\n{0}\n".format(item)
+
+            #Add the item description
             config_doc+="\t{0}\n".format(v.description)
 
-            config_doc+="\tType: {0}\n".format(v.type)
+            #Add expected type
+            config_doc+="\n\t:Type: {0}\n".format(v.type)
 
             if v.options:
-                config_doc+="\tAvailable Options: {0}\n".format(v.options)
+                config_doc+="\n\t:Available Options:\n {0}\n".format(v.options)
 
-            if v.default != None:
-                config_doc+="\tDefault: {0}\n".format(v.default)
+            config_doc+="\n\t:Default: {0}\n".format(v.default)
             config_doc+="\n"
-    with open('./docs/auto_config.rst','w+') as f:
+    path = os.path.abspath('./')
+    path = os.path.join(path,'auto_config.rst')
+    print("Writing auto documentation for config file to:\n{0}".format(path))
+    with open(path,'w+') as f:
         f.writelines(config_doc)
     f.close()

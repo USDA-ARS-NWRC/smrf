@@ -5,7 +5,9 @@ Configuration
 SMRF is configured using a configuration file and an extension of Pythons
 `ConfigParser`_ (:mod:`smrf.framework.model_framework.MyParser`). See
 ``test_data/testConfig.ini`` for an example and read below for more information
-on specific sections.
+on specific sections. All the entrys to a config file are governed by the
+CoreConfig.ini in :mod:`smrf.framework.model_framework`. A couple of commandline
+tools have provided to help get the config files generated correctly.
 
 A brief introduction to a configuration file from the `ConfigParser`_ documentation: ::
 
@@ -25,11 +27,14 @@ A brief introduction to a configuration file from the `ConfigParser`_ documentat
 
 Section and keys are case insensitive.
 
-*All values below are required except those with default values, shown in
-parenthesis next to the variable.*
+
+.. _ConfigParser: https://docs.python.org/2/library/configparser.html
+.. _logging: https://docs.python.org/2/library/logging.html
+
 
 .. toctree::
    :maxdepth: 4
 
-   auto_config
+
    core_config
+   auto_config
