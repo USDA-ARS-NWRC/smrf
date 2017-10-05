@@ -126,7 +126,7 @@ def cast_variable(variable,type_value):
         elif v in ['none']:  # None
             value.append(None)
         elif 'str' in type_value:
-            value.append(str(v))
+            value.append(str(v.lower()))
         else:
             raise ValueError("Unknown type_value prescribed. ----> {0}".format(type_value))
 
@@ -419,7 +419,7 @@ def print_config_report(warnings, errors, logger= None):
         out(" ")
 
     if not any_errors and not any_warnings:
-        out("No errors or warnings were reported with the config file.")
+        out("No errors or warnings were reported with the config file.\n")
 
 
 def add_defaults(user_config,master_config):
@@ -437,8 +437,7 @@ def add_defaults(user_config,master_config):
     for section,configured in user_config.items():
             for k,v in master_config[section].items():
                 if v.name not in configured.keys():
-                    if v.default != None:
-                        user_config[section][k]=v.default
+                    user_config[section][k]=v.default
     return user_config
 
 
@@ -626,9 +625,17 @@ def get_user_config(fname):
     #Convert the types
     for section in cfg.keys():
         for item in cfg[section]:
+            u = cfg[section][item]
             if item in mcfg[section]:
-                cfg[section][item] = mcfg[section][item].convert_type(cfg[section][item])
+                u = mcfg[section][item].convert_type(u)
+                if mcfg[section][item].type == 'str':
+                    if type(u) == list:
+                        u = [o.lower() for o in u]
+                    else:
+                        if item != 'password':
+                            u = u.lower()
 
+                cfg[section][item] = u
     return cfg
 
 

@@ -109,9 +109,6 @@ class ppt(image_data.image_data):
     # be written during main distribute loop
     post_process_variables = {}
 
-    max = np.Inf
-    min = 0
-
     def __init__(self, pptConfig, start_date, time_step=60):
 
         # extend the base class
