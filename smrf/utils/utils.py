@@ -162,6 +162,7 @@ def config_documentation():
     #Sections
     for section in mcfg.keys():
         #Section header
+        config_doc+=" \n"
         config_doc += "{0}\n".format(section)
         config_doc += "-"*len(section)+'\n'
         #If distributed module link api
@@ -211,6 +212,7 @@ The {0} section controls the {0} parameters for an entire SMRF run.
                 config_doc+="| \t\t*Options:*\n *{0}*\n".format(v.options)
 
             config_doc+="| \n"
+
             config_doc+="\n"
 
     path = os.path.abspath('./')
