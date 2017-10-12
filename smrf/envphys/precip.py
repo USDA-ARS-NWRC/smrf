@@ -243,6 +243,9 @@ def catchment_ratios(ws, gauge_type, snowing):
     #          CR = 103.11 - 8.67 * Ws + 0.30 * Tmax
     #     else:
     #          CR =  96.99 - 4.46 *Ws + 0.88 * Tmax + 0.22*Tmin
+    #Avoid corrupting data
+    if np.isnan(CR):
+        CR = 100.0
     # CR is in percent.
     CR = CR/100.0
     return CR
@@ -269,7 +272,6 @@ def adjust_for_undercatch(p_vec, wind, temp, sta_type, metadata):
         T = temp[sta]
         if sta in wind.keys():
             ws = wind[sta]
-
             if ws > 6.0:
                 ws = 6.0
 
@@ -285,4 +287,6 @@ def adjust_for_undercatch(p_vec, wind, temp, sta_type, metadata):
 
             cr = catchment_ratios(ws,gauge_type,snowing)
             adj_precip[sta] = p_vec[sta]/cr
+            print(adj_precip[sta],p_vec[sta],cr)
+
     return adj_precip

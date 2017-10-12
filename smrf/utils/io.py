@@ -619,6 +619,15 @@ def update_config_paths(cfg,user_cfg_path):
     return cfg
 
 def get_user_config(fname):
+    """
+    Retrieve the user config and apply
+    types according to the master config.
+
+    Args:
+        fname - filename of the user config file.
+    Returns:
+        cfg - A dictionary of dictionaries
+    """
     mcfg = get_master_config()
     cfg = read_config(fname)
 
@@ -628,7 +637,7 @@ def get_user_config(fname):
             u = cfg[section][item]
             if item in mcfg[section]:
                 u = mcfg[section][item].convert_type(u)
-                if mcfg[section][item].type == 'str':
+                if mcfg[section][item].type == 'str' and u != None:
                     if type(u) == list:
                         u = [o.lower() for o in u]
                     else:
