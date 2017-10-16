@@ -95,7 +95,6 @@ class database:
             end_date: end of time period
             variable: string for variable to get
         """
-
         if isinstance(variables, list):
             variables = ','.join(variables)
 

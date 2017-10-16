@@ -123,9 +123,9 @@ def backup_input(data, config):
     #Copy topo files over to backup
     ignore = ['basin_lon','basin_lat','type']
     for s in config['topo']:
-        if s not in ignore:
-            src = config['topo'][s]
-            dst =  os.path.join(backup_dir,os.path.split(src)[-1])
+        src = config['topo'][s]
+        if s not in ignore and src != None:
+            dst =  os.path.join(backup_dir,os.path.basename(src))
             config["topo"][s] = dst
             copyfile(src, dst)
 

@@ -109,9 +109,6 @@ class ppt(image_data.image_data):
     # be written during main distribute loop
     post_process_variables = {}
 
-    max = np.Inf
-    min = 0
-
     def __init__(self, pptConfig, start_date, time_step=60):
 
         # extend the base class
@@ -185,12 +182,12 @@ class ppt(image_data.image_data):
             self.storms, storm_count = storms.tracking_by_station(data.precip,
                                                                   mass_thresh=self.ppt_threshold,
                                                                   steps_thresh=self.time_to_end_storm)
-            self.corrected_precip = storms.clip_and_correct(data.precip,
+            self.storm_correction = storms.clip_and_correct(data.precip,
                                                             self.storms)
-            self._logger.debug('''Conservation of mass check (precip -
-                                precip_clipped):\n{0}'''.format(
-                                    data.precip.sum() -
-                                    self.corrected_precip.sum()))
+            # self._logger.debug('''Conservation of mass check (precip -
+            #                     precip_clipped):\n{0}'''.format(
+            #                         data.precip.sum() -
+            #                         corrected_precip.sum()))
 
             self._logger.info("Identified Storms:\n{0}".format(self.storms))
             self.storm_id = 0
@@ -272,6 +269,7 @@ class ppt(image_data.image_data):
 
         #Adjust the precip for undercatchment
         if self.config['adjust_for_undercatch']:
+            self._logger.debug('%s Adjusting precip for undercatch...' % data.name)
             data = precip.adjust_for_undercatch(data,wind,temp,self.config,self.metadata)
 
         if self.nasde_model == 'marks2017':
@@ -284,11 +282,11 @@ class ppt(image_data.image_data):
     def distribute_for_marks2017(self, data, dpt, time, mask=None):
         """
         Specialized distribute function for working with the new accumulated
-        snow density model Marks2017 requires storm total  and a corrected
+        snow density model Marks2017 requires storm total and a corrected
         precipitation as to avoid precip between storms.
         """
-
-        if self.corrected_precip.ix[time].sum() > 0.0:
+        corrected_precip = data.mul(self.storm_correction)
+        if corrected_precip.sum() > 0.0:
             # Check for time in every storm
             for i, s in self.storms.iterrows():
                 if time >= s['start'] and time <= s['end']:
@@ -309,7 +307,7 @@ class ppt(image_data.image_data):
                     self.storming = False
 
             # distribute data and set the min/max
-            self._distribute(self.corrected_precip.ix[time], zeros=None)
+            self._distribute(corrected_precip, zeros=None)
             self.precip = utils.set_min_max(self.precip, self.min, self.max)
 
             if time == storm_start:
@@ -364,6 +362,7 @@ class ppt(image_data.image_data):
             self.last_storm_day_basin = np.max(mask * self.last_storm_day)
         else:
             self.last_storm_day_basin = np.max(self.last_storm_day)
+
 
     def distribute_for_susong1999(self, data, dpt, time, mask=None):
         """

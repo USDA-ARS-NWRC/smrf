@@ -79,14 +79,12 @@ class image_data():
         Args:
             config (dict): dict from the [variable]
         """
-
+        stations = None
         # determine the stations that will be used, alphabetical order
-        if 'stations' in config:
-            stations = config['stations']
-#             stations = map(str.strip, stations)
-            stations.sort()
-        else:
-            stations = None
+        if 'stations' in config.keys():
+            if config['stations'] != None:
+                stations = [s.upper() for s in config['stations']]
+                stations.sort()
 
         self.stations = stations
 
@@ -112,7 +110,12 @@ class image_data():
         """
 
         self.min = self.config['min']
+        if self.min == None:
+            self.min = -np.inf
+
         self.max = self.config['max']
+        if self.max == None:
+            self.max = np.inf
 
         # pull out the metadata subset
         if self.stations is not None:
