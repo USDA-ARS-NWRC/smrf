@@ -27,6 +27,17 @@ A brief introduction to a configuration file from the `ConfigParser`_ documentat
 
 Section and keys are case insensitive.
 
+Notes:
+1. Config file can have items in it that are not registered, they will simply be
+ignored and SMRF will warn you at the beginning of the run. This should be used
+to make sure you spelled things correctly.
+2. The exception to the above, is station names. In some modules like wind,
+have adjustment values can be added to the config file on a station by
+station basis. SMRF will still warn that stations are not registered but they
+are used when the code is reading it.
+3. A config file can only have one data section. You can choose from mysql,
+csv,gridded.
+
 
 .. _ConfigParser: https://docs.python.org/2/library/configparser.html
 .. _logging: https://docs.python.org/2/library/logging.html
@@ -35,6 +46,5 @@ Section and keys are case insensitive.
 .. toctree::
    :maxdepth: 4
 
-
-   core_config
    auto_config
+   core_config

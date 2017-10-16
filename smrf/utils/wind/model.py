@@ -8,12 +8,6 @@ from datetime import datetime
 
 from . import wind_c
 
-__author__ = "Scott Havens"
-__maintainer__ = "Scott Havens"
-__email__ = "scott.havens@ars.usda.gov"
-__date__ = "2016-09-01"
-__version__ = '0.2.2'
-
 
 class wind_model():
     """

@@ -153,11 +153,23 @@ def getgitinfo():
         return version
 
 def config_documentation():
+    """
+    Auto documents the core config file.
+    Creates a file named auto_config.rst
+    in the docs folder which is then used 
+    for documentation
+    """
+
     mcfg = io.get_master_config()
 
     #RST header
-    config_doc ="Config Sections\n"
-    config_doc+="=================\n"
+    config_doc ="Config File Reference\n"
+    config_doc+="=====================\n"
+    config_doc+="""Below are the sections and items that are registered to the
+configuration file. If an entry conflicts with these SMRF will end
+the run and show the errors with the config file. If an entry is not provided
+SMRF will automatical add the default in. 
+"""
 
     #Sections
     for section in mcfg.keys():
