@@ -331,13 +331,15 @@ class ppt(image_data.image_data):
             else:
                 snow_den = np.zeros(self.precip.shape)
                 perc_snow = np.zeros(self.precip.shape)
-                # determine time since last storm basin wide
-                self.stormDays = storms.time_since_storm_basin(self.precip,
-                                                          self.storms.iloc[self.storm_id],
-                                                          self.storm_id,
-                                                          self.storming, time,
-                                                          time_step=self.time_step/60.0/24.0,
-                                                          stormDays=self.storm_days)
+
+            # calculate decimal days since last storm
+            self.storm_days = storms.time_since_storm_pixel(self.precip,
+                                                     dpt,
+                                                     perc_snow,
+                                                     storming=self.storming,
+                                                     time_step=self.time_step/60.0/24.0,
+                                                     stormDays=self.storm_days,
+                                                     mass=self.ppt_threshold)
 
         else:
             self.storm_days += self.time_step/60.0/24.0
