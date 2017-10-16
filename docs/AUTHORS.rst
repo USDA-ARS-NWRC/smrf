@@ -16,4 +16,4 @@ Contributors
 * Andrew Hedrick <hedrick.ars@gmail.com>
 Version
 -------
-0.2.5
+0.3.0

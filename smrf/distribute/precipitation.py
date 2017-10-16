@@ -3,8 +3,7 @@ import numpy as np
 import logging
 import netCDF4 as nc
 from smrf.distribute import image_data
-from smrf.envphys import snow
-from smrf.envphys import storms
+from smrf.envphys import snow,storms,precip
 from smrf.utils import utils
 import os
 
@@ -110,9 +109,6 @@ class ppt(image_data.image_data):
     # be written during main distribute loop
     post_process_variables = {}
 
-    max = np.Inf
-    min = 0
-
     def __init__(self, pptConfig, start_date, time_step=60):
 
         # extend the base class
@@ -186,12 +182,12 @@ class ppt(image_data.image_data):
             self.storms, storm_count = storms.tracking_by_station(data.precip,
                                                                   mass_thresh=self.ppt_threshold,
                                                                   steps_thresh=self.time_to_end_storm)
-            self.corrected_precip = storms.clip_and_correct(data.precip,
+            self.storm_correction = storms.clip_and_correct(data.precip,
                                                             self.storms)
-            self._logger.debug('''Conservation of mass check (precip -
-                                precip_clipped):\n{0}'''.format(
-                                    data.precip.sum() -
-                                    self.corrected_precip.sum()))
+            # self._logger.debug('''Conservation of mass check (precip -
+            #                     precip_clipped):\n{0}'''.format(
+            #                         data.precip.sum() -
+            #                         corrected_precip.sum()))
 
             self._logger.info("Identified Storms:\n{0}".format(self.storms))
             self.storm_id = 0
@@ -221,6 +217,7 @@ class ppt(image_data.image_data):
             # make everything else zeros
             self.precip = np.zeros(self.storm_days.shape)
 
+
     def distribute_precip_thread(self,  queue, data):
         """
         Distribute the data using threading and queue. All data is provided and
@@ -241,7 +238,8 @@ class ppt(image_data.image_data):
 
             queue[self.variable].put([t, self.precip])
 
-    def distribute(self, data, dpt, time, mask=None):
+
+    def distribute(self, data, dpt, time, wind, temp, mask=None):
         """
         Distribute given a Panda's dataframe for a single time step. Calls
         :mod:`smrf.distribute.image_data.image_data._distribute`.
@@ -269,20 +267,26 @@ class ppt(image_data.image_data):
         # only need to distribute precip if there is any
         data = data[self.stations]
 
+        #Adjust the precip for undercatchment
+        if self.config['adjust_for_undercatch']:
+            self._logger.debug('%s Adjusting precip for undercatch...' % data.name)
+            data = precip.adjust_for_undercatch(data,wind,temp,self.config,self.metadata)
+
         if self.nasde_model == 'marks2017':
             self.distribute_for_marks2017(data, dpt, time, mask=mask)
 
         else:
             self.distribute_for_susong1999(data, dpt, time, mask=mask)
 
+
     def distribute_for_marks2017(self, data, dpt, time, mask=None):
         """
         Specialized distribute function for working with the new accumulated
-        snow density model Marks2017 requires storm total  and a corrected
+        snow density model Marks2017 requires storm total and a corrected
         precipitation as to avoid precip between storms.
         """
-
-        if self.corrected_precip.ix[time].sum() > 0.0:
+        corrected_precip = data.mul(self.storm_correction)
+        if corrected_precip.sum() > 0.0:
             # Check for time in every storm
             for i, s in self.storms.iterrows():
                 if time >= s['start'] and time <= s['end']:
@@ -303,7 +307,7 @@ class ppt(image_data.image_data):
                     self.storming = False
 
             # distribute data and set the min/max
-            self._distribute(self.corrected_precip.ix[time], zeros=None)
+            self._distribute(corrected_precip, zeros=None)
             self.precip = utils.set_min_max(self.precip, self.min, self.max)
 
             if time == storm_start:
@@ -359,6 +363,7 @@ class ppt(image_data.image_data):
         else:
             self.last_storm_day_basin = np.max(self.last_storm_day)
 
+
     def distribute_for_susong1999(self, data, dpt, time, mask=None):
         """
         Docs for susong1999
@@ -410,6 +415,7 @@ class ppt(image_data.image_data):
         else:
             self.last_storm_day_basin = np.max(self.last_storm_day)
 
+
     def distribute_thread(self, queue, data, date, mask=None):
         """
         Distribute the data using threading and queue. All data is provided and
@@ -428,11 +434,11 @@ class ppt(image_data.image_data):
             data: pandas dataframe for all data, indexed by date time
         """
 
-        for t in data.index:
+        for t in data.precip.index:
 
             dpt = queue['dew_point'].get(t)
 
-            self.distribute(data.ix[t], dpt, t, mask=mask)
+            self.distribute(data.precip.ix[t], dpt, t, data.wind_speed.ix[t],data.air_temp.ix[t], mask=mask)
 
             queue[self.variable].put([t, self.precip])
 
@@ -448,51 +454,9 @@ class ppt(image_data.image_data):
                 queue['storm_id'].put([t, self.storm_id])
                 queue['storm_total'].put([t, self.storm_total])
 
-    def post_process_snow_density(self, main_obj, pds, tds, storm):
-        """
-        Calculates the snow density for a single storm.
-
-        Args:
-            main_obj - the main smrf obj running everything
-            pds - netcdf object containing precip data
-            tds - netcdf object containing temp data
-            storm - a dictionary containing the start and end values of the
-                    storm. A single entry from the storm lst
-
-        Returns:
-            None, stores self.snow_density
-        """
-
-        storm_accum = np.zeros(pds.variables['precip'][0].shape)
-
-        delta = (storm['end'] - storm['start'])
-
-        storm_span = delta.total_seconds()/(60.0*self.time_step)
-        self._logger.debug("Storm Duration = {0} hours".format(storm_span))
-
-        start = main_obj.date_time.index(storm['start'])
-        end = main_obj.date_time.index(storm['end'])
-
-        storm_time = main_obj.date_time[start:end]
-
-        for t in storm_time:
-            i = main_obj.date_time.index(t)
-            storm_accum += pds.variables['precip'][i][:][:]
-
-        # self._logger.debug("Calculating snow density...")
-        for t in storm_time:
-            i = main_obj.date_time.index(t)
-            dpt = tds.variables['dew_point'][i]
-
-            # self._logger.debug("Calculating snow density at {0}".format(t))
-            self.snow_density = snow.calc_phase_and_density(storm_accum, dpt)
-
-            main_obj.output(t, module='precip', out_var='snow_density')
 
     def post_processor(self, main_obj, threaded=False):
-        """
-        Process the snow density values
-        """
+
         pass
         #
         # self._logger.info("Estimated total number of storms: {0} ...".format(len(self.storms)))

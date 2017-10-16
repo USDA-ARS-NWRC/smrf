@@ -526,7 +526,7 @@ class solar(image_data.image_data):
                 :mod:`smrf.distribute.albedo.albedo.albedo_ir`
         """
 
-        self._logger.debug('Calculing net radiation')
+        self._logger.debug('Calculating net radiation')
 
         # calculate net visible
         vv_n = (self.veg_vis_beam + self.veg_vis_diffuse) * (1 - albedo_vis)

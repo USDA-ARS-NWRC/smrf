@@ -93,7 +93,7 @@ class SMRF():
 
         try:
             #Read in the original users config
-            self.config = io.read_config(configFile)
+            self.config = io.get_user_config(configFile)
 
         except UnicodeDecodeError:
             raise Exception(('The configuration file is not encoded in '
@@ -134,33 +134,32 @@ class SMRF():
             self._logger.info(line)
 
         #Bring the the master config file
-        mconfig = io.read_master_config(__core_config__)
+        mconfig = io.get_master_config()
 
         #Add defaults.
         self._logger.info("Adding defaults to config...")
-        self.config = io.add_defaults(self.config,mconfig)
+        self.config = io.add_defaults(self.config, mconfig)
 
         #Check the user config file for errors and report issues if any
         self._logger.info("Checking config file for issues...")
-        warnings, errors = io.check_config_file(self.config,mconfig)
-        io.print_config_report(warnings, errors,logger = self._logger)
+        warnings, errors = io.check_config_file(self.config,mconfig,user_cfg_path=configFile)
+        io.print_config_report(warnings, errors, logger = self._logger)
 
         #Exit SMRF if config file has errors
         if len(errors) > 0:
             self._logger.error("Errors in the config file. See configuration status report above.")
             sys.exit()
-        else:
 
-            #write the config file to the output dir
-            fname = 'config.ini'
-            full_config_out = self.config['output']['out_location'] + '/'+fname
-            self._logger.info("Writing config file with full options.")
-            io.generate_config(self.config,full_config_out)
+        #write the config file to the output dir no matter where the project was ran
+        fname = 'config.ini'
+        full_config_out = self.config['output']['out_location']
+        full_config_out = os.path.abspath(os.path.join(os.path.split(configFile)[0],full_config_out,fname))
+        self._logger.info("Writing config file with full options.")
+        io.generate_config(self.config,full_config_out)
 
+        #Paths should be either relative to where the config is or absolute
+        self.config = io.update_config_paths(self.config,configFile)
 
-        # check for the desired sections
-        if 'stations' not in self.config:
-            self.config['stations'] = None
 
         # if a gridded dataset will be used
         self.gridded = False
@@ -179,7 +178,7 @@ class SMRF():
 
         self.max_values = self.config['system']['max_values']
 
-        self.time_out = float(self.config['system']['time_out'])
+        self.time_out = self.config['system']['time_out']
 
         # get the time sectionutils
         self.start_date = pd.to_datetime(self.config['time']['start_date'])
@@ -400,6 +399,7 @@ class SMRF():
                 self._logger.warn('''Distribution not initialized, data not
                                     filtered to desired stations''')
 
+        #Does the user want to create a CSV copy of the station data used.
         if self.config["output"]['input_backup'] == True:
             self._logger.info('Backing up input data...')
             backup_input(self.data, self.config)
@@ -444,8 +444,6 @@ class SMRF():
         for v in self.distribute:
             self.distribute[v].initialize(self.topo, self.data)
 
-#         sub_count = 0
-
         # -------------------------------------
         # Distribute the data
         for output_count, t in enumerate(self.date_time):
@@ -454,7 +452,6 @@ class SMRF():
             startTime = datetime.now()
 
             self._logger.info('Distributing time step %s' % t)
-
             # 0.1 sun angle for time step
             cosz, azimuth = radiation.sunang(t.astimezone(pytz.utc),
                                              self.topo.topoConfig['basin_lat'],
@@ -481,11 +478,13 @@ class SMRF():
             # 3. Wind_speed and wind_direction
             self.distribute['wind'].distribute(self.data.wind_speed.ix[t],
                                                self.data.wind_direction.ix[t])
-
+#self, data, dpt, time, wind, temp, mask=None
             # 4. Precipitation
             self.distribute['precip'].distribute(self.data.precip.ix[t],
                                                 self.distribute['vapor_pressure'].dew_point,
                                                 t,
+                                                self.data.wind_speed.ix[t],
+                                                self.data.air_temp.ix[t],
                                                 self.topo.mask)
 
             # 5. Albedo
@@ -594,8 +593,8 @@ class SMRF():
         # 4. Precipitation
         t.append(Thread(target=self.distribute['precip'].distribute_thread,
                         name='precipitation',
-                        args=(q, self.data.precip, self.date_time,
-                              self.topo.mask)))
+                        args=(q, self.data, self.date_time,
+                                self.topo.mask)))
 
         # 5. Albedo
         t.append(Thread(target=self.distribute['albedo'].distribute_thread,

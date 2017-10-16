@@ -18,6 +18,9 @@
 
 import os
 import sys
+from smrf.utils import utils
+
+utils.config_documentation()
 # sys.path.insert(0, os.path.abspath('.'))
 
 if os.environ.get('READTHEDOCS') == 'True':
@@ -77,7 +80,6 @@ master_doc = 'index'
 project = u'SMRF'
 copyright = u'2016, Scott Havens, USDA Agricultural Research Service'
 author = u'Scott Havens'
-
 # The version info for the project you're documenting, acts as replacement for
 # |version| and |release|, also used in various other places throughout the
 # built documents.
@@ -85,6 +87,7 @@ author = u'Scott Havens'
 # The short X.Y version.
 version = u'0.3.0'
 
+print("test")
 # The full version, including alpha/beta/rc tags.
 # release = u'0.3.0'
 

@@ -4,8 +4,6 @@ Originally written by Scott Havens in 2015
 @author: Micah Johnson
 """
 
-__version__ = '0.2.1'
-
 
 import numpy as np
 import os
@@ -415,4 +413,5 @@ def clip_and_correct(precip,storms):
 
         correction[station] = c
     #print "Max precip from the correction:{0}".format(precip_clipped.max())
-    return precip_clipped.mul(pd.Series(correction), axis=1)
+    return pd.Series(correction)
+    #return precip_clipped.mul(pd.Series(correction), axis=1)

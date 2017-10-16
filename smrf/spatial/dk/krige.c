@@ -159,7 +159,7 @@ double *w;						/* kriging weights */
 		/* Solve linear system for kriging weights */
 
 		if ((luret = lusolv(n, a, wcalc)) != 0) {
-			printf("Error in lusolv()");
+			printf("Error in lusolv()\n");
 			exit(0);
 		}
 
@@ -214,4 +214,3 @@ double *w;						/* kriging weights */
 
 //	return w;
 }
-
