@@ -35,7 +35,7 @@ import pytz
 from smrf import data, distribute, output, __core_config__
 from smrf.envphys import radiation
 from smrf.utils import queue, io
-from smrf.utils.utils import backup_input
+from smrf.utils.utils import backup_input, getqotw
 from threading import Thread
 
 
@@ -198,9 +198,11 @@ class SMRF():
         self.date_time = [di.replace(tzinfo=tzinfo) for di in d]
         self.time_steps = len(self.date_time)   # number of time steps to model
 
-        # initialize the distribute dict
         self.distribute = {}
+        if self.config['logging']['qotw']:
+            self._logger.info(getqotw())
 
+        # initialize the distribute dict
         self._logger.info('Started SMRF --> %s' % datetime.now())
         self._logger.info('Model start --> %s' % self.start_date)
         self._logger.info('Model end --> %s' % self.end_date)
