@@ -715,7 +715,7 @@ class SMRF():
             if self.config['output']['file_type'].lower() == 'netcdf':
                 self.out_func = output.output_netcdf(variable_list, self.topo,
                                                      self.config['time'],
-                                                     self.config['output']['frequency'])
+                                                     self.config['output'])
 
             elif self.config['output']['file_type'].lower() == 'hru':
                 self.out_func = output.output_hru(variable_list, self.topo,
