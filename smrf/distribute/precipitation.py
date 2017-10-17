@@ -289,22 +289,21 @@ class ppt(image_data.image_data):
         if corrected_precip.sum() > 0.0:
             # Check for time in every storm
             for i, s in self.storms.iterrows():
-                if time >= s['start'] and time <= s['end']:
+                storm_start = s['start']
+                storm_end = s['end']
+
+                if time >= storm_start and time <= storm_end:
                     # establish storm info
                     self.storm_id = i
                     storm = self.storms.iloc[self.storm_id]
-                    storm_start = s['start']
-                    storm_end = s['end']
                     self.storming = True
-                    self._logger.debug("Current Storm ID = {0}"
-                                       .format(self.storm_id))
-                    self._logger.debug("Storming? {0}".format(self.storming))
-                    self._logger.debug("During storm time? {0}".format(
-                        time >= storm_start and time <= storm_end))
-
                     break
                 else:
                     self.storming = False
+
+            self._logger.debug("Storming? {0}".format(self.storming))
+            self._logger.debug("Current Storm ID = {0}".format(self.storm_id))
+
 
             # distribute data and set the min/max
             self._distribute(corrected_precip, zeros=None)
