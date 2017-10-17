@@ -68,21 +68,18 @@ class albedo(image_data.image_data):
 
         # get the veg values for max litter decay - date method
         matching = [s for s in albedoConfig.keys() if "veg_" in s]
-        v = {}
+        self.veg = {}
         for m in matching:
-            if m != 'veg_default':
-                ms = m.split('_')
-                v[ms[1]] = float(albedoConfig[m])
-        albedoConfig['veg'] = v
+            ms = m.split('_')
+            self.veg[ms[1]] = albedoConfig[m]
 
         # get the veg values for max litter decay - hardy 2000 method
         matching = [s for s in albedoConfig.keys() if "litter_" in s]
-        v = {}
+        self.litter = {}
         for m in matching:
-            if (m != 'litter_default' and m != 'litter_albedo'):
-                ms = m.split('_')
-                v[ms[1]] = float(albedoConfig[m])
-        albedoConfig['litter'] = v
+            # if (m != 'litter_default' and m != 'litter_albedo'):
+            ms = m.split('_')
+            self.litter[ms[1]] = albedoConfig[m]
 
         self.config = albedoConfig
 
@@ -132,7 +129,8 @@ class albedo(image_data.image_data):
                         self.config['end_decay'] is not None and
                         self.config['end_decay'] > self.config['start_decay']):
 
-                    alb_v_d, alb_ir_d = radiation.decay_alb_power(self,
+                    alb_v_d, alb_ir_d = radiation.decay_alb_power(self.litter,
+                                            self.veg_type,
                                             self.config['start_decay'],
                                             self.config['end_decay'],
                                             current_time_step,
@@ -143,9 +141,11 @@ class albedo(image_data.image_data):
                     self._logger.error('Need correct inputs for decay method: {0}'.format(self.config['decay_method']))
 
             elif self.config['decay_method'] == 'hardy2000':
-                alb_v_d, alb_ir_d = radiation.decay_alb_hardy(self, storm_day,
-                                                                alb_v, alb_ir,
-                                                                self.config['litter_albedo'])
+                alb_v_d, alb_ir_d = radiation.decay_alb_hardy(self.litter,
+                                                              self.veg_type,
+                                                              storm_day,
+                                                              alb_v,
+                                                              alb_ir)
                 alb_v = alb_v_d
                 alb_ir = alb_ir_d
 
