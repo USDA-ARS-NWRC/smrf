@@ -17,11 +17,15 @@ See the following example.
 Example ::
 
   [precipitation]
-    configurable: my_rain_model, new_snow_parameter
-    available_options: my_rain_model = [curly mo larry], new_snow_parameter=[sharknado antman]
-    default: new_rain_model=Larry, new_snow_parameter=sharknado
+	rain_model:     default = curly,
+                        options = [curly mo larry],
+                        description = our silly rain models
+	
+	snow_parameter: default = 10.0,
+			type = float,
+			description = a calibration parameter for snow density
 
-This would add two new configurable options called my_rain_model and new snow_parameter.
+This would add two new options called my_rain_model and snow_parameter.
 They would only be able to be set to  curly,mo and larry for the my_rain_model and for the
 the new_snow_parameter sharknado and antman. Each has a default in the event it is
 not specified by the user which in this case is Larry and sharknado respectively.

@@ -153,27 +153,83 @@ def getgitinfo():
         return version
 
 def config_documentation():
+    """
+    Auto documents the core config file.
+    Creates a file named auto_config.rst
+    in the docs folder which is then used 
+    for documentation
+    """
+
     mcfg = io.get_master_config()
-    config_doc ="Configuration File\n"
-    config_doc+="==================\n"
+
+    #RST header
+    config_doc ="Config File Reference\n"
+    config_doc+="=====================\n"
+    config_doc+="""Below are the sections and items that are registered to the
+configuration file. If an entry conflicts with these SMRF will end
+the run and show the errors with the config file. If an entry is not provided
+SMRF will automatical add the default in. 
+"""
+
+    #Sections
     for section in mcfg.keys():
+        #Section header
+        config_doc+=" \n"
         config_doc += "{0}\n".format(section)
         config_doc += "-"*len(section)+'\n'
+        #If distributed module link api
+        dist_modules = ['air_temp','vapor_pressure','precip','wind', 'albedo','thermal','solar','soil_temp']
+        if section == 'precip':
+            sec = 'precipitation'
+        else:
+            sec = section
+        if section in dist_modules:
+            intro = """
+The {0} section controls all the available parameters that effect
+the distribution of the {0} module, espcially  the associated models.
+For more detailed information please see :mod:`smrf.distribute.{0}`.
+            """.format(sec)
+        else:
+            intro = """
+The {0} section controls the {0} parameters for an entire SMRF run.
+            """.format(sec)
+
+        config_doc+=intro
         config_doc+="\n"
 
+        #Auto document config file according to master config contents
         for item,v in sorted(mcfg[section].items()):
-            config_doc+="{0}\n".format(item)
-            #Add the description
-            config_doc+="\t{0}\n".format(v.description)
+            #Check for attributes that are lists
+            for att in ['default','options']:
+                z = getattr(v,att)
+                if type(z) == list:
+                    combo = ' '
+                    doc_s = combo.join([str(s) for s in z])
+                    setattr(v,att,doc_s)
 
-            config_doc+="\tType: {0}\n".format(v.type)
+            #Bold item with definition
+            config_doc+="| **{0}**\n".format(item)
 
+            #Add the item description
+            config_doc+="| \t{0}\n".format(v.description)
+
+            #Default
+            config_doc+="| \t\t*Default: {0}*\n".format(v.default)
+
+            #Add expected type
+            config_doc+="| \t\t*Type: {0}*\n".format(v.type)
+
+            #Print options should they be available
             if v.options:
-                config_doc+="\tAvailable Options: {0}\n".format(v.options)
+                config_doc+="| \t\t*Options:*\n *{0}*\n".format(v.options)
 
-            if v.default != None:
-                config_doc+="\tDefault: {0}\n".format(v.default)
+            config_doc+="| \n"
+
             config_doc+="\n"
-    with open('./docs/auto_config.rst','w+') as f:
+
+    path = os.path.abspath('./')
+    path = os.path.join(path,'auto_config.rst')
+    print("Writing auto documentation for config file to:\n{0}".format(path))
+    with open(path,'w+') as f:
         f.writelines(config_doc)
     f.close()
