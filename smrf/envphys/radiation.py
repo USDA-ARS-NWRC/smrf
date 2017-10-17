@@ -11,7 +11,7 @@ import datetime
 import logging
 import pytz
 from smrf.utils import utils
-
+from smrf.utils.io import isint
 
 on_rtd = os.environ.get('READTHEDOCS') == 'True'
 if on_rtd:
@@ -190,7 +190,7 @@ def decay_alb_power(veg, veg_type, start_decay, end_decay, t_curr, pwr, alb_v, a
             max_dec = v
             tao = (t_decay_hr) / (max_dec**(1.0/pwr))
             # Set albedo decay at correct veg types
-            if k in ['41','42','43']:
+            if isint(k):
                 alb_dec[veg_type == int(k)] = ((t_diff_hr) / tao)**pwr
                 # self._logger.debug('Type {0}, decay {1}'.format(int(v), veg_type['veg'][v]))
 
@@ -238,7 +238,7 @@ def decay_alb_hardy(litter, veg_type, storm_day, alb_v, alb_ir):
     for k, v in litter.items():
         #self._logger.debug('litter {0}: {1}'.format(v, self.config['litter'][v] ) )
         l_rate = litter[k]
-        if k in ['41','42','43']:
+        if isint(k):
             sc[veg_type == int(k)] = (1.0 - l_rate)**(storm_day[veg_type == int(k)])
     # calculate litter coverage
     lc = np.ones_like(alb_v) - sc

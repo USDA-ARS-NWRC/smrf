@@ -12,6 +12,7 @@ import utils
 from .pycompat import OrderedDict, SafeConfigParser, basestring, unicode_type
 import sys
 from datetime import date
+import pytz
 import pandas as pd
 
 
@@ -363,7 +364,7 @@ def check_config_file(user_cfg, master_config,user_cfg_path=None):
                                 err_str = "Invalid option: {0} ".format(v)
                                 errors.append(msg.format(section, item, err_str))
 
-    return warnings,errors,
+    return warnings,errors
 
 
 def print_config_report(warnings, errors, logger= None):
@@ -630,7 +631,7 @@ def get_user_config(fname):
     Args:
         fname - filename of the user config file.
     Returns:
-        cfg - A dictionary of dictionaries
+        cfg - A dictionary of dictionaries containing the config file
     """
     mcfg = get_master_config()
     cfg = read_config(fname)
@@ -639,16 +640,26 @@ def get_user_config(fname):
     for section in cfg.keys():
         for item in cfg[section]:
             u = cfg[section][item]
+
             if item in mcfg[section]:
                 u = mcfg[section][item].convert_type(u)
+
                 if mcfg[section][item].type == 'str' and u != None:
                     if type(u) == list:
                         u = [o.lower() for o in u]
                     else:
                         if item != 'password':
                             u = u.lower()
+                #Add the timezone to all date time
+                elif mcfg[section][item].type == 'datetime':
+                    #We tried to apply this to all the datetimes but it was not working if we changed it for the start
+                    # and end dates with mySQL.
+                    
+                    if item not in ['start_date', 'end_date']:
+                        u = u.replace(tzinfo = pytz.timezone(cfg['time']['time_zone']))
 
                 cfg[section][item] = u
+
     return cfg
 
 
