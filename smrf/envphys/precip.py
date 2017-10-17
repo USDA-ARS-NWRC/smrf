@@ -283,10 +283,10 @@ def adjust_for_undercatch(p_vec, wind, temp, sta_type, metadata):
             if sta in sta_type.keys():
                 gauge_type = sta_type[sta]
             else:
-                gauge_type = "us_nws_8_unshielded"
+                gauge_type = sta_type['catchment_model_default']
 
             cr = catchment_ratios(ws,gauge_type,snowing)
             adj_precip[sta] = p_vec[sta]/cr
-            print(adj_precip[sta],p_vec[sta],cr)
+            #print(adj_precip[sta],p_vec[sta],cr)
 
     return adj_precip
