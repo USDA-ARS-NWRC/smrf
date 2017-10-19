@@ -176,7 +176,8 @@ def decay_alb_power(veg, veg_type, start_decay, end_decay, t_curr, pwr, alb_v, a
         alb_dec = alb_dec + veg['default']
         # Decay based on veg type
         for k,v in veg.items():
-            alb_dec[veg_type == int(k)] = v
+            if isint(k):
+                alb_dec[veg_type == int(k)] = v
 
     # Power function decay if during decay period
     else:
