@@ -331,12 +331,16 @@ class SMRF():
                                              dataType='csv')
 
         elif 'mysql' in self.config:
+
             self.data = data.loadData.wxdata(self.config['mysql'],
                                              self.start_date,
                                              self.end_date,
                                              time_zone=self.config['time']['time_zone'],
                                              stations=self.config['stations'],
                                              dataType='mysql')
+
+            #Add stations to stations in config for input backup
+            self.config['stations']['stations'] = self.data.metadata.index.tolist()
 
         elif 'gridded' in self.config:
             flag = False
@@ -360,8 +364,6 @@ class SMRF():
 
         else:
             raise KeyError('Could not determine where station data is located')
-
-        self.config['stations']['stations'] = self.data.metadata.index.tolist()
 
         # determine the locations of the stations on the grid
         self.data.metadata['xi'] = \

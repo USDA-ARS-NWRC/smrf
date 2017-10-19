@@ -78,7 +78,6 @@ class wxdata():
 
         self._logger.info('Reading data coming from CSV files')
 
-        sta = None
         if self.stations is not None:
             if 'stations' in self.stations:
                 sta = self.stations['stations']

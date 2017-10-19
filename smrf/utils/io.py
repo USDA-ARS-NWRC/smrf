@@ -646,7 +646,11 @@ def get_user_config(fname):
 
                 if mcfg[section][item].type == 'str' and u != None:
                     if type(u) == list:
-                        u = [o.lower() for o in u]
+                        if item =='stations':
+                            u = [o.upper() for o in u]
+                        else:
+                            u = [o.lower() for o in u]
+
                     else:
                         if item != 'password':
                             u = u.lower()
@@ -654,7 +658,7 @@ def get_user_config(fname):
                 elif mcfg[section][item].type == 'datetime':
                     #We tried to apply this to all the datetimes but it was not working if we changed it for the start
                     # and end dates with mySQL.
-                    
+
                     if item not in ['start_date', 'end_date']:
                         u = u.replace(tzinfo = pytz.timezone(cfg['time']['time_zone']))
 

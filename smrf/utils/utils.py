@@ -111,8 +111,9 @@ def backup_input(data, config):
     if 'gridded' in config.keys():
         raise ValueError("Micah_o was unsure how to handle this scenario... please advise")
 
-    #Output station data to CSV
-    for k in data.variables:
+    # Output station data to CSV
+    csv_var = ['metadata', 'air_temp', 'vapor_pressure','precip','wind_speed','wind_direction','cloud_factor']
+    for k in csv_var:
         fname = os.path.join(backup_dir,k+'.csv')
         v = getattr(data,k)
         v.to_csv(fname)
@@ -156,7 +157,7 @@ def config_documentation():
     """
     Auto documents the core config file.
     Creates a file named auto_config.rst
-    in the docs folder which is then used 
+    in the docs folder which is then used
     for documentation
     """
 
@@ -168,7 +169,7 @@ def config_documentation():
     config_doc+="""Below are the sections and items that are registered to the
 configuration file. If an entry conflicts with these SMRF will end
 the run and show the errors with the config file. If an entry is not provided
-SMRF will automatical add the default in. 
+SMRF will automatical add the default in.
 """
 
     #Sections
