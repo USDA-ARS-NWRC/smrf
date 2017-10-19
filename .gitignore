@@ -93,4 +93,7 @@ test_data/config.ini
 docs/auto_config.rst
 
 #Ignore results in test_data
-test_data/*.nc
+test_data/output/*
+!test_data/output/.keep
+test_data/tmp/*
+!test_data/tmp/.keep
