@@ -35,7 +35,7 @@ import pytz
 from smrf import data, distribute, output, __core_config__
 from smrf.envphys import radiation
 from smrf.utils import queue, io
-from smrf.utils.utils import backup_input
+from smrf.utils.utils import backup_input, getqotw
 from threading import Thread
 
 
@@ -191,15 +191,18 @@ class SMRF():
         if self.start_date > datetime.now() and not self.gridded or self.end_date > datetime.now() and not self.gridded:
             raise ValueError("A date set in the future can only be used with WRF generated data!")
 
+        #Get the timesetps correctly in the time zone
         d = data.mysql_data.date_range(self.start_date, self.end_date,
                                        timedelta(minutes=int(self.config['time']['time_step'])))
         tzinfo = pytz.timezone(self.config['time']['time_zone'])
         self.date_time = [di.replace(tzinfo=tzinfo) for di in d]
-        self.time_steps = len(self.date_time)   # number of time steps to model
+        self.time_steps = len(self.date_time)
+
+        self.distribute = {}
+        if self.config['logging']['qotw']:
+            self._logger.info(getqotw())
 
         # initialize the distribute dict
-        self.distribute = {}
-
         self._logger.info('Started SMRF --> %s' % datetime.now())
         self._logger.info('Model start --> %s' % self.start_date)
         self._logger.info('Model end --> %s' % self.end_date)
@@ -715,7 +718,7 @@ class SMRF():
             if self.config['output']['file_type'].lower() == 'netcdf':
                 self.out_func = output.output_netcdf(variable_list, self.topo,
                                                      self.config['time'],
-                                                     self.config['output']['frequency'])
+                                                     self.config['output'])
 
             elif self.config['output']['file_type'].lower() == 'hru':
                 self.out_func = output.output_hru(variable_list, self.topo,

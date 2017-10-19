@@ -200,6 +200,54 @@ def time_since_storm_basin(precipitation, storm, stormid, storming, time, time_s
 
     return stormDays
 
+def time_since_storm_pixel(precipitation, dpt, perc_snow, storming, time_step=1/24, stormDays=None, mass=1.0, ps_thresh=0.5):
+    """
+    Calculate the decimal days since the last storm given a precip time series
+
+     - Will assign decimal days since last storm to every pixel
+
+    Args:
+        precipitation: Precipitation values
+
+        dpt: dew point values
+
+        perc_snow: percent_snow values
+
+        storming: if it is stomring
+
+        time_step: step in days of the model run
+
+        stormDays: unifrom days since last storm on pixel basis
+
+        mass: Threshold for the mass to start a new storm
+
+        ps_thresh: Threshold for percent_snow
+
+    Returns:
+        stormDays: days since last storm on pixel basis
+
+    Created October 16, 2017
+    @author: Micah Sandusky
+    """
+    # either preallocate or use the input
+    if stormDays is None:
+        stormDays = np.zeros(precipitation.shape)
+
+    # add timestep
+    stormDays += time_step
+
+    # only reset if stomring and not overly warm
+    if storming and dpt.min() < 2.0:
+        # determine location where there is enough mass
+        idx_mass = precipitation >= mass
+        # determine locations where it has snowed
+        idx = perc_snow >= ps_thresh
+
+        # reset the stormDays to zero where the storm is present
+        stormDays[(idx_mass & idx)] = 0
+
+    return stormDays
+
 def tracking_by_station(precip, mass_thresh = 0.01, steps_thresh = 3):
     """
     Processes the vector station data prior to the data being distributed

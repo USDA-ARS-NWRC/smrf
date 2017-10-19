@@ -152,7 +152,8 @@ setup(
         'smrf.spatial.dk'
         ],
     include_package_data=True,
-    package_data={'smrf':['./framework/CoreConfig.ini']},
+    package_data={'smrf':['./framework/CoreConfig.ini',
+			  './framework/.qotw']},
     install_requires=requirements,
     license="ISCL",
     zip_safe=False,

@@ -11,7 +11,8 @@ import os
 import io
 from shutil import copyfile
 from .gitinfo import __gitVersion__, __gitPath__
-from smrf import __version__
+from smrf import __version__, __core_config__
+import random
 
 
 def nan_helper(y):
@@ -234,3 +235,12 @@ The {0} section controls the {0} parameters for an entire SMRF run.
     with open(path,'w+') as f:
         f.writelines(config_doc)
     f.close()
+
+def getqotw():
+    p = os.path.dirname(__core_config__)
+    q_f = os.path.abspath(os.path.join('{0}'.format(p),'.qotw'))
+    with open(q_f) as f:
+        qs = f.readlines()
+        f.close()
+    i = random.randrange(0,len(qs))
+    return qs[i]

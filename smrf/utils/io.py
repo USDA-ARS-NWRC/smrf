@@ -39,6 +39,7 @@ class MasterConfig():
             sec = {}
             for item in raw_config[section]:
                 sec[item] = ConfigEntry(name = item, parseable_line=raw_config[section][item])
+
             cfg[section] = sec
 
         return cfg
@@ -57,14 +58,18 @@ class ConfigEntry():
             self.parse_info(parseable_line)
 
         self.default = self.convert_type(self.default)
+
         self.options = self.convert_type(self.options)
         #Options should always be a list
         if type(self.options) != list:
             self.options = [self.options]
 
     def parse_info(self,info):
+        """
+        """
         if type(info) != list:
             info = [info]
+
         for s in info:
             if '=' in s:
                 a = s.split('=')
@@ -121,6 +126,11 @@ def cast_variable(variable,type_value):
         if 'datetime' in type_value:
             value.append(pd.to_datetime(v))
         elif 'bool' in type_value:
+            if v.lower() in ['yes','y','true']:
+                v = True
+            elif v.lower() in ['no','n','false']:
+                v = False
+
             value.append(bool(v))
         elif 'int' in type_value:
             value.append(int(v))
@@ -442,6 +452,7 @@ def add_defaults(user_config,master_config):
     for section,configured in user_config.items():
             for k,v in master_config[section].items():
                 if v.name not in configured.keys():
+                    #print(v.name,v.default)
                     user_config[section][k]=v.default
     return user_config
 
@@ -640,10 +651,8 @@ def get_user_config(fname):
     for section in cfg.keys():
         for item in cfg[section]:
             u = cfg[section][item]
-
             if item in mcfg[section]:
                 u = mcfg[section][item].convert_type(u)
-
                 if mcfg[section][item].type == 'str' and u != None:
                     if type(u) == list:
                         if item =='stations':
