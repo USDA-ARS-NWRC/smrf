@@ -171,7 +171,7 @@ class ppt(image_data.image_data):
                                           'units': 'mm',
                                           'long_name': 'total_storm_mass'
                                           }
-
+    
             self.storm_total = np.zeros((topo.ny, topo.nx))
 
             self.storms = []

@@ -361,8 +361,7 @@ class SMRF():
         else:
             raise KeyError('Could not determine where station data is located')
 
-        # ensure that the dataframes have consistent times
-#         t = date_range(start_date, end_date, timedelta(minutes=m))
+        self.config['stations']['stations'] = self.data.metadata.index.tolist()
 
         # determine the locations of the stations on the grid
         self.data.metadata['xi'] = \
