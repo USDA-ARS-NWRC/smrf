@@ -99,6 +99,21 @@ class SMRF():
             raise Exception(('The configuration file is not encoded in '
                                     'UTF-8, please change and retry'))
 
+        #Make the tmp and output directories if they do not exist
+        makeable_dirs = [self.config['system']['temp_dir'],self.config['output']['out_location']]
+
+        for f in makeable_dirs:
+            path = os.path.abspath(os.path.join(os.path.split(configFile)[0],f))
+            if not os.path.isdir(path):
+                try:
+                    #self._logger.info("Directory does not exist, \nCreating {0}".format(f))
+                    os.makedirs(path)
+
+                except OSError as e:
+                    raise e
+
+
+
         # start logging
         if 'log_level' in self.config['logging']:
             loglevel = self.config['logging']['log_level'].upper()
@@ -157,9 +172,8 @@ class SMRF():
         self._logger.info("Writing config file with full options.")
         io.generate_config(self.config,full_config_out)
 
-        #Paths should be either relative to where the config is or absolute
-        self.config = io.update_config_paths(self.config,configFile)
-
+        #After writing update the paths to be full abs paths.
+        self.config = io.update_config_paths(self.config, configFile)
 
         # if a gridded dataset will be used
         self.gridded = False
@@ -167,18 +181,10 @@ class SMRF():
             self.gridded = True
 
         # process the system variables
-        if os.path.isdir(self.config['system']['temp_dir']):
-            tempDir = self.config['system']['temp_dir']
-            self.tempDir = os.path.abspath(tempDir)
-            os.environ['WORKDIR'] = self.tempDir
-        else:
-            raise IOError('''The temp_dir provided in the config file does not exist.\n{0}'''.format(os.path.abspath(os.path.expanduser(self.config['system']['temp_dir']))))
+        for k,v in self.config['system'].items():
+            setattr(self,k,v)
 
-        self.threading = self.config['system']['threading']
-
-        self.max_values = self.config['system']['max_values']
-
-        self.time_out = self.config['system']['time_out']
+        os.environ['WORKDIR'] = self.temp_dir
 
         # get the time sectionutils
         self.start_date = pd.to_datetime(self.config['time']['start_date'])
@@ -228,15 +234,6 @@ class SMRF():
                 if os.path.isfile(self.distribute['solar'].ir_file):
                     os.remove(self.distribute['solar'].ir_file)
 
-        # close other files
-#         self.distribute['wind']._maxus_file.close()
-
-#         # close output files
-#         if self.out_func.type == 'netcdf':
-#             for v in self.out_func.variable_list:
-#                 v['nc_file'].close()
-#                 self._logger.debug('Closed file: %s' % v['nc_file'])
-
         self._logger.info('SMRF closed --> %s' % datetime.now())
 
     def loadTopo(self, calcInput=True):
@@ -248,7 +245,7 @@ class SMRF():
         # load the topo
         self.topo = data.loadTopo.topo(self.config['topo'],
                                        calcInput,
-                                       tempDir=self.tempDir)
+                                       tempDir=self.temp_dir)
 
     def initializeDistribution(self):
         """
@@ -353,7 +350,7 @@ class SMRF():
                                            self.end_date,
                                            time_zone=self.config['time']['time_zone'],
                                            dataType=self.config['gridded']['data_type'],
-                                           tempDir=self.tempDir)
+                                           tempDir=self.temp_dir)
 
             # set the stations in the distribute
             try:

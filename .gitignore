@@ -94,6 +94,10 @@ docs/auto_config.rst
 
 #Ignore results in test_data
 test_data/output/*
-!test_data/output/.keep
 test_data/tmp/*
-!test_data/tmp/.keep
+
+#Auto generated config.
+test_data/config.ini
+
+#ignore maxus.
+test_data/topo/maxus.nc

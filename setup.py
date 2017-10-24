@@ -175,5 +175,9 @@ setup(
     tests_require=test_requirements,
     cmdclass=cmdclass,
     ext_modules=ext_modules,
-    scripts=['scripts/inicheck','scripts/update_configs','scripts/run_smrf','scripts/mk_project']
+    scripts=['scripts/inicheck',
+	     'scripts/update_configs',
+             'scripts/run_smrf',
+	     'scripts/mk_project',
+	     'scripts/gen_maxus']
 )

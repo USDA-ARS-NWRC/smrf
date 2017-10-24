@@ -652,8 +652,11 @@ def get_user_config(fname):
         for item in cfg[section]:
             u = cfg[section][item]
             if item in mcfg[section]:
+                m = mcfg[section][item]
                 u = mcfg[section][item].convert_type(u)
-                if mcfg[section][item].type == 'str' and u != None:
+
+                #Check for stations and passwords
+                if m.type == 'str' and u != None:
                     if type(u) == list:
                         if item =='stations':
                             u = [o.upper() for o in u]
@@ -663,6 +666,7 @@ def get_user_config(fname):
                     else:
                         if item != 'password':
                             u = u.lower()
+
                 #Add the timezone to all date time
                 elif mcfg[section][item].type == 'datetime':
                     #We tried to apply this to all the datetimes but it was not working if we changed it for the start

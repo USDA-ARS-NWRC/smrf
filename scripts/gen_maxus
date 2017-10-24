@@ -1,0 +1,97 @@
+#!/usr/bin/env python
+from smrf.utils.wind.model import wind_model
+from smrf.ipw import IPW
+import netCDF4 as nc
+import matplotlib.pyplot as plt
+import numpy as np
+import argparse
+import os
+
+from datetime import datetime
+start = datetime.now()
+
+import faulthandler
+
+faulthandler.enable()
+
+
+def main():
+    parser = argparse.ArgumentParser(
+                      description= "Takes in IPW dem image and creates maxus file from Adam Winstrals wind model. The maxus file is required for SMRF simulations" )
+    parser.add_argument('ipw_dem', type=str,
+                        help='File to the input IPW image containing the dem')
+
+    parser.add_argument('--out_maxus', metavar='-O', type=str, default = './maxus.nc',
+                        help='Output file path for maxus file')
+
+    parser.add_argument('--increment', metavar='-i', type=int, default = 5,
+                        help='Increment between direction calculations (degrees)')
+
+    parser.add_argument('--sv_global', metavar='--dmax', type=int, default = 690,
+                        help='Length of outlying upwind search vector (meters)')
+
+    parser.add_argument('--sv_local', metavar='-l', type=int, default = 90,
+                        help='Length of local upwind search vector (meters)')
+
+    parser.add_argument('--height', metavar='-H', type=int, default = 3,
+                        help='Anemometer height in meters')
+
+    parser.add_argument('--window', metavar='-W', type=int, default = 30,
+                        help='To average wind data across in the direction of the wind')
+    args = parser.parse_args()
+
+    #------------------------------------------------------------------------------
+    # Specify model input parameters
+
+    if not os.path.isfile(args.ipw_dem):
+        raise IOError("ipw_dem argument {0} does not exist!".format(args.ipw_dem))
+
+    if not os.path.isdir(os.path.dirname(args.out_maxus)):
+        raise IOError("Directory to out_maxus argument {0} does not exist!".format(args.out_maxus))
+    dem_file = args.ipw_dem
+
+    save_file = args.ipw_dem
+
+    inc = args.increment
+
+    # length of outlying upwind search vector (meters)
+    dmax = args.sv_global
+
+    # length of local max upwind slope search vector (meters)
+    sepdist = args.sv_local
+
+    # Anemometer height (meters)
+    inst = args.height
+
+    # Windower
+    windower = args.window
+
+    save_file = args.out_maxus
+    #------------------------------------------------------------------------------
+    # run the wind model
+
+    # read in the DEM
+    dem = IPW(dem_file)
+    # dem_data = np.round(dem.bands[0].data)
+    dem_data = dem.bands[0].data
+    x = dem.bands[0].x
+    y = dem.bands[0].y
+
+    # initialize the wind model with the dem
+    w = wind_model(x, y, dem_data, nthreads=12)
+
+    # calculate the maxus for the parameters and output to file
+    w.maxus(dmax, inc, inst, save_file)
+    print datetime.now() - start
+
+    # window the maxus values based on the maxus values in the file
+    w.windower(save_file, windower, 'maxus')
+
+    # calculate the maxus for the parameters and output to file
+    # w.tbreak(dmax, sepdist, inc, inst, save_file2)
+
+
+    print datetime.now() - start
+
+if __name__ == "__main__":
+    main()
