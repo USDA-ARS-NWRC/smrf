@@ -12,6 +12,7 @@ import utils
 from .pycompat import OrderedDict, SafeConfigParser, basestring, unicode_type
 import sys
 from datetime import date
+import pytz
 import pandas as pd
 
 
@@ -38,6 +39,7 @@ class MasterConfig():
             sec = {}
             for item in raw_config[section]:
                 sec[item] = ConfigEntry(name = item, parseable_line=raw_config[section][item])
+
             cfg[section] = sec
 
         return cfg
@@ -56,14 +58,18 @@ class ConfigEntry():
             self.parse_info(parseable_line)
 
         self.default = self.convert_type(self.default)
+
         self.options = self.convert_type(self.options)
         #Options should always be a list
         if type(self.options) != list:
             self.options = [self.options]
 
     def parse_info(self,info):
+        """
+        """
         if type(info) != list:
             info = [info]
+
         for s in info:
             if '=' in s:
                 a = s.split('=')
@@ -120,6 +126,11 @@ def cast_variable(variable,type_value):
         if 'datetime' in type_value:
             value.append(pd.to_datetime(v))
         elif 'bool' in type_value:
+            if v.lower() in ['yes','y','true']:
+                v = True
+            elif v.lower() in ['no','n','false']:
+                v = False
+
             value.append(bool(v))
         elif 'int' in type_value:
             value.append(int(v))
@@ -363,7 +374,7 @@ def check_config_file(user_cfg, master_config,user_cfg_path=None):
                                 err_str = "Invalid option: {0} ".format(v)
                                 errors.append(msg.format(section, item, err_str))
 
-    return warnings,errors,
+    return warnings,errors
 
 
 def print_config_report(warnings, errors, logger= None):
@@ -441,6 +452,7 @@ def add_defaults(user_config,master_config):
     for section,configured in user_config.items():
             for k,v in master_config[section].items():
                 if v.name not in configured.keys():
+                    #print(v.name,v.default)
                     user_config[section][k]=v.default
     return user_config
 
@@ -630,7 +642,7 @@ def get_user_config(fname):
     Args:
         fname - filename of the user config file.
     Returns:
-        cfg - A dictionary of dictionaries
+        cfg - A dictionary of dictionaries containing the config file
     """
     mcfg = get_master_config()
     cfg = read_config(fname)
@@ -643,12 +655,24 @@ def get_user_config(fname):
                 u = mcfg[section][item].convert_type(u)
                 if mcfg[section][item].type == 'str' and u != None:
                     if type(u) == list:
-                        u = [o.lower() for o in u]
+                        if item =='stations':
+                            u = [o.upper() for o in u]
+                        else:
+                            u = [o.lower() for o in u]
+
                     else:
                         if item != 'password':
                             u = u.lower()
+                #Add the timezone to all date time
+                elif mcfg[section][item].type == 'datetime':
+                    #We tried to apply this to all the datetimes but it was not working if we changed it for the start
+                    # and end dates with mySQL.
+
+                    if item not in ['start_date', 'end_date']:
+                        u = u.replace(tzinfo = pytz.timezone(cfg['time']['time_zone']))
 
                 cfg[section][item] = u
+
     return cfg
 
 

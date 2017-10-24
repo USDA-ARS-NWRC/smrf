@@ -11,7 +11,8 @@ import os
 import io
 from shutil import copyfile
 from .gitinfo import __gitVersion__, __gitPath__
-from smrf import __version__
+from smrf import __version__, __core_config__
+import random
 
 
 def nan_helper(y):
@@ -111,8 +112,9 @@ def backup_input(data, config):
     if 'gridded' in config.keys():
         raise ValueError("Micah_o was unsure how to handle this scenario... please advise")
 
-    #Output station data to CSV
-    for k in data.variables:
+    # Output station data to CSV
+    csv_var = ['metadata', 'air_temp', 'vapor_pressure','precip','wind_speed','wind_direction','cloud_factor']
+    for k in csv_var:
         fname = os.path.join(backup_dir,k+'.csv')
         v = getattr(data,k)
         v.to_csv(fname)
@@ -156,7 +158,7 @@ def config_documentation():
     """
     Auto documents the core config file.
     Creates a file named auto_config.rst
-    in the docs folder which is then used 
+    in the docs folder which is then used
     for documentation
     """
 
@@ -168,7 +170,7 @@ def config_documentation():
     config_doc+="""Below are the sections and items that are registered to the
 configuration file. If an entry conflicts with these SMRF will end
 the run and show the errors with the config file. If an entry is not provided
-SMRF will automatical add the default in. 
+SMRF will automatical add the default in.
 """
 
     #Sections
@@ -233,3 +235,12 @@ The {0} section controls the {0} parameters for an entire SMRF run.
     with open(path,'w+') as f:
         f.writelines(config_doc)
     f.close()
+
+def getqotw():
+    p = os.path.dirname(__core_config__)
+    q_f = os.path.abspath(os.path.join('{0}'.format(p),'.qotw'))
+    with open(q_f) as f:
+        qs = f.readlines()
+        f.close()
+    i = random.randrange(0,len(qs))
+    return qs[i]

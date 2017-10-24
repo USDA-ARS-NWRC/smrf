@@ -133,10 +133,10 @@ class wind(image_data.image_data):
                                .format(self.config['maxus_netcdf']))
 
             # check maxus defaults
-            if 'station_default' not in self.config:
-                self.config['station_default'] = 11.4
-            if 'veg_default' not in self.config:
-                self.config['veg_default'] = 11.4
+            # if 'station_default' not in self.config:
+            #     self.config['station_default'] = 11.4
+            # if 'veg_default' not in self.config:
+            #     self.config['veg_default'] = 11.4
 
             # get the veg values
             matching = [s for s in self.config.keys() if "veg_" in s]
@@ -145,7 +145,7 @@ class wind(image_data.image_data):
                 if m != 'veg_default':
                     ms = m.split('_')
                     v[ms[1]] = float(self.config[m])
-            self.config['veg'] = v
+            self.veg = v
 
         self._logger.debug('Created distribute.wind')
 
@@ -302,8 +302,8 @@ class wind(image_data.image_data):
             cellmaxus[ind] = self.maxus[i][ind]
 
         # correct for veg
-        for i, v in enumerate(self.config['veg']):
-            cellmaxus[self.veg_type == int(v)] += self.config['veg'][v]
+        for i, v in enumerate(self.veg):
+            cellmaxus[self.veg_type == int(v)] += self.veg[v]
 
         # correct unreasonable values
         cellmaxus[cellmaxus > 32] = 32

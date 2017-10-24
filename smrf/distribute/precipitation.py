@@ -171,7 +171,7 @@ class ppt(image_data.image_data):
                                           'units': 'mm',
                                           'long_name': 'total_storm_mass'
                                           }
-
+    
             self.storm_total = np.zeros((topo.ny, topo.nx))
 
             self.storms = []
@@ -289,22 +289,21 @@ class ppt(image_data.image_data):
         if corrected_precip.sum() > 0.0:
             # Check for time in every storm
             for i, s in self.storms.iterrows():
-                if time >= s['start'] and time <= s['end']:
+                storm_start = s['start']
+                storm_end = s['end']
+
+                if time >= storm_start and time <= storm_end:
                     # establish storm info
                     self.storm_id = i
                     storm = self.storms.iloc[self.storm_id]
-                    storm_start = s['start']
-                    storm_end = s['end']
                     self.storming = True
-                    self._logger.debug("Current Storm ID = {0}"
-                                       .format(self.storm_id))
-                    self._logger.debug("Storming? {0}".format(self.storming))
-                    self._logger.debug("During storm time? {0}".format(
-                        time >= storm_start and time <= storm_end))
-
                     break
                 else:
                     self.storming = False
+
+            self._logger.debug("Storming? {0}".format(self.storming))
+            self._logger.debug("Current Storm ID = {0}".format(self.storm_id))
+
 
             # distribute data and set the min/max
             self._distribute(corrected_precip, zeros=None)
@@ -335,13 +334,15 @@ class ppt(image_data.image_data):
             else:
                 snow_den = np.zeros(self.precip.shape)
                 perc_snow = np.zeros(self.precip.shape)
-                # determine time since last storm basin wide
-                self.stormDays = storms.time_since_storm_basin(self.precip,
-                                                          self.storms.iloc[self.storm_id],
-                                                          self.storm_id,
-                                                          self.storming, time,
-                                                          time_step=self.time_step/60.0/24.0,
-                                                          stormDays=self.storm_days)
+
+            # calculate decimal days since last storm
+            self.storm_days = storms.time_since_storm_pixel(self.precip,
+                                                     dpt,
+                                                     perc_snow,
+                                                     storming=self.storming,
+                                                     time_step=self.time_step/60.0/24.0,
+                                                     stormDays=self.storm_days,
+                                                     mass=self.ppt_threshold)
 
         else:
             self.storm_days += self.time_step/60.0/24.0
