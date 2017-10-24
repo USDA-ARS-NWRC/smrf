@@ -12,10 +12,14 @@ Ubuntu
 ------
 
 SMRF is actively developed on Ubuntu 16.04 LTS and has been tested on 14.04 as
-well. The system requirements are:
+well. SMRF needs gcc greater than 4.8 and Python compiled with gcc. Install the
+dependencies by updating, install build-essentials and installing python-dev:
 
- * gcc greater than 4.8
- * Python compiled with gcc
+  .. code:: bash
+
+    sudo apt-get update
+    sudo apt-get install build-essential
+    sudo apt-get install python-dev
 
 
 Mac OSX
@@ -30,14 +34,14 @@ Install the system dependencies using MacPorts or homebrew:
 
   a. MacPorts install system dependencies
 
-    .. code-block:: bash
+    .. code:: bash
 
        port install gcc5
        port install python27
 
   b.  Homebrew install system dependencies
 
-    .. code-block:: python
+    .. code:: bash
 
        brew tap homebrew/versions
        brew install gcc5
@@ -66,7 +70,7 @@ text file. If you would prefer to read the file in your browser `click here`_.
 
 .. _click here: https://github.com/USDA-ARS-NWRC/ipw/blob/master/Install
 
-.. code:: console
+.. code:: bash
 
     git clone https://github.com/USDA-ARS-NWRC/ipw.git
 
@@ -84,13 +88,13 @@ Installing SMRF
 
 Once the dependencies have been installed for your respective system, the
 following will install smrf. It is preferable to use a Python
-   `virtual environment`_  to reduce the possibility of a dependency issue.
+`virtual environment`_  to reduce the possibility of a dependency issue.
 
 .. _virtual environment: https://virtualenv.pypa.io
 
 1. Create a virtualenv and activate it.
 
-  .. code-block:: console
+  .. code:: bash
 
     virtualenv smrfenv
     source smrfenv/bin/activate
@@ -101,14 +105,14 @@ and off your virtual environment.
 
 2. Clone SMRF source code from the ARS-NWRC github.
 
-  .. code-block:: console
+  .. code:: bash
 
     git clone https://github.com/USDA-ARS-NWRC/smrf.git
 
 3. Change directories into the SMRF directory. Install the python requirements.
    After the requirements are done, install SMRF.
 
-  .. code-block:: console
+  .. code:: bash
 
     cd smrf
     pip install -r requirements.txt
@@ -116,7 +120,7 @@ and off your virtual environment.
 
 4. (Optional) Generate a local copy of the documentation.
 
-  .. code-block:: console
+  .. code:: bash
 
     cd docs
     make html
@@ -125,12 +129,12 @@ and off your virtual environment.
   This can be done from the browser by opening the index.rst file directly or
   by the commandline like the following:
 
-  .. code-block:: console
+  .. code:: bash
 
     google-chrome _build/html/index.html
 
 5. Test the installation by running a small example
 
-  .. code::
+  .. code:: bash
 
     run_smrf test_data/testConfig.ini
