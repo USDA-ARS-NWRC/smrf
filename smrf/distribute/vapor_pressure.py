@@ -123,8 +123,8 @@ class vp(image_data.image_data):
         dpt = np.zeros_like(self.vapor_pressure, dtype=np.float64)
         envphys_c.cdewpt(self.vapor_pressure,
                          dpt,
-                         float(self.config['tolerance']),
-                         int(self.config['nthreads']))
+                         self.config['tolerance'],
+                         self.config['nthreads'])
 
         # find where dpt > ta
         ind = dpt >= ta
