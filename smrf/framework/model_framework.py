@@ -545,6 +545,41 @@ class SMRF():
         distributed values into the
         :func:`DateQueue <smrf.utils.queue.DateQueue_Threading>`.
         """
+        #Create threads for distribution
+        t,q = self.create_distributed_threads()
+
+        # output thread
+        t.append(queue.QueueOutput(q, self.date_time,
+                                   self.out_func,
+                                   self.config['output']['frequency'],
+                                   self.topo.nx,
+                                   self.topo.ny))
+
+        # the cleaner
+        t.append(queue.QueueCleaner(self.date_time, q))
+
+        # start all the threads
+        for i in range(len(t)):
+            t[i].start()
+
+        # wait for all the threads to stop
+#         for v in q:
+#             q[v].join()
+
+        for i in range(len(t)):
+            t[i].join()
+
+        self._logger.debug('DONE!!!!')
+
+    def create_distributed_threads(self):
+        """
+        Creates the threads for a distributed run in smrf.
+        Designed for smrf runs in memory
+
+        Returns
+            t: list of threads for distirbution
+            q: queue
+        """
 
         # -------------------------------------
         # Initialize the distibutions
@@ -631,31 +666,7 @@ class SMRF():
                             name='thermal',
                             args=(q, self.date_time)))
 
-        # 8. Soil temperature
-#         self.distribute['soil_temp'].distribute()
-
-        # output thread
-        t.append(queue.QueueOutput(q, self.date_time,
-                                   self.out_func,
-                                   self.config['output']['frequency'],
-                                   self.topo.nx,
-                                   self.topo.ny))
-
-        # the cleaner
-        t.append(queue.QueueCleaner(self.date_time, q))
-
-        # start all the threads
-        for i in range(len(t)):
-            t[i].start()
-
-        # wait for all the threads to stop
-#         for v in q:
-#             q[v].join()
-
-        for i in range(len(t)):
-            t[i].join()
-
-        self._logger.debug('DONE!!!!')
+        return t,q
 
     def initializeOutput(self):
         """
