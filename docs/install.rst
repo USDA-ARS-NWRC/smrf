@@ -133,8 +133,20 @@ and off your virtual environment.
 
     google-chrome _build/html/index.html
 
-5. Test the installation by running a small example
+5. Test the installation by running a small example. First to run any of the
+   examples the maxus.nc for distributing wind. This only needs to be done once
+   at the beginning of a new project.
+
+   .. code:: bash
+
+      gen_maxus --out_maxus test_data/topo/maxus.nc test_data/topo/dem.ipw
+
+  Once the maxus file is in place run the small example over the Boise River
+  Basin.
 
   .. code:: bash
 
     run_smrf test_data/testConfig.ini
+
+If everything ran without the SMRF install is totall complete. See examples for
+specific types of runs. Happy SMRF-ing!

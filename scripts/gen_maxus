@@ -27,16 +27,16 @@ def main():
     parser.add_argument('--increment', metavar='-i', type=int, default = 5,
                         help='Increment between direction calculations (degrees)')
 
-    parser.add_argument('--sv_global', metavar='--dmax', type=int, default = 690,
+    parser.add_argument('--sv_global', metavar='--dmax', type=int, default = 500,
                         help='Length of outlying upwind search vector (meters)')
 
-    parser.add_argument('--sv_local', metavar='-l', type=int, default = 90,
+    parser.add_argument('--sv_local', metavar='-l', type=int, default = 100,
                         help='Length of local upwind search vector (meters)')
 
     parser.add_argument('--height', metavar='-H', type=int, default = 3,
                         help='Anemometer height in meters')
 
-    parser.add_argument('--window', metavar='-W', type=int, default = 30,
+    parser.add_argument('--window', metavar='-W', type=int, default = 100,
                         help='To average wind data across in the direction of the wind')
     args = parser.parse_args()
 
