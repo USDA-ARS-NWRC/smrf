@@ -82,7 +82,7 @@ class SMRF():
                         'cloud_factor', 'thermal',
                         'output']
 
-    def __init__(self, configFile):
+    def __init__(self, configFile, external_logger=None):
         """
         Initialize the model, read config file, start and end date, and logging
         """
@@ -115,33 +115,37 @@ class SMRF():
 
 
         # start logging
-        if 'log_level' in self.config['logging']:
-            loglevel = self.config['logging']['log_level'].upper()
+        if external_logger == None:
+
+            if 'log_level' in self.config['logging']:
+                loglevel = self.config['logging']['log_level'].upper()
+            else:
+                loglevel = 'INFO'
+
+            numeric_level = getattr(logging, loglevel, None)
+            if not isinstance(numeric_level, int):
+                raise ValueError('Invalid log level: %s' % loglevel)
+
+            # setup the logging
+            logfile = None
+            if 'log_file' in self.config['logging']:
+                logfile = self.config['logging']['log_file']
+
+            fmt = '%(levelname)s:%(name)s:%(message)s'
+            if logfile is not None:
+                logging.basicConfig(filename=logfile,
+                                    filemode='w',
+                                    level=numeric_level,
+                                    format=fmt)
+            else:
+                logging.basicConfig(level=numeric_level)
+                coloredlogs.install(level=numeric_level, fmt=fmt)
+
+            self._loglevel = numeric_level
+
+            self._logger = logging.getLogger(__name__)
         else:
-            loglevel = 'INFO'
-
-        numeric_level = getattr(logging, loglevel, None)
-        if not isinstance(numeric_level, int):
-            raise ValueError('Invalid log level: %s' % loglevel)
-
-        # setup the logging
-        logfile = None
-        if 'log_file' in self.config['logging']:
-            logfile = self.config['logging']['log_file']
-
-        fmt = '%(levelname)s:%(name)s:%(message)s'
-        if logfile is not None:
-            logging.basicConfig(filename=logfile,
-                                filemode='w',
-                                level=numeric_level,
-                                format=fmt)
-        else:
-            logging.basicConfig(level=numeric_level)
-            coloredlogs.install(level=numeric_level, fmt=fmt)
-
-        self._loglevel = numeric_level
-
-        self._logger = logging.getLogger(__name__)
+            self._logger = external_logger
 
         # add the title
         title = self.title(2)
