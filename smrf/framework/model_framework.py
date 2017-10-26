@@ -373,11 +373,11 @@ class SMRF():
         self.data.metadata['xi'] = \
             self.data.metadata.apply(lambda row: find_pixel_location(row,
                                                                      self.topo.x,
-                                                                     'X'), axis=1)
+                                                                     'utm_x'), axis=1)
         self.data.metadata['yi'] = \
             self.data.metadata.apply(lambda row: find_pixel_location(row,
                                                                      self.topo.y,
-                                                                     'Y'), axis=1)
+                                                                     'utm_y'), axis=1)
 
         # pre filter the data to only the desired stations
         if flag:

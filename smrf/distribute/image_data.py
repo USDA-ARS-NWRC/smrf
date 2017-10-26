@@ -124,8 +124,8 @@ class image_data():
             self.stations = metadata.index.values
         self.metadata = metadata
 
-        self.mx = metadata.X.values
-        self.my = metadata.Y.values
+        self.mx = metadata.utm_x.values
+        self.my = metadata.utm_y.values
         self.mz = metadata.elevation.values
 
         if self.config['distribution'] == 'idw':

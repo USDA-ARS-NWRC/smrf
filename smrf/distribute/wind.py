@@ -1,5 +1,6 @@
 
 import numpy as np
+import pandas as pd
 import logging
 import os
 from smrf.distribute import image_data
@@ -384,14 +385,13 @@ class wind(image_data.image_data):
         self.nstep = 360/self.nbins
 
         for m in self.metadata.index:
-
             # pixel locations
             xi = self.metadata.loc[m, 'xi']
             yi = self.metadata.loc[m, 'yi']
             e = self.metadata.loc[m, 'enhancement']
 
             # maxus value at the station
-            if not np.isnan(data_direction[m]):
+            if not pd.isnull(data_direction[m]):
 
                 if m in self.config['peak']:
                     val_maxus = np.min(self.maxus[:, yi, xi] + e)

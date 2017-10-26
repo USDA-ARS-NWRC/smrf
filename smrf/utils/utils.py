@@ -61,7 +61,9 @@ def water_day(indate):
         indate: datetime object
 
     Returns:
-        dd: decimal day from start of water year
+        tuple:
+            **dd** - decimal day from start of water year
+            **wy** - Water year
 
     20160105 Scott Havens
     """
@@ -95,6 +97,10 @@ def backup_input(data, config):
     """
     Backs up input data files so a user can rerun a run with the exact data used
     for a run.
+
+    Args:
+        data: Pandas dataframe containing the station data
+        config: The config object produced by :fun
     """
     #Make the output dir
     backup_dir = os.path.join(config['output']['out_location'], 'input_backup')

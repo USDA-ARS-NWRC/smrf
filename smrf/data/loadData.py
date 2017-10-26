@@ -29,6 +29,7 @@ class wxdata():
                       'password',
                       'host',
                       'database',
+                      'port',
                       'metadata',
                       'data_table',
                       'station_table']
@@ -136,7 +137,8 @@ class wxdata():
         data = mysql_data.database(self.dataConfig['user'],
                                    self.dataConfig['password'],
                                    self.dataConfig['host'],
-                                   self.dataConfig['database'])
+                                   self.dataConfig['database'],
+                                   self.dataConfig['port'])
 
         # ---------------------------------------------------
         # determine if it's stations or client
@@ -168,7 +170,6 @@ class wxdata():
         # ---------------------------------------------------
         # get a list of the stations
         station_ids = self.metadata.index.tolist()
-
         # get the correct column names if specified, along with variable names
         db_var_names = [val for key, val in self.dataConfig.items()
                         if key not in self.db_config_vars]
