@@ -2,10 +2,10 @@
 # -*- coding: utf-8 -*-
 
 """
-test_smrf
+test_snow
 ----------------------------------
 
-Tests for `smrf` module.
+Tests for `envphys.snow` module.
 """
 
 import unittest
