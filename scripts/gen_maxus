@@ -46,7 +46,7 @@ def main():
     if not os.path.isfile(args.ipw_dem):
         raise IOError("ipw_dem argument {0} does not exist!".format(args.ipw_dem))
 
-    if not os.path.isdir(os.path.dirname(args.out_maxus)):
+    if not os.path.isdir(os.path.abspath(os.path.dirname(args.out_maxus))):
         raise IOError("Directory to out_maxus argument {0} does not exist!".format(args.out_maxus))
     dem_file = args.ipw_dem
 
@@ -69,13 +69,21 @@ def main():
     save_file = args.out_maxus
     #------------------------------------------------------------------------------
     # run the wind model
+    if args.ipw_dem.split('.')[-1] =='ipw':
+        # read in the DEM
+        dem = IPW(dem_file)
+        # dem_data = np.round(dem.bands[0].data)
+        dem_data = dem.bands[0].data
+        x = dem.bands[0].x
+        y = dem.bands[0].y
 
-    # read in the DEM
-    dem = IPW(dem_file)
-    # dem_data = np.round(dem.bands[0].data)
-    dem_data = dem.bands[0].data
-    x = dem.bands[0].x
-    y = dem.bands[0].y
+    elif args.ipw_dem.split('.')[-1] =='nc':
+        d = nc.Dataset(args.ipw_dem,'r')
+        dem_data = d.variables['dem'][:]
+        y = d.variables['y'][:]
+        x = d.variables['x'][:]
+    else:
+        raise ValueError("Only NetCDF and IPW have been implemented.")
 
     # initialize the wind model with the dem
     w = wind_model(x, y, dem_data, nthreads=12)

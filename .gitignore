@@ -101,3 +101,5 @@ test_data/config.ini
 
 #ignore maxus.
 test_data/topo/maxus.nc
+examples/* *.nc
+examples/simple_hill/* *.csv
