@@ -553,6 +553,7 @@ def generate_config(config,fname, inicheck = False):
         order_lst.remove('gridded')
 
     elif 'gridded' in user_sections:
+        order_lst.remove('stations')
         order_lst.remove('csv')
         order_lst.remove('mysql')
 
