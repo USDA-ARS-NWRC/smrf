@@ -547,7 +547,7 @@ def generate_config(config,fname, inicheck = False):
         order_lst.remove('csv')
         order_lst.remove('gridded')
 
-    elif 'girdded' in user_sections:
+    elif 'gridded' in user_sections:
         order_lst.remove('csv')
         order_lst.remove('mysql')
 
