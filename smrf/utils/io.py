@@ -309,8 +309,10 @@ def check_config_file(user_cfg, master_config,user_cfg_path=None):
 
     for section in master_config.keys():
         if section not in user_sections and section not in data_sections:
-            err_str = "Missing required section."
-            errors.append(msg.format(section," ", err_str))
+            # stations not needed if gridded input data used
+            if 'gridded' not in user_sections and section == 'stations':
+                err_str = "Missing required section."
+                errors.append(msg.format(section," ", err_str))
 
         #Check for a data section
         elif section in user_sections and section in data_sections:
