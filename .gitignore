@@ -103,3 +103,6 @@ test_data/config.ini
 test_data/topo/maxus.nc
 examples/* *.nc
 examples/simple_hill/* *.csv
+*/input_backup/*
+*/output/*
+*/tmp/*

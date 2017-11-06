@@ -16,8 +16,8 @@ multiplier = 1.50
 span = 5000
 half_width = span/2
 station_data = {'precip': {'min':0,'max':50},
-        'air_temp': {'min':-10,'max':20},
-        'vapor_pressure': {'min':50,'max':1500},
+        'air_temp': {'min':-5,'max':10},
+        'vapor_pressure': {'min':500,'max':1000},
         'wind_speed': {'min':0,'max':25},
         'wind_direction': {'min':0,'max':45},
         'cloud_factor': {'min':0.2,'max':0.5},
