@@ -171,12 +171,13 @@ class ppt(image_data.image_data):
                                           'units': 'mm',
                                           'long_name': 'total_storm_mass'
                                           }
-    
+
             self.storm_total = np.zeros((topo.ny, topo.nx))
 
             self.storms = []
             self.time_steps_since_precip = 0
             self.storming = False
+
             # Clip and adjust the precip data so that there is only precip
             # during the storm and ad back in the missing data to conserve mass
             self.storms, storm_count = storms.tracking_by_station(data.precip,
@@ -188,11 +189,15 @@ class ppt(image_data.image_data):
             #                     precip_clipped):\n{0}'''.format(
             #                         data.precip.sum() -
             #                         corrected_precip.sum()))
+            if storm_count != 0:
+                self._logger.info("Identified Storms:\n{0}".format(self.storms))
+                self.storm_id = 0
+                self._logger.info("Estimated number of storms: {0}".format(storm_count))
 
-            self._logger.info("Identified Storms:\n{0}".format(self.storms))
-            self.storm_id = 0
-            self._logger.info("Estimated number of storms: {0}".format(storm_count))
-
+            else:
+                if (data.precip.sum() > 0).any():
+                    self.storm_id = np.nan
+                    self._logger.warning("Zero events triggered a storm definition, None of the precip will be used in this run.")
 
     def distribute_precip(self, data):
         """

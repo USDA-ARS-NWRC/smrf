@@ -124,8 +124,14 @@ class image_data():
             self.stations = metadata.index.values
         self.metadata = metadata
 
-        self.mx = metadata.utm_x.values
-        self.my = metadata.utm_y.values
+        #Old DB used X and Y, New DB uses utm_x, utm_y
+        try:
+            self.mx = metadata.utm_x.values
+            self.my = metadata.utm_y.values
+        except:
+            self.mx = metadata.X.values
+            self.my = metadata.Y.values
+
         self.mz = metadata.elevation.values
 
         if self.config['distribution'] == 'idw':

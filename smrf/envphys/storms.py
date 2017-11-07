@@ -438,8 +438,7 @@ def clip_and_correct(precip,storms):
 
     #Specify zeros where were not storming
     precip_clipped = precip.copy()
-
-    precip_clipped[:]=0
+    precip_clipped[:] = 0
 
     for j,storm in storms.iterrows():
 
@@ -449,16 +448,21 @@ def clip_and_correct(precip,storms):
         precip_clipped.ix[storm_start:storm_end] = my_slice
 
     correction = {}
+    #print "{0:>10} {1:>10} {2:>10}".format("Original","Clipped", "C")
 
     #Correct the precip to be equal to the sum.
     for station in precip.columns:
         original = precip[station].sum()
         clipped = precip_clipped[station].sum()
+
         if original == 0:
             c = 1.0
+        elif clipped == 0:
+            c = 0
         else:
             c = original/clipped
 
+        #print "{0:>10} {1:>10} {2:>10}".format(original,clipped,c)
         correction[station] = c
     #print "Max precip from the correction:{0}".format(precip_clipped.max())
     return pd.Series(correction)

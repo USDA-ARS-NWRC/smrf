@@ -369,15 +369,27 @@ class SMRF():
         else:
             raise KeyError('Could not determine where station data is located')
 
-        # determine the locations of the stations on the grid
-        self.data.metadata['xi'] = \
-            self.data.metadata.apply(lambda row: find_pixel_location(row,
+        # determine the locations of the stations on the grid while maintaining reverse compatibility
+        #New DB uses utm_x utm_y instead of X,Y
+        try:
+            self.data.metadata['xi'] = \
+                self.data.metadata.apply(lambda row: find_pixel_location(row,
                                                                      self.topo.x,
                                                                      'utm_x'), axis=1)
-        self.data.metadata['yi'] = \
-            self.data.metadata.apply(lambda row: find_pixel_location(row,
+            self.data.metadata['yi'] = \
+                self.data.metadata.apply(lambda row: find_pixel_location(row,
                                                                      self.topo.y,
                                                                      'utm_y'), axis=1)
+        #Old DB has X and Y
+        except:
+            self.data.metadata['xi'] = \
+                self.data.metadata.apply(lambda row: find_pixel_location(row,
+                                                                     self.topo.x,
+                                                                     'X'), axis=1)
+            self.data.metadata['yi'] = \
+                self.data.metadata.apply(lambda row: find_pixel_location(row,
+                                                                     self.topo.y,
+                                                                                 'Y'), axis=1)
 
         # pre filter the data to only the desired stations
         if flag:
