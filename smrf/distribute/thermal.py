@@ -4,7 +4,7 @@ import logging
 from smrf.distribute import image_data
 from smrf.envphys import thermal_radiation
 from smrf.envphys.core import envphys_c
-
+from smrf.utils import utils
 
 class th(image_data.image_data):
     """
@@ -180,6 +180,9 @@ class th(image_data.image_data):
         self._logger = logging.getLogger(__name__)
         self.getConfig(thermalConfig)
 
+        self.min = thermalConfig['min']
+        self.max = thermalConfig['max']
+
         self.method = self.config['method']
         self.correct_cloud = self.config['correct_cloud']
         self.cloud_method = self.config['cloud_method']
@@ -294,7 +297,7 @@ class th(image_data.image_data):
                                                            self.veg_tau,
                                                            self.veg_height)
 
-        self.thermal = cth
+        self.thermal = utils.set_min_max(cth,self.min,self.max)
 
     def distribute_thread(self, queue, date):
         """

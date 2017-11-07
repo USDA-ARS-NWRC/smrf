@@ -5,7 +5,7 @@ import datetime
 import pytz
 from smrf.distribute import image_data
 from smrf.envphys import radiation
-
+from smrf.utils import utils
 
 class albedo(image_data.image_data):
     """
@@ -81,6 +81,8 @@ class albedo(image_data.image_data):
 
         #Add time zone
         self.config = albedoConfig
+        self.min = self.config['min']
+        self.max = self.config['max']
 
         self._logger.debug('Created distribute.albedo')
 
@@ -148,8 +150,8 @@ class albedo(image_data.image_data):
                 alb_v = alb_v_d
                 alb_ir = alb_ir_d
 
-            self.albedo_vis = alb_v
-            self.albedo_ir = alb_ir
+            self.albedo_vis = utils.set_min_max(alb_v,self.min,self.max)
+            self.albedo_ir = utils.set_min_max(alb_ir,self.min,self.max)
 
         else:
             self.albedo_vis = np.zeros(storm_day.shape)
