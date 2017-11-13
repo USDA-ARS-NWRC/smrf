@@ -80,7 +80,11 @@ class SMRF():
                         'clear_ir_beam', 'clear_ir_diffuse',
                         'albedo_vis', 'albedo_ir', 'net_solar',
                         'cloud_factor', 'thermal',
-                        'output']
+                        'output', 'veg_ir_beam','veg_ir_diffuse',
+                        'veg_vis_beam', 'veg_vis_diffuse',
+                        'cloud_ir_beam', 'cloud_ir_diffuse', 'cloud_vis_beam',
+                        'cloud_vis_diffuse', 'thermal_clear', 'thermal_veg',
+                        'thermal_cloud']
 
     def __init__(self, configFile, external_logger=None):
         """
