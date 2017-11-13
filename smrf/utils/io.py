@@ -642,17 +642,20 @@ def update_config_paths(cfg,user_cfg_path):
                         cfg[section][item] = path
     return cfg
 
-def get_user_config(fname):
+def get_user_config(fname, mcfg = None):
     """
     Retrieve the user config and apply
     types according to the master config.
 
     Args:
         fname - filename of the user config file.
+        mcfg - master config object
     Returns:
         cfg - A dictionary of dictionaries containing the config file
     """
-    mcfg = get_master_config()
+    if mcfg == None:
+        mcfg = get_master_config()
+
     cfg = read_config(fname)
 
     #Convert the types
