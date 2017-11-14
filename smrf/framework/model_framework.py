@@ -608,10 +608,9 @@ class SMRF():
         q = {}
         t = []
 
+        self.thread_variables += ['storm_total']
         if self.distribute['precip'].nasde_model == 'marks2017':
-            self.thread_variables += ['storm_total', 'storm_id']
-        if self.distribute['precip'].nasde_model == 'susong1999':
-            self.thread_variables += ['storm_precip']
+            self.thread_variables += ['storm_id']
 
         for v in self.thread_variables:
             q[v] = queue.DateQueue_Threading(self.max_values, self.time_out)
