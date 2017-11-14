@@ -83,9 +83,8 @@ class SMRF():
                         'output', 'veg_ir_beam','veg_ir_diffuse',
                         'veg_vis_beam', 'veg_vis_diffuse',
                         'cloud_ir_beam', 'cloud_ir_diffuse', 'cloud_vis_beam',
-                        'cloud_vis_diffuse', 'thermal_clear', 'thermal_veg',
-                        'thermal_cloud', 'wind_direction', 'flatwind',
-                        'wind_direction']
+                        'cloud_vis_diffuse', 'thermal_clear', 'wind_direction',
+                        'flatwind', 'wind_direction']
 
     def __init__(self, configFile, external_logger=None):
         """
@@ -611,6 +610,11 @@ class SMRF():
         self.thread_variables += ['storm_total']
         if self.distribute['precip'].nasde_model == 'marks2017':
             self.thread_variables += ['storm_id']
+
+        if self.distribute['thermal'].correct_cloud:
+            self.thread_variables += ['thermal_cloud']
+        if self.distribute['thermal'].correct_veg:
+            self.thread_variables += ['thermal_veg']
 
         for v in self.thread_variables:
             q[v] = queue.DateQueue_Threading(self.max_values, self.time_out)
