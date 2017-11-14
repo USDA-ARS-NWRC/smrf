@@ -685,7 +685,7 @@ def get_user_config(fname, mcfg = None):
                             u = u.lower()
 
                 #Add the timezone to all date time
-                elif mcfg[section][item].type == 'datetime':
+                elif mcfg[section][item].type == 'datetime' and u != None:
                     #We tried to apply this to all the datetimes but it was not working if we changed it for the start
                     # and end dates with mySQL.
 

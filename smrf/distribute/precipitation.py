@@ -51,7 +51,7 @@ class ppt(image_data.image_data):
         percent_snow: numpy array of the percent of time step that was snow
         snow_density: numpy array of the snow density
         storm_days: numpy array of the days since last storm
-        storm_precip: numpy array of the precipitation mass for the storm
+        storm_total: numpy array of the precipitation mass for the storm
         last_storm_day: numpy array of the day of the last storm (decimal day)
         last_storm_day_basin: maximum value of last_storm day within the mask
             if specified
@@ -88,7 +88,7 @@ class ppt(image_data.image_data):
                                   'standard_name': 'days_since_last_storm',
                                   'long_name': 'Days since the last storm'
                                   },
-                        'storm_precip': {
+                        'storm_total': {
                                   'units': 'mm',
                                   'standard_name': 'precipitation_mass_storm',
                                   'long_name': 'Precipitation mass for the storm period'
@@ -97,12 +97,7 @@ class ppt(image_data.image_data):
                                   'units': 'day',
                                   'standard_name': 'day_of_last_storm',
                                   'long_name': 'Decimal day of the last storm since Oct 1'
-                                  },
-                        'storm_total': {
-                                 'units': 'mm',
-                                 'long_name': 'storm_total_mass'
-                                        }
-
+                                  }
                         }
 
     # these are variables that are operate at the end only and do not need to
@@ -128,7 +123,7 @@ class ppt(image_data.image_data):
         self.percent_snow = np.zeros((topo.ny, topo.nx))
         self.snow_density = np.zeros((topo.ny, topo.nx))
         self.storm_days = np.zeros((topo.ny, topo.nx))
-        self.storm_precip = np.zeros((topo.ny, topo.nx))
+        self.storm_total = np.zeros((topo.ny, topo.nx))
         self.last_storm_day = np.zeros((topo.ny, topo.nx))
 
         # Assign storm_days array if given
@@ -167,10 +162,6 @@ class ppt(image_data.image_data):
         self._logger.info('''Using {0} for the new accumulated snow density model:  '''.format(self.nasde_model))
 
         if self.nasde_model == 'marks2017':
-            self.output_variables["storm_total"] = {
-                                          'units': 'mm',
-                                          'long_name': 'total_storm_mass'
-                                          }
 
             self.storm_total = np.zeros((topo.ny, topo.nx))
 
@@ -242,11 +233,6 @@ class ppt(image_data.image_data):
             self.distribute_precip(data.ix[t])
 
             queue[self.variable].put([t, self.precip])
-
-            if self.nasde_model == 'marks2017':
-                queue['storm_total'].put([t, self.storm_total])
-            elif self.nasde_model == 'susong1999':
-                queue['storm_precip'].put([t, self.storm_precip])
 
 
     def distribute(self, data, dpt, time, wind, temp, mask=None):
@@ -399,13 +385,13 @@ class ppt(image_data.image_data):
                                                              mass=self.ppt_threshold,
                                                              time=self.time_to_end_storm,
                                                              stormDays=self.storm_days,
-                                                             stormPrecip=self.storm_precip)
+                                                             stormPrecip=self.storm_total)
 
             # save the model state
             self.percent_snow = perc_snow
             self.snow_density = snow_den
             self.storm_days = stormDays
-            self.storm_precip = stormPrecip
+            self.storm_total = stormPrecip
 
         else:
 
@@ -461,9 +447,10 @@ class ppt(image_data.image_data):
 
             queue['storm_days'].put([t, self.storm_days])
 
+            queue['storm_total'].put([t, self.storm_total])
             if self.nasde_model == "marks2017":
                 queue['storm_id'].put([t, self.storm_id])
-                queue['storm_total'].put([t, self.storm_total])
+
 
 
     def post_processor(self, main_obj, threaded=False):
