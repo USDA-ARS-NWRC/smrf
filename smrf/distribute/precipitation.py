@@ -243,6 +243,11 @@ class ppt(image_data.image_data):
 
             queue[self.variable].put([t, self.precip])
 
+            if self.nasde_model == 'marks2017':
+                queue['storm_total'].put([t, self.storm_total])
+            elif self.nasde_model == 'susong1999':
+                queue['storm_precip'].put([t, self.storm_precip])
+
 
     def distribute(self, data, dpt, time, wind, temp, mask=None):
         """
