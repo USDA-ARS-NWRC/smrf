@@ -167,7 +167,22 @@ class th(image_data.image_data):
                                   'units': 'watt/m2',
                                   'standard_name': 'thermal_radiation',
                                   'long_name': 'Thermal (longwave) radiation'
-                                  }
+                                  },
+                        'thermal_clear': {
+                                      'units': 'watt/m2',
+                                      'standard_name': 'thermal_radiation non-correct',
+                                      'long_name': 'Thermal (longwave) radiation non-corrected'
+                                      },
+                        'thermal_cloud': {
+                                      'units': 'watt/m2',
+                                      'standard_name': 'thermal_radiation cloud corrected',
+                                      'long_name': 'Thermal (longwave) radiation cloud corrected'
+                                      },
+                        'thermal_veg': {
+                                      'units': 'watt/m2',
+                                      'standard_name': 'thermal_radiation veg corrected',
+                                      'long_name': 'Thermal (longwave) radiation veg corrected'
+                                      }
                         }
     # these are variables that are operate at the end only and do not need to
     # be written during main distribute loop
@@ -267,6 +282,9 @@ class th(image_data.image_data):
             cth = cth * self.sky_view + (1.0 - self.sky_view) * \
                 thermal_radiation.STEF_BOLTZ * air_temp**4
 
+        # make output variable
+        self.thermal_clear = cth.copy()
+
         # correct for the cloud factor
         # ratio of measured/modeled solar indicates the thermal correction
         if self.correct_cloud:
@@ -290,12 +308,18 @@ class th(image_data.image_data):
                                                      air_temp,
                                                      cloud_factor)
 
+            # make output variable
+            self.thermal_cloud = cth.copy()
+
         # correct for vegetation
         if self.correct_veg:
             cth = thermal_radiation.thermal_correct_canopy(cth,
                                                            air_temp,
                                                            self.veg_tau,
                                                            self.veg_height)
+
+            # make output variable
+            self.thermal_veg = cth.copy()
 
         self.thermal = utils.set_min_max(cth,self.min,self.max)
 
@@ -321,6 +345,13 @@ class th(image_data.image_data):
 
             self.distribute(t, air_temp, vapor_pressure,
                             dew_point, cloud_factor)
+
+            if self.correct_veg:
+                queue['thermal_veg'].put([t, self.thermal_veg])
+            if self.correct_cloud:
+                queue['thermal_cloud'].put([t, self.thermal_cloud])
+
+            queue['thermal_clear'].put([t, self.thermal_clear])
 
             queue['thermal'].put([t, self.thermal])
 

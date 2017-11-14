@@ -402,7 +402,7 @@ class solar(image_data.image_data):
                         queue['clear_ir_beam'].get(t))
                 setattr(self, 'clear_ir_diffuse',
                         queue['clear_ir_diffuse'].get(t))
-                
+
                 self.ir_beam = self.clear_ir_beam.copy()
                 self.ir_diffuse = self.clear_ir_diffuse.copy()
                 self.vis_beam = self.clear_vis_beam.copy()
@@ -436,6 +436,29 @@ class solar(image_data.image_data):
 
             else:
                 self.net_solar = None
+                if self.config['correct_veg']:
+                    self.veg_vis_beam = None
+                    self.veg_vis_diffuse = None
+                    self.veg_ir_beam = None
+                    self.veg_ir_diffuse = None
+                if self.config['correct_cloud']:
+                    self.cloud_vis_beam = None
+                    self.cloud_vis_diffuse = None
+                    self.cloud_ir_beam = None
+                    self.cloud_ir_diffuse = None
+
+
+            if self.config['correct_veg']:
+                queue['veg_vis_beam'].put([t, self.veg_vis_beam])
+                queue['veg_vis_diffuse'].put([t, self.veg_vis_diffuse])
+                queue['veg_ir_beam'].put([t, self.veg_ir_beam])
+                queue['veg_ir_diffuse'].put([t, self.veg_ir_diffuse])
+
+            if self.config['correct_cloud']:
+                queue['cloud_vis_beam'].put([t, self.cloud_vis_beam])
+                queue['cloud_vis_diffuse'].put([t, self.cloud_vis_diffuse])
+                queue['cloud_ir_beam'].put([t, self.cloud_ir_beam])
+                queue['cloud_ir_diffuse'].put([t, self.cloud_ir_diffuse])
 
             queue['net_solar'].put([t, self.net_solar])
             queue['cloud_factor'].put([t, self.cloud_factor])
