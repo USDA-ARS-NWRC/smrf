@@ -53,7 +53,7 @@ ext_dk = Extension(mname,
 
 setup(
     name='smrf',
-    version='0.3.0',
+    version='0.4.0',
     description="Distributed snow modeling for water resources",
     long_description=readme + '\n\n' + history,
     author="Scott Havens",
