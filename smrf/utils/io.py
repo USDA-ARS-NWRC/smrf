@@ -65,6 +65,7 @@ class ConfigEntry():
         self.default = self.convert_type(self.default)
 
         self.options = self.convert_type(self.options)
+
         #Options should always be a list
         if type(self.options) != list:
             self.options = [self.options]
@@ -666,6 +667,11 @@ def get_user_config(fname, mcfg = None):
                 m = mcfg[section][item]
                 u = mcfg[section][item].convert_type(u)
 
+                #If all is  requested then use all the options
+                if u == 'all':
+                    u = m.options
+                    u.remove('all')
+
                 #Check for stations and passwords
                 if m.type == 'str' and u != None:
                     if type(u) == list:
@@ -685,6 +691,7 @@ def get_user_config(fname, mcfg = None):
 
                     if item not in ['start_date', 'end_date']:
                         u = u.replace(tzinfo = pytz.timezone(cfg['time']['time_zone']))
+
 
                 cfg[section][item] = u
 
