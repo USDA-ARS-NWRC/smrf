@@ -52,7 +52,7 @@ This can easily be used with the command
 
 bumpbversion patch --tag
 
-Currently SMRF is version 0.4.1 The development team of SMRF attempted to adhere
+Currently SMRF is version 0.4.2 The development team of SMRF attempted to adhere
 to semantic versioning. Here is the basics taken from the semantic versioning website.
 
  * Patch version Z (x.y.Z | x > 0) MUST be incremented if only backwards compatible bug fixes are introduced.
