@@ -623,12 +623,13 @@ def get_master_config():
     return cfg
 
 
-def update_config_paths(cfg,user_cfg_path):
+def update_config_paths(cfg,user_cfg_path, mcfg = None):
     """
     Paths should always be relative to the config file or
     absolute.
     """
-    mcfg = get_master_config()
+    if mcfg == None:
+        mcfg = get_master_config()
     #Cycle thru users config
     for section in cfg.keys():
         for item in cfg[section].keys():
