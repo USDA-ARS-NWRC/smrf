@@ -84,7 +84,7 @@ def albedo(telapsed, cosz, gsize, maxgsz, dirt=2):
     Modified July 23, 2015 - take image of cosz and calculate albedo for
         one time step
     Scott Havens
-    
+
     """
 
 #     telapsed = np.array(telapsed)
@@ -141,12 +141,11 @@ def decay_alb_power(veg, veg_type, start_decay, end_decay, t_curr, pwr, alb_v, a
     start_date. Fore times between start and end of decay,
 
     .. math::
-        \\alpha = \\alpha - (dec_{max}^{\\frac{1.0}{pwr}} \\times \\frac{t-start}{end-start})^{pwr}
+      \\alpha = \\alpha - (dec_{max}^{\\frac{1.0}{pwr}} \\times \\frac{t-start}{end-start})^{pwr}
 
-    Where :math:\\alpha is albedo, :math:'dec_{max}' is the maximum decay for albedo,
-    :math:'pwr' is the decay power, :math:'t', :math:'start', and :math:'end' are the current,
+    Where :math:`\\alpha` is albedo, :math:`dec_{max}` is the maximum decay for albedo,
+    :math:`pwr` is the decay power, :math:`t`, :math:`start`, and :math:`end` are the current,
     start, and end times for the litter decay.
-
 
     Args:
         start_decay: date to start albedo decay (datetime)
@@ -220,9 +219,10 @@ def decay_alb_hardy(litter, veg_type, storm_day, alb_v, alb_ir):
     .. math::
         lc = 1.0 - (1.0 - lr)^{day}
 
-    Where :math:'lc' is the fractional litter coverage and :math:'lr' is the daily
+    Where :math:`lc` is the fractional litter coverage and :math:`lr` is the daily
     litter rate of the forest. The new albedo is a weighted average of the calculated albedo
     for the clean snow and the albedo of the litter.
+
 
     Args:
         litter: A dictionary of values for default,albedo,41,42,43 veg types
