@@ -175,7 +175,8 @@ class ppt(image_data.image_data):
                                                                   mass_thresh=self.ppt_threshold,
                                                                   steps_thresh=self.time_to_end_storm)
             self.storm_correction = storms.clip_and_correct(data.precip,
-                                                            self.storms)
+                                                            self.storms,
+                                                            stations = self.stations)
             # self._logger.debug('''Conservation of mass check (precip -
             #                     precip_clipped):\n{0}'''.format(
             #                         data.precip.sum() -
