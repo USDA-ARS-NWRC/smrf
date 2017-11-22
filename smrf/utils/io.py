@@ -69,6 +69,8 @@ class ConfigEntry():
         #Options should always be a list
         if type(self.options) != list:
             self.options = [self.options]
+        if self.name =='client':
+            self.options = [v.upper() for v in self.options]
 
     def parse_info(self,info):
         """
@@ -349,6 +351,7 @@ def check_config_file(user_cfg, master_config,user_cfg_path=None):
                     for v in val_lst:
                         if v != None:
                             v = master_config[section][litem].convert_type(v)
+
                             # Do we have an idea os what to expect (type and options)?
                             options_type = master_config[section][item].type
 
@@ -676,13 +679,15 @@ def get_user_config(fname, mcfg = None):
                 #Check for stations and passwords
                 if m.type == 'str' and u != None:
                     if type(u) == list:
-                        if item =='stations':
+                        if item in ['stations', 'peak']:
                             u = [o.upper() for o in u]
                         else:
                             u = [o.lower() for o in u]
 
                     else:
-                        if item != 'password':
+                        if item == 'client':
+                            u = u.upper()
+                        elif item != 'password':
                             u = u.lower()
 
                 #Add the timezone to all date time
