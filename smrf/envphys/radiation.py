@@ -84,6 +84,7 @@ def albedo(telapsed, cosz, gsize, maxgsz, dirt=2):
     Modified July 23, 2015 - take image of cosz and calculate albedo for
         one time step
     Scott Havens
+    
     """
 
 #     telapsed = np.array(telapsed)
@@ -135,7 +136,17 @@ def albedo(telapsed, cosz, gsize, maxgsz, dirt=2):
 
 def decay_alb_power(veg, veg_type, start_decay, end_decay, t_curr, pwr, alb_v, alb_ir):
     """
-    Find a decrease in albedo due to litter acccumulation
+    Find a decrease in albedo due to litter acccumulation. Decay is based on max
+    decay, decay power, and start and end dates. No litter decay occurs before
+    start_date. Fore times between start and end of decay,
+
+    .. math::
+        \\alpha = \\alpha - (dec_{max}^{\\frac{1.0}{pwr}} \\times \\frac{t-start}{end-start})^{pwr}
+
+    Where :math:\\alpha is albedo, :math:'dec_{max}' is the maximum decay for albedo,
+    :math:'pwr' is the decay power, :math:'t', :math:'start', and :math:'end' are the current,
+    start, and end times for the litter decay.
+
 
     Args:
         start_decay: date to start albedo decay (datetime)
@@ -156,6 +167,7 @@ def decay_alb_power(veg, veg_type, start_decay, end_decay, t_curr, pwr, alb_v, a
 
     Created July 18, 2017
     Micah Sandusky
+
     """
     # Calculate hour past start of decay
     t_diff_hr = t_curr - start_decay
@@ -203,7 +215,14 @@ def decay_alb_power(veg, veg_type, start_decay, end_decay, t_curr, pwr, alb_v, a
 def decay_alb_hardy(litter, veg_type, storm_day, alb_v, alb_ir):
     """
     Find a decrease in albedo due to litter acccumulation
-    using method from (Hardy 2000) with storm_day as input
+    using method from :cite:`Hardy:2000` with storm_day as input.
+
+    .. math::
+        lc = 1.0 - (1.0 - lr)^{day}
+
+    Where :math:'lc' is the fractional litter coverage and :math:'lr' is the daily
+    litter rate of the forest. The new albedo is a weighted average of the calculated albedo
+    for the clean snow and the albedo of the litter.
 
     Args:
         litter: A dictionary of values for default,albedo,41,42,43 veg types
@@ -227,6 +246,7 @@ def decay_alb_hardy(litter, veg_type, storm_day, alb_v, alb_ir):
 
     Created July 19, 2017
     Micah Sandusky
+
     """
     # array for decimal percent snow coverage
     sc = np.zeros_like(alb_v)
