@@ -36,18 +36,22 @@ gitVersion = ''
 gitPath = ''
 
 # get git describe if in git repository
-try:
-	# if we are in a git repo, fetch most recent tags
-	print('Fetching most recent tags')
-	check_output(["git fetch", "--tags"], shell=True)
-except:
-	print('Unable to fetch most recent tags')
+print('Fetching most recent git tags')
+if os.path.exists('./.git'):
+	try:
+		# if we are in a git repo, fetch most recent tags
+		check_output(["git fetch --tags"], shell=True)
+	except Exception as e:
+		print('Unable to fetch most recent tags')
 
-try:
-	ls_proc = check_output(["git describe", "--tags"], shell=True)
-	gitVersion = ls_proc
-	print('Checking most recent version')
-except:
+	try:
+		ls_proc = check_output(["git describe --tags"], shell=True)
+		gitVersion = ls_proc
+		print('Checking most recent version')
+	except Exception as e:
+		print('Unable to get git tag and hash')
+# if not in git repo
+else:
 	print('Not in git repository')
 	gitVersion = ''
 
