@@ -174,7 +174,7 @@ class ppt(image_data.image_data):
             self.storms, storm_count = storms.tracking_by_station(data.precip,
                                                                   mass_thresh=self.ppt_threshold,
                                                                   steps_thresh=self.time_to_end_storm)
-            self.storm_correction = storms.clip_and_correct(data.precip,
+            self.corrected_precip = storms.clip_and_correct(data.precip,
                                                             self.storms,
                                                             stations = self.stations)
             # self._logger.debug('''Conservation of mass check (precip -
@@ -267,10 +267,11 @@ class ppt(image_data.image_data):
         #Adjust the precip for undercatchment
         if self.config['adjust_for_undercatch']:
             self._logger.debug('%s Adjusting precip for undercatch...' % data.name)
-            data = precip.adjust_for_undercatch(data,wind,temp,self.config,self.metadata)
+            data = precip.adjust_for_undercatch(data,wind,temp,self.config, self.metadata)
 
         if self.nasde_model == 'marks2017':
-            self.distribute_for_marks2017(data, dpt, time, mask=mask)
+            #Use the clipped and corrected precip
+            self.distribute_for_marks2017(self.corrected_precip.ix[time], dpt, time, mask=mask)
 
         else:
             self.distribute_for_susong1999(data, dpt, time, mask=mask)
@@ -282,8 +283,9 @@ class ppt(image_data.image_data):
         snow density model Marks2017 requires storm total and a corrected
         precipitation as to avoid precip between storms.
         """
-        corrected_precip = data.mul(self.storm_correction)
-        if corrected_precip.sum() > 0.0:
+        #self.corrected_precip # = data.mul(self.storm_correction)
+        print(data)
+        if data.sum() > 0.0:
             # Check for time in every storm
             for i, s in self.storms.iterrows():
                 storm_start = s['start']
@@ -301,9 +303,8 @@ class ppt(image_data.image_data):
             self._logger.debug("Storming? {0}".format(self.storming))
             self._logger.debug("Current Storm ID = {0}".format(self.storm_id))
 
-
             # distribute data and set the min/max
-            self._distribute(corrected_precip, zeros=None)
+            self._distribute(data, zeros=None)
             self.precip = utils.set_min_max(self.precip, self.min, self.max)
 
             if time == storm_start:

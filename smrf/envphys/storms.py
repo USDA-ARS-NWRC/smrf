@@ -471,5 +471,5 @@ def clip_and_correct(precip,storms,stations = []):
         #print "{0:>10} {1:>10} {2:>10}".format(original,clipped,c)
         correction[station] = c
     #print "Max precip from the correction:{0}".format(precip_clipped.max())
-    return pd.Series(correction)
-    #return precip_clipped.mul(pd.Series(correction), axis=1)
+    #return pd.Series(correction)
+    return precip_clipped.mul(pd.Series(correction), axis=1)
