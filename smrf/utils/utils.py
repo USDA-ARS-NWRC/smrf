@@ -5,6 +5,7 @@ Collection of utility functions
 """
 
 import numpy as np
+import pandas as pd
 from datetime import datetime
 import pytz
 import os
@@ -162,10 +163,8 @@ def getgitinfo():
 
 def config_documentation():
     """
-    Auto documents the core config file.
-    Creates a file named auto_config.rst
-    in the docs folder which is then used
-    for documentation
+    Auto documents the core config file. Creates a file named auto_config.rst
+    in the docs folder which is then used for documentation.
     """
 
     mcfg = io.get_master_config()
@@ -241,6 +240,51 @@ The {0} section controls the {0} parameters for an entire SMRF run.
     with open(path,'w+') as f:
         f.writelines(config_doc)
     f.close()
+
+def check_station_validity(metadata_csv=None,metadata=None):
+    """
+    Takes in a data frame representing the metadata for the weather stations
+    as produced by :mod:`smrf.framework.model_framework.SMRF.loadData` and
+    check to see if any stations have the same location. Produces an error
+    statement alerting the user.
+
+    Args:
+        metadata_csv: CSV containing the metdata for weather stations
+        metadata: Pandas Dataframe containing the metdata for weather stations
+
+    Returns:
+        msg: String containing error message for which stations are at the same location
+    """
+    if metadata_csv != None:
+        metadata = pd.read_csv(metadata_csv)
+        metadata.set_index('primary_id', inplace=True)
+
+    #Unique station locations
+    unique_x = list(metadata.xi.unique())
+    unique_y = list(metadata.yi.unique())
+
+    repeat_sta = []
+
+    #Cycle through all the positions look for multiple  stations at a position
+    for x in unique_x:
+        for y in unique_y:
+            x_search = metadata['xi'] == x
+            y_search = metadata['yi'] == y
+            stations = metadata.index[x_search & y_search].tolist()
+
+            if len(stations) > 1:
+                repeat_sta.append(stations)
+
+    if len(repeat_sta) > 0:
+        msg ="Stations in metadata share same location: \n"
+        for r_sta in repeat_sta:
+            msg += ",".join(r_sta)
+            msg+='\n'
+    else:
+        msg = None
+
+    return msg
+
 
 def getqotw():
     p = os.path.dirname(__core_config__)

@@ -35,7 +35,7 @@ import pytz
 from smrf import data, distribute, output, __core_config__
 from smrf.envphys import radiation
 from smrf.utils import queue, io
-from smrf.utils.utils import backup_input, getqotw
+from smrf.utils.utils import backup_input, getqotw, check_station_validity
 from threading import Thread
 
 
@@ -419,6 +419,11 @@ class SMRF():
             except:
                 self._logger.warn('''Distribution not initialized, data not
                                     filtered to desired stations''')
+
+        #Confirm out stations all have a unique position
+        msg = check_station_validity(metadata=self.data.metadata)
+        if msg != None:
+            raise IOError(msg)
 
         #Does the user want to create a CSV copy of the station data used.
         if self.config["output"]['input_backup'] == True:
