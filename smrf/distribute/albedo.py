@@ -139,7 +139,8 @@ class albedo(image_data.image_data):
                     alb_v = alb_v_d
                     alb_ir = alb_ir_d
                 else:
-                    self._logger.error('Need correct inputs for decay method: {0}'.format(self.config['decay_method']))
+                    self._logger.error('Need correct inputs for decay method: {0}. Check your dates!'.format(self.config['decay_method']))
+                    raise ValueError('Albedo decay dates are not correct!')
 
             elif self.config['decay_method'] == 'hardy2000':
                 alb_v_d, alb_ir_d = radiation.decay_alb_hardy(self.litter,

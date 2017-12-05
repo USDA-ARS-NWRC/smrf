@@ -468,7 +468,7 @@ def add_defaults(user_config,master_config):
     return user_config
 
 
-def generate_config(config,fname, inicheck = False):
+def generate_config(config,fname, inicheck = False, order_lst = None, titles = None):
     """
     Generates a list of strings to be written and then writes them in the ini file
 
@@ -488,44 +488,46 @@ def generate_config(config,fname, inicheck = False):
     section_header = ('#'*80) + '\n' + ('# {0}\n') +('#'*80)
 
     #Dictionaries do not go in order so we provide the order here
-    order_lst = ['topo',
-                  'time',
-                  'stations',
-                  'csv',
-                  'mysql',
-                  'gridded',
-                  'air_temp',
-                  'vapor_pressure',
-                  'wind',
-                  'precip',
-                  'albedo',
-                  'solar',
-                  'thermal',
-                  'soil_temp',
-                  'output',
-                  'logging',
-                  'system'
-                  ]
+    if order_lst == None:
+        order_lst = ['topo',
+                      'time',
+                      'stations',
+                      'csv',
+                      'mysql',
+                      'gridded',
+                      'air_temp',
+                      'vapor_pressure',
+                      'wind',
+                      'precip',
+                      'albedo',
+                      'solar',
+                      'thermal',
+                      'soil_temp',
+                      'output',
+                      'logging',
+                      'system'
+                      ]
 
     #Dictionary of commented section titles
-    titles = {'topo': "Files for DEM and vegetation",
-              'time': "Dates to run model",
-              'stations': "Stations to use",
-              'csv': "CSV data files",
-              'mysql': "MySQL database",
-              'gridded': "Gridded dataset i.e. wrf_out",
-              'air_temp': "Air temperature distribution",
-              'vapor_pressure': "Vapor pressure distribution",
-              'wind': "Wind speed and wind direction distribution",
-              'precip': "Precipitation distribution",
-              'albedo': "Albedo distribution",
-              'solar': "Solar radiation distribution",
-              'thermal': "Thermal radiation distribution",
-              'soil_temp': " Soil temperature",
-              'output': "Output variables",
-              'logging': "Logging",
-              'system': "System variables"
-            }
+    if titles == None:
+        titles = {'topo': "Files for DEM and vegetation",
+                  'time': "Dates to run model",
+                  'stations': "Stations to use",
+                  'csv': "CSV data files",
+                  'mysql': "MySQL database",
+                  'gridded': "Gridded dataset i.e. wrf_out",
+                  'air_temp': "Air temperature distribution",
+                  'vapor_pressure': "Vapor pressure distribution",
+                  'wind': "Wind speed and wind direction distribution",
+                  'precip': "Precipitation distribution",
+                  'albedo': "Albedo distribution",
+                  'solar': "Solar radiation distribution",
+                  'thermal': "Thermal radiation distribution",
+                  'soil_temp': " Soil temperature",
+                  'output': "Output variables",
+                  'logging': "Logging",
+                  'system': "System variables"
+                }
 
     #Construct the section strings
     config_str="#"*80
