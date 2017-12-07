@@ -13,6 +13,7 @@ test_data/stoporad.ip
 test_data/wrfout_d02_2016-03-10.nc
 test_data/stoporad*
 examples/*.nc
+test_data/output/*.nc
 
 
 # Byte-compiled / optimized / DLL files
@@ -100,4 +101,5 @@ test_data/tmp/*
 test_data/config.ini
 
 #ignore maxus.
+test_data/topo/maxus_100window.nc
 test_data/topo/maxus.nc
