@@ -416,6 +416,11 @@ class SMRF():
                         self.distribute[key].stations = sta_match.tolist()
                         setattr(self.data, key, d[sta_match])
 
+                        #Confirm out stations all have a unique position
+                        msg = check_station_validity(metadata=self.data.metadata.ix[self.distribute[key].stations])
+                        if msg != None:
+                            raise IOError(msg)
+
                 if hasattr(self.data, 'cloud_factor'):
                     d = getattr(self.data, 'cloud_factor')
                     setattr(self.data,
@@ -425,10 +430,6 @@ class SMRF():
                 self._logger.warn('''Distribution not initialized, data not
                                     filtered to desired stations''')
 
-        #Confirm out stations all have a unique position
-        msg = check_station_validity(metadata=self.data.metadata)
-        if msg != None:
-            raise IOError(msg)
 
         #Does the user want to create a CSV copy of the station data used.
         if self.config["output"]['input_backup'] == True:
