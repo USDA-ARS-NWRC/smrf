@@ -35,7 +35,7 @@ import pytz
 from smrf import data, distribute, output, __core_config__
 from smrf.envphys import radiation
 from smrf.utils import queue, io
-from smrf.utils.utils import backup_input, getqotw, check_station_validity
+from smrf.utils.utils import backup_input, getqotw, check_station_colocation
 from threading import Thread
 import shutil
 
@@ -416,10 +416,6 @@ class SMRF():
                         self.distribute[key].stations = sta_match.tolist()
                         setattr(self.data, key, d[sta_match])
 
-                        #Confirm out stations all have a unique position
-                        msg = check_station_validity(metadata=self.data.metadata.ix[self.distribute[key].stations])
-                        if msg != None:
-                            raise IOError(msg)
 
                 if hasattr(self.data, 'cloud_factor'):
                     d = getattr(self.data, 'cloud_factor')
@@ -430,6 +426,16 @@ class SMRF():
                 self._logger.warn('''Distribution not initialized, data not
                                     filtered to desired stations''')
 
+            #Check all section for stations that are colocated
+            for key in self.distribute.keys():
+                if key in self.data.variables:
+                    #Confirm out stations all have a unique position for each section
+                    colocated = check_station_colocation(metadata=self.data.metadata.ix[self.distribute[key].stations])
+
+                    #Stations are co-located, throw error
+                    if colocated != None:
+                        self._logger.error("ERROR: Stations in the {0} section are colocated.\n{1}".format(key,','.join(colocated[0])))
+                        sys.exit()
 
         #Does the user want to create a CSV copy of the station data used.
         if self.config["output"]['input_backup'] == True:
