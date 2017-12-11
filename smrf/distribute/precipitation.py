@@ -284,7 +284,6 @@ class ppt(image_data.image_data):
         precipitation as to avoid precip between storms.
         """
         #self.corrected_precip # = data.mul(self.storm_correction)
-        print(data)
         if data.sum() > 0.0:
             # Check for time in every storm
             for i, s in self.storms.iterrows():
