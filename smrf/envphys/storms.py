@@ -4,8 +4,6 @@ Originally written by Scott Havens in 2015
 @author: Micah Johnson
 """
 
-__version__ = '0.2.1'
-
 
 import numpy as np
 import os
@@ -202,6 +200,54 @@ def time_since_storm_basin(precipitation, storm, stormid, storming, time, time_s
 
     return stormDays
 
+def time_since_storm_pixel(precipitation, dpt, perc_snow, storming, time_step=1/24, stormDays=None, mass=1.0, ps_thresh=0.5):
+    """
+    Calculate the decimal days since the last storm given a precip time series
+
+     - Will assign decimal days since last storm to every pixel
+
+    Args:
+        precipitation: Precipitation values
+
+        dpt: dew point values
+
+        perc_snow: percent_snow values
+
+        storming: if it is stomring
+
+        time_step: step in days of the model run
+
+        stormDays: unifrom days since last storm on pixel basis
+
+        mass: Threshold for the mass to start a new storm
+
+        ps_thresh: Threshold for percent_snow
+
+    Returns:
+        stormDays: days since last storm on pixel basis
+
+    Created October 16, 2017
+    @author: Micah Sandusky
+    """
+    # either preallocate or use the input
+    if stormDays is None:
+        stormDays = np.zeros(precipitation.shape)
+
+    # add timestep
+    stormDays += time_step
+
+    # only reset if stomring and not overly warm
+    if storming and dpt.min() < 2.0:
+        # determine location where there is enough mass
+        idx_mass = precipitation >= mass
+        # determine locations where it has snowed
+        idx = perc_snow >= ps_thresh
+
+        # reset the stormDays to zero where the storm is present
+        stormDays[(idx_mass & idx)] = 0
+
+    return stormDays
+
 def tracking_by_station(precip, mass_thresh = 0.01, steps_thresh = 3):
     """
     Processes the vector station data prior to the data being distributed
@@ -369,7 +415,7 @@ def tracking_by_basin(precipitation, time, storm_lst, time_steps_since_precip, i
     return storm_lst, time_steps_since_precip, is_storming
 
 
-def clip_and_correct(precip,storms):
+def clip_and_correct(precip,storms,stations = []):
     """
     Meant to go along with the storm tracking, we correct the data here by adding in
     the precip we would miss by ignoring it. This is mostly because will get rain on snow events
@@ -379,7 +425,10 @@ def clip_and_correct(precip,storms):
     Args:
         precip: Vector station data representing the measured precipitation
         storms: Storm list with dictionaries as defined in
-            :func:`~smrf.envphys.storms.tracking_by_station`
+                :func:`~smrf.envphys.storms.tracking_by_station`
+        stations: Desired stations that are being used for clipping. If stations
+                  is not passed, then use all in the dataframe
+
 
     Returns:
         The correct precip that ensures there is no precip outside of the defined
@@ -392,8 +441,7 @@ def clip_and_correct(precip,storms):
 
     #Specify zeros where were not storming
     precip_clipped = precip.copy()
-
-    precip_clipped[:]=0
+    precip_clipped[:] = 0
 
     for j,storm in storms.iterrows():
 
@@ -403,16 +451,25 @@ def clip_and_correct(precip,storms):
         precip_clipped.ix[storm_start:storm_end] = my_slice
 
     correction = {}
+    #print "{0:>10} {1:>10} {2:>10}".format("Original","Clipped", "C")
+
+    if len(stations) == 0:
+        stations = precip.columns
 
     #Correct the precip to be equal to the sum.
-    for station in precip.columns:
+    for station in stations:
         original = precip[station].sum()
         clipped = precip_clipped[station].sum()
+
         if original == 0:
             c = 1.0
+        elif clipped == 0:
+            c = 0
         else:
             c = original/clipped
 
+        #print "{0:>10} {1:>10} {2:>10}".format(original,clipped,c)
         correction[station] = c
     #print "Max precip from the correction:{0}".format(precip_clipped.max())
+    #return pd.Series(correction)
     return precip_clipped.mul(pd.Series(correction), axis=1)

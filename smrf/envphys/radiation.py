@@ -11,7 +11,7 @@ import datetime
 import logging
 import pytz
 from smrf.utils import utils
-
+from smrf.utils.io import isint
 
 on_rtd = os.environ.get('READTHEDOCS') == 'True'
 if on_rtd:
@@ -84,6 +84,7 @@ def albedo(telapsed, cosz, gsize, maxgsz, dirt=2):
     Modified July 23, 2015 - take image of cosz and calculate albedo for
         one time step
     Scott Havens
+
     """
 
 #     telapsed = np.array(telapsed)
@@ -133,9 +134,18 @@ def albedo(telapsed, cosz, gsize, maxgsz, dirt=2):
 
     return alb_v, alb_ir
 
-def decay_alb_power(self, start_decay, end_decay, t_curr, pwr, alb_v, alb_ir):
+def decay_alb_power(veg, veg_type, start_decay, end_decay, t_curr, pwr, alb_v, alb_ir):
     """
-    Find a decrease in albedo due to litter acccumulation
+    Find a decrease in albedo due to litter acccumulation. Decay is based on max
+    decay, decay power, and start and end dates. No litter decay occurs before
+    start_date. Fore times between start and end of decay,
+
+    .. math::
+      \\alpha = \\alpha - (dec_{max}^{\\frac{1.0}{pwr}} \\times \\frac{t-start}{end-start})^{pwr}
+
+    Where :math:`\\alpha` is albedo, :math:`dec_{max}` is the maximum decay for albedo,
+    :math:`pwr` is the decay power, :math:`t`, :math:`start`, and :math:`end` are the current,
+    start, and end times for the litter decay.
 
     Args:
         start_decay: date to start albedo decay (datetime)
@@ -156,6 +166,7 @@ def decay_alb_power(self, start_decay, end_decay, t_curr, pwr, alb_v, alb_ir):
 
     Created July 18, 2017
     Micah Sandusky
+
     """
     # Calculate hour past start of decay
     t_diff_hr = t_curr - start_decay
@@ -173,37 +184,49 @@ def decay_alb_power(self, start_decay, end_decay, t_curr, pwr, alb_v, alb_ir):
     # Use max decay if after start
     elif t_diff_hr > t_decay_hr:
         # Use default
-        alb_dec = alb_dec + self.config['veg_default']
+        alb_dec = alb_dec + veg['default']
         # Decay based on veg type
-        for i, v in enumerate(self.config['veg']):
-            alb_dec[self.veg_type == int(v)] = self.config['veg'][v]
+        for k,v in veg.items():
+            if isint(k):
+                alb_dec[veg_type == int(k)] = v
 
     # Power function decay if during decay period
     else:
         # Use defaults
-        max_dec = self.config['veg_default']
+        max_dec = veg['default']
         tao = (t_decay_hr) / (max_dec**(1.0/pwr))
         # Add default decay to array of zeros
         alb_dec = alb_dec + ((t_diff_hr) / tao)**pwr
         # Decay based on veg type
-        for i, v in enumerate(self.config['veg']):
-            max_dec = self.config['veg'][v]
+        for k,v in veg.items():
+            max_dec = v
             tao = (t_decay_hr) / (max_dec**(1.0/pwr))
             # Set albedo decay at correct veg types
-            alb_dec[self.veg_type == int(v)] = ((t_diff_hr) / tao)**pwr
-            # self._logger.debug('Type {0}, decay {1}'.format(int(v), self.config['veg'][v]))
+            if isint(k):
+                alb_dec[veg_type == int(k)] = ((t_diff_hr) / tao)**pwr
+                # self._logger.debug('Type {0}, decay {1}'.format(int(v), veg_type['veg'][v]))
 
     alb_v_d = alb_v - alb_dec
     alb_ir_d = alb_ir - alb_dec
 
     return alb_v_d, alb_ir_d
 
-def decay_alb_hardy(self, storm_day, alb_v, alb_ir, alb_litter = 0.2):
+def decay_alb_hardy(litter, veg_type, storm_day, alb_v, alb_ir):
     """
     Find a decrease in albedo due to litter acccumulation
-    using method from (Hardy 2000) with storm_day as input
+    using method from :cite:`Hardy:2000` with storm_day as input.
+
+    .. math::
+        lc = 1.0 - (1.0 - lr)^{day}
+
+    Where :math:`lc` is the fractional litter coverage and :math:`lr` is the daily
+    litter rate of the forest. The new albedo is a weighted average of the calculated albedo
+    for the clean snow and the albedo of the litter.
+
 
     Args:
+        litter: A dictionary of values for default,albedo,41,42,43 veg types
+        veg_type: An image of the basin's NLCD veg type
         storm_day: numpy array of decimal day since last storm
         alb_v: numpy array of albedo for visibile spectrum
         alb_ir: numpy array of albedo for IR spectrum
@@ -223,17 +246,21 @@ def decay_alb_hardy(self, storm_day, alb_v, alb_ir, alb_litter = 0.2):
 
     Created July 19, 2017
     Micah Sandusky
+
     """
     # array for decimal percent snow coverage
     sc = np.zeros_like(alb_v)
     # calculate snow coverage default veg type
-    l_rate = self.config['litter_default']
+    l_rate = litter['default']
+    alb_litter = litter['albedo']
+
     sc = sc + (1.0-l_rate)**(storm_day)
     # calculate snow coverage based on veg type
-    for i, v in enumerate(self.config['litter']):
+    for k, v in litter.items():
         #self._logger.debug('litter {0}: {1}'.format(v, self.config['litter'][v] ) )
-        l_rate = self.config['litter'][v]
-        sc[self.veg_type == int(v)] = (1.0 - l_rate)**(storm_day[self.veg_type == int(v)])
+        l_rate = litter[k]
+        if isint(k):
+            sc[veg_type == int(k)] = (1.0 - l_rate)**(storm_day[veg_type == int(k)])
     # calculate litter coverage
     lc = np.ones_like(alb_v) - sc
     # weighted average to find decayed albedo

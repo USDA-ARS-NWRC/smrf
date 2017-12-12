@@ -305,22 +305,35 @@ class solar(image_data.image_data):
                                                  azimuth)
             setattr(self, 'clear_ir_beam', val_beam)
             setattr(self, 'clear_ir_diffuse', val_diffuse)
+            self.ir_beam = val_beam.copy()
+            self.ir_diffuse = val_diffuse.copy()
 
             val_beam, val_diffuse = self.calc_vis(min_storm_day, wy_day,
                                                   tz_min_west, wyear, cosz,
                                                   azimuth)
             setattr(self, 'clear_vis_beam', val_beam)
             setattr(self, 'clear_vis_diffuse', val_diffuse)
+            self.vis_beam = val_beam.copy()
+            self.vis_diffuse = val_diffuse.copy()
 
             # --------------------------------------------
             # correct clear sky for cloud
-
-            self.cloud_correct()
+            if self.config['correct_cloud']:
+                self.cloud_correct()
+                # copy output for output variables
+                self.cloud_vis_beam = self.vis_beam.copy()
+                self.cloud_vis_diffuse = self.vis_diffuse.copy()
+                self.cloud_ir_beam = self.ir_beam.copy()
+                self.cloud_ir_diffuse = self.ir_diffuse.copy()
 
             # --------------------------------------------
             # correct cloud for veg
-
-            self.veg_correct(illum_ang)
+            if self.config['correct_veg']:
+                self.veg_correct(illum_ang)
+                self.veg_vis_beam = self.vis_beam.copy()
+                self.veg_vis_diffuse = self.vis_diffuse.copy()
+                self.veg_ir_beam = self.ir_beam.copy()
+                self.veg_ir_diffuse = self.ir_diffuse.copy()
 
             # --------------------------------------------
             # calculate net radiation
@@ -390,12 +403,29 @@ class solar(image_data.image_data):
                 setattr(self, 'clear_ir_diffuse',
                         queue['clear_ir_diffuse'].get(t))
 
+                self.ir_beam = self.clear_ir_beam.copy()
+                self.ir_diffuse = self.clear_ir_diffuse.copy()
+                self.vis_beam = self.clear_vis_beam.copy()
+                self.vis_diffuse = self.clear_vis_diffuse.copy()
+
                 # correct clear sky for cloud
-                self.cloud_correct()
+                if self.config['correct_cloud'] == True:
+                    self.cloud_correct()
+                    # copy output for output variables
+                    self.cloud_vis_beam = self.vis_beam.copy()
+                    self.cloud_vis_diffuse = self.vis_diffuse.copy()
+                    self.cloud_ir_beam = self.ir_beam.copy()
+                    self.cloud_ir_diffuse = self.ir_diffuse.copy()
 
                 # correct cloud for veg
                 illum_ang = queue['illum_ang'].get(t)
-                self.veg_correct(illum_ang)
+                if self.config['correct_veg'] == True:
+                    self.veg_correct(illum_ang)
+                    # copy output for output variables
+                    self.veg_vis_beam = self.vis_beam.copy()
+                    self.veg_vis_diffuse = self.vis_diffuse.copy()
+                    self.veg_ir_beam = self.ir_beam.copy()
+                    self.veg_ir_diffuse = self.ir_diffuse.copy()
 
                 # get the albedo from the queue
                 albedo_vis = queue['albedo_vis'].get(t)
@@ -406,6 +436,29 @@ class solar(image_data.image_data):
 
             else:
                 self.net_solar = None
+                if self.config['correct_veg'] == True:
+                    self.veg_vis_beam = None
+                    self.veg_vis_diffuse = None
+                    self.veg_ir_beam = None
+                    self.veg_ir_diffuse = None
+                if self.config['correct_cloud'] == True:
+                    self.cloud_vis_beam = None
+                    self.cloud_vis_diffuse = None
+                    self.cloud_ir_beam = None
+                    self.cloud_ir_diffuse = None
+
+
+            if self.config['correct_veg'] == True:
+                queue['veg_vis_beam'].put([t, self.veg_vis_beam])
+                queue['veg_vis_diffuse'].put([t, self.veg_vis_diffuse])
+                queue['veg_ir_beam'].put([t, self.veg_ir_beam])
+                queue['veg_ir_diffuse'].put([t, self.veg_ir_diffuse])
+
+            if self.config['correct_cloud'] == True:
+                queue['cloud_vis_beam'].put([t, self.cloud_vis_beam])
+                queue['cloud_vis_diffuse'].put([t, self.cloud_vis_diffuse])
+                queue['cloud_ir_beam'].put([t, self.cloud_ir_beam])
+                queue['cloud_ir_diffuse'].put([t, self.cloud_ir_diffuse])
 
             queue['net_solar'].put([t, self.net_solar])
             queue['cloud_factor'].put([t, self.cloud_factor])
@@ -468,12 +521,12 @@ class solar(image_data.image_data):
         """
 
         self._logger.debug('Correcting clear sky radiation for clouds')
-        self.cloud_vis_beam, self.cloud_vis_diffuse = radiation.cf_cloud(self.clear_vis_beam,
-                                                                         self.clear_vis_diffuse,
+        self.vis_beam, self.vis_diffuse = radiation.cf_cloud(self.vis_beam,
+                                                                         self.vis_diffuse,
                                                                          self.cloud_factor)
 
-        self.cloud_ir_beam, self.cloud_ir_diffuse = radiation.cf_cloud(self.clear_ir_beam,
-                                                                       self.clear_ir_diffuse,
+        self.ir_beam, self.ir_diffuse = radiation.cf_cloud(self.ir_beam,
+                                                                       self.ir_diffuse,
                                                                        self.cloud_factor)
 
     def veg_correct(self, illum_ang):
@@ -494,24 +547,24 @@ class solar(image_data.image_data):
 
         # calculate for visible
         # correct beam
-        self.veg_vis_beam = radiation.veg_beam(self.cloud_vis_beam,
+        self.vis_beam = radiation.veg_beam(self.vis_beam,
                                                self.veg_height,
                                                illum_ang,
                                                self.veg_k)
 
         # correct diffuse
-        self.veg_vis_diffuse = radiation.veg_diffuse(self.cloud_vis_diffuse,
+        self.vis_diffuse = radiation.veg_diffuse(self.vis_diffuse,
                                                      self.veg_tau)
 
         # calculate for ir #
         # correct beam
-        self.veg_ir_beam = radiation.veg_beam(self.cloud_ir_beam,
+        self.ir_beam = radiation.veg_beam(self.ir_beam,
                                               self.veg_height,
                                               illum_ang,
                                               self.veg_k)
 
         # correct diffuse
-        self.veg_ir_diffuse = radiation.veg_diffuse(self.cloud_ir_diffuse,
+        self.ir_diffuse = radiation.veg_diffuse(self.ir_diffuse,
                                                     self.veg_tau)
 
     def calc_net(self, albedo_vis, albedo_ir):
@@ -526,14 +579,14 @@ class solar(image_data.image_data):
                 :mod:`smrf.distribute.albedo.albedo.albedo_ir`
         """
 
-        self._logger.debug('Calculing net radiation')
+        self._logger.debug('Calculating net radiation')
 
         # calculate net visible
-        vv_n = (self.veg_vis_beam + self.veg_vis_diffuse) * (1 - albedo_vis)
+        vv_n = (self.vis_beam + self.vis_diffuse) * (1 - albedo_vis)
         vv_n = utils.set_min_max(vv_n, self.min, self.max)
 
         # calculate net ir
-        vir_n = (self.veg_ir_beam + self.veg_ir_diffuse) * (1 - albedo_ir)
+        vir_n = (self.ir_beam + self.ir_diffuse) * (1 - albedo_ir)
         vir_n = utils.set_min_max(vir_n, self.min, self.max)
 
         # calculate total net

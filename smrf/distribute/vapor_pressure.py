@@ -97,7 +97,7 @@ class vp(image_data.image_data):
         1. Distribute the point vapor pressure measurements
         2. Calculate dew point temperature using
             :mod:`smrf.envphys.core.envphys_c.cdewpt`
-        3. Adjsut dew point values to not exceed the air temperature
+        3. Adjust dew point values to not exceed the air temperature
 
         Args:
             data: Pandas dataframe for a single time step from precip
@@ -123,8 +123,8 @@ class vp(image_data.image_data):
         dpt = np.zeros_like(self.vapor_pressure, dtype=np.float64)
         envphys_c.cdewpt(self.vapor_pressure,
                          dpt,
-                         float(self.config['tolerance']),
-                         int(self.config['nthreads']))
+                         self.config['tolerance'],
+                         self.config['nthreads'])
 
         # find where dpt > ta
         ind = dpt >= ta

@@ -3,8 +3,10 @@
 from smrf.utils import io
 import argparse
 import os
+import sys
 
 def main():
+
     """
     Meant to update the config files using make
     """
@@ -15,6 +17,8 @@ def main():
                         help='Path to a directory containing SMRF ini files')
     parser.add_argument('-c', action="store_true",
                         help='Print out errors and warnins on each file')
+    parser.add_argument('-d', action="store_true",
+                        help='Does a dry run and doesnt update any files')
     args = parser.parse_args()
 
     files_updated=0
@@ -27,11 +31,10 @@ def main():
             if f.split('.')[-1] =='ini':
                 files_checked+=1
                 out_f = os.path.abspath(os.path.join(args.dir,f))
-                user_cfg = io.read_config(out_f)
+                user_cfg = io.get_user_config(out_f)
                 config = io.get_master_config()
-                user_cfg = io.add_defaults(user_cfg,config)
-                #Print out errors
-                warnings, errors = io.check_config_file(user_cfg,config)
+                print(f)
+                warnings, errors = io.check_config_file(user_cfg,config,user_cfg_path=os.path.abspath(os.path.join(args.dir,f)))
                 print "Checking {0}".format(f)
                 if args.c:
                     io.print_config_report(warnings,errors)
@@ -40,8 +43,9 @@ def main():
                     files_with_errors +=1
                 else:
                     try:
-                        io.generate_config(user_cfg,out_f)
-                        files_updated +=1
+                        if not args.d:
+                            io.generate_config(user_cfg,out_f)
+                            files_updated +=1
                     except:
                         fails +=1
 

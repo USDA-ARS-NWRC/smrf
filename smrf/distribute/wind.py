@@ -1,5 +1,6 @@
 
 import numpy as np
+import pandas as pd
 import logging
 import os
 from smrf.distribute import image_data
@@ -133,10 +134,10 @@ class wind(image_data.image_data):
                                .format(self.config['maxus_netcdf']))
 
             # check maxus defaults
-            if 'station_default' not in self.config:
-                self.config['station_default'] = 11.4
-            if 'veg_default' not in self.config:
-                self.config['veg_default'] = 11.4
+            # if 'station_default' not in self.config:
+            #     self.config['station_default'] = 11.4
+            # if 'veg_default' not in self.config:
+            #     self.config['veg_default'] = 11.4
 
             # get the veg values
             matching = [s for s in self.config.keys() if "veg_" in s]
@@ -145,31 +146,7 @@ class wind(image_data.image_data):
                 if m != 'veg_default':
                     ms = m.split('_')
                     v[ms[1]] = float(self.config[m])
-            self.config['veg'] = v
-
-
-            #Set max and min values
-            if "min_wind" in self.config:
-                self.min = self.config['min_wind']
-            else:
-                self.min = 0.447
-
-            #Set max and min values and/opr defaults
-            if "max_wind" in self.config:
-                self.max = self.config['max_wind']
-            else:
-                self.max = 35.0
-
-            # Mountain peak values
-            if 'peak' in self.config:
-                # Check to see if parsed as NoneType from config
-                if self.config['peak'] is None:
-                    self.config['peak'] = ''
-                else:
-                    self.config['peak'] = self.config['peak'].split(',')
-            else:
-
-                self.config['peak'] = ''
+            self.veg = v
 
         self._logger.debug('Created distribute.wind')
 
@@ -188,7 +165,8 @@ class wind(image_data.image_data):
         """
 
         self._logger.debug('Initializing distribute.wind')
-
+        if type(self.config['peak']) != list:
+            self.config['peak'] = [self.config['peak']]
         self._initialize(topo, data.metadata)
 
         if not self.gridded:
@@ -290,6 +268,10 @@ class wind(image_data.image_data):
             self.distribute(data_speed.ix[t], data_direction.ix[t])
 
             queue['wind_speed'].put([t, self.wind_speed])
+            queue['wind_direction'].put([t, self.wind_direction])
+
+            if not self.gridded:
+                queue['flatwind'].put([t, self.flatwind])
 
     def simulateWind(self, data_speed):
         """
@@ -325,8 +307,8 @@ class wind(image_data.image_data):
             cellmaxus[ind] = self.maxus[i][ind]
 
         # correct for veg
-        for i, v in enumerate(self.config['veg']):
-            cellmaxus[self.veg_type == int(v)] += self.config['veg'][v]
+        for i, v in enumerate(self.veg):
+            cellmaxus[self.veg_type == int(v)] += self.veg[v]
 
         # correct unreasonable values
         cellmaxus[cellmaxus > 32] = 32
@@ -407,14 +389,13 @@ class wind(image_data.image_data):
         self.nstep = 360/self.nbins
 
         for m in self.metadata.index:
-
             # pixel locations
             xi = self.metadata.loc[m, 'xi']
             yi = self.metadata.loc[m, 'yi']
             e = self.metadata.loc[m, 'enhancement']
 
             # maxus value at the station
-            if not np.isnan(data_direction[m]):
+            if not pd.isnull(data_direction[m]):
 
                 if m in self.config['peak']:
                     val_maxus = np.min(self.maxus[:, yi, xi] + e)

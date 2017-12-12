@@ -21,7 +21,7 @@ class output_netcdf():
     type = 'netcdf'
     fmt = '%Y-%m-%d %H:%M:%S'
 
-    def __init__(self, variable_list, topo, time, out_frequency):
+    def __init__(self, variable_list, topo, time, outConfig):
         """
         Initialize the output_netcdf() class
 
@@ -41,11 +41,13 @@ class output_netcdf():
 
         # process the time section
         self.run_time_step = int(time['time_step'])
-        self.out_frequency = int(out_frequency)
+        self.out_frequency = int(outConfig['frequency'])
+        self.outConfig = outConfig
 
         # determine the x,y vectors for the netCDF file
         x = topo.x
         y = topo.y
+        self.mask = topo.mask
 #         dimensions = ('Time','dateStrLen','y','x')
         dimensions = ('time', 'y', 'x')
         self.date_time = {}
@@ -184,7 +186,10 @@ class output_netcdf():
         f.variables['time'][index] = t
 
         # insert the data
-        f.variables[variable][index, :] = data
+        if self.outConfig['mask']:
+            f.variables[variable][index, :] = data*self.mask
+        else:
+            f.variables[variable][index, :] = data
 
         # synce the data to disk to that it can be viewed immediately
 #         f.sync()

@@ -1,0 +1,165 @@
+#!/usr/bin/env python
+
+import smrf
+from smrf.utils import io
+from datetime import date
+import os
+import sys
+import shutil
+
+def create_project(summary):
+    if summary['overwrite']:
+            print('\tRemoving existing project...')
+            shutil.rmtree(summary['path'])
+
+    #Create file structure
+    summary['out location'] = os.path.join(summary['path'],'output')
+    summary['temp_dir'] = os.path.join(summary['path'],'tmp')
+    print('\tCreating the directories for the project...')
+    os.mkdir(summary['path'])
+    os.mkdir(summary['out location'])
+    os.mkdir(summary['temp_dir'])
+
+    #Creare the default config
+    print('\tMaking default config file for SMRF...')
+    config = io.get_master_config()
+    cfg = {}
+    #We only need one data section per user request
+    unneeded_sections = ['csv','mysql','gridded']
+    unneeded_sections.remove(summary['input data type'])
+    for name,section in config.items():
+        if name not in unneeded_sections:
+            sec = {}
+            for item,entry in section.items():
+                sec[item] = entry.default
+            cfg[name] = sec
+    cfg['output']['out_location'] = summary['out location']
+    cfg['system']['temp_dir'] = summary['temp_dir']
+    io.generate_config(cfg,os.path.join(summary['path'],'config.ini'), inicheck=True)
+
+    #Create a README for the run.
+    print("\tMaking Project README...")
+    with open(os.path.join(summary['path'],'README'),'w+') as f:
+        f.write("SMRF RUN SUMMARY:\n")
+        f.write("=================\n")
+        f.write("\n")
+
+        order_keys = ['project name', 'date created','author', 'path', 'description' ]
+        for k in order_keys:
+            f.write('{0: <20} {1: <30}\n'.format((k.upper())+':',summary[k]))
+        f.close()
+
+    print("\nProject Setup Complete.")
+
+
+def ask(question):
+
+    quitings = ['quit','q','e','exit']
+
+    user_input = raw_input('\n'+question+'\n')
+    user_input = user_input.lower()
+
+    if user_input in quitings:
+        print("Exiting per user request.\n")
+        sys.exit()
+    else:
+        return user_input
+
+def ask_yes_no(question):
+    acceptable = False
+    while not acceptable:
+        user_input = ask(question)
+        afirmatives = ['y','yes','ok']
+        negatives = ['n','no']
+
+        if user_input in afirmatives:
+            result = True
+            acceptable=True
+
+        elif user_input in negatives:
+            result = False
+            acceptable=True
+        else:
+            print "Unrecognized answer, try again."
+    return result
+
+
+def main():
+
+    print("STRUCTURED SMRF PROJECTS")
+    print('========================\n')
+    summary = {}
+    state = 0
+    while state <= 7:
+        #New project
+        if state == 0:
+            positive = ask_yes_no("Would you like to create a new project for a SMRF run?")
+            if positive:
+                state +=1
+
+        #Author name
+        elif state == 1:
+            summary['author'] = ask("Who is the author of this project?")
+            summary['date created'] = str(date.today())
+            state +=1
+
+        #Project name
+        elif state == 2:
+            summary['project name'] = ask("Whats the project name (this will be the folder name)?")
+            state +=1
+
+        #Project path
+        elif state == 3:
+                summary['overwrite'] = False
+                project_path = ask("Whats the project path?")
+                if os.path.isdir(os.path.abspath(project_path)):
+                    summary['path'] = os.path.abspath(os.path.join(project_path,summary['project name']))
+                    if os.path.isdir(summary['path']):
+                        print("\nWARNING: There is already a project named {0} in the folder:\n{1}".format(summary['project name'],os.path.abspath(project_path)))
+                        overwrite = ask_yes_no("Do you want to overwrite the entire folder?")
+                        summary['overwrite'] = overwrite
+                        #Go back to renaming
+                        if not overwrite:
+                            state = 2
+                            print("Please choose a different project name or different path.")
+                        else:
+                            state +=1
+                    else:
+                        state+=1
+
+                else:
+                    print("\nProject path does not exist.")
+
+        #Project data type
+        elif state == 4:
+            answers = ['csv','mysql', 'gridded']
+            input_data_type = ask("Whats the source of input data? ({0})".format(answers))
+            summary['input data type'] = input_data_type
+            state +=1
+        #Project description
+        elif state == 5:
+                description = ask("Briefly describe what you are doing with this run.")
+                summary['description'] = description
+                state +=1
+
+            #Overview
+        elif state == 6:
+                print("\nPROJECT SUMMARY")
+                print('===============\n')
+                for k,v in summary.items():
+                    print('{0: <20} {1: <30}\n'.format(k,str(v)))
+
+                positive = ask_yes_no("Does everything look correct?")
+                if positive:
+                    create_project(summary)
+                    print("Completed making your project, Exiting.")
+                    sys.exit()
+                else:
+                    state=1
+
+        else:
+            print("Nothing else to do. Exiting.")
+            sys.exit()
+
+if __name__ == '__main__':
+    main()

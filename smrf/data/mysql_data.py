@@ -20,12 +20,14 @@ class database:
     Database class for querying metadata and station data
     """
 
-    def __init__(self, user, password, host, db):
+    def __init__(self, user, password, host, db, port):
 
         try:
-            cnx = mysql.connector.connect(user=user, password=password,
+            cnx = mysql.connector.connect(user=user,
+                                          password=password,
                                           host=host,
-                                          database=db)
+                                          database=db,
+                                          port = port)
 
         except mysql.connector.Error as err:
             if err.errno == 1045:  # errorcode.ER_ACCESS_DENIED_ERROR:
@@ -59,16 +61,15 @@ class database:
             d: Pandas DataFrame of station information
         """
 
-        # form the query
+        # form the query for getting metadata
         if station_ids is not None:
             qry = "SELECT * FROM {0} WHERE primary_id IN ('{1}')".format(
                 table, "','".join(station_ids))
 
         else:
-            qry = """SELECT {0}.* FROM tbl_metadata INNER JOIN {1}
-                 ON {2}.primary_id={3}.station_id WHERE {4}.client='{5}'""".format(
-                    table, station_table, table, station_table,
-                    station_table, client)
+            qry = """SELECT {0}.* FROM {0} INNER JOIN {1} ON
+                    {0}.id={1}.metadata_id WHERE {1}.client='{2}'""".format(
+                    table, station_table, client)
 
         self._logger.debug(qry)
 
@@ -79,7 +80,7 @@ class database:
             raise Exception('No metadata found for query')
 
         # check to see if UTM locations are calculated
-        d[['X', 'Y']] = d.apply(to_utm, axis=1)
+        #d[['utm_x', 'utm_y']] = d.apply(to_utm, axis=1)
 
         return d
 
@@ -95,7 +96,6 @@ class database:
             end_date: end of time period
             variable: string for variable to get
         """
-
         if isinstance(variables, list):
             variables = ','.join(variables)
 

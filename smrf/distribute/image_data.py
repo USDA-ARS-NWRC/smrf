@@ -40,7 +40,7 @@ class image_data():
         grid: Gridded interpolation instance from :mod:`smrf.spatial.grid.GRID`
 
     """
-    
+
     def __init__(self, variable):
 
         self.variable = variable
@@ -79,14 +79,12 @@ class image_data():
         Args:
             config (dict): dict from the [variable]
         """
-
+        stations = None
         # determine the stations that will be used, alphabetical order
-        if 'stations' in config:
-            stations = config['stations']
-#             stations = map(str.strip, stations)
-            stations.sort()
-        else:
-            stations = None
+        if 'stations' in config.keys():
+            if config['stations'] != None:
+                stations = [s.upper() for s in config['stations']]
+                stations.sort()
 
         self.stations = stations
 
@@ -111,11 +109,13 @@ class image_data():
                 same
         """
 
-        if 'min' in  self.config:
-            self.min = self.config['min']
+        self.min = self.config['min']
+        if self.min == None:
+            self.min = -np.inf
 
-        if 'max' in  self.config:
-            self.max = self.config['max']
+        self.max = self.config['max']
+        if self.max == None:
+            self.max = np.inf
 
         # pull out the metadata subset
         if self.stations is not None:
@@ -124,22 +124,28 @@ class image_data():
             self.stations = metadata.index.values
         self.metadata = metadata
 
-        mx = metadata.X.values
-        my = metadata.Y.values
-        mz = metadata.elevation.values
+        #Old DB used X and Y, New DB uses utm_x, utm_y
+        try:
+            self.mx = metadata.utm_x.values
+            self.my = metadata.utm_y.values
+        except:
+            self.mx = metadata.X.values
+            self.my = metadata.Y.values
+
+        self.mz = metadata.elevation.values
 
         if self.config['distribution'] == 'idw':
             # inverse distance weighting
-            self.idw = idw.IDW(mx, my, topo.X, topo.Y, mz=mz,
+            self.idw = idw.IDW(self.mx, self.my, topo.X, topo.Y, mz=self.mz,
                                GridZ=topo.dem, power=self.config['power'])
 
         elif self.config['distribution'] == 'dk':
             # detrended kriging
-            self.dk = dk.DK(mx, my, mz, topo.X, topo.Y, topo.dem, self.config)
+            self.dk = dk.DK(self.mx, self.my, self.mz, topo.X, topo.Y, topo.dem, self.config)
 
         elif self.config['distribution'] == 'grid':
             # linear interpolation between points
-            self.grid = grid.GRID(self.config, mx, my, topo.X, topo.Y, mz=mz,
+            self.grid = grid.GRID(self.config, self.mx, self.my, topo.X, topo.Y, mz=self.mz,
                                   GridZ=topo.dem, mask=topo.mask)
 
         else:

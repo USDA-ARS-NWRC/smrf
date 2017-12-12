@@ -56,15 +56,11 @@ class topo():
         self._logger = logging.getLogger(__name__)
         self._logger.info('Reading [TOPO] and making stoporad input')
 
-        # convert lat/lon to float
-        self.topoConfig['basin_lat'] = float(self.topoConfig['basin_lat'])
-        self.topoConfig['basin_lon'] = float(self.topoConfig['basin_lon'])
-
         # read images
-        t = str(self.topoConfig['type'])
-        if t == 'ipw':
+        img_type = self.topoConfig['type']
+        if img_type == 'ipw':
             self.readImages()
-        elif t == 'netcdf':
+        elif img_type == 'netcdf':
             self.readNetCDF()
 
         # calculate the necessary images for stoporad
@@ -126,22 +122,22 @@ class topo():
         # read in the images
         # netCDF files are stored typically as 32-bit float, so convert
         # to double or int
-        for v_file in self.images:
+        for v_smrf in self.images:
 
-            # check to see if the user defined any variables
-            v_smrf = v_file
-            if v_file in self.topoConfig:
-                v_file = self.topoConfig[v_file]
+            # check to see if the user defined any variables e.g. veg_height = veg_length
+            if self.topoConfig[v_smrf] != None:
+                v_file = self.topoConfig[v_smrf]
+            else:
+                v_file = v_smrf
 
             if v_file in f.variables.keys():
                 if v_smrf == 'veg_type':
-                    setattr(self, v_smrf,
-                            f.variables[v_file][:].astype(int))
+                    result = f.variables[v_file][:].astype(int)
                 else:
-                    setattr(self, v_smrf,
-                            f.variables[v_file][:].astype(np.float64))
-            else:
-                setattr(self, v_smrf, None)
+                    result = f.variables[v_file][:].astype(np.float64)
+
+
+            setattr(self, v_smrf, result)
 
         # get some general information about the model domain from the dem
         self.nx = f.dimensions['x'].size

@@ -133,7 +133,12 @@ int ludcmp(
          to the precision of the algorithm) */
 
 		if (a[j][j] == 0.0)
+		{
+			printf("Error: Singular matrix\n");
+			
 			return(1);
+
+		}
 		/* For some applications on singular matrices, it is desirable
             to substitute TINY for zero; this line is given in the book
             but is not used here:
