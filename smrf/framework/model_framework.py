@@ -344,7 +344,6 @@ class SMRF():
                                              dataType='csv')
 
         elif 'mysql' in self.config:
-
             self.data = data.loadData.wxdata(self.config['mysql'],
                                              self.start_date,
                                              self.end_date,
@@ -422,20 +421,24 @@ class SMRF():
                     setattr(self.data,
                             'cloud_factor',
                             d[self.distribute['solar'].stations])
-            except:
-                self._logger.warn('''Distribution not initialized, data not
-                                    filtered to desired stations''')
+
+            except Exception as e:
+               self._logger.warn("Distribution not initialized, data not "
+                                   "filtered to desired stations")
+               self._logger.error(e)
+
 
             #Check all section for stations that are colocated
             for key in self.distribute.keys():
                 if key in self.data.variables:
-                    #Confirm out stations all have a unique position for each section
-                    colocated = check_station_colocation(metadata=self.data.metadata.ix[self.distribute[key].stations])
+                    if self.distribute[key].stations != None:
+                        #Confirm out stations all have a unique position for each section
+                        colocated = check_station_colocation(metadata=self.data.metadata.ix[self.distribute[key].stations])
 
-                    #Stations are co-located, throw error
-                    if colocated != None:
-                        self._logger.error("ERROR: Stations in the {0} section are colocated.\n{1}".format(key,','.join(colocated[0])))
-                        sys.exit()
+                        #Stations are co-located, throw error
+                        if colocated != None:
+                            self._logger.error("ERROR: Stations in the {0} section are colocated.\n{1}".format(key,','.join(colocated[0])))
+                            sys.exit()
 
         #Does the user want to create a CSV copy of the station data used.
         if self.config["output"]['input_backup'] == True:
