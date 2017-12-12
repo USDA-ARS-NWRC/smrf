@@ -142,7 +142,7 @@ test_requirements = [
 
 setup(
     name='smrf',
-    version='0.4.6',
+    version='0.4.7',
     description="Distributed snow modeling for water resources",
     long_description=readme + '\n\n' + history,
     author="Scott Havens",
