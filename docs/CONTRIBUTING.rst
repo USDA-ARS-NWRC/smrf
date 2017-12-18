@@ -47,12 +47,17 @@ articles, and such.
 
 Versioning
 ----------
-SMRF uses bumpversion to control version control. More about bumpversion can be found at https://pypi.python.org/pypi/bumpversion.
-This can easily be used with the command
+SMRF uses bumpversion to version control. More about bumpversion can be found at
+https://pypi.python.org/pypi/bumpversion. This can easily be used with the
+command::
 
-bumpbversion patch --tag
+  $ bumpbversion patch --tag
 
-Currently SMRF is version 0.3.0 The development team of SMRF attempted to adhere
+Don't forget to push your tags afterwards with::
+
+  $ git push origin --tags
+
+Currently SMRF is version 0.4.7 The development team of SMRF attempted to adhere
 to semantic versioning. Here is the basics taken from the semantic versioning website.
 
  * Patch version Z (x.y.Z | x > 0) MUST be incremented if only backwards compatible bug fixes are introduced.
@@ -89,7 +94,8 @@ Ready to contribute? Here's how to set up `smrf` for local development.
 
     $ git clone git@gitlab.com:your_name_here/smrf.git
 
-3. Install your local copy into a virtualenv. Assuming you have virtualenvwrapper installed, this is how you set up your fork for local development::
+3. Install your local copy into a virtualenv. Assuming you have
+   virtualenvwrapper installed, this is how you set up your fork for local development::
 
     $ mkvirtualenv smrf
     $ cd smrf/

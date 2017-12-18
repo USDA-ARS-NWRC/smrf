@@ -8,9 +8,14 @@ from __future__ import print_function
 import os
 from collections import Sequence
 from smrf import __core_config__, __version__
-import utils
-from .pycompat import OrderedDict, SafeConfigParser, basestring, unicode_type
 import sys
+#Python 3 troubles and hack
+if sys.version_info[0] >= 3:
+    from ..utils import utils
+else:
+    import utils
+
+from .pycompat import OrderedDict, SafeConfigParser, basestring, unicode_type
 from datetime import date
 import pytz
 import pandas as pd
@@ -60,9 +65,12 @@ class ConfigEntry():
         self.default = self.convert_type(self.default)
 
         self.options = self.convert_type(self.options)
+
         #Options should always be a list
         if type(self.options) != list:
             self.options = [self.options]
+        if self.name =='client':
+            self.options = [v.upper() for v in self.options]
 
     def parse_info(self,info):
         """
@@ -304,8 +312,10 @@ def check_config_file(user_cfg, master_config,user_cfg_path=None):
 
     for section in master_config.keys():
         if section not in user_sections and section not in data_sections:
-            err_str = "Missing required section."
-            errors.append(msg.format(section," ", err_str))
+            # stations not needed if gridded input data used
+            if 'gridded' not in user_sections and section == 'stations':
+                err_str = "Missing required section."
+                errors.append(msg.format(section," ", err_str))
 
         #Check for a data section
         elif section in user_sections and section in data_sections:
@@ -341,6 +351,7 @@ def check_config_file(user_cfg, master_config,user_cfg_path=None):
                     for v in val_lst:
                         if v != None:
                             v = master_config[section][litem].convert_type(v)
+
                             # Do we have an idea os what to expect (type and options)?
                             options_type = master_config[section][item].type
 
@@ -457,7 +468,7 @@ def add_defaults(user_config,master_config):
     return user_config
 
 
-def generate_config(config,fname, inicheck = False):
+def generate_config(config,fname, inicheck = False, order_lst = None, titles = None):
     """
     Generates a list of strings to be written and then writes them in the ini file
 
@@ -477,44 +488,46 @@ def generate_config(config,fname, inicheck = False):
     section_header = ('#'*80) + '\n' + ('# {0}\n') +('#'*80)
 
     #Dictionaries do not go in order so we provide the order here
-    order_lst = ['topo',
-                  'time',
-                  'stations',
-                  'csv',
-                  'mysql',
-                  'gridded',
-                  'air_temp',
-                  'vapor_pressure',
-                  'wind',
-                  'precip',
-                  'albedo',
-                  'solar',
-                  'thermal',
-                  'soil_temp',
-                  'output',
-                  'logging',
-                  'system'
-                  ]
+    if order_lst == None:
+        order_lst = ['topo',
+                      'time',
+                      'stations',
+                      'csv',
+                      'mysql',
+                      'gridded',
+                      'air_temp',
+                      'vapor_pressure',
+                      'wind',
+                      'precip',
+                      'albedo',
+                      'solar',
+                      'thermal',
+                      'soil_temp',
+                      'output',
+                      'logging',
+                      'system'
+                      ]
 
     #Dictionary of commented section titles
-    titles = {'topo': "Files for DEM and vegetation",
-              'time': "Dates to run model",
-              'stations': "Stations to use",
-              'csv': "CSV data files",
-              'mysql': "MySQL database",
-              'gridded': "Gridded dataset i.e. wrf_out",
-              'air_temp': "Air temperature distribution",
-              'vapor_pressure': "Vapor pressure distribution",
-              'wind': "Wind speed and wind direction distribution",
-              'precip': "Precipitation distribution",
-              'albedo': "Albedo distribution",
-              'solar': "Solar radiation distribution",
-              'thermal': "Thermal radiation distribution",
-              'soil_temp': " Soil temperature",
-              'output': "Output variables",
-              'logging': "Logging",
-              'system': "System variables"
-            }
+    if titles == None:
+        titles = {'topo': "Files for DEM and vegetation",
+                  'time': "Dates to run model",
+                  'stations': "Stations to use",
+                  'csv': "CSV data files",
+                  'mysql': "MySQL database",
+                  'gridded': "Gridded dataset i.e. wrf_out",
+                  'air_temp': "Air temperature distribution",
+                  'vapor_pressure': "Vapor pressure distribution",
+                  'wind': "Wind speed and wind direction distribution",
+                  'precip': "Precipitation distribution",
+                  'albedo': "Albedo distribution",
+                  'solar': "Solar radiation distribution",
+                  'thermal': "Thermal radiation distribution",
+                  'soil_temp': " Soil temperature",
+                  'output': "Output variables",
+                  'logging': "Logging",
+                  'system': "System variables"
+                }
 
     #Construct the section strings
     config_str="#"*80
@@ -547,7 +560,8 @@ def generate_config(config,fname, inicheck = False):
         order_lst.remove('csv')
         order_lst.remove('gridded')
 
-    elif 'girdded' in user_sections:
+    elif 'gridded' in user_sections:
+        order_lst.remove('stations')
         order_lst.remove('csv')
         order_lst.remove('mysql')
 
@@ -614,12 +628,13 @@ def get_master_config():
     return cfg
 
 
-def update_config_paths(cfg,user_cfg_path):
+def update_config_paths(cfg,user_cfg_path, mcfg = None):
     """
     Paths should always be relative to the config file or
     absolute.
     """
-    mcfg = get_master_config()
+    if mcfg == None:
+        mcfg = get_master_config()
     #Cycle thru users config
     for section in cfg.keys():
         for item in cfg[section].keys():
@@ -634,17 +649,20 @@ def update_config_paths(cfg,user_cfg_path):
                         cfg[section][item] = path
     return cfg
 
-def get_user_config(fname):
+def get_user_config(fname, mcfg = None):
     """
     Retrieve the user config and apply
     types according to the master config.
 
     Args:
         fname - filename of the user config file.
+        mcfg - master config object
     Returns:
         cfg - A dictionary of dictionaries containing the config file
     """
-    mcfg = get_master_config()
+    if mcfg == None:
+        mcfg = get_master_config()
+
     cfg = read_config(fname)
 
     #Convert the types
@@ -655,25 +673,33 @@ def get_user_config(fname):
                 m = mcfg[section][item]
                 u = mcfg[section][item].convert_type(u)
 
+                #If all is  requested then use all the options
+                if u == 'all':
+                    u = m.options
+                    u.remove('all')
+
                 #Check for stations and passwords
                 if m.type == 'str' and u != None:
                     if type(u) == list:
-                        if item =='stations':
+                        if item in ['stations', 'peak']:
                             u = [o.upper() for o in u]
                         else:
                             u = [o.lower() for o in u]
 
                     else:
-                        if item != 'password':
+                        if item == 'client':
+                            u = u.upper()
+                        elif item != 'password':
                             u = u.lower()
 
                 #Add the timezone to all date time
-                elif mcfg[section][item].type == 'datetime':
+                elif mcfg[section][item].type == 'datetime' and u != None:
                     #We tried to apply this to all the datetimes but it was not working if we changed it for the start
                     # and end dates with mySQL.
 
                     if item not in ['start_date', 'end_date']:
                         u = u.replace(tzinfo = pytz.timezone(cfg['time']['time_zone']))
+
 
                 cfg[section][item] = u
 

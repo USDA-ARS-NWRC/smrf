@@ -415,7 +415,7 @@ def tracking_by_basin(precipitation, time, storm_lst, time_steps_since_precip, i
     return storm_lst, time_steps_since_precip, is_storming
 
 
-def clip_and_correct(precip,storms):
+def clip_and_correct(precip,storms,stations = []):
     """
     Meant to go along with the storm tracking, we correct the data here by adding in
     the precip we would miss by ignoring it. This is mostly because will get rain on snow events
@@ -425,7 +425,10 @@ def clip_and_correct(precip,storms):
     Args:
         precip: Vector station data representing the measured precipitation
         storms: Storm list with dictionaries as defined in
-            :func:`~smrf.envphys.storms.tracking_by_station`
+                :func:`~smrf.envphys.storms.tracking_by_station`
+        stations: Desired stations that are being used for clipping. If stations
+                  is not passed, then use all in the dataframe
+
 
     Returns:
         The correct precip that ensures there is no precip outside of the defined
@@ -438,8 +441,7 @@ def clip_and_correct(precip,storms):
 
     #Specify zeros where were not storming
     precip_clipped = precip.copy()
-
-    precip_clipped[:]=0
+    precip_clipped[:] = 0
 
     for j,storm in storms.iterrows():
 
@@ -449,17 +451,25 @@ def clip_and_correct(precip,storms):
         precip_clipped.ix[storm_start:storm_end] = my_slice
 
     correction = {}
+    #print "{0:>10} {1:>10} {2:>10}".format("Original","Clipped", "C")
+
+    if len(stations) == 0:
+        stations = precip.columns
 
     #Correct the precip to be equal to the sum.
-    for station in precip.columns:
+    for station in stations:
         original = precip[station].sum()
         clipped = precip_clipped[station].sum()
+
         if original == 0:
             c = 1.0
+        elif clipped == 0:
+            c = 0
         else:
             c = original/clipped
 
+        #print "{0:>10} {1:>10} {2:>10}".format(original,clipped,c)
         correction[station] = c
     #print "Max precip from the correction:{0}".format(precip_clipped.max())
-    return pd.Series(correction)
-    #return precip_clipped.mul(pd.Series(correction), axis=1)
+    #return pd.Series(correction)
+    return precip_clipped.mul(pd.Series(correction), axis=1)

@@ -35,9 +35,9 @@ import pytz
 from smrf import data, distribute, output, __core_config__
 from smrf.envphys import radiation
 from smrf.utils import queue, io
-from smrf.utils.utils import backup_input, getqotw
+from smrf.utils.utils import backup_input, getqotw, check_station_colocation
 from threading import Thread
-
+import shutil
 
 class SMRF():
     """
@@ -80,7 +80,11 @@ class SMRF():
                         'clear_ir_beam', 'clear_ir_diffuse',
                         'albedo_vis', 'albedo_ir', 'net_solar',
                         'cloud_factor', 'thermal',
-                        'output']
+                        'output', 'veg_ir_beam','veg_ir_diffuse',
+                        'veg_vis_beam', 'veg_vis_diffuse',
+                        'cloud_ir_beam', 'cloud_ir_diffuse', 'cloud_vis_beam',
+                        'cloud_vis_diffuse', 'thermal_clear', 'wind_direction',
+                        'flatwind', 'wind_direction']
 
     def __init__(self, configFile, external_logger=None):
         """
@@ -98,21 +102,6 @@ class SMRF():
         except UnicodeDecodeError:
             raise Exception(('The configuration file is not encoded in '
                                     'UTF-8, please change and retry'))
-
-        #Make the tmp and output directories if they do not exist
-        makeable_dirs = [self.config['system']['temp_dir'],self.config['output']['out_location']]
-
-        for f in makeable_dirs:
-            path = os.path.abspath(os.path.join(os.path.split(configFile)[0],f))
-            if not os.path.isdir(path):
-                try:
-                    #self._logger.info("Directory does not exist, \nCreating {0}".format(f))
-                    os.makedirs(path)
-
-                except OSError as e:
-                    raise e
-
-
 
         # start logging
         if external_logger == None:
@@ -152,6 +141,21 @@ class SMRF():
         for line in title:
             self._logger.info(line)
 
+        #Make the tmp and output directories if they do not exist
+        makeable_dirs = [self.config['output']['out_location'],os.path.join(self.config['output']['out_location'],'tmp')]
+        for d in makeable_dirs:
+            path = os.path.abspath(os.path.join(os.path.dirname(configFile),d))
+
+            if not os.path.isdir(path):
+                try:
+                    #self._logger.info("Directory does not exist, \nCreating {0}".format(path))
+                    os.makedirs(path)
+
+                except OSError as e:
+                    raise e
+
+        self.temp_dir = path
+
         #Bring the the master config file
         mconfig = io.get_master_config()
 
@@ -172,7 +176,7 @@ class SMRF():
         #write the config file to the output dir no matter where the project was ran
         fname = 'config.ini'
         full_config_out = self.config['output']['out_location']
-        full_config_out = os.path.abspath(os.path.join(os.path.split(configFile)[0],full_config_out,fname))
+        full_config_out = os.path.abspath(os.path.join(os.path.dirname(configFile),full_config_out,fname))
         self._logger.info("Writing config file with full options.")
         io.generate_config(self.config,full_config_out)
 
@@ -209,6 +213,7 @@ class SMRF():
         self.time_steps = len(self.date_time)
 
         self.distribute = {}
+
         if self.config['logging']['qotw']:
             self._logger.info(getqotw())
 
@@ -237,6 +242,10 @@ class SMRF():
                     os.remove(self.distribute['solar'].vis_file)
                 if os.path.isfile(self.distribute['solar'].ir_file):
                     os.remove(self.distribute['solar'].ir_file)
+
+        if hasattr(self,'temp_dir'):
+            if os.path.isdir(self.temp_dir):
+                shutil.rmtree(self.temp_dir)
 
         self._logger.info('SMRF closed --> %s' % datetime.now())
 
@@ -282,7 +291,7 @@ class SMRF():
         # 3. Wind
         self.distribute['wind'] = \
             distribute.wind.wind(self.config['wind'],
-                                 self.config['system']['temp_dir'])
+                                 self.temp_dir)
 
         # 4. Precipitation
         self.distribute['precip'] = \
@@ -299,7 +308,7 @@ class SMRF():
             distribute.solar.solar(self.config['solar'],
                                    self.distribute['albedo'].config,
                                    self.topo.stoporad_in_file,
-                                   self.config['system']['temp_dir'])
+                                   self.temp_dir)
 
         # 7. thermal radiation
         self.distribute['thermal'] = \
@@ -335,7 +344,6 @@ class SMRF():
                                              dataType='csv')
 
         elif 'mysql' in self.config:
-
             self.data = data.loadData.wxdata(self.config['mysql'],
                                              self.start_date,
                                              self.end_date,
@@ -369,15 +377,27 @@ class SMRF():
         else:
             raise KeyError('Could not determine where station data is located')
 
-        # determine the locations of the stations on the grid
-        self.data.metadata['xi'] = \
-            self.data.metadata.apply(lambda row: find_pixel_location(row,
+        # determine the locations of the stations on the grid while maintaining reverse compatibility
+        #New DB uses utm_x utm_y instead of X,Y
+        try:
+            self.data.metadata['xi'] = \
+                self.data.metadata.apply(lambda row: find_pixel_location(row,
                                                                      self.topo.x,
                                                                      'utm_x'), axis=1)
-        self.data.metadata['yi'] = \
-            self.data.metadata.apply(lambda row: find_pixel_location(row,
+            self.data.metadata['yi'] = \
+                self.data.metadata.apply(lambda row: find_pixel_location(row,
                                                                      self.topo.y,
                                                                      'utm_y'), axis=1)
+        #Old DB has X and Y
+        except:
+            self.data.metadata['xi'] = \
+                self.data.metadata.apply(lambda row: find_pixel_location(row,
+                                                                     self.topo.x,
+                                                                     'X'), axis=1)
+            self.data.metadata['yi'] = \
+                self.data.metadata.apply(lambda row: find_pixel_location(row,
+                                                                     self.topo.y,
+                                                                                 'Y'), axis=1)
 
         # pre filter the data to only the desired stations
         if flag:
@@ -395,14 +415,30 @@ class SMRF():
                         self.distribute[key].stations = sta_match.tolist()
                         setattr(self.data, key, d[sta_match])
 
+
                 if hasattr(self.data, 'cloud_factor'):
                     d = getattr(self.data, 'cloud_factor')
                     setattr(self.data,
                             'cloud_factor',
                             d[self.distribute['solar'].stations])
-            except:
-                self._logger.warn('''Distribution not initialized, data not
-                                    filtered to desired stations''')
+
+            except Exception as e:
+               self._logger.warn("Distribution not initialized, data not "
+                                   "filtered to desired stations")
+               self._logger.error(e)
+
+
+            #Check all section for stations that are colocated
+            for key in self.distribute.keys():
+                if key in self.data.variables:
+                    if self.distribute[key].stations != None:
+                        #Confirm out stations all have a unique position for each section
+                        colocated = check_station_colocation(metadata=self.data.metadata.ix[self.distribute[key].stations])
+
+                        #Stations are co-located, throw error
+                        if colocated != None:
+                            self._logger.error("ERROR: Stations in the {0} section are colocated.\n{1}".format(key,','.join(colocated[0])))
+                            sys.exit()
 
         #Does the user want to create a CSV copy of the station data used.
         if self.config["output"]['input_backup'] == True:
@@ -591,8 +627,14 @@ class SMRF():
         q = {}
         t = []
 
+        self.thread_variables += ['storm_total']
         if self.distribute['precip'].nasde_model == 'marks2017':
-            self.thread_variables += ['storm_total', 'storm_id']
+            self.thread_variables += ['storm_id']
+
+        if self.distribute['thermal'].correct_cloud:
+            self.thread_variables += ['thermal_cloud']
+        if self.distribute['thermal'].correct_veg:
+            self.thread_variables += ['thermal_veg']
 
         for v in self.thread_variables:
             q[v] = queue.DateQueue_Threading(self.max_values, self.time_out)

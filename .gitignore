@@ -13,6 +13,7 @@ test_data/stoporad.ip
 test_data/wrfout_d02_2016-03-10.nc
 test_data/stoporad*
 examples/*.nc
+maxus.nc
 
 
 # Byte-compiled / optimized / DLL files

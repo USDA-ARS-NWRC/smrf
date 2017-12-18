@@ -29,19 +29,31 @@ import numpy
 import os
 import subprocess
 
-from subprocess import Popen, PIPE
+from subprocess import check_output, PIPE
 
 #Grab and write the gitVersion from 'git describe'.
 gitVersion = ''
 gitPath = ''
 
 # get git describe if in git repository
-ls_proc = Popen("git describe --tags", stdout=PIPE, stderr=PIPE, shell=True)
-out, err = ls_proc.communicate()
-if len(str(err)) > 1:
-	gitVersion = ''
+print('Fetching most recent git tags')
+if os.path.exists('./.git'):
+	try:
+		# if we are in a git repo, fetch most recent tags
+		check_output(["git fetch --tags"], shell=True)
+	except Exception as e:
+		print('Unable to fetch most recent tags')
+
+	try:
+		ls_proc = check_output(["git describe --tags"], shell=True)
+		gitVersion = ls_proc
+		print('Checking most recent version')
+	except Exception as e:
+		print('Unable to get git tag and hash')
+# if not in git repo
 else:
-	gitVersion = out
+	print('Not in git repository')
+	gitVersion = ''
 
 # get current working directory to define git path
 gitPath = os.getcwd()
@@ -130,7 +142,7 @@ test_requirements = [
 
 setup(
     name='smrf',
-    version='0.3.0',
+    version='0.4.7',
     description="Distributed snow modeling for water resources",
     long_description=readme + '\n\n' + history,
     author="Scott Havens",

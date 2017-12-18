@@ -268,6 +268,10 @@ class wind(image_data.image_data):
             self.distribute(data_speed.ix[t], data_direction.ix[t])
 
             queue['wind_speed'].put([t, self.wind_speed])
+            queue['wind_direction'].put([t, self.wind_direction])
+
+            if not self.gridded:
+                queue['flatwind'].put([t, self.flatwind])
 
     def simulateWind(self, data_speed):
         """
