@@ -1,12 +1,12 @@
 import pandas as pd
 from datetime import datetime
-
-
+from subprocess import check_output
+import os
 """
 Script for converting the 25 year RME dataset to be ran with SMRF
 """
-out_dir = '../station_data/'
-in_dir = '../raw_data/'
+out_dir = './station_data/'
+in_dir = './raw_data/'
 #met_data
 #By the cabin
 rme_176_met = {'primary_id':'RME_176',
@@ -30,6 +30,7 @@ met_data_map = {'air_temp':'Ta',
                 'wind_speed':'ws',
                 'wind_direction':'wd',
                 'solar':'Si',
+                'dew_point':'DPT',
                 'precip':'SH'}
 
 #Dictionary for holding all the data frames
@@ -65,6 +66,7 @@ data['vapor_pressure'] = pd.DataFrame(columns=["date_time","rme_176","rmesp"], i
 data['wind_direction'] = pd.DataFrame(columns=["date_time","rme_176","rmesp"], index = raw_data['rme_176'].index)
 data['wind_speed'] = pd.DataFrame(columns=["date_time","rme_176","rmesp"], index = raw_data['rme_176'].index)
 data['air_temp'] = pd.DataFrame(columns=["date_time","rme_176","rmesp"], index = raw_data['rme_176'].index)
+data['dew_point'] = pd.DataFrame(columns=["date_time","rme_176","rmesp"], index = raw_data['rme_176'].index)
 
 #Assign met data into individual df with stations as the column names
 for var,m_var in met_data_map.items():
@@ -75,12 +77,23 @@ for var,m_var in met_data_map.items():
         sta_data = raw_data
 
     for sta,met_df in sta_data.items():
+        print(sta,var,m_var)
         try:
-            data[var][sta] = met_df[m_var].values
+            if var=='dew_point':
+                with open('./vp.txt','w+') as f:
+                    f.writelines([str(i)+'\n' for i in met_df[m_var].values])
+                    f.close()
+
+                output = check_output('satvp < ./vp.txt',shell=True)
+                data['vapor_pressure'][sta] = [float(s) for s in output.split('\n')[0:-1]]
+                os.remove('./vp.txt')
+            else:
+                data[var][sta] = met_df[m_var].values
         except Exception as e:
             print e
             print("Missing {0} data for station {1}".format(var,sta))
-
+    if var == 'dew_point':
+        var = 'vapor_pressure'
     print("Writing {0}...".format(var))
     data[var]['date_time'] = d
     data[var].set_index('date_time', drop=True, inplace=True)
