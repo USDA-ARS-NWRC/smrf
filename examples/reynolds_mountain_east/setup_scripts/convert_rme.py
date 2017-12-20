@@ -2,14 +2,16 @@ import pandas as pd
 from datetime import datetime
 from subprocess import check_output
 import os
+
 """
 Script for converting the 25 year RME dataset to be ran with SMRF
 """
+
 out_dir = './station_data/'
 in_dir = './raw_data/'
 #met_data
 #By the cabin
-rme_176_met = {'primary_id':'RME_176',
+rme_176_met = {'primary_id':'rme_176',
            "utm_x": 519611,
            "utm_y": 4768129,
            "latitude": 43.065611,
@@ -17,7 +19,7 @@ rme_176_met = {'primary_id':'RME_176',
            "zone": 11,
            "elevation": 2093}
 #In the grove
-rmesp_met = {'primary_id': 'RMESP',
+rmesp_met = {'primary_id': 'rmesp',
          "utm_x": 519976,
          "utm_y": 4768323,
          "latitude": 43.067348,
@@ -60,13 +62,14 @@ for i,row in raw_data["rme_176"].iterrows():
     d.append(datetime(year=int(row['Yr']),month = int(row['M']), day = int(row['D']), hour = int(row['H'])))
 
 #Create output DF
-data["precip"] = pd.DataFrame(columns=["date_time","rme_176","rmesp"], index = raw_precip['rme_176'].index)
-data["solar"] = pd.DataFrame(columns=["date_time","rme_176","rmesp"], index = raw_data['rme_176'].index)
-data['vapor_pressure'] = pd.DataFrame(columns=["date_time","rme_176","rmesp"], index = raw_data['rme_176'].index)
-data['wind_direction'] = pd.DataFrame(columns=["date_time","rme_176","rmesp"], index = raw_data['rme_176'].index)
-data['wind_speed'] = pd.DataFrame(columns=["date_time","rme_176","rmesp"], index = raw_data['rme_176'].index)
-data['air_temp'] = pd.DataFrame(columns=["date_time","rme_176","rmesp"], index = raw_data['rme_176'].index)
-data['dew_point'] = pd.DataFrame(columns=["date_time","rme_176","rmesp"], index = raw_data['rme_176'].index)
+print("Generating Dataframes...")
+for k in ['precip','solar','vapor_pressure','wind_direction','wind_speed','air_temp','dew_point']:
+    if k == 'precip':
+        ind = raw_precip['rme_176'].index
+    else:
+        ind = raw_data['rme_176'].index
+
+    data[k] = pd.DataFrame(columns=["date_time","rme_176","rmesp"], index = ind,dtype=float)
 
 #Assign met data into individual df with stations as the column names
 for var,m_var in met_data_map.items():
@@ -77,7 +80,6 @@ for var,m_var in met_data_map.items():
         sta_data = raw_data
 
     for sta,met_df in sta_data.items():
-        print(sta,var,m_var)
         try:
             if var=='dew_point':
                 with open('./vp.txt','w+') as f:

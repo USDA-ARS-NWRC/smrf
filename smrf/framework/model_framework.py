@@ -337,32 +337,33 @@ class SMRF():
         flag = True
         if 'csv' in self.config:
             self.data = data.loadData.wxdata(self.config['csv'],
-                                             self.start_date,
-                                             self.end_date,
-                                             time_zone=self.config['time']['time_zone'],
-                                             stations=self.config['stations'],
-                                             dataType='csv')
+                                     self.start_date,
+                                     self.end_date,
+                                     time_zone=self.config['time']['time_zone'],
+                                     stations=self.config['stations'],
+                                     dataType='csv')
 
         elif 'mysql' in self.config:
             self.data = data.loadData.wxdata(self.config['mysql'],
-                                             self.start_date,
-                                             self.end_date,
-                                             time_zone=self.config['time']['time_zone'],
-                                             stations=self.config['stations'],
-                                             dataType='mysql')
+                                     self.start_date,
+                                     self.end_date,
+                                     time_zone=self.config['time']['time_zone'],
+                                     stations=self.config['stations'],
+                                     dataType='mysql')
 
             #Add stations to stations in config for input backup
-            self.config['stations']['stations'] = self.data.metadata.index.tolist()
+            self.config['stations']['stations'] = \
+                                               self.data.metadata.index.tolist()
 
         elif 'gridded' in self.config:
             flag = False
             self.data = data.loadGrid.grid(self.config['gridded'],
-                                           self.topo,
-                                           self.start_date,
-                                           self.end_date,
-                                           time_zone=self.config['time']['time_zone'],
-                                           dataType=self.config['gridded']['data_type'],
-                                           tempDir=self.temp_dir)
+                                   self.topo,
+                                   self.start_date,
+                                   self.end_date,
+                                   time_zone=self.config['time']['time_zone'],
+                                   dataType=self.config['gridded']['data_type'],
+                                   tempDir=self.temp_dir)
 
             # set the stations in the distribute
             try:
@@ -371,8 +372,8 @@ class SMRF():
                             'stations',
                             self.data.metadata.index.tolist())
             except:
-                self._logger.warn(''''Distribution not initialized,
-                                    grid stations could not be set''')
+                self._logger.warn("Distribution not initialized, grid stations"
+                                  "could not be set.")
 
         else:
             raise KeyError('Could not determine where station data is located')
