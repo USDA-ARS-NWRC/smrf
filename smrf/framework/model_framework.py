@@ -118,7 +118,9 @@ class SMRF():
             # setup the logging
             logfile = None
             if 'log_file' in self.config['logging']:
-                logfile = self.config['logging']['log_file']
+                log_file = self.config['logging']['log_file']
+                if not os.path.isabs(log_file):
+                    logfile = os.path.abspath(os.path.join(os.path.dirname(configFile),self.config['logging']['log_file']))
 
             fmt = '%(levelname)s:%(name)s:%(message)s'
             if logfile is not None:
