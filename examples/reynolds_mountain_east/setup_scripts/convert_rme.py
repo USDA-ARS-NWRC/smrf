@@ -11,7 +11,7 @@ out_dir = './station_data/'
 in_dir = './raw_data/'
 #met_data
 #By the cabin
-rme_176_met = {'primary_id':'rme_176',
+rme_176_met = {'primary_id':'RME_176',
            "utm_x": 519611,
            "utm_y": 4768129,
            "latitude": 43.065611,
@@ -19,7 +19,7 @@ rme_176_met = {'primary_id':'rme_176',
            "zone": 11,
            "elevation": 2093}
 #In the grove
-rmesp_met = {'primary_id': 'rmesp',
+rmesp_met = {'primary_id': 'RMESP',
          "utm_x": 519976,
          "utm_y": 4768323,
          "latitude": 43.067348,
@@ -42,10 +42,10 @@ raw_precip = {}
 
 #Get raw files in pandas dataframes using tab separated
 print("Creating opening raw datasets...")
-raw_data["rme_176"] = pd.read_csv(in_dir + 'met_exposed.txt', sep = '\t')
-raw_data["rmesp"] = pd.read_csv(in_dir + 'met_sheltered.txt', sep = '\t')
-raw_precip["rme_176"] = pd.read_csv(in_dir + 'ppt_exposed.txt', sep = '\t')
-raw_precip['rmesp'] = pd.read_csv(in_dir + 'ppt_sheltered.txt', sep = '\t')
+raw_data["RME_176"] = pd.read_csv(in_dir + 'met_exposed.txt', sep = '\t')
+raw_data["RMESP"] = pd.read_csv(in_dir + 'met_sheltered.txt', sep = '\t')
+raw_precip["RME_176"] = pd.read_csv(in_dir + 'ppt_exposed.txt', sep = '\t')
+raw_precip['RMESP'] = pd.read_csv(in_dir + 'ppt_sheltered.txt', sep = '\t')
 
 #Metadata setup
 rme_176 = pd.Series(rme_176_met)
@@ -58,18 +58,18 @@ data['metadata'].to_csv(out_dir + 'metadata.csv')
 d = []
 print("Creating datetime index...")
 
-for i,row in raw_data["rme_176"].iterrows():
+for i,row in raw_data["RME_176"].iterrows():
     d.append(datetime(year=int(row['Yr']),month = int(row['M']), day = int(row['D']), hour = int(row['H'])))
 
 #Create output DF
 print("Generating Dataframes...")
 for k in ['precip','solar','vapor_pressure','wind_direction','wind_speed','air_temp','dew_point']:
     if k == 'precip':
-        ind = raw_precip['rme_176'].index
+        ind = raw_precip['RME_176'].index
     else:
-        ind = raw_data['rme_176'].index
+        ind = raw_data['RME_176'].index
 
-    data[k] = pd.DataFrame(columns=["date_time","rme_176","rmesp"], index = ind,dtype=float)
+    data[k] = pd.DataFrame(columns=["date_time","RME_176","RMESP"], index = ind,dtype=float)
 
 #Assign met data into individual df with stations as the column names
 for var,m_var in met_data_map.items():

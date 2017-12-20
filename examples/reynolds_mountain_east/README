@@ -12,6 +12,7 @@ NOTES:
 		     * topo.nc was generated using basin_setup -f raw_data/rme_basin_outline.shp -dm ~/Downloads/ASTGTM2_N43W117/ASTGTM2_N43W117_dem.tif --cell_size 50
 		     * Station data was generate from a publish data set using the script ./setup_scripts/convert_rem.py to put data in SMRF compatible format
 		     * The exception to the above is cloud_factor which was generated using an automated script that lives in Mark Robertsons auto cleaning repo (contact Mark R.)
+		     * Maxus generated using gen_maxus ./topo/topo.nc 
 
 			
 

@@ -17,7 +17,7 @@ def run():
     '''
     parser = argparse.ArgumentParser(description='Examines SMRF config files for issues.')
     parser.add_argument('config_file', metavar='F', type=str,
-                        help='Path to SMRF config file that needs checking')
+                        help='Path to SMRF config file to run')
 
     args = parser.parse_args()
 
