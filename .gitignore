@@ -105,5 +105,5 @@ test_data/topo/maxus.nc
 examples/* *.nc
 examples/simple_hill/* *.csv
 */input_backup/*
-*/output/*
+test_data/output/*
 */tmp/*
