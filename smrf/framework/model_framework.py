@@ -885,80 +885,36 @@ class SMRF():
 
         return title
 
-#     def output_thread(self, q):
-#         """
-#         Output the desired variables to a file.
-#         """
-#
-#         for output_count,t in enumerate(self.date_time):
-#
-#             # output at the frequency and the last time step
-#             if (output_count % self.config['output']['frequency'] == 0) or (output_count == len(self.date_time)):
-#
-#                 self.output(t, q)
-#
-#                 # put the value into the output queue so clean knows it's done
-#                 q['output'].put([t, True])
-#
-#                 self._logger.debug('%s Variables output from queues' % t)
 
+def run_smrf(config_file):
+    """
+    Function that runs smrf how it should be operate for full runs.
 
-#     def initializeModel(self):
-#         """
-#         Initialize the models
-#         """
-#
-#         self.model = {}
-#
-#         self.model['isnobal'] = model.isnobal(self.config['isnobal'], self.topo)
+    Args:
+        config_file: string path to the config file
+    """
+    start = datetime.now()
+    # initialize
+    with SMRF(config_file) as s:
+        # load topo data
+        s.loadTopo()
 
+        # initialize the distribution
+        s.initializeDistribution()
 
-#     def runModel(self):
-#         """
-#         Run the model
-#         """
-#
-#         self.model['isnobal'].runModel()
+        # initialize the outputs if desired
+        s.initializeOutput()
 
+        # load weather data  and station metadata
+        s.loadData()
 
-#     def _initDistributionDict(self, date_time, variables):
-#         """
-#         Create a dictionary to hold all the data.  They keys will be datetime objects
-#         with each one holding all the necessary variables for that timestep
-#
-#         d = {
-#             datetime.datetime(2008, 10, 1, 1, 0): {
-#                 'air_temp':{},
-#                 'vapor_pressure':{},
-#                 ...
-#             },
-#             datetime.datetime(2008, 10, 1, 2, 0): {
-#                 'air_temp':{},
-#                 'vapor_pressure':{},
-#                 ...
-#             },
-#             ...
-#         }
-#
-#         Args:
-#             date_time: list/array of Timestamp or datetime objects
-#             variables: list of variables under each time
-#
-#         Return:
-#             d: dictionary
-#         """
-#
-#         d = {}
-#         b = {}
-#
-#         for v in variables:
-#             b[v] = []
-#
-#         for k in date_time:
-#             d[k] = dict(b)
-#
-#         return d
+        # distribute
+        s.distributeData()
 
+        #post process if necessary
+        s.post_process()
+
+        s._logger.info(datetime.now() - start)
 
 def find_pixel_location(row, vec, a):
         """
