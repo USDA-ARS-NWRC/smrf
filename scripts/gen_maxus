@@ -17,9 +17,12 @@ faulthandler.enable()
 
 def main():
     parser = argparse.ArgumentParser(
-                      description= "Takes in IPW dem image and creates maxus file from Adam Winstrals wind model. The maxus file is required for SMRF simulations" )
-    parser.add_argument('ipw_dem', type=str,
-                        help='File to the input IPW image containing the dem')
+                      description= "Takes in Netcdf or IPW dem image and"
+                                    "maxus file from Adam Winstrals wind model."
+                                    "The maxus file is required for SMRF"
+                                    "simulations" )
+    parser.add_argument('dem', type=str,
+                        help='Netcdf or IPW file containing the dem')
 
     parser.add_argument('--out_maxus', metavar='-O', type=str, default = './maxus.nc',
                         help='Output file path for maxus file')
@@ -38,19 +41,19 @@ def main():
 
     parser.add_argument('--window', metavar='-W', type=int, default = 100,
                         help='To average wind data across in the direction of the wind')
+
+    parser.add_argument('--var_name','-N',dest='var_name', type=str, default = 'dem',
+                        help='specify the variable name inside a netcdf file')
     args = parser.parse_args()
 
     #------------------------------------------------------------------------------
     # Specify model input parameters
 
-    if not os.path.isfile(args.ipw_dem):
-        raise IOError("ipw_dem argument {0} does not exist!".format(args.ipw_dem))
+    if not os.path.isfile(args.dem):
+        raise OSError("dem argument {0} does not exist!".format(args.dem))
 
-    if not os.path.isdir(os.path.abspath(os.path.dirname(args.out_maxus))):
-        raise IOError("Directory to out_maxus argument {0} does not exist!".format(args.out_maxus))
-    dem_file = args.ipw_dem
-
-    save_file = args.ipw_dem
+    if not os.path.isdir(os.path.dirname(args.out_maxus)):
+        raise OSError("Directory to out_maxus argument {0} does not exist!".format(args.out_maxus))
 
     inc = args.increment
 
@@ -67,24 +70,36 @@ def main():
     windower = args.window
 
     save_file = args.out_maxus
+
+    #Operate on file according to file type
+    dem_file = args.dem
+    ext = dem_file.split('.')[-1]
+
+    if ext == 'nc':
+        data = nc.Dataset(dem_file)
+        if args.var_name in data.variables:
+            dem_data = data.variables[args.var_name][:]
+            x = data.variables['x'][:]
+            y = data.variables['y'][:]
+
+        else:
+            raise IOError("{0} is not a variable provided. double check "
+                          "file has a variable named dem and dimensions named "
+                          "x and y".format(args.var_name))
+    elif ext == 'ipw':
+         # read in the DEM
+         dem = IPW(dem_file)
+         # dem_data = np.round(dem.bands[0].data)
+         dem_data = dem.bands[0].data
+         x = dem.bands[0].x
+         y = dem.bands[0].y
+
+    else:
+        raise IOError("Image must be a netcdf file (.nc) or an ipw image (.ipw)")
+
+
     #------------------------------------------------------------------------------
     # run the wind model
-    if args.ipw_dem.split('.')[-1] =='ipw':
-        # read in the DEM
-        dem = IPW(dem_file)
-        # dem_data = np.round(dem.bands[0].data)
-        dem_data = dem.bands[0].data
-        x = dem.bands[0].x
-        y = dem.bands[0].y
-
-    elif args.ipw_dem.split('.')[-1] =='nc':
-        d = nc.Dataset(args.ipw_dem,'r')
-        dem_data = d.variables['dem'][:]
-        y = d.variables['y'][:]
-        x = d.variables['x'][:]
-    else:
-        raise ValueError("Only NetCDF and IPW have been implemented.")
-
     # initialize the wind model with the dem
     w = wind_model(x, y, dem_data, nthreads=12)
 
