@@ -42,7 +42,7 @@ class KRIGE:
         self.variogram_model = 'linear'
         self.variogram_parameters = None
         self.variogram_function = None
-        self.nlags = np.round(len(mx)/2)
+        self.nlags = np.min([np.round(len(mx)/2), 6])
         self.weight = False
         self.anisotropy_scaling = 1.0
         self.anisotropy_angle = 0.0
