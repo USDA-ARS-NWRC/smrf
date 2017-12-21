@@ -6,6 +6,12 @@ import os
 import utm
 import subprocess as sp
 
+try:
+    import weather_forecast_retrieval as wfr
+except:
+    pass
+
+
 
 class grid():
     """
@@ -54,6 +60,8 @@ class grid():
             self.load_from_wrf()
         elif dataType == 'netcdf':
             self.load_from_netcdf()
+        elif dataType == 'hrrr':
+            self.load_from_hrrr()
         else:
             raise Exception('Could not resolve dataType')
 
@@ -61,6 +69,14 @@ class grid():
 #         for v in self.variables:
 #             d = getattr(self, v)
 #             setattr(self, v, d.tz_localize(tz=self.time_zone))
+
+
+    def load_from_hrrr(self):
+        """
+        Load the data from the High Resolution Rapid Refresh (HRRR) model
+        """
+        
+        pass
 
 #     @profile
     def load_from_netcdf(self):
