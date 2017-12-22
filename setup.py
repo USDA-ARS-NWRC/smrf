@@ -45,7 +45,7 @@ if os.path.exists('./.git'):
 		print('Unable to fetch most recent tags')
 
 	try:
-		ls_proc = check_output(["git describe --tags"], shell=True)
+		ls_proc = check_output(["git describe --tags"], shell=True, universal_newlines=True)
 		gitVersion = ls_proc
 		print('Checking most recent version')
 	except Exception as e:

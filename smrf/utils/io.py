@@ -9,9 +9,9 @@ import os
 from collections import Sequence
 from smrf import __core_config__, __version__
 import sys
-#Python 3 troubles and hack
+# hack for install with either version 2 or version 3 python
 if sys.version_info[0] >= 3:
-    from ..utils import utils
+    from smrf.utils import utils
 else:
     import utils
 
