@@ -553,17 +553,25 @@ def generate_config(config,fname, inicheck = False, order_lst = None, titles = N
     #Check for one of the three data set options
     user_sections = config.keys()
     if 'csv' in user_sections:
-        order_lst.remove('mysql')
-        order_lst.remove('gridded')
+        if 'mysql' in order_lst:
+            order_lst.remove('mysql')
+        if 'gridded' in order_lst:
+            order_lst.remove('gridded')
 
     elif 'mysql' in user_sections:
-        order_lst.remove('csv')
-        order_lst.remove('gridded')
+        if 'csv' in order_lst:
+            order_lst.remove('csv')
+        if 'gridded' in order_lst:
+            order_lst.remove('gridded')
 
     elif 'gridded' in user_sections:
-        order_lst.remove('stations')
-        order_lst.remove('csv')
-        order_lst.remove('mysql')
+        if 'stations' in order_lst:
+            order_lst.remove('stations')
+        if 'csv' in order_lst:
+            order_lst.remove('csv')
+        if 'mysql' in order_lst:
+            order_lst.remove('mysql')
+
 
     #Generate the string for the file, creating them in order.
     for section in order_lst:
