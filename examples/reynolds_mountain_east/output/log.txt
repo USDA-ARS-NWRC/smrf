@@ -1,0 +1,468 @@
+INFO:smrf.framework.model_framework:    SSSSSSSSSSSSSSS  MMMMMMMM               MMMMMMMM RRRRRRRRRRRRRRRRR    FFFFFFFFFFFFFFFFFFFFFF
+INFO:smrf.framework.model_framework:  SS:::::::::::::::S M:::::::M             M:::::::M R::::::::::::::::R   F::::::::::::::::::::F
+INFO:smrf.framework.model_framework: S:::::SSSSSS::::::S M::::::::M           M::::::::M R::::::RRRRRR:::::R  F::::::::::::::::::::F
+INFO:smrf.framework.model_framework: S:::::S     SSSSSSS M:::::::::M         M:::::::::M RR:::::R     R:::::R FF::::::FFFFFFFFF::::F
+INFO:smrf.framework.model_framework: S:::::S             M::::::::::M       M::::::::::M   R::::R     R:::::R   F:::::F       FFFFFF
+INFO:smrf.framework.model_framework: S:::::S             M:::::::::::M     M:::::::::::M   R::::R     R:::::R   F:::::F
+INFO:smrf.framework.model_framework:  S::::SSSS          M:::::::M::::M   M::::M:::::::M   R::::RRRRRR:::::R    F::::::FFFFFFFFFF
+INFO:smrf.framework.model_framework:   SS::::::SSSSS     M::::::M M::::M M::::M M::::::M   R:::::::::::::RR     F:::::::::::::::F
+INFO:smrf.framework.model_framework:     SSS::::::::SS   M::::::M  M::::M::::M  M::::::M   R::::RRRRRR:::::R    F:::::::::::::::F
+INFO:smrf.framework.model_framework:        SSSSSS::::S  M::::::M   M:::::::M   M::::::M   R::::R     R:::::R   F::::::FFFFFFFFFF
+INFO:smrf.framework.model_framework:             S:::::S M::::::M    M:::::M    M::::::M   R::::R     R:::::R   F:::::F
+INFO:smrf.framework.model_framework:             S:::::S M::::::M     MMMMM     M::::::M   R::::R     R:::::R   F:::::F
+INFO:smrf.framework.model_framework: SSSSSSS     S:::::S M::::::M               M::::::M RR:::::R     R:::::R FF:::::::FF
+INFO:smrf.framework.model_framework: S::::::SSSSSS:::::S M::::::M               M::::::M R::::::R     R:::::R F::::::::FF
+INFO:smrf.framework.model_framework: S:::::::::::::::SS  M::::::M               M::::::M R::::::R     R:::::R F::::::::FF
+INFO:smrf.framework.model_framework:  SSSSSSSSSSSSSSS    MMMMMMMM               MMMMMMMM RRRRRRRR     RRRRRRR FFFFFFFFFFF
+INFO:smrf.framework.model_framework: 
+INFO:smrf.framework.model_framework:Adding defaults to config...
+INFO:smrf.framework.model_framework:Checking config file for issues...
+INFO:smrf.framework.model_framework: 
+INFO:smrf.framework.model_framework: 
+INFO:smrf.framework.model_framework:Configuration File Status Report:
+INFO:smrf.framework.model_framework:==============================================================================================================
+INFO:smrf.framework.model_framework:No errors or warnings were reported with the config file.
+
+INFO:smrf.framework.model_framework:Writing config file with full options.
+INFO:smrf.framework.model_framework:Started SMRF --> 2018-01-04 14:28:01.226762
+INFO:smrf.framework.model_framework:Model start --> 1998-01-14 15:00:00
+INFO:smrf.framework.model_framework:Model end --> 1998-01-14 19:00:00
+INFO:smrf.framework.model_framework:Number of time steps --> 5
+INFO:smrf.data.loadTopo:Reading [TOPO] and making stoporad input
+INFO:smrf.framework.model_framework:['thermal', 'air_temp', 'vapor_pressure', 'wind_speed', 'net_solar', 'precip', 'percent_snow', 'snow_density', 'dew_point'] variables will be output
+WARNING:smrf.output.output_netcdf:Opening /home/micahjohnson/projects/smrf/examples/reynolds_mountain_east/output/wind_speed.nc, data may be overwritten!
+WARNING:smrf.output.output_netcdf:Opening /home/micahjohnson/projects/smrf/examples/reynolds_mountain_east/output/air_temp.nc, data may be overwritten!
+WARNING:smrf.output.output_netcdf:Opening /home/micahjohnson/projects/smrf/examples/reynolds_mountain_east/output/dew_point.nc, data may be overwritten!
+WARNING:smrf.output.output_netcdf:Opening /home/micahjohnson/projects/smrf/examples/reynolds_mountain_east/output/net_solar.nc, data may be overwritten!
+WARNING:smrf.output.output_netcdf:Opening /home/micahjohnson/projects/smrf/examples/reynolds_mountain_east/output/percent_snow.nc, data may be overwritten!
+WARNING:smrf.output.output_netcdf:Opening /home/micahjohnson/projects/smrf/examples/reynolds_mountain_east/output/snow_density.nc, data may be overwritten!
+WARNING:smrf.output.output_netcdf:Opening /home/micahjohnson/projects/smrf/examples/reynolds_mountain_east/output/thermal.nc, data may be overwritten!
+WARNING:smrf.output.output_netcdf:Opening /home/micahjohnson/projects/smrf/examples/reynolds_mountain_east/output/precip.nc, data may be overwritten!
+WARNING:smrf.output.output_netcdf:Opening /home/micahjohnson/projects/smrf/examples/reynolds_mountain_east/output/vapor_pressure.nc, data may be overwritten!
+INFO:smrf.data.loadData:Reading data coming from CSV files
+WARNING:smrf.framework.model_framework:Distribution not initialized, data not filtered to desired stations
+ERROR:smrf.framework.model_framework:only list-like objects are allowed to be passed to isin(), you passed a [NoneType]
+INFO:smrf.framework.model_framework:Backing up input data...
+INFO:smrf.distribute.precipitation:Using marks2017 for the new accumulated snow density model:  
+INFO:smrf.distribute.precipitation:Identified Storms:
+   RMESP  RME_176                       end                     start
+0   6.76      3.5 1998-01-14 19:00:00+00:00 1998-01-14 16:00:00+00:00
+INFO:smrf.distribute.precipitation:Estimated number of storms: 1
+INFO:smrf.framework.model_framework:0:00:00.745804
+INFO:smrf.framework.model_framework:SMRF closed --> 2018-01-04 14:28:01.944241
+INFO:smrf.framework.model_framework:    SSSSSSSSSSSSSSS  MMMMMMMM               MMMMMMMM RRRRRRRRRRRRRRRRR    FFFFFFFFFFFFFFFFFFFFFF
+INFO:smrf.framework.model_framework:  SS:::::::::::::::S M:::::::M             M:::::::M R::::::::::::::::R   F::::::::::::::::::::F
+INFO:smrf.framework.model_framework: S:::::SSSSSS::::::S M::::::::M           M::::::::M R::::::RRRRRR:::::R  F::::::::::::::::::::F
+INFO:smrf.framework.model_framework: S:::::S     SSSSSSS M:::::::::M         M:::::::::M RR:::::R     R:::::R FF::::::FFFFFFFFF::::F
+INFO:smrf.framework.model_framework: S:::::S             M::::::::::M       M::::::::::M   R::::R     R:::::R   F:::::F       FFFFFF
+INFO:smrf.framework.model_framework: S:::::S             M:::::::::::M     M:::::::::::M   R::::R     R:::::R   F:::::F
+INFO:smrf.framework.model_framework:  S::::SSSS          M:::::::M::::M   M::::M:::::::M   R::::RRRRRR:::::R    F::::::FFFFFFFFFF
+INFO:smrf.framework.model_framework:   SS::::::SSSSS     M::::::M M::::M M::::M M::::::M   R:::::::::::::RR     F:::::::::::::::F
+INFO:smrf.framework.model_framework:     SSS::::::::SS   M::::::M  M::::M::::M  M::::::M   R::::RRRRRR:::::R    F:::::::::::::::F
+INFO:smrf.framework.model_framework:        SSSSSS::::S  M::::::M   M:::::::M   M::::::M   R::::R     R:::::R   F::::::FFFFFFFFFF
+INFO:smrf.framework.model_framework:             S:::::S M::::::M    M:::::M    M::::::M   R::::R     R:::::R   F:::::F
+INFO:smrf.framework.model_framework:             S:::::S M::::::M     MMMMM     M::::::M   R::::R     R:::::R   F:::::F
+INFO:smrf.framework.model_framework: SSSSSSS     S:::::S M::::::M               M::::::M RR:::::R     R:::::R FF:::::::FF
+INFO:smrf.framework.model_framework: S::::::SSSSSS:::::S M::::::M               M::::::M R::::::R     R:::::R F::::::::FF
+INFO:smrf.framework.model_framework: S:::::::::::::::SS  M::::::M               M::::::M R::::::R     R:::::R F::::::::FF
+INFO:smrf.framework.model_framework:  SSSSSSSSSSSSSSS    MMMMMMMM               MMMMMMMM RRRRRRRR     RRRRRRR FFFFFFFFFFF
+INFO:smrf.framework.model_framework: 
+INFO:smrf.framework.model_framework:Adding defaults to config...
+INFO:smrf.framework.model_framework:Checking config file for issues...
+INFO:smrf.framework.model_framework: 
+INFO:smrf.framework.model_framework: 
+INFO:smrf.framework.model_framework:Configuration File Status Report:
+INFO:smrf.framework.model_framework:==============================================================================================================
+INFO:smrf.framework.model_framework:No errors or warnings were reported with the config file.
+
+INFO:smrf.framework.model_framework:Writing config file with full options.
+INFO:smrf.framework.model_framework:Started SMRF --> 2018-01-04 14:28:01.975463
+INFO:smrf.framework.model_framework:Model start --> 1998-01-14 15:00:00
+INFO:smrf.framework.model_framework:Model end --> 1998-01-14 19:00:00
+INFO:smrf.framework.model_framework:Number of time steps --> 5
+INFO:smrf.data.loadTopo:Reading [TOPO] and making stoporad input
+INFO:smrf.framework.model_framework:['thermal', 'air_temp', 'vapor_pressure', 'wind_speed', 'net_solar', 'precip', 'percent_snow', 'snow_density', 'dew_point'] variables will be output
+WARNING:smrf.output.output_netcdf:Opening /home/micahjohnson/projects/smrf/examples/reynolds_mountain_east/output/wind_speed.nc, data may be overwritten!
+WARNING:smrf.output.output_netcdf:Opening /home/micahjohnson/projects/smrf/examples/reynolds_mountain_east/output/air_temp.nc, data may be overwritten!
+WARNING:smrf.output.output_netcdf:Opening /home/micahjohnson/projects/smrf/examples/reynolds_mountain_east/output/dew_point.nc, data may be overwritten!
+WARNING:smrf.output.output_netcdf:Opening /home/micahjohnson/projects/smrf/examples/reynolds_mountain_east/output/net_solar.nc, data may be overwritten!
+WARNING:smrf.output.output_netcdf:Opening /home/micahjohnson/projects/smrf/examples/reynolds_mountain_east/output/percent_snow.nc, data may be overwritten!
+WARNING:smrf.output.output_netcdf:Opening /home/micahjohnson/projects/smrf/examples/reynolds_mountain_east/output/snow_density.nc, data may be overwritten!
+WARNING:smrf.output.output_netcdf:Opening /home/micahjohnson/projects/smrf/examples/reynolds_mountain_east/output/thermal.nc, data may be overwritten!
+WARNING:smrf.output.output_netcdf:Opening /home/micahjohnson/projects/smrf/examples/reynolds_mountain_east/output/precip.nc, data may be overwritten!
+WARNING:smrf.output.output_netcdf:Opening /home/micahjohnson/projects/smrf/examples/reynolds_mountain_east/output/vapor_pressure.nc, data may be overwritten!
+INFO:smrf.data.loadData:Reading data coming from CSV files
+WARNING:smrf.framework.model_framework:Distribution not initialized, data not filtered to desired stations
+ERROR:smrf.framework.model_framework:only list-like objects are allowed to be passed to isin(), you passed a [NoneType]
+INFO:smrf.framework.model_framework:Backing up input data...
+INFO:smrf.distribute.precipitation:Using marks2017 for the new accumulated snow density model:  
+INFO:smrf.distribute.precipitation:Identified Storms:
+   RMESP  RME_176                       end                     start
+0   6.76      3.5 1998-01-14 19:00:00+00:00 1998-01-14 16:00:00+00:00
+INFO:smrf.distribute.precipitation:Estimated number of storms: 1
+INFO:smrf.framework.model_framework:0:00:00.739073
+INFO:smrf.framework.model_framework:SMRF closed --> 2018-01-04 14:28:02.686320
+INFO:smrf.framework.model_framework:    SSSSSSSSSSSSSSS  MMMMMMMM               MMMMMMMM RRRRRRRRRRRRRRRRR    FFFFFFFFFFFFFFFFFFFFFF
+INFO:smrf.framework.model_framework:  SS:::::::::::::::S M:::::::M             M:::::::M R::::::::::::::::R   F::::::::::::::::::::F
+INFO:smrf.framework.model_framework: S:::::SSSSSS::::::S M::::::::M           M::::::::M R::::::RRRRRR:::::R  F::::::::::::::::::::F
+INFO:smrf.framework.model_framework: S:::::S     SSSSSSS M:::::::::M         M:::::::::M RR:::::R     R:::::R FF::::::FFFFFFFFF::::F
+INFO:smrf.framework.model_framework: S:::::S             M::::::::::M       M::::::::::M   R::::R     R:::::R   F:::::F       FFFFFF
+INFO:smrf.framework.model_framework: S:::::S             M:::::::::::M     M:::::::::::M   R::::R     R:::::R   F:::::F
+INFO:smrf.framework.model_framework:  S::::SSSS          M:::::::M::::M   M::::M:::::::M   R::::RRRRRR:::::R    F::::::FFFFFFFFFF
+INFO:smrf.framework.model_framework:   SS::::::SSSSS     M::::::M M::::M M::::M M::::::M   R:::::::::::::RR     F:::::::::::::::F
+INFO:smrf.framework.model_framework:     SSS::::::::SS   M::::::M  M::::M::::M  M::::::M   R::::RRRRRR:::::R    F:::::::::::::::F
+INFO:smrf.framework.model_framework:        SSSSSS::::S  M::::::M   M:::::::M   M::::::M   R::::R     R:::::R   F::::::FFFFFFFFFF
+INFO:smrf.framework.model_framework:             S:::::S M::::::M    M:::::M    M::::::M   R::::R     R:::::R   F:::::F
+INFO:smrf.framework.model_framework:             S:::::S M::::::M     MMMMM     M::::::M   R::::R     R:::::R   F:::::F
+INFO:smrf.framework.model_framework: SSSSSSS     S:::::S M::::::M               M::::::M RR:::::R     R:::::R FF:::::::FF
+INFO:smrf.framework.model_framework: S::::::SSSSSS:::::S M::::::M               M::::::M R::::::R     R:::::R F::::::::FF
+INFO:smrf.framework.model_framework: S:::::::::::::::SS  M::::::M               M::::::M R::::::R     R:::::R F::::::::FF
+INFO:smrf.framework.model_framework:  SSSSSSSSSSSSSSS    MMMMMMMM               MMMMMMMM RRRRRRRR     RRRRRRR FFFFFFFFFFF
+INFO:smrf.framework.model_framework: 
+INFO:smrf.framework.model_framework:Adding defaults to config...
+INFO:smrf.framework.model_framework:Checking config file for issues...
+INFO:smrf.framework.model_framework: 
+INFO:smrf.framework.model_framework: 
+INFO:smrf.framework.model_framework:Configuration File Status Report:
+INFO:smrf.framework.model_framework:==============================================================================================================
+INFO:smrf.framework.model_framework:No errors or warnings were reported with the config file.
+
+INFO:smrf.framework.model_framework:Writing config file with full options.
+INFO:smrf.framework.model_framework:Started SMRF --> 2018-01-04 14:28:02.712893
+INFO:smrf.framework.model_framework:Model start --> 1998-01-14 15:00:00
+INFO:smrf.framework.model_framework:Model end --> 1998-01-14 19:00:00
+INFO:smrf.framework.model_framework:Number of time steps --> 5
+INFO:smrf.data.loadTopo:Reading [TOPO] and making stoporad input
+INFO:smrf.framework.model_framework:['thermal', 'air_temp', 'vapor_pressure', 'wind_speed', 'net_solar', 'precip', 'percent_snow', 'snow_density', 'dew_point'] variables will be output
+WARNING:smrf.output.output_netcdf:Opening /home/micahjohnson/projects/smrf/examples/reynolds_mountain_east/output/wind_speed.nc, data may be overwritten!
+WARNING:smrf.output.output_netcdf:Opening /home/micahjohnson/projects/smrf/examples/reynolds_mountain_east/output/air_temp.nc, data may be overwritten!
+WARNING:smrf.output.output_netcdf:Opening /home/micahjohnson/projects/smrf/examples/reynolds_mountain_east/output/dew_point.nc, data may be overwritten!
+WARNING:smrf.output.output_netcdf:Opening /home/micahjohnson/projects/smrf/examples/reynolds_mountain_east/output/net_solar.nc, data may be overwritten!
+WARNING:smrf.output.output_netcdf:Opening /home/micahjohnson/projects/smrf/examples/reynolds_mountain_east/output/percent_snow.nc, data may be overwritten!
+WARNING:smrf.output.output_netcdf:Opening /home/micahjohnson/projects/smrf/examples/reynolds_mountain_east/output/snow_density.nc, data may be overwritten!
+WARNING:smrf.output.output_netcdf:Opening /home/micahjohnson/projects/smrf/examples/reynolds_mountain_east/output/thermal.nc, data may be overwritten!
+WARNING:smrf.output.output_netcdf:Opening /home/micahjohnson/projects/smrf/examples/reynolds_mountain_east/output/precip.nc, data may be overwritten!
+WARNING:smrf.output.output_netcdf:Opening /home/micahjohnson/projects/smrf/examples/reynolds_mountain_east/output/vapor_pressure.nc, data may be overwritten!
+INFO:smrf.data.loadData:Reading data coming from CSV files
+WARNING:smrf.framework.model_framework:Distribution not initialized, data not filtered to desired stations
+ERROR:smrf.framework.model_framework:only list-like objects are allowed to be passed to isin(), you passed a [NoneType]
+INFO:smrf.framework.model_framework:Backing up input data...
+INFO:smrf.distribute.precipitation:Using marks2017 for the new accumulated snow density model:  
+INFO:smrf.distribute.precipitation:Identified Storms:
+   RMESP  RME_176                       end                     start
+0   6.76      3.5 1998-01-14 19:00:00+00:00 1998-01-14 16:00:00+00:00
+INFO:smrf.distribute.precipitation:Estimated number of storms: 1
+INFO:smrf.framework.model_framework:0:00:00.736911
+INFO:smrf.framework.model_framework:SMRF closed --> 2018-01-04 14:28:03.426371
+INFO:smrf.framework.model_framework:    SSSSSSSSSSSSSSS  MMMMMMMM               MMMMMMMM RRRRRRRRRRRRRRRRR    FFFFFFFFFFFFFFFFFFFFFF
+INFO:smrf.framework.model_framework:  SS:::::::::::::::S M:::::::M             M:::::::M R::::::::::::::::R   F::::::::::::::::::::F
+INFO:smrf.framework.model_framework: S:::::SSSSSS::::::S M::::::::M           M::::::::M R::::::RRRRRR:::::R  F::::::::::::::::::::F
+INFO:smrf.framework.model_framework: S:::::S     SSSSSSS M:::::::::M         M:::::::::M RR:::::R     R:::::R FF::::::FFFFFFFFF::::F
+INFO:smrf.framework.model_framework: S:::::S             M::::::::::M       M::::::::::M   R::::R     R:::::R   F:::::F       FFFFFF
+INFO:smrf.framework.model_framework: S:::::S             M:::::::::::M     M:::::::::::M   R::::R     R:::::R   F:::::F
+INFO:smrf.framework.model_framework:  S::::SSSS          M:::::::M::::M   M::::M:::::::M   R::::RRRRRR:::::R    F::::::FFFFFFFFFF
+INFO:smrf.framework.model_framework:   SS::::::SSSSS     M::::::M M::::M M::::M M::::::M   R:::::::::::::RR     F:::::::::::::::F
+INFO:smrf.framework.model_framework:     SSS::::::::SS   M::::::M  M::::M::::M  M::::::M   R::::RRRRRR:::::R    F:::::::::::::::F
+INFO:smrf.framework.model_framework:        SSSSSS::::S  M::::::M   M:::::::M   M::::::M   R::::R     R:::::R   F::::::FFFFFFFFFF
+INFO:smrf.framework.model_framework:             S:::::S M::::::M    M:::::M    M::::::M   R::::R     R:::::R   F:::::F
+INFO:smrf.framework.model_framework:             S:::::S M::::::M     MMMMM     M::::::M   R::::R     R:::::R   F:::::F
+INFO:smrf.framework.model_framework: SSSSSSS     S:::::S M::::::M               M::::::M RR:::::R     R:::::R FF:::::::FF
+INFO:smrf.framework.model_framework: S::::::SSSSSS:::::S M::::::M               M::::::M R::::::R     R:::::R F::::::::FF
+INFO:smrf.framework.model_framework: S:::::::::::::::SS  M::::::M               M::::::M R::::::R     R:::::R F::::::::FF
+INFO:smrf.framework.model_framework:  SSSSSSSSSSSSSSS    MMMMMMMM               MMMMMMMM RRRRRRRR     RRRRRRR FFFFFFFFFFF
+INFO:smrf.framework.model_framework: 
+INFO:smrf.framework.model_framework:Adding defaults to config...
+INFO:smrf.framework.model_framework:Checking config file for issues...
+INFO:smrf.framework.model_framework: 
+INFO:smrf.framework.model_framework: 
+INFO:smrf.framework.model_framework:Configuration File Status Report:
+INFO:smrf.framework.model_framework:==============================================================================================================
+INFO:smrf.framework.model_framework:No errors or warnings were reported with the config file.
+
+INFO:smrf.framework.model_framework:Writing config file with full options.
+INFO:smrf.framework.model_framework:Started SMRF --> 2018-01-04 14:28:03.454006
+INFO:smrf.framework.model_framework:Model start --> 1998-01-14 15:00:00
+INFO:smrf.framework.model_framework:Model end --> 1998-01-14 19:00:00
+INFO:smrf.framework.model_framework:Number of time steps --> 5
+INFO:smrf.data.loadTopo:Reading [TOPO] and making stoporad input
+INFO:smrf.framework.model_framework:['thermal', 'air_temp', 'vapor_pressure', 'wind_speed', 'net_solar', 'precip', 'percent_snow', 'snow_density', 'dew_point'] variables will be output
+WARNING:smrf.output.output_netcdf:Opening /home/micahjohnson/projects/smrf/examples/reynolds_mountain_east/output/wind_speed.nc, data may be overwritten!
+WARNING:smrf.output.output_netcdf:Opening /home/micahjohnson/projects/smrf/examples/reynolds_mountain_east/output/air_temp.nc, data may be overwritten!
+WARNING:smrf.output.output_netcdf:Opening /home/micahjohnson/projects/smrf/examples/reynolds_mountain_east/output/dew_point.nc, data may be overwritten!
+WARNING:smrf.output.output_netcdf:Opening /home/micahjohnson/projects/smrf/examples/reynolds_mountain_east/output/net_solar.nc, data may be overwritten!
+WARNING:smrf.output.output_netcdf:Opening /home/micahjohnson/projects/smrf/examples/reynolds_mountain_east/output/percent_snow.nc, data may be overwritten!
+WARNING:smrf.output.output_netcdf:Opening /home/micahjohnson/projects/smrf/examples/reynolds_mountain_east/output/snow_density.nc, data may be overwritten!
+WARNING:smrf.output.output_netcdf:Opening /home/micahjohnson/projects/smrf/examples/reynolds_mountain_east/output/thermal.nc, data may be overwritten!
+WARNING:smrf.output.output_netcdf:Opening /home/micahjohnson/projects/smrf/examples/reynolds_mountain_east/output/precip.nc, data may be overwritten!
+WARNING:smrf.output.output_netcdf:Opening /home/micahjohnson/projects/smrf/examples/reynolds_mountain_east/output/vapor_pressure.nc, data may be overwritten!
+INFO:smrf.data.loadData:Reading data coming from CSV files
+WARNING:smrf.framework.model_framework:Distribution not initialized, data not filtered to desired stations
+ERROR:smrf.framework.model_framework:only list-like objects are allowed to be passed to isin(), you passed a [NoneType]
+INFO:smrf.framework.model_framework:Backing up input data...
+INFO:smrf.distribute.precipitation:Using marks2017 for the new accumulated snow density model:  
+INFO:smrf.distribute.precipitation:Identified Storms:
+   RMESP  RME_176                       end                     start
+0   6.76      3.5 1998-01-14 19:00:00+00:00 1998-01-14 16:00:00+00:00
+INFO:smrf.distribute.precipitation:Estimated number of storms: 1
+INFO:smrf.framework.model_framework:0:00:00.748452
+INFO:smrf.framework.model_framework:SMRF closed --> 2018-01-04 14:28:04.177854
+INFO:smrf.framework.model_framework:    SSSSSSSSSSSSSSS  MMMMMMMM               MMMMMMMM RRRRRRRRRRRRRRRRR    FFFFFFFFFFFFFFFFFFFFFF
+INFO:smrf.framework.model_framework:  SS:::::::::::::::S M:::::::M             M:::::::M R::::::::::::::::R   F::::::::::::::::::::F
+INFO:smrf.framework.model_framework: S:::::SSSSSS::::::S M::::::::M           M::::::::M R::::::RRRRRR:::::R  F::::::::::::::::::::F
+INFO:smrf.framework.model_framework: S:::::S     SSSSSSS M:::::::::M         M:::::::::M RR:::::R     R:::::R FF::::::FFFFFFFFF::::F
+INFO:smrf.framework.model_framework: S:::::S             M::::::::::M       M::::::::::M   R::::R     R:::::R   F:::::F       FFFFFF
+INFO:smrf.framework.model_framework: S:::::S             M:::::::::::M     M:::::::::::M   R::::R     R:::::R   F:::::F
+INFO:smrf.framework.model_framework:  S::::SSSS          M:::::::M::::M   M::::M:::::::M   R::::RRRRRR:::::R    F::::::FFFFFFFFFF
+INFO:smrf.framework.model_framework:   SS::::::SSSSS     M::::::M M::::M M::::M M::::::M   R:::::::::::::RR     F:::::::::::::::F
+INFO:smrf.framework.model_framework:     SSS::::::::SS   M::::::M  M::::M::::M  M::::::M   R::::RRRRRR:::::R    F:::::::::::::::F
+INFO:smrf.framework.model_framework:        SSSSSS::::S  M::::::M   M:::::::M   M::::::M   R::::R     R:::::R   F::::::FFFFFFFFFF
+INFO:smrf.framework.model_framework:             S:::::S M::::::M    M:::::M    M::::::M   R::::R     R:::::R   F:::::F
+INFO:smrf.framework.model_framework:             S:::::S M::::::M     MMMMM     M::::::M   R::::R     R:::::R   F:::::F
+INFO:smrf.framework.model_framework: SSSSSSS     S:::::S M::::::M               M::::::M RR:::::R     R:::::R FF:::::::FF
+INFO:smrf.framework.model_framework: S::::::SSSSSS:::::S M::::::M               M::::::M R::::::R     R:::::R F::::::::FF
+INFO:smrf.framework.model_framework: S:::::::::::::::SS  M::::::M               M::::::M R::::::R     R:::::R F::::::::FF
+INFO:smrf.framework.model_framework:  SSSSSSSSSSSSSSS    MMMMMMMM               MMMMMMMM RRRRRRRR     RRRRRRR FFFFFFFFFFF
+INFO:smrf.framework.model_framework: 
+INFO:smrf.framework.model_framework:Adding defaults to config...
+INFO:smrf.framework.model_framework:Checking config file for issues...
+INFO:smrf.framework.model_framework: 
+INFO:smrf.framework.model_framework: 
+INFO:smrf.framework.model_framework:Configuration File Status Report:
+INFO:smrf.framework.model_framework:==============================================================================================================
+INFO:smrf.framework.model_framework:No errors or warnings were reported with the config file.
+
+INFO:smrf.framework.model_framework:Writing config file with full options.
+INFO:smrf.framework.model_framework:Started SMRF --> 2018-01-04 14:28:04.205257
+INFO:smrf.framework.model_framework:Model start --> 1998-01-14 15:00:00
+INFO:smrf.framework.model_framework:Model end --> 1998-01-14 19:00:00
+INFO:smrf.framework.model_framework:Number of time steps --> 5
+INFO:smrf.data.loadTopo:Reading [TOPO] and making stoporad input
+INFO:smrf.framework.model_framework:['thermal', 'air_temp', 'vapor_pressure', 'wind_speed', 'net_solar', 'precip', 'percent_snow', 'snow_density', 'dew_point'] variables will be output
+WARNING:smrf.output.output_netcdf:Opening /home/micahjohnson/projects/smrf/examples/reynolds_mountain_east/output/wind_speed.nc, data may be overwritten!
+WARNING:smrf.output.output_netcdf:Opening /home/micahjohnson/projects/smrf/examples/reynolds_mountain_east/output/air_temp.nc, data may be overwritten!
+WARNING:smrf.output.output_netcdf:Opening /home/micahjohnson/projects/smrf/examples/reynolds_mountain_east/output/dew_point.nc, data may be overwritten!
+WARNING:smrf.output.output_netcdf:Opening /home/micahjohnson/projects/smrf/examples/reynolds_mountain_east/output/net_solar.nc, data may be overwritten!
+WARNING:smrf.output.output_netcdf:Opening /home/micahjohnson/projects/smrf/examples/reynolds_mountain_east/output/percent_snow.nc, data may be overwritten!
+WARNING:smrf.output.output_netcdf:Opening /home/micahjohnson/projects/smrf/examples/reynolds_mountain_east/output/snow_density.nc, data may be overwritten!
+WARNING:smrf.output.output_netcdf:Opening /home/micahjohnson/projects/smrf/examples/reynolds_mountain_east/output/thermal.nc, data may be overwritten!
+WARNING:smrf.output.output_netcdf:Opening /home/micahjohnson/projects/smrf/examples/reynolds_mountain_east/output/precip.nc, data may be overwritten!
+WARNING:smrf.output.output_netcdf:Opening /home/micahjohnson/projects/smrf/examples/reynolds_mountain_east/output/vapor_pressure.nc, data may be overwritten!
+INFO:smrf.data.loadData:Reading data coming from CSV files
+WARNING:smrf.framework.model_framework:Distribution not initialized, data not filtered to desired stations
+ERROR:smrf.framework.model_framework:only list-like objects are allowed to be passed to isin(), you passed a [NoneType]
+INFO:smrf.framework.model_framework:Backing up input data...
+INFO:smrf.distribute.precipitation:Using marks2017 for the new accumulated snow density model:  
+INFO:smrf.distribute.precipitation:Identified Storms:
+   RMESP  RME_176                       end                     start
+0   6.76      3.5 1998-01-14 19:00:00+00:00 1998-01-14 16:00:00+00:00
+INFO:smrf.distribute.precipitation:Estimated number of storms: 1
+INFO:smrf.framework.model_framework:0:00:00.723702
+INFO:smrf.framework.model_framework:SMRF closed --> 2018-01-04 14:28:04.904340
+INFO:smrf.framework.model_framework:    SSSSSSSSSSSSSSS  MMMMMMMM               MMMMMMMM RRRRRRRRRRRRRRRRR    FFFFFFFFFFFFFFFFFFFFFF
+INFO:smrf.framework.model_framework:  SS:::::::::::::::S M:::::::M             M:::::::M R::::::::::::::::R   F::::::::::::::::::::F
+INFO:smrf.framework.model_framework: S:::::SSSSSS::::::S M::::::::M           M::::::::M R::::::RRRRRR:::::R  F::::::::::::::::::::F
+INFO:smrf.framework.model_framework: S:::::S     SSSSSSS M:::::::::M         M:::::::::M RR:::::R     R:::::R FF::::::FFFFFFFFF::::F
+INFO:smrf.framework.model_framework: S:::::S             M::::::::::M       M::::::::::M   R::::R     R:::::R   F:::::F       FFFFFF
+INFO:smrf.framework.model_framework: S:::::S             M:::::::::::M     M:::::::::::M   R::::R     R:::::R   F:::::F
+INFO:smrf.framework.model_framework:  S::::SSSS          M:::::::M::::M   M::::M:::::::M   R::::RRRRRR:::::R    F::::::FFFFFFFFFF
+INFO:smrf.framework.model_framework:   SS::::::SSSSS     M::::::M M::::M M::::M M::::::M   R:::::::::::::RR     F:::::::::::::::F
+INFO:smrf.framework.model_framework:     SSS::::::::SS   M::::::M  M::::M::::M  M::::::M   R::::RRRRRR:::::R    F:::::::::::::::F
+INFO:smrf.framework.model_framework:        SSSSSS::::S  M::::::M   M:::::::M   M::::::M   R::::R     R:::::R   F::::::FFFFFFFFFF
+INFO:smrf.framework.model_framework:             S:::::S M::::::M    M:::::M    M::::::M   R::::R     R:::::R   F:::::F
+INFO:smrf.framework.model_framework:             S:::::S M::::::M     MMMMM     M::::::M   R::::R     R:::::R   F:::::F
+INFO:smrf.framework.model_framework: SSSSSSS     S:::::S M::::::M               M::::::M RR:::::R     R:::::R FF:::::::FF
+INFO:smrf.framework.model_framework: S::::::SSSSSS:::::S M::::::M               M::::::M R::::::R     R:::::R F::::::::FF
+INFO:smrf.framework.model_framework: S:::::::::::::::SS  M::::::M               M::::::M R::::::R     R:::::R F::::::::FF
+INFO:smrf.framework.model_framework:  SSSSSSSSSSSSSSS    MMMMMMMM               MMMMMMMM RRRRRRRR     RRRRRRR FFFFFFFFFFF
+INFO:smrf.framework.model_framework: 
+INFO:smrf.framework.model_framework:Adding defaults to config...
+INFO:smrf.framework.model_framework:Checking config file for issues...
+INFO:smrf.framework.model_framework: 
+INFO:smrf.framework.model_framework: 
+INFO:smrf.framework.model_framework:Configuration File Status Report:
+INFO:smrf.framework.model_framework:==============================================================================================================
+INFO:smrf.framework.model_framework:No errors or warnings were reported with the config file.
+
+INFO:smrf.framework.model_framework:Writing config file with full options.
+INFO:smrf.framework.model_framework:Started SMRF --> 2018-01-04 14:28:04.931736
+INFO:smrf.framework.model_framework:Model start --> 1998-01-14 15:00:00
+INFO:smrf.framework.model_framework:Model end --> 1998-01-14 19:00:00
+INFO:smrf.framework.model_framework:Number of time steps --> 5
+INFO:smrf.data.loadTopo:Reading [TOPO] and making stoporad input
+INFO:smrf.framework.model_framework:['thermal', 'air_temp', 'vapor_pressure', 'wind_speed', 'net_solar', 'precip', 'percent_snow', 'snow_density', 'dew_point'] variables will be output
+WARNING:smrf.output.output_netcdf:Opening /home/micahjohnson/projects/smrf/examples/reynolds_mountain_east/output/wind_speed.nc, data may be overwritten!
+WARNING:smrf.output.output_netcdf:Opening /home/micahjohnson/projects/smrf/examples/reynolds_mountain_east/output/air_temp.nc, data may be overwritten!
+WARNING:smrf.output.output_netcdf:Opening /home/micahjohnson/projects/smrf/examples/reynolds_mountain_east/output/dew_point.nc, data may be overwritten!
+WARNING:smrf.output.output_netcdf:Opening /home/micahjohnson/projects/smrf/examples/reynolds_mountain_east/output/net_solar.nc, data may be overwritten!
+WARNING:smrf.output.output_netcdf:Opening /home/micahjohnson/projects/smrf/examples/reynolds_mountain_east/output/percent_snow.nc, data may be overwritten!
+WARNING:smrf.output.output_netcdf:Opening /home/micahjohnson/projects/smrf/examples/reynolds_mountain_east/output/snow_density.nc, data may be overwritten!
+WARNING:smrf.output.output_netcdf:Opening /home/micahjohnson/projects/smrf/examples/reynolds_mountain_east/output/thermal.nc, data may be overwritten!
+WARNING:smrf.output.output_netcdf:Opening /home/micahjohnson/projects/smrf/examples/reynolds_mountain_east/output/precip.nc, data may be overwritten!
+WARNING:smrf.output.output_netcdf:Opening /home/micahjohnson/projects/smrf/examples/reynolds_mountain_east/output/vapor_pressure.nc, data may be overwritten!
+INFO:smrf.data.loadData:Reading data coming from CSV files
+WARNING:smrf.framework.model_framework:Distribution not initialized, data not filtered to desired stations
+ERROR:smrf.framework.model_framework:only list-like objects are allowed to be passed to isin(), you passed a [NoneType]
+INFO:smrf.framework.model_framework:Backing up input data...
+INFO:smrf.distribute.precipitation:Using marks2017 for the new accumulated snow density model:  
+INFO:smrf.distribute.precipitation:Identified Storms:
+   RMESP  RME_176                       end                     start
+0   6.76      3.5 1998-01-14 19:00:00+00:00 1998-01-14 16:00:00+00:00
+INFO:smrf.distribute.precipitation:Estimated number of storms: 1
+INFO:smrf.framework.model_framework:0:00:00.745459
+INFO:smrf.framework.model_framework:SMRF closed --> 2018-01-04 14:28:05.652718
+INFO:smrf.framework.model_framework:    SSSSSSSSSSSSSSS  MMMMMMMM               MMMMMMMM RRRRRRRRRRRRRRRRR    FFFFFFFFFFFFFFFFFFFFFF
+INFO:smrf.framework.model_framework:  SS:::::::::::::::S M:::::::M             M:::::::M R::::::::::::::::R   F::::::::::::::::::::F
+INFO:smrf.framework.model_framework: S:::::SSSSSS::::::S M::::::::M           M::::::::M R::::::RRRRRR:::::R  F::::::::::::::::::::F
+INFO:smrf.framework.model_framework: S:::::S     SSSSSSS M:::::::::M         M:::::::::M RR:::::R     R:::::R FF::::::FFFFFFFFF::::F
+INFO:smrf.framework.model_framework: S:::::S             M::::::::::M       M::::::::::M   R::::R     R:::::R   F:::::F       FFFFFF
+INFO:smrf.framework.model_framework: S:::::S             M:::::::::::M     M:::::::::::M   R::::R     R:::::R   F:::::F
+INFO:smrf.framework.model_framework:  S::::SSSS          M:::::::M::::M   M::::M:::::::M   R::::RRRRRR:::::R    F::::::FFFFFFFFFF
+INFO:smrf.framework.model_framework:   SS::::::SSSSS     M::::::M M::::M M::::M M::::::M   R:::::::::::::RR     F:::::::::::::::F
+INFO:smrf.framework.model_framework:     SSS::::::::SS   M::::::M  M::::M::::M  M::::::M   R::::RRRRRR:::::R    F:::::::::::::::F
+INFO:smrf.framework.model_framework:        SSSSSS::::S  M::::::M   M:::::::M   M::::::M   R::::R     R:::::R   F::::::FFFFFFFFFF
+INFO:smrf.framework.model_framework:             S:::::S M::::::M    M:::::M    M::::::M   R::::R     R:::::R   F:::::F
+INFO:smrf.framework.model_framework:             S:::::S M::::::M     MMMMM     M::::::M   R::::R     R:::::R   F:::::F
+INFO:smrf.framework.model_framework: SSSSSSS     S:::::S M::::::M               M::::::M RR:::::R     R:::::R FF:::::::FF
+INFO:smrf.framework.model_framework: S::::::SSSSSS:::::S M::::::M               M::::::M R::::::R     R:::::R F::::::::FF
+INFO:smrf.framework.model_framework: S:::::::::::::::SS  M::::::M               M::::::M R::::::R     R:::::R F::::::::FF
+INFO:smrf.framework.model_framework:  SSSSSSSSSSSSSSS    MMMMMMMM               MMMMMMMM RRRRRRRR     RRRRRRR FFFFFFFFFFF
+INFO:smrf.framework.model_framework: 
+INFO:smrf.framework.model_framework:Adding defaults to config...
+INFO:smrf.framework.model_framework:Checking config file for issues...
+INFO:smrf.framework.model_framework: 
+INFO:smrf.framework.model_framework: 
+INFO:smrf.framework.model_framework:Configuration File Status Report:
+INFO:smrf.framework.model_framework:==============================================================================================================
+INFO:smrf.framework.model_framework:No errors or warnings were reported with the config file.
+
+INFO:smrf.framework.model_framework:Writing config file with full options.
+INFO:smrf.framework.model_framework:Started SMRF --> 2018-01-04 14:28:05.679483
+INFO:smrf.framework.model_framework:Model start --> 1998-01-14 15:00:00
+INFO:smrf.framework.model_framework:Model end --> 1998-01-14 19:00:00
+INFO:smrf.framework.model_framework:Number of time steps --> 5
+INFO:smrf.data.loadTopo:Reading [TOPO] and making stoporad input
+INFO:smrf.framework.model_framework:['thermal', 'air_temp', 'vapor_pressure', 'wind_speed', 'net_solar', 'precip', 'percent_snow', 'snow_density', 'dew_point'] variables will be output
+WARNING:smrf.output.output_netcdf:Opening /home/micahjohnson/projects/smrf/examples/reynolds_mountain_east/output/wind_speed.nc, data may be overwritten!
+WARNING:smrf.output.output_netcdf:Opening /home/micahjohnson/projects/smrf/examples/reynolds_mountain_east/output/air_temp.nc, data may be overwritten!
+WARNING:smrf.output.output_netcdf:Opening /home/micahjohnson/projects/smrf/examples/reynolds_mountain_east/output/dew_point.nc, data may be overwritten!
+WARNING:smrf.output.output_netcdf:Opening /home/micahjohnson/projects/smrf/examples/reynolds_mountain_east/output/net_solar.nc, data may be overwritten!
+WARNING:smrf.output.output_netcdf:Opening /home/micahjohnson/projects/smrf/examples/reynolds_mountain_east/output/percent_snow.nc, data may be overwritten!
+WARNING:smrf.output.output_netcdf:Opening /home/micahjohnson/projects/smrf/examples/reynolds_mountain_east/output/snow_density.nc, data may be overwritten!
+WARNING:smrf.output.output_netcdf:Opening /home/micahjohnson/projects/smrf/examples/reynolds_mountain_east/output/thermal.nc, data may be overwritten!
+WARNING:smrf.output.output_netcdf:Opening /home/micahjohnson/projects/smrf/examples/reynolds_mountain_east/output/precip.nc, data may be overwritten!
+WARNING:smrf.output.output_netcdf:Opening /home/micahjohnson/projects/smrf/examples/reynolds_mountain_east/output/vapor_pressure.nc, data may be overwritten!
+INFO:smrf.data.loadData:Reading data coming from CSV files
+WARNING:smrf.framework.model_framework:Distribution not initialized, data not filtered to desired stations
+ERROR:smrf.framework.model_framework:only list-like objects are allowed to be passed to isin(), you passed a [NoneType]
+INFO:smrf.framework.model_framework:Backing up input data...
+INFO:smrf.distribute.precipitation:Using marks2017 for the new accumulated snow density model:  
+INFO:smrf.distribute.precipitation:Identified Storms:
+   RMESP  RME_176                       end                     start
+0   6.76      3.5 1998-01-14 19:00:00+00:00 1998-01-14 16:00:00+00:00
+INFO:smrf.distribute.precipitation:Estimated number of storms: 1
+INFO:smrf.framework.model_framework:0:00:00.726872
+INFO:smrf.framework.model_framework:SMRF closed --> 2018-01-04 14:28:06.382592
+INFO:smrf.framework.model_framework:    SSSSSSSSSSSSSSS  MMMMMMMM               MMMMMMMM RRRRRRRRRRRRRRRRR    FFFFFFFFFFFFFFFFFFFFFF
+INFO:smrf.framework.model_framework:  SS:::::::::::::::S M:::::::M             M:::::::M R::::::::::::::::R   F::::::::::::::::::::F
+INFO:smrf.framework.model_framework: S:::::SSSSSS::::::S M::::::::M           M::::::::M R::::::RRRRRR:::::R  F::::::::::::::::::::F
+INFO:smrf.framework.model_framework: S:::::S     SSSSSSS M:::::::::M         M:::::::::M RR:::::R     R:::::R FF::::::FFFFFFFFF::::F
+INFO:smrf.framework.model_framework: S:::::S             M::::::::::M       M::::::::::M   R::::R     R:::::R   F:::::F       FFFFFF
+INFO:smrf.framework.model_framework: S:::::S             M:::::::::::M     M:::::::::::M   R::::R     R:::::R   F:::::F
+INFO:smrf.framework.model_framework:  S::::SSSS          M:::::::M::::M   M::::M:::::::M   R::::RRRRRR:::::R    F::::::FFFFFFFFFF
+INFO:smrf.framework.model_framework:   SS::::::SSSSS     M::::::M M::::M M::::M M::::::M   R:::::::::::::RR     F:::::::::::::::F
+INFO:smrf.framework.model_framework:     SSS::::::::SS   M::::::M  M::::M::::M  M::::::M   R::::RRRRRR:::::R    F:::::::::::::::F
+INFO:smrf.framework.model_framework:        SSSSSS::::S  M::::::M   M:::::::M   M::::::M   R::::R     R:::::R   F::::::FFFFFFFFFF
+INFO:smrf.framework.model_framework:             S:::::S M::::::M    M:::::M    M::::::M   R::::R     R:::::R   F:::::F
+INFO:smrf.framework.model_framework:             S:::::S M::::::M     MMMMM     M::::::M   R::::R     R:::::R   F:::::F
+INFO:smrf.framework.model_framework: SSSSSSS     S:::::S M::::::M               M::::::M RR:::::R     R:::::R FF:::::::FF
+INFO:smrf.framework.model_framework: S::::::SSSSSS:::::S M::::::M               M::::::M R::::::R     R:::::R F::::::::FF
+INFO:smrf.framework.model_framework: S:::::::::::::::SS  M::::::M               M::::::M R::::::R     R:::::R F::::::::FF
+INFO:smrf.framework.model_framework:  SSSSSSSSSSSSSSS    MMMMMMMM               MMMMMMMM RRRRRRRR     RRRRRRR FFFFFFFFFFF
+INFO:smrf.framework.model_framework: 
+INFO:smrf.framework.model_framework:Adding defaults to config...
+INFO:smrf.framework.model_framework:Checking config file for issues...
+INFO:smrf.framework.model_framework: 
+INFO:smrf.framework.model_framework: 
+INFO:smrf.framework.model_framework:Configuration File Status Report:
+INFO:smrf.framework.model_framework:==============================================================================================================
+INFO:smrf.framework.model_framework:No errors or warnings were reported with the config file.
+
+INFO:smrf.framework.model_framework:Writing config file with full options.
+INFO:smrf.framework.model_framework:Started SMRF --> 2018-01-04 14:28:06.410808
+INFO:smrf.framework.model_framework:Model start --> 1998-01-14 15:00:00
+INFO:smrf.framework.model_framework:Model end --> 1998-01-14 19:00:00
+INFO:smrf.framework.model_framework:Number of time steps --> 5
+INFO:smrf.data.loadTopo:Reading [TOPO] and making stoporad input
+INFO:smrf.framework.model_framework:['thermal', 'air_temp', 'vapor_pressure', 'wind_speed', 'net_solar', 'precip', 'percent_snow', 'snow_density', 'dew_point'] variables will be output
+WARNING:smrf.output.output_netcdf:Opening /home/micahjohnson/projects/smrf/examples/reynolds_mountain_east/output/wind_speed.nc, data may be overwritten!
+WARNING:smrf.output.output_netcdf:Opening /home/micahjohnson/projects/smrf/examples/reynolds_mountain_east/output/air_temp.nc, data may be overwritten!
+WARNING:smrf.output.output_netcdf:Opening /home/micahjohnson/projects/smrf/examples/reynolds_mountain_east/output/dew_point.nc, data may be overwritten!
+WARNING:smrf.output.output_netcdf:Opening /home/micahjohnson/projects/smrf/examples/reynolds_mountain_east/output/net_solar.nc, data may be overwritten!
+WARNING:smrf.output.output_netcdf:Opening /home/micahjohnson/projects/smrf/examples/reynolds_mountain_east/output/percent_snow.nc, data may be overwritten!
+WARNING:smrf.output.output_netcdf:Opening /home/micahjohnson/projects/smrf/examples/reynolds_mountain_east/output/snow_density.nc, data may be overwritten!
+WARNING:smrf.output.output_netcdf:Opening /home/micahjohnson/projects/smrf/examples/reynolds_mountain_east/output/thermal.nc, data may be overwritten!
+WARNING:smrf.output.output_netcdf:Opening /home/micahjohnson/projects/smrf/examples/reynolds_mountain_east/output/precip.nc, data may be overwritten!
+WARNING:smrf.output.output_netcdf:Opening /home/micahjohnson/projects/smrf/examples/reynolds_mountain_east/output/vapor_pressure.nc, data may be overwritten!
+INFO:smrf.data.loadData:Reading data coming from CSV files
+WARNING:smrf.framework.model_framework:Distribution not initialized, data not filtered to desired stations
+ERROR:smrf.framework.model_framework:only list-like objects are allowed to be passed to isin(), you passed a [NoneType]
+INFO:smrf.framework.model_framework:Backing up input data...
+INFO:smrf.distribute.precipitation:Using marks2017 for the new accumulated snow density model:  
+INFO:smrf.distribute.precipitation:Identified Storms:
+   RMESP  RME_176                       end                     start
+0   6.76      3.5 1998-01-14 19:00:00+00:00 1998-01-14 16:00:00+00:00
+INFO:smrf.distribute.precipitation:Estimated number of storms: 1
+INFO:smrf.framework.model_framework:0:00:00.736008
+INFO:smrf.framework.model_framework:SMRF closed --> 2018-01-04 14:28:07.121430
+INFO:smrf.framework.model_framework:    SSSSSSSSSSSSSSS  MMMMMMMM               MMMMMMMM RRRRRRRRRRRRRRRRR    FFFFFFFFFFFFFFFFFFFFFF
+INFO:smrf.framework.model_framework:  SS:::::::::::::::S M:::::::M             M:::::::M R::::::::::::::::R   F::::::::::::::::::::F
+INFO:smrf.framework.model_framework: S:::::SSSSSS::::::S M::::::::M           M::::::::M R::::::RRRRRR:::::R  F::::::::::::::::::::F
+INFO:smrf.framework.model_framework: S:::::S     SSSSSSS M:::::::::M         M:::::::::M RR:::::R     R:::::R FF::::::FFFFFFFFF::::F
+INFO:smrf.framework.model_framework: S:::::S             M::::::::::M       M::::::::::M   R::::R     R:::::R   F:::::F       FFFFFF
+INFO:smrf.framework.model_framework: S:::::S             M:::::::::::M     M:::::::::::M   R::::R     R:::::R   F:::::F
+INFO:smrf.framework.model_framework:  S::::SSSS          M:::::::M::::M   M::::M:::::::M   R::::RRRRRR:::::R    F::::::FFFFFFFFFF
+INFO:smrf.framework.model_framework:   SS::::::SSSSS     M::::::M M::::M M::::M M::::::M   R:::::::::::::RR     F:::::::::::::::F
+INFO:smrf.framework.model_framework:     SSS::::::::SS   M::::::M  M::::M::::M  M::::::M   R::::RRRRRR:::::R    F:::::::::::::::F
+INFO:smrf.framework.model_framework:        SSSSSS::::S  M::::::M   M:::::::M   M::::::M   R::::R     R:::::R   F::::::FFFFFFFFFF
+INFO:smrf.framework.model_framework:             S:::::S M::::::M    M:::::M    M::::::M   R::::R     R:::::R   F:::::F
+INFO:smrf.framework.model_framework:             S:::::S M::::::M     MMMMM     M::::::M   R::::R     R:::::R   F:::::F
+INFO:smrf.framework.model_framework: SSSSSSS     S:::::S M::::::M               M::::::M RR:::::R     R:::::R FF:::::::FF
+INFO:smrf.framework.model_framework: S::::::SSSSSS:::::S M::::::M               M::::::M R::::::R     R:::::R F::::::::FF
+INFO:smrf.framework.model_framework: S:::::::::::::::SS  M::::::M               M::::::M R::::::R     R:::::R F::::::::FF
+INFO:smrf.framework.model_framework:  SSSSSSSSSSSSSSS    MMMMMMMM               MMMMMMMM RRRRRRRR     RRRRRRR FFFFFFFFFFF
+INFO:smrf.framework.model_framework: 
+INFO:smrf.framework.model_framework:Adding defaults to config...
+INFO:smrf.framework.model_framework:Checking config file for issues...
+INFO:smrf.framework.model_framework: 
+INFO:smrf.framework.model_framework: 
+INFO:smrf.framework.model_framework:Configuration File Status Report:
+INFO:smrf.framework.model_framework:==============================================================================================================
+INFO:smrf.framework.model_framework:No errors or warnings were reported with the config file.
+
+INFO:smrf.framework.model_framework:Writing config file with full options.
+INFO:smrf.framework.model_framework:Started SMRF --> 2018-01-04 14:28:07.148699
+INFO:smrf.framework.model_framework:Model start --> 1998-01-14 15:00:00
+INFO:smrf.framework.model_framework:Model end --> 1998-01-14 19:00:00
+INFO:smrf.framework.model_framework:Number of time steps --> 5
+INFO:smrf.data.loadTopo:Reading [TOPO] and making stoporad input
+INFO:smrf.framework.model_framework:['thermal', 'air_temp', 'vapor_pressure', 'wind_speed', 'net_solar', 'precip', 'percent_snow', 'snow_density', 'dew_point'] variables will be output
+WARNING:smrf.output.output_netcdf:Opening /home/micahjohnson/projects/smrf/examples/reynolds_mountain_east/output/wind_speed.nc, data may be overwritten!
+WARNING:smrf.output.output_netcdf:Opening /home/micahjohnson/projects/smrf/examples/reynolds_mountain_east/output/air_temp.nc, data may be overwritten!
+WARNING:smrf.output.output_netcdf:Opening /home/micahjohnson/projects/smrf/examples/reynolds_mountain_east/output/dew_point.nc, data may be overwritten!
+WARNING:smrf.output.output_netcdf:Opening /home/micahjohnson/projects/smrf/examples/reynolds_mountain_east/output/net_solar.nc, data may be overwritten!
+WARNING:smrf.output.output_netcdf:Opening /home/micahjohnson/projects/smrf/examples/reynolds_mountain_east/output/percent_snow.nc, data may be overwritten!
+WARNING:smrf.output.output_netcdf:Opening /home/micahjohnson/projects/smrf/examples/reynolds_mountain_east/output/snow_density.nc, data may be overwritten!
+WARNING:smrf.output.output_netcdf:Opening /home/micahjohnson/projects/smrf/examples/reynolds_mountain_east/output/thermal.nc, data may be overwritten!
+WARNING:smrf.output.output_netcdf:Opening /home/micahjohnson/projects/smrf/examples/reynolds_mountain_east/output/precip.nc, data may be overwritten!
+WARNING:smrf.output.output_netcdf:Opening /home/micahjohnson/projects/smrf/examples/reynolds_mountain_east/output/vapor_pressure.nc, data may be overwritten!
+INFO:smrf.data.loadData:Reading data coming from CSV files
+WARNING:smrf.framework.model_framework:Distribution not initialized, data not filtered to desired stations
+ERROR:smrf.framework.model_framework:only list-like objects are allowed to be passed to isin(), you passed a [NoneType]
+INFO:smrf.framework.model_framework:Backing up input data...
+INFO:smrf.distribute.precipitation:Using marks2017 for the new accumulated snow density model:  
+INFO:smrf.distribute.precipitation:Identified Storms:
+   RMESP  RME_176                       end                     start
+0   6.76      3.5 1998-01-14 19:00:00+00:00 1998-01-14 16:00:00+00:00
+INFO:smrf.distribute.precipitation:Estimated number of storms: 1
+INFO:smrf.framework.model_framework:0:00:00.735419
+INFO:smrf.framework.model_framework:SMRF closed --> 2018-01-04 14:28:07.859876

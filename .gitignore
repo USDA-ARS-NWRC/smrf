@@ -107,3 +107,4 @@ examples/simple_hill/* *.csv
 */input_backup/*
 test_data/output/*
 */tmp/*
+examples/reynolds_mountain_east/output*.nc
