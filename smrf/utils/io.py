@@ -9,9 +9,9 @@ import os
 from collections import Sequence
 from smrf import __core_config__, __version__
 import sys
-#Python 3 troubles and hack
+# hack for install with either version 2 or version 3 python
 if sys.version_info[0] >= 3:
-    from ..utils import utils
+    from smrf.utils import utils
 else:
     import utils
 
@@ -553,17 +553,25 @@ def generate_config(config,fname, inicheck = False, order_lst = None, titles = N
     #Check for one of the three data set options
     user_sections = config.keys()
     if 'csv' in user_sections:
-        order_lst.remove('mysql')
-        order_lst.remove('gridded')
+        if 'mysql' in order_lst:
+            order_lst.remove('mysql')
+        if 'gridded' in order_lst:
+            order_lst.remove('gridded')
 
     elif 'mysql' in user_sections:
-        order_lst.remove('csv')
-        order_lst.remove('gridded')
+        if 'csv' in order_lst:
+            order_lst.remove('csv')
+        if 'gridded' in order_lst:
+            order_lst.remove('gridded')
 
     elif 'gridded' in user_sections:
-        order_lst.remove('stations')
-        order_lst.remove('csv')
-        order_lst.remove('mysql')
+        if 'stations' in order_lst:
+            order_lst.remove('stations')
+        if 'csv' in order_lst:
+            order_lst.remove('csv')
+        if 'mysql' in order_lst:
+            order_lst.remove('mysql')
+
 
     #Generate the string for the file, creating them in order.
     for section in order_lst:

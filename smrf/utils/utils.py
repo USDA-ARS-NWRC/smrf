@@ -9,7 +9,7 @@ import pandas as pd
 from datetime import datetime
 import pytz
 import os
-import io
+from smrf.utils import io
 from shutil import copyfile
 from .gitinfo import __gitVersion__, __gitPath__
 from smrf import __version__, __core_config__
