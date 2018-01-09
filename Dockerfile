@@ -19,7 +19,7 @@ RUN apt-get update -y && \
 	libhdf5-serial-dev \
 	python2.7-dev \
 	python-pip \
-        python-tk
+    python-tk
 
 ####################################################
 # SMRF
@@ -29,7 +29,7 @@ RUN mkdir -p /code/smrf && mkdir /data
 COPY . / /code/smrf/
 
 RUN cd /code/smrf \
-    && pip install -r /code/smrf/requirements.txt \
+    && pip install -r /code/smrf/requirements_python2.txt \
     && python setup.py install
 
 ####################################################
