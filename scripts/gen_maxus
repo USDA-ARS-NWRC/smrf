@@ -2,7 +2,6 @@
 from smrf.utils.wind.model import wind_model
 from smrf.ipw import IPW
 import netCDF4 as nc
-import matplotlib.pyplot as plt
 import numpy as np
 import argparse
 import os
