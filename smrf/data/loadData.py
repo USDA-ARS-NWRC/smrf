@@ -94,31 +94,47 @@ class wxdata():
 
                 self._logger.debug('Reading %s...' % self.dataConfig[i])
                 if i == 'metadata':
-                    dp = pd.read_csv(self.dataConfig[i],
+                    dp_final = pd.read_csv(self.dataConfig[i],
                                      index_col='primary_id')
                 elif self.dataConfig[i]:
-                    dp = pd.read_csv(self.dataConfig[i],
+                    dp_full = pd.read_csv(self.dataConfig[i],
                                      index_col='date_time',
                                      parse_dates=[0])
 
                     # check to see if pandas read in the date time correctly
-                    if not isinstance(dp.index[0], pd.Timestamp):
+                    if not isinstance(dp_full.index[0], pd.Timestamp):
                         raise Exception('''Pandas could not convert
                                         date_time to timestamp.
                                         Try using %Y-%m-%d %H:%M:%S format''')
 
                     if sta is not None:
-                        dp = dp[dp.columns[dp.columns.isin(sta)]]
-
+                        dp = dp_full[dp_full.columns[dp_full.columns.isin(sta)]]
+                    else:
+                        dp = dp_full
                     # only get the desired dates
-                    dp = dp[self.start_date:self.end_date]
+                    dp_final = dp[self.start_date:self.end_date]
 
-                    if dp.empty:
-                        raise Exception('''No CSV data found for
-                                        {} between the specified
-                                        dates'''.format(i))
+                    if dp_final.empty:
+                        if self.start_date not in dp_final.index:
+                            raise Exception("start_date in config file is not "
+                                            "inside of available date range "
+                                            "\n{0} not w/in {1} and {2}"
+                                            "".format(self.start_date,
+                                                      dp.index[0],
+                                                      dp.index[-1]))
 
-                setattr(self, i, dp)
+                        elif self.end_date not in dp_final.index:
+                            raise Exception("end_date in config file is not "
+                                            "inside of available date range "
+                                            "\n{0} not w/in {1} and {2}"
+                                            "".format(self.start_date,
+                                                      dp.index[0],
+                                                      dp.index[-1]))
+                        else:
+                            raise Exception("No CSV data found for {0}"
+                                            "".format(i))
+
+                setattr(self, i, dp_final)
 
         # check that metadata is there
         try:

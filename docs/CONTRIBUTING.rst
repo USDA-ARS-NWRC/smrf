@@ -15,7 +15,7 @@ Types of Contributions
 Report Bugs
 ~~~~~~~~~~~
 
-Report bugs at https://gitlab.com/ars-snow/smrf/issues.
+Report bugs at https://github.com/USDA-ARS-NWRC/smrf/issues.
 
 If you are reporting a bug, please include:
 
@@ -26,13 +26,13 @@ If you are reporting a bug, please include:
 Fix Bugs
 ~~~~~~~~
 
-Look through the GitLab issues for bugs. Anything tagged with "bug"
+Look through the GitHub issues for bugs. Anything tagged with "bug"
 is open to whoever wants to implement it.
 
 Implement Features
 ~~~~~~~~~~~~~~~~~~
 
-Look through the GitLab issues for features. Anything tagged with "feature"
+Look through the GitHub issues for features. Anything tagged with "feature"
 is open to whoever wants to implement it. If the added feature expands the options
 available in the config flie, please make them available by adding to the CoreConfig.ini
 in ./smrf/framework/CoreConfig.ini. For more information on syntax for this, please reference
@@ -57,11 +57,12 @@ Don't forget to push your tags afterwards with::
 
   $ git push origin --tags
 
-Currently SMRF is version 0.4.7 The development team of SMRF attempted to adhere
+Currently SMRF is version 0.4.8 The development team of SMRF attempted to adhere
 to semantic versioning. Here is the basics taken from the semantic versioning website.
 
  * Patch version Z (x.y.Z | x > 0) MUST be incremented if only backwards compatible bug fixes are introduced.
  A bug fix is defined as an internal change that fixes incorrect behavior.
+
  * Minor version Y (x.Y.z | x > 0) MUST be incremented if new, backwards compatible functionality is introduced to the public API.
  It MUST be incremented if any public API functionality is marked as deprecated.
  It MAY be incremented if substantial new functionality or improvements are introduced within the private code.
@@ -75,7 +76,7 @@ to semantic versioning. Here is the basics taken from the semantic versioning we
 Submit Feedback
 ~~~~~~~~~~~~~~~
 
-The best way to send feedback is to file an issue at https://gitlab.com/ars-snow/smrf/issues.
+The best way to send feedback is to file an issue at https://github.com/USDA-ARS-NWRC/smrf/issues.
 
 If you are proposing a feature:
 
@@ -89,10 +90,10 @@ Get Started!
 
 Ready to contribute? Here's how to set up `smrf` for local development.
 
-1. Fork the `smrf` repo on GitLab.
+1. Fork the `smrf` repo on GitHub.
 2. Clone your fork locally::
 
-    $ git clone git@gitlab.com:your_name_here/smrf.git
+    $ git clone https://github.com/your_name_here/smrf
 
 3. Install your local copy into a virtualenv. Assuming you have
    virtualenvwrapper installed, this is how you set up your fork for local development::
@@ -116,13 +117,13 @@ Ready to contribute? Here's how to set up `smrf` for local development.
 
    To get flake8 and tox, just pip install them into your virtualenv.
 
-6. Commit your changes and push your branch to GitLab::
+6. Commit your changes and push your branch to GitHub::
 
     $ git add .
     $ git commit -m "Your detailed description of your changes."
     $ git push origin name-of-your-bugfix-or-feature
 
-7. Submit a pull request through the GitLab website.
+7. Submit a pull request through the GitHub website.
 
 Pull Request Guidelines
 -----------------------

@@ -100,7 +100,6 @@ def main():
 
     #------------------------------------------------------------------------------
     # run the wind model
-
     # initialize the wind model with the dem
     w = wind_model(x, y, dem_data, nthreads=12)
 
