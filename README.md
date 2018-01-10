@@ -49,4 +49,4 @@ gen_maxus --out_maxus test_data/topo/maxus.nc test_data/topo/dem.ipw
 run_smrf.py test_data/testConfig.ini
 ```
 
-The output netCDF files will be placed in the `` location.
+The output netCDF files will be placed in the `/code/smrf/test_data/output` location.
