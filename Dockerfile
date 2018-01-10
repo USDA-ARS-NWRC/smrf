@@ -13,15 +13,14 @@ RUN apt-get update -y \
     libatlas-base-dev \
     libffi-dev \
     libssl-dev \
+    gfortran \
     libyaml-dev \
     libfreetype6-dev \
     libpng-dev \
     libhdf5-serial-dev \
-    python2.7-dev \
-    python-pip \
-    python-setuptools \
-    python-wheel \
-    python-tk \
+    python3-dev \
+    python3-pip \
+    python3-tk \
     curl \
     libgrib-api-dev \
     && cd /code \
@@ -38,12 +37,14 @@ COPY . / /code/smrf/
 
 RUN mkdir /data \
     && cd /code/smrf \
-    && pip install -r /code/smrf/requirements_python2.txt \
-    && python setup.py install \
+    && python3 -m pip install --upgrade pip \
+    && python3 -m pip install setuptools wheel \
+    && python3 -m pip install -r /code/smrf/requirements.txt \
+    && python3 setup.py install \
     && cd /code/weather_forecast_retrieval-0.3.2 \
-    && pip install pyproj==1.9.5.1 \
-    && pip install -r requirements_dev.txt \
-    && python setup.py install \
+    && python3 -m pip install pyproj==1.9.5.1 \
+    && python3 -m pip install -r requirements_dev.txt \
+    && python3 setup.py install \
     && rm -r /root/.cache/pip
 
 ####################################################
