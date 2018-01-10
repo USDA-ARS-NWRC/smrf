@@ -4,7 +4,6 @@
 [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.898158.svg)](https://doi.org/10.5281/zenodo.898158)
 [![DOI](https://readthedocs.org/projects/smrf/badge/)](https://smrf.readthedocs.io)
 
-
 Spatial Modeling for Resources Framework (SMRF) was developed by Dr. Scott Havens at
 the USDA Agricultural Research Service (ARS) in Boise, ID. SMRF was designed to
 increase the flexibility of taking measured weather data and distributing
