@@ -24,7 +24,7 @@ RUN apt-get update -y \
     curl \
     libgrib-api-dev \
     && cd /code \
-    && curl -L https://github.com/USDA-ARS-NWRC/weather_forecast_retrieval/archive/v0.3.2.tar.gz | tar xz \
+    && curl -L https://github.com/USDA-ARS-NWRC/weather_forecast_retrieval/archive/master.tar.gz | tar xz \
     && rm -rf /var/lib/apt/lists/* \
     && apt remove -y curl \
     && apt autoremove -y
@@ -41,7 +41,7 @@ RUN mkdir /data \
     && python3 -m pip install setuptools wheel \
     && python3 -m pip install -r /code/smrf/requirements.txt \
     && python3 setup.py install \
-    && cd /code/weather_forecast_retrieval-0.3.2 \
+    && cd /code/weather_forecast_retrieval-master \
     && python3 -m pip install pyproj==1.9.5.1 \
     && python3 -m pip install -r requirements_dev.txt \
     && python3 setup.py install \
