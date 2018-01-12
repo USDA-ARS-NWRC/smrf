@@ -265,7 +265,7 @@ class wind(image_data.image_data):
 
         for t in data_speed.index:
 
-            self.distribute(data_speed.ix[t], data_direction.ix[t])
+            self.distribute(data_speed.loc[t], data_direction.loc[t])
 
             queue['wind_speed'].put([t, self.wind_speed])
             queue['wind_direction'].put([t, self.wind_direction])

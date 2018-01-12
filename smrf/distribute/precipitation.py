@@ -231,7 +231,7 @@ class ppt(image_data.image_data):
 
         for t in data.index:
 
-            self.distribute_precip(data.ix[t])
+            self.distribute_precip(data.loc[t])
 
             queue[self.variable].put([t, self.precip])
 
@@ -271,7 +271,7 @@ class ppt(image_data.image_data):
 
         if self.nasde_model == 'marks2017':
             #Use the clipped and corrected precip
-            self.distribute_for_marks2017(self.corrected_precip.ix[time], dpt, time, mask=mask)
+            self.distribute_for_marks2017(self.corrected_precip.loc[time], dpt, time, mask=mask)
 
         else:
             self.distribute_for_susong1999(data, dpt, time, mask=mask)
@@ -436,7 +436,7 @@ class ppt(image_data.image_data):
 
             dpt = queue['dew_point'].get(t)
 
-            self.distribute(data.precip.ix[t], dpt, t, data.wind_speed.ix[t],data.air_temp.ix[t], mask=mask)
+            self.distribute(data.precip.loc[t], dpt, t, data.wind_speed.loc[t],data.air_temp.loc[t], mask=mask)
 
             queue[self.variable].put([t, self.precip])
 

@@ -153,7 +153,7 @@ class vp(image_data.image_data):
 
             ta = queue['air_temp'].get(t)
 
-            self.distribute(data.ix[t], ta)
+            self.distribute(data.loc[t], ta)
 
             queue[self.variable].put([t, self.vapor_pressure])
             queue['dew_point'].put([t, self.dew_point])

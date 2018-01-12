@@ -9,6 +9,7 @@ Tests for an entire smrf run. The SMRF integration run!
 """
 
 import unittest
+import shutil
 import smrf
 import os
 from smrf.framework.model_framework import run_smrf
@@ -44,15 +45,23 @@ class TestRME(unittest.TestCase):
 
     def setUp(self):
         """
-        Runs the simulation over reynolds_mountain_east
+        Runs the short simulation over reynolds mountain east
         """
         run_dir = os.path.abspath(os.path.join(os.path.dirname(smrf.__file__),
                                                 '..','examples',
                                                 'reynolds_mountain_east'))
         self.gold = os.path.abspath(os.path.join(os.path.dirname(smrf.__file__),
                                                 '..','test_data',
-                                                'reynolds_mountain_east','gold'))
+                                                'reynolds_mountain_east',
+                                                'gold'))
+
+
         self.output = os.path.join(run_dir,'output')
+
+        #Remove any potential files to ensure fresh run
+        if os.path.isdir(self.output):
+            shutil.rmtree(self.output)
+
         config = os.path.join(run_dir,'config.ini')
         run_smrf(config)
 
