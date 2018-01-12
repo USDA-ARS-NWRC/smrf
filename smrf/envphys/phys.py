@@ -7,7 +7,7 @@ Collection of functions to calculate various physical parameters
 """
 
 import numpy as np
-
+from smrf.envphys import thermal_radiation
 
 def idewpt(vp):
     """
@@ -32,3 +32,23 @@ def idewpt(vp):
     Td = (vp + 0.4926) / (0.0708 - 0.00421*vp)
 
     return Td
+
+def rh2vp(ta, rh):
+    """
+    Calculate the vapor pressure given the air temperature
+    and relative humidity
+    
+    Args:
+        ta: array of air temperature in [C]
+        rh: array of relative humidity from 0-100 [%]
+        
+    Returns:
+        vapor pressure
+    """
+    
+    if rh.flat[0] >= 1.0:
+        rh = rh/100.0
+        
+    satvp = thermal_radiation.sati(ta + 273.15)
+    
+    return satvp * rh
