@@ -105,6 +105,6 @@ class ta(image_data.image_data):
 
         for t in data.index:
 
-            self.distribute(data.ix[t])
+            self.distribute(data.loc[t])
 
             queue[self.variable].put([t, self.air_temp])

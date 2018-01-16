@@ -57,7 +57,7 @@ class output_netcdf():
             f = self.variable_list[v]
 
             if os.path.isfile(f['file_name']):
-                self._logger.warn('Opening {}, data may be overwritten!'
+                self._logger.warning('Opening {}, data may be overwritten!'
                                   .format(f['file_name']))
                 s = nc.Dataset(f['file_name'], 'a')
 #                 h = getattr(s, 'history')

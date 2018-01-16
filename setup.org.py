@@ -28,7 +28,7 @@ requirements = [
     'Cython >= 0.23.4',
     'pytz >= 2013.7',
     'setuptools >= 1.1.6',
-    'utm >= 0.4.8',
+    'utm >= 0.4.9',
 #     'cryptography >= 1.2.2',
     'mysql_connector_repackaged >= 0.3.1',
     'netCDF4 >= 1.2.1',
@@ -53,7 +53,7 @@ ext_dk = Extension(mname,
 
 setup(
     name='smrf',
-    version='0.4.8',
+    version='0.4.9',
     description="Distributed snow modeling for water resources",
     long_description=readme + '\n\n' + history,
     author="Scott Havens",

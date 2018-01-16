@@ -118,15 +118,24 @@ class SMRF():
             # setup the logging
             logfile = None
             if 'log_file' in self.config['logging']:
-                log_file = self.config['logging']['log_file']
-                if not os.path.isabs(log_file):
-                    logfile = os.path.abspath(os.path.join(os.path.dirname(configFile),self.config['logging']['log_file']))
+                logfile = self.config['logging']['log_file']
+                if not os.path.isabs(logfile):
+                    logfile = os.path.abspath(os.path.join(
+                                            os.path.dirname(configFile),
+                                            self.config['logging']['log_file']))
+
+                if not os.path.isdir(os.path.dirname(logfile)):
+                    os.makedirs(os.path.dirname(logfile))
+
+                if not os.path.isfile(logfile):
+                    with open(logfile,'w+') as f:
+                        f.close()
 
             fmt = '%(levelname)s:%(name)s:%(message)s'
             if logfile is not None:
                 logging.basicConfig(filename=logfile,
-                                    filemode='w',
                                     level=numeric_level,
+                                    filemode='w+',
                                     format=fmt)
             else:
                 logging.basicConfig(level=numeric_level)
@@ -374,7 +383,7 @@ class SMRF():
                             'stations',
                             self.data.metadata.index.tolist())
             except:
-                self._logger.warn("Distribution not initialized, grid stations"
+                self._logger.warning("Distribution not initialized, grid stations"
                                   "could not be set.")
 
         else:
@@ -426,7 +435,7 @@ class SMRF():
                             d[self.distribute['solar'].stations])
 
             except Exception as e:
-               self._logger.warn("Distribution not initialized, data not "
+               self._logger.warning("Distribution not initialized, data not "
                                    "filtered to desired stations")
                self._logger.error(e)
 
@@ -436,7 +445,7 @@ class SMRF():
                 if key in self.data.variables:
                     if self.distribute[key].stations != None:
                         #Confirm out stations all have a unique position for each section
-                        colocated = check_station_colocation(metadata=self.data.metadata.ix[self.distribute[key].stations])
+                        colocated = check_station_colocation(metadata=self.data.metadata.loc[self.distribute[key].stations])
 
                         #Stations are co-located, throw error
                         if colocated != None:
@@ -513,22 +522,22 @@ class SMRF():
                                             cosz)
 
             # 1. Air temperature
-            self.distribute['air_temp'].distribute(self.data.air_temp.ix[t])
+            self.distribute['air_temp'].distribute(self.data.air_temp.loc[t])
 
             # 2. Vapor pressure
-            self.distribute['vapor_pressure'].distribute(self.data.vapor_pressure.ix[t],
+            self.distribute['vapor_pressure'].distribute(self.data.vapor_pressure.loc[t],
                                                         self.distribute['air_temp'].air_temp)
 
             # 3. Wind_speed and wind_direction
-            self.distribute['wind'].distribute(self.data.wind_speed.ix[t],
-                                               self.data.wind_direction.ix[t])
+            self.distribute['wind'].distribute(self.data.wind_speed.loc[t],
+                                               self.data.wind_direction.loc[t])
 #self, data, dpt, time, wind, temp, mask=None
             # 4. Precipitation
-            self.distribute['precip'].distribute(self.data.precip.ix[t],
+            self.distribute['precip'].distribute(self.data.precip.loc[t],
                                                 self.distribute['vapor_pressure'].dew_point,
                                                 t,
-                                                self.data.wind_speed.ix[t],
-                                                self.data.air_temp.ix[t],
+                                                self.data.wind_speed.loc[t],
+                                                self.data.air_temp.loc[t],
                                                 self.topo.mask)
 
             # 5. Albedo
@@ -537,7 +546,7 @@ class SMRF():
                                                  self.distribute['precip'].storm_days)
 
             # 6. Solar
-            self.distribute['solar'].distribute(self.data.cloud_factor.ix[t],
+            self.distribute['solar'].distribute(self.data.cloud_factor.loc[t],
                                                 illum_ang,
                                                 cosz,
                                                 azimuth,
@@ -547,7 +556,7 @@ class SMRF():
 
             # 7. thermal radiation
             if self.distribute['thermal'].gridded:
-                self.distribute['thermal'].distribute_thermal(self.data.thermal.ix[t],
+                self.distribute['thermal'].distribute_thermal(self.data.thermal.loc[t],
                                                               self.distribute['air_temp'].air_temp)
             else:
                 self.distribute['thermal'].distribute(t,
