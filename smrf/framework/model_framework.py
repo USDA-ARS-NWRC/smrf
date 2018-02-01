@@ -194,11 +194,6 @@ class SMRF():
         #After writing update the paths to be full abs paths.
         self.config = io.update_config_paths(self.config, configFile)
 
-        # if a gridded dataset will be used
-        self.gridded = False
-        if 'gridded' in self.config:
-            self.gridded = True
-
         # process the system variables
         for k,v in self.config['system'].items():
             setattr(self,k,v)
@@ -222,6 +217,16 @@ class SMRF():
         tzinfo = pytz.timezone(self.config['time']['time_zone'])
         self.date_time = [di.replace(tzinfo=tzinfo) for di in d]
         self.time_steps = len(self.date_time)
+
+        # if a gridded dataset will be used
+        self.gridded = False
+        if 'gridded' in self.config:
+            self.gridded = True
+            self.forecast_flag = self.config['gridded']['forecast_flag']
+            # hours from start of day
+            self.day_hour = self.start_date - pd.to_datetime(d[0].strftime("%Y%m%d"))
+            self.day_hour = int(self.day_hour / np.timedelta64(1, 'h'))
+
 
         self.distribute = {}
 
@@ -374,7 +379,9 @@ class SMRF():
                                    self.end_date,
                                    time_zone=self.config['time']['time_zone'],
                                    dataType=self.config['gridded']['data_type'],
-                                   tempDir=self.temp_dir)
+                                   tempDir=self.temp_dir,
+                                   forecast_flag=self.forecast_flag,
+                                   day_hour=self.day_hour)
 
             # set the stations in the distribute
             try:
