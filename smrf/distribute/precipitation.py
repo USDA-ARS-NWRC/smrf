@@ -171,6 +171,7 @@ class ppt(image_data.image_data):
 
             # Clip and adjust the precip data so that there is only precip
             # during the storm and ad back in the missing data to conserve mass
+            data.precip = data.precip[self.stations]
             self.storms, storm_count = storms.tracking_by_station(data.precip,
                                                                   mass_thresh=self.ppt_threshold,
                                                                   steps_thresh=self.time_to_end_storm)

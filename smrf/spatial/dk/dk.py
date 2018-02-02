@@ -73,7 +73,8 @@ class DK:
         nan_val = pd.isnull(data)
 
         # only calcualte if the stations involved have changed
-        if np.sum(np.array_equal(nan_val,self.nan_val)) != len(self.mx):
+        # if np.sum(np.array_equal(nan_val,self.nan_val)) != len(self.mx):
+        if np.sum(nan_val == self.nan_val) != len(self.mx):
 
             self.nan_val = nan_val
             nsta = np.sum(~nan_val)
