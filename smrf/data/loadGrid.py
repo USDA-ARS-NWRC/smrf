@@ -30,7 +30,7 @@ class grid():
 
     def __init__(self, dataConfig, topo, start_date, end_date,
                  time_zone='UTC', dataType='wrf', tempDir=None,
-                 forecast_flag=False, day_hour=0):
+                 forecast_flag=False, day_hour=0, n_forecast_hours=18):
 
         if (tempDir is None) | (tempDir == 'WORKDIR'):
             tempDir = os.environ['WORKDIR']
@@ -43,6 +43,7 @@ class grid():
         self.time_zone = time_zone
         self.forecast_flag = forecast_flag
         self.day_hour = day_hour
+        self.n_forecast_hours = n_forecast_hours
 
         self.force_zone_number = None
         if 'force_zone_number' in dataConfig:
@@ -118,7 +119,7 @@ class grid():
         if not self.forecast_flag:
             fcast = [0]
         else:
-            fcast = [0, 1]
+            fcast = range(self.n_forecast_hours + 1)
 
         metadata, data = hrrr.HRRR(external_logger=self._logger).get_saved_data(
             self.start_date,
