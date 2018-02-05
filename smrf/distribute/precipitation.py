@@ -265,16 +265,33 @@ class ppt(image_data.image_data):
         # only need to distribute precip if there is any
         data = data[self.stations]
 
-        #Adjust the precip for undercatchment
-        if self.config['adjust_for_undercatch']:
-            self._logger.debug('%s Adjusting precip for undercatch...' % data.name)
-            data = precip.adjust_for_undercatch(data,wind,temp,self.config, self.metadata)
-
         if self.nasde_model == 'marks2017':
+            #Adjust the precip for undercatchment
+            if self.config['adjust_for_undercatch']:
+                self._logger.debug('%s Adjusting precip for undercatch...' % data.name)
+                self.corrected_precip.loc[time] = \
+                    precip.adjust_for_undercatch(self.corrected_precip.loc[time],
+                                                 wind,
+                                                 temp,
+                                                 self.config,
+                                                 self.metadata)
+
             #Use the clipped and corrected precip
-            self.distribute_for_marks2017(self.corrected_precip.loc[time], dpt, time, mask=mask)
+            self.distribute_for_marks2017(self.corrected_precip.loc[time],
+                                          dpt,
+                                          time,
+                                          mask=mask)
 
         else:
+            #Adjust the precip for undercatchment
+            if self.config['adjust_for_undercatch']:
+                self._logger.debug('%s Adjusting precip for undercatch...' % data.name)
+                data = precip.adjust_for_undercatch(data,
+                                                    wind,
+                                                    temp,
+                                                    self.config,
+                                                    self.metadata)
+
             self.distribute_for_susong1999(data, dpt, time, mask=mask)
 
 
