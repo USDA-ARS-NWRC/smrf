@@ -74,7 +74,7 @@ class DK:
 
         # only calcualte if the stations involved have changed
         # if np.sum(np.array_equal(nan_val,self.nan_val)) != len(self.mx):
-        if np.array_equal(nan_val, self.nan_val):
+        if not np.array_equal(nan_val, self.nan_val):
 
             self.nan_val = nan_val
             nsta = np.sum(~nan_val)
