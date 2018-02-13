@@ -32,12 +32,15 @@ import pandas as pd
 import numpy as np
 import pytz
 
-from smrf import data, distribute, output, __core_config__
+from smrf import data, distribute, output, __core_config__, __recipes__
 from smrf.envphys import radiation
 from smrf.utils import queue, io
 from smrf.utils.utils import backup_input, getqotw, check_station_colocation
 from threading import Thread
 import shutil
+from inicheck.tools import get_user_config
+from inicheck.output import print_config_report,generate_config, print_recipe_summary
+
 
 class SMRF():
     """
@@ -97,17 +100,18 @@ class SMRF():
 
         try:
             #Read in the original users config
-            self.config = io.get_user_config(configFile)
+            ucfg = get_user_config(configFile, master_files =[ __core_config__,__recipes__])
 
-        except UnicodeDecodeError:
+        except UnicodeDecodeError as e:
+            print(e)
             raise Exception(('The configuration file is not encoded in '
                                     'UTF-8, please change and retry'))
 
         # start logging
         if external_logger == None:
 
-            if 'log_level' in self.config['logging']:
-                loglevel = self.config['logging']['log_level'].upper()
+            if 'log_level' in ucfg.cfg['logging']:
+                loglevel = ucfg.cfg['logging']['log_level'].upper()
             else:
                 loglevel = 'INFO'
 
@@ -117,12 +121,12 @@ class SMRF():
 
             # setup the logging
             logfile = None
-            if 'log_file' in self.config['logging']:
-                logfile = self.config['logging']['log_file']
+            if 'log_file' in ucfg.cfg['logging']:
+                logfile = ucfg.cfg['logging']['log_file']
                 if not os.path.isabs(logfile):
                     logfile = os.path.abspath(os.path.join(
                                             os.path.dirname(configFile),
-                                            self.config['logging']['log_file']))
+                                            ucfg.cfg['logging']['log_file']))
 
                 if not os.path.isdir(os.path.dirname(logfile)):
                     os.makedirs(os.path.dirname(logfile))
@@ -153,7 +157,7 @@ class SMRF():
             self._logger.info(line)
 
         #Make the tmp and output directories if they do not exist
-        makeable_dirs = [self.config['output']['out_location'],os.path.join(self.config['output']['out_location'],'tmp')]
+        makeable_dirs = [ucfg.cfg['output']['out_location'],os.path.join(ucfg.cfg['output']['out_location'],'tmp')]
         for d in makeable_dirs:
             path = os.path.abspath(os.path.join(os.path.dirname(configFile),d))
 
@@ -167,17 +171,16 @@ class SMRF():
 
         self.temp_dir = path
 
-        #Bring the the master config file
-        mconfig = io.get_master_config()
-
         #Add defaults.
-        self._logger.info("Adding defaults to config...")
-        self.config = io.add_defaults(self.config, mconfig)
+        self._logger.info("Applying config file recipes...")
+
+        ucfg.apply_recipes()
 
         #Check the user config file for errors and report issues if any
         self._logger.info("Checking config file for issues...")
-        warnings, errors = io.check_config_file(self.config,mconfig,user_cfg_path=configFile)
-        io.print_config_report(warnings, errors, logger = self._logger)
+        warnings, errors = ucfg.check()
+        print_config_report(warnings, errors, logger = self._logger)
+        self.config = ucfg.cfg
 
         #Exit SMRF if config file has errors
         if len(errors) > 0:
@@ -189,10 +192,10 @@ class SMRF():
         full_config_out = self.config['output']['out_location']
         full_config_out = os.path.abspath(os.path.join(os.path.dirname(configFile),full_config_out,fname))
         self._logger.info("Writing config file with full options.")
-        io.generate_config(self.config,full_config_out)
+        generate_config(ucfg,full_config_out)
 
         #After writing update the paths to be full abs paths.
-        self.config = io.update_config_paths(self.config, configFile)
+        self.config = ucfg.update_config_paths(user_cfg_path = configFile)
 
         # if a gridded dataset will be used
         self.gridded = False
@@ -216,6 +219,7 @@ class SMRF():
         if self.start_date > datetime.now() and not self.gridded or self.end_date > datetime.now() and not self.gridded:
             raise ValueError("A date set in the future can only be used with WRF generated data!")
 
+        print(self.config)
         #Get the timesetps correctly in the time zone
         d = data.mysql_data.date_range(self.start_date, self.end_date,
                                        timedelta(minutes=int(self.config['time']['time_step'])))
