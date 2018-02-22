@@ -117,7 +117,7 @@ def backup_input(data, config):
         config.pop('mysql', None)
 
     if 'gridded' in config.keys():
-        raise ValueError("Micah_o was unsure how to handle this scenario... please advise")
+        raise ValueError("Developer Micah_o was unsure how to handle this scenario... please advise")
 
     # Output station data to CSV
     csv_var = ['metadata', 'air_temp', 'vapor_pressure','precip','wind_speed','wind_direction','cloud_factor']
@@ -160,6 +160,13 @@ def getgitinfo():
     else:
         version = 'v'+__version__
         return version
+
+def getConfigHeader():
+    cfg_str = ("Config File for SMRF {0}\n"
+              "For more SMRF related help see:\n"
+              "{1}").format(getgitinfo(),'http://smrf.readthedocs.io/en/latest/')
+    return cfg_str
+
 
 def config_documentation():
     """

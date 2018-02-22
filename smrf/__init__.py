@@ -15,4 +15,24 @@ from . import spatial
 from . import utils
 from . import model
 from . import output
+
+__config_titles__ = {
+                "topo":"Files for DEM and vegetation",
+                "time": "Dates to run model",
+                "stations":"Stations to use",
+                "mysql":"MySQL database",
+                "air_temp":"Air temperature distribution",
+                "vapor_pressure":"Vapor pressure distribution",
+                "wind": "Wind speed and wind direction distribution",
+                "precip": "Precipitation distribution",
+                "albedo":"Albedo distribution",
+                "solar":"Solar radiation distribution",
+                "thermal":"Thermal radiation distribution",
+                "soil_temp":"Soil temperature",
+                "output":"Output variables",
+                "logging":"Logging",
+                "system":"System variables"
+}
+
+__config_header__ = utils.utils.getConfigHeader()
 # -*- coding: utf-8 -*-
