@@ -10,10 +10,6 @@ import os
 from datetime import datetime
 start = datetime.now()
 
-import faulthandler
-
-faulthandler.enable()
-
 
 def main():
     parser = argparse.ArgumentParser(
