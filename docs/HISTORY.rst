@@ -21,3 +21,13 @@ History
 * Major update to config file, enabling checking and default adding
 * Updated C file prototypes.
 
+0.4.0 (2017-11-14)
+------------------
+
+* Small improvements to our config file code including: types checking, relative paths to config, auto documentation 
+* Fixed bugs related to precip undercatch
+* Improvements to ti station data backup
+* Various adjustments for better collaboration with AWSM
+* Moved to a new station database format
+
+
