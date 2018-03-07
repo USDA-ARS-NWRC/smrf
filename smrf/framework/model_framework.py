@@ -31,15 +31,15 @@ from datetime import datetime, timedelta
 import pandas as pd
 import numpy as np
 import pytz
-
 from smrf import data, distribute, output, __core_config__, __recipes__
 from smrf.envphys import radiation
 from smrf.utils import queue, io
 from smrf.utils.utils import backup_input, getqotw, check_station_colocation
 from threading import Thread
 import shutil
-from inicheck.tools import get_user_config
+from inicheck.tools import get_user_config, check_config
 from inicheck.output import print_config_report,generate_config, print_recipe_summary
+from inicheck.utilities import pcfg, get_relative_to_cfg
 
 
 class SMRF():
@@ -100,7 +100,7 @@ class SMRF():
 
         try:
             #Read in the original users config
-            ucfg = get_user_config(configFile, master_files =[ __core_config__,__recipes__])
+            ucfg = get_user_config(configFile, module = 'smrf')
 
         except UnicodeDecodeError as e:
             print(e)
@@ -156,11 +156,11 @@ class SMRF():
         for line in title:
             self._logger.info(line)
 
-        #Make the tmp and output directories if they do not exist
-        makeable_dirs = [ucfg.cfg['output']['out_location'],os.path.join(ucfg.cfg['output']['out_location'],'tmp')]
-        for d in makeable_dirs:
-            path = os.path.abspath(os.path.join(os.path.dirname(configFile),d))
+        out = get_relative_to_cfg(ucfg.cfg['output']['out_location'],ucfg.filename)
 
+        #Make the tmp and output directories if they do not exist
+        makeable_dirs = [out,os.path.join(out,'tmp')]
+        for path in makeable_dirs:
             if not os.path.isdir(path):
                 try:
                     #self._logger.info("Directory does not exist, \nCreating {0}".format(path))
@@ -178,7 +178,7 @@ class SMRF():
 
         #Check the user config file for errors and report issues if any
         self._logger.info("Checking config file for issues...")
-        warnings, errors = ucfg.check()
+        warnings, errors = check_config(ucfg)
         print_config_report(warnings, errors, logger = self._logger)
         self.config = ucfg.cfg
 
@@ -192,7 +192,7 @@ class SMRF():
         full_config_out = self.config['output']['out_location']
         full_config_out = os.path.abspath(os.path.join(os.path.dirname(configFile),full_config_out,fname))
         self._logger.info("Writing config file with full options.")
-        generate_config(ucfg,full_config_out)
+        generate_config(ucfg,full_config_out,section_titles = ucfg.mcfg.titles)
 
         #After writing update the paths to be full abs paths.
         self.config = ucfg.update_config_paths(user_cfg_path = configFile)
@@ -219,7 +219,6 @@ class SMRF():
         if self.start_date > datetime.now() and not self.gridded or self.end_date > datetime.now() and not self.gridded:
             raise ValueError("A date set in the future can only be used with WRF generated data!")
 
-        print(self.config)
         #Get the timesetps correctly in the time zone
         d = data.mysql_data.date_range(self.start_date, self.end_date,
                                        timedelta(minutes=int(self.config['time']['time_step'])))

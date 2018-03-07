@@ -14,6 +14,15 @@ from shutil import copyfile
 from .gitinfo import __gitVersion__, __gitPath__
 from smrf import __version__, __core_config__
 import random
+from inicheck.checkers import CheckType
+
+
+class CheckStation(CheckType):
+    def __init__(self,**kwargs):
+        super(CheckStation,self).__init__(**kwargs)
+
+    def cast(self):
+        return self.value.upper()
 
 
 def nan_helper(y):

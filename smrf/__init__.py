@@ -20,6 +20,7 @@ __config_titles__ = {
                 "topo":"Files for DEM and vegetation",
                 "time": "Dates to run model",
                 "stations":"Stations to use",
+                "csv":"CSV section configurations",
                 "mysql":"MySQL database",
                 "air_temp":"Air temperature distribution",
                 "vapor_pressure":"Vapor pressure distribution",
@@ -35,4 +36,5 @@ __config_titles__ = {
 }
 
 __config_header__ = utils.utils.getConfigHeader()
+__config_checkers__ = 'utils.utils'
 # -*- coding: utf-8 -*-
