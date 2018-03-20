@@ -14,7 +14,58 @@ from shutil import copyfile
 from .gitinfo import __gitVersion__, __gitPath__
 from smrf import __version__, __core_config__
 import random
+import sys
 
+def find_configs(directory):
+    """
+    Searches through a directory and returns all the .ini fulll filenames.
+
+    Args:
+        directory: string path to directory.
+    Returns:
+        configs: list of paths pointing to the config file.
+    """
+
+    configs = []
+    directory = os.path.abspath(os.path.expanduser(directory))
+
+    for f in os.listdir(directory):
+        if f.split('.')[-1] == 'ini':
+            configs.append(os.path.join(directory,f))
+    return configs
+
+
+def handle_run_script_options(config_option):
+    """
+    Handle function for dealing with args in the SMRF run script
+
+    Args:
+        config_option: string path to a directory or a specific config file.
+    Returns:
+        configFile:Full path to an existing config file.
+    """
+    config_option = os.path.abspath(os.path.expanduser(config_option))
+
+    #User passes a directory
+    if os.path.isdir(config_option):
+        configs = find_configs(config_option)
+
+        if len(configs) > 1:
+            print("\nError: Multiple config files detected in {0} please ensure"
+                  " only one is in the folder.\n".format(config_option))
+            sys.exit()
+
+        else:
+            configFile = configs[0]
+    else:
+        configFile = config_option
+
+    if not os.path.isfile(configFile):
+        print('\nError: Please provide a config file or a directory containing'
+              ' one.\n')
+        sys.exit()
+
+    return configFile
 
 def nan_helper(y):
         """Helper to handle indices and logical indices of NaNs.
