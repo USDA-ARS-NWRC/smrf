@@ -121,7 +121,7 @@ class SMRF():
 
             # setup the logging
             logfile = None
-            if 'log_file' in ucfg.cfg['logging']:
+            if ucfg.cfg['logging']['log_file']!= None:
                 logfile = ucfg.cfg['logging']['log_file']
                 if not os.path.isabs(logfile):
                     logfile = os.path.abspath(os.path.join(
@@ -170,11 +170,6 @@ class SMRF():
                     raise e
 
         self.temp_dir = path
-
-        #Add defaults.
-        self._logger.info("Applying config file recipes...")
-
-        ucfg.apply_recipes()
 
         #Check the user config file for errors and report issues if any
         self._logger.info("Checking config file for issues...")
@@ -236,6 +231,7 @@ class SMRF():
         self._logger.info('Model start --> %s' % self.start_date)
         self._logger.info('Model end --> %s' % self.end_date)
         self._logger.info('Number of time steps --> %i' % self.time_steps)
+
 
     def __enter__(self):
         return self
