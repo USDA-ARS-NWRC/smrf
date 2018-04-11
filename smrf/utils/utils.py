@@ -24,7 +24,6 @@ class CheckStation(CheckType):
     def cast(self):
         return self.value.upper()
 
-
 def nan_helper(y):
         """Helper to handle indices and logical indices of NaNs.
 

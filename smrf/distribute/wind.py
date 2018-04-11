@@ -182,6 +182,7 @@ class wind(image_data.image_data):
                         self.metadata.loc[m, 'enhancement'] = \
                             float(self.config[m.lower()])
 
+
     def distribute(self, data_speed, data_direction):
         """
         Distribute given a Panda's dataframe for a single time step. Calls
@@ -397,7 +398,7 @@ class wind(image_data.image_data):
             # maxus value at the station
             if not pd.isnull(data_direction[m]):
 
-                if m in self.config['peak']:
+                if m.upper() in self.config['peak']:
                     val_maxus = np.min(self.maxus[:, yi, xi] + e)
 
                 else:

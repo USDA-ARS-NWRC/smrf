@@ -401,6 +401,7 @@ class SMRF():
                                                                      'utm_y'), axis=1)
         #Old DB has X and Y
         except:
+            
             self.data.metadata['xi'] = \
                 self.data.metadata.apply(lambda row: find_pixel_location(row,
                                                                      self.topo.x,
