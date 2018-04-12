@@ -147,7 +147,7 @@ class image_data():
             # linear interpolation between points
             self.grid = grid.GRID(self.config, self.mx, self.my, topo.X, topo.Y, mz=self.mz,
                                   GridZ=topo.dem, mask=topo.mask)
-            
+
         elif self.config['distribution'] == 'kriging':
             # generic kriging
             self.kriging = kriging.KRIGE(self.mx, self.my, self.mz, topo.X, topo.Y, topo.dem, self.config)
@@ -198,7 +198,7 @@ class image_data():
             else:
                 v = self.grid.calculateInterpolation(data.values,
                                                      self.config['method'])
-                
+
         elif self.config['distribution'] == 'kriging':
             v, ss = self.kriging.calculate(data.values)
             setattr(self, '{}_variance'.format(self.variable), ss)

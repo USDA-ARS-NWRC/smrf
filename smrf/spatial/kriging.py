@@ -20,7 +20,7 @@ class KRIGE:
             power: power of the inverse distance weighting
         """
 
-        # measurement point locations
+        # Measurement point locations
         self.mx = mx
         self.my = my
         self.mz = mz
@@ -39,18 +39,18 @@ class KRIGE:
         self.config = config
 
         # kriging parameters for pykrige
-        self.variogram_model = 'linear'
+        self.variogram_model = self.config['variogram_model'] #'linear'
         self.variogram_parameters = None
         self.variogram_function = None
-        self.nlags = np.min([np.round(len(mx)/2), 6])
-        self.weight = False
-        self.anisotropy_scaling = 1.0
-        self.anisotropy_angle = 0.0
+        self.nlags = self.config['nlags']#np.min([np.round(len(mx)/2), 6])
+        self.weight = self.config['krig_weight']
+        self.anisotropy_scaling = self.config['anisotropy_scaling'] #1.0
+        self.anisotropy_angle = self.config['anisotropy_angle'] #0.0
         self.verbose = False
         self.enable_plotting = False
         self.enable_statistics = False
-        self.coordinates_type = 'euclidean' # not in the pypi release of PyKrige
-        
+        self.coordinates_type = self.config['coordinates_type'] # not in the pypi release of PyKrige
+
         # pykrige execution
         self.backend = 'vectorized'
         self.n_closest_points = None
@@ -64,24 +64,24 @@ class KRIGE:
             config: configuration for dk
 
         Returns:
-            v: Z-values of specified grid or at thespecified set of points. 
+            v: Z-values of specified grid or at thespecified set of points.
                If style was specified as 'masked', zvalues will
                be a numpy masked array.
             sigmasq: Variance at specified grid points or
-                     at the specified set of points. If style was specified as 'masked', sigmasq
-                     will be a numpy masked array.
+                     at the specified set of points. If style was specified as
+                     'masked', sigmasq will be a numpy masked array.
         """
 
         nan_val = pd.isnull(data)
-        
+
         if self.config['detrend']:
             d = self.detrendData(data)
         else:
             d = data.copy()
-            
-        OK = OrdinaryKriging(self.mx[~nan_val], 
-                             self.my[~nan_val], 
-                             d[~nan_val], 
+
+        OK = OrdinaryKriging(self.mx[~nan_val],
+                             self.my[~nan_val],
+                             d[~nan_val],
                              variogram_model=self.variogram_model,
                              variogram_parameters=self.variogram_parameters,
                              variogram_function=self.variogram_function,
@@ -92,7 +92,7 @@ class KRIGE:
                              verbose=self.verbose,
                              enable_plotting=self.enable_plotting,
                              enable_statistics=self.enable_statistics)
-        
+
         v, ss1 = OK.execute('grid',
                             self.GridX[0,:],
                             self.GridY[:,0],
@@ -104,14 +104,18 @@ class KRIGE:
             # retrend the residuals
             v = self.retrendData(v)
 
-           
+
         return v, ss1
 
     def detrendData(self, data, flag=0, zeros=None):
         '''
         Detrend the data in val using the heights zmeas
-        data    - is the same size at mx,my
-        flag     - 1 for positive, -1 for negative, 0 for any trend imposed
+        Args:
+            data: is the same size at mx,my
+            flag: - 1 for positive, -1 for negative, 0 for any trend imposed
+
+        Returns:
+            data minus the elevation trend
         '''
 
         # calculate the trend on any real data
@@ -131,7 +135,7 @@ class KRIGE:
 
         if zeros is not None:
             data[zeros] = self.zeroVal
-        
+
         return data - el_trend
 
     def retrendData(self, idw):
