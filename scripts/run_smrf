@@ -1,9 +1,8 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 
-import smrf
+from smrf.framework.model_framework import run_smrf
 import argparse
 import os
-from datetime import datetime
 import sys
 
 def run():
@@ -17,33 +16,12 @@ def run():
     '''
     parser = argparse.ArgumentParser(description='Examines SMRF config files for issues.')
     parser.add_argument('config_file', metavar='F', type=str,
-                        help='Path to SMRF config file that needs checking')
+                        help='Path to SMRF config file to run')
 
     args = parser.parse_args()
 
     if os.path.isfile(args.config_file):
-        start = datetime.now()
-        # initialize
-        with smrf.framework.SMRF(args.config_file) as s:
-            # load topo data
-            s.loadTopo()
-
-            # initialize the distribution
-            s.initializeDistribution()
-
-            # initialize the outputs if desired
-            s.initializeOutput()
-
-            # load weather data  and station metadata
-            s.loadData()
-
-            # distribute
-            s.distributeData()
-
-            #post process if necessary
-            s.post_process()
-
-            s._logger.info(datetime.now() - start)
+        run_smrf(args.config_file)
 
     else:
         raise IOError('File does not exist.')

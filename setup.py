@@ -45,7 +45,7 @@ if os.path.exists('./.git'):
 		print('Unable to fetch most recent tags')
 
 	try:
-		ls_proc = check_output(["git describe --tags"], shell=True)
+		ls_proc = check_output(["git describe --tags"], shell=True, universal_newlines=True)
 		gitVersion = ls_proc
 		print('Checking most recent version')
 	except Exception as e:
@@ -142,12 +142,12 @@ test_requirements = [
 
 setup(
     name='smrf',
-    version='0.4.6',
+    version='0.4.9',
     description="Distributed snow modeling for water resources",
     long_description=readme + '\n\n' + history,
     author="Scott Havens",
     author_email='scotthavens@ars.usda.gov',
-    url='https://gitlab.com/ars-snow/smrf',
+    url='https://github.com/USDA-ARS-NWRC/smrf',
     packages=[
         'smrf',
         'smrf.data',
@@ -167,13 +167,13 @@ setup(
     package_data={'smrf':['./framework/CoreConfig.ini',
 			  './framework/.qotw']},
     install_requires=requirements,
-    license="ISCL",
+    license="GPL-3.0",
     zip_safe=False,
     keywords='smrf',
     classifiers=[
         'Development Status :: 2 - Pre-Alpha',
         'Intended Audience :: Developers',
-        'License :: OSI Approved :: ISC License (ISCL)',
+        'License :: OSI Approved :: GNU GPL-3.0',
         'Natural Language :: English',
         "Programming Language :: Python :: 2",
         'Programming Language :: Python :: 2.6',
@@ -187,8 +187,7 @@ setup(
     tests_require=test_requirements,
     cmdclass=cmdclass,
     ext_modules=ext_modules,
-    scripts=['scripts/inicheck',
-	     'scripts/update_configs',
+    scripts=['scripts/update_configs',
              'scripts/run_smrf',
 	     'scripts/mk_project',
 	     'scripts/gen_maxus']

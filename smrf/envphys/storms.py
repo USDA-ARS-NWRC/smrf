@@ -447,8 +447,8 @@ def clip_and_correct(precip,storms,stations = []):
 
         storm_start = storm['start']
         storm_end = storm['end']
-        my_slice = precip.ix[storm_start:storm_end]
-        precip_clipped.ix[storm_start:storm_end] = my_slice
+        my_slice = precip.loc[storm_start:storm_end]
+        precip_clipped.loc[storm_start:storm_end] = my_slice
 
     correction = {}
     #print "{0:>10} {1:>10} {2:>10}".format("Original","Clipped", "C")

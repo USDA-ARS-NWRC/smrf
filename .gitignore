@@ -13,8 +13,8 @@ test_data/stoporad.ip
 test_data/wrfout_d02_2016-03-10.nc
 test_data/stoporad*
 examples/*.nc
-test_data/output/*.nc
-
+maxus.nc
+test_data/topo/maxus*.nc
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
@@ -103,3 +103,9 @@ test_data/config.ini
 #ignore maxus.
 test_data/topo/maxus_100window.nc
 test_data/topo/maxus.nc
+examples/* *.nc
+examples/reynolds_mountain_east/output/*
+examples/simple_hill/* *.csv
+*/input_backup/*
+test_data/output/*
+*/tmp/*

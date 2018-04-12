@@ -650,14 +650,8 @@ class IPW:
 
             # IPW writes integer floats without a dec point,
             # so remove if necessary
-            float_min = \
-                (b.float_min, int(b.float_min))[b.float_min == int(b.float_min)]
-            float_max = \
-                (b.float_max, int(b.float_max))[b.float_max == int(b.float_max)]
-
-#             if float_max == float_min:
-#                 float_max += 1
-#                 float_min -= 1
+            float_min = int_match(b.float_min)
+            float_max = int_match(b.float_max)
 
             # determine if there are units
             if b.units is not None:
@@ -842,6 +836,28 @@ nbands: {0.nbands}
             s.append(str(b))
 
         return ''.join(s)
+
+def int_match(val):
+    """
+    (Devel team is unsure if this is the case. This description is our
+    interpretation of pre-existing code that was re-written to be up-to-date
+    with deprecations. We are confident it behaves the same as it did before.)
+
+    IPW writes in the header a integer represented as a float in python without
+    the decimal. So sometimes we have to proactively check and pass a int to
+    the header function.
+
+    e.g. float_min == 1.00, IPW writes 1
+    Args:
+        val: an potential int represented as float.
+    Returns:
+        result: the val is casted as int if val is equivalent to itself casted
+                as an int
+    """
+    int_val = int(val)
+    return int_val if val == int_val else val
+
+
 
 
 def _packgrp(root, grp, wc, varlist, nbands=None):

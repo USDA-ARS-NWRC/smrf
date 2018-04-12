@@ -73,7 +73,8 @@ class DK:
         nan_val = pd.isnull(data)
 
         # only calcualte if the stations involved have changed
-        if np.sum(nan_val == self.nan_val) != len(self.mx):
+        # if np.sum(np.array_equal(nan_val,self.nan_val)) != len(self.mx):
+        if not np.array_equal(nan_val, self.nan_val):
 
             self.nan_val = nan_val
             nsta = np.sum(~nan_val)
@@ -186,7 +187,7 @@ class DK:
 
         # calculate the weights
         wg = np.zeros_like(dgrid)
-        detrended_kriging.call_grid(self.ad, self.dgrid, mz,
+        detrended_kriging.call_grid(self.ad, self.dgrid, mz.astype(np.double),
                                     wg, self.config['dk_nthreads'])
 
         # reshape the weights

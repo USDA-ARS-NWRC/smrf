@@ -171,6 +171,7 @@ class ppt(image_data.image_data):
 
             # Clip and adjust the precip data so that there is only precip
             # during the storm and ad back in the missing data to conserve mass
+            data.precip = data.precip[self.stations]
             self.storms, storm_count = storms.tracking_by_station(data.precip,
                                                                   mass_thresh=self.ppt_threshold,
                                                                   steps_thresh=self.time_to_end_storm)
@@ -231,7 +232,7 @@ class ppt(image_data.image_data):
 
         for t in data.index:
 
-            self.distribute_precip(data.ix[t])
+            self.distribute_precip(data.loc[t])
 
             queue[self.variable].put([t, self.precip])
 
@@ -264,16 +265,33 @@ class ppt(image_data.image_data):
         # only need to distribute precip if there is any
         data = data[self.stations]
 
-        #Adjust the precip for undercatchment
-        if self.config['adjust_for_undercatch']:
-            self._logger.debug('%s Adjusting precip for undercatch...' % data.name)
-            data = precip.adjust_for_undercatch(data,wind,temp,self.config, self.metadata)
-
         if self.nasde_model == 'marks2017':
+            #Adjust the precip for undercatchment
+            if self.config['adjust_for_undercatch']:
+                self._logger.debug('%s Adjusting precip for undercatch...' % data.name)
+                self.corrected_precip.loc[time] = \
+                    precip.adjust_for_undercatch(self.corrected_precip.loc[time],
+                                                 wind,
+                                                 temp,
+                                                 self.config,
+                                                 self.metadata)
+
             #Use the clipped and corrected precip
-            self.distribute_for_marks2017(self.corrected_precip.ix[time], dpt, time, mask=mask)
+            self.distribute_for_marks2017(self.corrected_precip.loc[time],
+                                          dpt,
+                                          time,
+                                          mask=mask)
 
         else:
+            #Adjust the precip for undercatchment
+            if self.config['adjust_for_undercatch']:
+                self._logger.debug('%s Adjusting precip for undercatch...' % data.name)
+                data = precip.adjust_for_undercatch(data,
+                                                    wind,
+                                                    temp,
+                                                    self.config,
+                                                    self.metadata)
+
             self.distribute_for_susong1999(data, dpt, time, mask=mask)
 
 
@@ -436,7 +454,7 @@ class ppt(image_data.image_data):
 
             dpt = queue['dew_point'].get(t)
 
-            self.distribute(data.precip.ix[t], dpt, t, data.wind_speed.ix[t],data.air_temp.ix[t], mask=mask)
+            self.distribute(data.precip.loc[t], dpt, t, data.wind_speed.loc[t],data.air_temp.loc[t], mask=mask)
 
             queue[self.variable].put([t, self.precip])
 

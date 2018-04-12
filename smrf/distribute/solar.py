@@ -386,7 +386,7 @@ class solar(image_data.image_data):
         for t in data.index:
 
             # distribute the cloud factor
-            self._distribute(data.ix[t], other_attribute='cloud_factor')
+            self._distribute(data.loc[t], other_attribute='cloud_factor')
 
             # check if sun is up or not
             cosz = queue['cosz'].get(t)

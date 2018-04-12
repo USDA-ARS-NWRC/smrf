@@ -5,6 +5,13 @@ import logging
 import os
 import utm
 import subprocess as sp
+from smrf.envphys import phys
+
+try:
+    from weather_forecast_retrieval import hrrr
+except:
+    pass
+
 
 
 class grid():
@@ -47,6 +54,22 @@ class grid():
         self.x = topo.x
         self.y = topo.y
 
+        # get the zone number and the bounding box    
+        u = utm.from_latlon(topo.topoConfig['basin_lat'],
+                            topo.topoConfig['basin_lon'],
+                            self.force_zone_number)
+        self.zone_number = u[2]
+        self.zone_letter = u[3]
+        
+        ur = np.array(utm.to_latlon(np.max(self.x), np.max(self.y), self.zone_number, self.zone_letter))
+        ll = np.array(utm.to_latlon(np.min(self.x), np.min(self.y), self.zone_number, self.zone_letter))
+        
+        buff = 0.1 # buffer of bounding box in degrees
+        ur += buff
+        ll -= buff
+        self.bbox = np.append(np.flipud(ll), np.flipud(ur))
+        
+
         self._logger = logging.getLogger(__name__)
 
         # load the data
@@ -54,6 +77,8 @@ class grid():
             self.load_from_wrf()
         elif dataType == 'netcdf':
             self.load_from_netcdf()
+        elif dataType == 'hrrr':
+            self.load_from_hrrr()
         else:
             raise Exception('Could not resolve dataType')
 
@@ -62,6 +87,77 @@ class grid():
 #             d = getattr(self, v)
 #             setattr(self, v, d.tz_localize(tz=self.time_zone))
 
+
+    def load_from_hrrr(self):
+        """
+        Load the data from the High Resolution Rapid Refresh (HRRR) model
+        The variables returned from the HRRR class in dataframes are
+        
+            - metadata
+            - air_temp
+            - relative_humidity
+            - precip_int
+            - cloud_factor 
+            - wind_u
+            - wind_v
+            
+        The function will take the keys and load them into the appropriate
+        objects within the `grid` class. The vapor pressure will be calculated
+        from the `air_temp` and `relative_humidity`. The `wind_speed` and
+        `wind_direction` will be calculated from `wind_u` and `wind_v`
+        """
+        
+        self._logger.info('Reading data from from HRRR directory: {}'.format(
+            self.dataConfig['directory']
+            ))
+        
+        metadata, data = hrrr.HRRR(external_logger=self._logger).get_saved_data(
+            self.start_date,
+            self.end_date,
+            self.bbox,
+            output_dir=self.dataConfig['directory'],
+            force_zone_number=self.force_zone_number)
+        
+        # the data may be returned as type=object, convert to numeric
+        # correct for the timezone
+        for key in data.keys():
+            data[key] = data[key].apply(pd.to_numeric)
+            data[key] = data[key].tz_localize(tz=self.time_zone)
+        
+        self.metadata = metadata
+
+        idx = data['air_temp'].index
+        cols = data['air_temp'].columns
+        
+        self._logger.debug('Loading air_temp')
+        self.air_temp = data['air_temp']
+        
+        # calculate vapor pressure
+        self._logger.debug('Loading vapor_pressure')
+        vp = phys.rh2vp(data['air_temp'].values, data['relative_humidity'].values)
+        self.vapor_pressure = pd.DataFrame(vp, index=idx, columns=cols)
+        
+        # calculate the wind speed and wind direction
+        self._logger.debug('Loading wind_speed and wind_direction')
+        min_speed = 0.47
+
+        # calculate the wind speed
+        s = np.sqrt(data['wind_u']**2 + data['wind_v']**2)
+        s[s < min_speed] = min_speed
+
+        # calculate the wind direction
+        d = np.degrees(np.arctan2(data['wind_v'], data['wind_u']))
+        ind = d < 0
+        d[ind] = d[ind] + 360
+        self.wind_speed = pd.DataFrame(s, index=idx, columns=cols)
+        self.wind_direction = pd.DataFrame(d, index=idx, columns=cols)
+        
+        self._logger.debug('Loading precip')
+        self.precip = pd.DataFrame(data['precip_int'], index=idx, columns=cols)
+        
+        self._logger.debug('Loading cloud_factor')
+        self.cloud_factor = pd.DataFrame(data['cloud_factor'], index=idx, columns=cols)
+        
 #     @profile
     def load_from_netcdf(self):
         """

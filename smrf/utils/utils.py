@@ -9,12 +9,20 @@ import pandas as pd
 from datetime import datetime
 import pytz
 import os
-import io
+from smrf.utils import io
 from shutil import copyfile
 from .gitinfo import __gitVersion__, __gitPath__
 from smrf import __version__, __core_config__
 import random
+from inicheck.checkers import CheckType
 
+
+class CheckStation(CheckType):
+    def __init__(self,**kwargs):
+        super(CheckStation,self).__init__(**kwargs)
+
+    def cast(self):
+        return self.value.upper()
 
 def nan_helper(y):
         """Helper to handle indices and logical indices of NaNs.
@@ -117,7 +125,7 @@ def backup_input(data, config):
         config.pop('mysql', None)
 
     if 'gridded' in config.keys():
-        raise ValueError("Micah_o was unsure how to handle this scenario... please advise")
+        raise ValueError("Developer Micah_o was unsure how to handle this scenario... please advise")
 
     # Output station data to CSV
     csv_var = ['metadata', 'air_temp', 'vapor_pressure','precip','wind_speed','wind_direction','cloud_factor']
@@ -160,6 +168,13 @@ def getgitinfo():
     else:
         version = 'v'+__version__
         return version
+
+def getConfigHeader():
+    cfg_str = ("Config File for SMRF {0}\n"
+              "For more SMRF related help see:\n"
+              "{1}").format(getgitinfo(),'http://smrf.readthedocs.io/en/latest/')
+    return cfg_str
+
 
 def config_documentation():
     """
@@ -241,19 +256,18 @@ The {0} section controls the {0} parameters for an entire SMRF run.
         f.writelines(config_doc)
     f.close()
 
-def check_station_validity(metadata_csv=None,metadata=None):
+def check_station_colocation(metadata_csv=None,metadata=None):
     """
     Takes in a data frame representing the metadata for the weather stations
     as produced by :mod:`smrf.framework.model_framework.SMRF.loadData` and
-    check to see if any stations have the same location. Produces an error
-    statement alerting the user.
+    check to see if any stations have the same location.
 
     Args:
         metadata_csv: CSV containing the metdata for weather stations
         metadata: Pandas Dataframe containing the metdata for weather stations
 
     Returns:
-        msg: String containing error message for which stations are at the same location
+        repeat_sta: list of station primary_id that are colocated
     """
     if metadata_csv != None:
         metadata = pd.read_csv(metadata_csv)
@@ -275,15 +289,10 @@ def check_station_validity(metadata_csv=None,metadata=None):
             if len(stations) > 1:
                 repeat_sta.append(stations)
 
-    if len(repeat_sta) > 0:
-        msg ="Stations in metadata share same location: \n"
-        for r_sta in repeat_sta:
-            msg += ",".join(r_sta)
-            msg+='\n'
-    else:
-        msg = None
+    if len(repeat_sta) == 0:
+        repeat_sta = None
 
-    return msg
+    return repeat_sta
 
 
 def getqotw():

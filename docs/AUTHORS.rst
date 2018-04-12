@@ -5,16 +5,16 @@ Credits
 Development Lead
 ----------------
 
-* Scott Havens <scott.havens@ars.usda.gov>
+* Scott Havens <scott.havens@ars.usda.gov>      `@scotthavens <http://github.com/scotthavens>`_
 
 Contributors
 ------------
 
-* Micah Johnson  <micah.johnson150@gmail.com>
-* Micah Sandusky <micc5725@gmail.com>
-* Mark Robertson <mark.robertson@ars.usda.gov>
-* Danny Marks    <ars.danny@gmail.com>
-* Andrew Hedrick <hedrick.ars@gmail.com>
+* Micah Johnson  <micah.johnson@ars.usda.gov>   `@micahjohnson150 <http://github.com/micahjohnson150>`_
+* Micah Sandusky <micah.sandusky@ars.usda.gov>  `@micah-prime <http://github.com/micah-prime>`_
+* Mark Robertson <mark.robertson@ars.usda.gov>  `@robertson-mark <http://github.com/robertson-mark>`_
+* Danny Marks    <danny.marks@ars.usda.gov>     `@dannymarks <http://github.com/dannymarks>`_
+* Andrew Hedrick <andrew.hedrick@ars.usda.gov>  `@Hedrick-ARS <http://github.com/Hedrick-ARS>`_
 
 Development History
 ===================
@@ -24,6 +24,4 @@ Development History
 
 Current Version
 ---------------
-0.4.6
-
-
+0.4.9

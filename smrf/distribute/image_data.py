@@ -153,8 +153,8 @@ class image_data():
             self.kriging = kriging.KRIGE(self.mx, self.my, self.mz, topo.X, topo.Y, topo.dem, self.config)
 
         else:
-            raise Exception('''Could not determine the distribution
-                                method for {}'''.format(self.variable))
+            raise Exception("Could not determine the distribution method for "
+                            "{}".format(self.variable))
 
     def _distribute(self, data, other_attribute=None, zeros=None):
         """
@@ -176,8 +176,8 @@ class image_data():
         data = data[self.stations]
 
         if np.sum(data.isnull()) == data.shape[0]:
-            raise Exception('''{}: All data values
-                            are NaN'''.format(self.variable))
+            raise Exception("{}: All data values are NaN"
+                            "".format(self.variable))
 
         if self.config['distribution'] == 'idw':
             if self.config['detrend']:

@@ -1,4 +1,4 @@
-primary_id,secondary_id,station_name,state,country,latitude,longitude,elevation,mesowest_network_id,network_name,status,primary_provider_id,primary_provider,secondary_provider_id,secondary_provider,tertiary_provider_id,tertiary_provider,wims_id,X,Y
+primary_id,secondary_id,station_name,state,country,latitude,longitude,elevation,mesowest_network_id,network_name,status,primary_provider_id,primary_provider,secondary_provider_id,secondary_provider,tertiary_provider_id,tertiary_provider,wims_id,utm_x,utm_y
 ARAI1,345E766C,ANDERSON RANCH DAM NEAR MOUNTAIN HOME 20NE,ID,US,43.357018,-115.452451,1182.9,106,HADS,ACTIVE,158,Bureau of Reclamation Boise,NaN,null,302,Hydrometeorological Automated Data System,;,625406.300743309,4801625.14045335
 ARKI1,347D061C,ARROWROCK DAM AND RESERVOIR NEAR BOISE 14E,ID,US,43.593762,-115.923969,998.2,106,HADS,ACTIVE,158,Bureau of Reclamation Boise,NaN,null,302,Hydrometeorological Automated Data System,;,586856.531086388,4827316.89749841
 ATAI1,15F04S,ATLANTA SUMMIT,ID,US,43.756922,-115.239142,2310.4,25,SNOTEL,ACTIVE,20,Natural Resources Conservation Service,NaN,null,NaN,null,;,641751.327003432,4846381.95646793

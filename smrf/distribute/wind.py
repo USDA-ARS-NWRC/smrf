@@ -133,12 +133,6 @@ class wind(image_data.image_data):
             self._logger.debug('Read data from {}'
                                .format(self.config['maxus_netcdf']))
 
-            # check maxus defaults
-            # if 'station_default' not in self.config:
-            #     self.config['station_default'] = 11.4
-            # if 'veg_default' not in self.config:
-            #     self.config['veg_default'] = 11.4
-
             # get the veg values
             matching = [s for s in self.config.keys() if "veg_" in s]
             v = {}
@@ -181,6 +175,7 @@ class wind(image_data.image_data):
                     if m.lower() in self.config:
                         self.metadata.loc[m, 'enhancement'] = \
                             float(self.config[m.lower()])
+
 
     def distribute(self, data_speed, data_direction):
         """
@@ -265,7 +260,7 @@ class wind(image_data.image_data):
 
         for t in data_speed.index:
 
-            self.distribute(data_speed.ix[t], data_direction.ix[t])
+            self.distribute(data_speed.loc[t], data_direction.loc[t])
 
             queue['wind_speed'].put([t, self.wind_speed])
             queue['wind_direction'].put([t, self.wind_direction])
@@ -396,8 +391,7 @@ class wind(image_data.image_data):
 
             # maxus value at the station
             if not pd.isnull(data_direction[m]):
-
-                if m in self.config['peak']:
+                if m.upper() in self.config['peak']:
                     val_maxus = np.min(self.maxus[:, yi, xi] + e)
 
                 else:

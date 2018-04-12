@@ -175,13 +175,13 @@ class QueueCleaner(threading.Thread):
             # first do a get on all the data, this will ensure that
             # there is data there to be had
             for v in self.queues.keys():
-                # self._logger.debug('Clean checking %s -- %s' % (t, v))
+#                 self._logger.debug('Clean checking %s -- %s' % (t, v))
                 self.queues[v].get(t)
 
             # now that we know there is data in all of the queues
             # that have the same time, clean up those times
             for v in self.queues.keys():
-                # self._logger.debug('Clean cleaning %s -- %s' % (t, v))
+#                 self._logger.debug('Clean cleaning %s -- %s' % (t, v))
                 self.queues[v].clean(t)
 
             self._logger.debug('%s Cleaned from queues' % t)
