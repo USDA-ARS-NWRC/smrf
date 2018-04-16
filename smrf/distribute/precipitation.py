@@ -293,7 +293,7 @@ class ppt(image_data.image_data):
         if self.config['distribute_drifts']:
             self._logger.debug('%s Redistributing due to wind' % data.name)
             if np.any(dpt < 0.5):
-                self.distribute_precip_wind(self.precip, az, dir_round_cell,
+                self.precip = precip.distribute_precip_wind(self.precip, az, dir_round_cell,
                                             wind_speed, cell_maxus)
 
     def distribute_for_marks2017(self, data, dpt, time, mask=None):

@@ -291,3 +291,53 @@ def adjust_for_undercatch(p_vec, wind, temp, sta_type, metadata):
                 #print(adj_precip[sta],p_vec[sta],cr)
 
     return adj_precip
+
+
+def dist_precip_wind(precip, az, dir_round_cell, wind_speed
+                     cell_maxus):
+    """
+    Redistribute the precip based on wind speed and direciton
+    to account for drifting.
+
+    Args:
+        precip: distributed precip
+        az: wind direction
+        dir_round_cell:
+        wind_speed
+
+    Returns:
+        precip_drift: precip redistributed for wind
+
+    """
+    celltbreak = np.zeros(dir_round_cell.shape)
+    drift_factor = np.zeros(dir_round_cell.shape)
+    precip_drift = np.zeros(dir_round_cell.shape)
+    pptmult = np.zeros(dir_round_cell.shape)
+
+    # classify tbreak
+    dir_unique = np.unique(dir_round_cell)
+    for d in dir_unique:
+        # find all values for matching direction
+        ind = dir_round_cell == d
+        i = np.argwhere(tbreak_direction == d)[0][0]
+        celltbreak[ind] = tbreak[i][ind]
+
+    # ############################## #
+    # for tbreak cells >  0
+    idx = celltbreak > 0
+    drift_factor[idx] = 1.000761 * np.exp(-0.0956 * wind_speed[idx] + 0.0289 * wind_speed[idx]**2);
+    drift_factor[idx] = utils.set_min_max(drift_factor[idx], 1.1, 4.2)
+    pptmult[idx] = 0.5929 + 0.03265 * cellmaxus[idx] - 0.002549 * cellmaxus[idx]**2 + 0.0001737 * cellmaxus[idx]**3;
+    pptmult[idx] = utils.set_min_max(pptmult[idx], 0.0, 1.0)
+    # weight total precipitation by drift cell and non-drift cell percentages (from 10m2 grid)	*/
+    precip_drift[idx] = tbreak_cell[idx] / 100.0 * drift_factor[idx] * sheltprecip[idx] + (100.0 - tbreak_cell[idx]) / 100.0 * pptmult[idx] * sheltprecip[idx]
+
+    # ############################## #
+    # for tbreak cells <= 0 (i.e. the rest of them)
+    idx = celtbreak <= 0
+    # original from manuscript
+    pptmult[idx] = 0.5929 + 0.03265 * maxus_cell[idx] - 0.002549 * maxus_cell[idx]**2 + 0.0001737 * maxus_cell[idx]**3;
+    pptmult[idx] = utils.set_min_max(pptmult[idx], 0.0, 1.0)
+    precip_drift = pptmult * sheltprecip;
+
+    return precip_drift
