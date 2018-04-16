@@ -269,6 +269,8 @@ class wind(image_data.image_data):
 
             queue['wind_speed'].put([t, self.wind_speed])
             queue['wind_direction'].put([t, self.wind_direction])
+            queue['cellmaxus'].put([t,self.cellmaxus])
+            queue['dir_round_cell'].put([t,self.dir_round_cell])
 
             if not self.gridded:
                 queue['flatwind'].put([t, self.flatwind])
@@ -360,6 +362,8 @@ class wind(image_data.image_data):
 
         self.wind_speed = utils.set_min_max(cellwind, self.min, self.max)
         self.wind_direction = az
+        self.cellmaxus = cellmaxus
+        self.dir_round_cell = dir_round_cell
 
     def stationMaxus(self, data_speed, data_direction):
         """

@@ -191,6 +191,16 @@ class ppt(image_data.image_data):
                     self.storm_id = np.nan
                     self._logger.warning("Zero events triggered a storm definition, None of the precip will be used in this run.")
 
+        # if redistributing due to wind
+        if self.config['distribute_drifts']:
+            self._tbreak_file = nc.Dataset(self.config['tbreak_netcdf'], 'r')
+            self.tbreak = self._tbreak_file.variables['tbreak'][:]
+            self.tbreak_direction = self._tbreak_file.variables['direction'][:]
+            self._tbreak_file.close()
+            self._logger.debug('Read data from {}'
+                               .format(self.config['tbreak_netcdf']))
+
+
     def distribute_precip(self, data):
         """
         Distribute given a Panda's dataframe for a single time step. Calls
@@ -236,7 +246,8 @@ class ppt(image_data.image_data):
             queue[self.variable].put([t, self.precip])
 
 
-    def distribute(self, data, dpt, time, wind, temp, mask=None):
+    def distribute(self, data, dpt, time, wind, temp, az, dir_round_cell,
+                   wind_speed, cell_maxus, mask=None):
         """
         Distribute given a Panda's dataframe for a single time step. Calls
         :mod:`smrf.distribute.image_data.image_data._distribute`.
@@ -255,9 +266,11 @@ class ppt(image_data.image_data):
             data: Pandas dataframe for a single time step from precip
             dpt: dew point numpy array that will be used for the precipitaiton
                 temperature
-            time: pass in the time were are currently on
-            mask: basin mask to apply to the storm days for calculating the
-                last storm day for the basin
+            time:   pass in the time were are currently on
+            wind: station wind speed at time step
+            temp:   station air temperature at time step
+            mask:   basin mask to apply to the storm days for calculating the
+                    last storm day for the basin
         """
 
         self._logger.debug('%s Distributing all precip' % data.name)
@@ -267,7 +280,7 @@ class ppt(image_data.image_data):
         #Adjust the precip for undercatchment
         if self.config['adjust_for_undercatch']:
             self._logger.debug('%s Adjusting precip for undercatch...' % data.name)
-            data = precip.adjust_for_undercatch(data,wind,temp,self.config, self.metadata)
+            data = precip.adjust_for_undercatch(data,stn_wind,stn_temp,self.config, self.metadata)
 
         if self.nasde_model == 'marks2017':
             #Use the clipped and corrected precip
@@ -276,6 +289,12 @@ class ppt(image_data.image_data):
         else:
             self.distribute_for_susong1999(data, dpt, time, mask=mask)
 
+        # redistribute due to wind to account for driftin
+        if self.config['distribute_drifts']:
+            self._logger.debug('%s Redistributing due to wind' % data.name)
+            if np.any(dpt < 0.5):
+                self.distribute_precip_wind(self.precip, az, dir_round_cell,
+                                            wind_speed, cell_maxus)
 
     def distribute_for_marks2017(self, data, dpt, time, mask=None):
         """
@@ -435,8 +454,14 @@ class ppt(image_data.image_data):
         for t in data.precip.index:
 
             dpt = queue['dew_point'].get(t)
+            # variables for wind redistribution
+            az = queue['wind_direction'].get(t)
+            wind_speed = queue['wind_speed'].get(t)
+            dir_round_cell = queue['dir_round_cell'].get(t)
+            cellmaxus = queue['cellmaxus'].get(t)
 
-            self.distribute(data.precip.loc[t], dpt, t, data.wind_speed.loc[t],data.air_temp.loc[t], mask=mask)
+            self.distribute(data.precip.loc[t], dpt, t, data.wind_speed.loc[t],data.air_temp.loc[t],
+                            az, dir_round_cell, wind_speed, cell_maxus, mask=mask)
 
             queue[self.variable].put([t, self.precip])
 

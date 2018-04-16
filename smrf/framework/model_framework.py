@@ -84,7 +84,7 @@ class SMRF():
                         'veg_vis_beam', 'veg_vis_diffuse',
                         'cloud_ir_beam', 'cloud_ir_diffuse', 'cloud_vis_beam',
                         'cloud_vis_diffuse', 'thermal_clear', 'wind_direction',
-                        'flatwind', 'wind_direction']
+                        'flatwind', 'wind_direction', 'cellmaxus', 'dir_round_cell']
 
     def __init__(self, configFile, external_logger=None):
         """
@@ -547,6 +547,10 @@ class SMRF():
                                                 t,
                                                 self.data.wind_speed.loc[t],
                                                 self.data.air_temp.loc[t],
+                                                self.distribute['wind'].wind_direction,
+                                                self.distribute['wind'].dir_round_cell,
+                                                self.distribute['wind'].wind_speed,
+                                                self.distribute['wind'].cellmaxus
                                                 self.topo.mask)
 
             # 5. Albedo
