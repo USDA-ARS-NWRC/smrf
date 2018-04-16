@@ -294,7 +294,7 @@ def adjust_for_undercatch(p_vec, wind, temp, sta_type, metadata):
 
 
 def dist_precip_wind(precip, dpt, az, dir_round_cell, wind_speed, cell_maxus,
-                     tbreak, tbreak_direction):
+                     tbreak, tbreak_direction, veg_type, veg_fact):
     """
     Redistribute the precip based on wind speed and direciton
     to account for drifting.
@@ -308,15 +308,17 @@ def dist_precip_wind(precip, dpt, az, dir_round_cell, wind_speed, cell_maxus,
         cell_maxus:
         tbreak:
         tbreak_direction
+        veg_type:
+        veg_factor
 
     Returns:
         precip_drift: precip redistributed for wind
 
     """
     celltbreak = np.zeros(dir_round_cell.shape)
-    drift_factor = np.zeros(dir_round_cell.shape)
+    drift_factor = np.ones(dir_round_cell.shape)
     precip_drift = np.zeros(dir_round_cell.shape)
-    pptmult = np.zeros(dir_round_cell.shape)
+    pptmult = np.ones(dir_round_cell.shape)
 
     # classify tbreak
     dir_unique = np.unique(dir_round_cell)
@@ -332,7 +334,14 @@ def dist_precip_wind(precip, dpt, az, dir_round_cell, wind_speed, cell_maxus,
     drift_factor[idx] = 1.000761 * np.exp(-0.0956 * wind_speed[idx] + 0.0289 * wind_speed[idx]**2);
     drift_factor[idx] = utils.set_min_max(drift_factor[idx], 1.1, 4.2)
     pptmult[idx] = 0.5929 + 0.03265 * cell_maxus[idx] - 0.002549 * cell_maxus[idx]**2 + 0.0001737 * cell_maxus[idx]**3;
+
+
+    for i, v in enumerate(veg_fact):
+        idv = ( veg_type == (int(v)) & idx)
+        pptmult[idv] = pptmult[idv] *  1.0 / veg_fact[v]
+
     pptmult[idx] = utils.set_min_max(pptmult[idx], 0.0, 1.0)
+
     # weight total precipitation by drift cell and non-drift cell percentages (from 10m2 grid)	*/
     precip_drift[idx] = celltbreak[idx] / 100.0 * drift_factor[idx] * precip[idx] + (100.0 - celltbreak[idx]) / 100.0 * pptmult[idx] * precip[idx]
 
@@ -341,7 +350,14 @@ def dist_precip_wind(precip, dpt, az, dir_round_cell, wind_speed, cell_maxus,
     idx = ((celltbreak <= 0) & (dpt < 0.5))
     # original from manuscript
     pptmult[idx] = 0.5929 + 0.03265 * cell_maxus[idx] - 0.002549 * cell_maxus[idx]**2 + 0.0001737 * cell_maxus[idx]**3;
+
+    # veg effects at indices that we are working on where veg type matches
+    for i, v in enumerate(veg_fact):
+        idv = ( veg_type == (int(v)) & idx)
+        pptmult[idv] = pptmult[idv] *  1.0 / veg_fact[v]
+
     pptmult[idx] = utils.set_min_max(pptmult[idx], 0.0, 1.0)
+
     precip_drift = pptmult * precip;
 
     # ############################## #
