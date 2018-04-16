@@ -550,7 +550,7 @@ class SMRF():
                                                 self.distribute['wind'].wind_direction,
                                                 self.distribute['wind'].dir_round_cell,
                                                 self.distribute['wind'].wind_speed,
-                                                self.distribute['wind'].cellmaxus
+                                                self.distribute['wind'].cellmaxus,
                                                 self.topo.mask)
 
             # 5. Albedo

@@ -5,7 +5,7 @@ Created on Apr 15, 2015
 '''
 
 import numpy as np
-
+from smrf.utils import utils
 
 def mkprecip(precipitation, temperature):
     '''
@@ -293,17 +293,21 @@ def adjust_for_undercatch(p_vec, wind, temp, sta_type, metadata):
     return adj_precip
 
 
-def dist_precip_wind(precip, az, dir_round_cell, wind_speed
-                     cell_maxus):
+def dist_precip_wind(precip, dpt, az, dir_round_cell, wind_speed, cell_maxus,
+                     tbreak, tbreak_direction):
     """
     Redistribute the precip based on wind speed and direciton
     to account for drifting.
 
     Args:
         precip: distributed precip
+        dpt
         az: wind direction
         dir_round_cell:
-        wind_speed
+        wind_speed:
+        cell_maxus:
+        tbreak:
+        tbreak_direction
 
     Returns:
         precip_drift: precip redistributed for wind
@@ -324,20 +328,25 @@ def dist_precip_wind(precip, az, dir_round_cell, wind_speed
 
     # ############################## #
     # for tbreak cells >  0
-    idx = celltbreak > 0
+    idx = ((celltbreak > 0) & (dpt < 0.5))
     drift_factor[idx] = 1.000761 * np.exp(-0.0956 * wind_speed[idx] + 0.0289 * wind_speed[idx]**2);
     drift_factor[idx] = utils.set_min_max(drift_factor[idx], 1.1, 4.2)
-    pptmult[idx] = 0.5929 + 0.03265 * cellmaxus[idx] - 0.002549 * cellmaxus[idx]**2 + 0.0001737 * cellmaxus[idx]**3;
+    pptmult[idx] = 0.5929 + 0.03265 * cell_maxus[idx] - 0.002549 * cell_maxus[idx]**2 + 0.0001737 * cell_maxus[idx]**3;
     pptmult[idx] = utils.set_min_max(pptmult[idx], 0.0, 1.0)
     # weight total precipitation by drift cell and non-drift cell percentages (from 10m2 grid)	*/
-    precip_drift[idx] = tbreak_cell[idx] / 100.0 * drift_factor[idx] * sheltprecip[idx] + (100.0 - tbreak_cell[idx]) / 100.0 * pptmult[idx] * sheltprecip[idx]
+    precip_drift[idx] = celltbreak[idx] / 100.0 * drift_factor[idx] * precip[idx] + (100.0 - celltbreak[idx]) / 100.0 * pptmult[idx] * precip[idx]
 
     # ############################## #
     # for tbreak cells <= 0 (i.e. the rest of them)
-    idx = celtbreak <= 0
+    idx = ((celltbreak <= 0) & (dpt < 0.5))
     # original from manuscript
-    pptmult[idx] = 0.5929 + 0.03265 * maxus_cell[idx] - 0.002549 * maxus_cell[idx]**2 + 0.0001737 * maxus_cell[idx]**3;
+    pptmult[idx] = 0.5929 + 0.03265 * cell_maxus[idx] - 0.002549 * cell_maxus[idx]**2 + 0.0001737 * cell_maxus[idx]**3;
     pptmult[idx] = utils.set_min_max(pptmult[idx], 0.0, 1.0)
-    precip_drift = pptmult * sheltprecip;
+    precip_drift = pptmult * precip;
+
+    # ############################## #
+    # no precip redistribution where dew point >= 0.5
+    idx = dpt >= 0.5
+    precip_drift[idx] = precip[idx]
 
     return precip_drift

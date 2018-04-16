@@ -280,7 +280,7 @@ class ppt(image_data.image_data):
         #Adjust the precip for undercatchment
         if self.config['adjust_for_undercatch']:
             self._logger.debug('%s Adjusting precip for undercatch...' % data.name)
-            data = precip.adjust_for_undercatch(data,stn_wind,stn_temp,self.config, self.metadata)
+            data = precip.adjust_for_undercatch(data,wind,temp,self.config, self.metadata)
 
         if self.nasde_model == 'marks2017':
             #Use the clipped and corrected precip
@@ -293,8 +293,9 @@ class ppt(image_data.image_data):
         if self.config['distribute_drifts']:
             self._logger.debug('%s Redistributing due to wind' % data.name)
             if np.any(dpt < 0.5):
-                self.precip = precip.distribute_precip_wind(self.precip, az, dir_round_cell,
-                                            wind_speed, cell_maxus)
+                self.precip = precip.dist_precip_wind(self.precip, dpt, az, dir_round_cell,
+                                            wind_speed, cell_maxus, self.tbreak,
+                                            self.tbreak_direction)
 
     def distribute_for_marks2017(self, data, dpt, time, mask=None):
         """
