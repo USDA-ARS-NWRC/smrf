@@ -294,7 +294,7 @@ def adjust_for_undercatch(p_vec, wind, temp, sta_type, metadata):
 
 
 def dist_precip_wind(precip, dpt, az, dir_round_cell, wind_speed, cell_maxus,
-                     tbreak, tbreak_direction, veg_type, veg_fact):
+                     tbreak, tbreak_direction, veg_type, veg_fact, mask=None):
     """
     Redistribute the precip based on wind speed and direciton
     to account for drifting.
@@ -315,13 +315,21 @@ def dist_precip_wind(precip, dpt, az, dir_round_cell, wind_speed, cell_maxus,
         precip_drift: precip redistributed for wind
 
     """
-    celltbreak = np.zeros(dir_round_cell.shape)
+    tbreak_thresh = 7.0
+    min_scour = 0.55
+    max_scour = 1.0
+    min_drift = 1.0
+    max_drift = 3.5
+    dpt_thresh = 0.5
+
+    celltbreak = np.ones(dir_round_cell.shape)
     drift_factor = np.ones(dir_round_cell.shape)
     precip_drift = np.zeros(dir_round_cell.shape)
     pptmult = np.ones(dir_round_cell.shape)
 
     # classify tbreak
     dir_unique = np.unique(dir_round_cell)
+    print(np.min(tbreak_direction), np.min(dir_unique))
     for d in dir_unique:
         # find all values for matching direction
         ind = dir_round_cell == d
@@ -330,9 +338,10 @@ def dist_precip_wind(precip, dpt, az, dir_round_cell, wind_speed, cell_maxus,
 
     # ############################## #
     # for tbreak cells >  0
-    idx = ((celltbreak > 0) & (dpt < 0.5))
+    idx = ((celltbreak > tbreak_thresh) & (dpt < dpt_thresh))
     drift_factor[idx] = 1.000761 * np.exp(-0.0956 * wind_speed[idx] + 0.0289 * wind_speed[idx]**2);
-    drift_factor[idx] = utils.set_min_max(drift_factor[idx], 1.1, 4.2)
+    drift_factor[idx] = utils.set_min_max(drift_factor[idx], min_drift, max_drift)
+
     pptmult[idx] = 0.5929 + 0.03265 * cell_maxus[idx] - 0.002549 * cell_maxus[idx]**2 + 0.0001737 * cell_maxus[idx]**3;
 
 
@@ -340,29 +349,40 @@ def dist_precip_wind(precip, dpt, az, dir_round_cell, wind_speed, cell_maxus,
         idv = ( veg_type == (int(v)) & idx)
         pptmult[idv] = pptmult[idv] *  1.0 / veg_fact[v]
 
-    pptmult[idx] = utils.set_min_max(pptmult[idx], 0.0, 1.0)
+    pptmult[idx] = utils.set_min_max(pptmult[idx], min_scour, max_scour)
 
     # weight total precipitation by drift cell and non-drift cell percentages (from 10m2 grid)	*/
-    precip_drift[idx] = celltbreak[idx] / 100.0 * drift_factor[idx] * precip[idx] + (100.0 - celltbreak[idx]) / 100.0 * pptmult[idx] * precip[idx]
+    mult = np.ones(dir_round_cell.shape)
+    #mult[idx] = celltbreak[idx] / 100.0 * drift_factor[idx] + (100.0 - celltbreak[idx]) / 100.0 * pptmult[idx]
+    mult[idx] = drift_factor[idx]
+    #precip_drift[idx] = celltbreak[idx] / 100.0 * drift_factor[idx] * precip[idx] + (100.0 - celltbreak[idx]) / 100.0 * pptmult[idx] * precip[idx]
+    precip_drift[idx] = mult[idx]*precip[idx]
+    # plt.imshow(mult*mask)
+    # plt.title('mult')
+    # plt.colorbar()
+    # plt.show()
 
     # ############################## #
     # for tbreak cells <= 0 (i.e. the rest of them)
-    idx = ((celltbreak <= 0) & (dpt < 0.5))
+    idx = ((celltbreak <= tbreak_thresh) & (dpt < dpt_thresh))
+    # reset pptmult for exposed pixels
+    pptmult = np.ones(dir_round_cell.shape)
     # original from manuscript
     pptmult[idx] = 0.5929 + 0.03265 * cell_maxus[idx] - 0.002549 * cell_maxus[idx]**2 + 0.0001737 * cell_maxus[idx]**3;
-
+    #other
+    #pptmult[idx] = 1.3 * (.5929 + 0.03265 * (cell_maxus[idx] + 12)) - 0.002549 * (cell_maxus[idx] + 12)**2 + 0.0001737 * (cell_maxus[idx] + 12)**3
     # veg effects at indices that we are working on where veg type matches
     for i, v in enumerate(veg_fact):
         idv = ( veg_type == (int(v)) & idx)
         pptmult[idv] = pptmult[idv] *  1.0 / veg_fact[v]
 
-    pptmult[idx] = utils.set_min_max(pptmult[idx], 0.0, 1.0)
+    pptmult[idx] = utils.set_min_max(pptmult[idx], min_scour, max_scour)
 
-    precip_drift = pptmult * precip;
+    precip_drift[idx] = pptmult[idx] * precip[idx];
 
     # ############################## #
     # no precip redistribution where dew point >= 0.5
-    idx = dpt >= 0.5
+    idx = dpt >= dpt_thresh
     precip_drift[idx] = precip[idx]
 
     return precip_drift

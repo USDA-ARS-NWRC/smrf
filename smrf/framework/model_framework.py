@@ -542,16 +542,25 @@ class SMRF():
                                                self.data.wind_direction.loc[t])
 #self, data, dpt, time, wind, temp, mask=None
             # 4. Precipitation
+            if self.config['precip']['distribute_drifts']:
+                prec_ws = self.distribute['wind'].wind_speed
+                prec_wd = self.distribute['wind'].wind_direction
+                prec_drc = self.distribute['wind'].dir_round_cell
+                prec_cm = self.distribute['wind'].cellmaxus
+            else:
+                prec_ws = None
+                prec_wd = None
+                prec_drc = None
+                prec_cm = None
             self.distribute['precip'].distribute(self.data.precip.loc[t],
                                                 self.distribute['vapor_pressure'].dew_point,
                                                 t,
                                                 self.data.wind_speed.loc[t],
                                                 self.data.air_temp.loc[t],
-                                                self.distribute['wind'].wind_direction,
-                                                self.distribute['wind'].dir_round_cell,
-                                                self.distribute['wind'].wind_speed,
-                                                self.distribute['wind'].cellmaxus,
-                                                self.topo.mask)
+                                                prec_wd,
+                                                prec_drc,
+                                                prec_ws,
+                                                prec_cm)
 
             # 5. Albedo
             self.distribute['albedo'].distribute(t,

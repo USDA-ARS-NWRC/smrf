@@ -212,6 +212,7 @@ class ppt(image_data.image_data):
                 v[ms[1]] = float(self.config[m])
         self.veg = v
 
+        self.mask = topo.mask
 
     def distribute_precip(self, data):
         """
@@ -308,7 +309,7 @@ class ppt(image_data.image_data):
                 self.precip = precip.dist_precip_wind(self.precip, dpt, az, dir_round_cell,
                                             wind_speed, cell_maxus, self.tbreak,
                                             self.tbreak_direction, self.veg_type,
-                                            self.veg)
+                                            self.veg, mask=self.mask)
 
     def distribute_for_marks2017(self, data, dpt, time, mask=None):
         """
