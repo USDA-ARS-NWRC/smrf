@@ -301,27 +301,38 @@ def dist_precip_wind(precip, dpt, az, dir_round_cell, wind_speed, cell_maxus,
 
     Args:
         precip: distributed precip
-        dpt
+        dpt: dew point array
         az: wind direction
-        dir_round_cell:
-        wind_speed:
-        cell_maxus:
-        tbreak:
-        tbreak_direction
-        veg_type:
-        veg_factor
+        dir_round_cell: from wind module
+        wind_speed: wind speed array
+        cell_maxus: max upwind slope from maxus file
+        tbreak: relative local slope from tbreak file
+        tbreak_direction: direction array from tbreak file
+        veg_type: user input veg types to correct
+        veg_factor: interception correction for veg types. ppt mult is multiplied by 1/veg_factor
 
     Returns:
-        precip_drift: precip redistributed for wind
+        precip_drift: numpy array of precip redistributed for wind
 
     """
-    tbreak_thresh = 7.0
+    # thresholds
+    tbreak_threshold = 7.0
     min_scour = 0.55
     max_scour = 1.0
     min_drift = 1.0
     max_drift = 3.5
-    dpt_thresh = 0.5
+    dpt_threshold = 0.5
+    # polynomial factors
+    drift_poly = {}
+    drift_poly['a'] = 0.0289
+    drift_poly['b'] = -0.0956
+    drift_poly['c'] = 1.000761
+    ppt_poly['a'] = 0.0001737
+    ppt_poly['b'] = 0.002549
+    ppt_poly['c'] = 0.03265
+    ppt_poly['d'] = 0.5929
 
+    # initialize arrays
     celltbreak = np.ones(dir_round_cell.shape)
     drift_factor = np.ones(dir_round_cell.shape)
     precip_drift = np.zeros(dir_round_cell.shape)
@@ -329,60 +340,52 @@ def dist_precip_wind(precip, dpt, az, dir_round_cell, wind_speed, cell_maxus,
 
     # classify tbreak
     dir_unique = np.unique(dir_round_cell)
-    print(np.min(tbreak_direction), np.min(dir_unique))
+
     for d in dir_unique:
         # find all values for matching direction
         ind = dir_round_cell == d
         i = np.argwhere(tbreak_direction == d)[0][0]
         celltbreak[ind] = tbreak[i][ind]
 
-    # ############################## #
-    # for tbreak cells >  0
-    idx = ((celltbreak > tbreak_thresh) & (dpt < dpt_thresh))
-    drift_factor[idx] = 1.000761 * np.exp(-0.0956 * wind_speed[idx] + 0.0289 * wind_speed[idx]**2);
+    # ################################################### #
+    # Routine for drift cells
+    # ################################################### #
+    # for tbreak cells >  threshold
+    idx = ((celltbreak > tbreak_threshold) & (dpt < dpt_threshold))
+    # calculate drift factor
+    drift_factor[idx] = drift_poly['c'] * np.exp(drift_poly['b'] * wind_speed[idx] \
+                        + drift_poly['a'] * wind_speed[idx]**2);
+    # cap drift factor
     drift_factor[idx] = utils.set_min_max(drift_factor[idx], min_drift, max_drift)
 
-    pptmult[idx] = 0.5929 + 0.03265 * cell_maxus[idx] - 0.002549 * cell_maxus[idx]**2 + 0.0001737 * cell_maxus[idx]**3;
+    # multiply precip by drift factor for drift cells
+    precip_drift[idx] = drift_factor[idx]*precip[idx]
 
+    # ################################################### #
+    # Now lets deal with non drift cells
+    # ################################################### #
 
-    for i, v in enumerate(veg_fact):
-        idv = ( veg_type == (int(v)) & idx)
-        pptmult[idv] = pptmult[idv] *  1.0 / veg_fact[v]
-
-    pptmult[idx] = utils.set_min_max(pptmult[idx], min_scour, max_scour)
-
-    # weight total precipitation by drift cell and non-drift cell percentages (from 10m2 grid)	*/
-    mult = np.ones(dir_round_cell.shape)
-    #mult[idx] = celltbreak[idx] / 100.0 * drift_factor[idx] + (100.0 - celltbreak[idx]) / 100.0 * pptmult[idx]
-    mult[idx] = drift_factor[idx]
-    #precip_drift[idx] = celltbreak[idx] / 100.0 * drift_factor[idx] * precip[idx] + (100.0 - celltbreak[idx]) / 100.0 * pptmult[idx] * precip[idx]
-    precip_drift[idx] = mult[idx]*precip[idx]
-    # plt.imshow(mult*mask)
-    # plt.title('mult')
-    # plt.colorbar()
-    # plt.show()
-
-    # ############################## #
-    # for tbreak cells <= 0 (i.e. the rest of them)
-    idx = ((celltbreak <= tbreak_thresh) & (dpt < dpt_thresh))
+    # for tbreak cells <= threshold (i.e. the rest of them)
+    idx = ((celltbreak <= tbreak_threshold) & (dpt < dpt_threshold))
     # reset pptmult for exposed pixels
     pptmult = np.ones(dir_round_cell.shape)
     # original from manuscript
-    pptmult[idx] = 0.5929 + 0.03265 * cell_maxus[idx] - 0.002549 * cell_maxus[idx]**2 + 0.0001737 * cell_maxus[idx]**3;
-    #other
-    #pptmult[idx] = 1.3 * (.5929 + 0.03265 * (cell_maxus[idx] + 12)) - 0.002549 * (cell_maxus[idx] + 12)**2 + 0.0001737 * (cell_maxus[idx] + 12)**3
+    pptmult[idx] = ppt_poly['a'] + ppt_poly['c'] * cell_maxus[idx] - ppt_poly['b'] * cell_maxus[idx]**2 \
+                   + ppt_poly['a'] * cell_maxus[idx]**3;
+
     # veg effects at indices that we are working on where veg type matches
     for i, v in enumerate(veg_fact):
         idv = ( veg_type == (int(v)) & idx)
         pptmult[idv] = pptmult[idv] *  1.0 / veg_fact[v]
 
+    # cap ppt mult
     pptmult[idx] = utils.set_min_max(pptmult[idx], min_scour, max_scour)
-
+    # multiply precip by scour factor
     precip_drift[idx] = pptmult[idx] * precip[idx];
 
     # ############################## #
-    # no precip redistribution where dew point >= 0.5
-    idx = dpt >= dpt_thresh
+    # no precip redistribution where dew point >= threshold
+    idx = dpt >= dpt_threshold
     precip_drift[idx] = precip[idx]
 
     return precip_drift
