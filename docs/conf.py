@@ -18,10 +18,13 @@
 
 import os
 import sys
-from smrf.utils import utils
+from smrf.utils.utils import get_config_doc_section_hdr
+from inicheck.tools import config_documentation
 
-utils.config_documentation()
-# sys.path.insert(0, os.path.abspath('.'))
+
+config_documentation('./auto_config.rst',
+					 module='smrf',
+					 section_link_dict=get_config_doc_section_hdr())
 
 if os.environ.get('READTHEDOCS') == 'True':
     sys.path.insert(0, os.path.abspath('.'))

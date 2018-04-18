@@ -35,8 +35,8 @@ Implement Features
 Look through the GitHub issues for features. Anything tagged with "feature"
 is open to whoever wants to implement it. If the added feature expands the options
 available in the config flie, please make them available by adding to the CoreConfig.ini
-in ./smrf/framework/CoreConfig.ini. For more information on syntax for this, please reference
-:ref:`Core Configuration`
+in ./smrf/framework/CoreConfig.ini. For more information on syntax for this,
+please reference the configuration section.
 
 Write Documentation
 ~~~~~~~~~~~~~~~~~~~
@@ -60,18 +60,16 @@ Don't forget to push your tags afterwards with::
 Currently SMRF is version 0.4.10 The development team of SMRF attempted to adhere
 to semantic versioning. Here is the basics taken from the semantic versioning website.
 
- * Patch version Z (x.y.Z | x > 0) MUST be incremented if only backwards compatible bug fixes are introduced.
- A bug fix is defined as an internal change that fixes incorrect behavior.
+  * Patch version Z (x.y.Z | x > 0) MUST be incremented if only backwards compatible bug fixes are introduced.
+    A bug fix is defined as an internal change that fixes incorrect behavior.
+  * Minor version Y (x.Y.z | x > 0) MUST be incremented if new, backwards compatible functionality is introduced to the public API.
+    It MUST be incremented if any public API functionality is marked as deprecated.
+    It MAY be incremented if substantial new functionality or improvements are introduced within the private code.
+    It MAY include patch level changes. Patch version MUST be reset to 0 when minor version is incremented
+  * Major version X (X.y.z | X > 0) MUST be incremented if any backwards incompatible changes are introduced to the public API.
+    It MAY include minor and patch level changes. Patch and minor version MUST be reset to 0 when major version is incremented.
 
- * Minor version Y (x.Y.z | x > 0) MUST be incremented if new, backwards compatible functionality is introduced to the public API.
- It MUST be incremented if any public API functionality is marked as deprecated.
- It MAY be incremented if substantial new functionality or improvements are introduced within the private code.
- It MAY include patch level changes. Patch version MUST be reset to 0 when minor version is incremented
-
- * Major version X (X.y.z | X > 0) MUST be incremented if any backwards incompatible changes are introduced to the public API.
-  It MAY include minor and patch level changes. Patch and minor version MUST be reset to 0 when major version is incremented.
-
-  For more info on versions see http://semver.org
+For more info on versions see http://semver.org
 
 Submit Feedback
 ~~~~~~~~~~~~~~~
@@ -143,4 +141,4 @@ Tips
 
 To run a subset of tests::
 
-    $ python -m unittest tests.test_smrf
+    $ python -m unittest discover -v
