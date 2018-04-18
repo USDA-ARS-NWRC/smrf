@@ -108,7 +108,7 @@ class wind(image_data.image_data):
     # be written during main distribute loop
     post_process_variables = {}
 
-    def __init__(self, windConfig, tempDir=None):
+    def __init__(self, windConfig, distribute_drifts, tempDir=None):
 
         # extend the base class
         image_data.image_data.__init__(self, self.variable)
@@ -148,6 +148,9 @@ class wind(image_data.image_data):
                     v[ms[1]] = float(self.config[m])
             self.veg = v
 
+            # whether or not we will use this data to redistribute precip
+            self.distribute_drifts = distribute_drifts
+
         self._logger.debug('Created distribute.wind')
 
     def initialize(self, topo, data):
@@ -181,6 +184,11 @@ class wind(image_data.image_data):
                     if m.lower() in self.config:
                         self.metadata.loc[m, 'enhancement'] = \
                             float(self.config[m.lower()])
+
+        if not self.distribute_drifts:
+            # we have to pass these to precip, so make them none if we won't use them
+            self.dir_round_cell = None
+            self.cellmaxus = None
 
     def distribute(self, data_speed, data_direction):
         """
@@ -269,11 +277,12 @@ class wind(image_data.image_data):
 
             queue['wind_speed'].put([t, self.wind_speed])
             queue['wind_direction'].put([t, self.wind_direction])
-            queue['cellmaxus'].put([t,self.cellmaxus])
-            queue['dir_round_cell'].put([t,self.dir_round_cell])
 
             if not self.gridded:
                 queue['flatwind'].put([t, self.flatwind])
+            if self.distribute_drifts:
+                queue['cellmaxus'].put([t,self.cellmaxus])
+                queue['dir_round_cell'].put([t,self.dir_round_cell])
 
     def simulateWind(self, data_speed):
         """

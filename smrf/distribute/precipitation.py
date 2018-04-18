@@ -200,17 +200,15 @@ class ppt(image_data.image_data):
             self._logger.debug('Read data from {}'
                                .format(self.config['tbreak_netcdf']))
 
-        if not self.gridded:
+            # get the veg values
             self.veg_type = topo.veg_type
-
-        # get the veg values
-        matching = [s for s in self.config.keys() if "veg_" in s]
-        v = {}
-        for m in matching:
-            if m != 'veg_default':
-                ms = m.split('_')
-                v[ms[1]] = float(self.config[m])
-        self.veg = v
+            matching = [s for s in self.config.keys() if "veg_" in s]
+            v = {}
+            for m in matching:
+                if m != 'veg_default':
+                    ms = m.split('_')
+                    v[ms[1]] = float(self.config[m])
+            self.veg = v
 
         self.mask = topo.mask
 
@@ -309,7 +307,7 @@ class ppt(image_data.image_data):
                 self.precip = precip.dist_precip_wind(self.precip, dpt, az, dir_round_cell,
                                             wind_speed, cell_maxus, self.tbreak,
                                             self.tbreak_direction, self.veg_type,
-                                            self.veg, mask=self.mask)
+                                            self.veg, self.config)
 
     def distribute_for_marks2017(self, data, dpt, time, mask=None):
         """

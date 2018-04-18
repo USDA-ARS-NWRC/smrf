@@ -294,7 +294,8 @@ def adjust_for_undercatch(p_vec, wind, temp, sta_type, metadata):
 
 
 def dist_precip_wind(precip, dpt, az, dir_round_cell, wind_speed, cell_maxus,
-                     tbreak, tbreak_direction, veg_type, veg_fact, mask=None):
+                     tbreak, tbreak_direction, veg_type, veg_fact,
+                     cfg, mask=None):
     """
     Redistribute the precip based on wind speed and direciton
     to account for drifting.
@@ -316,21 +317,22 @@ def dist_precip_wind(precip, dpt, az, dir_round_cell, wind_speed, cell_maxus,
 
     """
     # thresholds
-    tbreak_threshold = 7.0
-    min_scour = 0.55
-    max_scour = 1.0
-    min_drift = 1.0
-    max_drift = 3.5
+    tbreak_threshold =  cfg['tbreak_threshold']
+    min_scour = cfg['min_scour']
+    max_scour = cfg['max_scour']
+    min_drift = cfg['min_drift']
+    max_drift = cfg['max_drift']
     dpt_threshold = 0.5
     # polynomial factors
     drift_poly = {}
-    drift_poly['a'] = 0.0289
-    drift_poly['b'] = -0.0956
-    drift_poly['c'] = 1.000761
-    ppt_poly['a'] = 0.0001737
-    ppt_poly['b'] = 0.002549
-    ppt_poly['c'] = 0.03265
-    ppt_poly['d'] = 0.5929
+    drift_poly['a'] = cfg['drift_poly_a']
+    drift_poly['b'] = cfg['drift_poly_b']
+    drift_poly['c'] = cfg['drift_poly_c']
+    ppt_poly = {}
+    ppt_poly['a'] = cfg['ppt_poly_a']
+    ppt_poly['b'] = cfg['ppt_poly_b']
+    ppt_poly['c'] = cfg['ppt_poly_c']
+    ppt_poly['d'] = cfg['ppt_poly_d']
 
     # initialize arrays
     celltbreak = np.ones(dir_round_cell.shape)

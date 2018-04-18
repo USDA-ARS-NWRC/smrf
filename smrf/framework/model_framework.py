@@ -83,8 +83,7 @@ class SMRF():
                         'output', 'veg_ir_beam','veg_ir_diffuse',
                         'veg_vis_beam', 'veg_vis_diffuse',
                         'cloud_ir_beam', 'cloud_ir_diffuse', 'cloud_vis_beam',
-                        'cloud_vis_diffuse', 'thermal_clear', 'wind_direction',
-                        'flatwind', 'wind_direction', 'cellmaxus', 'dir_round_cell']
+                        'cloud_vis_diffuse', 'thermal_clear', 'wind_direction']
 
     def __init__(self, configFile, external_logger=None):
         """
@@ -228,6 +227,11 @@ class SMRF():
             self.day_hour = self.start_date - pd.to_datetime(d[0].strftime("%Y%m%d"))
             self.day_hour = int(self.day_hour / np.timedelta64(1, 'h'))
 
+        # add some variables to thread_variables based on what we're doing
+        if not self.gridded:
+            thread_variables += ['flatwind']
+        if self.config['precip']['distribute_drifts']:
+            thread_variables += ['cellmaxus', 'dir_round_cell']
 
         self.distribute = {}
 
@@ -308,6 +312,7 @@ class SMRF():
         # 3. Wind
         self.distribute['wind'] = \
             distribute.wind.wind(self.config['wind'],
+                                 self.config['precip']['distribute_drifts']
                                  self.temp_dir)
 
         # 4. Precipitation
@@ -542,25 +547,15 @@ class SMRF():
                                                self.data.wind_direction.loc[t])
 #self, data, dpt, time, wind, temp, mask=None
             # 4. Precipitation
-            if self.config['precip']['distribute_drifts']:
-                prec_ws = self.distribute['wind'].wind_speed
-                prec_wd = self.distribute['wind'].wind_direction
-                prec_drc = self.distribute['wind'].dir_round_cell
-                prec_cm = self.distribute['wind'].cellmaxus
-            else:
-                prec_ws = None
-                prec_wd = None
-                prec_drc = None
-                prec_cm = None
             self.distribute['precip'].distribute(self.data.precip.loc[t],
                                                 self.distribute['vapor_pressure'].dew_point,
                                                 t,
                                                 self.data.wind_speed.loc[t],
                                                 self.data.air_temp.loc[t],
-                                                prec_wd,
-                                                prec_drc,
-                                                prec_ws,
-                                                prec_cm)
+                                                self.distribute['wind'].wind_direction,
+                                                self.distribute['wind'].dir_round_cell,
+                                                self.distribute['wind'].wind_speed,
+                                                self.distribute['wind'].cellmaxus)
 
             # 5. Albedo
             self.distribute['albedo'].distribute(t,
