@@ -470,11 +470,12 @@ class ppt(image_data.image_data):
             # variables for wind redistribution
             az = queue['wind_direction'].get(t)
             wind_speed = queue['wind_speed'].get(t)
+            flatwind = queue['flatwind'].get(t)
             dir_round_cell = queue['dir_round_cell'].get(t)
             cell_maxus = queue['cellmaxus'].get(t)
 
             self.distribute(data.precip.loc[t], dpt, t, data.wind_speed.loc[t],data.air_temp.loc[t],
-                            az, dir_round_cell, wind_speed, cell_maxus, mask=mask)
+                            az, dir_round_cell, flatwind, cell_maxus, mask=mask)
 
             queue[self.variable].put([t, self.precip])
 

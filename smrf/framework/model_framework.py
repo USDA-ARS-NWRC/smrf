@@ -227,12 +227,6 @@ class SMRF():
             self.day_hour = self.start_date - pd.to_datetime(d[0].strftime("%Y%m%d"))
             self.day_hour = int(self.day_hour / np.timedelta64(1, 'h'))
 
-        # add some variables to thread_variables based on what we're doing
-        if not self.gridded:
-            thread_variables += ['flatwind']
-        if self.config['precip']['distribute_drifts']:
-            thread_variables += ['cellmaxus', 'dir_round_cell']
-
         self.distribute = {}
 
         if self.config['logging']['qotw']:
@@ -312,7 +306,7 @@ class SMRF():
         # 3. Wind
         self.distribute['wind'] = \
             distribute.wind.wind(self.config['wind'],
-                                 self.config['precip']['distribute_drifts']
+                                 self.config['precip']['distribute_drifts'],
                                  self.temp_dir)
 
         # 4. Precipitation
@@ -664,6 +658,11 @@ class SMRF():
             self.thread_variables += ['thermal_cloud']
         if self.distribute['thermal'].correct_veg:
             self.thread_variables += ['thermal_veg']
+
+        # add some variables to thread_variables based on what we're doing
+        if not self.gridded:
+            self.thread_variables += ['flatwind']
+            self.thread_variables += ['cellmaxus', 'dir_round_cell']
 
         for v in self.thread_variables:
             q[v] = queue.DateQueue_Threading(self.max_values, self.time_out)

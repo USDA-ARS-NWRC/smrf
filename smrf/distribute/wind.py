@@ -280,7 +280,6 @@ class wind(image_data.image_data):
 
             if not self.gridded:
                 queue['flatwind'].put([t, self.flatwind])
-            if self.distribute_drifts:
                 queue['cellmaxus'].put([t,self.cellmaxus])
                 queue['dir_round_cell'].put([t,self.dir_round_cell])
 
