@@ -123,6 +123,7 @@ class wind(image_data.image_data):
 
         if windConfig['distribution'] == 'grid':
             self.gridded = True
+            self.distribute_drifts = False
 
         else:
             # open the maxus netCDF
