@@ -100,7 +100,7 @@ class SMRF():
 
         try:
             #Read in the original users config
-            ucfg = get_user_config(configFile, module = 'smrf')
+            ucfg = get_user_config(configFile, modules = 'smrf')
 
         except UnicodeDecodeError as e:
             print(e)
@@ -846,9 +846,9 @@ class SMRF():
 
             # Incomplete request
             elif module is not None or out_var is not None:
-                raise ValueError('''Function requires an output module and
-                                variable name when outputting a specific
-                                variables''')
+                raise ValueError("Function requires an output module and"
+                                 " variable name when outputting a specific"
+                                 " variables")
 
             else:
                 # Output all the variables
