@@ -381,7 +381,7 @@ def dist_precip_wind(precip, dpt, az, dir_round_cell, wind_speed, cell_maxus,
         pptmult[idv] = pptmult[idv] *  1.0 / veg_fact[v]
 
     # hardcode for pine
-    pptmult[(idx) & ((veg_type == 3055) | (veg_type == 3053) | (veg_type == 42))] = 0.92
+    pptmult[(idx) & ((veg_type == 3055) | (veg_type == 3053) | (veg_type == 42))] = 1.0 #0.92
     # cap ppt mult
     pptmult[idx] = utils.set_min_max(pptmult[idx], min_scour, max_scour)
     # multiply precip by scour factor
