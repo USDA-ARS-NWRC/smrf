@@ -131,7 +131,7 @@ ext_modules += [
 with open('README.md') as readme_file:
     readme = readme_file.read()
 
-with open('HISTORY.rst') as history_file:
+with open('./docs/HISTORY.rst') as history_file:
     history = history_file.read()
 
 requirements = []
@@ -142,7 +142,7 @@ test_requirements = [
 
 setup(
     name='smrf',
-    version='0.4.9',
+    version='0.5.0',
     description="Distributed snow modeling for water resources",
     long_description=readme + '\n\n' + history,
     author="Scott Havens",
@@ -187,8 +187,7 @@ setup(
     tests_require=test_requirements,
     cmdclass=cmdclass,
     ext_modules=ext_modules,
-    scripts=['scripts/inicheck',
-	     'scripts/update_configs',
+    scripts=['scripts/update_configs',
              'scripts/run_smrf',
 	     'scripts/mk_project',
 	     'scripts/gen_maxus']

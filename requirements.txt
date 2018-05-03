@@ -5,9 +5,10 @@ chardet==3.0.4
 coloredlogs==6.1
 Cython==0.23.4
 docutils==0.14
-flake8==3.3.0
+flake8==3.5.0
 humanfriendly==4.6
 imagesize==0.7.1
+inicheck
 Jinja2==2.10
 latexcodec==1.0.5
 MarkupSafe==1.0

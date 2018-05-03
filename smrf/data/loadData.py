@@ -81,7 +81,7 @@ class wxdata():
 
         if self.stations is not None:
             if 'stations' in self.stations:
-                sta = self.stations['stations']
+                sta = [s.upper() for s in self.stations['stations']]
                 self._logger.debug('Using only stations {0}'.format(
                     self.stations['stations']
                     ))
@@ -96,10 +96,14 @@ class wxdata():
                 if i == 'metadata':
                     dp_final = pd.read_csv(self.dataConfig[i],
                                      index_col='primary_id')
+                    #Ensure all stations are all caps.
+                    dp_final.index = [s.upper() for s in dp_final.index]
+
                 elif self.dataConfig[i]:
                     dp_full = pd.read_csv(self.dataConfig[i],
                                      index_col='date_time',
                                      parse_dates=[0])
+                    dp_full.columns = [s.upper() for s in dp_full.columns]
 
                     # check to see if pandas read in the date time correctly
                     if not isinstance(dp_full.index[0], pd.Timestamp):
@@ -108,7 +112,8 @@ class wxdata():
                                         Try using %Y-%m-%d %H:%M:%S format''')
 
                     if sta is not None:
-                        dp = dp_full[dp_full.columns[dp_full.columns.isin(sta)]]
+                        self.stations = [s for s in dp_full.columns.str.upper() if s in sta]
+                        dp = dp_full[dp_full.columns[(dp_full.columns.str.upper()).isin(sta)]]
                     else:
                         dp = dp_full
                     # only get the desired dates

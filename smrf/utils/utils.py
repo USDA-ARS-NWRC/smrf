@@ -15,6 +15,16 @@ from .gitinfo import __gitVersion__, __gitPath__
 from smrf import __version__, __core_config__
 import random
 import sys
+from inicheck.checkers import CheckType
+from inicheck.output import generate_config
+
+
+class CheckStation(CheckType):
+    def __init__(self,**kwargs):
+        super(CheckStation,self).__init__(**kwargs)
+
+    def cast(self):
+        return self.value.upper()
 
 def find_configs(directory):
     """
@@ -145,63 +155,65 @@ def water_day(indate):
 def is_leap_year(year):
     return (year % 4 == 0 and year % 100 != 0) or year % 400 == 0
 
-def backup_input(data, config):
+
+def backup_input(data, config_obj):
     """
     Backs up input data files so a user can rerun a run with the exact data used
     for a run.
 
     Args:
         data: Pandas dataframe containing the station data
-        config: The config object produced by :fun
+        config_obj: The config object produced by inicheck
     """
-    #Make the output dir
-    backup_dir = os.path.join(config['output']['out_location'], 'input_backup')
+    # Make the output dir
+    backup_dir = os.path.join(config_obj.cfg['output']['out_location'],
+                              'input_backup')
     if not os.path.isdir(backup_dir):
         os.mkdir(backup_dir)
     csv_names = {}
 
-    #Check config file for csv section and remove alternate data sets form config
-    if 'csv' not in config.keys():
-        config['csv'] = {}
-
-    if 'mysql' in config.keys():
-        config.pop('mysql', None)
-
-    if 'gridded' in config.keys():
-        raise ValueError("Micah_o was unsure how to handle this scenario... please advise")
+    # Check config file for csv section and remove alternate data form config
+    if 'csv' not in config_obj.cfg.keys():
+        config_obj.cfg['csv'] = {}
+        # With a new section added, we need to remove the other data sections
+        config_obj.apply_recipes()
 
     # Output station data to CSV
-    csv_var = ['metadata', 'air_temp', 'vapor_pressure','precip','wind_speed','wind_direction','cloud_factor']
+    csv_var = ['metadata', 'air_temp', 'vapor_pressure', 'precip','wind_speed',
+               'wind_direction','cloud_factor']
+
     for k in csv_var:
-        fname = os.path.join(backup_dir,k+'.csv')
+        fname = os.path.join(backup_dir,k + '.csv')
         v = getattr(data,k)
         v.to_csv(fname)
 
-        #Adjust and output the inifile
-        config['csv'][k] = fname
+        # Adjust and output the inifile
+        config_obj.cfg['csv'][k] = fname
 
-    #Copy topo files over to backup
-    ignore = ['basin_lon','basin_lat','type']
-    for s in config['topo']:
-        src = config['topo'][s]
+    # Copy topo files over to backup
+    ignore = ['basin_lon', 'basin_lat', 'type']
+    for s in config_obj.cfg['topo']:
+        src = config_obj.cfg['topo'][s]
+
+        # Avoid attempring to copy files that don't exist
         if s not in ignore and src != None:
-            dst =  os.path.join(backup_dir,os.path.basename(src))
-            config["topo"][s] = dst
+            dst =  os.path.join(backup_dir, os.path.basename(src))
+            config_obj.cfg["topo"][s] = dst
             copyfile(src, dst)
 
-    #We dont want to backup the backup
-    config['output']['input_backup'] = False
-    #output inifile
-    io.generate_config(config,os.path.join(backup_dir,'backup_config.ini'))
+    # We dont want to backup the backup
+    config_obj.cfg['output']['input_backup'] = False
+
+    # Output inifile
+    generate_config(config_obj,os.path.join(backup_dir,'backup_config.ini'))
+
 
 def getgitinfo():
-    """gitignored file that contains specific SMRF version and path
+    """
+    gitignored file that contains specific SMRF version and path
 
-    Input:
-        - none
-    Output:
-        - path to base SMRF directory
-        - git version from 'git describe'
+    Returns:
+        str: git version from 'git describe'
     """
     # return git describe if in git tracked SMRF
     if len(__gitVersion__) > 1:
@@ -212,85 +224,20 @@ def getgitinfo():
         version = 'v'+__version__
         return version
 
-def config_documentation():
+
+def getConfigHeader():
     """
-    Auto documents the core config file. Creates a file named auto_config.rst
-    in the docs folder which is then used for documentation.
+    Generates string for inicheck to add to config files
+
+    Returns:
+        cfg_str: string for cfg headers
     """
 
-    mcfg = io.get_master_config()
+    cfg_str = ("Config File for SMRF {0}\n"
+              "For more SMRF related help see:\n"
+              "{1}").format(getgitinfo(),'http://smrf.readthedocs.io/en/latest/')
+    return cfg_str
 
-    #RST header
-    config_doc ="Config File Reference\n"
-    config_doc+="=====================\n"
-    config_doc+="""Below are the sections and items that are registered to the
-configuration file. If an entry conflicts with these SMRF will end
-the run and show the errors with the config file. If an entry is not provided
-SMRF will automatical add the default in.
-"""
-
-    #Sections
-    for section in mcfg.keys():
-        #Section header
-        config_doc+=" \n"
-        config_doc += "{0}\n".format(section)
-        config_doc += "-"*len(section)+'\n'
-        #If distributed module link api
-        dist_modules = ['air_temp','vapor_pressure','precip','wind', 'albedo','thermal','solar','soil_temp']
-        if section == 'precip':
-            sec = 'precipitation'
-        else:
-            sec = section
-        if section in dist_modules:
-            intro = """
-The {0} section controls all the available parameters that effect
-the distribution of the {0} module, espcially  the associated models.
-For more detailed information please see :mod:`smrf.distribute.{0}`.
-            """.format(sec)
-        else:
-            intro = """
-The {0} section controls the {0} parameters for an entire SMRF run.
-            """.format(sec)
-
-        config_doc+=intro
-        config_doc+="\n"
-
-        #Auto document config file according to master config contents
-        for item,v in sorted(mcfg[section].items()):
-            #Check for attributes that are lists
-            for att in ['default','options']:
-                z = getattr(v,att)
-                if type(z) == list:
-                    combo = ' '
-                    doc_s = combo.join([str(s) for s in z])
-                    setattr(v,att,doc_s)
-
-            #Bold item with definition
-            config_doc+="| **{0}**\n".format(item)
-
-            #Add the item description
-            config_doc+="| \t{0}\n".format(v.description)
-
-            #Default
-            config_doc+="| \t\t*Default: {0}*\n".format(v.default)
-
-            #Add expected type
-            config_doc+="| \t\t*Type: {0}*\n".format(v.type)
-
-            #Print options should they be available
-            if v.options:
-                config_doc+="| \t\t*Options:*\n *{0}*\n".format(v.options)
-
-            config_doc+="| \n"
-
-            config_doc+="\n"
-
-    path = os.path.abspath('./')
-    path = os.path.join(path,'auto_config.rst')
-    print("Writing auto documentation for config file to:\n{0}".format(path))
-    with open(path,'w+') as f:
-        f.writelines(config_doc)
-    f.close()
 
 def check_station_colocation(metadata_csv=None,metadata=None):
     """
@@ -329,6 +276,34 @@ def check_station_colocation(metadata_csv=None,metadata=None):
         repeat_sta = None
 
     return repeat_sta
+
+
+def get_config_doc_section_hdr():
+    """
+    Returns the header dictionary for linking modules in smrf to the
+    documentation generated by inicheck auto doc functions
+    """
+    hdr_dict = {}
+
+    dist_modules = ['air_temp', 'vapor_pressure', 'precip', 'wind', 'albedo',
+                    'thermal','solar','soil_temp']
+
+    for d in dist_modules:
+        if d == 'precip':
+            sec = 'precipitation'
+        else:
+            sec = d
+
+        # If distributed module link api
+        intro = """
+The {0} section controls all the available parameters that effect
+the distribution of the {0} module, espcially  the associated models.
+For more detailed information please see :mod:`smrf.distribute.{0}`.
+        """.format(sec)
+
+        hdr_dict[d] = intro
+
+    return hdr_dict
 
 
 def getqotw():

@@ -32,6 +32,7 @@ docs/zreferences.rst
 scripts/inicheck.py
 smrf/__init__.py
 smrf/framework/CoreConfig.ini
+smrf/framework/recipes.ini
 smrf/framework/.qotw
 smrf/data/__init__.py
 smrf/data/csv_data.py
