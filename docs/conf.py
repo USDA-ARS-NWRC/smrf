@@ -23,7 +23,7 @@ from inicheck.tools import config_documentation
 
 
 config_documentation('./auto_config.rst',
-					 module='smrf',
+					 modules='smrf',
 					 section_link_dict=get_config_doc_section_hdr())
 
 if os.environ.get('READTHEDOCS') == 'True':
