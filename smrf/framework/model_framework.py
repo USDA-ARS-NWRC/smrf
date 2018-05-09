@@ -225,6 +225,11 @@ class SMRF():
         self.date_time = [di.replace(tzinfo=tzinfo) for di in d]
         self.time_steps = len(self.date_time)
 
+        # need to align date time
+        if self.config['albedo']['start_decay'] is not None:
+            self.config['albedo']['start_decay'] = self.config['albedo']['start_decay'].replace(tzinfo=tzinfo)
+            self.config['albedo']['end_decay'] = self.config['albedo']['end_decay'].replace(tzinfo=tzinfo)
+
         # if a gridded dataset will be used
         self.gridded = False
         if 'gridded' in self.config:
