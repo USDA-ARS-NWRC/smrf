@@ -90,7 +90,6 @@ author = u'Scott Havens'
 # The short X.Y version.
 version = u'0.5.0'
 
-print("test")
 # The full version, including alpha/beta/rc tags.
 # release = u'0.5.0'
 

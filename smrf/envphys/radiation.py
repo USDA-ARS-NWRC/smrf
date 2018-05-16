@@ -67,10 +67,10 @@ def albedo(telapsed, cosz, gsize, maxgsz, dirt=2):
         telapsed - time since last snow storm (decimal days)
         cosz - cosine local solar illumination angle matrix
         gsize - gsize is effective grain radius of snow after last storm (mu m)
-        maxgsz -  maxgsz is maximum grain radius expected from grain
-            growth (mu m)
+        maxgsz - maxgsz is maximum grain radius expected from grain growth
+                  (mu m)
         dirt - dirt is effective contamination for adjustment to visible
-            albedo (usually between 1.5-3.0)
+               albedo (usually between 1.5-3.0)
 
     Returns:
         tuple:
@@ -158,7 +158,7 @@ def decay_alb_power(veg, veg_type, start_decay, end_decay, t_curr, pwr, alb_v, a
     Returns:
         tuple:
         Returns a tuple containing the corrected albedo arrays
-            based on date, veg type
+        based on date, veg type
         - **alb_v** (*numpy.array*) - albedo for visible specturm
 
         - **alb_ir** (*numpy.array*) -  albedo for ir spectrum
@@ -223,6 +223,9 @@ def decay_alb_hardy(litter, veg_type, storm_day, alb_v, alb_ir):
     litter rate of the forest. The new albedo is a weighted average of the calculated albedo
     for the clean snow and the albedo of the litter.
 
+    Note: uses input of l_rate (litter rate) from config
+    which is based on veg type. This is decimal percent litter
+    coverage per day
 
     Args:
         litter: A dictionary of values for default,albedo,41,42,43 veg types
@@ -232,14 +235,10 @@ def decay_alb_hardy(litter, veg_type, storm_day, alb_v, alb_ir):
         alb_ir: numpy array of albedo for IR spectrum
         alb_litter: albedo of pure litter
 
-        Note: uses input of l_rate (litter rate) from config
-        which is based on veg type. This is decimal percent litter
-        coverage per day
-
     Returns:
         tuple:
         Returns a tuple containing the corrected albedo arrays
-            based on date, veg type
+        based on date, veg type
         - **alb_v** (*numpy.array*) - albedo for visible specturm
 
         - **alb_ir** (*numpy.array*) -  albedo for ir spectrum

@@ -1,50 +1,103 @@
-.. _Configuration:
-Configuration
-=============
+.. _using-configs:
 
-SMRF is configured using a configuration file and an extension of Pythons
-`ConfigParser`_ (:mod:`smrf.framework.model_framework.MyParser`). See
-``test_data/testConfig.ini`` for an example and read below for more information
-on specific sections. All the entrys to a config file are governed by the
-CoreConfig.ini in :mod:`smrf.framework.model_framework`. A couple of commandline
-tools have provided to help get the config files generated correctly.
+=========================
+Using Configuration Files
+=========================
 
-A brief introduction to a configuration file from the `ConfigParser`_ documentation: ::
+SMRF simulation details are managed using configuration files. The python
+package inicheck is used to manage and interpret the configuration files. Each
+configuration file is broken down into sections containing items and each item
+is assigned a value.
 
-   The configuration file consists of sections, led by a [section] header and followed
-   by name: value entries, with continuations in the style of RFC 822 (see section
-   3.1.1, “LONG HEADER FIELDS”); name=value is also accepted. Note that leading
-   whitespace is removed from values. The optional values can contain format strings
-   which refer to other values in the same section, or values in a special DEFAULT
-   section. Additional defaults can be provided on initialization and retrieval. Lines
-   beginning with '#' or ';' are ignored and may be used to provide comments.
+A brief description of the syntax is:
 
-   Configuration files may include comments, prefixed by specific characters (# and ;).
-   Comments may appear on their own in an otherwise empty line, or may be entered in
-   lines holding values or section names. In the latter case, they need to be preceded
-   by a whitespace character to be recognized as a comment. (For backwards compatibility,
-   only ; starts an inline comment, while # does not.)
+* Sections are noted by being in a line by themselves and are bracketed.
+* Items are denoted by colon ( **:** ).
+* Values are simply written in, and values that are lists are comma separated.
+* Comments are preceeded by a **#**
 
-Section and keys are case insensitive.
+For more information regarding inicheck syntax and utilities refer to the
+`inicheck documentation`_.
 
-Notes:
-1. Config file can have items in it that are not registered, they will simply be
-ignored and SMRF will warn you at the beginning of the run. This should be used
-to make sure you spelled things correctly.
-2. The exception to the above, is station names. In some modules like wind,
-have adjustment values can be added to the config file on a station by
-station basis. SMRF will still warn that stations are not registered but they
-are used when the code is reading it.
-3. A config file can only have one data section. You can choose from mysql,
-csv,gridded.
+.. _inicheck documentation: http://inicheck.readthedocs.io/en/latest/
 
 
-.. _ConfigParser: https://docs.python.org/2/library/configparser.html
-.. _logging: https://docs.python.org/2/library/logging.html
+Understanding Configuration Files
+----------------------------------
+
+The easiest way to get started is to look at one of the config files
+in the repo already. A simple case to use is our reynolds mountain east test
+which can be view easily here_.
+
+.. _here: https://github.com/USDA-ARS-NWRC/SMRF/blob/devel/examples/reynolds_mountain_east/config.ini
+
+Take a look at the "topo" section from the config file show below
+
+.. literalinclude:: ./examples/reynolds_mountain_east/config.ini
+   :lines: 20-29
+   :language: none
+
+This section describes all the topographic information required for SMRF to run.
+At the top of the section there is comment that describes the section.
+The section name "topo" is bracketed to show it is a section and the items
+underneath are assigned values by using the colon.
+
+Editing/Checking Configuration Files
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+Use any text editor to make changes to a config file. We like to use atom_ with
+the .ini syntax package installed.
+
+.. _atom: https://atom.io/
+
+If you are unsure of what to use various entries in your config file refer to
+the :ref:`config-file-reference` or use the inicheck command for command line help.
+Below is an example of how to use the inicheck details option to figure out what
+options are available for the topo section type item.
+
+.. code-block:: console
+
+  inicheck --details topo type -m smrf
+
+The output is:
+
+.. code-block:: console
+
+  Providing details for section topo and item type...
+
+  Section      Item    Default    Options                   Description
+  ==========================================================================================
+  topo         type    netcdf     ['netcdf', 'ipw']         Specifies the input file type
 
 
-.. toctree::
-   :maxdepth: 4
+Creating Configuration Files
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-   auto_config
-   core_config
+Not all items and options need to be assigned, if an item is left blank
+it will be assigned a default. If it is a required filename or something it
+will be assigned a none value and SMRF will throw an error until it is assigned.
+
+To make an up to date config file use the following command to generate a fully
+populated list of options.
+
+.. code-block:: console
+
+  inicheck -f config.ini -m smrf -w
+
+This will create a config file using the same name but call "config_full.ini"
+at the end.
+
+.. _core-config:
+
+Core Configuration File
+-----------------------
+
+Each configuration file is checked against the core configuration file stored
+./smrf/framework/core_config.ini and various scenarios are guided by the a recipes
+file that is stored in ./smrf/framework/recipes.ini. These files work together
+to guide the outcomes of the configuration file.
+
+To learn more about syntax and how to contribute to a Core or Master configuration
+file see `Master Configuration Files`_ in inicheck.
+
+.. _Master Configuration Files: http://inicheck.readthedocs.io/en/latest/master_config.html

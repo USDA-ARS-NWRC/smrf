@@ -78,18 +78,24 @@ def handle_run_script_options(config_option):
     return configFile
 
 def nan_helper(y):
-        """Helper to handle indices and logical indices of NaNs.
+        """
+        Helper to handle indices and logical indices of NaNs.
 
-        Input:
-            - y, 1d numpy array with possible NaNs
-        Output:
-            - nans, logical indices of NaNs
-            - index, a function, with signature indices=index(logical_indices)
-              to convert logical indices of NaNs to 'equivalent' indices
         Example:
             >>> # linear interpolation of NaNs
             >>> nans, x= nan_helper(y)
             >>> y[nans]= np.interp(x(nans), x(~nans), y[~nans])
+
+        Args:
+            y: 1d numpy array with possible NaNs
+
+        Returns:
+            tuple:
+                **nans** - logical indices of NaNs
+                **index** -  a function, with signature
+                             indices=index(logical_indices) to convert logical
+                             indices of NaNs to 'equivalent' indices
+
         """
 
         return np.isnan(y), lambda z: z.nonzero()[0]
@@ -98,7 +104,14 @@ def nan_helper(y):
 def set_min_max(data, min_val, max_val):
     """
     Ensure that the data is in the bounds of min and max
-    20150611 Scott Havens
+
+    Args:
+        data: numpy array of data to be min/maxed
+        min_val: minimum threshold to trim data
+        max_val: Maximum threshold to trim data
+
+    Returns:
+        data: numpy array of data trimmed at min_val and max_val
     """
     if max_val == None:
         max_val = np.inf
@@ -295,11 +308,10 @@ def get_config_doc_section_hdr():
             sec = d
 
         # If distributed module link api
-        intro = """
-The {0} section controls all the available parameters that effect
-the distribution of the {0} module, espcially  the associated models.
-For more detailed information please see :mod:`smrf.distribute.{0}`.
-        """.format(sec)
+        intro = ("The {0} section controls all the available parameters that"
+                 " effect the distribution of the {0} module, espcially  the"
+                 " associated models. For more detailed information please see"
+                 " :mod:`smrf.distribute.{0}`").format(sec)
 
         hdr_dict[d] = intro
 

@@ -11,9 +11,12 @@ import numpy as np
 
 class IDW:
     '''
-    Inverse distance weighting class
-    - Standard IDW
-    - Detrended IDW
+    Inverse distance weighting class for distributing input data. Availables
+    options are:
+
+    * Standard IDW
+    * Detrended IDW
+
     '''
 
     def __init__(self, mx, my, GridX, GridY, mz=None, GridZ=None,
@@ -26,7 +29,8 @@ class IDW:
             GridX: x locations in grid to interpolate over
             GridY: y locations in grid to interpolate over
             mz: elevation for the points
-            GridZ: Elevation values for the points to interpolate over for trended data
+            GridZ: Elevation values for the points to interpolate over for
+                   trended data
             power: power of the inverse distance weighting
         """
 
