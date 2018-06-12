@@ -167,7 +167,7 @@ setup(
     package_data={'smrf':['./framework/CoreConfig.ini',
 			  './framework/.qotw', './framework/recipes.ini']},
     install_requires=requirements,
-    license="GPL-3.0",
+    license="CC0 1.0",
     zip_safe=False,
     keywords='smrf',
     classifiers=[
