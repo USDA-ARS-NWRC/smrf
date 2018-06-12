@@ -134,6 +134,16 @@ class vp(image_data.image_data):
 
         self.dew_point = dpt
 
+        # calculate wet bulb temperature
+        if self.use_wetbulb:
+            wet_bulb = np.zeros_like(self.vapor_pressure, dtype=np.float64)
+            envphy_c.cwbt(ta, dew_point, self.dem,
+                          wet_bulb, self.config['nthreads']))
+            #self.wet_bulb = wet_bulb
+            self.precip_temp = wet_bulb
+        else:
+            self.precip_temp = dpt
+
     def distribute_thread(self, queue, data):
         """
         Distribute the data using threading and queue. All data is provided and
@@ -156,4 +166,6 @@ class vp(image_data.image_data):
             self.distribute(data.loc[t], ta)
 
             queue[self.variable].put([t, self.vapor_pressure])
-            queue['dew_point'].put([t, self.dew_point])
+            queue['precip_temp'].put([t, self.dew_point])
+
+            if self.use_wetbulb:
