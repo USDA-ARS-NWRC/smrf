@@ -29,11 +29,11 @@ The easiest way to get started is to look at one of the config files
 in the repo already. A simple case to use is our reynolds mountain east test
 which can be view easily here_.
 
-.. _here: https://github.com/USDA-ARS-NWRC/SMRF/blob/devel/examples/reynolds_mountain_east/config.ini
+.. _here: https://github.com/USDA-ARS-NWRC/SMRF/blob/develop/examples/reynolds_mountain_east/config.ini
 
 Take a look at the "topo" section from the config file show below
 
-.. literalinclude:: ./examples/reynolds_mountain_east/config.ini
+.. literalinclude:: ../examples/reynolds_mountain_east/config.ini
    :lines: 20-29
    :language: none
 

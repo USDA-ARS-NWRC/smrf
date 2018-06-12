@@ -48,11 +48,12 @@ class TestRME(unittest.TestCase):
         Runs the short simulation over reynolds mountain east
         """
         run_dir = os.path.abspath(os.path.join(os.path.dirname(smrf.__file__),
-                                                '..','examples',
-                                                'reynolds_mountain_east'))
+                                               '../tests',
+					       'RME'))
+
         self.gold = os.path.abspath(os.path.join(os.path.dirname(smrf.__file__),
-                                                '..','test_data',
-                                                'reynolds_mountain_east',
+						'../tests',
+                                                'RME',
                                                 'gold'))
 
 
