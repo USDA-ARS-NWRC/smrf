@@ -216,7 +216,7 @@ class ppt(image_data.image_data):
             self.precip = np.zeros(self.storm_days.shape)
 
 
-    def distribute_precip_thread(self,  queue, data):
+    def distribute_precip_thread(self, queue, data):
         """
         Distribute the data using threading and queue. All data is provided and
         ``distribute_precip_thread`` will go through each time step and call
@@ -237,7 +237,7 @@ class ppt(image_data.image_data):
             queue[self.variable].put([t, self.precip])
 
 
-    def distribute(self, data, dpt, time, wind, temp, mask=None):
+    def distribute(self, data, ppt_temp, time, wind, temp, mask=None):
         """
         Distribute given a Panda's dataframe for a single time step. Calls
         :mod:`smrf.distribute.image_data.image_data._distribute`.
@@ -254,8 +254,7 @@ class ppt(image_data.image_data):
 
         Args:
             data: Pandas dataframe for a single time step from precip
-            dpt: dew point numpy array that will be used for the precipitaiton
-                temperature
+            ppt_temp: precp_temp numpy array, either dew_point or wetbulb temp
             time: pass in the time were are currently on
             mask: basin mask to apply to the storm days for calculating the
                 last storm day for the basin
@@ -278,7 +277,7 @@ class ppt(image_data.image_data):
 
             #Use the clipped and corrected precip
             self.distribute_for_marks2017(self.corrected_precip.loc[time],
-                                          dpt,
+                                          ppt_temp,
                                           time,
                                           mask=mask)
 
@@ -292,10 +291,10 @@ class ppt(image_data.image_data):
                                                     self.config,
                                                     self.metadata)
 
-            self.distribute_for_susong1999(data, dpt, time, mask=mask)
+            self.distribute_for_susong1999(data, ppt_temp, time, mask=mask)
 
 
-    def distribute_for_marks2017(self, data, dpt, time, mask=None):
+    def distribute_for_marks2017(self, data, ppt_temp, time, mask=None):
         """
         Specialized distribute function for working with the new accumulated
         snow density model Marks2017 requires storm total and a corrected
@@ -328,7 +327,7 @@ class ppt(image_data.image_data):
                 # Entered into a new storm period distribute the storm total
                 self._logger.debug('{0} Entering storm #{1}'
                                    .format(data.name, self.storm_id+1))
-                if dpt.min() < 2.0:
+                if ppt_temp.min() < 2.0:
                     self._logger.debug('''Distributing Total Precip
                                         for Storm #{0}'''
                                        .format(self.storm_id+1))
@@ -338,11 +337,11 @@ class ppt(image_data.image_data):
                                                          self.min,
                                                          self.max)
 
-            if self.storming and dpt.min() < 2.0:
+            if self.storming and ppt_temp.min() < 2.0:
                 self._logger.debug('''Calculating new snow density for
                                     storm #{0}'''.format(self.storm_id+1))
                 # determine the precip phase and den
-                snow_den, perc_snow = snow.calc_phase_and_density(dpt,
+                snow_den, perc_snow = snow.calc_phase_and_density(ppt_temp,
                                                                   self.precip,
                                                                   nasde_model=self.nasde_model)
 
@@ -352,7 +351,7 @@ class ppt(image_data.image_data):
 
             # calculate decimal days since last storm
             self.storm_days = storms.time_since_storm_pixel(self.precip,
-                                                     dpt,
+                                                     ppt_temp,
                                                      perc_snow,
                                                      storming=self.storming,
                                                      time_step=self.time_step/60.0/24.0,
@@ -380,7 +379,7 @@ class ppt(image_data.image_data):
             self.last_storm_day_basin = np.max(self.last_storm_day)
 
 
-    def distribute_for_susong1999(self, data, dpt, time, mask=None):
+    def distribute_for_susong1999(self, data, ppt_temp, time, mask=None):
         """
         Docs for susong1999
         """
@@ -393,7 +392,7 @@ class ppt(image_data.image_data):
             self.precip = utils.set_min_max(self.precip, self.min, self.max)
 
             # determine the precip phase and den
-            snow_den, perc_snow = snow.calc_phase_and_density(dpt,
+            snow_den, perc_snow = snow.calc_phase_and_density(ppt_temp,
                                                               self.precip,
                                                               nasde_model=self.nasde_model)
 
@@ -452,9 +451,9 @@ class ppt(image_data.image_data):
 
         for t in data.precip.index:
 
-            dpt = queue['dew_point'].get(t)
+            ppt_temp = queue['precip_temp'].get(t)
 
-            self.distribute(data.precip.loc[t], dpt, t, data.wind_speed.loc[t],data.air_temp.loc[t], mask=mask)
+            self.distribute(data.precip.loc[t], ppt_temp, t, data.wind_speed.loc[t],data.air_temp.loc[t], mask=mask)
 
             queue[self.variable].put([t, self.precip])
 
