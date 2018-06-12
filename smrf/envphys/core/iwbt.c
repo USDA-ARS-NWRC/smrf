@@ -98,7 +98,8 @@ double wetbulb(
 		dti = ti0 - ti;
 		i++;
 		if (i > 10)
-			error("failure to converge in 10 iterations");
+			printf("failure to converge in 10 iterations");
+			exit(-1);
 	}
 	return(ti);
 }
@@ -110,7 +111,7 @@ void iwbt (
 		double *td,		/* dew point temperature */
 		double *z,		/* elevation */
 		int nthreads,	/* number of threads for parrallel processing */
-		double *tw		/* wet bulb temperature (return) */
+		double *tw)		/* wet bulb temperature (return) */
 {
 	int samp;
 	double		td_p;		/* dew point temperature (C)	*/
@@ -122,7 +123,7 @@ void iwbt (
 	omp_set_dynamic(0);     // Explicitly disable dynamic teams
 	omp_set_num_threads(nthreads); // Use N threads for all consecutive parallel regions
 
-#pragma omp parallel shared(ngrid, ta, tw, z, skvfac) private(samp, ta_p, tw_p, z_p, skvfac_p, ea, emiss, T0, press, lw_in)
+#pragma omp parallel shared(ngrid, ta, tw, z) private(samp, ta_p, tw_p, z_p, pa_p, td_p)
 	{
 #pragma omp for
 
@@ -152,15 +153,15 @@ void iwbt (
 			}
 
 			/*	call wetbulb function & fill output buffer	*/
-			tw_p = wetbulb(ta, td, pa);
+			tw_p = wetbulb(ta_p, td_p, pa_p);
 
 			if(tw_p < 0){
 				printf("tw < 0 at pixel %i", samp);
 				exit(-1);
 			}
-			
+
 			// put back in array
-			tw[samp] = tw_p - FREEZE
+			tw[samp] = tw_p - FREEZE;
 			}
 		}
 

@@ -140,8 +140,7 @@ class vp(image_data.image_data):
         # calculate wet bulb temperature
         if self.precip_temp == 'wet_bulb':
             wet_bulb = np.zeros_like(self.vapor_pressure, dtype=np.float64)
-            envphy_c.cwbt(ta, dew_point, self.dem,
-                          wet_bulb, self.config['nthreads']))
+            envphys_c.cwbt(ta, dpt, self.dem, wet_bulb, self.config['nthreads'])
             #self.wet_bulb = wet_bulb
             self.precip_temp = wet_bulb
         else:

@@ -102,7 +102,8 @@ ext_modules += [
                           sources=[os.path.join(loc, val) for val in [
                               "envphys_c.pyx",
                               "topotherm.c",
-                              "dewpt.c"
+                              "dewpt.c",
+							  "iwbt.c"
                               ]],
                           include_dirs=[numpy.get_include()],
                           extra_compile_args=['-fopenmp', '-O3'],

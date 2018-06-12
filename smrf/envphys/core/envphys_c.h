@@ -16,5 +16,5 @@ double dew_pointp(double e, double tol);
 double	zerobr(double a, double b, double t);
 
 /* from iwbt.c */
-void iwbt(int ngrid,	double *ta, double *td,	double *z, double nthreads,	double *tw);
+void iwbt(int ngrid,	double *ta, double *td,	double *z, int nthreads,	double *tw);
 double wetbulb(double	ta,	double dpt, double press);
