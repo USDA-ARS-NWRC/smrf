@@ -166,6 +166,5 @@ class vp(image_data.image_data):
             self.distribute(data.loc[t], ta)
 
             queue[self.variable].put([t, self.vapor_pressure])
-            queue['precip_temp'].put([t, self.dew_point])
-
-            if self.use_wetbulb:
+            queue['precip_temp'].put([t, self.precip_temp])
+            queue['dew_point'].put([t, self.dew_point])

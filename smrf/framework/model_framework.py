@@ -78,7 +78,7 @@ class SMRF():
                         'air_temp', 'dew_point', 'vapor_pressure',
                         'wind_speed', 'precip', 'percent_snow',
                         'snow_density', 'last_storm_day_basin',
-                        'storm_days',
+                        'storm_days', 'precip_temp',
                         'clear_vis_beam', 'clear_vis_diffuse',
                         'clear_ir_beam', 'clear_ir_diffuse',
                         'albedo_vis', 'albedo_ir', 'net_solar',
@@ -353,7 +353,7 @@ class SMRF():
         Load the measurement point data for distributing to the DEM,
         must be called after the distributions are initialized. Currently, data
         can be loaded from three different sources:
-        
+
             * :func:`CSV files <smrf.data.loadData.wxdata>`
             * :func:`MySQL database <smrf.data.loadData.wxdata>`
             * :func:`Gridded data source (WRF) <smrf.data.loadGrid.grid>`
@@ -559,7 +559,7 @@ class SMRF():
 #self, data, dpt, time, wind, temp, mask=None
             # 4. Precipitation
             self.distribute['precip'].distribute(self.data.precip.loc[t],
-                                                self.distribute['vapor_pressure'].dew_point,
+                                                self.distribute['vapor_pressure'].precip_temp,
                                                 t,
                                                 self.data.wind_speed.loc[t],
                                                 self.data.air_temp.loc[t],
