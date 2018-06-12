@@ -123,7 +123,7 @@ void iwbt (
 	omp_set_dynamic(0);     // Explicitly disable dynamic teams
 	omp_set_num_threads(nthreads); // Use N threads for all consecutive parallel regions
 
-#pragma omp parallel shared(ngrid, ta, tw, z) private(samp, ta_p, tw_p, z_p, pa_p, td_p)
+#pragma omp parallel shared(ngrid, ta, td, tw, z) private(samp, ta_p, tw_p, z_p, pa_p, td_p)
 	{
 #pragma omp for
 

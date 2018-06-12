@@ -944,6 +944,14 @@ static Py_ssize_t __Pyx_minusones[] = {-1, -1, -1, -1, -1, -1, -1, -1};
 
 static CYTHON_INLINE int __Pyx_PyInt_As_int(PyObject *);
 
+static int __Pyx_Print(PyObject*, PyObject *, int);
+#if CYTHON_COMPILING_IN_PYPY || PY_MAJOR_VERSION >= 3
+static PyObject* __pyx_print = 0;
+static PyObject* __pyx_print_kwargs = 0;
+#endif
+
+static int __Pyx_PrintOne(PyObject* stream, PyObject *o);
+
 #if CYTHON_CCOMPLEX
   #ifdef __cplusplus
     #define __Pyx_CREAL(z) ((z).real())
@@ -1130,13 +1138,16 @@ static char __pyx_k_ta[] = "ta";
 static char __pyx_k_td[] = "td";
 static char __pyx_k_tw[] = "tw";
 static char __pyx_k_vp[] = "vp";
+static char __pyx_k_end[] = "end";
 static char __pyx_k_cwbt[] = "cwbt";
 static char __pyx_k_dwpt[] = "dwpt";
+static char __pyx_k_file[] = "file";
 static char __pyx_k_main[] = "__main__";
 static char __pyx_k_test[] = "__test__";
 static char __pyx_k_dtype[] = "dtype";
 static char __pyx_k_ngrid[] = "ngrid";
 static char __pyx_k_numpy[] = "numpy";
+static char __pyx_k_print[] = "print";
 static char __pyx_k_range[] = "range";
 static char __pyx_k_z_arr[] = "z_arr";
 static char __pyx_k_cdewpt[] = "cdewpt";
@@ -1154,6 +1165,7 @@ static char __pyx_k_ValueError[] = "ValueError";
 static char __pyx_k_ctopotherm[] = "ctopotherm";
 static char __pyx_k_skvfac_arr[] = "skvfac_arr";
 static char __pyx_k_RuntimeError[] = "RuntimeError";
+static char __pyx_k_calling_iwbt[] = "calling iwbt";
 static char __pyx_k_ascontiguousarray[] = "ascontiguousarray";
 static char __pyx_k_ndarray_is_not_C_contiguous[] = "ndarray is not C contiguous";
 static char __pyx_k_smrf_envphys_core_envphys_c[] = "smrf.envphys.core.envphys_c";
@@ -1170,11 +1182,14 @@ static PyObject *__pyx_kp_u_Non_native_byte_order_not_suppor;
 static PyObject *__pyx_n_s_RuntimeError;
 static PyObject *__pyx_n_s_ValueError;
 static PyObject *__pyx_n_s_ascontiguousarray;
+static PyObject *__pyx_kp_s_calling_iwbt;
 static PyObject *__pyx_n_s_cdewpt;
 static PyObject *__pyx_n_s_ctopotherm;
 static PyObject *__pyx_n_s_cwbt;
 static PyObject *__pyx_n_s_dtype;
 static PyObject *__pyx_n_s_dwpt;
+static PyObject *__pyx_n_s_end;
+static PyObject *__pyx_n_s_file;
 static PyObject *__pyx_n_s_float64;
 static PyObject *__pyx_kp_s_home_micahsandusky_Code_smrf_sm;
 static PyObject *__pyx_n_s_import;
@@ -1185,6 +1200,7 @@ static PyObject *__pyx_n_s_ngrid;
 static PyObject *__pyx_n_s_np;
 static PyObject *__pyx_n_s_nthreads;
 static PyObject *__pyx_n_s_numpy;
+static PyObject *__pyx_n_s_print;
 static PyObject *__pyx_n_s_range;
 static PyObject *__pyx_n_s_skvfac;
 static PyObject *__pyx_n_s_skvfac_arr;
@@ -2365,7 +2381,7 @@ static PyObject *__pyx_pf_4smrf_7envphys_4core_9envphys_c_4cwbt(CYTHON_UNUSED Py
  *     cdef np.ndarray[double, mode="c", ndim=2] z_arr
  *     z_arr = np.ascontiguousarray(z, dtype=np.float64)             # <<<<<<<<<<<<<<
  * 
- *     # call the C function
+ *     print('calling iwbt')
  */
   __pyx_t_4 = __Pyx_GetModuleGlobalName(__pyx_n_s_np); if (unlikely(!__pyx_t_4)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 132; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_4);
@@ -2413,8 +2429,17 @@ static PyObject *__pyx_pf_4smrf_7envphys_4core_9envphys_c_4cwbt(CYTHON_UNUSED Py
   __pyx_v_z_arr = ((PyArrayObject *)__pyx_t_2);
   __pyx_t_2 = 0;
 
-  /* "smrf/envphys/core/envphys_c.pyx":135
+  /* "smrf/envphys/core/envphys_c.pyx":134
+ *     z_arr = np.ascontiguousarray(z, dtype=np.float64)
  * 
+ *     print('calling iwbt')             # <<<<<<<<<<<<<<
+ *     # call the C function
+ *     iwbt(ngrid, &ta_arr[0,0], &td_arr[0,0], &z_arr[0,0], nthreads, &tw[0,0])
+ */
+  if (__Pyx_PrintOne(0, __pyx_kp_s_calling_iwbt) < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 134; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+
+  /* "smrf/envphys/core/envphys_c.pyx":136
+ *     print('calling iwbt')
  *     # call the C function
  *     iwbt(ngrid, &ta_arr[0,0], &td_arr[0,0], &z_arr[0,0], nthreads, &tw[0,0])             # <<<<<<<<<<<<<<
  * 
@@ -2430,7 +2455,7 @@ static PyObject *__pyx_pf_4smrf_7envphys_4core_9envphys_c_4cwbt(CYTHON_UNUSED Py
   __pyx_t_20 = 0;
   iwbt(__pyx_v_ngrid, (&(*__Pyx_BufPtrCContig2d(double *, __pyx_pybuffernd_ta_arr.rcbuffer->pybuffer.buf, __pyx_t_13, __pyx_pybuffernd_ta_arr.diminfo[0].strides, __pyx_t_14, __pyx_pybuffernd_ta_arr.diminfo[1].strides))), (&(*__Pyx_BufPtrCContig2d(double *, __pyx_pybuffernd_td_arr.rcbuffer->pybuffer.buf, __pyx_t_15, __pyx_pybuffernd_td_arr.diminfo[0].strides, __pyx_t_16, __pyx_pybuffernd_td_arr.diminfo[1].strides))), (&(*__Pyx_BufPtrCContig2d(double *, __pyx_pybuffernd_z_arr.rcbuffer->pybuffer.buf, __pyx_t_17, __pyx_pybuffernd_z_arr.diminfo[0].strides, __pyx_t_18, __pyx_pybuffernd_z_arr.diminfo[1].strides))), __pyx_v_nthreads, (&(*__Pyx_BufPtrCContig2d(double *, __pyx_pybuffernd_tw.rcbuffer->pybuffer.buf, __pyx_t_19, __pyx_pybuffernd_tw.diminfo[0].strides, __pyx_t_20, __pyx_pybuffernd_tw.diminfo[1].strides))));
 
-  /* "smrf/envphys/core/envphys_c.pyx":137
+  /* "smrf/envphys/core/envphys_c.pyx":138
  *     iwbt(ngrid, &ta_arr[0,0], &td_arr[0,0], &z_arr[0,0], nthreads, &tw[0,0])
  * 
  *     return None             # <<<<<<<<<<<<<<
@@ -4657,11 +4682,14 @@ static __Pyx_StringTabEntry __pyx_string_tab[] = {
   {&__pyx_n_s_RuntimeError, __pyx_k_RuntimeError, sizeof(__pyx_k_RuntimeError), 0, 0, 1, 1},
   {&__pyx_n_s_ValueError, __pyx_k_ValueError, sizeof(__pyx_k_ValueError), 0, 0, 1, 1},
   {&__pyx_n_s_ascontiguousarray, __pyx_k_ascontiguousarray, sizeof(__pyx_k_ascontiguousarray), 0, 0, 1, 1},
+  {&__pyx_kp_s_calling_iwbt, __pyx_k_calling_iwbt, sizeof(__pyx_k_calling_iwbt), 0, 0, 1, 0},
   {&__pyx_n_s_cdewpt, __pyx_k_cdewpt, sizeof(__pyx_k_cdewpt), 0, 0, 1, 1},
   {&__pyx_n_s_ctopotherm, __pyx_k_ctopotherm, sizeof(__pyx_k_ctopotherm), 0, 0, 1, 1},
   {&__pyx_n_s_cwbt, __pyx_k_cwbt, sizeof(__pyx_k_cwbt), 0, 0, 1, 1},
   {&__pyx_n_s_dtype, __pyx_k_dtype, sizeof(__pyx_k_dtype), 0, 0, 1, 1},
   {&__pyx_n_s_dwpt, __pyx_k_dwpt, sizeof(__pyx_k_dwpt), 0, 0, 1, 1},
+  {&__pyx_n_s_end, __pyx_k_end, sizeof(__pyx_k_end), 0, 0, 1, 1},
+  {&__pyx_n_s_file, __pyx_k_file, sizeof(__pyx_k_file), 0, 0, 1, 1},
   {&__pyx_n_s_float64, __pyx_k_float64, sizeof(__pyx_k_float64), 0, 0, 1, 1},
   {&__pyx_kp_s_home_micahsandusky_Code_smrf_sm, __pyx_k_home_micahsandusky_Code_smrf_sm, sizeof(__pyx_k_home_micahsandusky_Code_smrf_sm), 0, 0, 1, 0},
   {&__pyx_n_s_import, __pyx_k_import, sizeof(__pyx_k_import), 0, 0, 1, 1},
@@ -4672,6 +4700,7 @@ static __Pyx_StringTabEntry __pyx_string_tab[] = {
   {&__pyx_n_s_np, __pyx_k_np, sizeof(__pyx_k_np), 0, 0, 1, 1},
   {&__pyx_n_s_nthreads, __pyx_k_nthreads, sizeof(__pyx_k_nthreads), 0, 0, 1, 1},
   {&__pyx_n_s_numpy, __pyx_k_numpy, sizeof(__pyx_k_numpy), 0, 0, 1, 1},
+  {&__pyx_n_s_print, __pyx_k_print, sizeof(__pyx_k_print), 0, 0, 1, 1},
   {&__pyx_n_s_range, __pyx_k_range, sizeof(__pyx_k_range), 0, 0, 1, 1},
   {&__pyx_n_s_skvfac, __pyx_k_skvfac, sizeof(__pyx_k_skvfac), 0, 0, 1, 1},
   {&__pyx_n_s_skvfac_arr, __pyx_k_skvfac_arr, sizeof(__pyx_k_skvfac_arr), 0, 0, 1, 1},
@@ -6487,6 +6516,147 @@ raise_neg_overflow:
         "can't convert negative value to int");
     return (int) -1;
 }
+
+#if !CYTHON_COMPILING_IN_PYPY && PY_MAJOR_VERSION < 3
+static PyObject *__Pyx_GetStdout(void) {
+    PyObject *f = PySys_GetObject((char *)"stdout");
+    if (!f) {
+        PyErr_SetString(PyExc_RuntimeError, "lost sys.stdout");
+    }
+    return f;
+}
+static int __Pyx_Print(PyObject* f, PyObject *arg_tuple, int newline) {
+    int i;
+    if (!f) {
+        if (!(f = __Pyx_GetStdout()))
+            return -1;
+    }
+    Py_INCREF(f);
+    for (i=0; i < PyTuple_GET_SIZE(arg_tuple); i++) {
+        PyObject* v;
+        if (PyFile_SoftSpace(f, 1)) {
+            if (PyFile_WriteString(" ", f) < 0)
+                goto error;
+        }
+        v = PyTuple_GET_ITEM(arg_tuple, i);
+        if (PyFile_WriteObject(v, f, Py_PRINT_RAW) < 0)
+            goto error;
+        if (PyString_Check(v)) {
+            char *s = PyString_AsString(v);
+            Py_ssize_t len = PyString_Size(v);
+            if (len > 0) {
+                switch (s[len-1]) {
+                    case ' ': break;
+                    case '\f': case '\r': case '\n': case '\t': case '\v':
+                        PyFile_SoftSpace(f, 0);
+                        break;
+                    default:  break;
+                }
+            }
+        }
+    }
+    if (newline) {
+        if (PyFile_WriteString("\n", f) < 0)
+            goto error;
+        PyFile_SoftSpace(f, 0);
+    }
+    Py_DECREF(f);
+    return 0;
+error:
+    Py_DECREF(f);
+    return -1;
+}
+#else
+static int __Pyx_Print(PyObject* stream, PyObject *arg_tuple, int newline) {
+    PyObject* kwargs = 0;
+    PyObject* result = 0;
+    PyObject* end_string;
+    if (unlikely(!__pyx_print)) {
+        __pyx_print = PyObject_GetAttr(__pyx_b, __pyx_n_s_print);
+        if (!__pyx_print)
+            return -1;
+    }
+    if (stream) {
+        kwargs = PyDict_New();
+        if (unlikely(!kwargs))
+            return -1;
+        if (unlikely(PyDict_SetItem(kwargs, __pyx_n_s_file, stream) < 0))
+            goto bad;
+        if (!newline) {
+            end_string = PyUnicode_FromStringAndSize(" ", 1);
+            if (unlikely(!end_string))
+                goto bad;
+            if (PyDict_SetItem(kwargs, __pyx_n_s_end, end_string) < 0) {
+                Py_DECREF(end_string);
+                goto bad;
+            }
+            Py_DECREF(end_string);
+        }
+    } else if (!newline) {
+        if (unlikely(!__pyx_print_kwargs)) {
+            __pyx_print_kwargs = PyDict_New();
+            if (unlikely(!__pyx_print_kwargs))
+                return -1;
+            end_string = PyUnicode_FromStringAndSize(" ", 1);
+            if (unlikely(!end_string))
+                return -1;
+            if (PyDict_SetItem(__pyx_print_kwargs, __pyx_n_s_end, end_string) < 0) {
+                Py_DECREF(end_string);
+                return -1;
+            }
+            Py_DECREF(end_string);
+        }
+        kwargs = __pyx_print_kwargs;
+    }
+    result = PyObject_Call(__pyx_print, arg_tuple, kwargs);
+    if (unlikely(kwargs) && (kwargs != __pyx_print_kwargs))
+        Py_DECREF(kwargs);
+    if (!result)
+        return -1;
+    Py_DECREF(result);
+    return 0;
+bad:
+    if (kwargs != __pyx_print_kwargs)
+        Py_XDECREF(kwargs);
+    return -1;
+}
+#endif
+
+#if !CYTHON_COMPILING_IN_PYPY && PY_MAJOR_VERSION < 3
+static int __Pyx_PrintOne(PyObject* f, PyObject *o) {
+    if (!f) {
+        if (!(f = __Pyx_GetStdout()))
+            return -1;
+    }
+    Py_INCREF(f);
+    if (PyFile_SoftSpace(f, 0)) {
+        if (PyFile_WriteString(" ", f) < 0)
+            goto error;
+    }
+    if (PyFile_WriteObject(o, f, Py_PRINT_RAW) < 0)
+        goto error;
+    if (PyFile_WriteString("\n", f) < 0)
+        goto error;
+    Py_DECREF(f);
+    return 0;
+error:
+    Py_DECREF(f);
+    return -1;
+    /* the line below is just to avoid C compiler
+     * warnings about unused functions */
+    return __Pyx_Print(f, NULL, 0);
+}
+#else
+static int __Pyx_PrintOne(PyObject* stream, PyObject *o) {
+    int res;
+    PyObject* arg_tuple = PyTuple_Pack(1, o);
+    if (unlikely(!arg_tuple))
+        return -1;
+    res = __Pyx_Print(stream, arg_tuple, 1);
+    Py_DECREF(arg_tuple);
+    return res;
+}
+#endif
 
 #if CYTHON_CCOMPLEX
   #ifdef __cplusplus

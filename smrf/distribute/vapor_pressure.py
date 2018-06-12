@@ -89,6 +89,7 @@ class vp(image_data.image_data):
 
         self._logger.debug('Initializing distribute.vapor_pressure')
         self._initialize(topo, data.metadata)
+        self.dem = topo.dem
 
     def distribute(self, data, ta):
         """
