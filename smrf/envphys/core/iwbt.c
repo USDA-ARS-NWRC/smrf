@@ -1,33 +1,4 @@
-/*
- **
- ** NAME
- ** 	iwbt -- compute wet or icebult from air and dewpoint temperatures
- **
- ** SYNOPSIS
- **
- **	void iwbt (fdi, fdm, fdo)
- **	int fdi, fdm, fdo;
- **
- ** DESCRIPTION
- ** 	iwbt reads a three-band image of air and dewpoint temperature and
- **	elevation and computes wetbulb temperature;
- **	Elevation is used to compute pressure using the hydrostatic equation
- **	air and dewpoint temperature, and air pressure are used to compute
- **	wet or ice bult temperature using the psychrometric constant, its
- **	value at specific temperatures using the Clausius-Clapeyron equation
- **	solving for Tw or Ti using the Newton-Raphson iterative approximation;
- **	Returns Tw or Ti, to the given output image;
- **	Works at all temperatures (accounting for both fusion and vaporization).
- **
- */
-
-// #include "ipw.h"
-// #include "envphys.h"
-// #include "pgm.h"
-// #include "fpio.h"
-// #include "bih.h"
-// #include "pixio.h"
-
+//iwbt -- compute wet or icebult from air and dewpoint temperatures
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -79,7 +50,6 @@ double wetbulb(
 	/* vapor pressure and saturation vapor pressure at ta */
 	ea = sati(dpt);
 	esat = sati(ta);
-
 	/* Psychrometric "constant" (K/Pa) */
 	psyc = EPS * (xlh / (CP_AIR * press));
 
@@ -97,9 +67,10 @@ double wetbulb(
 		ti = ti - (pf / dpdt);
 		dti = ti0 - ti;
 		i++;
-		if (i > 10)
+		if (i > 10){
 			printf("failure to converge in 10 iterations");
 			exit(-1);
+		}
 	}
 	return(ti);
 }
@@ -123,12 +94,11 @@ void iwbt (
 	omp_set_dynamic(0);     // Explicitly disable dynamic teams
 	omp_set_num_threads(nthreads); // Use N threads for all consecutive parallel regions
 
-#pragma omp parallel shared(ngrid, ta, td, tw, z) private(samp, ta_p, tw_p, z_p, pa_p, td_p)
+#pragma omp parallel shared(ngrid, ta, td, z) private(samp, ta_p, tw_p, z_p, pa_p, td_p)
 	{
 #pragma omp for
 
 		for (samp=0; samp < ngrid; samp++) {
-
 			// get pixel values
 			ta_p = ta[samp];
 			td_p = td[samp];
@@ -151,14 +121,8 @@ void iwbt (
 				printf("ta or td < 0 at pixel %i", samp);
 				exit(-1);
 			}
-
 			/*	call wetbulb function & fill output buffer	*/
 			tw_p = wetbulb(ta_p, td_p, pa_p);
-
-			if(tw_p < 0){
-				printf("tw < 0 at pixel %i", samp);
-				exit(-1);
-			}
 
 			// put back in array
 			tw[samp] = tw_p - FREEZE;
