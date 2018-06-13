@@ -317,7 +317,7 @@ class SMRF():
         # 2. Vapor pressure
         self.distribute['vapor_pressure'] = \
             distribute.vapor_pressure.vp(self.config['vapor_pressure'],
-                                         self.config['precip']['precip_temp'])
+                                         self.config['precip']['precip_temp_method'])
 
         # 3. Wind
         self.distribute['wind'] = \

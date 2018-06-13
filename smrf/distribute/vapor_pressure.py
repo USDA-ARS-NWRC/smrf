@@ -52,6 +52,11 @@ class vp(image_data.image_data):
                                   'units': 'degree_Celcius',
                                   'standard_name': 'dew_point_temperature',
                                   'long_name': 'Dew point temperature'
+                                  },
+                        'precip_temp': {
+                                  'units': 'degree_Celcius',
+                                  'standard_name': 'precip_temperature',
+                                  'long_name': 'Precip temperature'
                                   }
                         }
 
@@ -59,7 +64,7 @@ class vp(image_data.image_data):
     # be written during main distribute loop
     post_process_variables = {}
 
-    def __init__(self, vpConfig, precip_temp):
+    def __init__(self, vpConfig, precip_temp_method):
 
         # extend the base class
         image_data.image_data.__init__(self, self.variable)
@@ -69,7 +74,7 @@ class vp(image_data.image_data):
         self.getConfig(vpConfig)
 
         # dew_point or wet_bulb
-        self.precip_temp = precip_temp
+        self.precip_temp_method = precip_temp_method
 
         self._logger.debug('Created distribute.vapor_pressure')
 
@@ -139,7 +144,7 @@ class vp(image_data.image_data):
         self.dew_point = dpt
 
         # calculate wet bulb temperature
-        if self.precip_temp == 'wet_bulb':
+        if self.precip_temp_method == 'wet_bulb':
             wet_bulb = np.zeros_like(self.vapor_pressure, dtype=np.float64)
             envphys_c.cwbt(ta, dpt, self.dem, wet_bulb, self.config['nthreads'])
             #self.wet_bulb = wet_bulb

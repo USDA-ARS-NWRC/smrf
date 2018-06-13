@@ -131,7 +131,6 @@ def cwbt(np.ndarray[double, mode="c", ndim=2] ta,
     cdef np.ndarray[double, mode="c", ndim=2] z_arr
     z_arr = np.ascontiguousarray(z, dtype=np.float64)
 
-    print('calling iwbt')
     # call the C function
     iwbt(ngrid, &ta_arr[0,0], &td_arr[0,0], &z_arr[0,0], nthreads, &tw[0,0])
 
