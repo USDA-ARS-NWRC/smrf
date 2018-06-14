@@ -57,7 +57,7 @@ Windows
 
 Since IPW has not been tested to run in Window, Docker will have to be used
 to run SMRF.  The docker image for SMRF can be found on docker hub
-`here <https://hub.docker.com/r/scotthavens/smrf/>`_. The docker image is
+`here <https://hub.docker.com/r/usdaarsnwrc/smrf/>`_. The docker image is
 already setup to run smrf so the following steps do not apply for running out
 of a docker.
 

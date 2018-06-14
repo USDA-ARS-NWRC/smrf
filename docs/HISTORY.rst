@@ -21,3 +21,22 @@ History
 * Major update to config file, enabling checking and default adding
 * Updated C file prototypes.
 
+0.4.0 (2017-11-14)
+------------------
+
+* Small improvements to our config file code including: types checking, relative paths to config, auto documentation
+* Fixed bugs related to precip undercatch
+* Improvements to ti station data backup
+* Various adjustments for better collaboration with AWSM
+* Moved to a new station database format
+
+
+0.5.0 (2017-04-18)
+------------------
+
+* Removed inicheck to make its own package.
+* Added in HRRR input data for new gridded type
+* Fixed various bugs associated with precip
+* Modularized some functions for easiuer use scripting
+* Added netcdf functionality to gen_maxus
+* Added first integration test

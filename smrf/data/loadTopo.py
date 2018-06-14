@@ -125,7 +125,7 @@ class topo():
         for v_smrf in self.images:
 
             # check to see if the user defined any variables e.g. veg_height = veg_length
-            if self.topoConfig[v_smrf] != None:
+            if v_smrf in self.topoConfig.keys():
                 v_file = self.topoConfig[v_smrf]
             else:
                 v_file = v_smrf

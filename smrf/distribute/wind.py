@@ -134,12 +134,6 @@ class wind(image_data.image_data):
             self._logger.debug('Read data from {}'
                                .format(self.config['maxus_netcdf']))
 
-            # check maxus defaults
-            # if 'station_default' not in self.config:
-            #     self.config['station_default'] = 11.4
-            # if 'veg_default' not in self.config:
-            #     self.config['veg_default'] = 11.4
-
             # get the veg values
             matching = [s for s in self.config.keys() if "veg_" in s]
             v = {}
@@ -409,8 +403,7 @@ class wind(image_data.image_data):
 
             # maxus value at the station
             if not pd.isnull(data_direction[m]):
-
-                if m in self.config['peak']:
+                if m.upper() in self.config['peak']:
                     val_maxus = np.min(self.maxus[:, yi, xi] + e)
 
                 else:

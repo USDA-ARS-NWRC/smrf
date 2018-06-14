@@ -437,7 +437,9 @@ def marks2017(Tpp,pp):
             ind = (s_rho_ns * water) >= 100.0
             c11 = np.ones(s_rho_ns.shape)
 
-            c11[ind] = (c_min + ((Tz - s_tsnow[ind]) * cfac)) + 1.0
+            #c11[ind] = (c_min + ((Tz - s_tsnow[ind]) * cfac)) + 1.0
+
+            c11[ind] = np.exp(-0.046*(s_rho_ns[ind]*1000.0-100.0))
 
             s_d_rho_m = 0.01 * c11 * np.exp(-0.04 * (Tz - s_tsnow))
 

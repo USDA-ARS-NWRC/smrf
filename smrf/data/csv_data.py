@@ -5,13 +5,15 @@ from smrf import ipw
 def read_metadata(mFile, dem):
     """
     Read the metadata csv file
+
     Args:
         mFile: metadata file
         dem: dem IPW file, if co-location of stations is required
 
     Returns:
-        metadata: metadata array
-        dem: opened IPW file
+        tuple:
+            **metadata** - metadata array
+            **dem** - opened IPW file
     """
 
     f = open(mFile, 'rU')
