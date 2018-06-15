@@ -86,8 +86,7 @@ class SMRF():
                         'output', 'veg_ir_beam','veg_ir_diffuse',
                         'veg_vis_beam', 'veg_vis_diffuse',
                         'cloud_ir_beam', 'cloud_ir_diffuse', 'cloud_vis_beam',
-                        'cloud_vis_diffuse', 'thermal_clear', 'wind_direction',
-                        'flatwind', 'wind_direction']
+                        'cloud_vis_diffuse', 'thermal_clear', 'wind_direction']
 
     def __init__(self, configFile, external_logger=None):
         """
@@ -240,7 +239,6 @@ class SMRF():
             self.day_hour = self.start_date - pd.to_datetime(d[0].strftime("%Y%m%d"))
             self.day_hour = int(self.day_hour / np.timedelta64(1, 'h'))
 
-
         self.distribute = {}
 
         if self.config['logging']['qotw']:
@@ -321,6 +319,7 @@ class SMRF():
         # 3. Wind
         self.distribute['wind'] = \
             distribute.wind.wind(self.config['wind'],
+                                 self.config['precip']['distribute_drifts'],
                                  self.temp_dir)
 
         # 4. Precipitation
@@ -564,7 +563,10 @@ class SMRF():
                                                 t,
                                                 self.data.wind_speed.loc[t],
                                                 self.data.air_temp.loc[t],
-                                                self.topo.mask)
+                                                self.distribute['wind'].wind_direction,
+                                                self.distribute['wind'].dir_round_cell,
+                                                self.distribute['wind'].wind_speed,
+                                                self.distribute['wind'].cellmaxus)
 
             # 5. Albedo
             self.distribute['albedo'].distribute(t,
@@ -673,6 +675,11 @@ class SMRF():
             self.thread_variables += ['thermal_cloud']
         if self.distribute['thermal'].correct_veg:
             self.thread_variables += ['thermal_veg']
+
+        # add some variables to thread_variables based on what we're doing
+        if not self.gridded:
+            self.thread_variables += ['flatwind']
+            self.thread_variables += ['cellmaxus', 'dir_round_cell']
 
         for v in self.thread_variables:
             q[v] = queue.DateQueue_Threading(self.max_values, self.time_out)

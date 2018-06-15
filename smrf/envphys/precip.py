@@ -5,7 +5,7 @@ Created on Apr 15, 2015
 '''
 
 import numpy as np
-
+from smrf.utils import utils
 
 def mkprecip(precipitation, temperature):
     '''
@@ -291,3 +291,105 @@ def adjust_for_undercatch(p_vec, wind, temp, sta_type, metadata):
                 #print(adj_precip[sta],p_vec[sta],cr)
 
     return adj_precip
+
+
+def dist_precip_wind(precip, dpt, az, dir_round_cell, wind_speed, cell_maxus,
+                     tbreak, tbreak_direction, veg_type, veg_fact,
+                     cfg, mask=None):
+    """
+    Redistribute the precip based on wind speed and direciton
+    to account for drifting.
+
+    Args:
+        precip: distributed precip
+        dpt: dew point array
+        az: wind direction
+        dir_round_cell: from wind module
+        wind_speed: wind speed array
+        cell_maxus: max upwind slope from maxus file
+        tbreak: relative local slope from tbreak file
+        tbreak_direction: direction array from tbreak file
+        veg_type: user input veg types to correct
+        veg_factor: interception correction for veg types. ppt mult is multiplied by 1/veg_factor
+
+    Returns:
+        precip_drift: numpy array of precip redistributed for wind
+
+    """
+    # thresholds
+    tbreak_threshold =  cfg['tbreak_threshold']
+    min_scour = cfg['min_scour']
+    max_scour = cfg['max_scour']
+    min_drift = cfg['min_drift']
+    max_drift = cfg['max_drift']
+    dpt_threshold = 0.5
+    # polynomial factors
+    drift_poly = {}
+    drift_poly['a'] = cfg['drift_poly_a']
+    drift_poly['b'] = cfg['drift_poly_b']
+    drift_poly['c'] = cfg['drift_poly_c']
+    ppt_poly = {}
+    ppt_poly['a'] = cfg['ppt_poly_a']
+    ppt_poly['b'] = cfg['ppt_poly_b']
+    ppt_poly['c'] = cfg['ppt_poly_c']
+    ppt_poly['d'] = cfg['ppt_poly_d']
+
+    # initialize arrays
+    celltbreak = np.ones(dir_round_cell.shape)
+    drift_factor = np.ones(dir_round_cell.shape)
+    precip_drift = np.zeros(dir_round_cell.shape)
+    pptmult = np.ones(dir_round_cell.shape)
+
+    # classify tbreak
+    dir_unique = np.unique(dir_round_cell)
+
+    for d in dir_unique:
+        # find all values for matching direction
+        ind = dir_round_cell == d
+        i = np.argwhere(tbreak_direction == d)[0][0]
+        celltbreak[ind] = tbreak[i][ind]
+
+    # ################################################### #
+    # Routine for drift cells
+    # ################################################### #
+    # for tbreak cells >  threshold
+    idx = ((celltbreak > tbreak_threshold) & (dpt < dpt_threshold))
+    # calculate drift factor
+    drift_factor[idx] = drift_poly['c'] * np.exp(drift_poly['b'] * wind_speed[idx] \
+                        + drift_poly['a'] * wind_speed[idx]**2);
+    # cap drift factor
+    drift_factor[idx] = utils.set_min_max(drift_factor[idx], min_drift, max_drift)
+
+    # multiply precip by drift factor for drift cells
+    precip_drift[idx] = drift_factor[idx]*precip[idx]
+
+    # ################################################### #
+    # Now lets deal with non drift cells
+    # ################################################### #
+
+    # for tbreak cells <= threshold (i.e. the rest of them)
+    idx = ((celltbreak <= tbreak_threshold) & (dpt < dpt_threshold))
+    # reset pptmult for exposed pixels
+    pptmult = np.ones(dir_round_cell.shape)
+    # original from manuscript
+    pptmult[idx] = ppt_poly['a'] + ppt_poly['c'] * cell_maxus[idx] - ppt_poly['b'] * cell_maxus[idx]**2 \
+                   + ppt_poly['a'] * cell_maxus[idx]**3;
+
+    # veg effects at indices that we are working on where veg type matches
+    for i, v in enumerate(veg_fact):
+        idv = ( (veg_type == int(v)) & (idx) )
+        pptmult[idv] = pptmult[idv] *  1.0 / veg_fact[v]
+
+    # hardcode for pine
+    pptmult[(idx) & ((veg_type == 3055) | (veg_type == 3053) | (veg_type == 42))] = 1.0 #0.92
+    # cap ppt mult
+    pptmult[idx] = utils.set_min_max(pptmult[idx], min_scour, max_scour)
+    # multiply precip by scour factor
+    precip_drift[idx] = pptmult[idx] * precip[idx];
+
+    # ############################## #
+    # no precip redistribution where dew point >= threshold
+    idx = dpt >= dpt_threshold
+    precip_drift[idx] = precip[idx]
+
+    return precip_drift
