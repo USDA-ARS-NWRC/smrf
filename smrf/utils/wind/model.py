@@ -504,7 +504,7 @@ class wind_model():
 
         # set attributes
         if ex_att is not None:
-            for key, value in ex_att:
+            for key, value in ex_att.items():
                 setattr(s, key, value)
 
         s.variables['y'][:] = self.y
