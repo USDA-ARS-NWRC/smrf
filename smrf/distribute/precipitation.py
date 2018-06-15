@@ -4,6 +4,7 @@ import logging
 import netCDF4 as nc
 from smrf.distribute import image_data
 from smrf.envphys import snow,storms,precip
+from smrf.envphys.core import envphys_c
 from smrf.utils import utils
 import os
 
@@ -97,14 +98,19 @@ class ppt(image_data.image_data):
                                   'units': 'day',
                                   'standard_name': 'day_of_last_storm',
                                   'long_name': 'Decimal day of the last storm since Oct 1'
-                                  }
+                                  },
+                         'precip_temp': {
+                                   'units': 'degree_Celcius',
+                                   'standard_name': 'precip_temperature',
+                                   'long_name': 'Precip temperature'
+                                   }
                         }
 
     # these are variables that are operate at the end only and do not need to
     # be written during main distribute loop
     post_process_variables = {}
 
-    def __init__(self, pptConfig, start_date, time_step=60):
+    def __init__(self, pptConfig, start_date, precip_temp_method, time_step=60):
 
         # extend the base class
         image_data.image_data.__init__(self, self.variable)
@@ -114,6 +120,8 @@ class ppt(image_data.image_data):
         self.getConfig(pptConfig)
         self.time_step = float(time_step)
         self.start_date = start_date
+
+        self.precip_temp_method = self.config['precip_temp_method']
 
     def initialize(self, topo, data):
 
@@ -125,6 +133,7 @@ class ppt(image_data.image_data):
         self.storm_days = np.zeros((topo.ny, topo.nx))
         self.storm_total = np.zeros((topo.ny, topo.nx))
         self.last_storm_day = np.zeros((topo.ny, topo.nx))
+        self.dem = topo.dem
 
         # Assign storm_days array if given
         if self.config["storm_days_restart"] != None:
@@ -237,7 +246,7 @@ class ppt(image_data.image_data):
             queue[self.variable].put([t, self.precip])
 
 
-    def distribute(self, data, ppt_temp, time, wind, temp, mask=None):
+    def distribute(self, data, dpt, ta, time, wind, temp, mask=None):
         """
         Distribute given a Panda's dataframe for a single time step. Calls
         :mod:`smrf.distribute.image_data.image_data._distribute`.
@@ -254,7 +263,7 @@ class ppt(image_data.image_data):
 
         Args:
             data: Pandas dataframe for a single time step from precip
-            ppt_temp: precp_temp numpy array, either dew_point or wetbulb temp
+            dpt: dew_poin numpy array
             time: pass in the time were are currently on
             mask: basin mask to apply to the storm days for calculating the
                 last storm day for the basin
@@ -277,7 +286,8 @@ class ppt(image_data.image_data):
 
             #Use the clipped and corrected precip
             self.distribute_for_marks2017(self.corrected_precip.loc[time],
-                                          ppt_temp,
+                                          dpt,
+                                          ta,
                                           time,
                                           mask=mask)
 
@@ -291,16 +301,18 @@ class ppt(image_data.image_data):
                                                     self.config,
                                                     self.metadata)
 
-            self.distribute_for_susong1999(data, ppt_temp, time, mask=mask)
+            self.distribute_for_susong1999(data, dpt, time, mask=mask)
 
 
-    def distribute_for_marks2017(self, data, ppt_temp, time, mask=None):
+    def distribute_for_marks2017(self, data, dpt, ta, time, mask=None):
         """
         Specialized distribute function for working with the new accumulated
         snow density model Marks2017 requires storm total and a corrected
         precipitation as to avoid precip between storms.
         """
         #self.corrected_precip # = data.mul(self.storm_correction)
+        self.precip_temp = None
+
         if data.sum() > 0.0:
             # Check for time in every storm
             for i, s in self.storms.iterrows():
@@ -323,11 +335,26 @@ class ppt(image_data.image_data):
             self._distribute(data, zeros=None)
             self.precip = utils.set_min_max(self.precip, self.min, self.max)
 
+            # calculate precip temperature#
+            if self.precip_temp_method == 'wet_bulb':
+                # initialize timestep wet_bulb
+                wet_bulb = np.zeros_like(dpt, dtype=np.float64)
+                # calculate wet_bulb
+                envphys_c.cwbt(ta, dpt, self.dem,
+                               wet_bulb, 0.01,
+                               16)
+                # # store last time step of wet_bulb
+                # self.wet_bulb_old = wet_bulb.copy()
+                # store in precip temp for use in precip
+                self.precip_temp = wet_bulb
+            else:
+                self.precip_temp = dpt
+
             if time == storm_start:
                 # Entered into a new storm period distribute the storm total
                 self._logger.debug('{0} Entering storm #{1}'
                                    .format(data.name, self.storm_id+1))
-                if ppt_temp.min() < 2.0:
+                if self.precip_temp.min() < 2.0:
                     self._logger.debug('''Distributing Total Precip
                                         for Storm #{0}'''
                                        .format(self.storm_id+1))
@@ -337,11 +364,11 @@ class ppt(image_data.image_data):
                                                          self.min,
                                                          self.max)
 
-            if self.storming and ppt_temp.min() < 2.0:
+            if self.storming and self.precip_temp.min() < 2.0:
                 self._logger.debug('''Calculating new snow density for
                                     storm #{0}'''.format(self.storm_id+1))
                 # determine the precip phase and den
-                snow_den, perc_snow = snow.calc_phase_and_density(ppt_temp,
+                snow_den, perc_snow = snow.calc_phase_and_density(self.precip_temp,
                                                                   self.precip,
                                                                   nasde_model=self.nasde_model)
 
@@ -351,7 +378,7 @@ class ppt(image_data.image_data):
 
             # calculate decimal days since last storm
             self.storm_days = storms.time_since_storm_pixel(self.precip,
-                                                     ppt_temp,
+                                                     self.precip_temp,
                                                      perc_snow,
                                                      storming=self.storming,
                                                      time_step=self.time_step/60.0/24.0,
@@ -451,15 +478,18 @@ class ppt(image_data.image_data):
 
         for t in data.precip.index:
 
-            ppt_temp = queue['precip_temp'].get(t)
+            dpt = queue['dew_point'].get(t)
+            ta = queue['air_temp'].get(t)
 
-            self.distribute(data.precip.loc[t], ppt_temp, t, data.wind_speed.loc[t],data.air_temp.loc[t], mask=mask)
+            self.distribute(data.precip.loc[t], dpt, ta, t, data.wind_speed.loc[t],data.air_temp.loc[t], mask=mask)
 
             queue[self.variable].put([t, self.precip])
 
             queue['percent_snow'].put([t, self.percent_snow])
 
             queue['snow_density'].put([t, self.snow_density])
+
+            queue['precip_temp'].put([t, self.precip_temp])
 
             queue['last_storm_day_basin'].put([t, self.last_storm_day_basin])
 

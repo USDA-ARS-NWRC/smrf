@@ -316,8 +316,7 @@ class SMRF():
 
         # 2. Vapor pressure
         self.distribute['vapor_pressure'] = \
-            distribute.vapor_pressure.vp(self.config['vapor_pressure'],
-                                         self.config['precip']['precip_temp_method'])
+            distribute.vapor_pressure.vp(self.config['vapor_pressure'])
 
         # 3. Wind
         self.distribute['wind'] = \
@@ -560,7 +559,8 @@ class SMRF():
 #self, data, dpt, time, wind, temp, mask=None
             # 4. Precipitation
             self.distribute['precip'].distribute(self.data.precip.loc[t],
-                                                self.distribute['vapor_pressure'].precip_temp,
+                                                self.distribute['vapor_pressure'].dew_point,
+                                                self.distribute['air_temp'].air_temp,
                                                 t,
                                                 self.data.wind_speed.loc[t],
                                                 self.data.air_temp.loc[t],

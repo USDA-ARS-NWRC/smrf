@@ -17,7 +17,7 @@ np.import_array()
 cdef extern from "envphys_c.h":
     void topotherm(int ngrid, double *ta, double *tw, double *z, double *skvfac, int nthreads, double *thermal);
     void dewpt(int ngrid, double *ea, int nthreads, double tol, double *dpt);
-    void iwbt(int ngrid, double *ta, double *td,	double *z, double *tw_o, int nthreads, double tol, double *tw);
+    void iwbt(int ngrid, double *ta, double *td,	double *z, int nthreads, double tol, double *tw);
 
 
 @cython.boundscheck(False)
@@ -102,7 +102,6 @@ def cdewpt(np.ndarray[double, mode="c", ndim=2] vp,
 def cwbt(np.ndarray[double, mode="c", ndim=2] ta,
          np.ndarray[double, mode="c", ndim=2] td,
          np.ndarray[double, mode="c", ndim=2] z,
-         np.ndarray[double, mode="c", ndim=2] tw_o,
          np.ndarray[double, mode="c", ndim=2] tw not None,
          float tolerance=0,
          int nthreads=1):
@@ -111,7 +110,7 @@ def cwbt(np.ndarray[double, mode="c", ndim=2] ta,
     within the C code
 
     Args:
-        ta, td, z, tw_o (last time step of tw)
+        ta, td, z
     Out:
         tw changed in place (wet bulb temperature)
 
@@ -133,11 +132,7 @@ def cwbt(np.ndarray[double, mode="c", ndim=2] ta,
     cdef np.ndarray[double, mode="c", ndim=2] z_arr
     z_arr = np.ascontiguousarray(z, dtype=np.float64)
 
-    # convert the old wet_bulb array to C
-    cdef np.ndarray[double, mode="c", ndim=2] tw_o_arr
-    tw_o_arr = np.ascontiguousarray(tw_o, dtype=np.float64)
-
     # call the C function
-    iwbt(ngrid, &ta_arr[0,0], &td_arr[0,0], &z_arr[0,0], &tw_o_arr[0,0], nthreads, tolerance, &tw[0,0])
+    iwbt(ngrid, &ta_arr[0,0], &td_arr[0,0], &z_arr[0,0], nthreads, tolerance, &tw[0,0])
 
     return None

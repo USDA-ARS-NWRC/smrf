@@ -16,7 +16,6 @@ double wetbulb(
 	double	ta,	/* air tempterature (K) */
 	double	dpt,	/* dewpoint temperature (K) */
 	double	press,	/* total air pressure (Pa)  */
-	double	tw_o,		/* previous wet_bulb (K)	*/
 	double	tol)		/* wet_bulb tolerance threshold */
 {
 	int	i;
@@ -58,8 +57,7 @@ double wetbulb(
 	/* solve for wet or ice bulb temperature */
 	dti = 1.0;
 	i = 0;
-	//ti = ta;
-	ti = tw_o;
+	ti = ta;
 	while (dti > tol) {
 		ti0 = ti;
 		if (ti != ta)
@@ -84,7 +82,6 @@ void iwbt (
 		double *ta,		/* air temperature */
 		double *td,		/* dew point temperature */
 		double *z,		/* elevation */
-		double *tw_o,	/* previous timestep wet_bulb */
 		int nthreads,	/* number of threads for parrallel processing */
 		double tol,		/* wet_bulb tolerance threshold */
 		double *tw)		/* wet bulb temperature (return) */
@@ -94,13 +91,12 @@ void iwbt (
 	double		tw_p;		/* wet bulb temperature (C)	*/
 	double		ta_p;		/* air temperature (C)		*/
 	double		z_p;		/* elevation (m)		*/
-	double		tw_o_p; /* previous teimstep wet_bulb (C)	*/
 	double		pa_p;		/* air pressure (pa)		*/
 
 	omp_set_dynamic(0);     // Explicitly disable dynamic teams
 	omp_set_num_threads(nthreads); // Use N threads for all consecutive parallel regions
 
-#pragma omp parallel shared(ngrid, ta, td, z, tw_o) private(samp, ta_p, tw_p, z_p, tw_o_p, pa_p, td_p)
+#pragma omp parallel shared(ngrid, ta, td, z) private(samp, ta_p, tw_p, z_p, pa_p, td_p)
 	{
 #pragma omp for
 
@@ -109,7 +105,6 @@ void iwbt (
 			ta_p = ta[samp];
 			td_p = td[samp];
 			z_p = z[samp];
-			tw_o_p = tw_o[samp];
 
 			/*	set pa	*/
 			if (z_p == 0.0) {
@@ -123,14 +118,13 @@ void iwbt (
 			/*	convert ta & td to Kelvin	*/
 			ta_p += FREEZE;
 			td_p += FREEZE;
-			tw_o_p += FREEZE;
 
 			if(ta_p < 0 || td_p < 0){
 				printf("ta or td < 0 at pixel %i", samp);
 				exit(-1);
 			}
 			/*	call wetbulb function & fill output buffer	*/
-			tw_p = wetbulb(ta_p, td_p, pa_p, tw_o_p, tol);
+			tw_p = wetbulb(ta_p, td_p, pa_p, tol);
 
 			// put back in array
 			tw[samp] = tw_p - FREEZE;
