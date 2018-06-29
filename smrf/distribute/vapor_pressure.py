@@ -52,14 +52,19 @@ class vp(image_data.image_data):
                                   'units': 'degree_Celcius',
                                   'standard_name': 'dew_point_temperature',
                                   'long_name': 'Dew point temperature'
-                                  }
+                                  },
+                         'precip_temp': {
+                                   'units': 'degree_Celcius',
+                                   'standard_name': 'precip_temperature',
+                                   'long_name': 'Precip temperature'
+                                   }
                         }
 
     # these are variables that are operate at the end only and do not need to
     # be written during main distribute loop
     post_process_variables = {}
 
-    def __init__(self, vpConfig):
+    def __init__(self, vpConfig, precip_temp_method):
 
         # extend the base class
         image_data.image_data.__init__(self, self.variable)
@@ -67,6 +72,9 @@ class vp(image_data.image_data):
 
         # check and assign the configuration
         self.getConfig(vpConfig)
+
+        # assign precip temp method
+        self.precip_temp_method = precip_temp_method
 
         self._logger.debug('Created distribute.vapor_pressure')
 
@@ -86,6 +94,9 @@ class vp(image_data.image_data):
 
         self._logger.debug('Initializing distribute.vapor_pressure')
         self._initialize(topo, data.metadata)
+
+        # get dem to pass to wet_bulb
+        self.dem = topo.dem
 
     def distribute(self, data, ta):
         """
@@ -134,20 +145,20 @@ class vp(image_data.image_data):
 
         self.dew_point = dpt
 
-        # # calculate wet bulb temperature
-        # if self.precip_temp_method == 'wet_bulb':
-        #     # initialize timestep wet_bulb
-        #     wet_bulb = np.zeros_like(self.vapor_pressure, dtype=np.float64)
-        #     # calculate wet_bulb
-        #     envphys_c.cwbt(ta, dpt, self.dem,
-        #                    wet_bulb, self.config['tolerance'],
-        #                    self.config['nthreads'])
-        #     # # store last time step of wet_bulb
-        #     # self.wet_bulb_old = wet_bulb.copy()
-        #     # store in precip temp for use in precip
-        #     self.precip_temp = wet_bulb
-        # else:
-        #     self.precip_temp = dpt
+        # calculate wet bulb temperature
+        if self.precip_temp_method == 'wet_bulb':
+            # initialize timestep wet_bulb
+            wet_bulb = np.zeros_like(self.vapor_pressure, dtype=np.float64)
+            # calculate wet_bulb
+            envphys_c.cwbt(ta, dpt, self.dem,
+                           wet_bulb, self.config['tolerance'],
+                           self.config['nthreads'])
+            # # store last time step of wet_bulb
+            # self.wet_bulb_old = wet_bulb.copy()
+            # store in precip temp for use in precip
+            self.precip_temp = wet_bulb
+        else:
+            self.precip_temp = dpt
 
     def distribute_thread(self, queue, data):
         """
@@ -171,5 +182,5 @@ class vp(image_data.image_data):
             self.distribute(data.loc[t], ta)
 
             queue[self.variable].put([t, self.vapor_pressure])
-            # queue['precip_temp'].put([t, self.precip_temp])
+            queue['precip_temp'].put([t, self.precip_temp])
             queue['dew_point'].put([t, self.dew_point])

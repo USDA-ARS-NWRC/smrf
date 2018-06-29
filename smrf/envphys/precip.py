@@ -293,8 +293,8 @@ def adjust_for_undercatch(p_vec, wind, temp, sta_type, metadata):
     return adj_precip
 
 
-def dist_precip_wind(precip, dpt, az, dir_round_cell, wind_speed, cell_maxus,
-                     tbreak, tbreak_direction, veg_type, veg_fact,
+def dist_precip_wind(precip, precip_temp, az, dir_round_cell, wind_speed,
+                     cell_maxus, tbreak, tbreak_direction, veg_type, veg_fact,
                      cfg, mask=None):
     """
     Redistribute the precip based on wind speed and direciton
@@ -302,7 +302,7 @@ def dist_precip_wind(precip, dpt, az, dir_round_cell, wind_speed, cell_maxus,
 
     Args:
         precip: distributed precip
-        dpt: dew point array
+        precip_temp: precip_temp array
         az: wind direction
         dir_round_cell: from wind module
         wind_speed: wind speed array
@@ -322,7 +322,7 @@ def dist_precip_wind(precip, dpt, az, dir_round_cell, wind_speed, cell_maxus,
     max_scour = cfg['max_scour']
     min_drift = cfg['min_drift']
     max_drift = cfg['max_drift']
-    dpt_threshold = 0.5
+    precip_temp_threshold = 0.5
     # polynomial factors
     drift_poly = {}
     drift_poly['a'] = cfg['drift_poly_a']
@@ -353,7 +353,7 @@ def dist_precip_wind(precip, dpt, az, dir_round_cell, wind_speed, cell_maxus,
     # Routine for drift cells
     # ################################################### #
     # for tbreak cells >  threshold
-    idx = ((celltbreak > tbreak_threshold) & (dpt < dpt_threshold))
+    idx = ((celltbreak > tbreak_threshold) & (precip_temp < precip_temp_threshold))
     # calculate drift factor
     drift_factor[idx] = drift_poly['c'] * np.exp(drift_poly['b'] * wind_speed[idx] \
                         + drift_poly['a'] * wind_speed[idx]**2);
@@ -368,7 +368,7 @@ def dist_precip_wind(precip, dpt, az, dir_round_cell, wind_speed, cell_maxus,
     # ################################################### #
 
     # for tbreak cells <= threshold (i.e. the rest of them)
-    idx = ((celltbreak <= tbreak_threshold) & (dpt < dpt_threshold))
+    idx = ((celltbreak <= tbreak_threshold) & (precip_temp < precip_temp_threshold))
     # reset pptmult for exposed pixels
     pptmult = np.ones(dir_round_cell.shape)
     # original from manuscript
@@ -389,7 +389,7 @@ def dist_precip_wind(precip, dpt, az, dir_round_cell, wind_speed, cell_maxus,
 
     # ############################## #
     # no precip redistribution where dew point >= threshold
-    idx = dpt >= dpt_threshold
+    idx = precip_temp >= precip_temp_threshold
     precip_drift[idx] = precip[idx]
 
     return precip_drift

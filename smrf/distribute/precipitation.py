@@ -98,19 +98,14 @@ class ppt(image_data.image_data):
                                   'units': 'day',
                                   'standard_name': 'day_of_last_storm',
                                   'long_name': 'Decimal day of the last storm since Oct 1'
-                                  },
-                         'precip_temp': {
-                                   'units': 'degree_Celcius',
-                                   'standard_name': 'precip_temperature',
-                                   'long_name': 'Precip temperature'
-                                   }
+                                  }
                         }
 
     # these are variables that are operate at the end only and do not need to
     # be written during main distribute loop
     post_process_variables = {}
 
-    def __init__(self, pptConfig, start_date, precip_temp_method, time_step=60):
+    def __init__(self, pptConfig, start_date, time_step=60):
 
         # extend the base class
         image_data.image_data.__init__(self, self.variable)
@@ -120,8 +115,6 @@ class ppt(image_data.image_data):
         self.getConfig(pptConfig)
         self.time_step = float(time_step)
         self.start_date = start_date
-
-        self.precip_temp_method = self.config['precip_temp_method']
 
     def initialize(self, topo, data):
 
@@ -268,8 +261,8 @@ class ppt(image_data.image_data):
 
 
 
-    def distribute(self, data, dpt, ta, time, wind, temp, az, dir_round_cell,
-                   wind_speed, cell_maxus, mask=None):
+    def distribute(self, data, dpt, precip_temp, ta, time, wind, temp, az,
+                   dir_round_cell, wind_speed, cell_maxus, mask=None):
         """
         Distribute given a Panda's dataframe for a single time step. Calls
         :mod:`smrf.distribute.image_data.image_data._distribute`.
@@ -286,8 +279,8 @@ class ppt(image_data.image_data):
 
         Args:
             data: Pandas dataframe for a single time step from precip
-            dpt: dew point numpy array that will be used for the precipitaiton
-                temperature
+            dpt: dew point numpy array that will be used for
+            precip_temp: numpy array of the precipitaiton temperature
             ta:     air temp numpy array
             time:   pass in the time were are currently on
             wind: station wind speed at time step
@@ -313,7 +306,7 @@ class ppt(image_data.image_data):
 
             #Use the clipped and corrected precip
             self.distribute_for_marks2017(self.corrected_precip.loc[time],
-                                          dpt,
+                                          precip_temp,
                                           ta,
                                           time,
                                           mask=mask)
@@ -328,7 +321,7 @@ class ppt(image_data.image_data):
                                                     self.config,
                                                     self.metadata)
 
-            self.distribute_for_susong1999(data, dpt, time, mask=mask)
+            self.distribute_for_susong1999(data, precip_temp, time, mask=mask)
 
         # redistribute due to wind to account for driftin
         if self.config['distribute_drifts']:
@@ -339,14 +332,13 @@ class ppt(image_data.image_data):
                                             self.tbreak_direction, self.veg_type,
                                             self.veg, self.config)
 
-    def distribute_for_marks2017(self, data, dpt, ta, time, mask=None):
+    def distribute_for_marks2017(self, data, precip_temp, ta, time, mask=None):
         """
         Specialized distribute function for working with the new accumulated
         snow density model Marks2017 requires storm total and a corrected
         precipitation as to avoid precip between storms.
         """
         #self.corrected_precip # = data.mul(self.storm_correction)
-        self.precip_temp = None
 
         if data.sum() > 0.0:
             # Check for time in every storm
@@ -369,21 +361,6 @@ class ppt(image_data.image_data):
             # distribute data and set the min/max
             self._distribute(data, zeros=None)
             self.precip = utils.set_min_max(self.precip, self.min, self.max)
-
-            # calculate precip temperature#
-            if self.precip_temp_method == 'wet_bulb':
-                # initialize timestep wet_bulb
-                wet_bulb = np.zeros_like(dpt, dtype=np.float64)
-                # calculate wet_bulb
-                envphys_c.cwbt(ta, dpt, self.dem,
-                               wet_bulb, 0.01,
-                               16)
-                # # store last time step of wet_bulb
-                # self.wet_bulb_old = wet_bulb.copy()
-                # store in precip temp for use in precip
-                self.precip_temp = wet_bulb
-            else:
-                self.precip_temp = dpt
 
             if time == storm_start:
                 # Entered into a new storm period distribute the storm total
@@ -514,6 +491,7 @@ class ppt(image_data.image_data):
         for t in data.precip.index:
 
             dpt = queue['dew_point'].get(t)
+            precip_temp = queue['precip_temp'].get(t)
             ta = queue['air_temp'].get(t)
             # variables for wind redistribution
             az = queue['wind_direction'].get(t)
@@ -522,7 +500,8 @@ class ppt(image_data.image_data):
             dir_round_cell = queue['dir_round_cell'].get(t)
             cell_maxus = queue['cellmaxus'].get(t)
 
-            self.distribute(data.precip.loc[t], dpt, ta, t, data.wind_speed.loc[t],data.air_temp.loc[t],
+            self.distribute(data.precip.loc[t], dpt, precip_temp, ta, t,
+                            data.wind_speed.loc[t],data.air_temp.loc[t],
                             az, dir_round_cell, flatwind, cell_maxus, mask=mask)
 
             queue[self.variable].put([t, self.precip])
@@ -530,8 +509,6 @@ class ppt(image_data.image_data):
             queue['percent_snow'].put([t, self.percent_snow])
 
             queue['snow_density'].put([t, self.snow_density])
-
-            queue['precip_temp'].put([t, self.precip_temp])
 
             queue['last_storm_day_basin'].put([t, self.last_storm_day_basin])
 
