@@ -366,7 +366,7 @@ class ppt(image_data.image_data):
                 # Entered into a new storm period distribute the storm total
                 self._logger.debug('{0} Entering storm #{1}'
                                    .format(data.name, self.storm_id+1))
-                if self.precip_temp.min() < 2.0:
+                if precip_temp.min() < 2.0:
                     self._logger.debug('''Distributing Total Precip
                                         for Storm #{0}'''
                                        .format(self.storm_id+1))
@@ -376,11 +376,11 @@ class ppt(image_data.image_data):
                                                          self.min,
                                                          self.max)
 
-            if self.storming and self.precip_temp.min() < 2.0:
+            if self.storming and precip_temp.min() < 2.0:
                 self._logger.debug('''Calculating new snow density for
                                     storm #{0}'''.format(self.storm_id+1))
                 # determine the precip phase and den
-                snow_den, perc_snow = snow.calc_phase_and_density(self.precip_temp,
+                snow_den, perc_snow = snow.calc_phase_and_density(precip_temp,
                                                                   self.precip,
                                                                   nasde_model=self.nasde_model)
 
@@ -390,7 +390,7 @@ class ppt(image_data.image_data):
 
             # calculate decimal days since last storm
             self.storm_days = storms.time_since_storm_pixel(self.precip,
-                                                     self.precip_temp,
+                                                     precip_temp,
                                                      perc_snow,
                                                      storming=self.storming,
                                                      time_step=self.time_step/60.0/24.0,
