@@ -100,7 +100,7 @@ class SMRF():
 
         try:
             #Read in the original users config
-            ucfg = get_user_config(configFile, module = 'smrf')
+            ucfg = get_user_config(configFile, modules = 'smrf')
 
         except UnicodeDecodeError as e:
             print(e)
@@ -171,31 +171,32 @@ class SMRF():
 
         self.temp_dir = path
 
-        #Check the user config file for errors and report issues if any
+        # Check the user config file for errors and report issues if any
         self._logger.info("Checking config file for issues...")
         warnings, errors = check_config(ucfg)
         print_config_report(warnings, errors, logger = self._logger)
         self.config = ucfg.cfg
+        self.ucfg = ucfg
 
-        #Exit SMRF if config file has errors
+        # Exit SMRF if config file has errors
         if len(errors) > 0:
-            self._logger.error("Errors in the config file. See configuration status report above.")
+            self._logger.error("Errors in the config file. See configuration"
+                               " status report above.")
             sys.exit()
 
-        #write the config file to the output dir no matter where the project was ran
+        # Write the config file to the output dir no matter where the project is
         fname = 'config.ini'
         full_config_out = self.config['output']['out_location']
-        full_config_out = os.path.abspath(os.path.join(os.path.dirname(configFile),full_config_out,fname))
+        full_config_out = os.path.abspath(os.path.join(
+                                          os.path.dirname(configFile),
+                                          full_config_out,fname))
+
         self._logger.info("Writing config file with full options.")
-        generate_config(ucfg,full_config_out,section_titles = ucfg.mcfg.titles)
+        generate_config(self.ucfg,full_config_out)
 
-        #After writing update the paths to be full abs paths.
-        self.config = ucfg.update_config_paths(user_cfg_path = configFile)
+        # After writing update the paths to be full abs paths.
+        self.config = self.ucfg.update_config_paths(user_cfg_path=configFile)
 
-        # if a gridded dataset will be used
-        self.gridded = False
-        if 'gridded' in self.config:
-            self.gridded = True
 
         # process the system variables
         for k,v in self.config['system'].items():
@@ -203,30 +204,49 @@ class SMRF():
 
         os.environ['WORKDIR'] = self.temp_dir
 
-        # get the time sectionutils
+        # Get the time sectionutils
         self.start_date = pd.to_datetime(self.config['time']['start_date'])
         self.end_date = pd.to_datetime(self.config['time']['end_date'])
 
-        #Check to see if user specified a real end time.
+        # Check to see if user specified a real end time.
         if self.start_date > self.end_date:
             raise ValueError("start_date cannot be larger than end_date.")
 
-        if self.start_date > datetime.now() and not self.gridded or self.end_date > datetime.now() and not self.gridded:
-            raise ValueError("A date set in the future can only be used with WRF generated data!")
+        if ((self.start_date > datetime.now() and not self.gridded) or
+           (self.end_date > datetime.now() and not self.gridded)):
+            raise ValueError("A date set in the future can only be used with"
+                             " WRF generated data!")
 
-        #Get the timesetps correctly in the time zone
+        # Get the timesetps correctly in the time zone
         d = data.mysql_data.date_range(self.start_date, self.end_date,
-                                       timedelta(minutes=int(self.config['time']['time_step'])))
+                       timedelta(minutes=int(self.config['time']['time_step'])))
+
         tzinfo = pytz.timezone(self.config['time']['time_zone'])
         self.date_time = [di.replace(tzinfo=tzinfo) for di in d]
         self.time_steps = len(self.date_time)
+
+        # need to align date time
+        if self.config['albedo']['start_decay'] is not None:
+            self.config['albedo']['start_decay'] = self.config['albedo']['start_decay'].replace(tzinfo=tzinfo)
+            self.config['albedo']['end_decay'] = self.config['albedo']['end_decay'].replace(tzinfo=tzinfo)
+
+        # if a gridded dataset will be used
+        self.gridded = False
+        if 'gridded' in self.config:
+            self.gridded = True
+            self.forecast_flag = self.config['gridded']['forecast_flag']
+            self.n_forecast_hours = self.config['gridded']['n_forecast_hours']
+            # hours from start of day
+            self.day_hour = self.start_date - pd.to_datetime(d[0].strftime("%Y%m%d"))
+            self.day_hour = int(self.day_hour / np.timedelta64(1, 'h'))
+
 
         self.distribute = {}
 
         if self.config['logging']['qotw']:
             self._logger.info(getqotw())
 
-        # initialize the distribute dict
+        # Initialize the distribute dict
         self._logger.info('Started SMRF --> %s' % datetime.now())
         self._logger.info('Model start --> %s' % self.start_date)
         self._logger.info('Model end --> %s' % self.end_date)
@@ -333,9 +353,11 @@ class SMRF():
         Load the measurement point data for distributing to the DEM,
         must be called after the distributions are initialized. Currently, data
         can be loaded from three different sources:
+        
             * :func:`CSV files <smrf.data.loadData.wxdata>`
             * :func:`MySQL database <smrf.data.loadData.wxdata>`
             * :func:`Gridded data source (WRF) <smrf.data.loadGrid.grid>`
+
         After loading, :func:`~smrf.framework.mode_framework.SMRF.loadData`
         will call :func:`smrf.framework.model_framework.find_pixel_location`
         to determine the pixel locations of the point measurements and filter
@@ -373,7 +395,10 @@ class SMRF():
                                    self.end_date,
                                    time_zone=self.config['time']['time_zone'],
                                    dataType=self.config['gridded']['data_type'],
-                                   tempDir=self.temp_dir)
+                                   tempDir=self.temp_dir,
+                                   forecast_flag=self.forecast_flag,
+                                   day_hour=self.day_hour,
+                                   n_forecast_hours=self.n_forecast_hours)
 
             # set the stations in the distribute
             try:
@@ -401,7 +426,7 @@ class SMRF():
                                                                      'utm_y'), axis=1)
         #Old DB has X and Y
         except:
-            
+
             self.data.metadata['xi'] = \
                 self.data.metadata.apply(lambda row: find_pixel_location(row,
                                                                      self.topo.x,
@@ -455,7 +480,7 @@ class SMRF():
         #Does the user want to create a CSV copy of the station data used.
         if self.config["output"]['input_backup'] == True:
             self._logger.info('Backing up input data...')
-            backup_input(self.data, self.config)
+            backup_input(self.data, self.ucfg)
 
     def distributeData(self):
         """
@@ -828,9 +853,9 @@ class SMRF():
 
             # Incomplete request
             elif module is not None or out_var is not None:
-                raise ValueError('''Function requires an output module and
-                                variable name when outputting a specific
-                                variables''')
+                raise ValueError("Function requires an output module and"
+                                 " variable name when outputting a specific"
+                                 " variables")
 
             else:
                 # Output all the variables

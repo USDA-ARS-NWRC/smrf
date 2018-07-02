@@ -1,5 +1,5 @@
 # SMRF is built on the IPW
-FROM scotthavens/ipw:latest
+FROM usdaarsnwrc/ipw:latest
 
 MAINTAINER Scott Havens <scott.havens@ars.usda.gov>
 
@@ -55,12 +55,3 @@ VOLUME /data
 WORKDIR /data
 
 ENTRYPOINT ["/bin/bash"]
-
-
-
-
-
-
-
-
-
