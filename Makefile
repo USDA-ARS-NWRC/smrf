@@ -82,3 +82,7 @@ dist: clean
 
 install: clean
 	python setup.py install
+
+install_tests:
+	python setup.py build_ext --inplace
+

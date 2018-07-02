@@ -4,6 +4,7 @@ include HISTORY.rst
 include LICENSE
 include README.rst
 include smrf/framework/CoreConfig.ini
+include smrf/framework/recipes.ini
 
 recursive-include tests *
 recursive-exclude * __pycache__

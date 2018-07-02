@@ -31,13 +31,16 @@ from datetime import datetime, timedelta
 import pandas as pd
 import numpy as np
 import pytz
-
-from smrf import data, distribute, output, __core_config__
+from smrf import data, distribute, output, __core_config__, __recipes__
 from smrf.envphys import radiation
 from smrf.utils import queue, io
 from smrf.utils.utils import backup_input, getqotw, check_station_colocation
 from threading import Thread
 import shutil
+from inicheck.tools import get_user_config, check_config
+from inicheck.output import print_config_report,generate_config, print_recipe_summary
+from inicheck.utilities import pcfg, get_relative_to_cfg
+
 
 class SMRF():
     """
@@ -97,17 +100,18 @@ class SMRF():
 
         try:
             #Read in the original users config
-            self.config = io.get_user_config(configFile)
+            ucfg = get_user_config(configFile, modules = 'smrf')
 
-        except UnicodeDecodeError:
+        except UnicodeDecodeError as e:
+            print(e)
             raise Exception(('The configuration file is not encoded in '
                                     'UTF-8, please change and retry'))
 
         # start logging
         if external_logger == None:
 
-            if 'log_level' in self.config['logging']:
-                loglevel = self.config['logging']['log_level'].upper()
+            if 'log_level' in ucfg.cfg['logging']:
+                loglevel = ucfg.cfg['logging']['log_level'].upper()
             else:
                 loglevel = 'INFO'
 
@@ -117,12 +121,12 @@ class SMRF():
 
             # setup the logging
             logfile = None
-            if 'log_file' in self.config['logging']:
-                logfile = self.config['logging']['log_file']
+            if ucfg.cfg['logging']['log_file']!= None:
+                logfile = ucfg.cfg['logging']['log_file']
                 if not os.path.isabs(logfile):
                     logfile = os.path.abspath(os.path.join(
                                             os.path.dirname(configFile),
-                                            self.config['logging']['log_file']))
+                                            ucfg.cfg['logging']['log_file']))
 
                 if not os.path.isdir(os.path.dirname(logfile)):
                     os.makedirs(os.path.dirname(logfile))
@@ -152,11 +156,11 @@ class SMRF():
         for line in title:
             self._logger.info(line)
 
-        #Make the tmp and output directories if they do not exist
-        makeable_dirs = [self.config['output']['out_location'],os.path.join(self.config['output']['out_location'],'tmp')]
-        for d in makeable_dirs:
-            path = os.path.abspath(os.path.join(os.path.dirname(configFile),d))
+        out = get_relative_to_cfg(ucfg.cfg['output']['out_location'],ucfg.filename)
 
+        #Make the tmp and output directories if they do not exist
+        makeable_dirs = [out,os.path.join(out,'tmp')]
+        for path in makeable_dirs:
             if not os.path.isdir(path):
                 try:
                     #self._logger.info("Directory does not exist, \nCreating {0}".format(path))
@@ -167,37 +171,32 @@ class SMRF():
 
         self.temp_dir = path
 
-        #Bring the the master config file
-        mconfig = io.get_master_config()
-
-        #Add defaults.
-        self._logger.info("Adding defaults to config...")
-        self.config = io.add_defaults(self.config, mconfig)
-
-        #Check the user config file for errors and report issues if any
+        # Check the user config file for errors and report issues if any
         self._logger.info("Checking config file for issues...")
-        warnings, errors = io.check_config_file(self.config,mconfig,user_cfg_path=configFile)
-        io.print_config_report(warnings, errors, logger = self._logger)
+        warnings, errors = check_config(ucfg)
+        print_config_report(warnings, errors, logger = self._logger)
+        self.config = ucfg.cfg
+        self.ucfg = ucfg
 
-        #Exit SMRF if config file has errors
+        # Exit SMRF if config file has errors
         if len(errors) > 0:
-            self._logger.error("Errors in the config file. See configuration status report above.")
+            self._logger.error("Errors in the config file. See configuration"
+                               " status report above.")
             sys.exit()
 
-        #write the config file to the output dir no matter where the project was ran
+        # Write the config file to the output dir no matter where the project is
         fname = 'config.ini'
         full_config_out = self.config['output']['out_location']
-        full_config_out = os.path.abspath(os.path.join(os.path.dirname(configFile),full_config_out,fname))
+        full_config_out = os.path.abspath(os.path.join(
+                                          os.path.dirname(configFile),
+                                          full_config_out,fname))
+
         self._logger.info("Writing config file with full options.")
-        io.generate_config(self.config,full_config_out)
+        generate_config(self.ucfg,full_config_out)
 
-        #After writing update the paths to be full abs paths.
-        self.config = io.update_config_paths(self.config, configFile)
+        # After writing update the paths to be full abs paths.
+        self.config = self.ucfg.update_config_paths(user_cfg_path=configFile)
 
-        # if a gridded dataset will be used
-        self.gridded = False
-        if 'gridded' in self.config:
-            self.gridded = True
 
         # process the system variables
         for k,v in self.config['system'].items():
@@ -205,34 +204,54 @@ class SMRF():
 
         os.environ['WORKDIR'] = self.temp_dir
 
-        # get the time sectionutils
+        # Get the time sectionutils
         self.start_date = pd.to_datetime(self.config['time']['start_date'])
         self.end_date = pd.to_datetime(self.config['time']['end_date'])
 
-        #Check to see if user specified a real end time.
+        # Check to see if user specified a real end time.
         if self.start_date > self.end_date:
             raise ValueError("start_date cannot be larger than end_date.")
 
-        if self.start_date > datetime.now() and not self.gridded or self.end_date > datetime.now() and not self.gridded:
-            raise ValueError("A date set in the future can only be used with WRF generated data!")
+        if ((self.start_date > datetime.now() and not self.gridded) or
+           (self.end_date > datetime.now() and not self.gridded)):
+            raise ValueError("A date set in the future can only be used with"
+                             " WRF generated data!")
 
-        #Get the timesetps correctly in the time zone
+        # Get the timesetps correctly in the time zone
         d = data.mysql_data.date_range(self.start_date, self.end_date,
-                                       timedelta(minutes=int(self.config['time']['time_step'])))
+                       timedelta(minutes=int(self.config['time']['time_step'])))
+
         tzinfo = pytz.timezone(self.config['time']['time_zone'])
         self.date_time = [di.replace(tzinfo=tzinfo) for di in d]
         self.time_steps = len(self.date_time)
+
+        # need to align date time
+        if self.config['albedo']['start_decay'] is not None:
+            self.config['albedo']['start_decay'] = self.config['albedo']['start_decay'].replace(tzinfo=tzinfo)
+            self.config['albedo']['end_decay'] = self.config['albedo']['end_decay'].replace(tzinfo=tzinfo)
+
+        # if a gridded dataset will be used
+        self.gridded = False
+        if 'gridded' in self.config:
+            self.gridded = True
+            self.forecast_flag = self.config['gridded']['forecast_flag']
+            self.n_forecast_hours = self.config['gridded']['n_forecast_hours']
+            # hours from start of day
+            self.day_hour = self.start_date - pd.to_datetime(d[0].strftime("%Y%m%d"))
+            self.day_hour = int(self.day_hour / np.timedelta64(1, 'h'))
+
 
         self.distribute = {}
 
         if self.config['logging']['qotw']:
             self._logger.info(getqotw())
 
-        # initialize the distribute dict
+        # Initialize the distribute dict
         self._logger.info('Started SMRF --> %s' % datetime.now())
         self._logger.info('Model start --> %s' % self.start_date)
         self._logger.info('Model end --> %s' % self.end_date)
         self._logger.info('Number of time steps --> %i' % self.time_steps)
+
 
     def __enter__(self):
         return self
@@ -334,9 +353,11 @@ class SMRF():
         Load the measurement point data for distributing to the DEM,
         must be called after the distributions are initialized. Currently, data
         can be loaded from three different sources:
+        
             * :func:`CSV files <smrf.data.loadData.wxdata>`
             * :func:`MySQL database <smrf.data.loadData.wxdata>`
             * :func:`Gridded data source (WRF) <smrf.data.loadGrid.grid>`
+
         After loading, :func:`~smrf.framework.mode_framework.SMRF.loadData`
         will call :func:`smrf.framework.model_framework.find_pixel_location`
         to determine the pixel locations of the point measurements and filter
@@ -374,7 +395,10 @@ class SMRF():
                                    self.end_date,
                                    time_zone=self.config['time']['time_zone'],
                                    dataType=self.config['gridded']['data_type'],
-                                   tempDir=self.temp_dir)
+                                   tempDir=self.temp_dir,
+                                   forecast_flag=self.forecast_flag,
+                                   day_hour=self.day_hour,
+                                   n_forecast_hours=self.n_forecast_hours)
 
             # set the stations in the distribute
             try:
@@ -402,6 +426,7 @@ class SMRF():
                                                                      'utm_y'), axis=1)
         #Old DB has X and Y
         except:
+
             self.data.metadata['xi'] = \
                 self.data.metadata.apply(lambda row: find_pixel_location(row,
                                                                      self.topo.x,
@@ -455,7 +480,7 @@ class SMRF():
         #Does the user want to create a CSV copy of the station data used.
         if self.config["output"]['input_backup'] == True:
             self._logger.info('Backing up input data...')
-            backup_input(self.data, self.config)
+            backup_input(self.data, self.ucfg)
 
     def distributeData(self):
         """
@@ -828,9 +853,9 @@ class SMRF():
 
             # Incomplete request
             elif module is not None or out_var is not None:
-                raise ValueError('''Function requires an output module and
-                                variable name when outputting a specific
-                                variables''')
+                raise ValueError("Function requires an output module and"
+                                 " variable name when outputting a specific"
+                                 " variables")
 
             else:
                 # Output all the variables

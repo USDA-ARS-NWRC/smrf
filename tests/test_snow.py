@@ -22,7 +22,7 @@ class TestNASDE(unittest.TestCase):
         T = np.array([-10,-5,0,1])
         PP = np.array([100,100,100,100])
         s = snow.marks2017(T,PP)
-        r = [79,115,250,0]
+        r = [79,115,247,0]
 
         for i,rho in enumerate(s['rho_s']):
             msg = "NASDE Model Failed: marks2017({0},{3}) == {1}\nExpected {2}".format(T[i],rho,r[i],PP[i])

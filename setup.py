@@ -131,7 +131,7 @@ ext_modules += [
 with open('README.md') as readme_file:
     readme = readme_file.read()
 
-with open('HISTORY.rst') as history_file:
+with open('./docs/HISTORY.rst') as history_file:
     history = history_file.read()
 
 requirements = []
@@ -142,7 +142,7 @@ test_requirements = [
 
 setup(
     name='smrf',
-    version='0.4.10',
+    version='0.5.3',
     description="Distributed snow modeling for water resources",
     long_description=readme + '\n\n' + history,
     author="Scott Havens",
@@ -165,9 +165,9 @@ setup(
         ],
     include_package_data=True,
     package_data={'smrf':['./framework/CoreConfig.ini',
-			  './framework/.qotw']},
+			  './framework/.qotw', './framework/recipes.ini']},
     install_requires=requirements,
-    license="GPL-3.0",
+    license="CC0 1.0",
     zip_safe=False,
     keywords='smrf',
     classifiers=[
@@ -187,8 +187,7 @@ setup(
     tests_require=test_requirements,
     cmdclass=cmdclass,
     ext_modules=ext_modules,
-    scripts=['scripts/inicheck',
-	     'scripts/update_configs',
+    scripts=['scripts/update_configs',
              'scripts/run_smrf',
 	     'scripts/mk_project',
 	     'scripts/gen_maxus']
