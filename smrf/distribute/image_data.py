@@ -163,7 +163,7 @@ class image_data():
 
         Args:
             data: Pandas dataframe for a single time step
-            other_attribute (str): By defult, the distributed data matrix goes
+            other_attribute (str): By default, the distributed data matrix goes
                 into self.variable but this specifies another attribute in self
             zeros: data values that should be treated as zeros (not used)
 

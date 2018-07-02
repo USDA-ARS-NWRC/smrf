@@ -172,9 +172,15 @@ class wind(image_data.image_data):
                     float(self.config['station_default'])
 
                 for m in self.metadata.index:
-                    if m.lower() in self.config:
+                    sta_e = m.lower()
+                    if sta_e in self.config:
+                        if type(self.config[sta_e]) == list:
+                            enhancement = self.config[sta_e][0]
+                        else:
+                            enhancement = self.config[sta_e]
+
                         self.metadata.loc[m, 'enhancement'] = \
-                            float(self.config[m.lower()])
+                            float(enhancement)
 
 
     def distribute(self, data_speed, data_direction):
