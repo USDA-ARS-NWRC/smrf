@@ -139,7 +139,10 @@ class wind(image_data.image_data):
             for m in matching:
                 if m != 'veg_default':
                     ms = m.split('_')
-                    v[ms[1]] = float(self.config[m])
+                    if type(self.config[m]) == list:
+                        v[ms[1]] = float(self.config[m][0])
+                    else:
+                        v[ms[1]] = float(self.config[m])
             self.veg = v
 
         self._logger.debug('Created distribute.wind')
