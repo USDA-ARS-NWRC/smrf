@@ -14,3 +14,7 @@ double brutsaert(double ta, double lmba, double ea, double z, double pa);
 void dewpt(int ngrid, double *ea, int nthreads, double tol, double *dpt);
 double dew_pointp(double e, double tol);
 double	zerobr(double a, double b, double t);
+
+/* from iwbt.c */
+void iwbt(int ngrid, double *ta, double *td,	double *z, int nthreads, double tol,	double *tw);
+double wetbulb(double	ta,	double dpt, double press, double tol);

@@ -78,7 +78,7 @@ class SMRF():
                         'air_temp', 'dew_point', 'vapor_pressure',
                         'wind_speed', 'precip', 'percent_snow',
                         'snow_density', 'last_storm_day_basin',
-                        'storm_days',
+                        'storm_days', 'precip_temp',
                         'clear_vis_beam', 'clear_vis_diffuse',
                         'clear_ir_beam', 'clear_ir_diffuse',
                         'albedo_vis', 'albedo_ir', 'net_solar',
@@ -86,8 +86,7 @@ class SMRF():
                         'output', 'veg_ir_beam','veg_ir_diffuse',
                         'veg_vis_beam', 'veg_vis_diffuse',
                         'cloud_ir_beam', 'cloud_ir_diffuse', 'cloud_vis_beam',
-                        'cloud_vis_diffuse', 'thermal_clear', 'wind_direction',
-                        'flatwind', 'wind_direction']
+                        'cloud_vis_diffuse', 'thermal_clear', 'wind_direction']
 
     def __init__(self, configFile, external_logger=None):
         """
@@ -240,7 +239,6 @@ class SMRF():
             self.day_hour = self.start_date - pd.to_datetime(d[0].strftime("%Y%m%d"))
             self.day_hour = int(self.day_hour / np.timedelta64(1, 'h'))
 
-
         self.distribute = {}
 
         if self.config['logging']['qotw']:
@@ -316,11 +314,13 @@ class SMRF():
 
         # 2. Vapor pressure
         self.distribute['vapor_pressure'] = \
-            distribute.vapor_pressure.vp(self.config['vapor_pressure'])
+            distribute.vapor_pressure.vp(self.config['vapor_pressure'],
+                                         self.config['precip']['precip_temp_method'])
 
         # 3. Wind
         self.distribute['wind'] = \
             distribute.wind.wind(self.config['wind'],
+                                 self.config['precip']['distribute_drifts'],
                                  self.temp_dir)
 
         # 4. Precipitation
@@ -353,7 +353,7 @@ class SMRF():
         Load the measurement point data for distributing to the DEM,
         must be called after the distributions are initialized. Currently, data
         can be loaded from three different sources:
-        
+
             * :func:`CSV files <smrf.data.loadData.wxdata>`
             * :func:`MySQL database <smrf.data.loadData.wxdata>`
             * :func:`Gridded data source (WRF) <smrf.data.loadGrid.grid>`
@@ -560,10 +560,15 @@ class SMRF():
             # 4. Precipitation
             self.distribute['precip'].distribute(self.data.precip.loc[t],
                                                 self.distribute['vapor_pressure'].dew_point,
+                                                self.distribute['vapor_pressure'].precip_temp,
+                                                self.distribute['air_temp'].air_temp,
                                                 t,
                                                 self.data.wind_speed.loc[t],
                                                 self.data.air_temp.loc[t],
-                                                self.topo.mask)
+                                                self.distribute['wind'].wind_direction,
+                                                self.distribute['wind'].dir_round_cell,
+                                                self.distribute['wind'].wind_speed,
+                                                self.distribute['wind'].cellmaxus)
 
             # 5. Albedo
             self.distribute['albedo'].distribute(t,
@@ -672,6 +677,11 @@ class SMRF():
             self.thread_variables += ['thermal_cloud']
         if self.distribute['thermal'].correct_veg:
             self.thread_variables += ['thermal_veg']
+
+        # add some variables to thread_variables based on what we're doing
+        if not self.gridded:
+            self.thread_variables += ['flatwind']
+            self.thread_variables += ['cellmaxus', 'dir_round_cell']
 
         for v in self.thread_variables:
             q[v] = queue.DateQueue_Threading(self.max_values, self.time_out)
