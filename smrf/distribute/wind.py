@@ -138,12 +138,12 @@ class wind(image_data.image_data):
             matching = [s for s in self.config.keys() if "veg_" in s]
             v = {}
             for m in matching:
-                if m != 'veg_default':
-                    ms = m.split('_')
-                    if type(self.config[m]) == list:
-                        v[ms[1]] = float(self.config[m][0])
-                    else:
-                        v[ms[1]] = float(self.config[m])
+                ms = m.split('_')
+                if type(self.config[m]) == list:
+                    v[ms[1]] = float(self.config[m][0])
+                else:
+                    v[ms[1]] = float(self.config[m])
+
             self.veg = v
 
             # whether or not we will use this data to redistribute precip
@@ -321,8 +321,17 @@ class wind(image_data.image_data):
             cellmaxus[ind] = self.maxus[i][ind]
 
         # correct for veg
-        for i, v in enumerate(self.veg):
-            cellmaxus[self.veg_type == int(v)] += self.veg[v]
+        dynamic_mask = np.ones(cellmaxus.shape)
+        for i,v in enumerate(self.veg):
+            # Adjust veg types that were specified by the user
+            if v != 'default':
+                ind = self.veg_type == int(v)
+                dynamic_mask[ind] = 0
+                cellmaxus[ind] += self.veg[v]
+
+        # Apply the veg default to those that weren't messed with
+        if self.veg['default'] != 0:
+            cellmaxus[~ind] += self.veg['default']
 
         # correct unreasonable values
         cellmaxus[cellmaxus > 32] = 32
