@@ -9,6 +9,7 @@ MAINTAINER Scott Havens <scott.havens@ars.usda.gov>
 
 RUN apt-get update -y \
     && apt-get install -y --no-install-recommends libblas-dev \
+    git \
     liblapack-dev \
     libatlas-base-dev \
     libffi-dev \
