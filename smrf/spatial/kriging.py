@@ -2,7 +2,6 @@
 import numpy as np
 import pandas as pd
 from pykrige.ok import OrdinaryKriging
-import matplotlib.pyplot as plt
 
 class KRIGE:
     '''
