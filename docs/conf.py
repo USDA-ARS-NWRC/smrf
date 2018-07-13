@@ -81,7 +81,7 @@ master_doc = 'index'
 
 # General information about the project.
 project = u'SMRF'
-copyright = u'2016, Scott Havens, USDA Agricultural Research Service'
+copyright = u'2018, Scott Havens, USDA Agricultural Research Service'
 author = u'Scott Havens'
 # The version info for the project you're documenting, acts as replacement for
 # |version| and |release|, also used in various other places throughout the

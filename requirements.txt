@@ -3,7 +3,7 @@ Babel==2.5.1
 certifi==2017.11.5
 chardet==3.0.4
 coloredlogs==6.1
-Cython==0.23.4
+Cython==0.28.4
 docutils==0.14
 flake8==3.5.0
 humanfriendly==4.6

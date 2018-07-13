@@ -11,7 +11,7 @@ measured or derived variables are needed
 * Precipitation
 * Wind speed and direction
 * Cloud factor
-   
+
 This page documents a more detailed description of each of the input variables,
 the types of input data that can be used for SMRF, and the data format for
 passing the data to SRMF.
@@ -22,11 +22,11 @@ Variable Descriptions
 
 Air temperature [Celcius]
    Measured or modeled air temperature at the surface
-   
+
 Vapor pressure [Pascals]
    Derived from the air temperature and measured relative humidity. Can be calculated
    using the IPW utility ``sat2vp``.
-   
+
 Precipitation [mm]
    Instantaneous precipitation with no negative values. If using a weighing precipitation
    gauge that outputs accumulated precipitation, the value must be converted.
@@ -34,17 +34,17 @@ Precipitation [mm]
 Wind speed [meters per second]
    The measured wind speed at the surface. Typically an average value over the measurement
    interval.
-   
+
 Wind direction [degrees]
    The measured wind direction at the surface. Typically an average value over the measurement
    interval.
-   
+
 Cloud factor [None]
     The percentage between 0 and 1 of the incoming solar radiation that is obstructed by clouds.
     0 equates to no light and 1 equates to no clouds.  The cloud factor is derived from the
     measured solar radiation and the modeled clear sky solar raditation.  The modeled clear sky
     solar radiation can be calculated using the IPW utility ``twostream``.
-   
+
 
 
 Types of Input Data
@@ -56,13 +56,14 @@ location must have a X, Y, and elevation associated with it.
 Weather Stations
 ````````````````
 
-Generally, SMRF will be ran using measured variables from weather stations in and around the area
-of interest. Potential websites for finding data for weather stations:
+Generally, SMRF will be run using measured variables from weather stations in
+and around the area of interest. Below are some potential websites for finding
+data for weather stations:
 
 * `Mesowest <http://mesowest.utah.edu>`_
 * `NRCS SNOTEL <http://www.wcc.nrcs.usda.gov/snow/>`_
 * `California Data Exchange Center <http://cdec.water.ca.gov/>`_
-   
+
 Gridded Model Output
 ````````````````````
 
@@ -152,8 +153,8 @@ column. A benefit to using MySQL is that we can use a ``client`` as a way to gro
 stations to be used for a given model run.  For example, we can have a client named BRB, which
 will have all the station ID's for the stations that would be used to run SMRF.  Then we can
 specify the client in the configuration file instead of listing out all the station ID's.  To use
-this feature, a table must be created to hold this information. Then the station  ID's matching 
-the client will only be imported.  The following is how the table should be setup. Source is used 
+this feature, a table must be created to hold this information. Then the station  ID's matching
+the client will only be imported.  The following is how the table should be setup. Source is used
 to track where the data is coming from.
 
 ==========  ======   ======
@@ -177,42 +178,38 @@ Gridded Dataset
 Gridded datasets can come in many forms and the :mod:`smrf.data.loadGrid` module is meant to import
 gridded datasets.  Currently, SMRF can ingest WRF output in the standard wrf_out NetCDF files. SMRF
 looks for specific variables with the WRF output file and converts them to the related SMRF values.
-The grid cells are imported as if they are a single measurement station with it's own X, Y, and 
+The grid cells are imported as if they are a single measurement station with it's own X, Y, and
 elevation. The minimum variables required are:
 
 Times
    The date time for each timestep
-   
+
 XLAT
    Latitude of each grid cell
-   
+
 XLONG
    Longitude of each grid cell
-    
+
 HGT
    Elevation of each grid cell
-   
+
 T2
    Air temperature at 2 meters above the surface
-   
+
 DWPT
    Dew point temperature at 2 meters above the surface, which will be used to calculate vapor pressure
-   
+
 GLW
    Incoming thermal radiation at the surface
-   
+
 RAINNC
    Accumulated precipitation
-   
+
 CLDFRA
    Cloud fraction for all atmoshperic layers, the average will be used at the SMRF cloud factor
-   
+
 UGRD
    Wind vector, u component
-   
+
 VGRD
    Wind vector, v component
-
-
-
-

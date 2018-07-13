@@ -9,7 +9,7 @@ Detrending Measurement Data
 Most meterological variables used in SMRF have an underlying elevational gradient.  Therefore,
 all of the distribution methods can estimate the gradient from the measurement data and apply
 the elevational gradient to the DEM during distribution. Here, the theory of how the elevational
-gradient is calcualted, removed from the data, and reapplied after distirbution is explained. All
+gradient is calculated, removed from the data, and reapplied after distirbution is explained. All
 the distribution methods follow this pattern and detrending can be ignored by setting ``detrend: False``
 in the configuration.
 
@@ -18,8 +18,8 @@ in the configuration.
    The elevational trend for meterological stations is calculated using all available stations
    in the modeling domain. A line is fit to the measurement data with the slope as the elevational
    gradient (:numref:`Fig. %sa <air_temp_trend>`, :numref:`Fig. %sa <precip_trend>`, and :numref:`Fig. %sa <grid_trend>`). The slope
-   can be constrained as positive, negative, or no contraint. 
-   
+   can be constrained as positive, negative, or no contraint.
+
    Gridded datasets have significantly more information than point measurements. Therefore, the
    approach is slightly different for calculating the elevational trend line.  To limit the number of
    grid cells that contribute to the elevational trend, only those grid cells within the mask are
@@ -29,27 +29,27 @@ in the configuration.
 
 **Distributing the Residuals**
 
-   The point measurements minus the elevational trend at the stations (or grid cell's) elevation is 
+   The point measurements minus the elevational trend at the stations (or grid cell's) elevation is
    the measurement residual. The residuals are then distributed using the desired distribution
-   method (:numref:`Fig. %sb <air_temp_trend>`, :numref:`Fig. %sb <precip_trend>`, and :numref:`Fig. %sb <grid_trend>`) and show the 
+   method (:numref:`Fig. %sb <air_temp_trend>`, :numref:`Fig. %sb <precip_trend>`, and :numref:`Fig. %sb <grid_trend>`) and show the
    deviance from the estimated elevational trend.
 
-   
+
 **Retrending the Distributed Residuals**
 
-   The distributed residuals are added to the elevational trend line evaluated at each of the DEM 
+   The distributed residuals are added to the elevational trend line evaluated at each of the DEM
    grid points (:numref:`Fig. %sc <air_temp_trend>`, :numref:`Fig. %sc <precip_trend>`, and :numref:`Fig. %sc <grid_trend>`). This
    produces a distributed value that has the underlying elevational trend in the measurment data but
    also takes into account local changes in that value.
-   
+
 .. note ::
 
    Constraints can be placed on the elevational trend to be either positive, negative, or no constraint.
    However, if a constraint is applied and the measurement data does not fit the constratint (for example
    negavite trend for air temp but there is a positive trend during an inversion or night time), then
    the slope of the trend line will be set to zero. This will distribute the data based on the underlying
-   method and not apply any trends.   
-   
+   method and not apply any trends.
+
 
 Methods
 ```````
@@ -77,13 +77,13 @@ set of measurement locations, the value at any :math:`x,y` location can be calcu
 .. math::
 
    u(x,y) = \frac{\sum\limits_{i=1}^{N} w_i(x,y)~u_i}{\sum\limits_{i=1}^{N}w(x,y)}
-   
+
 where
 
 .. math::
-   
+
    w_i(x,y) = \frac{1}{d_i(x,y)^p}
-   
+
 and :math:`d_i(x,y)` is the distance between the model grid cell and the measurement location raised to
 a power of :math:`p` (typcially defaults to 2). The results of the inverse distance weighting, :math:`u(x,y)`,
 is shown in :numref:`Figure %sb <air_temp_trend>`.
@@ -102,7 +102,7 @@ Detrended Kriging
    Distribution of precipitation using detrended kriging. a) Precipitation as a function
    of elevation. b) Kriging of the residuals. c) Retrending the residuals to the
    DEM elevation.
-   
+
 Detrended kriging is based on the work developed by Garen et al. (1994) :cite:`Garen&al:1994`.
 
 Detrended kriging uses a model semivariogram based on the station locations to distribute the measurement data
@@ -112,7 +112,7 @@ points, the semivariogram :math:`\hat{\gamma}` is defined as:
 
 .. math::
    \hat{\gamma}( \mathbf{h} ) = \frac{1}{2m} \sum\limits_{i=1}^{m} [z(\mathbf{x}_i) - z(\mathbf{x}_i + \mathbf{h})]^2
-   
+
 where :math:`\mathbf{h}` is the seperation vector between measurement points, :math:`m` is the number of points at
 lag :math:`\mathbf{h}`, and :math:`z(\mathbf{x})` and :math:`z(\mathbf{x} + \mathbf{h})` represent the
 measurement values at locations seperated by :math:`\mathbf{h}`. For the purposes of the detrended kriging within
@@ -146,10 +146,10 @@ Gridded Interpolation
    Distribution of air temperature using gridded interploation. a) Air temperature as a function
    of elevation. b) Linear interpolation of the residuals. c) Retrending the residuals to the
    DEM elevation.
- 
+
 Gridded interpolation was developed for gridded datasets that have orders of magnitude more data than station measurements
-(i.e. 3000 grid points for a gridded forecast). This ensures that the computions required for inverse distance weighting 
-or detrended kriging are not performed to save memory and computational time. The interpolation uses :mod:`scipy.interpolate.griddata` 
+(i.e. 3000 grid points for a gridded forecast). This ensures that the computions required for inverse distance weighting
+or detrended kriging are not performed to save memory and computational time. The interpolation uses :mod:`scipy.interpolate.griddata`
 (documentation `here`_) to interpolate the values to the model domain. Four different interpolation methods can be used:
 
 * linear (default)
@@ -159,6 +159,5 @@ or detrended kriging are not performed to save memory and computational time. Th
 
 
 
-   
+
 .. _here: http://docs.scipy.org/doc/scipy/reference/generated/scipy.interpolate.griddata.html
-   
