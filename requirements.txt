@@ -39,4 +39,4 @@ sphinxcontrib-bibtex==0.3.5
 sphinxcontrib-websupport==1.0.1
 urllib3==1.22
 utm==0.4.0
-pykrige == 1.3.2
+git+https://github.com/USDA-ARS-NWRC/PyKrige.git@master
