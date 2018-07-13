@@ -73,11 +73,11 @@ class TestRME(unittest.TestCase):
         a = compare_image('air_temp',self.gold,self.output)
         assert(a)
 
-    def testDewPoint(self):
+    def testPrecipTemp(self):
         """
         Compare that the dew point is the same as the gold file provided.
         """
-        a = compare_image('dew_point',self.gold,self.output)
+        a = compare_image('precip_temp',self.gold,self.output)
         assert(a)
 
     def testNetSolar(self):
