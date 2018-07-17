@@ -10,11 +10,6 @@ services:
 before_install:
   - docker build -t usdaarsnwrc/smrf .
 
-# change from 'script: python setup.py test' to this
-# script: coverage run --source smrf setup.py test
-#docker run -it  bash "pip install -e . && pip install -r requirements.txt && python setup.py test";
 script:
-  docker run -it usdaarsnwrc/smrf -c "cd /code/smrf && coverage run --source smrf setup.py test; coveralls"
+  docker run -it usdaarsnwrc/smrf test
 
-#after_success:
-#  docker run -it usdaarsnwrc/smrf -c "cd /code/smrf && coveralls"

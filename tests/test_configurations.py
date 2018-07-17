@@ -17,11 +17,11 @@ class SMRFTestCase(unittest.TestCase):
         """
         
         # check whether or not this is being ran as a single test or part of the suite
-        if os.path.isfile('test_base_config.ini'):
-            config_file = 'test_base_config.ini'
+        config_file = 'test_base_config.ini'
+        if os.path.isfile(config_file):
             self.test_dir = ''
-        elif os.path.isfile(os.path.join('tests', 'test_base_config.ini')):
-            config_file = os.path.join('tests', 'test_base_config.ini')
+        elif os.path.isfile(os.path.join('tests', config_file)):
+            config_file = os.path.join('tests', config_file)
             self.test_dir = 'tests'
         else:
             raise Exception('Configuration file not found for testing')
@@ -56,8 +56,9 @@ class TestConfigurations(SMRFTestCase):
         """
         
         # test the base run with the config file
-        result = run_smrf(self.config_file)
-        self.assertTrue(result)
+        #result = run_smrf(self.config_file)
+        #self.assertTrue(result)
+        self.assertTrue(False)
         
         # test the base run with the config file
         result = run_smrf(self.base_config)
