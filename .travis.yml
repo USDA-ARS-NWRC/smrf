@@ -1,31 +1,21 @@
 # Config file for automatic testing at travis-ci.org
-# This file will be regenerated if you run travis_pypi_setup.py
+
+sudo: required
 
 language: python
 
-env:
-  - TOXENV=py35
-  - TOXENV=py34
-  - TOXENV=py33
-  - TOXENV=py27
-  - TOXENV=py26
-  - TOXENV=pypy
+services:
+  - docker
 
-# command to install dependencies, e.g. pip install -r requirements.txt --use-mirrors
-install: pip install -U tox
+before_install:
+  - docker build -t usdaarsnwrc/smrf .
+  - docker run usdaarsnwrc/smrf test
 
-# command to run tests, e.g. python setup.py test
-script: tox
+# change from 'script: python setup.py test' to this
+# script: coverage run --source smrf setup.py test
+#docker run -it  bash "pip install -e . && pip install -r requirements.txt && python setup.py test";
+script:
+  docker run -it usdaarsnwrc/smrf -c "cd /code/smrf && python3 setup.py test"
 
-# After you create the Github repo and add it to Travis, run the
-# travis_pypi_setup.py script to finish PyPI deployment setup
-deploy:
-  provider: pypi
-  distributions: sdist bdist_wheel
-  user: scotthavens
-  password:
-    secure: PLEASE_REPLACE_ME
-  on:
-    tags: true
-    repo: scotthavens/smrf
-    condition: $TOXENV == py27
+#after_success:
+#  coveralls
