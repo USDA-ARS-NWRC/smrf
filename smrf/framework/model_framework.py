@@ -38,6 +38,7 @@ from smrf.utils.utils import backup_input, getqotw, check_station_colocation
 from threading import Thread
 import shutil
 from inicheck.tools import get_user_config, check_config
+from inicheck.config import UserConfig
 from inicheck.output import print_config_report,generate_config, print_recipe_summary
 from inicheck.utilities import pcfg, get_relative_to_cfg
 
@@ -88,23 +89,31 @@ class SMRF():
                         'cloud_ir_beam', 'cloud_ir_diffuse', 'cloud_vis_beam',
                         'cloud_vis_diffuse', 'thermal_clear', 'wind_direction']
 
-    def __init__(self, configFile, external_logger=None):
+    def __init__(self, config, external_logger=None):
         """
         Initialize the model, read config file, start and end date, and logging
         """
         # read the config file and store
-        if not os.path.isfile(configFile):
-            raise Exception('Configuration file does not exist --> {}'
-                            .format(configFile))
-
-        try:
-            #Read in the original users config
-            ucfg = get_user_config(configFile, modules = 'smrf')
-
-        except UnicodeDecodeError as e:
-            print(e)
-            raise Exception(('The configuration file is not encoded in '
+        if isinstance(config, str):
+            if not os.path.isfile(config):
+                raise Exception('Configuration file does not exist --> {}'
+                                .format(config))
+            configFile = config    
+            try:
+                #Read in the original users config
+                ucfg = get_user_config(config, modules = 'smrf')
+    
+            except UnicodeDecodeError as e:
+                print(e)
+                raise Exception(('The configuration file is not encoded in '
                                     'UTF-8, please change and retry'))
+        
+        elif isinstance(config, UserConfig):
+            ucfg = config
+            configFile = ''
+            
+        else:
+            raise Exception('Config passed to SMRF is neither file name nor UserConfig instance')
 
         # start logging
         if external_logger == None:
@@ -932,35 +941,42 @@ class SMRF():
         return title
 
 
-def run_smrf(config_file):
+def run_smrf(config):
     """
     Function that runs smrf how it should be operate for full runs.
 
     Args:
-        config_file: string path to the config file
+        config: string path to the config file or inicheck UserConfig instance
     """
     start = datetime.now()
     # initialize
-    with SMRF(config_file) as s:
-        # load topo data
-        s.loadTopo()
-
-        # initialize the distribution
-        s.initializeDistribution()
-
-        # initialize the outputs if desired
-        s.initializeOutput()
-
-        # load weather data  and station metadata
-        s.loadData()
-
-        # distribute
-        s.distributeData()
-
-        #post process if necessary
-        s.post_process()
-
-        s._logger.info(datetime.now() - start)
+    with SMRF(config) as s:
+        try:
+            # load topo data
+            s.loadTopo()
+    
+            # initialize the distribution
+            s.initializeDistribution()
+    
+            # initialize the outputs if desired
+            s.initializeOutput()
+    
+            # load weather data  and station metadata
+            s.loadData()
+    
+            # distribute
+            s.distributeData()
+    
+            #post process if necessary
+            s.post_process()
+    
+            s._logger.info(datetime.now() - start)
+            
+            return True
+            
+        except Exception as e:
+            s._logger.warn(e)
+            return False
 
 def find_pixel_location(row, vec, a):
         """
