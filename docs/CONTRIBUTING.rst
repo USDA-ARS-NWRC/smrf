@@ -142,3 +142,9 @@ Tips
 To run a subset of tests::
 
     $ python -m unittest discover -v
+
+To check the coverage of the tests::
+
+	$ coverage run --source smrf setup.py test
+	$ coverage html
+	$ xdg-open htmlcov/index.html

@@ -3,6 +3,7 @@ Babel==2.5.1
 certifi==2017.11.5
 chardet==3.0.4
 coloredlogs==6.1
+coverage>=4.5.1
 Cython==0.28.4
 docutils==0.14
 flake8==3.5.0
@@ -31,6 +32,7 @@ pytz==2017.3
 PyYAML==3.11
 requests==2.18.4
 scipy==1.0.0
+setuptools
 six==1.11.0
 snowballstemmer==1.2.1
 Sphinx==1.6.6
