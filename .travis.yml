@@ -9,7 +9,6 @@ services:
 
 before_install:
   - docker build -t usdaarsnwrc/smrf .
-  - docker run usdaarsnwrc/smrf test
 
 # change from 'script: python setup.py test' to this
 # script: coverage run --source smrf setup.py test
