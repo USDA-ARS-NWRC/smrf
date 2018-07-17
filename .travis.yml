@@ -14,7 +14,7 @@ before_install:
 # script: coverage run --source smrf setup.py test
 #docker run -it  bash "pip install -e . && pip install -r requirements.txt && python setup.py test";
 script:
-  docker run -it usdaarsnwrc/smrf -c "cd /code/smrf && python3 setup.py test"
+  docker run -it usdaarsnwrc/smrf -c "cd /code/smrf && coverage run --source smrf setup.py test; coveralls"
 
 #after_success:
-#  coveralls
+#  docker run -it usdaarsnwrc/smrf -c "cd /code/smrf && coveralls"
