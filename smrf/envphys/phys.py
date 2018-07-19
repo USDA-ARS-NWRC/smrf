@@ -52,3 +52,18 @@ def rh2vp(ta, rh):
     satvp = thermal_radiation.sati(ta + 273.15)
     
     return satvp * rh
+
+def satvp(dpt):
+    """
+    Calculate the saturation vapor pressure at the dew point
+    temperature.
+    
+    Args:
+        dwpt: array of dew point temperature in [C]
+        
+    Returns
+       vapor_pressure
+    """
+    
+    return thermal_radiation.sati(dpt + 273.15)
+    

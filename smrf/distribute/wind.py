@@ -188,6 +188,8 @@ class wind(image_data.image_data):
 
                         self.metadata.loc[m, 'enhancement'] = \
                             float(enhancement)
+        else:
+            self.flatwind = None
 
         if not self.distribute_drifts:
             # we have to pass these to precip, so make them none if we won't use them
@@ -282,10 +284,10 @@ class wind(image_data.image_data):
             queue['wind_speed'].put([t, self.wind_speed])
             queue['wind_direction'].put([t, self.wind_direction])
 
-            if not self.gridded:
-                queue['flatwind'].put([t, self.flatwind])
-                queue['cellmaxus'].put([t,self.cellmaxus])
-                queue['dir_round_cell'].put([t,self.dir_round_cell])
+#             if not self.gridded:
+            queue['flatwind'].put([t, self.flatwind])
+            queue['cellmaxus'].put([t,self.cellmaxus])
+            queue['dir_round_cell'].put([t,self.dir_round_cell])
 
     def simulateWind(self, data_speed):
         """

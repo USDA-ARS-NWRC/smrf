@@ -56,6 +56,8 @@ class GRID:
                 yi = np.argmin(np.abs(y - my[i]))
 
                 self.mask[i] = mask[yi, xi]
+        else:
+            self.mask = np.ones_like(self.mx, dtype=bool)
 
     def detrendedInterpolation(self, data, flag=0, method='linear'):
         """

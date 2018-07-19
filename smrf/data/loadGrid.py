@@ -325,7 +325,15 @@ class grid():
         # GET THE TIMES
         t = f.variables['Times']
         t.set_auto_maskandscale(False)
-        times = [('').join(v) for v in t]
+        try:
+            times = [('').join(v) for v in t]
+        except TypeError:
+            times = []
+            for v in t:
+                times.append(''.join([s.decode('utf-8') for s in v]))
+        except Exception:
+            raise Exception('Could not convert WRF times to readable format')
+        
         times = [v.replace('_', ' ') for v in times]  # remove the underscore
         time = pd.to_datetime(times)
 
@@ -343,25 +351,30 @@ class grid():
             self.air_temp[g] = v
 
         self._logger.debug('Loading dew_point and calculating vapor_pressure')
-        self.vapor_pressure = pd.DataFrame(index=time, columns=primary_id)
         self.dew_point = pd.DataFrame(index=time, columns=primary_id)
         for i in a:
             g = 'grid_y%i_x%i' % (i[0], i[1])
             v = f.variables['DWPT'][time_ind, i[0], i[1]]
             self.dew_point[g] = v
+            
+            
 
-            tmp_file = os.path.join(self.tempDir, 'dpt.txt')
-            np.savetxt(tmp_file, v)
+#             tmp_file = os.path.join(self.tempDir, 'dpt.txt')
+#             np.savetxt(tmp_file, v)
+# 
+#             dp_cmd = 'satvp < %s' % tmp_file
+#             p = sp.Popen(dp_cmd, shell=True, stdout=sp.PIPE)
+#             out, err = p.communicate()
+# 
+#             x = np.array(filter(None, out.split('\n')), dtype='|S8')
+#             y = x.astype(np.float64)
+# 
+#             self.vapor_pressure[g] = y
+#         sp.Popen('rm %s' % tmp_file, shell=True)
 
-            dp_cmd = 'satvp < %s' % tmp_file
-            p = sp.Popen(dp_cmd, shell=True, stdout=sp.PIPE)
-            out, err = p.communicate()
-
-            x = np.array(filter(None, out.split('\n')), dtype='|S8')
-            y = x.astype(np.float64)
-
-            self.vapor_pressure[g] = y
-        sp.Popen('rm %s' % tmp_file, shell=True)
+        self._logger.debug('Calculating vapor_pressure')
+        satvp = phys.satvp(self.dew_point.values)
+        self.vapor_pressure = pd.DataFrame(satvp, index=time, columns=primary_id)
 
         self._logger.debug('Loading thermal')
         self.thermal = pd.DataFrame(index=time, columns=primary_id)
