@@ -56,9 +56,9 @@ class TestConfigurations(SMRFTestCase):
         """
         
         # test the base run with the config file
-        #result = run_smrf(self.config_file)
-        #self.assertTrue(result)
-        self.assertTrue(False)
+        result = run_smrf(self.config_file)
+        self.assertTrue(result)
+#         self.assertTrue(False)
         
         # test the base run with the config file
         result = run_smrf(self.base_config)

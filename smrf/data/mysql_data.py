@@ -142,6 +142,7 @@ class database:
 
         return df
 
+    #  TODO: is this used anymore?
     def query(self, query, params):
         return self._db_cur.execute(query, params)
 
@@ -149,18 +150,18 @@ class database:
         self._db_connection.close()
 
 
-def to_utm(row):
-    """
-    Convert a row from data frame to X,Y
-    """
-    if (row['X'] is None) and (row['Y'] is None):
-        return pd.Series(utm.from_latlon(row['latitude'],
-                                         row['longitude'])[:2])
-    elif np.isnan(row['X']) and np.isnan(row['Y']):
-        return pd.Series(utm.from_latlon(row['latitude'],
-                                         row['longitude'])[:2])
-    else:
-        return pd.Series([row['X'], row['Y']])
+# def to_utm(row):
+#     """
+#     Convert a row from data frame to X,Y
+#     """
+#     if (row['X'] is None) and (row['Y'] is None):
+#         return pd.Series(utm.from_latlon(row['latitude'],
+#                                          row['longitude'])[:2])
+#     elif np.isnan(row['X']) and np.isnan(row['Y']):
+#         return pd.Series(utm.from_latlon(row['latitude'],
+#                                          row['longitude'])[:2])
+#     else:
+#         return pd.Series([row['X'], row['Y']])
 
 
 def date_range(start_date, end_date, increment):

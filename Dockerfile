@@ -41,7 +41,9 @@ RUN mkdir /data \
     && python3 -m pip install --upgrade pip \
     && python3 -m pip install setuptools wheel \
     && python3 -m pip install -r /code/smrf/requirements.txt \
+    && python3 setup.py build_ext --inplace \
     && python3 setup.py install \
+    && python3 -m compileall . \
     && cd /code/weather_forecast_retrieval-master \
     && python3 -m pip install pyproj==1.9.5.1 \
     && python3 -m pip install -r requirements_dev.txt \

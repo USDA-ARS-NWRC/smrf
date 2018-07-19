@@ -688,9 +688,9 @@ class SMRF():
             self.thread_variables += ['thermal_veg']
 
         # add some variables to thread_variables based on what we're doing
-        if not self.gridded:
-            self.thread_variables += ['flatwind']
-            self.thread_variables += ['cellmaxus', 'dir_round_cell']
+#         if not self.gridded:
+        self.thread_variables += ['flatwind']
+        self.thread_variables += ['cellmaxus', 'dir_round_cell']
 
         for v in self.thread_variables:
             q[v] = queue.DateQueue_Threading(self.max_values, self.time_out)
@@ -975,7 +975,7 @@ def run_smrf(config):
             return True
             
         except Exception as e:
-            s._logger.warn(e)
+            s._logger.exception(e)
             return False
 
 def find_pixel_location(row, vec, a):
