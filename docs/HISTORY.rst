@@ -31,7 +31,7 @@ History
 * Moved to a new station database format
 
 
-0.5.0 (2017-04-18)
+0.5.0 (2018-04-18)
 ------------------
 
 * Removed inicheck to make its own package.
@@ -40,3 +40,12 @@ History
 * Modularized some functions for easiuer use scripting
 * Added netcdf functionality to gen_maxus
 * Added first integration test
+
+
+0.6.0 (2018-07-13)
+------------------
+
+* Added a new feature allowing wet bulb to be used to determine the phase of the precip.
+* Added a new feature to redistribute precip due to wind.
+* Added in kriging as a new distribution option all distributable variables.
+
