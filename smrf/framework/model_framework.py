@@ -975,7 +975,7 @@ def run_smrf(config):
             return True
             
         except Exception as e:
-            s._logger.warn(e)
+            s._logger.exception(e)
             return False
 
 def find_pixel_location(row, vec, a):
