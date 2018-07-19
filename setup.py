@@ -13,7 +13,7 @@ if sys.argv[-1] != 'test':
 	#Grab and write the gitVersion from 'git describe'.
 	gitVersion = ''
 	gitPath = ''
-	
+
 	# get git describe if in git repository
 	print('Fetching most recent git tags')
 	if os.path.exists('./.git'):
@@ -22,7 +22,7 @@ if sys.argv[-1] != 'test':
 			check_output(["git fetch --tags"], shell=True)
 		except Exception as e:
 			print('Unable to fetch most recent tags')
-	
+
 		try:
 			ls_proc = check_output(["git describe --tags"], shell=True, universal_newlines=True)
 			gitVersion = ls_proc
@@ -33,13 +33,13 @@ if sys.argv[-1] != 'test':
 	else:
 		print('Not in git repository')
 		gitVersion = ''
-	
+
 	# get current working directory to define git path
 	gitPath = os.getcwd()
-	
+
 	# git untracked file to store version and path
 	fname = os.path.abspath(os.path.expanduser('./smrf/utils/gitinfo.py'))
-	
+
 	with open(fname,'w') as f:
 		nchars = len(gitVersion) - 1
 		f.write("__gitPath__='{0}'\n".format(gitPath))
@@ -139,12 +139,13 @@ setup(
     classifiers=[
         'Development Status :: 2 - Pre-Alpha',
         'Intended Audience :: Developers',
-        'License :: OSI Approved :: GNU GPL-3.0',
+        'License :: OSI Approved :: CC0 1.0',
         'Natural Language :: English',
         'Programming Language :: Python :: 3',
         'Programming Language :: Python :: 3.3',
         'Programming Language :: Python :: 3.4',
         'Programming Language :: Python :: 3.5',
+		'Programming Language :: Python :: 3.6',
     ],
     test_suite='tests',
 #     tests_require=test_requirements,
