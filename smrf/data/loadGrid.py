@@ -4,7 +4,7 @@ import pandas as pd
 import logging
 import os
 import utm
-import subprocess as sp
+import pytz
 from smrf.envphys import phys
 
 try:
@@ -194,7 +194,8 @@ class grid():
         mlon = f.variables['lon'][:]
         mhgt = f.variables['elev'][:]
 
-        [mlon, mlat] = np.meshgrid(mlon, mlat)
+        if mlat.ndim != 2 & mlon.ndim !=2:
+            [mlon, mlat] = np.meshgrid(mlon, mlat)
 
         # GET THE METADATA
         # create some fake station names based on the index
@@ -218,12 +219,19 @@ class grid():
 
         # GET THE TIMES
         t = f.variables['time']
-        time = nc.num2date(t[:], t.getncattr('units'), t.getncattr('calendar'))
-
+        time = nc.num2date(t[:].astype(int), t.getncattr('units'), t.getncattr('calendar'))
+        time = [tm.replace(microsecond=0) for tm in time] # drop the milliseconds
         # subset the times to only those needed
-        time_ind = (time >= pd.to_datetime(self.start_date)) & \
-                   (time <= pd.to_datetime(self.end_date))
-        time = time[time_ind]
+#         tzinfo = pytz.timezone(self.time_zone)
+#         time = []
+#         for t in tt:
+#             time.append(t.replace(tzinfo=tzinfo))
+#         time = np.array(time)
+        
+#         time_ind = (time >= pd.to_datetime(self.start_date)) & \
+#                    (time <= pd.to_datetime(self.end_date))
+#         time = time[time_ind]
+        
 #         time_idx = np.where(time_ind)[0]
 
         # GET THE DATA, ONE AT A TIME
@@ -236,12 +244,15 @@ class grid():
                 df = pd.DataFrame(index=time, columns=primary_id)
                 for i in a:
                     g = 'grid_y%i_x%i' % (i[0], i[1])
-                    df[g] = f.variables[v_file][time_ind, i[0], i[1]]
+                    df[g] = f.variables[v_file][:, i[0], i[1]]
 
                 # deal with any fillValues
-                fv = f.variables[v_file].getncattr('_FillValue')
-                df.replace(fv, np.nan, inplace=True)
-                setattr(self, v, df)
+                try:
+                    fv = f.variables[v_file].getncattr('_FillValue')
+                    df.replace(fv, np.nan, inplace=True)
+                except:
+                    pass
+                setattr(self, v, df.tz_localize(tz=self.time_zone))
 
     def load_from_wrf(self):
         """
@@ -356,21 +367,6 @@ class grid():
             g = 'grid_y%i_x%i' % (i[0], i[1])
             v = f.variables['DWPT'][time_ind, i[0], i[1]]
             self.dew_point[g] = v
-            
-            
-
-#             tmp_file = os.path.join(self.tempDir, 'dpt.txt')
-#             np.savetxt(tmp_file, v)
-# 
-#             dp_cmd = 'satvp < %s' % tmp_file
-#             p = sp.Popen(dp_cmd, shell=True, stdout=sp.PIPE)
-#             out, err = p.communicate()
-# 
-#             x = np.array(filter(None, out.split('\n')), dtype='|S8')
-#             y = x.astype(np.float64)
-# 
-#             self.vapor_pressure[g] = y
-#         sp.Popen('rm %s' % tmp_file, shell=True)
 
         self._logger.debug('Calculating vapor_pressure')
         satvp = phys.satvp(self.dew_point.values)
