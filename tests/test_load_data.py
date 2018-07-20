@@ -186,7 +186,9 @@ class TestLoadData(SMRFTestCase):
                     'zone_number': 11,
                     'zone_letter': 'N'}
         config.cfg['gridded'] = wrf_grid
-        config.cfg['system']['max_values'] = 2
+#         config.cfg['system']['max_values'] = 2
+#         config.cfg['system']['threading'] = True
+#         config.cfg['system']['timeout'] = 10
          
         # set the distrition to grid, thermal defaults will be fine
         variables = ['air_temp', 'vapor_pressure', 'wind', 'precip', 'solar']
@@ -208,10 +210,10 @@ class TestLoadData(SMRFTestCase):
         
     def test_grid_netcdf(self):
         """ Generic NetCDF loading """
-        
+         
         config = deepcopy(self.base_config)
         del config.cfg['csv']
-        
+         
         wrf_grid = {'data_type': 'netcdf',
                     'file': './RME/gridded/netcdf_test.nc',
                     'zone_number': 11,
@@ -225,23 +227,23 @@ class TestLoadData(SMRFTestCase):
                     'cloud_factor': 'cloud_factor'}
         config.cfg['gridded'] = wrf_grid
         config.cfg['system']['threading'] = False # doesn't work with true
-        
+         
         # set the distrition to grid, thermal defaults will be fine
         variables = ['air_temp', 'vapor_pressure', 'wind', 'precip', 'solar']
         for v in variables:
             config.cfg[v]['distribution'] = 'grid'
             config.cfg[v]['mask'] = False
-        
-        
+         
+         
         config.cfg['precip']['adjust_for_undercatch'] = False
-        
+         
         # fix the time to that of the WRF_test.nc
         config.cfg['time']['start_date'] = '2015-03-03 00:00'
         config.cfg['time']['end_date'] = '2015-03-03 04:00'
-        
+         
         config.apply_recipes()
         config = cast_all_variables(config, config.mcfg)
-        
+         
         result = run_smrf(config)
         self.assertTrue(result)
         
