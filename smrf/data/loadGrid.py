@@ -44,6 +44,9 @@ class grid():
         self.forecast_flag = forecast_flag
         self.day_hour = day_hour
         self.n_forecast_hours = n_forecast_hours
+        
+        # degree offset for a buffer around the model domain
+        self.offset = 0.1
 
         self.force_zone_number = None
         if 'force_zone_number' in dataConfig:
@@ -91,6 +94,23 @@ class grid():
 #             d = getattr(self, v)
 #             setattr(self, v, d.tz_localize(tz=self.time_zone))
 
+    def model_domain_grid(self):
+        
+        dlat = np.zeros((2,))
+        dlon = np.zeros_like(dlat)
+        dlat[0], dlon[0] = utm.to_latlon(np.min(self.x), np.min(self.y),
+                                         int(self.dataConfig['zone_number']),
+                                         self.dataConfig['zone_letter'])
+        dlat[1], dlon[1] = utm.to_latlon(np.max(self.x), np.max(self.y),
+                                         int(self.dataConfig['zone_number']),
+                                         self.dataConfig['zone_letter'])
+        # add a buffer
+        dlat[0] -= self.offset
+        dlat[1] += self.offset
+        dlon[0] -= self.offset
+        dlon[1] += self.offset
+        
+        return dlat, dlon
 
     def load_from_hrrr(self):
         """
@@ -171,7 +191,7 @@ class grid():
         self._logger.debug('Loading cloud_factor')
         self.cloud_factor = pd.DataFrame(data['cloud_factor'], index=idx, columns=cols)
 
-#     @profile
+
     def load_from_netcdf(self):
         """
         Load the data from a generic netcdf file
@@ -196,10 +216,23 @@ class grid():
 
         if mlat.ndim != 2 & mlon.ndim !=2:
             [mlon, mlat] = np.meshgrid(mlon, mlat)
+            
+        # get that grid cells in the model domain
+        dlat, dlon = self.model_domain_grid()
+
+        # get the values that are in the modeling domain
+        ind = (mlat >= dlat[0]) & \
+            (mlat <= dlat[1]) & \
+            (mlon >= dlon[0]) & \
+            (mlon <= dlon[1])
+
+        mlat = mlat[ind]
+        mlon = mlon[ind]
+        mhgt = mhgt[ind]    
 
         # GET THE METADATA
         # create some fake station names based on the index
-        a = np.argwhere(mlon)
+        a = np.argwhere(ind)
         primary_id = ['grid_y%i_x%i' % (i[0], i[1]) for i in a]
         self._logger.debug('{} grid cells within model domain'.format(len(a)))
 
@@ -282,8 +315,7 @@ class grid():
 #         self.variables = ['thermal','air_temp','dew_point','wind_speed',
 #                             'wind_direction','cloud_factor','precip']
 
-        # degree offset for a buffer around the model domain
-        offset = 0.1
+        
 
         self._logger.info('Reading data coming from WRF output: {}'.format(
             self.dataConfig['file']
@@ -291,19 +323,7 @@ class grid():
         f = nc.Dataset(self.dataConfig['file'])
 
         # DETERMINE THE MODEL DOMAIN AREA IN THE GRID
-        dlat = np.zeros((2,))
-        dlon = np.zeros_like(dlat)
-        dlat[0], dlon[0] = utm.to_latlon(np.min(self.x), np.min(self.y),
-                                         int(self.dataConfig['zone_number']),
-                                         self.dataConfig['zone_letter'])
-        dlat[1], dlon[1] = utm.to_latlon(np.max(self.x), np.max(self.y),
-                                         int(self.dataConfig['zone_number']),
-                                         self.dataConfig['zone_letter'])
-        # add a buffer
-        dlat[0] -= offset
-        dlat[1] += offset
-        dlon[0] -= offset
-        dlon[1] += offset
+        dlat, dlon = self.model_domain_grid()
 
         # get the values that are in the modeling domain
         ind = (f.variables['XLAT'] >= dlat[0]) & \
