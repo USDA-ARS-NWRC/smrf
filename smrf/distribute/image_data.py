@@ -62,11 +62,10 @@ class image_data():
         """
 
         # check of gridded interpolation
+        self.gridded = False
         if 'distribution' in cfg.keys():
             if cfg['distribution'] == 'grid':
-                self.gridded = True
-            else:
-                self.gridded = False
+                self.gridded = True          
 
         self.getStations(cfg)
         self.config = cfg
@@ -119,7 +118,7 @@ class image_data():
 
         # pull out the metadata subset
         if self.stations is not None:
-            metadata = metadata.ix[self.stations]
+            metadata = metadata.loc[self.stations]
         else:
             self.stations = metadata.index.values
         self.metadata = metadata
@@ -194,10 +193,10 @@ class image_data():
             if self.config['detrend']:
                 v = self.grid.detrendedInterpolation(data.values,
                                                      self.config['slope'],
-                                                     self.config['method'])
+                                                     self.config['grid_method'])
             else:
                 v = self.grid.calculateInterpolation(data.values,
-                                                     self.config['method'])
+                                                     self.config['grid_method'])
 
         elif self.config['distribution'] == 'kriging':
             v, ss = self.kriging.calculate(data.values)

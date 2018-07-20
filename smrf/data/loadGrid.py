@@ -221,6 +221,7 @@ class grid():
         t = f.variables['time']
         time = nc.num2date(t[:].astype(int), t.getncattr('units'), t.getncattr('calendar'))
         time = [tm.replace(microsecond=0) for tm in time] # drop the milliseconds
+        
         # subset the times to only those needed
 #         tzinfo = pytz.timezone(self.time_zone)
 #         time = []
@@ -252,6 +253,7 @@ class grid():
                     df.replace(fv, np.nan, inplace=True)
                 except:
                     pass
+                df = df[self.start_date:self.end_date]
                 setattr(self, v, df.tz_localize(tz=self.time_zone))
 
     def load_from_wrf(self):

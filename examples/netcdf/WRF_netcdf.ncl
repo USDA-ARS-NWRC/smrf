@@ -77,8 +77,9 @@ lat = ispan(45,55,1)
     ncdf->DWPT = sfile->DWPT(:,lat,lon)
 
     ;--- Precip accumulated
+    ;--- Not a big storm so make it bigger
     print("    RAINNC...")
-    ncdf->RAINNC = sfile->RAINNC(:,lat,lon)
+    ncdf->RAINNC = sfile->RAINNC(:,lat,lon) * 10
 
     print("    CLDFRA...")
     ncdf->CLDFRA = sfile->CLDFRA(:,:,lat,lon)

@@ -9,7 +9,8 @@ from smrf.envphys.phys import satvp
 input_file = '../../tests/RME/gridded/WRF_test.nc'
 output_file = '../../tests/RME/gridded/netcdf_test.nc'
 
-os.remove(output_file)
+if os.path.isfile(output_file):
+    os.remove(output_file)
 
 #===============================================================================
 # Create netCDF file
@@ -81,7 +82,7 @@ o.variables['elev'][:] = i.variables['HGT'][:]
 
 o.createVariable('air_temp', 'f', dimensions)
 o.variables['air_temp'].setncattr('units', 'Celcius')
-o.variables['air_temp'][:] = i.variables['T2'][:]
+o.variables['air_temp'][:] = i.variables['T2'][:] - 273.15
 
 #===============================================================================
 # vapor pressure
@@ -132,7 +133,7 @@ o.variables['wind_direction'][:] = d
 o.createVariable('cloud_factor', 'f', dimensions)
 o.variables['cloud_factor'].setncattr('units', 'None')
 cf = np.mean(i.variables['CLDFRA'][:], axis=1)
-o.variables['cloud_factor'][:] = cf
+o.variables['cloud_factor'][:] = 1 - cf
 
 #===============================================================================
 # thermal
