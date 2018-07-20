@@ -175,45 +175,45 @@ class TestLoadData(SMRFTestCase):
 #         self.assertFalse(result)
            
            
-#     def test_grid_wrf(self):
-#         """ WRF NetCDF loading """
-#             
-#         config = deepcopy(self.base_config)
-#         del config.cfg['csv']
-#             
-#         wrf_grid = {'data_type': 'wrf',
-#                     'file': './RME/gridded/WRF_test.nc',
-#                     'zone_number': 11,
-#                     'zone_letter': 'N'}
-#         config.cfg['gridded'] = wrf_grid
-# #         config.cfg['system']['max_values'] = 2
-# #         config.cfg['system']['threading'] = False
-#         config.cfg['system']['timeout'] = 10
-#             
-#         # set the distrition to grid, thermal defaults will be fine
-#         variables = ['air_temp', 'vapor_pressure', 'wind', 'precip', 'solar', 'thermal']
-#         for v in variables:
-#             config.cfg[v]['distribution'] = 'grid'
-#             config.cfg[v]['mask'] = False
-#             
-#         config.cfg['precip']['adjust_for_undercatch'] = False
-#         config.cfg['thermal']['correct_cloud'] = False
-#         config.cfg['thermal']['correct_veg'] = True
-#                     
-#         # fix the time to that of the WRF_test.nc
-#         config.cfg['time']['start_date'] = '2015-03-03 00:00'
-#         config.cfg['time']['end_date'] = '2015-03-03 04:00'
-#             
-#         config.apply_recipes()
-#         config = cast_all_variables(config, config.mcfg)
-#             
-#         # ensure that the recipes are used
-#         self.assertTrue(config.cfg['precip']['adjust_for_undercatch'] == False)
-#         self.assertTrue(config.cfg['thermal']['correct_cloud'] == False)
-#         self.assertTrue(config.cfg['thermal']['correct_veg'] == True)
-#           
-#         result = run_smrf(config)
-#         self.assertTrue(result)
+    def test_grid_wrf(self):
+        """ WRF NetCDF loading """
+             
+        config = deepcopy(self.base_config)
+        del config.cfg['csv']
+             
+        wrf_grid = {'data_type': 'wrf',
+                    'file': './RME/gridded/WRF_test.nc',
+                    'zone_number': 11,
+                    'zone_letter': 'N'}
+        config.cfg['gridded'] = wrf_grid
+#         config.cfg['system']['max_values'] = 2
+#         config.cfg['system']['threading'] = False
+        config.cfg['system']['timeout'] = 10
+             
+        # set the distrition to grid, thermal defaults will be fine
+        variables = ['air_temp', 'vapor_pressure', 'wind', 'precip', 'solar', 'thermal']
+        for v in variables:
+            config.cfg[v]['distribution'] = 'grid'
+            config.cfg[v]['mask'] = False
+             
+        config.cfg['precip']['adjust_for_undercatch'] = False
+        config.cfg['thermal']['correct_cloud'] = False
+        config.cfg['thermal']['correct_veg'] = True
+                     
+        # fix the time to that of the WRF_test.nc
+        config.cfg['time']['start_date'] = '2015-03-03 00:00'
+        config.cfg['time']['end_date'] = '2015-03-03 04:00'
+             
+        config.apply_recipes()
+        config = cast_all_variables(config, config.mcfg)
+             
+        # ensure that the recipes are used
+        self.assertTrue(config.cfg['precip']['adjust_for_undercatch'] == False)
+        self.assertTrue(config.cfg['thermal']['correct_cloud'] == False)
+        self.assertTrue(config.cfg['thermal']['correct_veg'] == True)
+           
+        result = run_smrf(config)
+        self.assertTrue(result)
          
          
     def test_grid_netcdf(self):
