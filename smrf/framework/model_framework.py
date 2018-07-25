@@ -98,20 +98,20 @@ class SMRF():
             if not os.path.isfile(config):
                 raise Exception('Configuration file does not exist --> {}'
                                 .format(config))
-            configFile = config    
+            configFile = config
             try:
                 #Read in the original users config
                 ucfg = get_user_config(config, modules = 'smrf')
-    
+
             except UnicodeDecodeError as e:
                 print(e)
                 raise Exception(('The configuration file is not encoded in '
                                     'UTF-8, please change and retry'))
-        
+
         elif isinstance(config, UserConfig):
             ucfg = config
             configFile = ''
-            
+
         else:
             raise Exception('Config passed to SMRF is neither file name nor UserConfig instance')
 
@@ -594,7 +594,8 @@ class SMRF():
                                                 self.distribute['albedo'].albedo_ir)
 
             # 7. thermal radiation
-            if self.distribute['thermal'].gridded:
+            if self.distribute['thermal'].gridded and \
+               self.config['gridded']['data_type'] != 'hrrr':
                 self.distribute['thermal'].distribute_thermal(self.data.thermal.loc[t],
                                                               self.distribute['air_temp'].air_temp)
             else:
@@ -954,26 +955,26 @@ def run_smrf(config):
         try:
             # load topo data
             s.loadTopo()
-    
+
             # initialize the distribution
             s.initializeDistribution()
-    
+
             # initialize the outputs if desired
             s.initializeOutput()
-    
+
             # load weather data  and station metadata
             s.loadData()
-    
+
             # distribute
             s.distributeData()
-    
+
             #post process if necessary
             s.post_process()
-    
+
             s._logger.info(datetime.now() - start)
-            
+
             return True
-            
+
         except Exception as e:
             s._logger.exception(e)
             return False
