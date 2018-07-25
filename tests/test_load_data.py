@@ -187,8 +187,8 @@ class TestLoadData(SMRFTestCase):
                     'zone_letter': 'N'}
         config.cfg['gridded'] = wrf_grid
 #         config.cfg['system']['max_values'] = 2
-#         config.cfg['system']['threading'] = False
-        config.cfg['system']['timeout'] = 10
+        config.cfg['system']['threading'] = False
+#         config.cfg['system']['timeout'] = 10
              
         # set the distrition to grid, thermal defaults will be fine
         variables = ['air_temp', 'vapor_pressure', 'wind', 'precip', 'solar', 'thermal']
