@@ -1,7 +1,10 @@
 from copy import deepcopy
 from inicheck.tools import cast_all_variables
+from inicheck.utilities import pcfg
+import unittest
 
 from smrf.framework.model_framework import run_smrf
+
 from .test_configurations import SMRFTestCase
 
 
@@ -31,8 +34,8 @@ class TestLoadData(SMRFTestCase):
 #
 #         # test the start date
 #         config = deepcopy(self.base_config)
-#         config.cfg['time']['start_date'] = '2018-01-01 00:00'
-#         config.cfg['time']['end_date'] = '2018-02-01 00:00'
+#         config.raw_cfg['time']['start_date'] = '2018-01-01 00:00'
+#         config.raw_cfg['time']['end_date'] = '2018-02-01 00:00'
 #
 #         # apply the new recipies
 #         config.apply_recipes()
@@ -49,7 +52,7 @@ class TestLoadData(SMRFTestCase):
 #
 #         # test the end date
 #         config = deepcopy(self.base_config)
-#         config.cfg['time']['end_date'] = '2018-02-01 00:00'
+#         config.raw_cfg['time']['end_date'] = '2018-02-01 00:00'
 #
 #         # apply the new recipies
 #         config.apply_recipes()
@@ -66,7 +69,7 @@ class TestLoadData(SMRFTestCase):
 #
 #         # test the end date
 #         config = deepcopy(self.base_config)
-#         config.cfg['stations']['stations'] = ['RMESP', 'RME_176']
+#         config.raw_cfg['stations']['stations'] = ['RMESP', 'RME_176']
 #
 #         # apply the new recipies
 #         config.apply_recipes()
@@ -85,9 +88,9 @@ class TestLoadData(SMRFTestCase):
 #
 #         # test a succesful run specifiying stations
 #         config = deepcopy(self.base_config)
-#         config.cfg['stations']['stations'] = ['RMESP', 'RME_176']
-#         del config.cfg['csv']
-#         config.cfg['mysql'] = self.options
+#         config.raw_cfg['stations']['stations'] = ['RMESP', 'RME_176']
+#         del config.raw_cfg['csv']
+#         config.raw_cfg['mysql'] = self.options
 #
 #         config.apply_recipes()
 #         config = cast_all_variables(config, config.mcfg)
@@ -97,9 +100,9 @@ class TestLoadData(SMRFTestCase):
 #
 #         # test a succesful run specifiying client
 #         config = deepcopy(self.base_config)
-#         config.cfg['stations']['client'] = 'RME_test'
-#         del config.cfg['csv']
-#         config.cfg['mysql'] = self.options
+#         config.raw_cfg['stations']['client'] = 'RME_test'
+#         del config.raw_cfg['csv']
+#         config.raw_cfg['mysql'] = self.options
 #
 #         config.apply_recipes()
 #         config = cast_all_variables(config, config.mcfg)
@@ -112,13 +115,13 @@ class TestLoadData(SMRFTestCase):
 #         """ wrong password to mysql """
 #
 #         config = deepcopy(self.base_config)
-#         config.cfg['stations']['stations'] = ['RMESP', 'RME_176']
-#         del config.cfg['csv']
+#         config.raw_cfg['stations']['stations'] = ['RMESP', 'RME_176']
+#         del config.raw_cfg['csv']
 #
 #         # test wrong password
 #         options = deepcopy(self.options)
 #         options['password'] = 'not_the_right_password'
-#         config.cfg['mysql'] = options
+#         config.raw_cfg['mysql'] = options
 #
 #         config.apply_recipes()
 #         config = cast_all_variables(config, config.mcfg)
@@ -130,11 +133,11 @@ class TestLoadData(SMRFTestCase):
 #         """ test with wrong port to trigger different error """
 #
 #         config = deepcopy(self.base_config)
-#         config.cfg['stations']['stations'] = ['RMESP', 'RME_176']
-#         del config.cfg['csv']
+#         config.raw_cfg['stations']['stations'] = ['RMESP', 'RME_176']
+#         del config.raw_cfg['csv']
 #         options = deepcopy(self.options)
 #         options['port'] = '123456'
-#         config.cfg['mysql'] = options
+#         config.raw_cfg['mysql'] = options
 #
 #         config.apply_recipes()
 #         config = cast_all_variables(config, config.mcfg)
@@ -146,9 +149,9 @@ class TestLoadData(SMRFTestCase):
 #         """ test no metadata found """
 #
 #         config = deepcopy(self.base_config)
-#         config.cfg['stations']['stations'] = ['NOT_STID', 'NOPE']
-#         del config.cfg['csv']
-#         config.cfg['mysql'] = deepcopy(self.options)
+#         config.raw_cfg['stations']['stations'] = ['NOT_STID', 'NOPE']
+#         del config.raw_cfg['csv']
+#         config.raw_cfg['mysql'] = deepcopy(self.options)
 #
 #         config.apply_recipes()
 #         config = cast_all_variables(config, config.mcfg)
@@ -160,13 +163,13 @@ class TestLoadData(SMRFTestCase):
 #         """ test no data found """
 #
 #         config = deepcopy(self.base_config)
-#         config.cfg['stations']['stations'] = ['RMESP', 'RME_176']
-#         del config.cfg['csv']
-#         config.cfg['mysql'] = deepcopy(self.options)
+#         config.raw_cfg['stations']['stations'] = ['RMESP', 'RME_176']
+#         del config.raw_cfg['csv']
+#         config.raw_cfg['mysql'] = deepcopy(self.options)
 #
 #         # wrong time
-#         config.cfg['time']['start_date'] = '2018-01-01 00:00'
-#         config.cfg['time']['end_date'] = '2018-02-01 00:00'
+#         config.raw_cfg['time']['start_date'] = '2018-01-01 00:00'
+#         config.raw_cfg['time']['end_date'] = '2018-02-01 00:00'
 #
 #         config.apply_recipes()
 #         config = cast_all_variables(config, config.mcfg)
@@ -179,38 +182,37 @@ class TestLoadData(SMRFTestCase):
         """ WRF NetCDF loading """
 
         config = deepcopy(self.base_config)
-        del config.cfg['csv']
+        del config.raw_cfg['csv']
 
         wrf_grid = {'data_type': 'wrf',
                     'file': './RME/gridded/WRF_test.nc',
                     'zone_number': 11,
                     'zone_letter': 'N'}
-        config.cfg['gridded'] = wrf_grid
-#         config.cfg['system']['max_values'] = 2
-        config.cfg['system']['threading'] = False
-#         config.cfg['system']['timeout'] = 10
+        config.raw_cfg['gridded'] = wrf_grid
+#         config.raw_cfg['system']['max_values'] = 2
+        config.raw_cfg['system']['threading'] = False
+#         config.raw_cfg['system']['timeout'] = 10
 
         # set the distrition to grid, thermal defaults will be fine
         variables = ['air_temp', 'vapor_pressure', 'wind', 'precip', 'solar', 'thermal']
         for v in variables:
-            config.cfg[v]['distribution'] = 'grid'
-            config.cfg[v]['mask'] = False
+             config.raw_cfg[v]['mask'] = False
 
-        config.cfg['precip']['adjust_for_undercatch'] = False
-        config.cfg['thermal']['correct_cloud'] = False
-        config.cfg['thermal']['correct_veg'] = True
+        config.raw_cfg['precip']['adjust_for_undercatch'] = False
+        config.raw_cfg['thermal']['correct_cloud'] = False
+        config.raw_cfg['thermal']['correct_veg'] = True
 
         # fix the time to that of the WRF_test.nc
-        config.cfg['time']['start_date'] = '2015-03-03 00:00'
-        config.cfg['time']['end_date'] = '2015-03-03 04:00'
-
+        config.raw_cfg['time']['start_date'] = '2015-03-03 00:00'
+        config.raw_cfg['time']['end_date'] = '2015-03-03 04:00'
         config.apply_recipes()
         config = cast_all_variables(config, config.mcfg)
 
+
         # ensure that the recipes are used
-        self.assertTrue(config.cfg['precip']['adjust_for_undercatch'] == False)
-        self.assertTrue(config.cfg['thermal']['correct_cloud'] == False)
-        self.assertTrue(config.cfg['thermal']['correct_veg'] == True)
+        self.assertTrue(config.raw_cfg['precip']['adjust_for_undercatch'] == False)
+        self.assertTrue(config.raw_cfg['thermal']['correct_cloud'] == False)
+        self.assertTrue(config.raw_cfg['thermal']['correct_veg'] == True)
 
         result = run_smrf(config)
         self.assertTrue(result)
@@ -219,38 +221,37 @@ class TestLoadData(SMRFTestCase):
         """ HRRR grib2 loading """
 
         config = deepcopy(self.base_config)
-        del config.cfg['csv']
+        del config.raw_cfg['csv']
 
         hrrr_grid = {'data_type': 'hrrr',
                     'directory': './RME/gridded/hrrr_test/',
                     'zone_number': 11,
                     'zone_letter': 'N'}
-        config.cfg['gridded'] = hrrr_grid
-    #         config.cfg['system']['max_values'] = 2
-        config.cfg['system']['threading'] = False
-    #         config.cfg['system']['timeout'] = 10
+        config.raw_cfg['gridded'] = hrrr_grid
+    #         config.raw_cfg['system']['max_values'] = 2
+        config.raw_cfg['system']['threading'] = False
+    #         config.raw_cfg['system']['timeout'] = 10
 
         # set the distrition to grid, thermal defaults will be fine
         variables = ['air_temp', 'vapor_pressure', 'wind', 'precip', 'solar', 'thermal']
         for v in variables:
-            config.cfg[v]['distribution'] = 'grid'
-            config.cfg[v]['mask'] = False
+            config.raw_cfg[v]['mask'] = False
 
-        config.cfg['precip']['adjust_for_undercatch'] = False
-        config.cfg['thermal']['correct_cloud'] = False
-        config.cfg['thermal']['correct_veg'] = True
+        config.raw_cfg['precip']['adjust_for_undercatch'] = False
+        config.raw_cfg['thermal']['correct_cloud'] = True
+        config.raw_cfg['thermal']['correct_veg'] = True
 
         # fix the time to that of the WRF_test.nc
-        config.cfg['time']['start_date'] = '2018-07-22 01:00'
-        config.cfg['time']['end_date'] = '2018-07-23 15:00'
+        config.raw_cfg['time']['start_date'] = '2018-07-22 01:00'
+        config.raw_cfg['time']['end_date'] = '2018-07-23 15:00'
 
         config.apply_recipes()
         config = cast_all_variables(config, config.mcfg)
 
         # ensure that the recipes are used
-        self.assertTrue(config.cfg['precip']['adjust_for_undercatch'] == False)
-        self.assertTrue(config.cfg['thermal']['correct_cloud'] == False)
-        self.assertTrue(config.cfg['thermal']['correct_veg'] == True)
+        self.assertTrue(config.raw_cfg['precip']['adjust_for_undercatch'] == False)
+        self.assertTrue(config.raw_cfg['thermal']['correct_cloud'] == True)
+        self.assertTrue(config.raw_cfg['thermal']['correct_veg'] == True)
 
         result = run_smrf(config)
         self.assertTrue(result)
@@ -259,7 +260,7 @@ class TestLoadData(SMRFTestCase):
         """ Generic NetCDF loading """
 
         config = deepcopy(self.base_config)
-        del config.cfg['csv']
+        del config.raw_cfg['csv']
 
         wrf_grid = {'data_type': 'netcdf',
                     'file': './RME/gridded/netcdf_test.nc',
@@ -272,32 +273,34 @@ class TestLoadData(SMRFTestCase):
                     'wind_direction': 'wind_direction',
                     'thermal': 'thermal',
                     'cloud_factor': 'cloud_factor'}
-        config.cfg['gridded'] = wrf_grid
-        config.cfg['system']['time_out'] = 10
-        config.cfg['system']['max_values'] = 1
-        config.cfg['system']['threading'] = False # doesn't work with true
+        config.raw_cfg['gridded'] = wrf_grid
+        config.raw_cfg['system']['time_out'] = 10
+        config.raw_cfg['system']['max_values'] = 1
+        config.raw_cfg['system']['threading'] = False # Doesn't work with true
 
         # set the distrition to grid, thermal defaults will be fine
         variables = ['air_temp', 'vapor_pressure', 'wind', 'precip', 'solar', 'thermal']
         for v in variables:
-            config.cfg[v]['distribution'] = 'grid'
-            config.cfg[v]['mask'] = False
+            config.raw_cfg[v]['distribution'] = 'grid'
+            config.raw_cfg[v]['mask'] = False
 
-        config.cfg['precip']['adjust_for_undercatch'] = False
-        config.cfg['thermal']['correct_cloud'] = False
-        config.cfg['thermal']['correct_veg'] = True
+        config.raw_cfg['precip']['adjust_for_undercatch'] = False
+        config.raw_cfg['thermal']['correct_cloud'] = False
+        config.raw_cfg['thermal']['correct_veg'] = True
 
         # fix the time to that of the WRF_test.nc
-        config.cfg['time']['start_date'] = '2015-03-03 00:00'
-        config.cfg['time']['end_date'] = '2015-03-03 04:00'
+        config.raw_cfg['time']['start_date'] = '2015-03-03 00:00'
+        config.raw_cfg['time']['end_date'] = '2015-03-03 04:00'
 
         config.apply_recipes()
         config = cast_all_variables(config, config.mcfg)
 
         # ensure that the recipes are used
-        self.assertTrue(config.cfg['precip']['adjust_for_undercatch'] == False)
-        self.assertTrue(config.cfg['thermal']['correct_cloud'] == False)
-        self.assertTrue(config.cfg['thermal']['correct_veg'] == True)
+        self.assertTrue(config.raw_cfg['precip']['adjust_for_undercatch'] == False)
+        self.assertTrue(config.raw_cfg['thermal']['correct_cloud'] == False)
+        self.assertTrue(config.raw_cfg['thermal']['correct_veg'] == True)
 
         result = run_smrf(config)
         self.assertTrue(result)
+if __name__ == '__main__':
+    unittest.main()

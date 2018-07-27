@@ -968,7 +968,7 @@ def run_smrf(config):
             # distribute
             s.distributeData()
 
-            #post process if necessary
+            # post process if necessary
             s.post_process()
 
             s._logger.info(datetime.now() - start)
