@@ -30,11 +30,14 @@ def compare_image(v_name,gold_dir,test_dir):
     image1 = os.path.join(gold_dir,v_name+'.nc')
     image2 = os.path.join(test_dir,v_name+'.nc')
 
-    d1 = Dataset(image1)
+    d1 = Dataset(image1, 'r')
     gold = d1.variables[v_name][:]
+    d1.close()
 
-    d2 = Dataset(image2)
+    d2 = Dataset(image2, 'r')
     rough = d2.variables[v_name][:]
+    d2.close()
+
     result = np.abs(gold-rough)
     return  not np.any(result>0)
 

@@ -243,7 +243,7 @@ class TestLoadData(SMRFTestCase):
 
         # fix the time to that of the WRF_test.nc
         config.raw_cfg['time']['start_date'] = '2018-07-22 01:00'
-        config.raw_cfg['time']['end_date'] = '2018-07-23 15:00'
+        config.raw_cfg['time']['end_date'] = '2018-07-22 06:00'
 
         config.apply_recipes()
         config = cast_all_variables(config, config.mcfg)
