@@ -324,16 +324,16 @@ class wind(image_data.image_data):
 
         # correct for veg
         dynamic_mask = np.ones(cellmaxus.shape)
-        for i,v in enumerate(self.veg):
+        for k,v in self.veg.items():
             # Adjust veg types that were specified by the user
-            if v != 'default':
-                ind = self.veg_type == int(v)
+            if k != 'default':
+                ind = self.veg_type == int(k)
                 dynamic_mask[ind] = 0
-                cellmaxus[ind] += self.veg[v]
+                cellmaxus[ind] += v
 
         # Apply the veg default to those that weren't messed with
         if self.veg['default'] != 0:
-            cellmaxus[~ind] += self.veg['default']
+            cellmaxus[dynamic_mask == 1] += self.veg['default']
 
         # correct unreasonable values
         cellmaxus[cellmaxus > 32] = 32
