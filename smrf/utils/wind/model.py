@@ -90,7 +90,10 @@ class wind_model():
         # initialize the output file
         self.out_file = out_file
         self.type = 'maxus'
-        self.output_init(self.type, out_file)
+        ex_att = {}
+        ex_att['dmax'] = dmax
+        #initialize output
+        self.output_init(self.type, out_file, ex_att=ex_att)
 
         # run model over range in wind directions
         for i, angle in enumerate(swa):
@@ -130,7 +133,13 @@ class wind_model():
         # initialize the output file
         self.out_file = out_file
         self.type = 'tbreak'
-        self.output_init(self.type, out_file)
+        # extra attributes
+        ex_att = {}
+        ex_att['dmax'] = dmax
+        ex_att['sepdist'] = sepdist
+        # initialize output
+        self.output_init(self.type, out_file, ex_att=ex_att)
+
 
         # run model over range in wind directions
         for i, angle in enumerate(swa):
@@ -444,7 +453,7 @@ class wind_model():
 
         return (zj - zi) / (xj - float(xi))
 
-    def output_init(self, ptype, filename):
+    def output_init(self, ptype, filename, ex_att=None):
         """
         Initialize a NetCDF file for outputing the maxus values or tbreak
 
@@ -452,6 +461,7 @@ class wind_model():
             ptype: type of calculation that will be saved, either 'maxus' or
                 'tbreak'
             filename: filename to save the output into
+            ex_att:   extra attributes to add
         """
 
         if ptype == 'maxus':
@@ -491,6 +501,11 @@ class wind_model():
         setattr(s.variables[var], 'units', 'angle')
         setattr(s.variables[var], 'description', desc)
         setattr(s, 'dateCreated', datetime.now().isoformat())
+
+        # set attributes
+        if ex_att is not None:
+            for key, value in ex_att.items():
+                setattr(s, key, value)
 
         s.variables['y'][:] = self.y
         s.variables['x'][:] = self.x

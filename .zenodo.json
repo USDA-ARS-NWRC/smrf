@@ -1,0 +1,53 @@
+{
+
+    "license": "other-open",
+    "title": "Spatial Modeling for Resources Framework (SMRF)",
+    "version": "v0.6.0",
+    "upload_type": "software",
+    "keywords": [
+        "snow modeling",
+        "water resources",
+        "water supply forecasting"
+    ],
+    "creators": [
+        {
+            "affiliation": "USDA Agricultural Research Service",
+            "name": "Scott Havens",
+			"orcid": "0000-0002-6933-4485"
+        },
+        {
+            "affiliation": "USDA Agricultural Research Service",
+            "name": "Danny Marks",
+			"orcid": "0000-0003-3105-8427"
+        },
+        {
+            "affiliation": "National Weather Service River Forecast Center",
+            "name": "Patrick Kormos",
+			"orcid": "0000-0003-1874-9215"
+        },
+        {
+            "affiliation": "USDA Agricultural Research Service",
+            "name": "Andrew Hedrick",
+      "orcid": "0000-0001-9511-1341"
+        },
+        {
+            "affiliation": "USDA Agricultural Research Service",
+            "name": "Micah Johnson",
+			"orcid": "0000-0003-4029-8545"
+        },
+        {
+            "affiliation": "USDA Agricultural Research Service",
+            "name": "Micah Sandusky",
+			"orcid": "0000-0002-4235-5876"
+        },
+        {
+            "affiliation": "USDA Agricultural Research Service",
+            "name": "Mark Robertson",
+			"orcid": "0000-0003-4621-0161"
+        }
+
+    ],
+
+    "access_right": "open"
+
+}

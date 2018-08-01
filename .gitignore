@@ -104,6 +104,7 @@ test_data/tmp/*
 test_data/config.ini
 
 #ignore maxus.
+test_data/topo/maxus_100window.nc
 test_data/topo/maxus.nc
 examples/* *.nc
 examples/reynolds_mountain_east/output/*

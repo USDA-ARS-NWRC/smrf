@@ -108,7 +108,7 @@ class wind(image_data.image_data):
     # be written during main distribute loop
     post_process_variables = {}
 
-    def __init__(self, windConfig, tempDir=None):
+    def __init__(self, windConfig, distribute_drifts, tempDir=None):
 
         # extend the base class
         image_data.image_data.__init__(self, self.variable)
@@ -123,6 +123,7 @@ class wind(image_data.image_data):
 
         if windConfig['distribution'] == 'grid':
             self.gridded = True
+            self.distribute_drifts = False
 
         else:
             # open the maxus netCDF
@@ -137,10 +138,16 @@ class wind(image_data.image_data):
             matching = [s for s in self.config.keys() if "veg_" in s]
             v = {}
             for m in matching:
-                if m != 'veg_default':
-                    ms = m.split('_')
+                ms = m.split('_')
+                if type(self.config[m]) == list:
+                    v[ms[1]] = float(self.config[m][0])
+                else:
                     v[ms[1]] = float(self.config[m])
+
             self.veg = v
+
+            # whether or not we will use this data to redistribute precip
+            self.distribute_drifts = distribute_drifts
 
         self._logger.debug('Created distribute.wind')
 
@@ -172,10 +179,20 @@ class wind(image_data.image_data):
                     float(self.config['station_default'])
 
                 for m in self.metadata.index:
-                    if m.lower() in self.config:
-                        self.metadata.loc[m, 'enhancement'] = \
-                            float(self.config[m.lower()])
+                    sta_e = m.lower()
+                    if sta_e in self.config:
+                        if type(self.config[sta_e]) == list:
+                            enhancement = self.config[sta_e][0]
+                        else:
+                            enhancement = self.config[sta_e]
 
+                        self.metadata.loc[m, 'enhancement'] = \
+                            float(enhancement)
+
+        if not self.distribute_drifts:
+            # we have to pass these to precip, so make them none if we won't use them
+            self.dir_round_cell = None
+            self.cellmaxus = None
 
     def distribute(self, data_speed, data_direction):
         """
@@ -267,6 +284,8 @@ class wind(image_data.image_data):
 
             if not self.gridded:
                 queue['flatwind'].put([t, self.flatwind])
+                queue['cellmaxus'].put([t,self.cellmaxus])
+                queue['dir_round_cell'].put([t,self.dir_round_cell])
 
     def simulateWind(self, data_speed):
         """
@@ -302,8 +321,17 @@ class wind(image_data.image_data):
             cellmaxus[ind] = self.maxus[i][ind]
 
         # correct for veg
-        for i, v in enumerate(self.veg):
-            cellmaxus[self.veg_type == int(v)] += self.veg[v]
+        dynamic_mask = np.ones(cellmaxus.shape)
+        for i,v in enumerate(self.veg):
+            # Adjust veg types that were specified by the user
+            if v != 'default':
+                ind = self.veg_type == int(v)
+                dynamic_mask[ind] = 0
+                cellmaxus[ind] += self.veg[v]
+
+        # Apply the veg default to those that weren't messed with
+        if self.veg['default'] != 0:
+            cellmaxus[~ind] += self.veg['default']
 
         # correct unreasonable values
         cellmaxus[cellmaxus > 32] = 32
@@ -355,6 +383,8 @@ class wind(image_data.image_data):
 
         self.wind_speed = utils.set_min_max(cellwind, self.min, self.max)
         self.wind_direction = az
+        self.cellmaxus = cellmaxus
+        self.dir_round_cell = dir_round_cell
 
     def stationMaxus(self, data_speed, data_direction):
         """

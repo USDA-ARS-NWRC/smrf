@@ -40,6 +40,13 @@ def main():
 
     parser.add_argument('--var_name','-N',dest='var_name', type=str, default = 'dem',
                         help='specify the variable name inside a netcdf file')
+
+    parser.add_argument('--make_tbreak',metavar='-tb', type=bool, default = False,
+                        help='Argument to make tbreak file that can be used for precip redistribution')
+
+    parser.add_argument('--out_tbreak', metavar='-OTB', type=str, default = './tbreak.nc',
+                        help='Output file path for tbreak file')
+
     args = parser.parse_args()
 
     #------------------------------------------------------------------------------
@@ -65,8 +72,11 @@ def main():
     # Windower
     windower = args.window
 
-    save_file = args.out_maxus
+    # make tbreak?
+    make_tbreak = args.make_tbreak
 
+    save_file = args.out_maxus
+    save_file_tb = args.out_tbreak
     #Operate on file according to file type
     dem_file = args.dem
     ext = dem_file.split('.')[-1]
@@ -100,14 +110,18 @@ def main():
     w = wind_model(x, y, dem_data, nthreads=12)
 
     # calculate the maxus for the parameters and output to file
-    w.maxus(dmax, inc, inst, save_file)
+    w.maxus(dmax, inc=inc, inst=inst, out_file=save_file)
     print(datetime.now() - start)
 
     # window the maxus values based on the maxus values in the file
     w.windower(save_file, windower, 'maxus')
 
-    # calculate the maxus for the parameters and output to file
-    # w.tbreak(dmax, sepdist, inc, inst, save_file2)
+    if make_tbreak:
+        # calculate the maxus for the parameters and output to file
+        w.tbreak(dmax, sepdist, inc=inc, inst=inst, out_file=save_file_tb)
+
+        # window the maxus values based on the maxus values in the file
+        w.windower(save_file_tb, windower, 'tbreak')
 
 
     print(datetime.now() - start)

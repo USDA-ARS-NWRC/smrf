@@ -1,5 +1,5 @@
 import numpy as np
-from smrf.spatial import idw, dk, grid
+from smrf.spatial import idw, dk, grid, kriging
 import logging
 
 
@@ -148,6 +148,10 @@ class image_data():
             self.grid = grid.GRID(self.config, self.mx, self.my, topo.X, topo.Y, mz=self.mz,
                                   GridZ=topo.dem, mask=topo.mask)
 
+        elif self.config['distribution'] == 'kriging':
+            # generic kriging
+            self.kriging = kriging.KRIGE(self.mx, self.my, self.mz, topo.X, topo.Y, topo.dem, self.config)
+
         else:
             raise Exception("Could not determine the distribution method for "
                             "{}".format(self.variable))
@@ -159,7 +163,7 @@ class image_data():
 
         Args:
             data: Pandas dataframe for a single time step
-            other_attribute (str): By defult, the distributed data matrix goes
+            other_attribute (str): By default, the distributed data matrix goes
                 into self.variable but this specifies another attribute in self
             zeros: data values that should be treated as zeros (not used)
 
@@ -194,6 +198,10 @@ class image_data():
             else:
                 v = self.grid.calculateInterpolation(data.values,
                                                      self.config['method'])
+
+        elif self.config['distribution'] == 'kriging':
+            v, ss = self.kriging.calculate(data.values)
+            setattr(self, '{}_variance'.format(self.variable), ss)
 
         if other_attribute is not None:
             setattr(self, other_attribute, v)
