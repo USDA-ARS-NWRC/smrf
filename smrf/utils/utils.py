@@ -190,15 +190,15 @@ def backup_input(data, config_obj):
     csv_names = {}
 
     # Check config file for csv section and remove alternate data form config
-    if 'csv' not in backup_config_obj.raw_cfg.keys():
-        backup_config_obj.raw_cfg['csv'] = {}
-    if 'mysql' in backup_config_obj.raw_cfg.keys():
-        del backup_config_obj.raw_cfg['mysql']
-    if 'stations' in backup_config_obj.raw_cfg.keys():
-        if 'client' in backup_config_obj.raw_cfg['stations']:
-            del backup_config_obj.raw_cfg['stations']['client']
-    # With a new section added, we need to remove the other data sections
-    backup_config_obj.apply_recipes()
+    if 'csv' not in backup_config_obj.cfg.keys():
+        backup_config_obj.cfg['csv'] = {}
+        # With a new section added, we need to remove the other data sections
+        #backup_config_obj.apply_recipes()
+    if 'mysql' in backup_config_obj.cfg.keys():
+        del backup_config_obj.cfg['mysql']
+    if 'stations' in backup_config_obj.cfg.keys():
+        if 'client' in backup_config_obj.cfg['stations']:
+            del backup_config_obj.cfg['stations']['client']
 
     # Output station data to CSV
     csv_var = ['metadata', 'air_temp', 'vapor_pressure', 'precip','wind_speed',
@@ -217,7 +217,7 @@ def backup_input(data, config_obj):
     for s in backup_config_obj.cfg['topo'].keys():
         src = backup_config_obj.cfg['topo'][s]
         # make not a list if lenth is 1
-        src = mk_lst(src, unlst=True)
+        if isinstance(src, list): src = mk_lst(src, unlst=True)
         # Avoid attempring to copy files that don't exist
         if s not in ignore and src != None:
             dst =  os.path.join(backup_dir, os.path.basename(src))

@@ -215,52 +215,6 @@ class ppt(image_data.image_data):
 
         self.mask = topo.mask
 
-    def distribute_precip(self, data):
-        """
-        Distribute given a Panda's dataframe for a single time step. Calls
-        :mod:`smrf.distribute.image_data.image_data._distribute`.
-
-        Soley distributes the precipitation data and does not calculate the
-        other dependent variables
-        """
-
-        self._logger.debug('{} Distributing precip'.format(data.name))
-
-        # only need to distribute precip if there is any
-        data = data[self.stations]
-        if data.sum() > 0:
-
-            # distribute data and set the min/max
-            self._distribute(data, zeros=None)
-            self.precip = utils.set_min_max(self.precip, self.min, self.max)
-
-        else:
-            # make everything else zeros
-            self.precip = np.zeros(self.storm_days.shape)
-
-
-    def distribute_precip_thread(self, queue, data):
-        """
-        Distribute the data using threading and queue. All data is provided and
-        ``distribute_precip_thread`` will go through each time step and call
-        :mod:`smrf.distribute.precip.ppt.distribute_precip` then puts the
-        distributed data into the queue for:
-
-        * :py:attr:`precip`
-
-        Args:
-            queue: queue dictionary for all variables
-            data: pandas dataframe for all data, indexed by date time
-        """
-
-        for t in data.index:
-
-            self.distribute_precip(data.loc[t])
-
-            queue[self.variable].put([t, self.precip])
-
-
-
     def distribute(self, data, dpt, precip_temp, ta, time, wind, temp, az,
                    dir_round_cell, wind_speed, cell_maxus, mask=None):
         """

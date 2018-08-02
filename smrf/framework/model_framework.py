@@ -110,7 +110,7 @@ class SMRF():
 
         elif isinstance(config, UserConfig):
             ucfg = config
-            configFile = ''
+            configFile = config.filename
 
         else:
             raise Exception('Config passed to SMRF is neither file name nor UserConfig instance')
@@ -203,7 +203,7 @@ class SMRF():
         generate_config(self.ucfg,full_config_out)
 
         # After writing update the paths to be full abs paths.
-        self.config = self.ucfg.update_config_paths(user_cfg_path=configFile)
+        self.config = self.ucfg.update_config_paths()
 
 
         # process the system variables
