@@ -983,7 +983,7 @@ def can_i_run_smrf(config):
         run_smrf(config)
         return True
     except Exception as e:
-        s._logger.exception(e)
+        print(e)
         return False
 
 
