@@ -952,32 +952,41 @@ def run_smrf(config):
     start = datetime.now()
     # initialize
     with SMRF(config) as s:
-        try:
-            # load topo data
-            s.loadTopo()
+        # load topo data
+        s.loadTopo()
 
-            # initialize the distribution
-            s.initializeDistribution()
+        # initialize the distribution
+        s.initializeDistribution()
 
-            # initialize the outputs if desired
-            s.initializeOutput()
+        # initialize the outputs if desired
+        s.initializeOutput()
 
-            # load weather data  and station metadata
-            s.loadData()
+        # load weather data  and station metadata
+        s.loadData()
 
-            # distribute
-            s.distributeData()
+        # distribute
+        s.distributeData()
 
-            # post process if necessary
-            s.post_process()
+        # post process if necessary
+        s.post_process()
 
-            s._logger.info(datetime.now() - start)
+        s._logger.info(datetime.now() - start)
 
-            return True
 
-        except Exception as e:
-            s._logger.exception(e)
-            return False
+def can_i_run_smrf(config):
+    """
+    Function that wraps run_smrf in try, except for testing purposes
+
+    Args:
+        config: string path to the config file or inicheck UserConfig instance
+    """
+    try:
+        run_smrf(config)
+        return True
+    except Exception as e:
+        s._logger.exception(e)
+        return False
+
 
 def find_pixel_location(row, vec, a):
         """
