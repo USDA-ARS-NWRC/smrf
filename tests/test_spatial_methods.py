@@ -1,7 +1,7 @@
 from copy import deepcopy
 from inicheck.tools import get_user_config, check_config, cast_all_variables
 
-from smrf.framework.model_framework import run_smrf
+from smrf.framework.model_framework import can_i_run_smrf
 from .test_configurations import SMRFTestCase
 
 
@@ -28,7 +28,7 @@ from .test_configurations import SMRFTestCase
 #         config = cast_all_variables(config, config.mcfg)
 #
 #         # test the base run with the config file
-#         result = run_smrf(config)
+#         result = can_i_run_smrf(config)
 #         self.assertFalse(result)
 
 
@@ -48,5 +48,5 @@ from .test_configurations import SMRFTestCase
 #         config = cast_all_variables(config, config.mcfg)
 #
 #         # test the base run with the config file
-#         result = run_smrf(config)
+#         result = can_i_run_smrf(config)
 #         self.assertTrue(result)

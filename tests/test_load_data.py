@@ -3,7 +3,7 @@ from inicheck.tools import cast_all_variables
 from inicheck.utilities import pcfg
 import unittest
 
-from smrf.framework.model_framework import run_smrf
+from smrf.framework.model_framework import can_i_run_smrf
 
 from .test_configurations import SMRFTestCase
 
@@ -42,7 +42,7 @@ class TestLoadData(SMRFTestCase):
 #         config = cast_all_variables(config, config.mcfg)
 #
 #         # test the base run with the config file
-#         result = run_smrf(config)
+#         result = can_i_run_smrf(config)
 #         self.assertFalse(result)
 #
 #     def test_station_end_date(self):
@@ -59,7 +59,7 @@ class TestLoadData(SMRFTestCase):
 #         config = cast_all_variables(config, config.mcfg)
 #
 #         # test the base run with the config file
-#         result = run_smrf(config)
+#         result = can_i_run_smrf(config)
 #         self.assertFalse(result)
 #
 #     def test_all_stations(self):
@@ -76,7 +76,7 @@ class TestLoadData(SMRFTestCase):
 #         config = cast_all_variables(config, config.mcfg)
 #
 #         # test the base run with the config file
-#         result = run_smrf(config)
+#         result = can_i_run_smrf(config)
 #         self.assertFalse(result)
 #
 #
@@ -95,7 +95,7 @@ class TestLoadData(SMRFTestCase):
 #         config.apply_recipes()
 #         config = cast_all_variables(config, config.mcfg)
 #
-#         result = run_smrf(config)
+#         result = can_i_run_smrf(config)
 #         self.assertTrue(result)
 #
 #         # test a succesful run specifiying client
@@ -107,7 +107,7 @@ class TestLoadData(SMRFTestCase):
 #         config.apply_recipes()
 #         config = cast_all_variables(config, config.mcfg)
 #
-#         result = run_smrf(config)
+#         result = can_i_run_smrf(config)
 #         self.assertTrue(result)
 #
 #
@@ -126,7 +126,7 @@ class TestLoadData(SMRFTestCase):
 #         config.apply_recipes()
 #         config = cast_all_variables(config, config.mcfg)
 #
-#         result = run_smrf(config)
+#         result = can_i_run_smrf(config)
 #         self.assertFalse(result)
 #
 #     def test_mysql_wrong_port(self):
@@ -142,7 +142,7 @@ class TestLoadData(SMRFTestCase):
 #         config.apply_recipes()
 #         config = cast_all_variables(config, config.mcfg)
 #
-#         result = run_smrf(config)
+#         result = can_i_run_smrf(config)
 #         self.assertFalse(result)
 #
 #     def test_mysql_metadata_error(self):
@@ -156,7 +156,7 @@ class TestLoadData(SMRFTestCase):
 #         config.apply_recipes()
 #         config = cast_all_variables(config, config.mcfg)
 #
-#         result = run_smrf(config)
+#         result = can_i_run_smrf(config)
 #         self.assertFalse(result)
 #
 #     def test_mysql_data_error(self):
@@ -174,7 +174,7 @@ class TestLoadData(SMRFTestCase):
 #         config.apply_recipes()
 #         config = cast_all_variables(config, config.mcfg)
 #
-#         result = run_smrf(config)
+#         result = can_i_run_smrf(config)
 #         self.assertFalse(result)
 
 
@@ -214,7 +214,7 @@ class TestLoadData(SMRFTestCase):
         self.assertTrue(config.raw_cfg['thermal']['correct_cloud'] == False)
         self.assertTrue(config.raw_cfg['thermal']['correct_veg'] == True)
 
-        result = run_smrf(config)
+        result = can_i_run_smrf(config)
         self.assertTrue(result)
 
     def test_grid_hrrr(self):
@@ -253,7 +253,7 @@ class TestLoadData(SMRFTestCase):
         self.assertTrue(config.raw_cfg['thermal']['correct_cloud'] == True)
         self.assertTrue(config.raw_cfg['thermal']['correct_veg'] == True)
 
-        result = run_smrf(config)
+        result = can_i_run_smrf(config)
         self.assertTrue(result)
 
     def test_grid_netcdf(self):
@@ -300,7 +300,7 @@ class TestLoadData(SMRFTestCase):
         self.assertTrue(config.raw_cfg['thermal']['correct_cloud'] == False)
         self.assertTrue(config.raw_cfg['thermal']['correct_veg'] == True)
 
-        result = run_smrf(config)
+        result = can_i_run_smrf(config)
         self.assertTrue(result)
 if __name__ == '__main__':
     unittest.main()

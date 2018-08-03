@@ -17,7 +17,8 @@ import random
 import sys
 from inicheck.checkers import CheckType
 from inicheck.output import generate_config
-
+from inicheck.utilities import mk_lst
+import copy
 
 class CheckStation(CheckType):
     """
@@ -185,18 +186,26 @@ def backup_input(data, config_obj):
         data: Pandas dataframe containing the station data
         config_obj: The config object produced by inicheck
     """
+    # mask copy
+    backup_config_obj = copy.deepcopy(config_obj)
+
     # Make the output dir
-    backup_dir = os.path.join(config_obj.cfg['output']['out_location'],
+    backup_dir = os.path.join(backup_config_obj.cfg['output']['out_location'],
                               'input_backup')
     if not os.path.isdir(backup_dir):
         os.mkdir(backup_dir)
     csv_names = {}
 
     # Check config file for csv section and remove alternate data form config
-    if 'csv' not in config_obj.cfg.keys():
-        config_obj.cfg['csv'] = {}
+    if 'csv' not in backup_config_obj.cfg.keys():
+        backup_config_obj.cfg['csv'] = {}
         # With a new section added, we need to remove the other data sections
-        config_obj.apply_recipes()
+        #backup_config_obj.apply_recipes()
+    if 'mysql' in backup_config_obj.cfg.keys():
+        del backup_config_obj.cfg['mysql']
+    if 'stations' in backup_config_obj.cfg.keys():
+        if 'client' in backup_config_obj.cfg['stations']:
+            del backup_config_obj.cfg['stations']['client']
 
     # Output station data to CSV
     csv_var = ['metadata', 'air_temp', 'vapor_pressure', 'precip','wind_speed',
@@ -208,24 +217,25 @@ def backup_input(data, config_obj):
         v.to_csv(fname)
 
         # Adjust and output the inifile
-        config_obj.cfg['csv'][k] = fname
+        backup_config_obj.cfg['csv'][k] = fname
 
     # Copy topo files over to backup
     ignore = ['basin_lon', 'basin_lat', 'type']
-    for s in config_obj.cfg['topo']:
-        src = config_obj.cfg['topo'][s]
-
+    for s in backup_config_obj.cfg['topo'].keys():
+        src = backup_config_obj.cfg['topo'][s]
+        # make not a list if lenth is 1
+        if isinstance(src, list): src = mk_lst(src, unlst=True)
         # Avoid attempring to copy files that don't exist
         if s not in ignore and src != None:
             dst =  os.path.join(backup_dir, os.path.basename(src))
-            config_obj.cfg["topo"][s] = dst
+            backup_config_obj.cfg["topo"][s] = dst
             copyfile(src, dst)
 
     # We dont want to backup the backup
-    config_obj.cfg['output']['input_backup'] = False
+    backup_config_obj.cfg['output']['input_backup'] = False
 
     # Output inifile
-    generate_config(config_obj,os.path.join(backup_dir,'backup_config.ini'))
+    generate_config(backup_config_obj,os.path.join(backup_dir,'backup_config.ini'))
 
 
 def getgitinfo():

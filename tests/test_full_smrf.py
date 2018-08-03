@@ -12,7 +12,7 @@ import unittest
 import shutil
 import smrf
 import os
-from smrf.framework.model_framework import run_smrf
+from smrf.framework.model_framework import can_i_run_smrf
 import numpy as np
 from netCDF4 import Dataset
 
@@ -67,7 +67,7 @@ class TestRME(unittest.TestCase):
             shutil.rmtree(self.output)
 
         config = os.path.join(run_dir,'config.ini')
-        run_smrf(config)
+        can_i_run_smrf(config)
 
     def testAirTemp(self):
         """
