@@ -415,9 +415,11 @@ class SMRF():
                     setattr(self.distribute[key],
                             'stations',
                             self.data.metadata.index.tolist())
-            except:
+
+            except Exception as e:
                 self._logger.warning("Distribution not initialized, grid stations"
                                   "could not be set.")
+                self._logger.exception(e)
 
         else:
             raise KeyError('Could not determine where station data is located')
@@ -450,14 +452,14 @@ class SMRF():
             try:
                 for key in self.distribute.keys():
                     if key in self.data.variables:
-                        # pull out the loaded data
+                        # Pull out the loaded data
                         d = getattr(self.data, key)
 
-                        # check to find the matching stations
+                        # Check to find the matching stations
                         match = d.columns.isin(self.distribute[key].stations)
                         sta_match = d.columns[match]
 
-                        # update the dataframe and the distribute stations
+                        # Update the dataframe and the distribute stations
                         self.distribute[key].stations = sta_match.tolist()
                         setattr(self.data, key, d[sta_match])
 
@@ -470,20 +472,20 @@ class SMRF():
 
             except Exception as e:
                self._logger.warning("Distribution not initialized, data not "
-                                   "filtered to desired stations")
+                                   "filtered to desired stations in variable {}".format(key))
                self._logger.error(e)
 
 
-            #Check all section for stations that are colocated
+            #Check all sections for stations that are colocated
             for key in self.distribute.keys():
                 if key in self.data.variables:
                     if self.distribute[key].stations != None:
-                        #Confirm out stations all have a unique position for each section
+                        # Confirm out stations all have a unique position for each section
                         colocated = check_station_colocation(metadata=self.data.metadata.loc[self.distribute[key].stations])
 
-                        #Stations are co-located, throw error
+                        # Stations are co-located, throw error
                         if colocated != None:
-                            self._logger.error("ERROR: Stations in the {0} section are colocated.\n{1}".format(key,','.join(colocated[0])))
+                            self._logger.error("Stations in the {0} section are colocated.\n{1}".format(key,','.join(colocated[0])))
                             sys.exit()
 
         #Does the user want to create a CSV copy of the station data used.
@@ -650,10 +652,7 @@ class SMRF():
         for i in range(len(t)):
             t[i].start()
 
-        # wait for all the threads to stop
-#         for v in q:
-#             q[v].join()
-
+        # Wait for the end
         for i in range(len(t)):
             t[i].join()
 
@@ -683,13 +682,13 @@ class SMRF():
         if self.distribute['precip'].nasde_model == 'marks2017':
             self.thread_variables += ['storm_id']
 
+        #Add threaded variables on the fly
         if self.distribute['thermal'].correct_cloud:
             self.thread_variables += ['thermal_cloud']
         if self.distribute['thermal'].correct_veg:
             self.thread_variables += ['thermal_veg']
 
         # add some variables to thread_variables based on what we're doing
-#         if not self.gridded:
         self.thread_variables += ['flatwind']
         self.thread_variables += ['cellmaxus', 'dir_round_cell']
 

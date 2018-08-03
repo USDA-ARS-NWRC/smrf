@@ -20,11 +20,18 @@ from inicheck.output import generate_config
 
 
 class CheckStation(CheckType):
+    """
+    Custom check for ensuring our stations are always capitalized
+    """
     def __init__(self,**kwargs):
         super(CheckStation,self).__init__(**kwargs)
 
     def cast(self):
-        return self.value.upper()
+        if self.value.lower() != 'none':
+            return self.value.upper()
+        else:
+            return self.value
+
 
 def find_configs(directory):
     """
