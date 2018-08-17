@@ -4,6 +4,7 @@ Created on Apr 17, 2015
 """
 
 import numpy as np
+import pandas as pd
 import subprocess as sp
 import math
 import os
@@ -612,12 +613,10 @@ def sunang(date, lat, lon, zone=0, slope=0, aspect=0):
     cmd_str = 'sunang -b %s -l %s -t %s -s %i -a %i -z %i' % \
         (lat_str, lon_str, dstr, slope, aspect, zone)
 
-    p = sp.Popen(cmd_str, stdout=sp.PIPE, shell=True)
+    out = sp.check_output([cmd_str], shell=True, universal_newlines=True)
 
-    # get the results
-    out, err = p.communicate()
+    c = out.rstrip().split(' ')
 
-    c = out.decode('utf-8').rstrip().split(' ')
     cosz = float(c[1])
     azimuth = float(c[3])
 
@@ -893,10 +892,7 @@ def twostream(mu0, S0, tau=0.2, omega=0.85, g=0.3, R0=0.5, d=False):
     cmd_str = 'twostream -u %s -0 -t %s -w %s -g %s -r %s -s %s %s' % \
         (str(mu0), str(tau), str(omega), str(g), str(R0), str(S0), dflag)
 
-    p = sp.Popen(cmd_str, stdout=sp.PIPE, shell=True, env={"PATH": IPW})
-
-    # get the results
-    out, err = p.communicate()
+    out = sp.check_output([cmd_str], shell=True, universal_newlines=True)
 
     c = out.rstrip().split('\n')
 
@@ -940,13 +936,12 @@ def solar_ipw(d, w=[0.28, 2.8]):
     if (len(w) > 1):
         w = ','.join(str(x) for x in w)
 
-    cmd_str = 'solar -w %s -d %s -a' % \
-        (w, dstr)
+    cmd_str = 'solar -w %s -d %s -a' % (w, dstr)
 
-    p = sp.Popen(cmd_str, stdout=sp.PIPE, shell=True, env={"PATH": IPW})
-
+    #p = sp.Popen(cmd_str, stdout=sp.PIPE, shell=True, env={"PATH": IPW})
+    out = sp.check_output([cmd_str], shell=True, universal_newlines=True)
     # get the results
-    out, err = p.communicate()
+    # out, err = p.communicate()
 
     return float(out.rstrip())
 
@@ -977,3 +972,83 @@ def model_solar(dt, lat, lon, tau=0.2, tzone=0):
     R = twostream(cosz, sol, tau=tau)
 
     return R[4]
+
+
+def get_hrrr_cloud(df_solar, df_meta, logger, lat, lon):
+    """
+    Take the combined solar from HRRR and use the two stream calculation
+    at the specific HRRR pixels to find the cloud_factor.
+
+    Args:
+        df_solar - solar dataframe from hrrr
+        df_meta - meta_data from hrrr
+        logger - smrf logger
+        lat - basin lat
+        lon - basin lon
+
+    Returns:
+        df_cf - cloud factor dataframe in same format as df_solar input
+    """
+
+    # get and loop through the columns
+    clms = df_solar.columns
+    dates = df_solar.index.values[:]
+
+    # find basin solar at top of atmosphere for each data
+    basin_sol = np.zeros(len(dates))
+    basin_sol[:] = np.nan
+    for idt, dt in enumerate(dates):
+        # get solar using twostream
+        dtt = pd.to_datetime(dt)
+        basin_sol[idt] =  model_solar(dtt, lat, lon)
+
+    # create cloud factor dataframe
+    df_cf = df_solar.copy()
+    #df_basin_sol = pd.DataFrame(index = dates, data = basin_sol)
+
+    # calculate cloud factor from basin solar
+    for cl in clms:
+        cf_tmp = df_cf[cl].values[:]/basin_sol
+        cf_tmp[np.isnan(cf_tmp)] = 0.0
+        cf_tmp[cf_tmp > 1.0] = 1.0
+        df_cf[cl] = cf_tmp
+
+    # df_cf = df_solar.divide(df_basin_sol)
+    # # clip to 1.0
+    # df_cf = df_cf.clip(upper=1.0)
+    # # fill nighttime with 0
+    # df_cf = df_cf.fillna(value=0.0)
+
+    # for idc, cl in enumerate(clms):
+    #     # get lat and lon for each hrrr pixel
+    #     lat = df_meta.loc[ cl,'latitude']
+    #     lon = df_meta.loc[ cl,'longitude']
+    #
+    #     # get solar values and make empty cf vector
+    #     sol_vals = df_solar[cl].values[:]
+    #     cf_vals = np.zeros_like(sol_vals)
+    #     cf_vals[:] = np.nan
+    #
+    #     # loop through time series for the pixel
+    #     for idt, sol in enumerate(sol_vals):
+    #         dt = pd.to_datetime(dates[idt])
+    #         # get the modeled solar
+    #         calc_sol = model_solar(dt, lat, lon)
+    #         if calc_sol == 0.0:
+    #             cf_tmp = 0.0
+    #             # diff = sol - calc_sol
+    #             # if diff > 5:
+    #             #     print(sol)
+    #         else:
+    #             cf_tmp = sol / calc_sol
+    #         if cf_tmp > 1.0:
+    #             logger.warning('CF to large: ')
+    #             logger.warning('{} for {} at {}'.format(cf_tmp, cl, idt))
+    #             cf_tmp = 1.0
+    #         # store value
+    #         cf_vals[idt] =cf_tmp
+    #
+    #     # store pixel cloud factor
+    #     df_cf[cl] = cf_vals
+
+    return df_cf

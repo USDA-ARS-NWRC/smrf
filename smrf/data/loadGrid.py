@@ -6,6 +6,7 @@ import os
 import utm
 import pytz
 from smrf.envphys import phys
+from smrf.envphys.radiation import get_hrrr_cloud
 
 try:
     from weather_forecast_retrieval import hrrr
@@ -44,7 +45,7 @@ class grid():
         self.forecast_flag = forecast_flag
         self.day_hour = day_hour
         self.n_forecast_hours = n_forecast_hours
-        
+
         # degree offset for a buffer around the model domain
         self.offset = 0.1
 
@@ -60,6 +61,8 @@ class grid():
         # the model domain are used
         self.x = topo.x
         self.y = topo.y
+        self.lat = topo.topoConfig['basin_lat']
+        self.lon = topo.topoConfig['basin_lon']
 
         # get the zone number and the bounding box
         u = utm.from_latlon(topo.topoConfig['basin_lat'],
@@ -95,7 +98,7 @@ class grid():
 #             setattr(self, v, d.tz_localize(tz=self.time_zone))
 
     def model_domain_grid(self):
-        
+
         dlat = np.zeros((2,))
         dlon = np.zeros_like(dlat)
         dlat[0], dlon[0] = utm.to_latlon(np.min(self.x), np.min(self.y),
@@ -109,7 +112,7 @@ class grid():
         dlat[1] += self.offset
         dlon[0] -= self.offset
         dlon[1] += self.offset
-        
+
         return dlat, dlon
 
     def load_from_hrrr(self):
@@ -188,9 +191,14 @@ class grid():
         self._logger.debug('Loading precip')
         self.precip = pd.DataFrame(data['precip_int'], index=idx, columns=cols)
 
-        self._logger.debug('Loading cloud_factor')
-        self.cloud_factor = pd.DataFrame(data['cloud_factor'], index=idx, columns=cols)
-
+        self._logger.debug('Loading solar')
+        # solar_beam = pd.DataFrame(data['solar_beam'], index=idx, columns=cols)
+        # solar_diffuse = pd.DataFrame(data['solar_diffuse'], index=idx, columns=cols)
+        # solar = solar_beam + solar_diffuse
+        solar = pd.DataFrame(data['short_wave'], index=idx, columns=cols)
+        self._logger.debug('Calculating cloud factor')
+        self.cloud_factor = get_hrrr_cloud(solar, self.metadata, self._logger,
+                                           self.lat, self.lon)
 
     def load_from_netcdf(self):
         """
@@ -216,7 +224,7 @@ class grid():
 
         if mlat.ndim != 2 & mlon.ndim !=2:
             [mlon, mlat] = np.meshgrid(mlon, mlat)
-            
+
         # get that grid cells in the model domain
         dlat, dlon = self.model_domain_grid()
 
@@ -228,7 +236,7 @@ class grid():
 
         mlat = mlat[ind]
         mlon = mlon[ind]
-        mhgt = mhgt[ind]    
+        mhgt = mhgt[ind]
 
         # GET THE METADATA
         # create some fake station names based on the index
@@ -254,18 +262,18 @@ class grid():
         t = f.variables['time']
         time = nc.num2date(t[:].astype(int), t.getncattr('units'), t.getncattr('calendar'))
         time = [tm.replace(microsecond=0) for tm in time] # drop the milliseconds
-        
+
         # subset the times to only those needed
 #         tzinfo = pytz.timezone(self.time_zone)
 #         time = []
 #         for t in tt:
 #             time.append(t.replace(tzinfo=tzinfo))
 #         time = np.array(time)
-        
+
 #         time_ind = (time >= pd.to_datetime(self.start_date)) & \
 #                    (time <= pd.to_datetime(self.end_date))
 #         time = time[time_ind]
-        
+
 #         time_idx = np.where(time_ind)[0]
 
         # GET THE DATA, ONE AT A TIME
@@ -315,7 +323,7 @@ class grid():
 #         self.variables = ['thermal','air_temp','dew_point','wind_speed',
 #                             'wind_direction','cloud_factor','precip']
 
-        
+
 
         self._logger.info('Reading data coming from WRF output: {}'.format(
             self.dataConfig['file']
@@ -366,7 +374,7 @@ class grid():
                 times.append(''.join([s.decode('utf-8') for s in v]))
         except Exception:
             raise Exception('Could not convert WRF times to readable format')
-        
+
         times = [v.replace('_', ' ') for v in times]  # remove the underscore
         time = pd.to_datetime(times)
 
