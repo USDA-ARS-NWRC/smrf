@@ -6,6 +6,8 @@ import os
 from smrf.distribute import image_data
 from smrf.utils import utils
 import netCDF4 as nc
+from scipy.interpolate import griddata
+import pytz
 
 
 class wind(image_data.image_data):
@@ -125,6 +127,13 @@ class wind(image_data.image_data):
             self.gridded = True
             self.distribute_drifts = False
 
+        # wind ninja parameters
+        self.wind_ninja_dir = self.config['wind_ninja_dir']
+        self.wind_ninja_dxy = self.config['wind_ninja_dxy']
+        self.wind_ninja_pref = self.config['wind_ninja_pref']
+        if self.config['wind_ninja_tz'] is not None:
+            self.wind_ninja_tz = pytz.timezone(self.config['wind_ninja_tz'])
+
         else:
             # open the maxus netCDF
             self._maxus_file = nc.Dataset(self.config['maxus_netcdf'], 'r')
@@ -170,6 +179,10 @@ class wind(image_data.image_data):
             self.config['peak'] = [self.config['peak']]
         self._initialize(topo, data.metadata)
 
+        # meshgrid points
+        self.X = topo.X
+        self.Y = topo.Y
+
         if not self.gridded:
             self.veg_type = topo.veg_type
 
@@ -196,7 +209,7 @@ class wind(image_data.image_data):
             self.dir_round_cell = None
             self.cellmaxus = None
 
-    def distribute(self, data_speed, data_direction):
+    def distribute(self, data_speed, data_direction, t):
         """
         Distribute given a Panda's dataframe for a single time step. Calls
         :mod:`smrf.distribute.image_data.image_data._distribute`.
@@ -216,6 +229,7 @@ class wind(image_data.image_data):
             data_speed: Pandas dataframe for single time step from wind_speed
             data_direction: Pandas dataframe for single time step from
                 wind_direction
+            t: time stamp
 
         """
 
@@ -226,24 +240,32 @@ class wind(image_data.image_data):
         data_direction = data_direction[self.stations]
 
         if self.gridded:
-            self._distribute(data_speed, other_attribute='wind_speed')
+            # check if running with windninja
+            if self.wind_ninja_dir is not None:
+                wind_speed, wind_direction = self.convert_wind_ninja()
+                self.wind_speed = wind_speed
+                self.wind_direction = wind_direction
 
-            # wind direction components at the station
-            self.u_direction = np.sin(data_direction * np.pi/180)    # u
-            self.v_direction = np.cos(data_direction * np.pi/180)    # v
+            else:
+                self._distribute(data_speed, other_attribute='wind_speed')
 
-            # distribute u_direction and v_direction
-            self._distribute(self.u_direction,
-                             other_attribute='u_direction_distributed')
-            self._distribute(self.v_direction,
-                             other_attribute='v_direction_distributed')
+                # wind direction components at the station
+                self.u_direction = np.sin(data_direction * np.pi/180)    # u
+                self.v_direction = np.cos(data_direction * np.pi/180)    # v
 
-            # combine u and v to azimuth
-            az = np.arctan2(self.u_direction_distributed,
-                            self.v_direction_distributed)*180/np.pi
-            az[az < 0] = az[az < 0] + 360
-            self.wind_direction = az
+                # distribute u_direction and v_direction
+                self._distribute(self.u_direction,
+                                 other_attribute='u_direction_distributed')
+                self._distribute(self.v_direction,
+                                 other_attribute='v_direction_distributed')
 
+                # combine u and v to azimuth
+                az = np.arctan2(self.u_direction_distributed,
+                                self.v_direction_distributed)*180/np.pi
+                az[az < 0] = az[az < 0] + 360
+                self.wind_direction = az
+
+            # set min and max
             self.wind_speed = utils.set_min_max(self.wind_speed,
                                                 self.min,
                                                 self.max)
@@ -279,7 +301,7 @@ class wind(image_data.image_data):
 
         for t in data_speed.index:
 
-            self.distribute(data_speed.loc[t], data_direction.loc[t])
+            self.distribute(data_speed.loc[t], data_direction.loc[t], t)
 
             queue['wind_speed'].put([t, self.wind_speed])
             queue['wind_direction'].put([t, self.wind_direction])
@@ -467,3 +489,79 @@ class wind(image_data.image_data):
         # wind direction components at the station
         self.u_direction = np.sin(data_direction * np.pi/180)    # u
         self.v_direction = np.cos(data_direction * np.pi/180)    # v
+
+    def convert_wind_ninja(self, wn_prefix, t):
+        """
+        Convert the WindNinja ascii grids back to the SMRF grids and into the
+        SMRF data streamself.
+
+        Args:
+            wn_prefix:      prefix for WindNinja output files
+            t:              datetime of timestep
+
+        Returns:
+            ws: wind speed numpy array
+            wd: wind direction numpy array
+
+        """
+        fmt_wn = '%Y%m%d_%H%M'
+
+        # get the ascii files that need converted
+        # file example tuol_09-20-2018_1900_200m_vel.prj
+        # find timestamp of WindNinja file
+        t_file = t.astimezone(self.wind_ninja_tz)
+
+        fp_vel = os.path.join(self.wind_ninja_dir,
+                          '{}_{}_{:d}m_vel.asc'.format(self.wn_prefix,
+                                                       t_file.strftime(fmt_wn),
+                                                       self.dxy))
+        fp_ang = os.path.join(self.wind_ninja_dir,
+                          '{}_{}_{:d}m_ang.asc'.format(self.wn_prefix,
+                                                       t_file.strftime(fmt_wn),
+                                                       self.dxy))
+
+        # make sure files exist
+        if not os.path.isfile(fp_vel):
+            raise ValueError('{} in windninja convert module does not exist!'.format(fp_vel))
+        if not os.path.isfile(fp_ang):
+            raise ValueError('{} in windninja convert module does not exist!'.format(fp_ang))
+
+        # get wind ninja topo stats
+        ts2 = utils.get_asc_stats(fp_vel, filetype='ascii')
+        xwn = ts2['x'][:]
+        ywn = ts2['y'][:]
+
+        XW, YW = np.meshgrid(xwn, ywn)
+        xwint = XW.flatten()
+        ywint = YW.flatten()
+
+        ############# NEED #######
+        # Need to look at time zone from WindNinja cfg and convert
+        # back to UTC so that we are consistent with SMRF outputs
+        ######### END NEED #######
+        #tmpdate = dt.replace(tzinfo=pytz.timezone('UTC'))
+
+        data_vel = np.loadtxt(fp_vel, skiprows=6)
+        data_vel_int = data.flatten()
+
+        data_ang = np.loadtxt(fp_ang, skiprows=6)
+        data_ang_int = data.flatten()
+
+        # interpolate to the SMRF grid from the WindNinja grid
+        g_vel = griddata((xwint, ywint),
+                         data_vel_int,
+                         (self.X, self.Y),
+                         method='linear')
+
+        g_ang = griddata((xwint, ywint),
+                         data_ang_int,
+                         (self.X, self.Y),
+                         method='linear')
+
+        ############# NEED #######
+        # Do we convert? power law to 5m?
+        ######### END NEED #######
+        g_vel = np.flipud(g_vel)*0.447 #  convert?
+        g_ang = np.flipud(g_ang)
+
+        return g_vel, g_ang

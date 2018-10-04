@@ -335,6 +335,34 @@ def get_config_doc_section_hdr():
     return hdr_dict
 
 
+def get_asc_stats(fp):
+    """
+    Returns header of ascii dem file
+    """
+    ts = {}
+    header = {}
+
+    ff = open(fp, 'r')
+    for idl, line in enumerate(ff):
+        tmp_line = line.strip().split()
+        header[tmp_line[0]] = tmp_line[1]
+        if idl >= 5:
+            break
+    ff.close()
+
+    ts['nx'] = int(header['ncols'])
+    ts['ny'] = int(header['nrows'])
+    ts['du'] = float(header['cellsize'])
+    ts['dv'] = float(header['cellsize'])
+    ts['u'] = float(header['yllcorner'])
+    ts['v'] = float(header['xllcorner'])
+
+    ts['x'] = ts['v'] + ts['dv']*np.arange(ts['nx'])
+    ts['y'] = ts['u'] + ts['du']*np.arange(ts['ny'])
+
+    return ts
+
+
 def getqotw():
     p = os.path.dirname(__core_config__)
     q_f = os.path.abspath(os.path.join('{0}'.format(p),'.qotw'))
