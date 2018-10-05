@@ -242,7 +242,7 @@ class wind(image_data.image_data):
         if self.gridded:
             # check if running with windninja
             if self.wind_ninja_dir is not None:
-                wind_speed, wind_direction = self.convert_wind_ninja()
+                wind_speed, wind_direction = self.convert_wind_ninja(t)
                 self.wind_speed = wind_speed
                 self.wind_direction = wind_direction
 
@@ -490,13 +490,12 @@ class wind(image_data.image_data):
         self.u_direction = np.sin(data_direction * np.pi/180)    # u
         self.v_direction = np.cos(data_direction * np.pi/180)    # v
 
-    def convert_wind_ninja(self, wn_prefix, t):
+    def convert_wind_ninja(self, t):
         """
         Convert the WindNinja ascii grids back to the SMRF grids and into the
         SMRF data streamself.
 
         Args:
-            wn_prefix:      prefix for WindNinja output files
             t:              datetime of timestep
 
         Returns:
@@ -504,7 +503,9 @@ class wind(image_data.image_data):
             wd: wind direction numpy array
 
         """
-        fmt_wn = '%Y%m%d_%H%M'
+        # fmt_wn = '%Y-%m-%d_%H%M'
+        fmt_wn = '%m-%d-%Y_%H%M'
+        fmt_d = '%Y%m%d'
 
         # get the ascii files that need converted
         # file example tuol_09-20-2018_1900_200m_vel.prj
@@ -512,13 +513,15 @@ class wind(image_data.image_data):
         t_file = t.astimezone(self.wind_ninja_tz)
 
         fp_vel = os.path.join(self.wind_ninja_dir,
-                          '{}_{}_{:d}m_vel.asc'.format(self.wn_prefix,
-                                                       t_file.strftime(fmt_wn),
-                                                       self.dxy))
+                              'data{}'.format(t.strftime(fmt_d)),
+                              '{}_{}_{:d}m_vel.asc'.format(self.wind_ninja_pref,
+                                                           t_file.strftime(fmt_wn),
+                                                           self.wind_ninja_dxy))
         fp_ang = os.path.join(self.wind_ninja_dir,
-                          '{}_{}_{:d}m_ang.asc'.format(self.wn_prefix,
-                                                       t_file.strftime(fmt_wn),
-                                                       self.dxy))
+                              'data{}'.format(t.strftime(fmt_d)),
+                              '{}_{}_{:d}m_ang.asc'.format(self.wind_ninja_pref,
+                                                           t_file.strftime(fmt_wn),
+                                                           self.wind_ninja_dxy))
 
         # make sure files exist
         if not os.path.isfile(fp_vel):
@@ -527,7 +530,7 @@ class wind(image_data.image_data):
             raise ValueError('{} in windninja convert module does not exist!'.format(fp_ang))
 
         # get wind ninja topo stats
-        ts2 = utils.get_asc_stats(fp_vel, filetype='ascii')
+        ts2 = utils.get_asc_stats(fp_vel)
         xwn = ts2['x'][:]
         ywn = ts2['y'][:]
 
@@ -542,10 +545,7 @@ class wind(image_data.image_data):
         #tmpdate = dt.replace(tzinfo=pytz.timezone('UTC'))
 
         data_vel = np.loadtxt(fp_vel, skiprows=6)
-        data_vel_int = data.flatten()
-
-        data_ang = np.loadtxt(fp_ang, skiprows=6)
-        data_ang_int = data.flatten()
+        data_vel_int = data_vel.flatten()
 
         # interpolate to the SMRF grid from the WindNinja grid
         g_vel = griddata((xwint, ywint),
@@ -553,15 +553,23 @@ class wind(image_data.image_data):
                          (self.X, self.Y),
                          method='linear')
 
-        g_ang = griddata((xwint, ywint),
-                         data_ang_int,
-                         (self.X, self.Y),
-                         method='linear')
-
         ############# NEED #######
-        # Do we convert? power law to 5m?
+        # Do we convert? power law to 5m from (5m+veg)?
         ######### END NEED #######
         g_vel = np.flipud(g_vel)*0.447 #  convert?
-        g_ang = np.flipud(g_ang)
+
+        data_ang = np.loadtxt(fp_ang, skiprows=6)
+        data_ang_int = data_ang.flatten()
+
+        # Don't get angle if not distributing drifts
+        if self.distribute_drifts:
+            g_ang = griddata((xwint, ywint),
+                             data_ang_int,
+                             (self.X, self.Y),
+                             method='linear')
+
+            g_ang = np.flipud(g_ang)
+        else:
+            g_ang = None
 
         return g_vel, g_ang
