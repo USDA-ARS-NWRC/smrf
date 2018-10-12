@@ -203,6 +203,24 @@ class wind(image_data.image_data):
                             float(enhancement)
         else:
             self.flatwind = None
+            # Wind Ninja output height in meters
+            self.wind_height = 5
+            # set roughness that was used in WindNinja simulation
+            self.wn_roughness = 0.01*np.ones_like(topo.dem)
+            # self.wn_roughness = 0.005*np.ones_like(topo.dem)
+            # self.wn_roughness = 0.43*np.ones_like(topo.dem)
+            # self.wn_roughness = 1.0*np.ones_like(topo.dem)
+            # get our surface roughness to use in log law scaling of WindNinja data
+            if hasattr(topo,'roughness'):
+                self.roughness = topo.roughness
+            else:
+                self._logger.warning('Will use 0.005 m surface roughness \
+                                      to scale WindNinja data')
+                self.roughness = 0.005*np.ones_like(topo.dem)
+
+            # precalculate scale arrays so we don't do it every timestep
+            self.ln_wind_scale = np.log(self.wind_height / self.roughness) / \
+                                 np.log(self.wind_height / self.wn_roughness)
 
         if not self.distribute_drifts:
             # we have to pass these to precip, so make them none if we won't use them
@@ -555,8 +573,13 @@ class wind(image_data.image_data):
 
         ############# NEED #######
         # Do we convert? power law to 5m from (5m+veg)?
+        # *0.447 #  convert?
         ######### END NEED #######
-        g_vel = np.flipud(g_vel)*0.447 #  convert?
+        # no need to convert because units are correct now
+        g_vel = np.flipud(g_vel)
+        # log law scale
+        g_vel = g_vel * self.ln_wind_scale
+
 
         data_ang = np.loadtxt(fp_ang, skiprows=6)
         data_ang_int = data_ang.flatten()
