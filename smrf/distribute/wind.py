@@ -127,12 +127,12 @@ class wind(image_data.image_data):
             self.gridded = True
             self.distribute_drifts = False
 
-        # wind ninja parameters
-        self.wind_ninja_dir = self.config['wind_ninja_dir']
-        self.wind_ninja_dxy = self.config['wind_ninja_dxy']
-        self.wind_ninja_pref = self.config['wind_ninja_pref']
-        if self.config['wind_ninja_tz'] is not None:
-            self.wind_ninja_tz = pytz.timezone(self.config['wind_ninja_tz'])
+            # wind ninja parameters
+            self.wind_ninja_dir = self.config['wind_ninja_dir']
+            self.wind_ninja_dxy = self.config['wind_ninja_dxy']
+            self.wind_ninja_pref = self.config['wind_ninja_pref']
+            if self.config['wind_ninja_tz'] is not None:
+                self.wind_ninja_tz = pytz.timezone(self.config['wind_ninja_tz'])
 
         else:
             # open the maxus netCDF
@@ -203,23 +203,25 @@ class wind(image_data.image_data):
                             float(enhancement)
         else:
             self.flatwind = None
-            # Wind Ninja output height in meters
-            self.wind_height = 5
+            # WindNinja output height in meters
+            self.wind_height = float(self.config['wind_ninja_height'])
             # set roughness that was used in WindNinja simulation
-            self.wn_roughness = 0.01*np.ones_like(topo.dem)
-            # self.wn_roughness = 0.005*np.ones_like(topo.dem)
-            # self.wn_roughness = 0.43*np.ones_like(topo.dem)
-            # self.wn_roughness = 1.0*np.ones_like(topo.dem)
-            # get our surface roughness to use in log law scaling of WindNinja data
-            if hasattr(topo,'roughness'):
-                self.roughness = topo.roughness
-            else:
-                self._logger.warning('Will use 0.005 m surface roughness \
-                                      to scale WindNinja data')
-                self.roughness = 0.005*np.ones_like(topo.dem)
+            # WindNinja uses 0.01m for grass, 0.43 for shrubs, and 1.0 for forest
+            self.wn_roughness = float(self.config['wind_ninja_roughness']) * \
+                                np.ones_like(topo.dem)
+
+            # get our effective veg surface roughness
+            # to use in log law scaling of WindNinja data
+            # using the relationship in
+            # https://www.jstage.jst.go.jp/article/jmsj1965/53/1/53_1_96/_pdf
+            self.veg_roughness = topo.veg_height / 7.39
+            # make sure roughness stays reasonable using bounds from
+            # http://www.iawe.org/Proceedings/11ACWE/11ACWE-Cataldo3.pdf
+            self.veg_roughness = utils.set_min_max(self.veg_roughness,
+                                                   0.005, 1.6)
 
             # precalculate scale arrays so we don't do it every timestep
-            self.ln_wind_scale = np.log(self.wind_height / self.roughness) / \
+            self.ln_wind_scale = np.log(self.wind_height / self.veg_roughness) / \
                                  np.log(self.wind_height / self.wn_roughness)
 
         if not self.distribute_drifts:
