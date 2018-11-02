@@ -217,12 +217,16 @@ class wind(image_data.image_data):
             self.veg_roughness = topo.veg_height / 7.39
             # make sure roughness stays reasonable using bounds from
             # http://www.iawe.org/Proceedings/11ACWE/11ACWE-Cataldo3.pdf
-            self.veg_roughness = utils.set_min_max(self.veg_roughness,
-                                                   0.005, 1.6)
+
+            self.veg_roughness[self.veg_roughness < 0.01] = 0.01
+            self.veg_roughness[np.isnan(self.veg_roughness)] = 0.01
+            self.veg_roughness[self.veg_roughness > 1.6] = 1.6
 
             # precalculate scale arrays so we don't do it every timestep
-            self.ln_wind_scale = np.log(self.wind_height / self.veg_roughness) / \
-                                 np.log(self.wind_height / self.wn_roughness)
+            self.ln_wind_scale = np.log((self.veg_roughness + self.wind_height) / self.veg_roughness) / \
+                                 np.log((self.wn_roughness + self.wind_height) / self.wn_roughness)
+
+            # self.ln_wind_scale = 1.0
 
         if not self.distribute_drifts:
             # we have to pass these to precip, so make them none if we won't use them
@@ -534,20 +538,14 @@ class wind(image_data.image_data):
 
         fp_vel = os.path.join(self.wind_ninja_dir,
                               'data{}'.format(t.strftime(fmt_d)),
+                              'wind_ninja_data',
                               '{}_{}_{:d}m_vel.asc'.format(self.wind_ninja_pref,
-                                                           t_file.strftime(fmt_wn),
-                                                           self.wind_ninja_dxy))
-        fp_ang = os.path.join(self.wind_ninja_dir,
-                              'data{}'.format(t.strftime(fmt_d)),
-                              '{}_{}_{:d}m_ang.asc'.format(self.wind_ninja_pref,
                                                            t_file.strftime(fmt_wn),
                                                            self.wind_ninja_dxy))
 
         # make sure files exist
         if not os.path.isfile(fp_vel):
             raise ValueError('{} in windninja convert module does not exist!'.format(fp_vel))
-        if not os.path.isfile(fp_ang):
-            raise ValueError('{} in windninja convert module does not exist!'.format(fp_ang))
 
         # get wind ninja topo stats
         ts2 = utils.get_asc_stats(fp_vel)
@@ -573,21 +571,26 @@ class wind(image_data.image_data):
                          (self.X, self.Y),
                          method='linear')
 
-        ############# NEED #######
-        # Do we convert? power law to 5m from (5m+veg)?
-        # *0.447 #  convert?
-        ######### END NEED #######
         # no need to convert because units are correct now
         g_vel = np.flipud(g_vel)
         # log law scale
         g_vel = g_vel * self.ln_wind_scale
 
-
-        data_ang = np.loadtxt(fp_ang, skiprows=6)
-        data_ang_int = data_ang.flatten()
-
         # Don't get angle if not distributing drifts
         if self.distribute_drifts:
+            fp_ang = os.path.join(self.wind_ninja_dir,
+                                  'data{}'.format(t.strftime(fmt_d)),
+                                  'wind_ninja_data',
+                                  '{}_{}_{:d}m_ang.asc'.format(self.wind_ninja_pref,
+                                                               t_file.strftime(fmt_wn),
+                                                               self.wind_ninja_dxy))
+
+            if not os.path.isfile(fp_ang):
+                raise ValueError('{} in windninja convert module does not exist!'.format(fp_ang))
+
+            data_ang = np.loadtxt(fp_ang, skiprows=6)
+            data_ang_int = data_ang.flatten()
+
             g_ang = griddata((xwint, ywint),
                              data_ang_int,
                              (self.X, self.Y),
