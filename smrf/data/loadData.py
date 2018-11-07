@@ -79,6 +79,7 @@ class wxdata():
 
         self._logger.info('Reading data coming from CSV files')
 
+        sta = None
         if self.stations is not None:
             if 'stations' in self.stations:
                 sta = [s.upper() for s in self.stations['stations']]
@@ -116,36 +117,39 @@ class wxdata():
                         dp = dp_full[dp_full.columns[(dp_full.columns.str.upper()).isin(sta)]]
                     else:
                         dp = dp_full
+                        
+                    # check that the start and end date are within the data
+                    if self.start_date not in dp.index:
+                        raise Exception("start_date in config file is not "
+                                        "inside of available date range "
+                                        "\n{0} not w/in {1} and {2}"
+                                        "".format(self.start_date,
+                                                  dp.index[0],
+                                                  dp.index[-1]))
+
+                    if self.end_date not in dp.index:
+                        raise Exception("end_date in config file is not "
+                                        "inside of available date range "
+                                        "\n{0} not w/in {1} and {2}"
+                                        "".format(self.start_date,
+                                                  dp.index[0],
+                                                  dp.index[-1]))
+                        
                     # only get the desired dates
                     dp_final = dp[self.start_date:self.end_date]
 
                     if dp_final.empty:
-                        if self.start_date not in dp_final.index:
-                            raise Exception("start_date in config file is not "
-                                            "inside of available date range "
-                                            "\n{0} not w/in {1} and {2}"
-                                            "".format(self.start_date,
-                                                      dp.index[0],
-                                                      dp.index[-1]))
-
-                        elif self.end_date not in dp_final.index:
-                            raise Exception("end_date in config file is not "
-                                            "inside of available date range "
-                                            "\n{0} not w/in {1} and {2}"
-                                            "".format(self.start_date,
-                                                      dp.index[0],
-                                                      dp.index[-1]))
-                        else:
-                            raise Exception("No CSV data found for {0}"
-                                            "".format(i))
+                        raise Exception("No CSV data found for {0}"
+                                        "".format(i))
 
                 setattr(self, i, dp_final)
 
         # check that metadata is there
-        try:
-            self.metadata
-        except:
-            raise AttributeError('Metadata missing from configuration file')
+        # This is now handled by inicheck. Leaving out the metadata in the config will error in inicheck
+#         try:
+#             self.metadata
+#         except:
+#             raise AttributeError('Metadata missing from configuration file')
 
     def load_from_mysql(self):
         """

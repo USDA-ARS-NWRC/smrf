@@ -4,7 +4,7 @@ import pandas as pd
 import logging
 import os
 import utm
-import subprocess as sp
+import pytz
 from smrf.envphys import phys
 
 try:
@@ -44,6 +44,9 @@ class grid():
         self.forecast_flag = forecast_flag
         self.day_hour = day_hour
         self.n_forecast_hours = n_forecast_hours
+        
+        # degree offset for a buffer around the model domain
+        self.offset = 0.1
 
         self.force_zone_number = None
         if 'force_zone_number' in dataConfig:
@@ -91,6 +94,23 @@ class grid():
 #             d = getattr(self, v)
 #             setattr(self, v, d.tz_localize(tz=self.time_zone))
 
+    def model_domain_grid(self):
+        
+        dlat = np.zeros((2,))
+        dlon = np.zeros_like(dlat)
+        dlat[0], dlon[0] = utm.to_latlon(np.min(self.x), np.min(self.y),
+                                         int(self.dataConfig['zone_number']),
+                                         self.dataConfig['zone_letter'])
+        dlat[1], dlon[1] = utm.to_latlon(np.max(self.x), np.max(self.y),
+                                         int(self.dataConfig['zone_number']),
+                                         self.dataConfig['zone_letter'])
+        # add a buffer
+        dlat[0] -= self.offset
+        dlat[1] += self.offset
+        dlon[0] -= self.offset
+        dlon[1] += self.offset
+        
+        return dlat, dlon
 
     def load_from_hrrr(self):
         """
@@ -171,7 +191,7 @@ class grid():
         self._logger.debug('Loading cloud_factor')
         self.cloud_factor = pd.DataFrame(data['cloud_factor'], index=idx, columns=cols)
 
-#     @profile
+
     def load_from_netcdf(self):
         """
         Load the data from a generic netcdf file
@@ -194,11 +214,25 @@ class grid():
         mlon = f.variables['lon'][:]
         mhgt = f.variables['elev'][:]
 
-        [mlon, mlat] = np.meshgrid(mlon, mlat)
+        if mlat.ndim != 2 & mlon.ndim !=2:
+            [mlon, mlat] = np.meshgrid(mlon, mlat)
+            
+        # get that grid cells in the model domain
+        dlat, dlon = self.model_domain_grid()
+
+        # get the values that are in the modeling domain
+        ind = (mlat >= dlat[0]) & \
+            (mlat <= dlat[1]) & \
+            (mlon >= dlon[0]) & \
+            (mlon <= dlon[1])
+
+        mlat = mlat[ind]
+        mlon = mlon[ind]
+        mhgt = mhgt[ind]    
 
         # GET THE METADATA
         # create some fake station names based on the index
-        a = np.argwhere(mlon)
+        a = np.argwhere(ind)
         primary_id = ['grid_y%i_x%i' % (i[0], i[1]) for i in a]
         self._logger.debug('{} grid cells within model domain'.format(len(a)))
 
@@ -218,12 +252,20 @@ class grid():
 
         # GET THE TIMES
         t = f.variables['time']
-        time = nc.num2date(t[:], t.getncattr('units'), t.getncattr('calendar'))
-
+        time = nc.num2date(t[:].astype(int), t.getncattr('units'), t.getncattr('calendar'))
+        time = [tm.replace(microsecond=0) for tm in time] # drop the milliseconds
+        
         # subset the times to only those needed
-        time_ind = (time >= pd.to_datetime(self.start_date)) & \
-                   (time <= pd.to_datetime(self.end_date))
-        time = time[time_ind]
+#         tzinfo = pytz.timezone(self.time_zone)
+#         time = []
+#         for t in tt:
+#             time.append(t.replace(tzinfo=tzinfo))
+#         time = np.array(time)
+        
+#         time_ind = (time >= pd.to_datetime(self.start_date)) & \
+#                    (time <= pd.to_datetime(self.end_date))
+#         time = time[time_ind]
+        
 #         time_idx = np.where(time_ind)[0]
 
         # GET THE DATA, ONE AT A TIME
@@ -236,12 +278,16 @@ class grid():
                 df = pd.DataFrame(index=time, columns=primary_id)
                 for i in a:
                     g = 'grid_y%i_x%i' % (i[0], i[1])
-                    df[g] = f.variables[v_file][time_ind, i[0], i[1]]
+                    df[g] = f.variables[v_file][:, i[0], i[1]]
 
                 # deal with any fillValues
-                fv = f.variables[v_file].getncattr('_FillValue')
-                df.replace(fv, np.nan, inplace=True)
-                setattr(self, v, df)
+                try:
+                    fv = f.variables[v_file].getncattr('_FillValue')
+                    df.replace(fv, np.nan, inplace=True)
+                except:
+                    pass
+                df = df[self.start_date:self.end_date]
+                setattr(self, v, df.tz_localize(tz=self.time_zone))
 
     def load_from_wrf(self):
         """
@@ -269,8 +315,7 @@ class grid():
 #         self.variables = ['thermal','air_temp','dew_point','wind_speed',
 #                             'wind_direction','cloud_factor','precip']
 
-        # degree offset for a buffer around the model domain
-        offset = 0.1
+        
 
         self._logger.info('Reading data coming from WRF output: {}'.format(
             self.dataConfig['file']
@@ -278,19 +323,7 @@ class grid():
         f = nc.Dataset(self.dataConfig['file'])
 
         # DETERMINE THE MODEL DOMAIN AREA IN THE GRID
-        dlat = np.zeros((2,))
-        dlon = np.zeros_like(dlat)
-        dlat[0], dlon[0] = utm.to_latlon(np.min(self.x), np.min(self.y),
-                                         int(self.dataConfig['zone_number']),
-                                         self.dataConfig['zone_letter'])
-        dlat[1], dlon[1] = utm.to_latlon(np.max(self.x), np.max(self.y),
-                                         int(self.dataConfig['zone_number']),
-                                         self.dataConfig['zone_letter'])
-        # add a buffer
-        dlat[0] -= offset
-        dlat[1] += offset
-        dlon[0] -= offset
-        dlon[1] += offset
+        dlat, dlon = self.model_domain_grid()
 
         # get the values that are in the modeling domain
         ind = (f.variables['XLAT'] >= dlat[0]) & \
@@ -325,7 +358,15 @@ class grid():
         # GET THE TIMES
         t = f.variables['Times']
         t.set_auto_maskandscale(False)
-        times = [('').join(v) for v in t]
+        try:
+            times = [('').join(v) for v in t]
+        except TypeError:
+            times = []
+            for v in t:
+                times.append(''.join([s.decode('utf-8') for s in v]))
+        except Exception:
+            raise Exception('Could not convert WRF times to readable format')
+        
         times = [v.replace('_', ' ') for v in times]  # remove the underscore
         time = pd.to_datetime(times)
 
@@ -343,25 +384,15 @@ class grid():
             self.air_temp[g] = v
 
         self._logger.debug('Loading dew_point and calculating vapor_pressure')
-        self.vapor_pressure = pd.DataFrame(index=time, columns=primary_id)
         self.dew_point = pd.DataFrame(index=time, columns=primary_id)
         for i in a:
             g = 'grid_y%i_x%i' % (i[0], i[1])
             v = f.variables['DWPT'][time_ind, i[0], i[1]]
             self.dew_point[g] = v
 
-            tmp_file = os.path.join(self.tempDir, 'dpt.txt')
-            np.savetxt(tmp_file, v)
-
-            dp_cmd = 'satvp < %s' % tmp_file
-            p = sp.Popen(dp_cmd, shell=True, stdout=sp.PIPE)
-            out, err = p.communicate()
-
-            x = np.array(filter(None, out.split('\n')), dtype='|S8')
-            y = x.astype(np.float64)
-
-            self.vapor_pressure[g] = y
-        sp.Popen('rm %s' % tmp_file, shell=True)
+        self._logger.debug('Calculating vapor_pressure')
+        satvp = phys.satvp(self.dew_point.values)
+        self.vapor_pressure = pd.DataFrame(satvp, index=time, columns=primary_id)
 
         self._logger.debug('Loading thermal')
         self.thermal = pd.DataFrame(index=time, columns=primary_id)

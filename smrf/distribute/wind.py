@@ -188,6 +188,8 @@ class wind(image_data.image_data):
 
                         self.metadata.loc[m, 'enhancement'] = \
                             float(enhancement)
+        else:
+            self.flatwind = None
 
         if not self.distribute_drifts:
             # we have to pass these to precip, so make them none if we won't use them
@@ -282,10 +284,10 @@ class wind(image_data.image_data):
             queue['wind_speed'].put([t, self.wind_speed])
             queue['wind_direction'].put([t, self.wind_direction])
 
-            if not self.gridded:
-                queue['flatwind'].put([t, self.flatwind])
-                queue['cellmaxus'].put([t,self.cellmaxus])
-                queue['dir_round_cell'].put([t,self.dir_round_cell])
+#             if not self.gridded:
+            queue['flatwind'].put([t, self.flatwind])
+            queue['cellmaxus'].put([t,self.cellmaxus])
+            queue['dir_round_cell'].put([t,self.dir_round_cell])
 
     def simulateWind(self, data_speed):
         """
@@ -322,16 +324,16 @@ class wind(image_data.image_data):
 
         # correct for veg
         dynamic_mask = np.ones(cellmaxus.shape)
-        for i,v in enumerate(self.veg):
+        for k,v in self.veg.items():
             # Adjust veg types that were specified by the user
-            if v != 'default':
-                ind = self.veg_type == int(v)
+            if k != 'default':
+                ind = self.veg_type == int(k)
                 dynamic_mask[ind] = 0
-                cellmaxus[ind] += self.veg[v]
+                cellmaxus[ind] += v
 
         # Apply the veg default to those that weren't messed with
         if self.veg['default'] != 0:
-            cellmaxus[~ind] += self.veg['default']
+            cellmaxus[dynamic_mask == 1] += self.veg['default']
 
         # correct unreasonable values
         cellmaxus[cellmaxus > 32] = 32

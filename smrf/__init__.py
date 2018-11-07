@@ -15,7 +15,6 @@ from . import ipw
 from . import framework
 from . import spatial
 from . import utils
-from . import model
 from . import output
 
 __config_titles__ = {

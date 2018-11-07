@@ -56,14 +56,16 @@ class GRID:
                 yi = np.argmin(np.abs(y - my[i]))
 
                 self.mask[i] = mask[yi, xi]
+        else:
+            self.mask = np.ones_like(self.mx, dtype=bool)
 
-    def detrendedInterpolation(self, data, flag=0, method='linear'):
+    def detrendedInterpolation(self, data, flag=0, grid_method='linear'):
         """
         Interpolate using a detrended approach
 
         Args:
             data: data to interpolate
-            method: scipy.interpolate.griddata interpolation method
+            grid_method: scipy.interpolate.griddata interpolation method
         """
 
         # get the trend, ensure it's positive
@@ -85,7 +87,7 @@ class GRID:
         idtrend = griddata((self.mx, self.my),
                            dtrend,
                            (self.GridX, self.GridY),
-                           method=method)
+                           method=grid_method)
 
         # retrend the data
         rtrend = idtrend + pv[0]*self.GridZ + pv[1]
@@ -154,7 +156,7 @@ class GRID:
 
         return rtrend
 
-    def calculateInterpolation(self, data, method='linear'):
+    def calculateInterpolation(self, data, grid_method='linear'):
         """
         Interpolate over the grid
 
@@ -169,6 +171,6 @@ class GRID:
         g = griddata((self.mx, self.my),
                      data,
                      (self.GridX, self.GridY),
-                     method=method)
+                     method=grid_method)
 
         return g

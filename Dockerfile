@@ -23,7 +23,8 @@ RUN apt-get update -y \
     python3-pip \
     python3-tk \
     curl \
-    libgrib-api-dev \
+    libeccodes-dev \
+    libeccodes-tools \
     && cd /code \
     && curl -L https://github.com/USDA-ARS-NWRC/weather_forecast_retrieval/archive/master.tar.gz | tar xz \
     && rm -rf /var/lib/apt/lists/* \
@@ -41,9 +42,18 @@ RUN mkdir /data \
     && python3 -m pip install --upgrade pip \
     && python3 -m pip install setuptools wheel \
     && python3 -m pip install -r /code/smrf/requirements.txt \
+    && python3 setup.py build_ext --inplace \
+    && python3 setup.py install \
+    && cd /code \
+    && git clone https://github.com/jswhit/pygrib.git \
+    && cd /code/pygrib \
+    && git checkout 8a87238 \
+    && python3 -m pip install pyproj==1.9.5.1 \
+    && cp /code/weather_forecast_retrieval-master/setup.cfg.pygrib /code/pygrib \
+    && mv /code/pygrib/setup.cfg.pygrib /code/pygrib/setup.cfg \
+    && python3 setup.py build \
     && python3 setup.py install \
     && cd /code/weather_forecast_retrieval-master \
-    && python3 -m pip install pyproj==1.9.5.1 \
     && python3 -m pip install -r requirements_dev.txt \
     && python3 setup.py install \
     && rm -r /root/.cache/pip
@@ -55,4 +65,7 @@ RUN mkdir /data \
 VOLUME /data
 WORKDIR /data
 
-ENTRYPOINT ["/bin/bash"]
+COPY ./docker-entrypoint.sh /
+RUN chmod +x /docker-entrypoint.sh
+ENTRYPOINT ["/docker-entrypoint.sh"]
+CMD ["/bin/bash"]

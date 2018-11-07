@@ -38,6 +38,7 @@ from smrf.utils.utils import backup_input, getqotw, check_station_colocation
 from threading import Thread
 import shutil
 from inicheck.tools import get_user_config, check_config
+from inicheck.config import UserConfig
 from inicheck.output import print_config_report,generate_config, print_recipe_summary
 from inicheck.utilities import pcfg, get_relative_to_cfg
 
@@ -88,23 +89,31 @@ class SMRF():
                         'cloud_ir_beam', 'cloud_ir_diffuse', 'cloud_vis_beam',
                         'cloud_vis_diffuse', 'thermal_clear', 'wind_direction']
 
-    def __init__(self, configFile, external_logger=None):
+    def __init__(self, config, external_logger=None):
         """
         Initialize the model, read config file, start and end date, and logging
         """
         # read the config file and store
-        if not os.path.isfile(configFile):
-            raise Exception('Configuration file does not exist --> {}'
-                            .format(configFile))
+        if isinstance(config, str):
+            if not os.path.isfile(config):
+                raise Exception('Configuration file does not exist --> {}'
+                                .format(config))
+            configFile = config
+            try:
+                #Read in the original users config
+                ucfg = get_user_config(config, modules = 'smrf')
 
-        try:
-            #Read in the original users config
-            ucfg = get_user_config(configFile, modules = 'smrf')
-
-        except UnicodeDecodeError as e:
-            print(e)
-            raise Exception(('The configuration file is not encoded in '
+            except UnicodeDecodeError as e:
+                print(e)
+                raise Exception(('The configuration file is not encoded in '
                                     'UTF-8, please change and retry'))
+
+        elif isinstance(config, UserConfig):
+            ucfg = config
+            configFile = config.filename
+
+        else:
+            raise Exception('Config passed to SMRF is neither file name nor UserConfig instance')
 
         # start logging
         if external_logger == None:
@@ -194,7 +203,7 @@ class SMRF():
         generate_config(self.ucfg,full_config_out)
 
         # After writing update the paths to be full abs paths.
-        self.config = self.ucfg.update_config_paths(user_cfg_path=configFile)
+        self.config = self.ucfg.update_config_paths()
 
 
         # process the system variables
@@ -406,9 +415,11 @@ class SMRF():
                     setattr(self.distribute[key],
                             'stations',
                             self.data.metadata.index.tolist())
-            except:
+
+            except Exception as e:
                 self._logger.warning("Distribution not initialized, grid stations"
                                   "could not be set.")
+                self._logger.exception(e)
 
         else:
             raise KeyError('Could not determine where station data is located')
@@ -441,14 +452,14 @@ class SMRF():
             try:
                 for key in self.distribute.keys():
                     if key in self.data.variables:
-                        # pull out the loaded data
+                        # Pull out the loaded data
                         d = getattr(self.data, key)
 
-                        # check to find the matching stations
+                        # Check to find the matching stations
                         match = d.columns.isin(self.distribute[key].stations)
                         sta_match = d.columns[match]
 
-                        # update the dataframe and the distribute stations
+                        # Update the dataframe and the distribute stations
                         self.distribute[key].stations = sta_match.tolist()
                         setattr(self.data, key, d[sta_match])
 
@@ -461,20 +472,20 @@ class SMRF():
 
             except Exception as e:
                self._logger.warning("Distribution not initialized, data not "
-                                   "filtered to desired stations")
+                                   "filtered to desired stations in variable {}".format(key))
                self._logger.error(e)
 
 
-            #Check all section for stations that are colocated
+            #Check all sections for stations that are colocated
             for key in self.distribute.keys():
                 if key in self.data.variables:
                     if self.distribute[key].stations != None:
-                        #Confirm out stations all have a unique position for each section
+                        # Confirm out stations all have a unique position for each section
                         colocated = check_station_colocation(metadata=self.data.metadata.loc[self.distribute[key].stations])
 
-                        #Stations are co-located, throw error
+                        # Stations are co-located, throw error
                         if colocated != None:
-                            self._logger.error("ERROR: Stations in the {0} section are colocated.\n{1}".format(key,','.join(colocated[0])))
+                            self._logger.error("Stations in the {0} section are colocated.\n{1}".format(key,','.join(colocated[0])))
                             sys.exit()
 
         #Does the user want to create a CSV copy of the station data used.
@@ -585,7 +596,8 @@ class SMRF():
                                                 self.distribute['albedo'].albedo_ir)
 
             # 7. thermal radiation
-            if self.distribute['thermal'].gridded:
+            if self.distribute['thermal'].gridded and \
+               self.config['gridded']['data_type'] != 'hrrr':
                 self.distribute['thermal'].distribute_thermal(self.data.thermal.loc[t],
                                                               self.distribute['air_temp'].air_temp)
             else:
@@ -640,10 +652,7 @@ class SMRF():
         for i in range(len(t)):
             t[i].start()
 
-        # wait for all the threads to stop
-#         for v in q:
-#             q[v].join()
-
+        # Wait for the end
         for i in range(len(t)):
             t[i].join()
 
@@ -673,15 +682,15 @@ class SMRF():
         if self.distribute['precip'].nasde_model == 'marks2017':
             self.thread_variables += ['storm_id']
 
+        #Add threaded variables on the fly
         if self.distribute['thermal'].correct_cloud:
             self.thread_variables += ['thermal_cloud']
         if self.distribute['thermal'].correct_veg:
             self.thread_variables += ['thermal_veg']
 
         # add some variables to thread_variables based on what we're doing
-        if not self.gridded:
-            self.thread_variables += ['flatwind']
-            self.thread_variables += ['cellmaxus', 'dir_round_cell']
+        self.thread_variables += ['flatwind']
+        self.thread_variables += ['cellmaxus', 'dir_round_cell']
 
         for v in self.thread_variables:
             q[v] = queue.DateQueue_Threading(self.max_values, self.time_out)
@@ -932,16 +941,16 @@ class SMRF():
         return title
 
 
-def run_smrf(config_file):
+def run_smrf(config):
     """
     Function that runs smrf how it should be operate for full runs.
 
     Args:
-        config_file: string path to the config file
+        config: string path to the config file or inicheck UserConfig instance
     """
     start = datetime.now()
     # initialize
-    with SMRF(config_file) as s:
+    with SMRF(config) as s:
         # load topo data
         s.loadTopo()
 
@@ -957,10 +966,26 @@ def run_smrf(config_file):
         # distribute
         s.distributeData()
 
-        #post process if necessary
+        # post process if necessary
         s.post_process()
 
         s._logger.info(datetime.now() - start)
+
+
+def can_i_run_smrf(config):
+    """
+    Function that wraps run_smrf in try, except for testing purposes
+
+    Args:
+        config: string path to the config file or inicheck UserConfig instance
+    """
+    try:
+        run_smrf(config)
+        return True
+    except Exception as e:
+        print(e)
+        return False
+
 
 def find_pixel_location(row, vec, a):
         """

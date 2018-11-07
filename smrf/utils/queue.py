@@ -13,7 +13,7 @@ import numpy as np
 import threading
 from time import time as _time
 import logging
-
+import sys
 
 class DateQueue_Threading(Queue):
     """
@@ -29,6 +29,7 @@ class DateQueue_Threading(Queue):
         # extend the base class
         Queue.__init__(self, maxsize)
         self.timeout = timeout
+        self._logger = logging.getLogger(__name__)
 
     # The following override the methods in Queue to use
     # a date approach to the queue
@@ -74,7 +75,7 @@ class DateQueue_Threading(Queue):
 
         This is from queue.Queue but with modifcation for supplying what to get
         """
-
+        timed_out = False
         # see if timeout was passed
         if timeout is not None:
             self.timeout = timeout
@@ -84,23 +85,35 @@ class DateQueue_Threading(Queue):
             if not block:
                 if not self._qsize():
                     raise Empty
+
             elif self.timeout is None:
                 while index not in self.queue.keys():
                     self.not_empty.wait()
-            elif self.timeout < 0:
-                raise ValueError("'timeout' must be a non-negative number")
             else:
                 endtime = _time() + self.timeout
+
                 while index not in self.queue.keys():
                     remaining = endtime - _time()
+
+                    # Time out has occurred
                     if remaining <= 0.0:
+                        self._logger.error("Timeout occurred while removing"
+                                            " an item from queue")
+                        timed_out = True
                         raise Empty
+
                     self.not_empty.wait(remaining)
             item = self._get(index)
             self.not_full.notifyAll()
             return item
+
+        except Exception as e:
+            self._logger.error(e)
+
         finally:
             self.not_empty.release()
+            if timed_out:
+                sys.exit()
 
     def put(self, item, block=True, timeout=None):
         """Put an item into the queue.
@@ -113,7 +126,7 @@ class DateQueue_Threading(Queue):
         is immediately available, else raise the Full exception ('timeout'
         is ignored in that case).
         """
-
+        timed_out = False
         # see if timeout was passed
         timeout = None
         if timeout is not None:
@@ -128,26 +141,34 @@ class DateQueue_Threading(Queue):
                 elif self.timeout is None:
                     while self._qsize() == self.maxsize:
                         self.not_full.wait()
-                elif self.timeout < 0:
-                    raise ValueError("'timeout' must be a non-negative number")
                 else:
                     endtime = _time() + self.timeout
+
                     while self._qsize() == self.maxsize:
                         remaining = endtime - _time()
                         if remaining <= 0.0:
+                            self._logger.error("Timeout occurred in while"
+                                               " putting an item in the queue")
+                            timed_out=True
                             raise Full
+
                         self.not_full.wait(remaining)
             self._put(item)
             self.unfinished_tasks += 1
             self.not_empty.notifyAll()
+
+        except Exception as e:
+            self._logger.error(e)
+
         finally:
             self.not_full.release()
-
+            if timed_out:
+                sys.exit()
 
 class QueueCleaner(threading.Thread):
     """
     QueueCleaner that will go through all the queues and check
-    if they all have a date in common.  When this occurs, all the 
+    if they all have a date in common.  When this occurs, all the
     threads will have processed that time step and it's not longer needed
     """
 
@@ -175,13 +196,13 @@ class QueueCleaner(threading.Thread):
             # first do a get on all the data, this will ensure that
             # there is data there to be had
             for v in self.queues.keys():
-#                 self._logger.debug('Clean checking %s -- %s' % (t, v))
+                # self._logger.debug('Clean checking %s -- %s' % (t, v))
                 self.queues[v].get(t)
 
             # now that we know there is data in all of the queues
             # that have the same time, clean up those times
             for v in self.queues.keys():
-#                 self._logger.debug('Clean cleaning %s -- %s' % (t, v))
+                # self._logger.debug('Clean cleaning %s -- %s' % (t, v))
                 self.queues[v].clean(t)
 
             self._logger.debug('%s Cleaned from queues' % t)
