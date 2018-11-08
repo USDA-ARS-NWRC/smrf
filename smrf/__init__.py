@@ -2,7 +2,7 @@
 '''
 SMRF - Snow Modeling Resource Framework
 '''
-__version__ = '0.6.1'
+__version__ = '0.6.2'
 import os
 
 __core_config__ = os.path.abspath(os.path.dirname(__file__)+'/framework/CoreConfig.ini')
