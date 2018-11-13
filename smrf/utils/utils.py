@@ -19,6 +19,7 @@ from inicheck.checkers import CheckType
 from inicheck.output import generate_config
 from inicheck.utilities import mk_lst
 import copy
+import scipy.spatial.qhull as qhull
 
 class CheckStation(CheckType):
     """
@@ -371,3 +372,15 @@ def getqotw():
         f.close()
     i = random.randrange(0,len(qs))
     return qs[i]
+
+def interp_weights(xy, uv,d=2):
+    tri = qhull.Delaunay(xy)
+    simplex = tri.find_simplex(uv)
+    vertices = np.take(tri.simplices, simplex, axis=0)
+    temp = np.take(tri.transform, simplex, axis=0)
+    delta = uv - temp[:, d]
+    bary = np.einsum('njk,nk->nj', temp[:, :d, :], delta)
+    return vertices, np.hstack((bary, 1 - bary.sum(axis=1, keepdims=True)))
+
+def interpolate(values, vtx, wts):
+    return np.einsum('nj,nj->n', np.take(values, vtx), wts)

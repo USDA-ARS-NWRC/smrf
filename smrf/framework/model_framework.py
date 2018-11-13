@@ -330,7 +330,8 @@ class SMRF():
         self.distribute['wind'] = \
             distribute.wind.wind(self.config['wind'],
                                  self.config['precip']['distribute_drifts'],
-                                 self.temp_dir)
+                                 self.config['time'],
+                                 tempDir=self.temp_dir)
 
         # 4. Precipitation
         self.distribute['precip'] = \

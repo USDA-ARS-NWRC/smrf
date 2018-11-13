@@ -8,6 +8,7 @@ from smrf.utils import utils
 import netCDF4 as nc
 from scipy.interpolate import griddata
 import pytz
+import glob
 
 
 class wind(image_data.image_data):
@@ -110,7 +111,7 @@ class wind(image_data.image_data):
     # be written during main distribute loop
     post_process_variables = {}
 
-    def __init__(self, windConfig, distribute_drifts, tempDir=None):
+    def __init__(self, windConfig, distribute_drifts, timeConfig, tempDir=None):
 
         # extend the base class
         image_data.image_data.__init__(self, self.variable)
@@ -133,6 +134,8 @@ class wind(image_data.image_data):
             self.wind_ninja_pref = self.config['wind_ninja_pref']
             if self.config['wind_ninja_tz'] is not None:
                 self.wind_ninja_tz = pytz.timezone(self.config['wind_ninja_tz'])
+
+            self.start_date = pd.to_datetime(timeConfig['start_date'])
 
         else:
             # open the maxus netCDF
@@ -226,7 +229,32 @@ class wind(image_data.image_data):
             self.ln_wind_scale = np.log((self.veg_roughness + self.wind_height) / self.veg_roughness) / \
                                  np.log((self.wn_roughness + self.wind_height) / self.wn_roughness)
 
-            # self.ln_wind_scale = 1.0
+            ###### do this first to speedup the interpolation later ####
+            # find vertices and weights to speedup interpolation fro ascii file
+            fmt_d = '%Y%m%d'
+            fp_vel = glob.glob(os.path.join(self.wind_ninja_dir,
+                                  'data{}'.format(self.start_date.strftime(fmt_d)),
+                                  'wind_ninja_data',
+                                  '*_vel.asc'))[0]
+
+            # get wind ninja topo stats
+            ts2 = utils.get_asc_stats(fp_vel)
+            xwn = ts2['x'][:]
+            ywn = ts2['y'][:]
+
+            XW, YW = np.meshgrid(xwn, ywn)
+            xwint = XW.flatten()
+            ywint = YW.flatten()
+
+            xy=np.zeros([XW.shape[0]*XW.shape[1],2])
+            xy[:,1]=ywint
+            xy[:,0]=xwint
+            uv=np.zeros([self.X.shape[0]*self.X.shape[1],2])
+            uv[:,1]=self.Y.flatten()
+            uv[:,0]=self.X.flatten()
+
+            self.vtx, self.wts = utils.interp_weights(xy, uv,d=2)
+            ###### end do this first to speedup the interpolation later ####
 
         if not self.distribute_drifts:
             # we have to pass these to precip, so make them none if we won't use them
@@ -548,28 +576,25 @@ class wind(image_data.image_data):
             raise ValueError('{} in windninja convert module does not exist!'.format(fp_vel))
 
         # get wind ninja topo stats
-        ts2 = utils.get_asc_stats(fp_vel)
-        xwn = ts2['x'][:]
-        ywn = ts2['y'][:]
-
-        XW, YW = np.meshgrid(xwn, ywn)
-        xwint = XW.flatten()
-        ywint = YW.flatten()
-
-        ############# NEED #######
-        # Need to look at time zone from WindNinja cfg and convert
-        # back to UTC so that we are consistent with SMRF outputs
-        ######### END NEED #######
-        #tmpdate = dt.replace(tzinfo=pytz.timezone('UTC'))
+        # ts2 = utils.get_asc_stats(fp_vel)
+        # xwn = ts2['x'][:]
+        # ywn = ts2['y'][:]
+        #
+        # XW, YW = np.meshgrid(xwn, ywn)
+        # xwint = XW.flatten()
+        # ywint = YW.flatten()
 
         data_vel = np.loadtxt(fp_vel, skiprows=6)
         data_vel_int = data_vel.flatten()
 
-        # interpolate to the SMRF grid from the WindNinja grid
-        g_vel = griddata((xwint, ywint),
-                         data_vel_int,
-                         (self.X, self.Y),
-                         method='linear')
+        # # interpolate to the SMRF grid from the WindNinja grid
+        # g_vel = griddata((xwint, ywint),
+        #                  data_vel_int,
+        #                  (self.X, self.Y),
+        #                  method='linear')
+
+        g_vel = utils.interpolate(data_vel_int, self.vtx, self.wts)
+        g_vel = g_vel.reshape(self.X.shape[0], self.X.shape[1])
 
         # no need to convert because units are correct now
         g_vel = np.flipud(g_vel)
