@@ -20,6 +20,7 @@ class output_netcdf():
 
     type = 'netcdf'
     fmt = '%Y-%m-%d %H:%M:%S'
+    cs = (6, 10, 10)
 
     def __init__(self, variable_list, topo, time, outConfig):
         """
@@ -81,7 +82,8 @@ class output_netcdf():
                 s.createVariable('y', 'f', dimensions[1])
                 s.createVariable('x', 'f', dimensions[2])
                 s.createVariable(f['variable'], 'f',
-                                 (dimensions[0], dimensions[1], dimensions[2]))
+                                 (dimensions[0], dimensions[1], dimensions[2]),
+                                 chunksizes=self.cs)
 
                 # define some attributes
                 s.variables['time'].setncattr(
