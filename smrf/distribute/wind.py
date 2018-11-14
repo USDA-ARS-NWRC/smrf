@@ -110,7 +110,7 @@ class wind(image_data.image_data):
     # be written during main distribute loop
     post_process_variables = {}
 
-    def __init__(self, windConfig, distribute_drifts, timeConfig, tempDir=None):
+    def __init__(self, windConfig, distribute_drifts, wholeConfig, tempDir=None):
 
         # extend the base class
         image_data.image_data.__init__(self, self.variable)
@@ -134,7 +134,8 @@ class wind(image_data.image_data):
             if self.config['wind_ninja_tz'] is not None:
                 self.wind_ninja_tz = pytz.timezone(self.config['wind_ninja_tz'])
 
-            self.start_date = pd.to_datetime(timeConfig['start_date'])
+            self.start_date = pd.to_datetime(wholeConfig['time']['start_date'])
+            self.grid_data = wholeConfig['gridded']['data_type']
 
         else:
             # open the maxus netCDF
@@ -205,55 +206,57 @@ class wind(image_data.image_data):
                             float(enhancement)
         else:
             self.flatwind = None
-            # WindNinja output height in meters
-            self.wind_height = float(self.config['wind_ninja_height'])
-            # set roughness that was used in WindNinja simulation
-            # WindNinja uses 0.01m for grass, 0.43 for shrubs, and 1.0 for forest
-            self.wn_roughness = float(self.config['wind_ninja_roughness']) * \
-                                np.ones_like(topo.dem)
 
-            # get our effective veg surface roughness
-            # to use in log law scaling of WindNinja data
-            # using the relationship in
-            # https://www.jstage.jst.go.jp/article/jmsj1965/53/1/53_1_96/_pdf
-            self.veg_roughness = topo.veg_height / 7.39
-            # make sure roughness stays reasonable using bounds from
-            # http://www.iawe.org/Proceedings/11ACWE/11ACWE-Cataldo3.pdf
+            if self.grid_data == 'hrrr':
+                # WindNinja output height in meters
+                self.wind_height = float(self.config['wind_ninja_height'])
+                # set roughness that was used in WindNinja simulation
+                # WindNinja uses 0.01m for grass, 0.43 for shrubs, and 1.0 for forest
+                self.wn_roughness = float(self.config['wind_ninja_roughness']) * \
+                                    np.ones_like(topo.dem)
 
-            self.veg_roughness[self.veg_roughness < 0.01] = 0.01
-            self.veg_roughness[np.isnan(self.veg_roughness)] = 0.01
-            self.veg_roughness[self.veg_roughness > 1.6] = 1.6
+                # get our effective veg surface roughness
+                # to use in log law scaling of WindNinja data
+                # using the relationship in
+                # https://www.jstage.jst.go.jp/article/jmsj1965/53/1/53_1_96/_pdf
+                self.veg_roughness = topo.veg_height / 7.39
+                # make sure roughness stays reasonable using bounds from
+                # http://www.iawe.org/Proceedings/11ACWE/11ACWE-Cataldo3.pdf
 
-            # precalculate scale arrays so we don't do it every timestep
-            self.ln_wind_scale = np.log((self.veg_roughness + self.wind_height) / self.veg_roughness) / \
-                                 np.log((self.wn_roughness + self.wind_height) / self.wn_roughness)
+                self.veg_roughness[self.veg_roughness < 0.01] = 0.01
+                self.veg_roughness[np.isnan(self.veg_roughness)] = 0.01
+                self.veg_roughness[self.veg_roughness > 1.6] = 1.6
 
-            ###### do this first to speedup the interpolation later ####
-            # find vertices and weights to speedup interpolation fro ascii file
-            fmt_d = '%Y%m%d'
-            fp_vel = glob.glob(os.path.join(self.wind_ninja_dir,
-                                  'data{}'.format(self.start_date.strftime(fmt_d)),
-                                  'wind_ninja_data',
-                                  '*_vel.asc'))[0]
+                # precalculate scale arrays so we don't do it every timestep
+                self.ln_wind_scale = np.log((self.veg_roughness + self.wind_height) / self.veg_roughness) / \
+                                     np.log((self.wn_roughness + self.wind_height) / self.wn_roughness)
 
-            # get wind ninja topo stats
-            ts2 = utils.get_asc_stats(fp_vel)
-            xwn = ts2['x'][:]
-            ywn = ts2['y'][:]
+                ###### do this first to speedup the interpolation later ####
+                # find vertices and weights to speedup interpolation fro ascii file
+                fmt_d = '%Y%m%d'
+                fp_vel = glob.glob(os.path.join(self.wind_ninja_dir,
+                                      'data{}'.format(self.start_date.strftime(fmt_d)),
+                                      'wind_ninja_data',
+                                      '*_vel.asc'))[0]
 
-            XW, YW = np.meshgrid(xwn, ywn)
-            xwint = XW.flatten()
-            ywint = YW.flatten()
+                # get wind ninja topo stats
+                ts2 = utils.get_asc_stats(fp_vel)
+                xwn = ts2['x'][:]
+                ywn = ts2['y'][:]
 
-            xy=np.zeros([XW.shape[0]*XW.shape[1],2])
-            xy[:,1]=ywint
-            xy[:,0]=xwint
-            uv=np.zeros([self.X.shape[0]*self.X.shape[1],2])
-            uv[:,1]=self.Y.flatten()
-            uv[:,0]=self.X.flatten()
+                XW, YW = np.meshgrid(xwn, ywn)
+                xwint = XW.flatten()
+                ywint = YW.flatten()
 
-            self.vtx, self.wts = utils.interp_weights(xy, uv,d=2)
-            ###### end do this first to speedup the interpolation later ####
+                xy=np.zeros([XW.shape[0]*XW.shape[1],2])
+                xy[:,1]=ywint
+                xy[:,0]=xwint
+                uv=np.zeros([self.X.shape[0]*self.X.shape[1],2])
+                uv[:,1]=self.Y.flatten()
+                uv[:,0]=self.X.flatten()
+
+                self.vtx, self.wts = utils.interp_weights(xy, uv,d=2)
+                ###### end do this first to speedup the interpolation later ####
 
         if not self.distribute_drifts:
             # we have to pass these to precip, so make them none if we won't use them
