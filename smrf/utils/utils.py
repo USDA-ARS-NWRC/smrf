@@ -19,6 +19,7 @@ from inicheck.checkers import CheckType
 from inicheck.output import generate_config
 from inicheck.utilities import mk_lst
 import copy
+import scipy.spatial.qhull as qhull
 
 class CheckStation(CheckType):
     """
@@ -371,3 +372,53 @@ def getqotw():
         f.close()
     i = random.randrange(0,len(qs))
     return qs[i]
+
+def interp_weights(xy, uv,d=2):
+    """
+    Find vertices and weights of LINEAR interpolation for gridded interp.
+    This routine follows the methods of scipy.interpolate.griddata as outlined
+    here:
+    https://stackoverflow.com/questions/20915502/speedup-scipy-griddata-for-multiple-interpolations-between-two-irregular-grids
+    This function finds the vertices and weights which is the most computationally
+    expensive part of the routine. The interpolateion can then be done quickly.
+
+    Args:
+        xy: n by 2 array of flattened meshgrid x and y coords of WindNinja grid
+        uv: n by 2 array of flattened meshgrid x and y coords of SMRF grid
+        d:  dimensions of array (i.e. 2 for our purposes)
+
+    Returns:
+        vertices:
+        wts:
+
+    """
+    tri = qhull.Delaunay(xy)
+    simplex = tri.find_simplex(uv)
+    vertices = np.take(tri.simplices, simplex, axis=0)
+    temp = np.take(tri.transform, simplex, axis=0)
+    delta = uv - temp[:, d]
+    bary = np.einsum('njk,nk->nj', temp[:, :d, :], delta)
+
+    return vertices, np.hstack((bary, 1 - bary.sum(axis=1, keepdims=True)))
+
+def grid_interpolate(values, vtx, wts, shp, fill_value=np.nan):
+    """
+    Broken out gridded interpolation from scipy.interpolate.griddata that takes
+    the vertices and wts from interp_weights function
+
+    Args:
+        values: flattened WindNinja wind speeds
+        vtx:    vertices for interpolation
+        wts:    weights for interpolation
+        shape:  shape of SMRF grid
+        fill_value: value for extrapolated points
+
+    Returns:
+        ret:    interpolated values
+    """
+    ret = np.einsum('nj,nj->n', np.take(values, vtx), wts)
+    ret[np.any(wts < 0, axis=1)] = fill_value
+
+    ret = ret.reshape(shp[0], shp[1])
+
+    return ret
