@@ -6,7 +6,6 @@ import os
 from smrf.distribute import image_data
 from smrf.utils import utils
 import netCDF4 as nc
-from scipy.interpolate import griddata
 import pytz
 import glob
 
@@ -575,28 +574,14 @@ class wind(image_data.image_data):
         if not os.path.isfile(fp_vel):
             raise ValueError('{} in windninja convert module does not exist!'.format(fp_vel))
 
-        # get wind ninja topo stats
-        # ts2 = utils.get_asc_stats(fp_vel)
-        # xwn = ts2['x'][:]
-        # ywn = ts2['y'][:]
-        #
-        # XW, YW = np.meshgrid(xwn, ywn)
-        # xwint = XW.flatten()
-        # ywint = YW.flatten()
-
         data_vel = np.loadtxt(fp_vel, skiprows=6)
         data_vel_int = data_vel.flatten()
 
         # # interpolate to the SMRF grid from the WindNinja grid
-        # g_vel = griddata((xwint, ywint),
-        #                  data_vel_int,
-        #                  (self.X, self.Y),
-        #                  method='linear')
+        g_vel = utils.grid_interpolate(data_vel_int, self.vtx,
+                                       self.wts, self.X.shape)
 
-        g_vel = utils.interpolate(data_vel_int, self.vtx, self.wts)
-        g_vel = g_vel.reshape(self.X.shape[0], self.X.shape[1])
-
-        # no need to convert because units are correct now
+        # flip because it comes out upsidedown
         g_vel = np.flipud(g_vel)
         # log law scale
         g_vel = g_vel * self.ln_wind_scale
@@ -616,12 +601,11 @@ class wind(image_data.image_data):
             data_ang = np.loadtxt(fp_ang, skiprows=6)
             data_ang_int = data_ang.flatten()
 
-            g_ang = griddata((xwint, ywint),
-                             data_ang_int,
-                             (self.X, self.Y),
-                             method='linear')
+            g_ang = utils.grid_interpolate(data_ang_int, self.vtx,
+                                           self.wts, self.X.shape)
 
             g_ang = np.flipud(g_ang)
+
         else:
             g_ang = None
 
