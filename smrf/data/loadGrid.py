@@ -50,7 +50,7 @@ class grid():
         self.offset = 0.1
 
         self.force_zone_number = None
-        if 'force_zone_number' in dataConfig:
+        if 'zone_number' in dataConfig:
             self.force_zone_number = dataConfig['zone_number']
 
         # The data that will be output
