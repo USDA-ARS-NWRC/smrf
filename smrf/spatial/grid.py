@@ -14,7 +14,7 @@ class GRID:
     - Standard IDW
     - Detrended IDW
     '''
-    def __init__(self, config, mx, my, GridX, GridY, mz=None, GridZ=None, mask=None):
+    def __init__(self, config, mx, my, GridX, GridY, mz=None, GridZ=None, mask=None, metadata=None):
 
         """
         Args:
@@ -42,6 +42,11 @@ class GRID:
         self.GridY = GridY
         self.GridZ = GridZ
 
+        self.metadata = metadata
+        
+        # local elevation gradient
+        # if config['grid_local']:
+
         # mask
         self.mask = np.zeros_like(self.mx, dtype=bool)
         if config['mask']:
@@ -60,6 +65,63 @@ class GRID:
             self.mask = np.ones_like(self.mx, dtype=bool)
 
     def detrendedInterpolation(self, data, flag=0, grid_method='linear'):
+        """
+        Interpolate using a detrended approach
+
+        Args:
+            data: data to interpolate
+            grid_method: scipy.interpolate.griddata interpolation method
+        """
+
+        # get the trend, ensure it's positive
+        if self.config['grid_local']:
+            rtrend = self.detrendedInterpolationLocal(data, flag, grid_method)
+        else:
+            rtrend = self.detrendedInterpolationMask(data, flag, grid_method)
+
+        return rtrend
+
+    def detrendedInterpolationLocal(self, data, flag=0, grid_method='linear'):
+        """
+        Interpolate using a detrended approach
+
+        Args:
+            data: data to interpolate
+            grid_method: scipy.interpolate.griddata interpolation method
+        """
+
+        # copy the metadata to append the slope/intercept and data to
+        pv = metadata.copy()
+        pv['slope'] = np.nan
+        pv['intercept'] = np.nan
+        pv['data'] = data
+
+        for grid_name,drow in dist_df.iterrows():
+
+            elev = pv.loc[drow].elevation
+            pp = np.polyfit(elev, datr[drow], 1)
+            if pp[0] < 0:
+                pp = np.array([0, 0])
+            pv.loc[grid_name, ['slope', 'intercept']] = pp
+
+        # interpolate the slope/intercept
+        grid_slope = griddata((pv.utm_x, pv.utm_y), pv.slope, (GridX, GridY), method='cubic')
+        grid_intercept = griddata((pv.utm_x, pv.utm_y), pv.intercept, (GridX, GridY), method='cubic')
+
+        # remove the elevation trend from the HRRR precip
+        el_trend = pv.elevation * pv.slope + pv.intercept
+        dtrend = pv.data - el_trend
+
+        # interpolate the residuals over the DEM
+        idtrend = griddata((pv.utm_x, pv.utm_y), dtrend, (GridX, GridY), method='cubic')
+
+        # reinterpolate
+        rtrend = idtrend + grid_slope * GridZ + grid_intercept
+        
+        return rtrend
+
+
+    def detrendedInterpolationMask(self, data, flag=0, grid_method='linear'):
         """
         Interpolate using a detrended approach
 
@@ -91,68 +153,6 @@ class GRID:
 
         # retrend the data
         rtrend = idtrend + pv[0]*self.GridZ + pv[1]
-
-#         # create a plot for the DOCS
-#         fs = 16
-#         fw = 'bold'
-#         xi = np.array([500, 3000])
-#         yi = pv[0]*xi + self.pv[1]
-#         fig = plt.figure(figsize=(24,9))
-#
-#         extent = (np.min(self.GridX), np.max(self.GridX), np.min(self.GridY), np.max(self.GridY))
-#         # elevational trend
-#         ax0 = plt.subplot(1,3,1)
-#         plt.plot(self.mz, data, 'o', xi, yi, 'k', linewidth=2)
-#         plt.text(2000, 10, 'Slope: %f' % self.pv[0], fontsize=fs, fontweight=fw)
-#         plt.xlabel('Elevation [m]', fontsize=fs, fontweight=fw)
-#         plt.ylabel('Air Temperature [C]', fontsize=fs, fontweight=fw)
-#         ax0.set_ylim(-5, 12)
-#
-#         ax1 = plt.subplot(1,3,2)
-#         im1 = ax1.imshow(idtrend, aspect='equal',extent=extent)
-# #         plt.plot(self.mx, self.my, 'o')
-#         plt.title('Distributed Residuals', fontsize=fs, fontweight=fw)
-#         cbar = plt.colorbar(im1, orientation="horizontal")
-#         cbar.ax.tick_params(labelsize=fs-2)
-#         plt.tick_params(
-#             axis='both',          # changes apply to the x-axis
-#             which='both',      # both major and minor ticks are affected
-#             bottom='off',      # ticks along the bottom edge are off
-#             top='off',         # ticks along the top edge are off
-#             left='off',
-#             right='off',
-#             labelleft='off',
-#             labelbottom='off') # labels along the bottom edge are off
-#         ax1.set_xlim(extent[0], extent[1])
-#         ax1.set_ylim(extent[2], extent[3])
-#
-#
-#         # retrended
-#         ax2 = plt.subplot(133)
-#         im2 = ax2.imshow(rtrend, aspect='equal',extent=extent)
-# #         plt.plot(self.mx, self.my, 'o')
-#         plt.title('Retrended by Elevation', fontsize=fs, fontweight=fw)
-#         cbar = plt.colorbar(im2, orientation="horizontal")
-#         cbar.ax.tick_params(labelsize=fs-2)
-#         plt.tick_params(
-#             axis='both',          # changes apply to the x-axis
-#             which='both',      # both major and minor ticks are affected
-#             bottom='off',      # ticks along the bottom edge are off
-#             top='off',         # ticks along the top edge are off
-#             left='off',
-#             right='off',
-#             labelleft='off',
-#             labelbottom='off') # labels along the bottom edge are off
-#         ax2.set_xlim(extent[0], extent[1])
-#         ax2.set_ylim(extent[2], extent[3])
-#
-#         for item in ([ax0.xaxis.label, ax0.yaxis.label] +
-#                      ax0.get_xticklabels() + ax0.get_yticklabels()):
-#             item.set_fontsize(fs)
-#             item.set_fontweight(fw)
-#
-#         plt.tight_layout()
-#         plt.show()
 
         return rtrend
 

@@ -145,7 +145,7 @@ class image_data():
         elif self.config['distribution'] == 'grid':
             # linear interpolation between points
             self.grid = grid.GRID(self.config, self.mx, self.my, topo.X, topo.Y, mz=self.mz,
-                                  GridZ=topo.dem, mask=topo.mask)
+                                  GridZ=topo.dem, mask=topo.mask, metadata=metadata)
 
         elif self.config['distribution'] == 'kriging':
             # generic kriging

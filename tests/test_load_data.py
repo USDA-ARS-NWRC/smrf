@@ -5,7 +5,7 @@ import unittest
 
 from smrf.framework.model_framework import can_i_run_smrf
 
-from .test_configurations import SMRFTestCase
+from tests.test_configurations import SMRFTestCase
 
 
 class TestLoadData(SMRFTestCase):
@@ -219,6 +219,45 @@ class TestLoadData(SMRFTestCase):
 
     def test_grid_hrrr(self):
         """ HRRR grib2 loading """
+
+        config = deepcopy(self.base_config)
+        del config.raw_cfg['csv']
+
+        hrrr_grid = {'data_type': 'hrrr',
+                    'directory': './RME/gridded/hrrr_test/',
+                    'zone_number': 11,
+                    'zone_letter': 'N'}
+        config.raw_cfg['gridded'] = hrrr_grid
+    #         config.raw_cfg['system']['max_values'] = 2
+        config.raw_cfg['system']['threading'] = False
+    #         config.raw_cfg['system']['timeout'] = 10
+
+        # set the distrition to grid, thermal defaults will be fine
+        variables = ['air_temp', 'vapor_pressure', 'wind', 'precip', 'solar', 'thermal']
+        for v in variables:
+            config.raw_cfg[v]['mask'] = False
+
+        config.raw_cfg['precip']['adjust_for_undercatch'] = False
+        config.raw_cfg['thermal']['correct_cloud'] = True
+        config.raw_cfg['thermal']['correct_veg'] = True
+
+        # fix the time to that of the WRF_test.nc
+        config.raw_cfg['time']['start_date'] = '2018-07-22 01:00'
+        config.raw_cfg['time']['end_date'] = '2018-07-22 06:00'
+
+        config.apply_recipes()
+        config = cast_all_variables(config, config.mcfg)
+
+        # ensure that the recipes are used
+        self.assertTrue(config.raw_cfg['precip']['adjust_for_undercatch'] == False)
+        self.assertTrue(config.raw_cfg['thermal']['correct_cloud'] == True)
+        self.assertTrue(config.raw_cfg['thermal']['correct_veg'] == True)
+
+        result = can_i_run_smrf(config)
+        self.assertTrue(result)
+
+    def test_grid_hrrr_local(self):
+        """ HRRR grib2 loading with local elevation gradient """
 
         config = deepcopy(self.base_config)
         del config.raw_cfg['csv']
