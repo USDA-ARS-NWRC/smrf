@@ -274,7 +274,12 @@ class TestLoadData(SMRFTestCase):
         # set the distrition to grid, thermal defaults will be fine
         variables = ['air_temp', 'vapor_pressure', 'wind', 'precip', 'solar', 'thermal']
         for v in variables:
+            config.raw_cfg[v]['distribution'] = 'grid'
             config.raw_cfg[v]['mask'] = False
+        
+        # local gradient
+        config.raw_cfg['air_temp']['grid_local'] = True
+        config.raw_cfg['air_temp']['grid_local_n'] = 25 # only 47 grid cells
 
         config.raw_cfg['precip']['adjust_for_undercatch'] = False
         config.raw_cfg['thermal']['correct_cloud'] = True

@@ -175,7 +175,7 @@ class topo():
             ))
         self._logger.debug('sky view file - %s' % svfile)
 
-#         _viewf(self.topoConfig['dem'], svfile)
+        # self._viewf(self.topoConfig['dem'], svfile)
         ts = Process(target=self._viewf, args=(self.topoConfig['dem'], svfile))
         ts.start()
 
@@ -185,7 +185,7 @@ class topo():
             ))
         self._logger.debug('gradient file - %s' % gfile)
 
-#         _gradient(self.topoConfig['dem'], gfile)
+        # self._gradient(self.topoConfig['dem'], gfile)
         tg = Process(target=self._gradient,
                      args=(self.topoConfig['dem'], gfile))
         tg.start()

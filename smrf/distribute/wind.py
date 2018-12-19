@@ -207,7 +207,7 @@ class wind(image_data.image_data):
         else:
             self.flatwind = None
 
-            if self.grid_data == 'hrrr':
+            if self.config['wind_ninja_dir'] is not None:
                 # WindNinja output height in meters
                 self.wind_height = float(self.config['wind_ninja_height'])
                 # set roughness that was used in WindNinja simulation

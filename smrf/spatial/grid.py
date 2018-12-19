@@ -5,6 +5,7 @@ Distributed forcing data over a grid using interpolation
 '''
 
 import numpy as np
+import pandas as pd
 from scipy.interpolate import griddata
 
 
@@ -44,8 +45,17 @@ class GRID:
 
         self.metadata = metadata
         
-        # local elevation gradient
-        # if config['grid_local']:
+        # local elevation gradient, precalculte the distance dataframe
+        if config['grid_local']:
+            k = config['grid_local_n']
+            dist_df = pd.DataFrame(index=metadata.index, columns=range(k))
+            for i,row in metadata.iterrows():
+
+                d = np.sqrt((metadata.latitude - row.latitude)**2 + (metadata.longitude - row.longitude)**2)
+                dist_df.loc[row.name] = d.sort_values()[:k].index
+
+            self.dist_df = dist_df
+
 
         # mask
         self.mask = np.zeros_like(self.mx, dtype=bool)
@@ -91,32 +101,36 @@ class GRID:
         """
 
         # copy the metadata to append the slope/intercept and data to
-        pv = metadata.copy()
+        pv = self.metadata.copy()
         pv['slope'] = np.nan
         pv['intercept'] = np.nan
         pv['data'] = data
 
-        for grid_name,drow in dist_df.iterrows():
+        for grid_name,drow in self.dist_df.iterrows():
 
             elev = pv.loc[drow].elevation
-            pp = np.polyfit(elev, datr[drow], 1)
-            if pp[0] < 0:
+            pp = np.polyfit(elev, pv.loc[drow].data, 1)
+
+            # apply trend constraints
+            if flag == 1 and pp[0] < 0:
+                pp = np.array([0, 0])
+            elif (flag == -1 and pp[0] > 0):
                 pp = np.array([0, 0])
             pv.loc[grid_name, ['slope', 'intercept']] = pp
 
         # interpolate the slope/intercept
-        grid_slope = griddata((pv.utm_x, pv.utm_y), pv.slope, (GridX, GridY), method='cubic')
-        grid_intercept = griddata((pv.utm_x, pv.utm_y), pv.intercept, (GridX, GridY), method='cubic')
+        grid_slope = griddata((pv.utm_x, pv.utm_y), pv.slope, (self.GridX, self.GridY), method=grid_method)
+        grid_intercept = griddata((pv.utm_x, pv.utm_y), pv.intercept, (self.GridX, self.GridY), method=grid_method)
 
         # remove the elevation trend from the HRRR precip
         el_trend = pv.elevation * pv.slope + pv.intercept
         dtrend = pv.data - el_trend
 
         # interpolate the residuals over the DEM
-        idtrend = griddata((pv.utm_x, pv.utm_y), dtrend, (GridX, GridY), method='cubic')
+        idtrend = griddata((pv.utm_x, pv.utm_y), dtrend, (self.GridX, self.GridY), method=grid_method)
 
         # reinterpolate
-        rtrend = idtrend + grid_slope * GridZ + grid_intercept
+        rtrend = idtrend + grid_slope * self.GridZ + grid_intercept
         
         return rtrend
 

@@ -191,7 +191,7 @@ class image_data():
 
         elif self.config['distribution'] == 'grid':
             if self.config['detrend']:
-                v = self.grid.detrendedInterpolation(data.values,
+                v = self.grid.detrendedInterpolation(data,
                                                      self.config['slope'],
                                                      self.config['grid_method'])
             else:
