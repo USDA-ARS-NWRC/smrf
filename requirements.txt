@@ -30,7 +30,7 @@ pyflakes==1.5.0
 Pygments==2.2.0
 python-dateutil==2.6.1
 pytz==2017.3
-PyYAML==3.11
+pyyaml==4.2b1
 requests==2.20.0
 scipy==1.0.0
 setuptools
