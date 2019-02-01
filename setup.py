@@ -122,7 +122,6 @@ setup(
         'smrf.envphys',
         'smrf.envphys.core',
         'smrf.framework',
-        'smrf.ipw',
         'smrf.output',
         'smrf.spatial',
         'smrf.utils',
