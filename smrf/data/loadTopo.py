@@ -1,5 +1,5 @@
 
-from smrf import ipw
+from spatialnc import ipw
 import numpy as np
 from netCDF4 import Dataset
 import subprocess as sp

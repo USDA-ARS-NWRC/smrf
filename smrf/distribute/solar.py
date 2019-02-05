@@ -6,7 +6,7 @@ from multiprocessing import Process
 from smrf.distribute import image_data
 from smrf.envphys import radiation
 from smrf.utils import utils
-from smrf import ipw
+from spatialnc import ipw
 
 
 class solar(image_data.image_data):

@@ -64,8 +64,6 @@ smrf/envphys/core/topotherm.c
 smrf/framework/CoreConfig.ini
 smrf/framework/__init__.py
 smrf/framework/model_framework.py
-smrf/ipw/__init__.py
-smrf/ipw/ipw.py
 smrf/model/__init__.py
 smrf/model/isnobal.py
 smrf/output/__init__.py

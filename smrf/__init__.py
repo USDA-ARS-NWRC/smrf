@@ -11,7 +11,6 @@ __recipes__ = os.path.abspath(os.path.dirname(__file__)+'/framework/recipes.ini'
 from . import data
 from . import distribute
 from . import envphys
-from . import ipw
 from . import framework
 from . import spatial
 from . import utils

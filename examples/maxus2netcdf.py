@@ -6,7 +6,7 @@ Create a netCDF file from the maxus files
 
 import numpy as np
 import os, glob
-from smrf import ipw
+from spatialnc import ipw
 import netCDF4 as nc
 import re
 import progressbar
@@ -31,7 +31,7 @@ nFile = 'maxus.nc'
 
 maxusInd = range(0, 360, 5)
 
-#------------------------------------------------------------------------------ 
+#------------------------------------------------------------------------------
 # include the geohdr
 # execfile('/media/Drobo1/BRB/BRB-wy09/grid_info.py')
 dem = '/media/Drobo1/BRB/BRB-wy09/spatial_WRF_OG/data/topo/dem30m.ipw'
@@ -51,21 +51,21 @@ nfiles = len(maxusInd)
 #===============================================================================
 # Create netCDF file
 #===============================================================================
- 
+
 dimensions = ('Direction','y','x')
- 
+
 s = nc.Dataset(nFile, 'w', 'NETCDF4')
- 
+
 s.createDimension(dimensions[0], nfiles)
 s.createDimension(dimensions[1], ny)
 s.createDimension(dimensions[2], nx)
- 
+
 # create the variables
 s.createVariable('direction', 'i', dimensions[0])
 s.createVariable('y', 'f', dimensions[1])
 s.createVariable('x', 'f', dimensions[2])
 s.createVariable(var, 'f', dimensions)
- 
+
 # define some attributes
 setattr(s.variables['y'], 'units', 'meters')
 setattr(s.variables['y'], 'description', 'UTM, north south')
@@ -76,14 +76,14 @@ setattr(s.variables['direction'], 'description', 'Wind direction from North')
 setattr(s.variables[var], 'units', 'angle')
 setattr(s.variables[var], 'description', 'Maximum upwind slope')
 setattr(s, 'dateCreated', startTime.isoformat())
- 
+
 # create the x,y vectors
 x = v + dv*np.arange(nx)
 y = u + du*np.arange(ny)
- 
+
 s.variables['y'][:] = y
 s.variables['x'][:] = x
- 
+
 
 
 #===============================================================================
@@ -95,16 +95,16 @@ s.variables['x'][:] = x
 # maxus = np.empty((ny, nx, nfiles))
 # maxusInd = np.empty(nfiles)
 pbar = progressbar.ProgressBar(max_value=nfiles).start()
- 
+
 # # get all the file names and sort
 # for i,filename in enumerate(files):
 #     dir = int(re.split('\.',filename)[-2])
 #     maxusInd[i] = dir
-#      
+#
 # indSorted = np.argsort(maxusInd)
 # maxusInd = maxusInd[indSorted]
 # filesSorted = [files[i] for i in indSorted]
- 
+
 s.variables['direction'][:] = maxusInd
 
 j = 0
@@ -122,8 +122,3 @@ pbar.finish()
 s.close()
 
 print datetime.now() - startTime
-
-
-
-
-
