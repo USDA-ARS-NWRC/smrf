@@ -49,3 +49,20 @@ History
 * Added a new feature to redistribute precip due to wind.
 * Added in kriging as a new distribution option all distributable variables.
 
+
+0.7.0 (2018-11-28)
+------------------
+
+* New cloud factor method for HRRR data
+* Added use of WindNinja outputs from Katana package using HRRR data
+* Added unit testing as well as Travis CI and Coveralls
+* Added PyKrig
+* Various bug fixes
+
+
+0.8.0 (2019-02-06)
+------------------
+
+* Added local gradient interpolation option for use with gridded data
+* Removed ipw package to installed spatialnc dependency
+* Added projection info to output files
