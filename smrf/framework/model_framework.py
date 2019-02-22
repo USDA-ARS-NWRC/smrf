@@ -220,11 +220,6 @@ class SMRF():
         if self.start_date > self.end_date:
             raise ValueError("start_date cannot be larger than end_date.")
 
-        if ((self.start_date > datetime.now() and not self.gridded) or
-           (self.end_date > datetime.now() and not self.gridded)):
-            raise ValueError("A date set in the future can only be used with"
-                             " WRF generated data!")
-
         # Get the timesetps correctly in the time zone
         d = data.mysql_data.date_range(self.start_date, self.end_date,
                        timedelta(minutes=int(self.config['time']['time_step'])))
@@ -247,6 +242,11 @@ class SMRF():
             # hours from start of day
             self.day_hour = self.start_date - pd.to_datetime(d[0].strftime("%Y%m%d"))
             self.day_hour = int(self.day_hour / np.timedelta64(1, 'h'))
+
+        if ((self.start_date > datetime.now() and not self.gridded) or
+           (self.end_date > datetime.now() and not self.gridded)):
+            raise ValueError("A date set in the future can only be used with"
+                             " WRF generated data!")
 
         self.distribute = {}
 
