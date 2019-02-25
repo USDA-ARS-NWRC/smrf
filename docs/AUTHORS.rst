@@ -24,4 +24,4 @@ Development History
 
 Current Version
 ---------------
-0.8.3
+0.8.4
