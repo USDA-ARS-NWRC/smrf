@@ -481,13 +481,14 @@ class SMRF():
             for key in self.distribute.keys():
                 if key in self.data.variables:
                     if self.distribute[key].stations != None:
-                        # Confirm out stations all have a unique position for each section
-                        colocated = check_station_colocation(metadata=self.data.metadata.loc[self.distribute[key].stations])
+                        if self.config['stations']['check_colocation']:
+                            # Confirm out stations all have a unique position for each section
+                            colocated = check_station_colocation(metadata=self.data.metadata.loc[self.distribute[key].stations])
 
-                        # Stations are co-located, throw error
-                        if colocated != None:
-                            self._logger.error("Stations in the {0} section are colocated.\n{1}".format(key,','.join(colocated[0])))
-                            sys.exit()
+                            # Stations are co-located, throw error
+                            if colocated != None:
+                                self._logger.error("Stations in the {0} section are colocated.\n{1}".format(key,','.join(colocated[0])))
+                                sys.exit()
 
         #Does the user want to create a CSV copy of the station data used.
         if self.config["output"]['input_backup'] == True:
