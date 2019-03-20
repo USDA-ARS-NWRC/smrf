@@ -1,71 +1,50 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-
-# try:
-#     from setuptools import setup
-# except ImportError:
-#     from distutils.core import setup
-
-
-from distutils.core import setup
-from distutils.extension import Extension
-# from setuptools import setup, Extension, find_packages
-# from setuptools import find_packages
-
-# try:
-#    from Cython.Distutils import build_ext
-# except ImportError:
-#    from distutils.command import build_ext
-
-# try:
+from setuptools import setup, Extension
 from Cython.Distutils import build_ext
-# except ImportError:
-#    use_cython = False
-# else:
-#    use_cython = True
-
 import numpy
 import os
-import subprocess
+import sys
+from subprocess import check_output
 
-from subprocess import check_output, PIPE
+if sys.argv[-1] != 'test':
 
-#Grab and write the gitVersion from 'git describe'.
-gitVersion = ''
-gitPath = ''
-
-# get git describe if in git repository
-print('Fetching most recent git tags')
-if os.path.exists('./.git'):
-	try:
-		# if we are in a git repo, fetch most recent tags
-		check_output(["git fetch --tags"], shell=True)
-	except Exception as e:
-		print('Unable to fetch most recent tags')
-
-	try:
-		ls_proc = check_output(["git describe --tags"], shell=True, universal_newlines=True)
-		gitVersion = ls_proc
-		print('Checking most recent version')
-	except Exception as e:
-		print('Unable to get git tag and hash')
-# if not in git repo
-else:
-	print('Not in git repository')
+	#Grab and write the gitVersion from 'git describe'.
 	gitVersion = ''
+	gitPath = ''
 
-# get current working directory to define git path
-gitPath = os.getcwd()
+	# get git describe if in git repository
+	print('Fetching most recent git tags')
+	if os.path.exists('./.git'):
+		try:
+			# if we are in a git repo, fetch most recent tags
+			check_output(["git fetch --tags"], shell=True)
+		except Exception as e:
+			print('Unable to fetch most recent tags')
 
-# git untracked file to store version and path
-fname = os.path.abspath(os.path.expanduser('./smrf/utils/gitinfo.py'))
+		try:
+			ls_proc = check_output(["git describe --tags"], shell=True, universal_newlines=True)
+			gitVersion = ls_proc
+			print('Checking most recent version')
+		except Exception as e:
+			print('Unable to get git tag and hash')
+	# if not in git repo
+	else:
+		print('Not in git repository')
+		gitVersion = ''
 
-with open(fname,'w') as f:
-	nchars = len(gitVersion) - 1
-	f.write("__gitPath__='{0}'\n".format(gitPath))
-	f.write("__gitVersion__='{0}'\n".format(gitVersion[:nchars]))
-	f.close()
+	# get current working directory to define git path
+	gitPath = os.getcwd()
+
+	# git untracked file to store version and path
+	fname = os.path.abspath(os.path.expanduser('./smrf/utils/gitinfo.py'))
+
+	with open(fname,'w') as f:
+		nchars = len(gitVersion) - 1
+		f.write("__gitPath__='{0}'\n".format(gitPath))
+		f.write("__gitVersion__='{0}'\n".format(gitVersion[:nchars]))
+		f.close()
 
 # force the compiler to use gcc
 os.environ["CC"] = "gcc"
@@ -129,25 +108,12 @@ ext_modules += [
                           ),
                 ]
 
-with open('README.md') as readme_file:
-    readme = readme_file.read()
-
-with open('./docs/HISTORY.rst') as history_file:
-    history = history_file.read()
-
-requirements = []
-
-test_requirements = [
-    # TODO: put package test requirements here
-]
-
 setup(
     name='smrf',
-    version='0.6.0',
+    version='0.8.5',
     description="Distributed snow modeling for water resources",
-    long_description=readme + '\n\n' + history,
     author="Scott Havens",
-    author_email='scotthavens@ars.usda.gov',
+    author_email='scott.havens@ars.usda.gov',
     url='https://github.com/USDA-ARS-NWRC/smrf',
     packages=[
         'smrf',
@@ -156,8 +122,6 @@ setup(
         'smrf.envphys',
         'smrf.envphys.core',
         'smrf.framework',
-        'smrf.ipw',
-        'smrf.model',
         'smrf.output',
         'smrf.spatial',
         'smrf.utils',
@@ -167,25 +131,22 @@ setup(
     include_package_data=True,
     package_data={'smrf':['./framework/CoreConfig.ini',
 			  './framework/.qotw', './framework/recipes.ini']},
-    install_requires=requirements,
     license="CC0 1.0",
     zip_safe=False,
     keywords='smrf',
     classifiers=[
         'Development Status :: 2 - Pre-Alpha',
         'Intended Audience :: Developers',
-        'License :: OSI Approved :: GNU GPL-3.0',
+        'License :: OSI Approved :: CC0 1.0',
         'Natural Language :: English',
-        "Programming Language :: Python :: 2",
-        'Programming Language :: Python :: 2.6',
-        'Programming Language :: Python :: 2.7',
         'Programming Language :: Python :: 3',
         'Programming Language :: Python :: 3.3',
         'Programming Language :: Python :: 3.4',
         'Programming Language :: Python :: 3.5',
+		'Programming Language :: Python :: 3.6',
     ],
     test_suite='tests',
-    tests_require=test_requirements,
+#     tests_require=test_requirements,
     cmdclass=cmdclass,
     ext_modules=ext_modules,
     scripts=['scripts/update_configs',

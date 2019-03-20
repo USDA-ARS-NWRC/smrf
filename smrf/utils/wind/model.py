@@ -145,12 +145,12 @@ class wind_model():
         for i, angle in enumerate(swa):
 
             # calculate the maxus value
-            maxus = self.maxus_angle(angle, self.dmax)
+            maxus_outlying = self.maxus_angle(angle, self.dmax)
 
             # calculate the local maxus value
-            tbreak = self.maxus_angle(angle, self.sepdist)
+            maxus_local = self.maxus_angle(angle, self.sepdist)
 
-            self.maxus_val = maxus - tbreak
+            self.maxus_val = maxus_local - maxus_outlying
 
             self.output(self.type, i)
 

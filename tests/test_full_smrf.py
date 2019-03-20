@@ -12,7 +12,7 @@ import unittest
 import shutil
 import smrf
 import os
-from smrf.framework.model_framework import run_smrf
+from smrf.framework.model_framework import can_i_run_smrf
 import numpy as np
 from netCDF4 import Dataset
 
@@ -30,11 +30,14 @@ def compare_image(v_name,gold_dir,test_dir):
     image1 = os.path.join(gold_dir,v_name+'.nc')
     image2 = os.path.join(test_dir,v_name+'.nc')
 
-    d1 = Dataset(image1)
+    d1 = Dataset(image1, 'r')
     gold = d1.variables[v_name][:]
+    d1.close()
 
-    d2 = Dataset(image2)
+    d2 = Dataset(image2, 'r')
     rough = d2.variables[v_name][:]
+    d2.close()
+
     result = np.abs(gold-rough)
     return  not np.any(result>0)
 
@@ -64,7 +67,7 @@ class TestRME(unittest.TestCase):
             shutil.rmtree(self.output)
 
         config = os.path.join(run_dir,'config.ini')
-        run_smrf(config)
+        can_i_run_smrf(config)
 
     def testAirTemp(self):
         """

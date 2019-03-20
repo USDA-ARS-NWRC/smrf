@@ -6,4 +6,4 @@ For a list of contributors please see https://smrf.readthedocs.io/en/latest/cred
 
 Version
 -------
-0.6.0
+0.8.5

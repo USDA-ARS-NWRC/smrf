@@ -372,13 +372,20 @@ class th(image_data.image_data):
 
         self._logger.debug('%s Distributing thermal' % data.name)
 
-        self._distribute(data)
+        # assign the input thermal radiation to clear thermal, this may not be the case
+        # but will be the assumption for now
+        self._distribute(data, other_attribute='thermal_clear')
+        
+        self.thermal_cloud = self.thermal_clear.copy()
+        self.thermal = self.thermal_clear.copy()
 
         # correct for vegetation
-        self.thermal = thermal_radiation.thermal_correct_canopy(self.thermal,
-                                                                air_temp,
-                                                                self.veg_tau,
-                                                                self.veg_height)
+        if self.correct_veg:
+            self.thermal_veg = thermal_radiation.thermal_correct_canopy(self.thermal_cloud,
+                                                                        air_temp,
+                                                                        self.veg_tau,
+                                                                        self.veg_height)
+            self.thermal = self.thermal_veg.copy()
 
     def distribute_thermal_thread(self, queue, data):
         """
@@ -398,6 +405,14 @@ class th(image_data.image_data):
 
             air_temp = queue['air_temp'].get(t)
 
-            self.distribute_thermal(data.ix[t], air_temp)
+            self.distribute_thermal(data.loc[t], air_temp)
+
+
+            if self.correct_veg:
+                queue['thermal_veg'].put([t, self.thermal_veg])
+            if self.correct_cloud:
+                queue['thermal_cloud'].put([t, self.thermal_cloud])
+
+            queue['thermal_clear'].put([t, self.thermal_clear])
 
             queue['thermal'].put([t, self.thermal])

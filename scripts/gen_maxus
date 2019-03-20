@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 
 from smrf.utils.wind.model import wind_model
-from smrf.ipw import IPW
+from spatialnc.ipw import IPW
 import netCDF4 as nc
 import numpy as np
 import argparse

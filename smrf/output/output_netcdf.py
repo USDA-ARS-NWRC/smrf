@@ -9,6 +9,7 @@ import logging
 import os
 from datetime import datetime
 from smrf.utils import utils
+from spatialnc.proj import add_proj
 # import pandas as pd
 
 from smrf import __version__
@@ -20,6 +21,7 @@ class output_netcdf():
 
     type = 'netcdf'
     fmt = '%Y-%m-%d %H:%M:%S'
+    cs = (6, 10, 10)
 
     def __init__(self, variable_list, topo, time, outConfig):
         """
@@ -65,6 +67,9 @@ class output_netcdf():
                     datetime.now().strftime(self.fmt))
                 setattr(s, 'last_modified', h)
 
+                if 'projection' not in s.variables.keys():
+                    s = add_proj(s, None, topo.topoConfig['filename'])
+
             else:
                 self._logger.debug('Creating %s' % f['file_name'])
                 s = nc.Dataset(f['file_name'], 'w',
@@ -81,7 +86,8 @@ class output_netcdf():
                 s.createVariable('y', 'f', dimensions[1])
                 s.createVariable('x', 'f', dimensions[2])
                 s.createVariable(f['variable'], 'f',
-                                 (dimensions[0], dimensions[1], dimensions[2]))
+                                 (dimensions[0], dimensions[1], dimensions[2]),
+                                 chunksizes=self.cs)
 
                 # define some attributes
                 s.variables['time'].setncattr(
@@ -129,6 +135,9 @@ class output_netcdf():
                 s.variables[f['variable']].setncattr(
                         'long_name',
                         f['info']['long_name'])
+
+                # add projection info
+                s = add_proj(s, None, topo.topoConfig['filename'])
 
                 # define some global attributes
                 s.setncattr_string('Conventions', 'CF-1.6')

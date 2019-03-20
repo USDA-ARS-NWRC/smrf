@@ -5,6 +5,8 @@
 [![DOI](https://readthedocs.org/projects/smrf/badge/)](https://smrf.readthedocs.io)
 [![Docker Build Status](https://img.shields.io/docker/build/usdaarsnwrc/smrf.svg)](https://hub.docker.com/r/usdaarsnwrc/smrf/)
 [![Docker Automated build](https://img.shields.io/docker/automated/usdaarsnwrc/smrf.svg)](https://hub.docker.com/r/usdaarsnwrc/smrf/)
+[![Build Status](https://travis-ci.org/USDA-ARS-NWRC/smrf.svg?branch=develop)](https://travis-ci.org/USDA-ARS-NWRC/smrf)
+[![Coverage Status](https://coveralls.io/repos/github/USDA-ARS-NWRC/smrf/badge.svg?branch=HEAD)](https://coveralls.io/github/USDA-ARS-NWRC/smrf?branch=HEAD)
 
 Spatial Modeling for Resources Framework (SMRF) was developed by Dr. Scott
 Havens at the USDA Agricultural Research Service (ARS) in Boise, ID. SMRF was

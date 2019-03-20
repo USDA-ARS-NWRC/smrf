@@ -1,5 +1,5 @@
 
-from smrf import ipw
+from spatialnc import ipw
 import numpy as np
 from netCDF4 import Dataset
 import subprocess as sp
@@ -59,7 +59,8 @@ class topo():
         # read images
         img_type = self.topoConfig['type']
         if img_type == 'ipw':
-            self.readImages()
+            #self.readImages()
+            raise IOError('IPW topos are deprecated as of SMRF 0.8.0')
         elif img_type == 'netcdf':
             self.readNetCDF()
 
@@ -119,6 +120,8 @@ class topo():
         # read in the images
         f = Dataset(self.topoConfig['filename'], 'r')
 
+        if 'projection' not in f.variables.keys():
+            raise IOError("Topo input files must have projection information")
         # read in the images
         # netCDF files are stored typically as 32-bit float, so convert
         # to double or int
@@ -175,7 +178,7 @@ class topo():
             ))
         self._logger.debug('sky view file - %s' % svfile)
 
-#         _viewf(self.topoConfig['dem'], svfile)
+        # self._viewf(self.topoConfig['dem'], svfile)
         ts = Process(target=self._viewf, args=(self.topoConfig['dem'], svfile))
         ts.start()
 
@@ -185,7 +188,7 @@ class topo():
             ))
         self._logger.debug('gradient file - %s' % gfile)
 
-#         _gradient(self.topoConfig['dem'], gfile)
+        # self._gradient(self.topoConfig['dem'], gfile)
         tg = Process(target=self._gradient,
                      args=(self.topoConfig['dem'], gfile))
         tg.start()

@@ -17,14 +17,23 @@ import random
 import sys
 from inicheck.checkers import CheckType
 from inicheck.output import generate_config
-
+from inicheck.utilities import mk_lst
+import copy
+import scipy.spatial.qhull as qhull
 
 class CheckStation(CheckType):
+    """
+    Custom check for ensuring our stations are always capitalized
+    """
     def __init__(self,**kwargs):
         super(CheckStation,self).__init__(**kwargs)
 
     def cast(self):
-        return self.value.upper()
+        if self.value.lower() != 'none':
+            return self.value.upper()
+        else:
+            return self.value
+
 
 def find_configs(directory):
     """
@@ -178,18 +187,26 @@ def backup_input(data, config_obj):
         data: Pandas dataframe containing the station data
         config_obj: The config object produced by inicheck
     """
+    # mask copy
+    backup_config_obj = copy.deepcopy(config_obj)
+
     # Make the output dir
-    backup_dir = os.path.join(config_obj.cfg['output']['out_location'],
+    backup_dir = os.path.join(backup_config_obj.cfg['output']['out_location'],
                               'input_backup')
     if not os.path.isdir(backup_dir):
         os.mkdir(backup_dir)
     csv_names = {}
 
     # Check config file for csv section and remove alternate data form config
-    if 'csv' not in config_obj.cfg.keys():
-        config_obj.cfg['csv'] = {}
+    if 'csv' not in backup_config_obj.cfg.keys():
+        backup_config_obj.cfg['csv'] = {}
         # With a new section added, we need to remove the other data sections
-        config_obj.apply_recipes()
+        #backup_config_obj.apply_recipes()
+    if 'mysql' in backup_config_obj.cfg.keys():
+        del backup_config_obj.cfg['mysql']
+    if 'stations' in backup_config_obj.cfg.keys():
+        if 'client' in backup_config_obj.cfg['stations']:
+            del backup_config_obj.cfg['stations']['client']
 
     # Output station data to CSV
     csv_var = ['metadata', 'air_temp', 'vapor_pressure', 'precip','wind_speed',
@@ -201,24 +218,25 @@ def backup_input(data, config_obj):
         v.to_csv(fname)
 
         # Adjust and output the inifile
-        config_obj.cfg['csv'][k] = fname
+        backup_config_obj.cfg['csv'][k] = fname
 
     # Copy topo files over to backup
     ignore = ['basin_lon', 'basin_lat', 'type']
-    for s in config_obj.cfg['topo']:
-        src = config_obj.cfg['topo'][s]
-
+    for s in backup_config_obj.cfg['topo'].keys():
+        src = backup_config_obj.cfg['topo'][s]
+        # make not a list if lenth is 1
+        if isinstance(src, list): src = mk_lst(src, unlst=True)
         # Avoid attempring to copy files that don't exist
         if s not in ignore and src != None:
             dst =  os.path.join(backup_dir, os.path.basename(src))
-            config_obj.cfg["topo"][s] = dst
+            backup_config_obj.cfg["topo"][s] = dst
             copyfile(src, dst)
 
     # We dont want to backup the backup
-    config_obj.cfg['output']['input_backup'] = False
+    backup_config_obj.cfg['output']['input_backup'] = False
 
     # Output inifile
-    generate_config(config_obj,os.path.join(backup_dir,'backup_config.ini'))
+    generate_config(backup_config_obj,os.path.join(backup_dir,'backup_config.ini'))
 
 
 def getgitinfo():
@@ -318,6 +336,34 @@ def get_config_doc_section_hdr():
     return hdr_dict
 
 
+def get_asc_stats(fp):
+    """
+    Returns header of ascii dem file
+    """
+    ts = {}
+    header = {}
+
+    ff = open(fp, 'r')
+    for idl, line in enumerate(ff):
+        tmp_line = line.strip().split()
+        header[tmp_line[0]] = tmp_line[1]
+        if idl >= 5:
+            break
+    ff.close()
+
+    ts['nx'] = int(header['ncols'])
+    ts['ny'] = int(header['nrows'])
+    ts['du'] = float(header['cellsize'])
+    ts['dv'] = float(header['cellsize'])
+    ts['u'] = float(header['yllcorner'])
+    ts['v'] = float(header['xllcorner'])
+
+    ts['x'] = ts['v'] + ts['dv']*np.arange(ts['nx'])
+    ts['y'] = ts['u'] + ts['du']*np.arange(ts['ny'])
+
+    return ts
+
+
 def getqotw():
     p = os.path.dirname(__core_config__)
     q_f = os.path.abspath(os.path.join('{0}'.format(p),'.qotw'))
@@ -326,3 +372,53 @@ def getqotw():
         f.close()
     i = random.randrange(0,len(qs))
     return qs[i]
+
+def interp_weights(xy, uv,d=2):
+    """
+    Find vertices and weights of LINEAR interpolation for gridded interp.
+    This routine follows the methods of scipy.interpolate.griddata as outlined
+    here:
+    https://stackoverflow.com/questions/20915502/speedup-scipy-griddata-for-multiple-interpolations-between-two-irregular-grids
+    This function finds the vertices and weights which is the most computationally
+    expensive part of the routine. The interpolateion can then be done quickly.
+
+    Args:
+        xy: n by 2 array of flattened meshgrid x and y coords of WindNinja grid
+        uv: n by 2 array of flattened meshgrid x and y coords of SMRF grid
+        d:  dimensions of array (i.e. 2 for our purposes)
+
+    Returns:
+        vertices:
+        wts:
+
+    """
+    tri = qhull.Delaunay(xy)
+    simplex = tri.find_simplex(uv)
+    vertices = np.take(tri.simplices, simplex, axis=0)
+    temp = np.take(tri.transform, simplex, axis=0)
+    delta = uv - temp[:, d]
+    bary = np.einsum('njk,nk->nj', temp[:, :d, :], delta)
+
+    return vertices, np.hstack((bary, 1 - bary.sum(axis=1, keepdims=True)))
+
+def grid_interpolate(values, vtx, wts, shp, fill_value=np.nan):
+    """
+    Broken out gridded interpolation from scipy.interpolate.griddata that takes
+    the vertices and wts from interp_weights function
+
+    Args:
+        values: flattened WindNinja wind speeds
+        vtx:    vertices for interpolation
+        wts:    weights for interpolation
+        shape:  shape of SMRF grid
+        fill_value: value for extrapolated points
+
+    Returns:
+        ret:    interpolated values
+    """
+    ret = np.einsum('nj,nj->n', np.take(values, vtx), wts)
+    ret[np.any(wts < 0, axis=1)] = fill_value
+
+    ret = ret.reshape(shp[0], shp[1])
+
+    return ret

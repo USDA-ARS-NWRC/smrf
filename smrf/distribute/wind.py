@@ -6,6 +6,8 @@ import os
 from smrf.distribute import image_data
 from smrf.utils import utils
 import netCDF4 as nc
+import pytz
+import glob
 
 
 class wind(image_data.image_data):
@@ -108,7 +110,7 @@ class wind(image_data.image_data):
     # be written during main distribute loop
     post_process_variables = {}
 
-    def __init__(self, windConfig, distribute_drifts, tempDir=None):
+    def __init__(self, windConfig, distribute_drifts, wholeConfig, tempDir=None):
 
         # extend the base class
         image_data.image_data.__init__(self, self.variable)
@@ -124,6 +126,16 @@ class wind(image_data.image_data):
         if windConfig['distribution'] == 'grid':
             self.gridded = True
             self.distribute_drifts = False
+
+            # wind ninja parameters
+            self.wind_ninja_dir = self.config['wind_ninja_dir']
+            self.wind_ninja_dxy = self.config['wind_ninja_dxy']
+            self.wind_ninja_pref = self.config['wind_ninja_pref']
+            if self.config['wind_ninja_tz'] is not None:
+                self.wind_ninja_tz = pytz.timezone(self.config['wind_ninja_tz'])
+
+            self.start_date = pd.to_datetime(wholeConfig['time']['start_date'])
+            self.grid_data = wholeConfig['gridded']['data_type']
 
         else:
             # open the maxus netCDF
@@ -170,6 +182,10 @@ class wind(image_data.image_data):
             self.config['peak'] = [self.config['peak']]
         self._initialize(topo, data.metadata)
 
+        # meshgrid points
+        self.X = topo.X
+        self.Y = topo.Y
+
         if not self.gridded:
             self.veg_type = topo.veg_type
 
@@ -188,13 +204,66 @@ class wind(image_data.image_data):
 
                         self.metadata.loc[m, 'enhancement'] = \
                             float(enhancement)
+        else:
+            self.flatwind = None
+
+            if self.config['wind_ninja_dir'] is not None:
+                # WindNinja output height in meters
+                self.wind_height = float(self.config['wind_ninja_height'])
+                # set roughness that was used in WindNinja simulation
+                # WindNinja uses 0.01m for grass, 0.43 for shrubs, and 1.0 for forest
+                self.wn_roughness = float(self.config['wind_ninja_roughness']) * \
+                                    np.ones_like(topo.dem)
+
+                # get our effective veg surface roughness
+                # to use in log law scaling of WindNinja data
+                # using the relationship in
+                # https://www.jstage.jst.go.jp/article/jmsj1965/53/1/53_1_96/_pdf
+                self.veg_roughness = topo.veg_height / 7.39
+                # make sure roughness stays reasonable using bounds from
+                # http://www.iawe.org/Proceedings/11ACWE/11ACWE-Cataldo3.pdf
+
+                self.veg_roughness[self.veg_roughness < 0.01] = 0.01
+                self.veg_roughness[np.isnan(self.veg_roughness)] = 0.01
+                self.veg_roughness[self.veg_roughness > 1.6] = 1.6
+
+                # precalculate scale arrays so we don't do it every timestep
+                self.ln_wind_scale = np.log((self.veg_roughness + self.wind_height) / self.veg_roughness) / \
+                                     np.log((self.wn_roughness + self.wind_height) / self.wn_roughness)
+
+                ###### do this first to speedup the interpolation later ####
+                # find vertices and weights to speedup interpolation fro ascii file
+                fmt_d = '%Y%m%d'
+                fp_vel = glob.glob(os.path.join(self.wind_ninja_dir,
+                                      'data{}'.format(self.start_date.strftime(fmt_d)),
+                                      'wind_ninja_data',
+                                      '*_vel.asc'))[0]
+
+                # get wind ninja topo stats
+                ts2 = utils.get_asc_stats(fp_vel)
+                xwn = ts2['x'][:]
+                ywn = ts2['y'][:]
+
+                XW, YW = np.meshgrid(xwn, ywn)
+                xwint = XW.flatten()
+                ywint = YW.flatten()
+
+                xy=np.zeros([XW.shape[0]*XW.shape[1],2])
+                xy[:,1]=ywint
+                xy[:,0]=xwint
+                uv=np.zeros([self.X.shape[0]*self.X.shape[1],2])
+                uv[:,1]=self.Y.flatten()
+                uv[:,0]=self.X.flatten()
+
+                self.vtx, self.wts = utils.interp_weights(xy, uv,d=2)
+                ###### end do this first to speedup the interpolation later ####
 
         if not self.distribute_drifts:
             # we have to pass these to precip, so make them none if we won't use them
             self.dir_round_cell = None
             self.cellmaxus = None
 
-    def distribute(self, data_speed, data_direction):
+    def distribute(self, data_speed, data_direction, t):
         """
         Distribute given a Panda's dataframe for a single time step. Calls
         :mod:`smrf.distribute.image_data.image_data._distribute`.
@@ -214,6 +283,7 @@ class wind(image_data.image_data):
             data_speed: Pandas dataframe for single time step from wind_speed
             data_direction: Pandas dataframe for single time step from
                 wind_direction
+            t: time stamp
 
         """
 
@@ -224,24 +294,32 @@ class wind(image_data.image_data):
         data_direction = data_direction[self.stations]
 
         if self.gridded:
-            self._distribute(data_speed, other_attribute='wind_speed')
+            # check if running with windninja
+            if self.wind_ninja_dir is not None:
+                wind_speed, wind_direction = self.convert_wind_ninja(t)
+                self.wind_speed = wind_speed
+                self.wind_direction = wind_direction
 
-            # wind direction components at the station
-            self.u_direction = np.sin(data_direction * np.pi/180)    # u
-            self.v_direction = np.cos(data_direction * np.pi/180)    # v
+            else:
+                self._distribute(data_speed, other_attribute='wind_speed')
 
-            # distribute u_direction and v_direction
-            self._distribute(self.u_direction,
-                             other_attribute='u_direction_distributed')
-            self._distribute(self.v_direction,
-                             other_attribute='v_direction_distributed')
+                # wind direction components at the station
+                self.u_direction = np.sin(data_direction * np.pi/180)    # u
+                self.v_direction = np.cos(data_direction * np.pi/180)    # v
 
-            # combine u and v to azimuth
-            az = np.arctan2(self.u_direction_distributed,
-                            self.v_direction_distributed)*180/np.pi
-            az[az < 0] = az[az < 0] + 360
-            self.wind_direction = az
+                # distribute u_direction and v_direction
+                self._distribute(self.u_direction,
+                                 other_attribute='u_direction_distributed')
+                self._distribute(self.v_direction,
+                                 other_attribute='v_direction_distributed')
 
+                # combine u and v to azimuth
+                az = np.arctan2(self.u_direction_distributed,
+                                self.v_direction_distributed)*180/np.pi
+                az[az < 0] = az[az < 0] + 360
+                self.wind_direction = az
+
+            # set min and max
             self.wind_speed = utils.set_min_max(self.wind_speed,
                                                 self.min,
                                                 self.max)
@@ -277,15 +355,15 @@ class wind(image_data.image_data):
 
         for t in data_speed.index:
 
-            self.distribute(data_speed.loc[t], data_direction.loc[t])
+            self.distribute(data_speed.loc[t], data_direction.loc[t], t)
 
             queue['wind_speed'].put([t, self.wind_speed])
             queue['wind_direction'].put([t, self.wind_direction])
 
-            if not self.gridded:
-                queue['flatwind'].put([t, self.flatwind])
-                queue['cellmaxus'].put([t,self.cellmaxus])
-                queue['dir_round_cell'].put([t,self.dir_round_cell])
+#             if not self.gridded:
+            queue['flatwind'].put([t, self.flatwind])
+            queue['cellmaxus'].put([t,self.cellmaxus])
+            queue['dir_round_cell'].put([t,self.dir_round_cell])
 
     def simulateWind(self, data_speed):
         """
@@ -322,16 +400,16 @@ class wind(image_data.image_data):
 
         # correct for veg
         dynamic_mask = np.ones(cellmaxus.shape)
-        for i,v in enumerate(self.veg):
+        for k,v in self.veg.items():
             # Adjust veg types that were specified by the user
-            if v != 'default':
-                ind = self.veg_type == int(v)
+            if k != 'default':
+                ind = self.veg_type == int(k)
                 dynamic_mask[ind] = 0
-                cellmaxus[ind] += self.veg[v]
+                cellmaxus[ind] += v
 
         # Apply the veg default to those that weren't messed with
         if self.veg['default'] != 0:
-            cellmaxus[~ind] += self.veg['default']
+            cellmaxus[dynamic_mask == 1] += self.veg['default']
 
         # correct unreasonable values
         cellmaxus[cellmaxus > 32] = 32
@@ -465,3 +543,73 @@ class wind(image_data.image_data):
         # wind direction components at the station
         self.u_direction = np.sin(data_direction * np.pi/180)    # u
         self.v_direction = np.cos(data_direction * np.pi/180)    # v
+
+    def convert_wind_ninja(self, t):
+        """
+        Convert the WindNinja ascii grids back to the SMRF grids and into the
+        SMRF data streamself.
+
+        Args:
+            t:              datetime of timestep
+
+        Returns:
+            ws: wind speed numpy array
+            wd: wind direction numpy array
+
+        """
+        # fmt_wn = '%Y-%m-%d_%H%M'
+        fmt_wn = '%m-%d-%Y_%H%M'
+        fmt_d = '%Y%m%d'
+
+        # get the ascii files that need converted
+        # file example tuol_09-20-2018_1900_200m_vel.prj
+        # find timestamp of WindNinja file
+        t_file = t.astimezone(self.wind_ninja_tz)
+
+        fp_vel = os.path.join(self.wind_ninja_dir,
+                              'data{}'.format(t.strftime(fmt_d)),
+                              'wind_ninja_data',
+                              '{}_{}_{:d}m_vel.asc'.format(self.wind_ninja_pref,
+                                                           t_file.strftime(fmt_wn),
+                                                           self.wind_ninja_dxy))
+
+        # make sure files exist
+        if not os.path.isfile(fp_vel):
+            raise ValueError('{} in windninja convert module does not exist!'.format(fp_vel))
+
+        data_vel = np.loadtxt(fp_vel, skiprows=6)
+        data_vel_int = data_vel.flatten()
+
+        # # interpolate to the SMRF grid from the WindNinja grid
+        g_vel = utils.grid_interpolate(data_vel_int, self.vtx,
+                                       self.wts, self.X.shape)
+
+        # flip because it comes out upsidedown
+        g_vel = np.flipud(g_vel)
+        # log law scale
+        g_vel = g_vel * self.ln_wind_scale
+
+        # Don't get angle if not distributing drifts
+        if self.distribute_drifts:
+            fp_ang = os.path.join(self.wind_ninja_dir,
+                                  'data{}'.format(t.strftime(fmt_d)),
+                                  'wind_ninja_data',
+                                  '{}_{}_{:d}m_ang.asc'.format(self.wind_ninja_pref,
+                                                               t_file.strftime(fmt_wn),
+                                                               self.wind_ninja_dxy))
+
+            if not os.path.isfile(fp_ang):
+                raise ValueError('{} in windninja convert module does not exist!'.format(fp_ang))
+
+            data_ang = np.loadtxt(fp_ang, skiprows=6)
+            data_ang_int = data_ang.flatten()
+
+            g_ang = utils.grid_interpolate(data_ang_int, self.vtx,
+                                           self.wts, self.X.shape)
+
+            g_ang = np.flipud(g_ang)
+
+        else:
+            g_ang = None
+
+        return g_vel, g_ang

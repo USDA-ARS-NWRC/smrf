@@ -57,7 +57,7 @@ Don't forget to push your tags afterwards with::
 
   $ git push origin --tags
 
-Currently SMRF is version 0.6.0 The development team of SMRF attempted to adhere
+Currently SMRF is version 0.8.5 The development team of SMRF attempted to adhere
 to semantic versioning. Here is the basics taken from the semantic versioning website.
 
   * Patch version Z (x.y.Z | x > 0) MUST be incremented if only backwards compatible bug fixes are introduced.
@@ -142,3 +142,9 @@ Tips
 To run a subset of tests::
 
     $ python -m unittest discover -v
+
+To check the coverage of the tests::
+
+	$ coverage run --source smrf setup.py test
+	$ coverage html
+	$ xdg-open htmlcov/index.html

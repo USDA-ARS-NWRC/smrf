@@ -202,8 +202,7 @@ def susong1999(temperature, precipitation):
     for row in t:
 
         # get the values between the temperature ranges that have precip
-        ind = [(temperature >= row['temp_min']) & (temperature < row['temp_max'])]
-
+        ind = ((temperature >= row['temp_min']) & (temperature < row['temp_max']))
         # set the percent snow
         ps[ind] = row['snow']
 
