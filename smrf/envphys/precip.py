@@ -301,19 +301,20 @@ def dist_precip_wind(precip, precip_temp, az, dir_round_cell, wind_speed,
     to account for drifting.
 
     Args:
-        precip: distributed precip
-        precip_temp: precip_temp array
-        az: wind direction
-        dir_round_cell: from wind module
-        wind_speed: wind speed array
-        cell_maxus: max upwind slope from maxus file
-        tbreak: relative local slope from tbreak file
-        tbreak_direction: direction array from tbreak file
-        veg_type: user input veg types to correct
-        veg_factor: interception correction for veg types. ppt mult is multiplied by 1/veg_factor
+        precip:             distributed precip
+        precip_temp:        precip_temp array
+        az:                 wind direction
+        dir_round_cell:     from wind module
+        wind_speed:         wind speed array
+        cell_maxus:         max upwind slope from maxus file
+        tbreak:             relative local slope from tbreak file
+        tbreak_direction:   direction array from tbreak file
+        veg_type:           user input veg types to correct
+        veg_factor:         interception correction for veg types. ppt mult is
+                            multiplied by 1/veg_factor
 
     Returns:
-        precip_drift: numpy array of precip redistributed for wind
+        precip_drift:       numpy array of precip redistributed for wind
 
     """
     # thresholds
