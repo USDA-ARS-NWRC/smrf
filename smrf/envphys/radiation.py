@@ -994,24 +994,44 @@ def get_hrrr_cloud(df_solar, df_meta, logger, lat, lon):
     clms = df_solar.columns
     dates = df_solar.index.values[:]
 
-    # find basin solar at top of atmosphere for each data
+    # find each cell solar at top of atmosphere for each date
     basin_sol = np.zeros(len(dates))
     basin_sol[:] = np.nan
-    for idt, dt in enumerate(dates):
-        # get solar using twostream
+
+
+    cs_solar = df_solar.copy()
+    for dt, row in cs_solar.iterrows():
         dtt = pd.to_datetime(dt)
-        basin_sol[idt] =  model_solar(dtt, lat, lon)
+        for ix,value in row.iteritems():
+            # get solar using twostream only if the sun is up
+            if value > 0:
+                cs_solar.loc[dt, ix] = model_solar(dtt, df_meta.loc[ix, 'latitude'], df_meta.loc[ix, 'longitude'])
 
-    # create cloud factor dataframe
-    df_cf = df_solar.copy()
-    #df_basin_sol = pd.DataFrame(index = dates, data = basin_sol)
+    # This will produce NaN values when the sun is down
+    df_cf = df_solar / cs_solar
 
-    # calculate cloud factor from basin solar
-    for cl in clms:
-        cf_tmp = df_cf[cl].values[:]/basin_sol
-        cf_tmp[np.isnan(cf_tmp)] = 0.0
-        cf_tmp[cf_tmp > 1.0] = 1.0
-        df_cf[cl] = cf_tmp
+    # linear interpolate the NaN values at night
+    df_cf = df_cf.interpolate(method='linear', axis=1).ffill().bfill()
+
+    # Clean up the dataframe to be between 0 and 1
+    df_cf[df_cf > 1.0] = 1.0
+    df_cf[df_cf < 0.0] = 0.0
+
+    # for idt, dt in enumerate(dates):
+    #     # get solar using twostream
+    #     dtt = pd.to_datetime(dt)
+    #     basin_sol[idt] =  model_solar(dtt, lat, lon)
+
+    # # create cloud factor dataframe
+    # df_cf = df_solar.copy()
+    # #df_basin_sol = pd.DataFrame(index = dates, data = basin_sol)
+
+    # # calculate cloud factor from basin solar
+    # for cl in clms:
+    #     cf_tmp = df_cf[cl].values[:]/basin_sol
+    #     cf_tmp[np.isnan(cf_tmp)] = 0.0
+    #     cf_tmp[cf_tmp > 1.0] = 1.0
+    #     df_cf[cl] = cf_tmp
 
     # df_cf = df_solar.divide(df_basin_sol)
     # # clip to 1.0
