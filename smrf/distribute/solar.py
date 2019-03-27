@@ -290,6 +290,7 @@ class solar(image_data.image_data):
 
         # cloud must always be distributed since it is used by thermal
         self._distribute(data, other_attribute='cloud_factor')
+        self.cloud_factor = utils.set_min_max(self.cloud_factor, 0, 1)
 
         # only need to calculate solar if the sun is up
         if cosz > 0:
@@ -387,6 +388,7 @@ class solar(image_data.image_data):
 
             # distribute the cloud factor
             self._distribute(data.loc[t], other_attribute='cloud_factor')
+            self.cloud_factor = utils.set_min_max(self.cloud_factor, 0, 1)
 
             # check if sun is up or not
             cosz = queue['cosz'].get(t)

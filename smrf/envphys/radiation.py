@@ -1011,7 +1011,7 @@ def get_hrrr_cloud(df_solar, df_meta, logger, lat, lon):
     df_cf = df_solar / cs_solar
 
     # linear interpolate the NaN values at night
-    df_cf = df_cf.interpolate(method='linear', axis=1).ffill().bfill()
+    df_cf = df_cf.interpolate(method='linear').ffill()
 
     # Clean up the dataframe to be between 0 and 1
     df_cf[df_cf > 1.0] = 1.0
