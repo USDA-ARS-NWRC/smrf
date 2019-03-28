@@ -1001,7 +1001,10 @@ def get_hrrr_cloud(df_solar, df_meta, logger, lat, lon):
         dtt = pd.to_datetime(dt)
         basin_sol.iloc[idt, :] =  model_solar(dtt, lat, lon)
     
-
+    # if it's close to sun down or sun up, then the cloud factor gets difficult to calculate
+    basin_sol[basin_sol < 50] = 0
+    df_solar[basin_sol < 50] = 0
+    
     # This would be the proper way to do this but it's too computationally expensive
     # cs_solar = df_solar.copy()
     # for dt, row in cs_solar.iterrows():
