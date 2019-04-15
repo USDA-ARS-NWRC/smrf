@@ -7,7 +7,8 @@ Distributed forcing data over a grid using interpolation
 import numpy as np
 import pandas as pd
 from scipy.interpolate import griddata
-
+from scipy.interpolate.interpnd import CloughTocher2DInterpolator, _ndim_coords_from_arrays
+import scipy.spatial.qhull as qhull
 
 class GRID:
     '''
@@ -44,7 +45,7 @@ class GRID:
         self.GridZ = GridZ
 
         self.metadata = metadata
-        
+
         # local elevation gradient, precalculte the distance dataframe
         if config['grid_local']:
             k = config['grid_local_n']
@@ -118,8 +119,12 @@ class GRID:
                 pp = np.array([0, 0])
             pv.loc[grid_name, ['slope', 'intercept']] = pp
 
+        # get triangulation
+        xy = _ndim_coords_from_arrays((pv.utm_x, pv.utm_y))
+        tri = qhull.Delaunay(xy)
         # interpolate the slope/intercept
-        grid_slope = griddata((pv.utm_x, pv.utm_y), pv.slope, (self.GridX, self.GridY), method=grid_method)
+        # grid_slope = griddata(tri, pv.slope, (self.GridX, self.GridY), method=grid_method)
+        grid_slope = CloughTocher2DInterpolator(tri, pv.slope.values[:])((self.GridX, self.GridY))
         grid_intercept = griddata((pv.utm_x, pv.utm_y), pv.intercept, (self.GridX, self.GridY), method=grid_method)
 
         # remove the elevation trend from the HRRR precip
@@ -131,7 +136,7 @@ class GRID:
 
         # reinterpolate
         rtrend = idtrend + grid_slope * self.GridZ + grid_intercept
-        
+
         return rtrend
 
 
