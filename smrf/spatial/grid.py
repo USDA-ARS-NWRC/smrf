@@ -57,6 +57,7 @@ class GRID:
                 dist_df.loc[row.name] = d.sort_values()[:k].index
 
             self.dist_df = dist_df
+            self.tri = None
 
 
         # mask
@@ -121,23 +122,24 @@ class GRID:
             pv.loc[grid_name, ['slope', 'intercept']] = pp
 
         # get triangulation
-        xy = _ndim_coords_from_arrays((pv.utm_x, pv.utm_y))
-        tri = qhull.Delaunay(xy)
+        if self.tri is None:
+            xy = _ndim_coords_from_arrays((pv.utm_x, pv.utm_y))
+            self.tri = qhull.Delaunay(xy)
         # interpolate the slope/intercept
         # grid_slope = griddata((pv.utm_x, pv.utm_y), pv.slope, (self.GridX, self.GridY), method=grid_method)
-        grid_slope = grid_interpolate_deconstructed(tri,
+        grid_slope = grid_interpolate_deconstructed(self.tri,
                                                     pv.slope.values[:],
                                                     (self.GridX, self.GridY),
                                                     method=grid_method)
 
-        grid_intercept = grid_interpolate_deconstructed(tri, pv.intercept, (self.GridX, self.GridY), method=grid_method)
+        grid_intercept = grid_interpolate_deconstructed(self.tri, pv.intercept, (self.GridX, self.GridY), method=grid_method)
 
         # remove the elevation trend from the HRRR precip
         el_trend = pv.elevation * pv.slope + pv.intercept
         dtrend = pv.data - el_trend
 
         # interpolate the residuals over the DEM
-        idtrend = grid_interpolate_deconstructed(tri, dtrend, (self.GridX, self.GridY), method=grid_method)
+        idtrend = grid_interpolate_deconstructed(self.tri, dtrend, (self.GridX, self.GridY), method=grid_method)
 
         # reinterpolate
         rtrend = idtrend + grid_slope * self.GridZ + grid_intercept
