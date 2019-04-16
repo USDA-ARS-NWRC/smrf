@@ -7,8 +7,9 @@ Distributed forcing data over a grid using interpolation
 import numpy as np
 import pandas as pd
 from scipy.interpolate import griddata
-from scipy.interpolate.interpnd import CloughTocher2DInterpolator, _ndim_coords_from_arrays
+from scipy.interpolate.interpnd import _ndim_coords_from_arrays
 import scipy.spatial.qhull as qhull
+from smrf.utils.utils import grid_interpolate_deconstructed
 
 class GRID:
     '''
@@ -123,16 +124,20 @@ class GRID:
         xy = _ndim_coords_from_arrays((pv.utm_x, pv.utm_y))
         tri = qhull.Delaunay(xy)
         # interpolate the slope/intercept
-        # grid_slope = griddata(tri, pv.slope, (self.GridX, self.GridY), method=grid_method)
-        grid_slope = CloughTocher2DInterpolator(tri, pv.slope.values[:])((self.GridX, self.GridY))
-        grid_intercept = griddata((pv.utm_x, pv.utm_y), pv.intercept, (self.GridX, self.GridY), method=grid_method)
+        # grid_slope = griddata((pv.utm_x, pv.utm_y), pv.slope, (self.GridX, self.GridY), method=grid_method)
+        grid_slope = grid_interpolate_deconstructed(tri,
+                                                    pv.slope.values[:],
+                                                    (self.GridX, self.GridY),
+                                                    method=grid_method)
+
+        grid_intercept = grid_interpolate_deconstructed(tri, pv.intercept, (self.GridX, self.GridY), method=grid_method)
 
         # remove the elevation trend from the HRRR precip
         el_trend = pv.elevation * pv.slope + pv.intercept
         dtrend = pv.data - el_trend
 
         # interpolate the residuals over the DEM
-        idtrend = griddata((pv.utm_x, pv.utm_y), dtrend, (self.GridX, self.GridY), method=grid_method)
+        idtrend = grid_interpolate_deconstructed(tri, dtrend, (self.GridX, self.GridY), method=grid_method)
 
         # reinterpolate
         rtrend = idtrend + grid_slope * self.GridZ + grid_intercept

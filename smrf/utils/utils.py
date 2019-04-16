@@ -20,6 +20,7 @@ from inicheck.output import generate_config
 from inicheck.utilities import mk_lst
 import copy
 import scipy.spatial.qhull as qhull
+from scipy.interpolate.interpnd import CloughTocher2DInterpolator, LinearNDInterpolator
 
 class CheckStation(CheckType):
     """
@@ -422,3 +423,24 @@ def grid_interpolate(values, vtx, wts, shp, fill_value=np.nan):
     ret = ret.reshape(shp[0], shp[1])
 
     return ret
+
+def grid_interpolate_deconstructed(tri, values, grid_points, method='linear'):
+    """
+    Underlying methods from scipy grid_data broken out to pass in the tri
+    values returned from qhull.Delaunay. This is done to improve the speed
+    of using grid_data
+
+    Args:
+        tri:            values returned from qhull.Delaunay
+        values:         values at HRRR stations generally
+        grid_points:    tuple of vectors for X,Y coords of grid stations
+        method:         either linear or cubic
+
+    Returns:
+        result of interpolation to gridded points
+    """
+
+    if method == 'cubic':
+        return CloughTocher2DInterpolator(tri, values)(grid_points)
+    elif method == 'linear':
+        return LinearNDInterpolator(tri, values)(grid_points)
