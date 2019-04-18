@@ -46,8 +46,9 @@ class topo():
 
     images = ['dem', 'mask', 'veg_type', 'veg_height', 'veg_k', 'veg_tau']
 
-    def __init__(self, topoConfig, calcInput=True, tempDir=None):
+    def __init__(self, topoConfig, calcInput=True, tempDir=None, threaded=True):
         self.topoConfig = topoConfig
+        self.threaded = threaded
 
         if (tempDir is None) | (tempDir == 'WORKDIR'):
             tempDir = os.environ['WORKDIR']
@@ -178,24 +179,28 @@ class topo():
             ))
         self._logger.debug('sky view file - %s' % svfile)
 
-        # self._viewf(self.topoConfig['dem'], svfile)
-        ts = Process(target=self._viewf, args=(self.topoConfig['dem'], svfile))
-        ts.start()
-
         # calculate the gradient
         gfile = os.path.abspath(os.path.expanduser(
             os.path.join(self.tempDir, 'gradient.ipw')
             ))
         self._logger.debug('gradient file - %s' % gfile)
 
-        # self._gradient(self.topoConfig['dem'], gfile)
-        tg = Process(target=self._gradient,
-                     args=(self.topoConfig['dem'], gfile))
-        tg.start()
+        if self.threaded:
 
-        # wait for the processes to stop
-        tg.join()
-        ts.join()
+            ts = Process(target=self._viewf, args=(self.topoConfig['dem'], svfile))
+            ts.start()
+
+            tg = Process(target=self._gradient,
+                     args=(self.topoConfig['dem'], gfile))
+            tg.start()
+
+            # wait for the processes to stop
+            tg.join()
+            ts.join()
+
+        else:
+            self._viewf(self.topoConfig['dem'], svfile)
+            self._gradient(self.topoConfig['dem'], gfile)
 
         # combine into a value
         sfile = os.path.abspath(os.path.expanduser(

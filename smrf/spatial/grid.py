@@ -11,6 +11,8 @@ from scipy.interpolate.interpnd import _ndim_coords_from_arrays
 import scipy.spatial.qhull as qhull
 from smrf.utils.utils import grid_interpolate_deconstructed
 
+from line_profiler import LineProfiler
+
 class GRID:
     '''
     Inverse distance weighting class
@@ -87,11 +89,17 @@ class GRID:
         """
 
         # get the trend, ensure it's positive
+        
+        
         if self.config['grid_local']:
-            rtrend = self.detrendedInterpolationLocal(data, flag, grid_method)
+            # rtrend = self.detrendedInterpolationLocal(data, flag, grid_method)
+            lp = LineProfiler()
+            lp_wrapper = lp(self.detrendedInterpolationLocal)
+            rtrend = lp_wrapper(data, flag, grid_method)
+            lp.print_stats()
         else:
             rtrend = self.detrendedInterpolationMask(data, flag, grid_method)
-
+        
         return rtrend
 
     def detrendedInterpolationLocal(self, data, flag=0, grid_method='linear'):
@@ -125,21 +133,24 @@ class GRID:
         if self.tri is None:
             xy = _ndim_coords_from_arrays((pv.utm_x, pv.utm_y))
             self.tri = qhull.Delaunay(xy)
-        # interpolate the slope/intercept
-        # grid_slope = griddata((pv.utm_x, pv.utm_y), pv.slope, (self.GridX, self.GridY), method=grid_method)
-        grid_slope = grid_interpolate_deconstructed(self.tri,
-                                                    pv.slope.values[:],
-                                                    (self.GridX, self.GridY),
-                                                    method=grid_method)
 
-        grid_intercept = grid_interpolate_deconstructed(self.tri, pv.intercept, (self.GridX, self.GridY), method=grid_method)
+        # interpolate the slope/intercept
+        grid_slope_og = griddata((pv.utm_x, pv.utm_y), pv.slope, (self.GridX, self.GridY), method=grid_method)
+        grid_slope = grid_interpolate_deconstructed(self.tri, pv.slope.values[:], (self.GridX, self.GridY), method=grid_method)
+        print('Slope difference: {}'.format(np.sum(grid_slope_og-grid_slope)))
+
+        grid_intercept_og = griddata((pv.utm_x, pv.utm_y), pv.intercept, (self.GridX, self.GridY), method=grid_method)
+        grid_intercept = grid_interpolate_deconstructed(self.tri, pv.intercept.values[:], (self.GridX, self.GridY), method=grid_method)
+        print('Intercept difference: {}'.format(np.sum(grid_intercept_og-grid_intercept)))
 
         # remove the elevation trend from the HRRR precip
         el_trend = pv.elevation * pv.slope + pv.intercept
         dtrend = pv.data - el_trend
 
         # interpolate the residuals over the DEM
+        idtrend_og = griddata((pv.utm_x, pv.utm_y), dtrend, (self.GridX, self.GridY), method=grid_method)
         idtrend = grid_interpolate_deconstructed(self.tri, dtrend, (self.GridX, self.GridY), method=grid_method)
+        print('idtrend difference: {}'.format(np.sum(idtrend_og-idtrend)))
 
         # reinterpolate
         rtrend = idtrend + grid_slope * self.GridZ + grid_intercept
@@ -200,3 +211,5 @@ class GRID:
                      method=grid_method)
 
         return g
+
+        

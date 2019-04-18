@@ -269,6 +269,7 @@ class TestLoadData(SMRFTestCase):
         config.raw_cfg['gridded'] = hrrr_grid
     #         config.raw_cfg['system']['max_values'] = 2
         config.raw_cfg['system']['threading'] = False
+        # config.raw_cfg['logging']['log_file'] = None
     #         config.raw_cfg['system']['timeout'] = 10
 
         # set the distrition to grid, thermal defaults will be fine
@@ -348,5 +349,6 @@ class TestLoadData(SMRFTestCase):
 
         result = can_i_run_smrf(config)
         self.assertTrue(result)
+
 if __name__ == '__main__':
     unittest.main()
