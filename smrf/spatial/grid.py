@@ -53,12 +53,25 @@ class GRID:
         if config['grid_local']:
             k = config['grid_local_n']
             dist_df = pd.DataFrame(index=metadata.index, columns=range(k))
+            dist_df.index.name = 'cell_id'
             for i,row in metadata.iterrows():
 
                 d = np.sqrt((metadata.latitude - row.latitude)**2 + (metadata.longitude - row.longitude)**2)
                 dist_df.loc[row.name] = d.sort_values()[:k].index
 
             self.dist_df = dist_df
+
+            # stack and reset index
+            df = dist_df.stack().reset_index()
+            df = df.rename(columns={0: 'cell_local'})
+            df.drop('level_1', axis=1, inplace=True)
+
+            # get the elevations
+            df['elevation'] = metadata.loc[df['cell_local'], 'elevation'].values
+
+            # now we have cell_id, cell_local and elevation for the whole grid
+            self.full_df = df
+
             self.tri = None
 
 
@@ -117,6 +130,21 @@ class GRID:
         pv['intercept'] = np.nan
         pv['data'] = data
 
+        # take the new full_df and fill a data column
+        # Adapted from:
+        # https://stackoverflow.com/questions/51140302/using-polyfit-on-pandas-dataframe-and-then-adding-the-results-to-new-columns
+        df = self.full_df.copy()
+        df['data'] = data[df['cell_local']].values
+        df = df.set_index('cell_id')
+        df['fit'] = df.groupby('cell_id').apply(lambda x: np.polyfit(x.elevation, x.data, 1))
+
+        # drop all the duplicates
+        df.reset_index(inplace=True)
+        df.drop_duplicates(subset=['cell_id'], keep='first', inplace=True)
+        df.set_index('cell_id', inplace=True)
+        df[['slope', 'intercept']] = df.fit.apply(pd.Series)
+        # df = df.drop(columns='fit').reset_index()
+
         for grid_name,drow in self.dist_df.iterrows():
 
             elev = pv.loc[drow].elevation
@@ -128,6 +156,10 @@ class GRID:
             elif (flag == -1 and pp[0] > 0):
                 pp = np.array([0, 0])
             pv.loc[grid_name, ['slope', 'intercept']] = pp
+
+        # compare the pv and df
+        print('Cell slope difference: {}'.format(np.mean(df['slope']-pv['slope'])))
+        print('Cell intercept difference: {}'.format(np.mean(df['intercept']-pv['intercept'])))
 
         # get triangulation
         if self.tri is None:
