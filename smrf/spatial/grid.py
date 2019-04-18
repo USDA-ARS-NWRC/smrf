@@ -11,8 +11,6 @@ from scipy.interpolate.interpnd import _ndim_coords_from_arrays
 import scipy.spatial.qhull as qhull
 from smrf.utils.utils import grid_interpolate_deconstructed
 
-from line_profiler import LineProfiler
-
 class GRID:
     '''
     Inverse distance weighting class
@@ -106,10 +104,7 @@ class GRID:
 
         if self.config['grid_local']:
             rtrend = self.detrendedInterpolationLocal(data, flag, grid_method)
-            # lp = LineProfiler()
-            # lp_wrapper = lp(self.detrendedInterpolationLocal)
-            # rtrend = lp_wrapper(data, flag, grid_method)
-            # lp.print_stats()
+
         else:
             rtrend = self.detrendedInterpolationMask(data, flag, grid_method)
 
