@@ -236,15 +236,20 @@ class ppt(image_data.image_data):
 
 
         Args:
-            data: Pandas dataframe for a single time step from precip
-            dpt: dew point numpy array that will be used for
-            precip_temp: numpy array of the precipitaiton temperature
-            ta:     air temp numpy array
-            time:   pass in the time were are currently on
-            wind: station wind speed at time step
-            temp:   station air temperature at time step
-            mask:   basin mask to apply to the storm days for calculating the
-                    last storm day for the basin
+            data:           Pandas dataframe for a single time step from precip
+            dpt:            dew point numpy array that will be used for
+            precip_temp:    numpy array of the precipitaiton temperature
+            ta:             air temp numpy array
+            time:           pass in the time were are currently on
+            wind:           station wind speed at time step
+            temp:           station air temperature at time step
+            az:             numpy array for simulated wind direction
+            dir_round_cell: numpy array for wind direction in descriete incriments
+                            for referencing maxus at a specific direction
+            wind_speed:     numpy array of wind speed
+            cell_maxus:     numpy array for maxus at correct wind directions
+            mask:           basin mask to apply to the storm days for calculating
+                            the last storm day for the basin
         """
 
         self._logger.debug('%s Distributing all precip' % data.name)

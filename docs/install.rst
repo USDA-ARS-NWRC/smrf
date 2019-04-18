@@ -11,7 +11,7 @@ install the dependencies for your system prior to install install IPW and SMRF.
 Ubuntu
 ------
 
-SMRF is actively developed on Ubuntu 16.04 LTS and has been tested on 14.04 as
+SMRF is actively developed on Ubuntu 16.04 LTS and has been tested on 14.04 and 18.04 as
 well. SMRF needs gcc greater than 4.8 and Python compiled with gcc. Install the
 dependencies by updating, install build-essentials and installing python-dev:
 
@@ -37,7 +37,7 @@ Install the system dependencies using MacPorts or homebrew:
     .. code:: bash
 
        port install gcc5
-       port install python27
+       port install python35
 
   b.  Homebrew install system dependencies
 
@@ -96,7 +96,7 @@ following will install smrf. It is preferable to use a Python
 
   .. code:: bash
 
-    virtualenv smrfenv
+    virtualenv -p python3.5 smrfenv
     source smrfenv/bin/activate
 
 **Tip:** The developers recommend using an alias to quickly turn on
