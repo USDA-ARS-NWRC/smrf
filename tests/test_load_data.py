@@ -282,6 +282,9 @@ class TestLoadData(SMRFTestCase):
         config.raw_cfg['air_temp']['grid_local'] = True
         config.raw_cfg['air_temp']['grid_local_n'] = 25 # only 47 grid cells
 
+        config.raw_cfg['vapor_pressure']['grid_local'] = True
+        config.raw_cfg['vapor_pressure']['grid_local_n'] = 25 # only 47 grid cells
+
         config.raw_cfg['precip']['adjust_for_undercatch'] = False
         config.raw_cfg['precip']['grid_local'] = True
         config.raw_cfg['precip']['grid_local_n'] = 25
