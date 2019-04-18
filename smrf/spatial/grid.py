@@ -105,11 +105,11 @@ class GRID:
         
         
         if self.config['grid_local']:
-            # rtrend = self.detrendedInterpolationLocal(data, flag, grid_method)
-            lp = LineProfiler()
-            lp_wrapper = lp(self.detrendedInterpolationLocal)
-            rtrend = lp_wrapper(data, flag, grid_method)
-            lp.print_stats()
+            rtrend = self.detrendedInterpolationLocal(data, flag, grid_method)
+            # lp = LineProfiler()
+            # lp_wrapper = lp(self.detrendedInterpolationLocal)
+            # rtrend = lp_wrapper(data, flag, grid_method)
+            # lp.print_stats()
         else:
             rtrend = self.detrendedInterpolationMask(data, flag, grid_method)
         
@@ -145,6 +145,12 @@ class GRID:
         df[['slope', 'intercept']] = df.fit.apply(pd.Series)
         # df = df.drop(columns='fit').reset_index()
 
+        # apply trend constraints
+        if flag == 1:
+            df.loc[df['slope'] < 0, ['slope', 'intercept']] = 0
+        elif flag == -1:
+            df.loc[df['slope'] > 0, ['slope', 'intercept']] = 0
+
         for grid_name,drow in self.dist_df.iterrows():
 
             elev = pv.loc[drow].elevation
@@ -168,11 +174,11 @@ class GRID:
 
         # interpolate the slope/intercept
         grid_slope_og = griddata((pv.utm_x, pv.utm_y), pv.slope, (self.GridX, self.GridY), method=grid_method)
-        grid_slope = grid_interpolate_deconstructed(self.tri, pv.slope.values[:], (self.GridX, self.GridY), method=grid_method)
+        grid_slope = grid_interpolate_deconstructed(self.tri, df.slope.values[:], (self.GridX, self.GridY), method=grid_method)
         print('Slope difference: {}'.format(np.sum(grid_slope_og-grid_slope)))
 
         grid_intercept_og = griddata((pv.utm_x, pv.utm_y), pv.intercept, (self.GridX, self.GridY), method=grid_method)
-        grid_intercept = grid_interpolate_deconstructed(self.tri, pv.intercept.values[:], (self.GridX, self.GridY), method=grid_method)
+        grid_intercept = grid_interpolate_deconstructed(self.tri, df.intercept.values[:], (self.GridX, self.GridY), method=grid_method)
         print('Intercept difference: {}'.format(np.sum(grid_intercept_og-grid_intercept)))
 
         # remove the elevation trend from the HRRR precip
