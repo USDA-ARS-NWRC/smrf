@@ -147,7 +147,7 @@ class GRID:
 
         # get triangulation
         if self.tri is None:
-            xy = _ndim_coords_from_arrays((pv.utm_x, pv.utm_y))
+            xy = _ndim_coords_from_arrays((self.metadata.utm_x, self.metadata.utm_y))
             self.tri = qhull.Delaunay(xy)
 
         # interpolate the slope/intercept
