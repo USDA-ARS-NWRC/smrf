@@ -102,8 +102,8 @@ class GRID:
         """
 
         # get the trend, ensure it's positive
-        
-        
+
+
         if self.config['grid_local']:
             rtrend = self.detrendedInterpolationLocal(data, flag, grid_method)
             # lp = LineProfiler()
@@ -112,7 +112,7 @@ class GRID:
             # lp.print_stats()
         else:
             rtrend = self.detrendedInterpolationMask(data, flag, grid_method)
-        
+
         return rtrend
 
     def detrendedInterpolationLocal(self, data, flag=0, grid_method='linear'):
@@ -123,12 +123,6 @@ class GRID:
             data: data to interpolate
             grid_method: scipy.interpolate.griddata interpolation method
         """
-
-        # copy the metadata to append the slope/intercept and data to
-        pv = self.metadata.copy()
-        pv['slope'] = np.nan
-        pv['intercept'] = np.nan
-        pv['data'] = data
 
         # take the new full_df and fill a data column
         # Adapted from:
@@ -151,44 +145,22 @@ class GRID:
         elif flag == -1:
             df.loc[df['slope'] > 0, ['slope', 'intercept']] = 0
 
-        for grid_name,drow in self.dist_df.iterrows():
-
-            elev = pv.loc[drow].elevation
-            pp = np.polyfit(elev, pv.loc[drow].data, 1)
-
-            # apply trend constraints
-            if flag == 1 and pp[0] < 0:
-                pp = np.array([0, 0])
-            elif (flag == -1 and pp[0] > 0):
-                pp = np.array([0, 0])
-            pv.loc[grid_name, ['slope', 'intercept']] = pp
-
-        # compare the pv and df
-        print('Cell slope difference: {}'.format(np.mean(df['slope']-pv['slope'])))
-        print('Cell intercept difference: {}'.format(np.mean(df['intercept']-pv['intercept'])))
-
         # get triangulation
         if self.tri is None:
             xy = _ndim_coords_from_arrays((pv.utm_x, pv.utm_y))
             self.tri = qhull.Delaunay(xy)
 
         # interpolate the slope/intercept
-        grid_slope_og = griddata((pv.utm_x, pv.utm_y), pv.slope, (self.GridX, self.GridY), method=grid_method)
         grid_slope = grid_interpolate_deconstructed(self.tri, df.slope.values[:], (self.GridX, self.GridY), method=grid_method)
-        print('Slope difference: {}'.format(np.sum(grid_slope_og-grid_slope)))
 
-        grid_intercept_og = griddata((pv.utm_x, pv.utm_y), pv.intercept, (self.GridX, self.GridY), method=grid_method)
         grid_intercept = grid_interpolate_deconstructed(self.tri, df.intercept.values[:], (self.GridX, self.GridY), method=grid_method)
-        print('Intercept difference: {}'.format(np.sum(grid_intercept_og-grid_intercept)))
 
         # remove the elevation trend from the HRRR precip
-        el_trend = pv.elevation * pv.slope + pv.intercept
-        dtrend = pv.data - el_trend
+        el_trend = df.elevation * df.slope + df.intercept
+        dtrend = df.data - el_trend
 
         # interpolate the residuals over the DEM
-        idtrend_og = griddata((pv.utm_x, pv.utm_y), dtrend, (self.GridX, self.GridY), method=grid_method)
         idtrend = grid_interpolate_deconstructed(self.tri, dtrend, (self.GridX, self.GridY), method=grid_method)
-        print('idtrend difference: {}'.format(np.sum(idtrend_og-idtrend)))
 
         # reinterpolate
         rtrend = idtrend + grid_slope * self.GridZ + grid_intercept
@@ -249,5 +221,3 @@ class GRID:
                      method=grid_method)
 
         return g
-
-        
