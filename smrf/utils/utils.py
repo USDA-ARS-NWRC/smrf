@@ -222,7 +222,7 @@ def backup_input(data, config_obj):
         backup_config_obj.cfg['csv'][k] = fname
 
     # Copy topo files over to backup
-    ignore = ['basin_lon', 'basin_lat', 'type']
+    ignore = ['basin_lon', 'basin_lat', 'type', 'threading']
     for s in backup_config_obj.cfg['topo'].keys():
         src = backup_config_obj.cfg['topo'][s]
         # make not a list if lenth is 1

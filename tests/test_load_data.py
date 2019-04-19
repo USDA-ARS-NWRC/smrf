@@ -245,6 +245,8 @@ class TestLoadData(SMRFTestCase):
         config.raw_cfg['time']['start_date'] = '2018-07-22 01:00'
         config.raw_cfg['time']['end_date'] = '2018-07-22 06:00'
 
+        config.raw_cfg['topo']['threading'] = False
+
         config.apply_recipes()
         config = cast_all_variables(config, config.mcfg)
 

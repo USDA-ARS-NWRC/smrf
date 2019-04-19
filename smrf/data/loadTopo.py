@@ -46,9 +46,9 @@ class topo():
 
     images = ['dem', 'mask', 'veg_type', 'veg_height', 'veg_k', 'veg_tau']
 
-    def __init__(self, topoConfig, calcInput=True, tempDir=None, threaded=True):
+    def __init__(self, topoConfig, calcInput=True, tempDir=None):
         self.topoConfig = topoConfig
-        self.threaded = threaded
+        self.threaded = self.topoConfig['threading']
 
         if (tempDir is None) | (tempDir == 'WORKDIR'):
             tempDir = os.environ['WORKDIR']
