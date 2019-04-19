@@ -7,7 +7,9 @@ Distributed forcing data over a grid using interpolation
 import numpy as np
 import pandas as pd
 from scipy.interpolate import griddata
-
+from scipy.interpolate.interpnd import _ndim_coords_from_arrays
+import scipy.spatial.qhull as qhull
+from smrf.utils.utils import grid_interpolate_deconstructed
 
 class GRID:
     '''
@@ -44,17 +46,31 @@ class GRID:
         self.GridZ = GridZ
 
         self.metadata = metadata
-        
+
         # local elevation gradient, precalculte the distance dataframe
         if config['grid_local']:
             k = config['grid_local_n']
             dist_df = pd.DataFrame(index=metadata.index, columns=range(k))
+            dist_df.index.name = 'cell_id'
             for i,row in metadata.iterrows():
 
                 d = np.sqrt((metadata.latitude - row.latitude)**2 + (metadata.longitude - row.longitude)**2)
                 dist_df.loc[row.name] = d.sort_values()[:k].index
 
             self.dist_df = dist_df
+
+            # stack and reset index
+            df = dist_df.stack().reset_index()
+            df = df.rename(columns={0: 'cell_local'})
+            df.drop('level_1', axis=1, inplace=True)
+
+            # get the elevations
+            df['elevation'] = metadata.loc[df['cell_local'], 'elevation'].values
+
+            # now we have cell_id, cell_local and elevation for the whole grid
+            self.full_df = df
+
+            self.tri = None
 
 
         # mask
@@ -84,8 +100,11 @@ class GRID:
         """
 
         # get the trend, ensure it's positive
+
+
         if self.config['grid_local']:
             rtrend = self.detrendedInterpolationLocal(data, flag, grid_method)
+
         else:
             rtrend = self.detrendedInterpolationMask(data, flag, grid_method)
 
@@ -100,38 +119,47 @@ class GRID:
             grid_method: scipy.interpolate.griddata interpolation method
         """
 
-        # copy the metadata to append the slope/intercept and data to
-        pv = self.metadata.copy()
-        pv['slope'] = np.nan
-        pv['intercept'] = np.nan
-        pv['data'] = data
+        # take the new full_df and fill a data column
+        # Adapted from:
+        # https://stackoverflow.com/questions/51140302/using-polyfit-on-pandas-dataframe-and-then-adding-the-results-to-new-columns
+        df = self.full_df.copy()
+        df['data'] = data[df['cell_local']].values
+        df = df.set_index('cell_id')
+        df['fit'] = df.groupby('cell_id').apply(lambda x: np.polyfit(x.elevation, x.data, 1))
 
-        for grid_name,drow in self.dist_df.iterrows():
+        # drop all the duplicates
+        df.reset_index(inplace=True)
+        df.drop_duplicates(subset=['cell_id'], keep='first', inplace=True)
+        df.set_index('cell_id', inplace=True)
+        df[['slope', 'intercept']] = df.fit.apply(pd.Series)
+        # df = df.drop(columns='fit').reset_index()
 
-            elev = pv.loc[drow].elevation
-            pp = np.polyfit(elev, pv.loc[drow].data, 1)
+        # apply trend constraints
+        if flag == 1:
+            df.loc[df['slope'] < 0, ['slope', 'intercept']] = 0
+        elif flag == -1:
+            df.loc[df['slope'] > 0, ['slope', 'intercept']] = 0
 
-            # apply trend constraints
-            if flag == 1 and pp[0] < 0:
-                pp = np.array([0, 0])
-            elif (flag == -1 and pp[0] > 0):
-                pp = np.array([0, 0])
-            pv.loc[grid_name, ['slope', 'intercept']] = pp
+        # get triangulation
+        if self.tri is None:
+            xy = _ndim_coords_from_arrays((self.metadata.utm_x, self.metadata.utm_y))
+            self.tri = qhull.Delaunay(xy)
 
         # interpolate the slope/intercept
-        grid_slope = griddata((pv.utm_x, pv.utm_y), pv.slope, (self.GridX, self.GridY), method=grid_method)
-        grid_intercept = griddata((pv.utm_x, pv.utm_y), pv.intercept, (self.GridX, self.GridY), method=grid_method)
+        grid_slope = grid_interpolate_deconstructed(self.tri, df.slope.values[:], (self.GridX, self.GridY), method=grid_method)
+
+        grid_intercept = grid_interpolate_deconstructed(self.tri, df.intercept.values[:], (self.GridX, self.GridY), method=grid_method)
 
         # remove the elevation trend from the HRRR precip
-        el_trend = pv.elevation * pv.slope + pv.intercept
-        dtrend = pv.data - el_trend
+        el_trend = df.elevation * df.slope + df.intercept
+        dtrend = df.data - el_trend
 
         # interpolate the residuals over the DEM
-        idtrend = griddata((pv.utm_x, pv.utm_y), dtrend, (self.GridX, self.GridY), method=grid_method)
+        idtrend = grid_interpolate_deconstructed(self.tri, dtrend, (self.GridX, self.GridY), method=grid_method)
 
         # reinterpolate
         rtrend = idtrend + grid_slope * self.GridZ + grid_intercept
-        
+
         return rtrend
 
 

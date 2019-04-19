@@ -245,6 +245,8 @@ class TestLoadData(SMRFTestCase):
         config.raw_cfg['time']['start_date'] = '2018-07-22 01:00'
         config.raw_cfg['time']['end_date'] = '2018-07-22 06:00'
 
+        config.raw_cfg['topo']['threading'] = False
+
         config.apply_recipes()
         config = cast_all_variables(config, config.mcfg)
 
@@ -269,6 +271,7 @@ class TestLoadData(SMRFTestCase):
         config.raw_cfg['gridded'] = hrrr_grid
     #         config.raw_cfg['system']['max_values'] = 2
         config.raw_cfg['system']['threading'] = False
+        # config.raw_cfg['logging']['log_file'] = None
     #         config.raw_cfg['system']['timeout'] = 10
 
         # set the distrition to grid, thermal defaults will be fine
@@ -280,6 +283,9 @@ class TestLoadData(SMRFTestCase):
         # local gradient
         config.raw_cfg['air_temp']['grid_local'] = True
         config.raw_cfg['air_temp']['grid_local_n'] = 25 # only 47 grid cells
+
+        config.raw_cfg['vapor_pressure']['grid_local'] = True
+        config.raw_cfg['vapor_pressure']['grid_local_n'] = 25 # only 47 grid cells
 
         config.raw_cfg['precip']['adjust_for_undercatch'] = False
         config.raw_cfg['precip']['grid_local'] = True
@@ -348,5 +354,6 @@ class TestLoadData(SMRFTestCase):
 
         result = can_i_run_smrf(config)
         self.assertTrue(result)
+
 if __name__ == '__main__':
     unittest.main()
