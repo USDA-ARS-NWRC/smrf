@@ -182,7 +182,7 @@ class TestRMEHRRR(TestRME):
                     'zone_letter': 'N'}
         config.raw_cfg['gridded'] = hrrr_grid
     #         config.raw_cfg['system']['max_values'] = 2
-        config.raw_cfg['system']['threading'] = False
+        config.raw_cfg['system']['threading'] = True
     #         config.raw_cfg['system']['timeout'] = 10
 
         # set the distrition to grid, thermal defaults will be fine
@@ -203,6 +203,9 @@ class TestRMEHRRR(TestRME):
         config.raw_cfg['precip']['grid_local_n'] = 25
         config.raw_cfg['thermal']['correct_cloud'] = True
         config.raw_cfg['thermal']['correct_veg'] = True
+
+        config.raw_cfg['topo']['threading'] = False
+        config.raw_cfg['logging']['log_file'] = None
 
         # fix the time to that of the WRF_test.nc
         config.raw_cfg['time']['start_date'] = '2018-07-22 01:00'

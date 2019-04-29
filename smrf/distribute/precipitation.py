@@ -184,6 +184,7 @@ class ppt(image_data.image_data):
             #                     precip_clipped):\n{0}'''.format(
             #                         data.precip.sum() -
             #                         corrected_precip.sum()))
+            self.storm_id = np.nan
             if storm_count != 0:
                 self._logger.info("Identified Storms:\n{0}".format(self.storms))
                 self.storm_id = 0
@@ -191,7 +192,6 @@ class ppt(image_data.image_data):
 
             else:
                 if (data.precip.sum() > 0).any():
-                    self.storm_id = np.nan
                     self._logger.warning("Zero events triggered a storm definition, None of the precip will be used in this run.")
 
         # if redistributing due to wind
