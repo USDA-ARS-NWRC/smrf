@@ -133,10 +133,28 @@ class grid():
         from the `air_temp` and `relative_humidity`. The `wind_speed` and
         `wind_direction` will be calculated from `wind_u` and `wind_v`
         """
+        
+        # Parse config to get HRRR files from the correct location
+        hrrr_directory = self.dataConfig['directory']
+        hrrr_obj_store = self.dataConfig['object_store']
+        if hrrr_directory is not None and hrrr_obj_store is not None:
+            raise Exception('Cannot have "directory" and "object_store" in grid config section')
+        # Assign location, type of file storage, and tmp location
+        # to download data if needed
+        elif hrrr_directory is not None:
+            location = hrrr_directory
+            storage_type='file'
+            tmpdir = None
+        elif hrrr_obj_store is not None:
+            location = hrrr_obj_store
+            storage_type='object'
+            tmpdir = self.tempDir
+        else:
+            raise Exception('Need either "directory" or "object_store" in grid config section')
 
-        self._logger.info('Reading data from from HRRR directory: {}'.format(
-            self.dataConfig['directory']
-            ))
+        self._logger.info('Reading data for HRRR from : {}'.format(
+            location))
+        self._logger.info('Storage type is {}'.format(storage_type))
 
         # forecast hours for each run hour
         if not self.forecast_flag:
@@ -148,11 +166,13 @@ class grid():
             self.start_date,
             self.end_date,
             self.bbox,
-            output_dir=self.dataConfig['directory'],
+            location=location,
             force_zone_number=self.force_zone_number,
             forecast=fcast,
             forecast_flag=self.forecast_flag,
-            day_hour=self.day_hour)
+            day_hour=self.day_hour,
+            tmpdir=tmpdir,
+            storage_type=storage_type)
 
         # the data may be returned as type=object, convert to numeric
         # correct for the timezone
