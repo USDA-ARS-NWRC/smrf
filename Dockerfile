@@ -6,7 +6,7 @@ MAINTAINER Scott Havens <scott.havens@ars.usda.gov>
 ####################################################
 # System requirements
 ####################################################
-ENV WFX "0.5.2"
+ENV WFX "0.5.4"
 
 RUN apt-get update -y \
     && apt-get install -y --no-install-recommends libblas-dev \
