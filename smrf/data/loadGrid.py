@@ -8,10 +8,8 @@ import pytz
 from smrf.envphys import phys
 from smrf.envphys.radiation import get_hrrr_cloud
 
-try:
-    from weather_forecast_retrieval import hrrr
-except:
-    pass
+from weather_forecast_retrieval import hrrr
+
 
 
 
@@ -138,8 +136,8 @@ class grid():
         `wind_direction` will be calculated from `wind_u` and `wind_v`
         """
 
-        self._logger.info('Reading data from from HRRR directory: {}'.format(
-            self.dataConfig['directory']
+        self._logger.info('Reading data from from HRRR Opendap server: {}'.format(
+            self.dataConfig['hrrr_opendap_url']
             ))
 
         # forecast hours for each run hour
@@ -153,7 +151,7 @@ class grid():
             self.end_date,
             self.bbox,
             file_type='netcdf',
-            output_dir=self.dataConfig['directory'],
+            output_dir=self.dataConfig['hrrr_opendap_url'],
             force_zone_number=self.force_zone_number,
             forecast=fcast,
             forecast_flag=self.forecast_flag,

@@ -197,6 +197,7 @@ class TestGriddedData(SMRFTestCase):
 
         config.raw_cfg['gridded'] = hrrr_grid
         config.raw_cfg['system']['threading'] = False
+        config.raw_cfg['logging']['log_file'] = None
 
         # set the distrition to grid, thermal defaults will be fine
         variables = ['air_temp', 'vapor_pressure', 'wind', 'precip', 'solar', 'thermal']
