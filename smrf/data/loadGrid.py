@@ -140,11 +140,11 @@ class grid():
             self.dataConfig['hrrr_opendap_url']
             ))
 
-        # forecast hours for each run hour
-        if not self.forecast_flag:
-            fcast = [0]
-        else:
-            fcast = range(self.n_forecast_hours + 1)
+        # # forecast hours for each run hour
+        # if not self.forecast_flag:
+        #     fcast = [0]
+        # else:
+        #     fcast = range(self.n_forecast_hours + 1)
 
         metadata, data = hrrr.HRRR(external_logger=self._logger).get_saved_data(
             self.start_date,
@@ -153,9 +153,7 @@ class grid():
             file_type='netcdf',
             output_dir=self.dataConfig['hrrr_opendap_url'],
             force_zone_number=self.force_zone_number,
-            forecast=fcast,
-            forecast_flag=self.forecast_flag,
-            day_hour=self.day_hour)
+            forecast_flag=self.forecast_flag)
 
         # the data may be returned as type=object, convert to numeric
         # correct for the timezone

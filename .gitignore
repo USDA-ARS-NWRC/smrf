@@ -1,3 +1,6 @@
+
+*.idx
+
 # Eclipse files
 .project
 .settings
