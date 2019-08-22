@@ -57,7 +57,7 @@ Don't forget to push your tags afterwards with::
 
   $ git push origin --tags
 
-Currently SMRF is version 0.8.10 The development team of SMRF attempted to adhere
+Currently SMRF is version 0.8.11 The development team of SMRF attempted to adhere
 
 to semantic versioning. Here is the basics taken from the semantic versioning website.
 

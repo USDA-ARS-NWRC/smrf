@@ -3,7 +3,7 @@
 SMRF - Snow Modeling Resource Framework
 '''
 <<<<<<< HEAD
-__version__ = '0.8.10'
+__version__ = '0.8.11'
 =======
 __version__ = '0.7.3'
 >>>>>>> master
