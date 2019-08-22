@@ -185,6 +185,7 @@ html_theme = 'sphinx_rtd_theme'
 #
 # html_title = u'SMRF v0.8.10'
 
+
 # A shorter title for the navigation bar.  Default is the same as html_title.
 #
 # html_short_title = None
