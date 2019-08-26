@@ -201,7 +201,7 @@ class TestGriddedData(SMRFTestCase):
         del config.raw_cfg['csv']
 
         hrrr_grid = {'data_type': 'hrrr_netcdf',
-                    'hrrr_opendap_url': url_path,
+                    'hrrr_netcdf_opendap_url': url_path,
                     'zone_number': 11,
                     'zone_letter': 'N'}
 
