@@ -178,8 +178,6 @@ class wind(image_data.image_data):
         """
 
         self._logger.debug('Initializing distribute.wind')
-        if type(self.config['peak']) != list:
-            self.config['peak'] = [self.config['peak']]
         self._initialize(topo, data.metadata)
 
         # meshgrid points
@@ -499,7 +497,7 @@ class wind(image_data.image_data):
 
             # maxus value at the station
             if not pd.isnull(data_direction[m]):
-                if m.upper() in self.config['peak']:
+                if m.upper() in self.config['station_peak']:
                     val_maxus = np.min(self.maxus[:, yi, xi] + e)
 
                 else:
