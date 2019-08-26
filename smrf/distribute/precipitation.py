@@ -159,7 +159,7 @@ class ppt(image_data.image_data):
         # Time steps needed to end a storm definition
         self.time_to_end_storm = self.config['time_steps_to_end_storms']
 
-        self.nasde_model = self.config['nasde_model']
+        self.nasde_model = self.config['new_snow_density_model']
 
         self._logger.info('''Using {0} for the new accumulated snow density model:  '''.format(self.nasde_model))
 
@@ -192,10 +192,12 @@ class ppt(image_data.image_data):
             else:
                 if (data.precip.sum() > 0).any():
                     self.storm_id = np.nan
-                    self._logger.warning("Zero events triggered a storm definition, None of the precip will be used in this run.")
+                    self._logger.warning("Zero events triggered a storm "
+                                         " definition, None of the precip will"
+                                         " be used in this run.")
 
         # if redistributing due to wind
-        if self.config['distribute_drifts']:
+        if self.config['precip_rescaling_model'] == 'winstral':
             self._tbreak_file = nc.Dataset(self.config['tbreak_netcdf'], 'r')
             self.tbreak = self._tbreak_file.variables['tbreak'][:]
             self.tbreak_direction = self._tbreak_file.variables['direction'][:]
@@ -253,12 +255,11 @@ class ppt(image_data.image_data):
         """
 
         self._logger.debug('%s Distributing all precip' % data.name)
-        # only need to distribute precip if there is any
         data = data[self.stations]
 
         if self.nasde_model == 'marks2017':
-            #Adjust the precip for undercatchment
-            if self.config['adjust_for_undercatch']:
+            # Adjust the precip for undercatchment
+            if self.config['station_adjust_for_undercatch']:
                 self._logger.debug('%s Adjusting precip for undercatch...' % data.name)
                 self.corrected_precip.loc[time] = \
                     precip.adjust_for_undercatch(self.corrected_precip.loc[time],
@@ -267,7 +268,7 @@ class ppt(image_data.image_data):
                                                  self.config,
                                                  self.metadata)
 
-            #Use the clipped and corrected precip
+            # Use the clipped and corrected precip
             self.distribute_for_marks2017(self.corrected_precip.loc[time],
                                           precip_temp,
                                           ta,
@@ -275,8 +276,8 @@ class ppt(image_data.image_data):
                                           mask=mask)
 
         else:
-            #Adjust the precip for undercatchment
-            if self.config['adjust_for_undercatch']:
+            # Adjust the precip for undercatchment
+            if self.config['station_adjust_for_undercatch']:
                 self._logger.debug('%s Adjusting precip for undercatch...' % data.name)
                 data = precip.adjust_for_undercatch(data,
                                                     wind,
@@ -287,7 +288,7 @@ class ppt(image_data.image_data):
             self.distribute_for_susong1999(data, precip_temp, time, mask=mask)
 
         # redistribute due to wind to account for driftin
-        if self.config['distribute_drifts']:
+        if self.config['precip_rescaling_model'] == 'winstral':
             self._logger.debug('%s Redistributing due to wind' % data.name)
             if np.any(dpt < 0.5):
                 self.precip = precip.dist_precip_wind(self.precip, dpt, az, dir_round_cell,
