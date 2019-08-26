@@ -234,7 +234,7 @@ class SMRF():
         if 'gridded' in self.config:
             self.gridded = True
             self.forecast_flag = self.config['gridded']['forecast_flag']
-            self.n_forecast_hours = self.config['gridded']['n_forecast_hours']
+
             # hours from start of day
             self.day_hour = self.start_date - pd.to_datetime(d[0].strftime("%Y%m%d"))
             self.day_hour = int(self.day_hour / np.timedelta64(1, 'h'))
@@ -403,8 +403,7 @@ class SMRF():
                                    dataType=self.config['gridded']['data_type'],
                                    tempDir=self.temp_dir,
                                    forecast_flag=self.forecast_flag,
-                                   day_hour=self.day_hour,
-                                   n_forecast_hours=self.n_forecast_hours)
+                                   day_hour=self.day_hour)
 
             # set the stations in the distribute
             try:
