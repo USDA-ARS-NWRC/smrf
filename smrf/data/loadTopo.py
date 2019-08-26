@@ -48,7 +48,7 @@ class topo():
 
     def __init__(self, topoConfig, calcInput=True, tempDir=None):
         self.topoConfig = topoConfig
-        self.threaded = self.topoConfig['threading']
+        self.threaded = self.topoConfig['topo_threading']
 
         if (tempDir is None) | (tempDir == 'WORKDIR'):
             tempDir = os.environ['WORKDIR']
