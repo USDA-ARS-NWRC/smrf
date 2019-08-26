@@ -65,7 +65,7 @@ class image_data():
         self.gridded = False
         if 'distribution' in cfg.keys():
             if cfg['distribution'] == 'grid':
-                self.gridded = True          
+                self.gridded = True
 
         self.getStations(cfg)
         self.config = cfg
@@ -79,11 +79,10 @@ class image_data():
             config (dict): dict from the [variable]
         """
         stations = None
+        
         # determine the stations that will be used, alphabetical order
         if 'stations' in config.keys():
-            if config['stations'] != None:
-                stations = [s.upper() for s in config['stations']]
-                stations.sort()
+            station = config['stations'].sort()
 
         self.stations = stations
 
