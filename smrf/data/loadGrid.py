@@ -137,7 +137,7 @@ class grid():
         """
 
         self._logger.info('Reading data from from HRRR Opendap server: {}'.format(
-            self.dataConfig['hrrr_opendap_url']
+            self.dataConfig['hrrr_netcdf_opendap_url']
             ))
 
         # # forecast hours for each run hour
@@ -151,7 +151,7 @@ class grid():
             self.end_date,
             self.bbox,
             file_type='netcdf',
-            output_dir=self.dataConfig['hrrr_opendap_url'],
+            output_dir=self.dataConfig['hrrr_netcdf_opendap_url'],
             force_zone_number=self.force_zone_number,
             forecast_flag=self.forecast_flag)
 
