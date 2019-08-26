@@ -49,7 +49,7 @@ class image_data():
         self.gridded = False
 
         self._base_logger = logging.getLogger(__name__)
-
+        
     def getConfig(self, cfg):
         """
         Check the configuration that was set by the user for the variable
@@ -79,7 +79,7 @@ class image_data():
             config (dict): dict from the [variable]
         """
         stations = None
-        
+
         # determine the stations that will be used, alphabetical order
         if 'stations' in config.keys():
             station = config['stations'].sort()

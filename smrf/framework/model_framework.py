@@ -349,8 +349,7 @@ class SMRF():
 
         # 6. Solar radiation
         self.distribute['solar'] = \
-            distribute.solar.solar(self.config['solar'],
-                                   self.distribute['albedo'].config,
+            distribute.solar.solar(self.config,
                                    self.topo.stoporad_in_file,
                                    self.temp_dir)
 
