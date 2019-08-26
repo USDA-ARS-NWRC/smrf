@@ -324,14 +324,14 @@ def dist_precip_wind(precip, precip_temp, az, dir_round_cell, wind_speed,
     precip_temp_threshold = 0.5
     # polynomial factors
     drift_poly = {}
-    drift_poly['a'] = cfg['drift_poly_a']
-    drift_poly['b'] = cfg['drift_poly_b']
-    drift_poly['c'] = cfg['drift_poly_c']
+    drift_poly['a'] = 0.0289
+    drift_poly['b'] = -0.0956
+    drift_poly['c'] = 1.000761
     ppt_poly = {}
-    ppt_poly['a'] = cfg['ppt_poly_a']
-    ppt_poly['b'] = cfg['ppt_poly_b']
-    ppt_poly['c'] = cfg['ppt_poly_c']
-    ppt_poly['d'] = cfg['ppt_poly_d']
+    ppt_poly['a'] = 0.0001737
+    ppt_poly['b'] = 0.002549
+    ppt_poly['c'] = 0.03265
+    ppt_poly['d'] = 0.5929
 
     # initialize arrays
     celltbreak = np.ones(dir_round_cell.shape)
