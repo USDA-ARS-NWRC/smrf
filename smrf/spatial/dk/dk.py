@@ -205,13 +205,12 @@ class DK:
         """
 
         # calculate the trend on any real data
-        if self.config['regression_method'] == 1:
-            pv = np.polyfit(self.mz[~self.nan_val], data[~self.nan_val], 1)
+        pv = np.polyfit(self.mz[~self.nan_val], data[~self.nan_val], 1)
 
         # apply trend constraints
-        if self.config['slope'] == 1 and pv[0] < 0:
+        if self.config['detrend_slope'] == 1 and pv[0] < 0:
             pv = np.array([0, 0])
-        elif (self.config['slope'] == -1 and pv[0] > 0):
+        elif (self.config['detrend_slope'] == -1 and pv[0] > 0):
             pv = np.array([0, 0])
 
         self.pv = pv
