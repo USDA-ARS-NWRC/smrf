@@ -277,8 +277,8 @@ class TestLoadData(SMRFTestCase):
         config.raw_cfg['thermal']['correct_veg'] = True
 
         # fix the time to that of the WRF_test.nc
-        config.raw_cfg['time']['start_date'] = '2018-07-22 01:00'
-        config.raw_cfg['time']['end_date'] = '2018-07-22 06:00'
+        config.raw_cfg['time']['start_date'] = '2018-07-22 16:00'
+        config.raw_cfg['time']['end_date'] = '2018-07-22 20:00'
 
         config.raw_cfg['topo']['threading'] = False
 
@@ -344,6 +344,8 @@ class TestLoadData(SMRFTestCase):
 
         result = can_i_run_smrf(config)
         self.assertTrue(result)
+
+        self.compare_hrrr_gold(config.raw_cfg['output']['out_location'][0])
 
     def test_grid_netcdf(self):
         """ Generic NetCDF loading """
