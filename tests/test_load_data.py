@@ -48,18 +48,7 @@ class TestLoadData(SMRFTestCase):
             gold_file = os.path.join(gold_path, nc_name)
             print('Comparing {}'.format(nc_name))
 
-            if 'precip_temp' in nc_name:
-                atol = 0.1 # because dew point uses a tolerance value for convergance
-            elif 'thermal' in nc_name:
-                atol = 0.5 # since thermal uses dew point
-            elif 'wind_direction' in nc_name:
-                atol = 0.1
-            elif 'vapor_pressure' in nc_name:
-                atol = 5 # since vapor_pressure uses dew point
-            else:
-                atol = 1e-3
             atol = 0
-
             self.compare_netcdf_files(gold_file, file_name, atol=atol)       
 
 #     def test_station_start_date(self):
@@ -252,48 +241,48 @@ class TestLoadData(SMRFTestCase):
         result = can_i_run_smrf(config)
         self.assertTrue(result)
 
-    def test_grid_hrrr(self):
-        """ HRRR grib2 loading """
+    # def test_grid_hrrr(self):
+    #     """ HRRR grib2 loading """
 
-        config = deepcopy(self.base_config)
-        del config.raw_cfg['csv']
+    #     config = deepcopy(self.base_config)
+    #     del config.raw_cfg['csv']
 
-        hrrr_grid = {'data_type': 'hrrr',
-                    'directory': './RME/gridded/hrrr_test/',
-                    'zone_number': 11,
-                    'zone_letter': 'N'}
-        config.raw_cfg['gridded'] = hrrr_grid
-    #         config.raw_cfg['system']['max_values'] = 2
-        config.raw_cfg['system']['threading'] = False
-    #         config.raw_cfg['system']['timeout'] = 10
+    #     hrrr_grid = {'data_type': 'hrrr',
+    #                 'directory': './RME/gridded/hrrr_test/',
+    #                 'zone_number': 11,
+    #                 'zone_letter': 'N'}
+    #     config.raw_cfg['gridded'] = hrrr_grid
+    # #         config.raw_cfg['system']['max_values'] = 2
+    #     config.raw_cfg['system']['threading'] = False
+    # #         config.raw_cfg['system']['timeout'] = 10
 
-        # set the distrition to grid, thermal defaults will be fine
-        variables = ['air_temp', 'vapor_pressure', 'wind', 'precip', 'solar', 'thermal']
-        for v in variables:
-            config.raw_cfg[v]['mask'] = False
+    #     # set the distrition to grid, thermal defaults will be fine
+    #     variables = ['air_temp', 'vapor_pressure', 'wind', 'precip', 'solar', 'thermal']
+    #     for v in variables:
+    #         config.raw_cfg[v]['mask'] = False
 
-        config.raw_cfg['precip']['adjust_for_undercatch'] = False
-        config.raw_cfg['thermal']['correct_cloud'] = True
-        config.raw_cfg['thermal']['correct_veg'] = True
+    #     config.raw_cfg['precip']['adjust_for_undercatch'] = False
+    #     config.raw_cfg['thermal']['correct_cloud'] = True
+    #     config.raw_cfg['thermal']['correct_veg'] = True
 
-        # fix the time to that of the WRF_test.nc
-        config.raw_cfg['time']['start_date'] = '2018-07-22 16:00'
-        config.raw_cfg['time']['end_date'] = '2018-07-22 20:00'
+    #     # fix the time to that of the WRF_test.nc
+    #     config.raw_cfg['time']['start_date'] = '2018-07-22 16:00'
+    #     config.raw_cfg['time']['end_date'] = '2018-07-22 20:00'
 
-        config.raw_cfg['topo']['threading'] = False
+    #     config.raw_cfg['topo']['threading'] = False
 
-        config.apply_recipes()
-        config = cast_all_variables(config, config.mcfg)
+    #     config.apply_recipes()
+    #     config = cast_all_variables(config, config.mcfg)
 
-        # ensure that the recipes are used
-        self.assertTrue(config.raw_cfg['precip']['adjust_for_undercatch'] == False)
-        self.assertTrue(config.raw_cfg['thermal']['correct_cloud'] == True)
-        self.assertTrue(config.raw_cfg['thermal']['correct_veg'] == True)
+    #     # ensure that the recipes are used
+    #     self.assertTrue(config.raw_cfg['precip']['adjust_for_undercatch'] == False)
+    #     self.assertTrue(config.raw_cfg['thermal']['correct_cloud'] == True)
+    #     self.assertTrue(config.raw_cfg['thermal']['correct_veg'] == True)
 
-        result = can_i_run_smrf(config)
-        self.assertTrue(result)
+    #     result = can_i_run_smrf(config)
+    #     self.assertTrue(result)
 
-        self.compare_hrrr_gold(config.raw_cfg['output']['out_location'][0])
+    #     self.compare_hrrr_gold(config.raw_cfg['output']['out_location'][0])
 
     def test_grid_hrrr_local(self):
         """ HRRR grib2 loading with local elevation gradient """
