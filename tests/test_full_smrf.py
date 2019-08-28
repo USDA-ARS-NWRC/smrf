@@ -34,19 +34,8 @@ class TestRME(SMRFTestCase):
             nc_name = file_name.split('/')[-1]
             gold_file = os.path.join(gold_path, nc_name)
             print('Comparing {}'.format(nc_name))
-
-            if 'precip_temp' in nc_name:
-                atol = 0.1 # because dew point uses a tolerance value for convergance
-            elif 'thermal' in nc_name:
-                atol = 0.5 # since thermal uses dew point
-            elif 'wind_direction' in nc_name:
-                atol = 0.1
-            elif 'vapor_pressure' in nc_name:
-                atol = 5 # since vapor_pressure uses dew point
-            else:
-                atol = 1e-3
-
-            self.compare_netcdf_files(gold_file, file_name, atol=atol)
+            
+            self.compare_netcdf_files(gold_file, file_name, atol=0)
 
 
     def testStationDataRun(self):
