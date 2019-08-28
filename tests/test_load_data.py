@@ -2,6 +2,8 @@ from copy import deepcopy
 from inicheck.tools import cast_all_variables
 from inicheck.utilities import pcfg
 import unittest
+import os
+from glob import glob
 
 from smrf.framework.model_framework import can_i_run_smrf
 
@@ -26,6 +28,39 @@ class TestLoadData(SMRFTestCase):
                'cloud_factor': 'cloud_factor',
                'port': '32768'
             }
+
+    def compare_hrrr_gold(self, out_dir):
+        """
+        Compare the model results with the gold standard
+        
+        Args:
+            out_dir: the output directory for the model run
+        """
+
+        s = os.path.join(self.test_dir, out_dir, '*.nc')
+        file_names = glob(os.path.realpath(s))
+
+        # path to the gold standard
+        gold_path = os.path.realpath(os.path.join(self.test_dir, 'RME', 'gold_hrrr'))
+
+        for file_name in file_names:
+            nc_name = file_name.split('/')[-1]
+            gold_file = os.path.join(gold_path, nc_name)
+            print('Comparing {}'.format(nc_name))
+
+            if 'precip_temp' in nc_name:
+                atol = 0.1 # because dew point uses a tolerance value for convergance
+            elif 'thermal' in nc_name:
+                atol = 0.5 # since thermal uses dew point
+            elif 'wind_direction' in nc_name:
+                atol = 0.1
+            elif 'vapor_pressure' in nc_name:
+                atol = 5 # since vapor_pressure uses dew point
+            else:
+                atol = 1e-3
+            atol = 0
+
+            self.compare_netcdf_files(gold_file, file_name, atol=atol)       
 
 #     def test_station_start_date(self):
 #         """
@@ -242,8 +277,8 @@ class TestLoadData(SMRFTestCase):
         config.raw_cfg['thermal']['correct_veg'] = True
 
         # fix the time to that of the WRF_test.nc
-        config.raw_cfg['time']['start_date'] = '2018-07-22 16:00'
-        config.raw_cfg['time']['end_date'] = '2018-07-22 20:00'
+        config.raw_cfg['time']['start_date'] = '2018-07-22 01:00'
+        config.raw_cfg['time']['end_date'] = '2018-07-22 06:00'
 
         config.raw_cfg['topo']['threading'] = False
 
@@ -257,6 +292,8 @@ class TestLoadData(SMRFTestCase):
 
         result = can_i_run_smrf(config)
         self.assertTrue(result)
+
+        self.compare_hrrr_gold(config.raw_cfg['output']['out_location'][0])
 
     def test_grid_hrrr_local(self):
         """ HRRR grib2 loading with local elevation gradient """
