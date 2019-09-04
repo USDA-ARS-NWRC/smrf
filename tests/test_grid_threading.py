@@ -11,8 +11,8 @@ from tests.test_full_smrf import compare_image
 
 class TestGridThreading(SMRFTestCase):
 
-    def test_grid_wrf(self):
-        """ WRF NetCDF loading with threading """
+    def test_thread_grid_wrf(self):
+        """ Threading WRF NetCDF loading with threading """
 
         config = deepcopy(self.base_config)
         del config.raw_cfg['csv']
@@ -22,9 +22,7 @@ class TestGridThreading(SMRFTestCase):
                     'zone_number': 11,
                     'zone_letter': 'N'}
         config.raw_cfg['gridded'] = wrf_grid
-#         config.raw_cfg['system']['max_values'] = 2
-        config.raw_cfg['system']['threading'] = False
-#         config.raw_cfg['system']['timeout'] = 10
+        config.raw_cfg['system']['threading'] = True
 
         # set the distrition to grid, thermal defaults will be fine
         variables = ['air_temp', 'vapor_pressure', 'wind', 'precip', 'solar', 'thermal']
@@ -51,8 +49,8 @@ class TestGridThreading(SMRFTestCase):
         self.assertTrue(result)
 
 
-    def test_grid_hrrr_local(self):
-        """ HRRR grib2 loading with local elevation gradient """
+    def test_thread_grid_hrrr_local(self):
+        """ Threading HRRR grib2 loading with local elevation gradient """
 
         config = deepcopy(self.base_config)
         del config.raw_cfg['csv']
@@ -102,14 +100,11 @@ class TestGridThreading(SMRFTestCase):
         out_dir = os.path.join(self.test_dir, 'RME', 'output')
         gold_dir = os.path.join(self.test_dir, 'RME', 'gold_hrrr')
 
-        variables = ['air_temp', 'net_solar', 'percent_snow', 'precip', 
-                    'precip_temp', 'snow_density', 'thermal', 'vapor_pressure',
-                    'wind_direction', 'wind_speed']
-        for v in variables:
+        for v in self.variables:
             self.assertTrue(compare_image(v, gold_dir, out_dir))
 
-    def test_grid_netcdf(self):
-        """ Generic NetCDF loading """
+    def test_thread_grid_netcdf(self):
+        """ Threading generic NetCDF loading """
 
         config = deepcopy(self.base_config)
         del config.raw_cfg['csv']
@@ -126,9 +121,7 @@ class TestGridThreading(SMRFTestCase):
                     'thermal': 'thermal',
                     'cloud_factor': 'cloud_factor'}
         config.raw_cfg['gridded'] = wrf_grid
-        config.raw_cfg['system']['time_out'] = 10
-        config.raw_cfg['system']['max_values'] = 1
-        config.raw_cfg['system']['threading'] = False # Doesn't work with true
+        config.raw_cfg['system']['threading'] = True # Doesn't work with true
 
         # set the distrition to grid, thermal defaults will be fine
         variables = ['air_temp', 'vapor_pressure', 'wind', 'precip', 'solar', 'thermal']

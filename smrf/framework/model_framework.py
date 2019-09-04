@@ -83,11 +83,11 @@ class SMRF():
                         'clear_vis_beam', 'clear_vis_diffuse',
                         'clear_ir_beam', 'clear_ir_diffuse',
                         'albedo_vis', 'albedo_ir', 'net_solar',
-                        'cloud_factor', 'thermal',
+                        'cloud_factor', 'thermal', 'thermal_clear',
                         'output', 'veg_ir_beam','veg_ir_diffuse',
                         'veg_vis_beam', 'veg_vis_diffuse',
                         'cloud_ir_beam', 'cloud_ir_diffuse', 'cloud_vis_beam',
-                        'cloud_vis_diffuse', 'thermal_clear', 'wind_direction']
+                        'cloud_vis_diffuse', 'wind_direction']
 
     def __init__(self, config, external_logger=None):
         """
@@ -171,10 +171,11 @@ class SMRF():
         for path in makeable_dirs:
             if not os.path.isdir(path):
                 try:
-                    #self._logger.info("Directory does not exist, \nCreating {0}".format(path))
+                    self._logger.debug("Creating {0}".format(path))
                     os.makedirs(path)
 
                 except OSError as e:
+                    self._logger.error('Error creating directory {}'.format(path))
                     raise e
 
         self.temp_dir = path
@@ -659,6 +660,9 @@ class SMRF():
         for i in range(len(t)):
             t[i].join()
 
+        # Clean up the queues
+        
+
         self._logger.debug('DONE!!!!')
 
     def create_distributed_threads(self):
@@ -685,11 +689,15 @@ class SMRF():
         if self.distribute['precip'].nasde_model == 'marks2017':
             self.thread_variables += ['storm_id']
 
-        #Add threaded variables on the fly
-        if self.distribute['thermal'].correct_cloud:
-            self.thread_variables += ['thermal_cloud']
-        if self.distribute['thermal'].correct_veg:
-            self.thread_variables += ['thermal_veg']
+        # This is a major reason why threading for gridded doesn't work
+        # I'm not sure how but every once in a while the thermal_cloud will
+        # be added to the queue even though it's not wanted
+        # Add threaded variables on the fly
+        # if self.distribute['thermal'].correct_cloud:
+        #     self._logger.warning('Adding thermal cloud to queue')
+        #     self.thread_variables += ['thermal_cloud']
+        # if self.distribute['thermal'].correct_veg:
+        #     self.thread_variables += ['thermal_veg']
 
         # add some variables to thread_variables based on what we're doing
         if not self.gridded:
@@ -697,7 +705,7 @@ class SMRF():
             self.thread_variables += ['cellmaxus', 'dir_round_cell']
 
         for v in self.thread_variables:
-            q[v] = queue.DateQueue_Threading(self.max_values, self.time_out)
+            q[v] = queue.DateQueue_Threading(self.max_values, self.time_out, name=v)
 
         # -------------------------------------
         # Distribute the data

@@ -4,10 +4,7 @@ Create classes for running on multiple threads
 20160323 Scott Havens
 """
 
-try:
-    from Queue import Queue, Empty, Full
-except:
-    from queue import Queue, Empty, Full
+from queue import Queue, Empty, Full
 
 import numpy as np
 import threading
@@ -25,11 +22,17 @@ class DateQueue_Threading(Queue):
     20160323 Scott Havens
     """
 
-    def __init__(self, maxsize=0, timeout=None):
+    def __init__(self, maxsize=0, timeout=None, name=None):
         # extend the base class
         Queue.__init__(self, maxsize)
         self.timeout = timeout
-        self._logger = logging.getLogger(__name__)
+
+        logger_name = __name__
+        if name is not None:
+            logger_name = '{}.{}'.format(logger_name, name)
+
+        self._logger = logging.getLogger(logger_name)
+
 
     # The following override the methods in Queue to use
     # a date approach to the queue
@@ -59,6 +62,8 @@ class DateQueue_Threading(Queue):
             if index in self.queue:
                 del self.queue[index]
                 self.not_full.notifyAll()
+        except Exception as e:
+            self._logger.error('Error cleaning {} - {}'.format(index, e))
         finally:
             self.not_empty.release()
 
@@ -97,8 +102,8 @@ class DateQueue_Threading(Queue):
 
                     # Time out has occurred
                     if remaining <= 0.0:
-                        self._logger.error("Timeout occurred while removing"
-                                            " an item from queue")
+                        self._logger.error("{} - Timeout occurred while removing"
+                                            " an item from queue".format(index))
                         timed_out = True
                         raise Empty
 
@@ -108,7 +113,7 @@ class DateQueue_Threading(Queue):
             return item
 
         except Exception as e:
-            self._logger.error(e)
+            self._logger.error('{} - {}'.format(index, e))
 
         finally:
             self.not_empty.release()
@@ -147,8 +152,8 @@ class DateQueue_Threading(Queue):
                     while self._qsize() == self.maxsize:
                         remaining = endtime - _time()
                         if remaining <= 0.0:
-                            self._logger.error("Timeout occurred in while"
-                                               " putting an item in the queue")
+                            self._logger.error("{} - Timeout occurred in while"
+                                               " putting an item in the queue".format(item[0]))
                             timed_out=True
                             raise Full
 
@@ -158,7 +163,7 @@ class DateQueue_Threading(Queue):
             self.not_empty.notifyAll()
 
         except Exception as e:
-            self._logger.error(e)
+            self._logger.error('{} - {}'.format(item[0], e))
 
         finally:
             self.not_full.release()

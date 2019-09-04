@@ -31,6 +31,10 @@ class SMRFTestCase(unittest.TestCase):
         # read in the base configuration
         self.base_config = get_user_config(config_file, modules = 'smrf')
 
+        self.variables = ['air_temp', 'net_solar', 'percent_snow', 'precip', 
+                    'precip_temp', 'snow_density', 'thermal', 'vapor_pressure',
+                    'wind_direction', 'wind_speed']
+
     def tearDown(self):
         """
         Clean up the output directory

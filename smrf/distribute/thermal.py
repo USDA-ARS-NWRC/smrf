@@ -346,10 +346,10 @@ class th(image_data.image_data):
             self.distribute(t, air_temp, vapor_pressure,
                             dew_point, cloud_factor)
 
-            if self.correct_veg:
-                queue['thermal_veg'].put([t, self.thermal_veg])
-            if self.correct_cloud:
-                queue['thermal_cloud'].put([t, self.thermal_cloud])
+            # if self.correct_veg:
+            #     queue['thermal_veg'].put([t, self.thermal_veg])
+            # if 'thermal_cloud' in queue and self.correct_cloud:
+            #     queue['thermal_cloud'].put([t, self.thermal_cloud])
 
             queue['thermal_clear'].put([t, self.thermal_clear])
 
@@ -402,16 +402,21 @@ class th(image_data.image_data):
         """
 
         for t in data.index:
-
+            
             air_temp = queue['air_temp'].get(t)
 
             self.distribute_thermal(data.loc[t], air_temp)
 
+            # self._logger.warning('Done thermal')
+            # if self.correct_veg:
+            #     self._logger.warning('Put thermal veg')
+            #     queue['thermal_veg'].put([t, self.thermal_veg])
+            # self._logger.warning('Put thermal veg')
 
-            if self.correct_veg:
-                queue['thermal_veg'].put([t, self.thermal_veg])
-            if self.correct_cloud:
-                queue['thermal_cloud'].put([t, self.thermal_cloud])
+            # if 'thermal_cloud' in queue and self.correct_cloud:
+            #     self._logger.warning('Put thermal veg')
+            #     queue['thermal_cloud'].put([t, self.thermal_cloud])
+            # self._logger.warning('Done put thermal cloud')
 
             queue['thermal_clear'].put([t, self.thermal_clear])
 
