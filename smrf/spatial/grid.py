@@ -125,6 +125,11 @@ class GRID:
         df = self.full_df.copy()
         df['data'] = data[df['cell_local']].values
         df = df.set_index('cell_id')
+
+        # remove any nan values
+        df.dropna(axis=0, how='any', inplace=True)
+
+        # do the polyfit
         df['fit'] = df.groupby('cell_id').apply(lambda x: np.polyfit(x.elevation, x.data, 1))
 
         # drop all the duplicates
