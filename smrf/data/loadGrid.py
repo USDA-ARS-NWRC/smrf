@@ -157,8 +157,10 @@ class grid():
         # the data may be returned as type=object, convert to numeric
         # correct for the timezone
         for key in data.keys():
-            data[key] = data[key].apply(pd.to_numeric)
-            data[key] = data[key].tz_localize(tz=self.time_zone)
+            df = data[key].apply(pd.to_numeric)
+            df = df.tz_localize(tz=self.time_zone)
+            df = df[self.start_date:self.end_date]
+            data[key] = df
 
         self.metadata = metadata
 

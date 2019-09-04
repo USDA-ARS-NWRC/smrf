@@ -128,6 +128,9 @@ class ppt(image_data.image_data):
         self.last_storm_day = np.zeros((topo.ny, topo.nx))
         self.dem = topo.dem
 
+        if self.config['distribution'] == 'grid':
+            self.gridded = True
+
         # Assign storm_days array if given
         if self.config["storm_days_restart"] != None:
             self._logger.debug('Reading {} from {}'.format('storm_days', self.config['storm_days_restart']))
@@ -220,7 +223,7 @@ class ppt(image_data.image_data):
         self.mask = topo.mask
 
     def distribute(self, data, dpt, precip_temp, ta, time, wind, temp, az,
-                   dir_round_cell, wind_speed, cell_maxus, mask=None):
+                   dir_round_cell=None, wind_speed=None, cell_maxus=None, mask=None):
         """
         Distribute given a Panda's dataframe for a single time step. Calls
         :mod:`smrf.distribute.image_data.image_data._distribute`.
@@ -459,9 +462,15 @@ class ppt(image_data.image_data):
             # variables for wind redistribution
             az = queue['wind_direction'].get(t)
             wind_speed = queue['wind_speed'].get(t)
-            flatwind = queue['flatwind'].get(t)
-            dir_round_cell = queue['dir_round_cell'].get(t)
-            cell_maxus = queue['cellmaxus'].get(t)
+
+            if not self.gridded:
+                flatwind = queue['flatwind'].get(t)
+                dir_round_cell = queue['dir_round_cell'].get(t)
+                cell_maxus = queue['cellmaxus'].get(t)
+            else:
+                flatwind = None
+                dir_round_cell = None
+                cell_maxus = None
 
             self.distribute(data.precip.loc[t], dpt, precip_temp, ta, t,
                             data.wind_speed.loc[t],data.air_temp.loc[t],
