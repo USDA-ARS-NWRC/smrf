@@ -117,8 +117,8 @@ class SMRF():
         # start logging
         if external_logger == None:
 
-            if 'log_level' in ucfg.cfg['logging']:
-                loglevel = ucfg.cfg['logging']['log_level'].upper()
+            if 'log_level' in ucfg.cfg['system']:
+                loglevel = ucfg.cfg['system']['log_level'].upper()
             else:
                 loglevel = 'INFO'
 
@@ -128,12 +128,12 @@ class SMRF():
 
             # setup the logging
             logfile = None
-            if ucfg.cfg['logging']['log_file']!= None:
-                logfile = ucfg.cfg['logging']['log_file']
+            if ucfg.cfg['system']['log_file']!= None:
+                logfile = ucfg.cfg['system']['log_file']
                 if not os.path.isabs(logfile):
                     logfile = os.path.abspath(os.path.join(
                                             os.path.dirname(configFile),
-                                            ucfg.cfg['logging']['log_file']))
+                                            ucfg.cfg['system']['log_file']))
 
                 if not os.path.isdir(os.path.dirname(logfile)):
                     os.makedirs(os.path.dirname(logfile))
@@ -246,7 +246,7 @@ class SMRF():
 
         self.distribute = {}
 
-        if self.config['logging']['qotw']:
+        if self.config['system']['qotw']:
             self._logger.info(getqotw())
 
         # Initialize the distribute dict
@@ -694,7 +694,7 @@ class SMRF():
         self.thread_variables += ['cellmaxus', 'dir_round_cell']
 
         for v in self.thread_variables:
-            q[v] = queue.DateQueue_Threading(self.max_values, self.time_out)
+            q[v] = queue.DateQueue_Threading(self.queue_max_values, self.time_out)
 
         # -------------------------------------
         # Distribute the data
