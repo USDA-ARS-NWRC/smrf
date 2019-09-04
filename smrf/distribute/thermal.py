@@ -265,7 +265,7 @@ class th(image_data.image_data):
         if self.method == 'marks1979':
             cth = np.zeros_like(air_temp, dtype=np.float64)
             envphys_c.ctopotherm(air_temp, dew_point, self.dem, self.sky_view,
-                                 cth, self.config['nthreads'])
+                                 cth, self.config['marks1979_nthread'])
 
         elif self.method == 'dilley1998':
             cth = thermal_radiation.Dilly1998(air_temp, vapor_pressure/1000)
@@ -375,7 +375,7 @@ class th(image_data.image_data):
         # assign the input thermal radiation to clear thermal, this may not be the case
         # but will be the assumption for now
         self._distribute(data, other_attribute='thermal_clear')
-        
+
         self.thermal_cloud = self.thermal_clear.copy()
         self.thermal = self.thermal_clear.copy()
 
