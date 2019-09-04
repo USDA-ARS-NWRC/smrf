@@ -26,6 +26,7 @@ Example:
 import logging
 import os
 import sys
+import gc
 import coloredlogs
 from datetime import datetime, timedelta
 import pandas as pd
@@ -641,6 +642,7 @@ class SMRF():
         """
         #Create threads for distribution
         t,q = self.create_distributed_threads()
+        self._logger.warning(q.keys())
 
         # output thread
         t.append(queue.QueueOutput(q, self.date_time,
@@ -661,7 +663,12 @@ class SMRF():
             t[i].join()
 
         # Clean up the queues
-        
+        keys = list(q.keys())
+        for key in keys:
+            self._logger.warning('Deleting queue {}'.format(key))
+            del q[key]
+        del q
+        gc.collect()
 
         self._logger.debug('DONE!!!!')
 
