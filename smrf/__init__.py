@@ -30,12 +30,11 @@ __config_titles__ = {
                 "precip": "Precipitation distribution",
                 "albedo":"Albedo distribution",
                 "cloud_factor": "Cloud Factor - Fraction used to limit solar radiation Cloudy (0) - Sunny (1)",
-                "solar":"Solar radiation distribution",
-                "thermal":"Thermal radiation distribution",
+                "solar":"Solar radiation",
+                "thermal":"Incoming thermal radiation",
                 "soil_temp":"Soil temperature",
                 "output":"Output variables",
-                "logging":"Logging",
-                "system":"System variables"
+                "system":"System variables and Logging"
 }
 
 __config_header__ = utils.utils.getConfigHeader()
