@@ -75,8 +75,15 @@ class SMRF():
                'vapor_pressure',
                'wind']
 
-    # These are the variables that will be queued
-    thread_variables = ['cosz', 'azimuth', 'illum_ang',
+    def __init__(self, config, external_logger=None):
+        """
+        Initialize the model, read config file, start and end date, and logging
+        """
+
+        # These are the variables that will be queued
+        # This was on the SMRF instance and adding to it will change
+        # for all smrf instances
+        self.thread_variables = ['cosz', 'azimuth', 'illum_ang',
                         'air_temp', 'dew_point', 'vapor_pressure',
                         'wind_speed', 'precip', 'percent_snow',
                         'snow_density', 'last_storm_day_basin',
@@ -90,10 +97,6 @@ class SMRF():
                         'cloud_ir_beam', 'cloud_ir_diffuse', 'cloud_vis_beam',
                         'cloud_vis_diffuse', 'wind_direction']
 
-    def __init__(self, config, external_logger=None):
-        """
-        Initialize the model, read config file, start and end date, and logging
-        """
         # read the config file and store
         if isinstance(config, str):
             if not os.path.isfile(config):
@@ -642,7 +645,6 @@ class SMRF():
         """
         #Create threads for distribution
         t,q = self.create_distributed_threads()
-        self._logger.warning(q.keys())
 
         # output thread
         t.append(queue.QueueOutput(q, self.date_time,
@@ -661,14 +663,6 @@ class SMRF():
         # Wait for the end
         for i in range(len(t)):
             t[i].join()
-
-        # Clean up the queues
-        keys = list(q.keys())
-        for key in keys:
-            self._logger.warning('Deleting queue {}'.format(key))
-            del q[key]
-        del q
-        gc.collect()
 
         self._logger.debug('DONE!!!!')
 
@@ -692,9 +686,9 @@ class SMRF():
         q = {}
         t = []
 
-        self.thread_variables += ['storm_total']
+        self.thread_variables.append('storm_total')
         if self.distribute['precip'].nasde_model == 'marks2017':
-            self.thread_variables += ['storm_id']
+            self.thread_variables.append('storm_id')
 
         # This is a major reason why threading for gridded doesn't work
         # I'm not sure how but every once in a while the thermal_cloud will
@@ -708,8 +702,7 @@ class SMRF():
 
         # add some variables to thread_variables based on what we're doing
         if not self.gridded:
-            self.thread_variables += ['flatwind']
-            self.thread_variables += ['cellmaxus', 'dir_round_cell']
+            self.thread_variables.extend(['flatwind', 'cellmaxus', 'dir_round_cell'])
 
         for v in self.thread_variables:
             q[v] = queue.DateQueue_Threading(self.max_values, self.time_out, name=v)
