@@ -26,7 +26,6 @@ Example:
 import logging
 import os
 import sys
-import gc
 import coloredlogs
 from datetime import datetime, timedelta
 import pandas as pd

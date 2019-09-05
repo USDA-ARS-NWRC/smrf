@@ -648,8 +648,6 @@ class solar(image_data.image_data):
         clear_ir_beam = ir.bands[0].data
         clear_ir_diffuse = ir.bands[1].data
 
-        os.remove(self.ir_file)
-
         return clear_ir_beam, clear_ir_diffuse
 
     def calc_vis(self, min_storm_day, wy_day, tz_min_west, wyear, cosz, azimuth):
@@ -706,8 +704,6 @@ class solar(image_data.image_data):
         vis = ipw.IPW(self.vis_file)
         clear_vis_beam = vis.bands[0].data
         clear_vis_diffuse = vis.bands[1].data
-
-        os.remove(self.vis_file)
 
         return clear_vis_beam, clear_vis_diffuse
 
