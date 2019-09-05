@@ -6,8 +6,9 @@ __version__ = '0.9.1'
 
 import os
 
-__core_config__ = os.path.abspath(os.path.dirname(__file__)+'/framework/CoreConfig.ini')
-__recipes__ = os.path.abspath(os.path.dirname(__file__)+'/framework/recipes.ini')
+__core_config__ = os.path.abspath(os.path.dirname(__file__) + '/framework/CoreConfig.ini')
+__recipes__ = os.path.abspath(os.path.dirname(__file__) + '/framework/recipes.ini')
+__config_changelog__ = os.path.abspath(os.path.dirname(__file__) + '/framework/changelog.ini')
 
 from . import data
 from . import distribute
