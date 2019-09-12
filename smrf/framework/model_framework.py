@@ -42,6 +42,7 @@ from inicheck.config import UserConfig
 from inicheck.output import print_config_report,generate_config, print_recipe_summary
 
 
+
 class SMRF():
     """
     SMRF - Spatial Modeling for Resources Framework
@@ -60,7 +61,7 @@ class SMRF():
         config: Configuration file read in as dictionary
         distribute: Dictionary the contains all the desired variables to
             distribute and is initialized in
-            :func:`~smrf.framework.model_framework.initializeDistirbution`
+            :func:`~smrf.framework.model_framework.initializeDistribution`
     """
 
     # These are the modules that the user can modify and use different methods
