@@ -39,8 +39,9 @@ from threading import Thread
 import shutil
 from inicheck.tools import get_user_config, check_config
 from inicheck.config import UserConfig
-from inicheck.output import print_config_report,generate_config, print_recipe_summary
+from inicheck.output import print_config_report, generate_config, print_recipe_summary, print_change_report
 from inicheck.utilities import pcfg, get_relative_to_cfg
+
 
 
 class SMRF():
@@ -61,7 +62,7 @@ class SMRF():
         config: Configuration file read in as dictionary
         distribute: Dictionary the contains all the desired variables to
             distribute and is initialized in
-            :func:`~smrf.framework.model_framework.initializeDistirbution`
+            :func:`~smrf.framework.model_framework.initializeDistribution`
     """
 
     # These are the modules that the user can modify and use different methods
