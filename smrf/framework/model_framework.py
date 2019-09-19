@@ -100,22 +100,22 @@ class SMRF():
                 raise Exception('Configuration file does not exist --> {}'
                                 .format(config))
             configFile = config
-            try:
-                #Read in the original users config
-                ucfg = get_user_config(config, modules = 'smrf')
+            # try:
+            # Read in the original users config
+            ucfg = get_user_config(config, modules='smrf')
 
-            except UnicodeDecodeError as e:
-                print(e)
-                raise Exception(('The configuration file is not encoded in '
-                                    'UTF-8, please change and retry'))
+            # except UnicodeDecodeError as e:
+                # print(e)
+                # raise Exception(('The configuration file is not encoded in '
+                                    # 'UTF-8, please change and retry'))
 
         elif isinstance(config, UserConfig):
             ucfg = config
             configFile = config.filename
 
         else:
-            raise Exception('Config passed to SMRF is neither file name nor UserConfig instance')
-
+            raise Exception('Config passed to SMRF is neither file name nor '
+                            ' UserConfig instance')
         # start logging
         if external_logger == None:
 
@@ -167,7 +167,7 @@ class SMRF():
 
         out = get_relative_to_cfg(ucfg.cfg['output']['out_location'],ucfg.filename)
 
-        #Make the tmp and output directories if they do not exist
+        # Make the tmp and output directories if they do not exist
         makeable_dirs = [out,os.path.join(out,'tmp')]
         for path in makeable_dirs:
             if not os.path.isdir(path):
@@ -183,7 +183,7 @@ class SMRF():
         # Check the user config file for errors and report issues if any
         self._logger.info("Checking config file for issues...")
         warnings, errors = check_config(ucfg)
-        print_config_report(warnings, errors, logger = self._logger)
+        print_config_report(warnings, errors, logger=self._logger)
         self.config = ucfg.cfg
         self.ucfg = ucfg
 
@@ -230,9 +230,11 @@ class SMRF():
         self.time_steps = len(self.date_time)
 
         # need to align date time
-        if self.config['albedo']['start_decay'] is not None:
-            self.config['albedo']['start_decay'] = self.config['albedo']['start_decay'].replace(tzinfo=tzinfo)
-            self.config['albedo']['end_decay'] = self.config['albedo']['end_decay'].replace(tzinfo=tzinfo)
+        if self.config['albedo']['date_method_start_decay'] is not None:
+            self.config['albedo']['date_method_start_decay'] = \
+            self.config['albedo']['date_method_start_decay'].replace(tzinfo=tzinfo)
+            self.config['albedo']['date_method_end_decay'] = \
+            self.config['albedo']['date_method_end_decay'].replace(tzinfo=tzinfo)
 
         # if a gridded dataset will be used
         self.gridded = False
