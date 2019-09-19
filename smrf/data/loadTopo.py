@@ -57,13 +57,7 @@ class topo():
         self._logger = logging.getLogger(__name__)
         self._logger.info('Reading [TOPO] and making stoporad input')
 
-        # read images
-        img_type = self.topoConfig['type']
-        if img_type == 'ipw':
-            #self.readImages()
-            raise IOError('IPW topos are deprecated as of SMRF 0.8.0')
-        elif img_type == 'netcdf':
-            self.readNetCDF()
+        self.readNetCDF()
 
         # calculate the necessary images for stoporad
         if calcInput:
@@ -71,52 +65,48 @@ class topo():
         else:
             self.stoporad_in_file = None
 
-    def readImages(self):
-        """
-        Read in the images from the config file
-        """
-        if 'dem' not in self.topoConfig:
-            raise ValueError('DEM file not specified')
-
-        # read in the images
-        for v in self.images:
-            if v in self.topoConfig:
-                i = ipw.IPW(self.topoConfig[v])
-
-                if v == 'veg_type':
-                    setattr(self, v, i.bands[0].data.astype(int))
-                else:
-                    setattr(self, v, i.bands[0].data.astype(np.float64))
-
-                if v == 'dem':
-                    # get some general information about the model
-                    # domain from the dem
-                    self.ny = i.nlines
-                    self.nx = i.nsamps
-                    self.u = i.bands[0].bline
-                    self.v = i.bands[0].bsamp
-                    self.du = i.bands[0].dline
-                    self.dv = i.bands[0].dsamp
-                    self.units = i.bands[0].geounits
-                    self.coord_sys_ID = i.bands[0].coord_sys_ID
-
-            else:
-                setattr(self, v, None)
-
-        # create the x,y vectors
-        self.x = self.v + self.dv*np.arange(self.nx)
-        self.y = self.u + self.du*np.arange(self.ny)
-        [self.X, self.Y] = np.meshgrid(self.x, self.y)
+    # def readImages(self):
+    #     """
+    #     Read in the images from the config file
+    #     """
+    #     if 'dem' not in self.topoConfig:
+    #         raise ValueError('DEM file not specified')
+    #
+    #     # read in the images
+    #     for v in self.images:
+    #         if v in self.topoConfig:
+    #             i = ipw.IPW(self.topoConfig[v])
+    #
+    #             if v == 'veg_type':
+    #                 setattr(self, v, i.bands[0].data.astype(int))
+    #             else:
+    #                 setattr(self, v, i.bands[0].data.astype(np.float64))
+    #
+    #             if v == 'dem':
+    #                 # get some general information about the model
+    #                 # domain from the dem
+    #                 self.ny = i.nlines
+    #                 self.nx = i.nsamps
+    #                 self.u = i.bands[0].bline
+    #                 self.v = i.bands[0].bsamp
+    #                 self.du = i.bands[0].dline
+    #                 self.dv = i.bands[0].dsamp
+    #                 self.units = i.bands[0].geounits
+    #                 self.coord_sys_ID = i.bands[0].coord_sys_ID
+    #
+    #         else:
+    #             setattr(self, v, None)
+    #
+    #     # create the x,y vectors
+    #     self.x = self.v + self.dv*np.arange(self.nx)
+    #     self.y = self.u + self.du*np.arange(self.ny)
+    #     [self.X, self.Y] = np.meshgrid(self.x, self.y)
 
     def readNetCDF(self):
         """
         Read in the images from the config file where the file
         listed is in netcdf format
         """
-
-        if 'filename' not in self.topoConfig:
-            raise ValueError('''Filename was not specified. Please provide
-                            a netcdf filename in config file.''')
 
         # read in the images
         f = Dataset(self.topoConfig['filename'], 'r')
@@ -134,11 +124,11 @@ class topo():
             else:
                 v_file = v_smrf
 
-            if v_file in f.variables.keys():
-                if v_smrf == 'veg_type':
-                    result = f.variables[v_file][:].astype(int)
-                else:
-                    result = f.variables[v_file][:].astype(np.float64)
+            # if v_file in f.variables.keys():
+            #     if v_smrf == 'veg_type':
+            #         result = f.variables[v_file][:].astype(int)
+            #     else:
+            #         result = f.variables[v_file][:].astype(np.float64)
 
 
             setattr(self, v_smrf, result)
