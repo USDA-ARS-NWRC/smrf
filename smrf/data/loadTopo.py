@@ -113,6 +113,7 @@ class topo():
 
         if 'projection' not in f.variables.keys():
             raise IOError("Topo input files must have projection information")
+
         # read in the images
         # netCDF files are stored typically as 32-bit float, so convert
         # to double or int
@@ -124,12 +125,11 @@ class topo():
             else:
                 v_file = v_smrf
 
-            # if v_file in f.variables.keys():
-            #     if v_smrf == 'veg_type':
-            #         result = f.variables[v_file][:].astype(int)
-            #     else:
-            #         result = f.variables[v_file][:].astype(np.float64)
-
+            if v_file in f.variables.keys():
+                if v_smrf == 'veg_type':
+                    result = f.variables[v_file][:].astype(int)
+                else:
+                    result = f.variables[v_file][:].astype(np.float64)
 
             setattr(self, v_smrf, result)
 
@@ -149,19 +149,19 @@ class topo():
         Calculate the necessary input file for stoporad
         The IPW and WORKDIR environment variables must be set
         """
-        if self.topoConfig['type'] != 'ipw':
+        # if self.topoConfig['type'] != 'ipw':
+        #
+        f = os.path.abspath(os.path.expanduser(os.path.join(self.tempDir,
+                                                            'dem.ipw')))
+        i = ipw.IPW()
+        i.new_band(self.dem)
 
-            f = os.path.abspath(os.path.expanduser(os.path.join(self.tempDir,
-                                                                'dem.ipw')))
-            i = ipw.IPW()
-            i.new_band(self.dem)
+        i.add_geo_hdr([self.x[0], self.y[0]],
+                      [np.mean(np.diff(self.x)), np.mean(np.diff(self.y))],
+                      'm', 'UTM')
+        i.write(f, 16)
 
-            i.add_geo_hdr([self.x[0], self.y[0]],
-                          [np.mean(np.diff(self.x)), np.mean(np.diff(self.y))],
-                          'm', 'UTM')
-            i.write(f, 16)
-
-            self.topoConfig['dem'] = f
+        self.topoConfig['dem'] = f
 
         # calculate the skyview
         svfile = os.path.abspath(os.path.expanduser(
@@ -218,9 +218,8 @@ class topo():
         os.remove(gfile)
         os.remove(svfile)
 
-        if self.topoConfig['type'] != 'ipw':
-            os.remove(self.topoConfig['dem'])
-            self.topoConfig.pop('dem', None)
+        os.remove(self.topoConfig['dem'])
+        self.topoConfig.pop('dem', None)
 
     def _gradient(self, demFile, gradientFile):
         # calculate the gradient
