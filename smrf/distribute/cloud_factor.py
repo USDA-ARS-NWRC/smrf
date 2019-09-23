@@ -6,7 +6,7 @@ from smrf.utils import utils
 
 class cf(image_data.image_data):
     """
-    The :mod:`~smrf.distribute.cloud_factor.ta` class allows for variable specific
+    The :mod:`~smrf.distribute.cloud_factor.cf` class allows for variable specific
     distributions that go beyond the base class.
 
     cloud factor is a relatively simple variable to distribute as it does
@@ -48,7 +48,7 @@ class cf(image_data.image_data):
 
         # check and assign the configuration
         self.getConfig(config)
-
+        print(config)        
         self._logger.debug('Created distribute.cloud_factor')
 
     def initialize(self, topo, data):
@@ -80,7 +80,8 @@ class cf(image_data.image_data):
         self._logger.debug('{} Distributing cloud_factor'.format(data.name))
 
         self._distribute(data)
-        self.cloud_factor = utils.set_min_max(self.cloud_factor, self.min, self.max)
+        self.cloud_factor = utils.set_min_max(self.cloud_factor, self.min,
+                                                                 self.max)
 
     def distribute_thread(self, queue, data):
         """
