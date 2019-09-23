@@ -590,7 +590,7 @@ class SMRF():
             self.distribute['cloud_factor'].distribute(self.data.cloud_factor.loc[t])
 
             # 7. Solar
-            self.distribute['solar'].distribute(self.distribute['cloud_factor'].cf,
+            self.distribute['solar'].distribute(self.distribute['cloud_factor'].cloud_factor,
                                                 illum_ang,
                                                 cosz,
                                                 azimuth,
