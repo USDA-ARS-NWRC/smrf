@@ -244,7 +244,8 @@ class solar(image_data.image_data):
         """
 
         self._logger.debug('Initializing distribute.solar')
-        self.stations = self.cf_config['stations']
+        # Solar has no stations. Relies on Cloud factor
+        self.stations = None
         self._initialize(topo, data.metadata)
         self.veg_height = topo.veg_height
         self.veg_tau = topo.veg_tau
@@ -285,7 +286,7 @@ class solar(image_data.image_data):
 
         """
 
-        self._logger.debug('%s Distributing solar' % data.name)
+        self._logger.debug('%s Distributing solar' % data.index)
 
         # only need to calculate solar if the sun is up
         if cosz > 0:

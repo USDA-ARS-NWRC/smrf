@@ -48,7 +48,6 @@ class cf(image_data.image_data):
 
         # check and assign the configuration
         self.getConfig(config)
-        print(config)        
         self._logger.debug('Created distribute.cloud_factor')
 
     def initialize(self, topo, data):

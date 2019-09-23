@@ -143,6 +143,18 @@ class wind(image_data.image_data):
             self.maxus = self._maxus_file.variables['maxus'][:]
             self.maxus_direction = self._maxus_file.variables['direction'][:]
             self._maxus_file.close()
+
+            # Maxus must be the the same size as the topo.
+            topo_nc = nc.Dataset(wholeConfig['topo']['filename'],'r')
+            t_shape = topo_nc.variables['dem'].shape
+            topo_nc.close()
+
+            if t_shape != self.maxus[0].shape:
+                raise IOError("\nMaxus file must be generated using the topo to"
+                              " be valid. Maxus netcdf shape = {} and topo"
+                              " netcdf shape = {}".format(t_shape,
+                                                          self.maxus.shape))
+
             self._logger.debug('Read data from {}'
                                .format(self.config['maxus_netcdf']))
 
@@ -357,8 +369,6 @@ class wind(image_data.image_data):
 
             queue['wind_speed'].put([t, self.wind_speed])
             queue['wind_direction'].put([t, self.wind_direction])
-
-#             if not self.gridded:
             queue['flatwind'].put([t, self.flatwind])
             queue['cellmaxus'].put([t,self.cellmaxus])
             queue['dir_round_cell'].put([t,self.dir_round_cell])
