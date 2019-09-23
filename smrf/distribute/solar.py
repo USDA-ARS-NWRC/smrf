@@ -17,9 +17,8 @@ class solar(image_data.image_data):
     Multiple steps are required to estimate solar radiation:
 
     1. Terrain corrected clear sky radiation
-    2. Distribute a cloud factor and adjust modeled clear sky
-    3. Adjust solar radiation for vegetation effects
-    4. Calculate net radiation using the albedo
+    2. Adjust solar radiation for vegetation effects
+    3. Calculate net radiation using the albedo
 
     The Image Processing Workbench (IPW) includes a utility ``stoporad`` to
     model terrain corrected clear sky radiation over the DEM. Within
@@ -75,7 +74,8 @@ class solar(image_data.image_data):
 
     Args:
         config: full configuration dictionary contain at least the sections
-                albedo, cloud_factor, and solar
+                albedo, and solar
+        cloud_factor: Numpy array representing cloud_factor
         stoporad_in: file path to the stoporad_in file created from
             :mod:`smrf.data.loadTopo.topo`
         tempDir: location of temp/working directory (default=None, which is the
@@ -152,11 +152,6 @@ class solar(image_data.image_data):
                                   'standard_name': 'clear_sky_visible_diffuse',
                                   'long_name': 'Clear sky visible diffuse solar radiation'
                                   },
-                        'cloud_factor': {
-                                  'units': 'None',
-                                  'standard_name': 'cloud_factor',
-                                  'long_name': 'Cloud factor'
-                                  },
                         'cloud_ir_beam': {
                                   'units': 'watt/m2',
                                   'standard_name': 'cloud_infrared_beam',
@@ -207,14 +202,14 @@ class solar(image_data.image_data):
     # be written during main distribute loop
     post_process_variables = {}
 
-    def __init__(self, config, stoporad_in, tempDir=None):
+    def __init__(self, config, cloud_factor, stoporad_in, tempDir=None):
 
         # extend the base class
         image_data.image_data.__init__(self, self.variable)
         self._logger = logging.getLogger(__name__)
 
-        self.config = config["cloud_factor"]
-        self.solarConfig = config["solar"]
+        self.config = config["solar"]
+        self.cloud_factor = cloud_factor
         self.albedoConfig = config["albedo"]
 
         self.stoporad_in = stoporad_in
@@ -248,7 +243,7 @@ class solar(image_data.image_data):
         """
 
         self._logger.debug('Initializing distribute.solar')
-
+        self.stations = self.cf_config['stations']
         self._initialize(topo, data.metadata)
         self.veg_height = topo.veg_height
         self.veg_tau = topo.veg_tau
@@ -290,12 +285,6 @@ class solar(image_data.image_data):
         """
 
         self._logger.debug('%s Distributing solar' % data.name)
-
-        # cloud must always be distributed since it is used by thermal
-        self._distribute(data, other_attribute='cloud_factor')
-        self.cloud_factor = utils.set_min_max(self.cloud_factor,
-                                              self.config['min'],
-                                              self.config["max"])
 
         # only need to calculate solar if the sun is up
         if cosz > 0:
@@ -391,10 +380,6 @@ class solar(image_data.image_data):
 
         for t in data.index:
 
-            # distribute the cloud factor
-            self._distribute(data.loc[t], other_attribute='cloud_factor')
-            self.cloud_factor = utils.set_min_max(self.cloud_factor, 0, 1)
-
             # check if sun is up or not
             cosz = queue['cosz'].get(t)
 
@@ -468,7 +453,6 @@ class solar(image_data.image_data):
                 queue['cloud_ir_diffuse'].put([t, self.cloud_ir_diffuse])
 
             queue['net_solar'].put([t, self.net_solar])
-            queue['cloud_factor'].put([t, self.cloud_factor])
 
     def distribute_thread_clear(self, queue, data, calc_type):
         """

@@ -157,7 +157,7 @@ class ppt(image_data.image_data):
         self.ppt_threshold = self.config['storm_mass_threshold']
 
         # Time steps needed to end a storm definition
-        self.time_to_end_storm = self.config['time_steps_to_end_storms']
+        self.time_to_end_storm = self.config['marks2017_timesteps_to_end_storms']
 
         self.nasde_model = self.config['new_snow_density_model']
 

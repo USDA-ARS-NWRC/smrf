@@ -346,17 +346,22 @@ class SMRF():
         self.distribute['albedo'] = \
             distribute.albedo.albedo(self.config['albedo'])
 
-        # 6. Solar radiation
+        # 6. cloud_factor
+        self.distribute['cloud_factor'] = \
+            distribute.cloud_factor.cf(self.config)
+
+        #7. Solar radiation
         self.distribute['solar'] = \
             distribute.solar.solar(self.config,
+
                                    self.topo.stoporad_in_file,
                                    self.temp_dir)
 
-        # 7. thermal radiation
+        # 8. thermal radiation
         self.distribute['thermal'] = \
             distribute.thermal.th(self.config['thermal'])
 
-        # 8. soil temperature
+        # 9. soil temperature
         self.distribute['soil_temp'] = \
             distribute.soil_temp.ts(self.config['soil_temp'])
 
@@ -384,7 +389,7 @@ class SMRF():
                                      self.start_date,
                                      self.end_date,
                                      time_zone=self.config['time']['time_zone'],
-                                     stations=self.config['stations'],
+                                     stations=self.config['csv']['stations'],
                                      dataType='csv')
 
         elif 'mysql' in self.config:
@@ -392,12 +397,8 @@ class SMRF():
                                      self.start_date,
                                      self.end_date,
                                      time_zone=self.config['time']['time_zone'],
-                                     stations=self.config['stations'],
+                                     stations=self.config['mysql']['stations'],
                                      dataType='mysql')
-
-            #Add stations to stations in config for input backup
-            self.config['stations']['stations'] = \
-                                               self.data.metadata.index.tolist()
 
         elif 'gridded' in self.config:
             flag = False
@@ -449,49 +450,49 @@ class SMRF():
                                                                      self.topo.y,
                                                                                  'Y'), axis=1)
 
-        # pre filter the data to only the desired stations
+        # Pre-filter the data to only the desired stations
         if flag:
-            try:
-                for key in self.distribute.keys():
-                    if key in self.data.variables:
-                        # Pull out the loaded data
-                        d = getattr(self.data, key)
+            for key in self.distribute.keys():
+                if key in self.data.variables:
+                    # Pull out the loaded data
+                    d = getattr(self.data, key)
 
-                        # Check to find the matching stations
+                    # Check to find the matching stations
+                    if self.distribute[key].stations != None:
+
                         match = d.columns.isin(self.distribute[key].stations)
                         sta_match = d.columns[match]
 
                         # Update the dataframe and the distribute stations
                         self.distribute[key].stations = sta_match.tolist()
                         setattr(self.data, key, d[sta_match])
+                    else:
+                       self._logger.warning("Distribution not initialized,"
+                                            " data not filtered to desired"
+                                            " stations in variable {}"
+                                            "".format(key))
+
+            # TODO delete this below comments if we do not need this due to new cloud factor section
+            # if hasattr(self.data, 'cloud_factor'):
+            #     d = getattr(self.data, 'cloud_factor')
+            #     setattr(self.data,
+            #             'cloud_factor',
+            #             d[self.distribute['solar'].stations])
 
 
-                if hasattr(self.data, 'cloud_factor'):
-                    d = getattr(self.data, 'cloud_factor')
-                    setattr(self.data,
-                            'cloud_factor',
-                            d[self.distribute['solar'].stations])
-
-            except Exception as e:
-               self._logger.warning("Distribution not initialized, data not "
-                                   "filtered to desired stations in variable {}".format(key))
-               self._logger.error(e)
-
-
-            #Check all sections for stations that are colocated
+            # Check all sections for stations that are colocated
             for key in self.distribute.keys():
                 if key in self.data.variables:
                     if self.distribute[key].stations != None:
-                        if self.config['stations']['check_colocation']:
-                            # Confirm out stations all have a unique position for each section
-                            colocated = check_station_colocation(metadata=self.data.metadata.loc[self.distribute[key].stations])
+                        # Confirm out stations all have a unique position for each section
+                        colocated = check_station_colocation(metadata=self.data.metadata.loc[self.distribute[key].stations])
 
-                            # Stations are co-located, throw error
-                            if colocated != None:
-                                self._logger.error("Stations in the {0} section are colocated.\n{1}".format(key,','.join(colocated[0])))
-                                sys.exit()
+                        # Stations are co-located, throw error
+                        if colocated != None:
+                            self._logger.error("Stations in the {0} section are colocated.\n{1}".format(key,','.join(colocated[0])))
+                            sys.exit()
 
-        #Does the user want to create a CSV copy of the station data used.
+        # Does the user want to create a CSV copy of the station data used.
         if self.config["output"]['input_backup'] == True:
             self._logger.info('Backing up input data...')
             backup_input(self.data, self.ucfg)
@@ -525,10 +526,11 @@ class SMRF():
             4. Vapor pressure
             5. Wind direction and speed
             6. Precipitation
-            7. Solar radiation
-            8. Thermal radiation
-            9. Soil temperature
-            10. Output time step if needed
+            7. Cloud Factor
+            8. Solar radiation
+            9. Thermal radiation
+            10. Soil temperature
+            11. Output time step if needed
         """
 
         # -------------------------------------
@@ -589,9 +591,11 @@ class SMRF():
             self.distribute['albedo'].distribute(t,
                                                  illum_ang,
                                                  self.distribute['precip'].storm_days)
+            # 6. cloud_factor
+            self.distribute['cloud_factor'].distribute(self.data.cloud_factor.loc[t])
 
-            # 6. Solar
-            self.distribute['solar'].distribute(self.data.cloud_factor.loc[t],
+            # 7. Solar
+            self.distribute['solar'].distribute(self.distribute['cloud_factor'].cloud_factor
                                                 illum_ang,
                                                 cosz,
                                                 azimuth,
@@ -609,7 +613,7 @@ class SMRF():
                                                       self.distribute['air_temp'].air_temp,
                                                       self.distribute['vapor_pressure'].vapor_pressure,
                                                       self.distribute['vapor_pressure'].dew_point,
-                                                      self.distribute['solar'].cloud_factor)
+                                                      self.distribute['cloud_factor'].cloud_factor)
 
             # 8. Soil temperature
             self.distribute['soil_temp'].distribute()
@@ -743,17 +747,22 @@ class SMRF():
                         name='albedo',
                         args=(q, self.date_time)))
 
-        # 6.1 Clear sky visible
+        # 6.Cloud Factor
+        t.append(Thread(target=self.distribute['cloud_factor'].distribute_thread,
+                        name='cloud_factor',
+                        args=(q, self.data.cloud_factor)))
+
+        # 7.1 Clear sky visible
         t.append(Thread(target=self.distribute['solar'].distribute_thread_clear,
                         name='clear_vis',
                         args=(q, self.data.cloud_factor, 'clear_vis')))
 
-        # 6.2 Clear sky ir
+        # 7.2 Clear sky ir
         t.append(Thread(target=self.distribute['solar'].distribute_thread_clear,
                         name='clear_ir',
                         args=(q, self.data.cloud_factor, 'clear_ir')))
 
-        # 6.3 Net radiation
+        # 7.3 Net radiation
         t.append(Thread(target=self.distribute['solar'].distribute_thread,
                         name='solar',
                         args=(q, self.data.cloud_factor)))
