@@ -352,7 +352,7 @@ class SMRF():
 
         # 6. cloud_factor
         self.distribute['cloud_factor'] = \
-            distribute.cloud_factor.cf(self.config)
+            distribute.cloud_factor.cf(self.config['cloud_factor'])
 
         #7. Solar radiation
         self.distribute['solar'] = \
@@ -476,14 +476,6 @@ class SMRF():
                                             " stations in variable {}"
                                             "".format(key))
 
-            # TODO delete this below comments if we do not need this due to new cloud factor section
-            # if hasattr(self.data, 'cloud_factor'):
-            #     d = getattr(self.data, 'cloud_factor')
-            #     setattr(self.data,
-            #             'cloud_factor',
-            #             d[self.distribute['solar'].stations])
-
-
             # Check all sections for stations that are colocated
             for key in self.distribute.keys():
                 if key in self.data.variables:
@@ -577,7 +569,6 @@ class SMRF():
             self.distribute['wind'].distribute(self.data.wind_speed.loc[t],
                                                self.data.wind_direction.loc[t],
                                                t)
-#self, data, dpt, time, wind, temp, mask=None
             # 4. Precipitation
             self.distribute['precip'].distribute(self.data.precip.loc[t],
                                                 self.distribute['vapor_pressure'].dew_point,
@@ -599,7 +590,7 @@ class SMRF():
             self.distribute['cloud_factor'].distribute(self.data.cloud_factor.loc[t])
 
             # 7. Solar
-            self.distribute['solar'].distribute(self.distribute['cloud_factor'].cloud_factor
+            self.distribute['solar'].distribute(self.distribute['cloud_factor'].cf,
                                                 illum_ang,
                                                 cosz,
                                                 azimuth,
