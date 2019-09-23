@@ -49,7 +49,7 @@ class image_data():
         self.gridded = False
 
         self._base_logger = logging.getLogger(__name__)
-        
+
     def getConfig(self, cfg):
         """
         Check the configuration that was set by the user for the variable
@@ -81,8 +81,9 @@ class image_data():
         stations = None
 
         # determine the stations that will be used, alphabetical order
-        if 'stations' in config.keys():
-            station = config['stations'].sort()
+        if "stations" in config.keys():
+            if config["stations"] != None:
+                stations = config['stations'].sort()
 
         self.stations = stations
 
@@ -135,20 +136,29 @@ class image_data():
         if self.config['distribution'] == 'idw':
             # inverse distance weighting
             self.idw = idw.IDW(self.mx, self.my, topo.X, topo.Y, mz=self.mz,
-                               GridZ=topo.dem, power=self.config['power'])
+                               GridZ=topo.dem, power=self.config['idw_power'])
 
         elif self.config['distribution'] == 'dk':
             # detrended kriging
-            self.dk = dk.DK(self.mx, self.my, self.mz, topo.X, topo.Y, topo.dem, self.config)
+            self.dk = dk.DK(self.mx, self.my, self.mz, topo.X, topo.Y,
+                                                               topo.dem,
+                                                               self.config)
 
         elif self.config['distribution'] == 'grid':
             # linear interpolation between points
-            self.grid = grid.GRID(self.config, self.mx, self.my, topo.X, topo.Y, mz=self.mz,
-                                  GridZ=topo.dem, mask=topo.mask, metadata=metadata)
+            self.grid = grid.GRID(self.config, self.mx, self.my, topo.X,
+                                                            topo.Y,
+                                                            mz=self.mz,
+                                                            GridZ=topo.dem,
+                                                            mask=topo.mask,
+                                                            metadata=metadata)
 
         elif self.config['distribution'] == 'kriging':
             # generic kriging
-            self.kriging = kriging.KRIGE(self.mx, self.my, self.mz, topo.X, topo.Y, topo.dem, self.config)
+            self.kriging = kriging.KRIGE(self.mx, self.my, self.mz, topo.X,
+                                                                    topo.Y,
+                                                                    topo.dem,
+                                                                    self.config)
 
         else:
             raise Exception("Could not determine the distribution method for "

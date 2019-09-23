@@ -33,8 +33,9 @@ class CheckStation(CheckType):
         """
         Attempt to convert all the values to upper case
         """
-        if type(value) == str:
-            value = value.upper()
+
+        value = value.upper()
+
         return value
 
 def find_configs(directory):
