@@ -30,15 +30,53 @@ class TestRadiation(SMRFTestCase):
         date_time = date_time.tz_localize('UTC')
         lat = 34.416667
         lon = -119.9
-        cosz = 0.680436
-        zenith = 47.122
-        az = -5.413
-        result = radiation.sunang(date_time, lat, lon)
-
-        self.assertTrue(result[0] == cosz)
-        self.assertTrue(result[1] == az)
+        cosz = 0.6806311288888297
+        zenith = 47.107
+        az = -5.416396416371043
+        
+        # result = radiation.sunang(date_time, lat, lon)
+        # self.assertTrue(result[0] == cosz)
+        # self.assertTrue(result[1] == az)
 
         result = radiation.pysolar_sunang(date_time, lat, lon)
-
         self.assertTrue(result[0] == cosz)
         self.assertTrue(result[1] == az)
+
+
+    # The code that generated the figures in the PR for comparison
+    # between the IPW version and the Pysolar version
+    # def test_sunang_timeseries(self):
+    #     """ Sunang calculation timeseries """ 
+
+    #     # RME basin lat/lon
+    #     lon = -116.7547
+    #     lat = 43.067
+
+    #     date_time = pd.date_range('2015-10-01 00:00', '2016-09-30 00:00', freq='H', tz='UTC')
+        
+    #     df = pd.DataFrame(
+    #         index=date_time,
+    #         columns=['ipw_cosz', 'ipw_az', 'pysolar_cosz', 'pysolar_az']
+    #         )
+
+    #     for dt in date_time:
+    #         print(dt)
+    #         result = radiation.sunang(dt, lat, lon)
+    #         df.loc[dt, ['ipw_cosz', 'ipw_az']] = result
+
+    #         result = radiation.pysolar_sunang(dt, lat, lon)
+    #         df.loc[dt, ['pysolar_cosz', 'pysolar_az']] = result
+
+    #     df['zen_diff'] = (df['ipw_cosz'] - df['pysolar_cosz']) * 180 / np.pi
+    #     df['az_diff'] = df['ipw_az'] - df['pysolar_az']
+
+    #     df.to_csv('sunang_comparison.csv')
+
+    #     ax = df['zen_diff'].hist(bins=50)
+    #     ax.set_title('IPW zenith - Pysolar zenith')
+    #     ax.set_xlabel('Zenith difference, degrees')
+        
+    #     ax = df['az_diff'].hist(bins=50)
+    #     ax.set_title('IPW azimuth - Pysolar azimuth')
+    #     ax.set_xlabel('Azimuth difference, degrees')
+        

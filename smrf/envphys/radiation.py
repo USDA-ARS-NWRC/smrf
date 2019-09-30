@@ -680,6 +680,32 @@ def pysolar_sunang(date_time, lat, lon):
 
     return cosz, azimuth
 
+def pysolar_sunang_thread(queue, date, lat, lon):
+    """
+    See sunang for input descriptions
+
+    Args:
+        queue: queue with cosz, azimuth
+        date: loop through dates to accesss queue, must be same as rest of queues
+
+    """
+
+    if 'cosz' not in queue.keys():
+        raise ValueError('queue must have cosz key')
+    if 'azimuth' not in queue.keys():
+        raise ValueError('queue must have cosz key')
+
+    log = logging.getLogger(__name__)
+
+    for t in date:
+
+        log.debug('%s Calculating sun angle' % t)
+
+        cosz, azimuth = pysolar_sunang(t.astimezone(pytz.utc), lat, lon)
+
+        queue['cosz'].put([t, cosz])
+        queue['azimuth'].put([t, azimuth])
+
 
 def shade(slope, aspect, azimuth, cosz=None, zenith=None):
     """
