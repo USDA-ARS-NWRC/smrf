@@ -78,9 +78,9 @@ def albedo(telapsed, cosz, gsize, maxgsz, dirt=2):
         tuple:
         Returns a tuple containing the visible and IR spectral albedo
 
-        - **alb_v** (*numpy.array*) - albedo for visible specturm
+        - alb_v (*numpy.array*) - albedo for visible specturm
 
-        - **alb_ir** (*numpy.array*) -  albedo for ir spectrum
+        - alb_ir (*numpy.array*) -  albedo for ir spectrum
 
     Created April 17, 2015
     Modified July 23, 2015 - take image of cosz and calculate albedo for
@@ -161,9 +161,9 @@ def decay_alb_power(veg, veg_type, start_decay, end_decay, t_curr, pwr, alb_v, a
         tuple:
         Returns a tuple containing the corrected albedo arrays
         based on date, veg type
-        - **alb_v** (*numpy.array*) - albedo for visible specturm
+        - alb_v (*numpy.array*) - albedo for visible specturm
 
-        - **alb_ir** (*numpy.array*) -  albedo for ir spectrum
+        - alb_ir (*numpy.array*) -  albedo for ir spectrum
 
 
     Created July 18, 2017
@@ -196,16 +196,16 @@ def decay_alb_power(veg, veg_type, start_decay, end_decay, t_curr, pwr, alb_v, a
     else:
         # Use defaults
         max_dec = veg['default']
-        tao = (t_decay_hr) / (max_dec**(1.0/pwr))
+        tao = (t_decay_hr) / (max_dec(1.0/pwr))
         # Add default decay to array of zeros
-        alb_dec = alb_dec + ((t_diff_hr) / tao)**pwr
+        alb_dec = alb_dec + ((t_diff_hr) / tao)pwr
         # Decay based on veg type
         for k,v in veg.items():
             max_dec = v
-            tao = (t_decay_hr) / (max_dec**(1.0/pwr))
+            tao = (t_decay_hr) / (max_dec(1.0/pwr))
             # Set albedo decay at correct veg types
             if isint(k):
-                alb_dec[veg_type == int(k)] = ((t_diff_hr) / tao)**pwr
+                alb_dec[veg_type == int(k)] = ((t_diff_hr) / tao)pwr
                 # self._logger.debug('Type {0}, decay {1}'.format(int(v), veg_type['veg'][v]))
 
     alb_v_d = alb_v - alb_dec
@@ -241,9 +241,9 @@ def decay_alb_hardy(litter, veg_type, storm_day, alb_v, alb_ir):
         tuple:
         Returns a tuple containing the corrected albedo arrays
         based on date, veg type
-        - **alb_v** (*numpy.array*) - albedo for visible specturm
+        - alb_v (*numpy.array*) - albedo for visible specturm
 
-        - **alb_ir** (*numpy.array*) -  albedo for ir spectrum
+        - alb_ir (*numpy.array*) -  albedo for ir spectrum
 
     Created July 19, 2017
     Micah Sandusky
@@ -255,13 +255,13 @@ def decay_alb_hardy(litter, veg_type, storm_day, alb_v, alb_ir):
     l_rate = litter['default']
     alb_litter = litter['albedo']
 
-    sc = sc + (1.0-l_rate)**(storm_day)
+    sc = sc + (1.0-l_rate)(storm_day)
     # calculate snow coverage based on veg type
     for k, v in litter.items():
         #self._logger.debug('litter {0}: {1}'.format(v, self.config['litter'][v] ) )
         l_rate = litter[k]
         if isint(k):
-            sc[veg_type == int(k)] = (1.0 - l_rate)**(storm_day[veg_type == int(k)])
+            sc[veg_type == int(k)] = (1.0 - l_rate)(storm_day[veg_type == int(k)])
     # calculate litter coverage
     lc = np.ones_like(alb_v) - sc
     # weighted average to find decayed albedo
@@ -504,7 +504,7 @@ def hor1f(x, z, offset=1):
 
         # Start with next-to-adjacent point in either forward or backward
         # direction, depending on which way loop is running. Note that we
-        # don't consider the adjacent point; this seems to help reduce noise.
+        # don't consider the adjacent point this seems to help reduce noise.
         k = i + offset
 
         if k >= N:
@@ -520,14 +520,14 @@ def hor1f(x, z, offset=1):
             sij = _slope(x[i], zi, x[j], z[j])
             sihj = _slope(x[i], zi, x[k], z[k])
 
-            # if slope(i,j) >= slope(i,h[j]), horizon has been found; otherwise
+            # if slope(i,j) >= slope(i,h[j]), horizon has been found otherwise
             # set j to k (=h[j]) and loop again
             # or if we are at the end of the section
             if sij > sihj:  # or k == N-1:
                 break
 
-        # if slope(i,j) > slope(j,h[j]), j is i's horizon; else if slope(i,j)
-        # is zero, i is its own horizon; otherwise slope(i,j) = slope(i,h[j])
+        # if slope(i,j) > slope(j,h[j]), j is i's horizon else if slope(i,j)
+        # is zero, i is its own horizon otherwise slope(i,j) = slope(i,h[j])
         # so h[j] is i's horizon
         if sij > sihj:
             h[i] = j
@@ -565,7 +565,7 @@ def _cosz(x1, z1, x2, z2):
 
     20150601 Scott Havens
     """
-    d = np.sqrt((x2 - x1)**2 + (z2 - z1)**2)
+    d = np.sqrt((x2 - x1)2 + (z2 - z1)2)
     diff = z2 - z1
 
 #     v = np.where(diff != 0., d/diff, 100)
@@ -853,7 +853,7 @@ def cf_cloud(beam, diffuse, cf):
     CCOEF = 1.38
 
     # cloud attenuation, beam ratio is reduced
-    bf_c = CCOEF * (cf - CRAT1)**2
+    bf_c = CCOEF * (cf - CRAT1)2
     c_grad = beam * cf
     c_brad = c_grad * bf_c
     c_drad = c_grad - c_brad
@@ -914,7 +914,7 @@ def twostream(mu0, S0, tau=0.2, omega=0.85, g=0.3, R0=0.5, d=False):
 
     Args:
         mu0 - The cosine of the incidence angle is cos (from program sunang).
-        0 - Do not force an error if mu0 is <= 0.0; set all outputs to 0.0 and
+        0 - Do not force an error if mu0 is <= 0.0 set all outputs to 0.0 and
             go on. Program will fail if incidence angle is <= 0.0, unless -0
             has been set.
         tau - The optical depth is tau.  0 implies an infinite optical depth.
@@ -1131,3 +1131,221 @@ def get_hrrr_cloud(df_solar, df_meta, logger, lat, lon):
     #     df_cf[cl] = cf_vals
 
     return df_cf
+
+
+  
+
+
+
+def dsign(a, b):
+    """
+    modified from /usr/src/lib/libF77/d_sign.c
+    """
+
+	x = a if a >= 0 else -a
+    y = x if b >= 0 then -x)
+	return y
+
+
+# original ibm 360/44 fortran ivf - vislab - wilson - 29jul79
+# translated, modified and reduced by dozier - ucsb - 11/81
+
+def ephemeris(dt, r):
+    """
+    NAME
+        ephemeris - calculates ephemeris data
+
+    SYNOPSIS
+        #include "solar.h"
+
+        int
+        ephemeris(
+            datetime_t  *dt,	|* date-time (GMT)		 *|
+            double      *r,		|* radius vector		 *|
+            double      *declin,	|* declination (radians, +north) *|
+            double      *omega)	|* sun longitude (radians +east) *|
+
+    DESCRIPTION
+        Calculates radius vector, declination, and apparent longitude
+        of sun, as function of the given date and time.
+
+        The routine is adapted from:
+
+        W. H. Wilson, Solar ephemeris algorithm, Reference 80-13, 70
+            pp., Scripps Institution of Oceanography, University of
+            California, San Diego, La Jolla, CA, 1980.
+
+    RETURN VALUE
+        OK	calculations succeeded, and output parameters assigned.
+
+        ERROR   error occurred, and message stored via 'usrerr' routine.
+    """
+    JULIAN_CENTURY = 36525		# days in Julian century
+    DEGS_IN_CIRCLE = 360        # degrees in circle
+#define	TOLERANCE	FLT_EPSILON
+
+	one = 1
+	degrd = atan(one) / 45
+
+    # Convert time to seconds since midnight
+	gmts = HR_TO_SEC(dt->hour) + MIN_TO_SEC(dt->min) + dt->sec
+
+    # p51 = gmts/3600/24*360
+
+	p51 = gmts / 10.0 / 24.0
+	p22 = ((dt->year - 1900) * JULIAN_CENTURY - 25) / 100
+	      + yearday(dt->year, dt->month, dt->day) - 0.5
+	p23 = (p51 / DEGS_IN_CIRCLE + p22) / JULIAN_CENTURY
+	p22 = p23 * JULIAN_CENTURY
+
+    # mean longitude - p24
+	p11 = 279.69668
+	p12 = 0.9856473354
+	p13 = 3.03e-4
+	p24 = p11 + fmod(p12 * p22, DEGS_IN_CIRCLE) + p13 * p23 * p23
+	p24 = fmod(p24, DEGS_IN_CIRCLE)
+
+    # mean anomaly - p25
+	p11 = 358.47583
+	p12 = 0.985600267
+	p13 = -1.5e-4
+	p14 = -3.e-6
+	p25 = p11 + fmod(p12 * p22, DEGS_IN_CIRCLE)
+		  + p23 * p23 * (p13 + p14 * p23)
+	p25 = fmod(p25, DEGS_IN_CIRCLE)
+ 
+    # eccentricity - p26
+	p11 = 0.01675104
+	p12 = -4.18e-5
+	p13 = -1.26e-7
+	p26 = p11 + p23 * (p12 + p13 * p23)
+	p11 = p25 * degrd
+	p12 = p11
+
+	do {
+		p13 = p12
+		p12 = p11 + p26 * sin(p13)
+	}
+	while (fabs((p12 - p13) / p12) > TOLERANCE)
+
+	p13 = p12 / degrd
+
+    # true anomaly - p27
+	p27 = 2.0 * atan(sqrt((1.0 + p26) / (1.0 - p26))
+			 * tan(p13 / 2.0 * degrd)) / degrd
+	if (dsign(1.0, p27) != dsign(1.0, sin(p13 * degrd)))
+		p27 += 1.8e2
+	if (p27 < 0.0)
+		p27 += DEGS_IN_CIRCLE
+ 
+    # radius vector - r
+	r = 1.0 - p26 * cos(p13 * degrd)
+
+    # aberration - p29
+	p29 = SEC_TO_HR(-20.47 / (*r))
+ 
+    # mean obliquity - p43
+	p11 = 23.452294
+	p12 = -0.0130125
+	p13 = -1.64e-6
+	p14 = 5.03e-7
+	p43 = p11 + p23 * (p12 + p23 * (p13 + p14 * p23))
+ 
+    #  mean ascension - p45
+	p11 = 279.6909832
+	p12 = 0.98564734
+	p13 = 3.8707
+	p13 = 3.8708e-4
+	p45 = p11 + fmod(p12 * p22, DEGS_IN_CIRCLE) + p13 * p23 * p23
+	p45 = fmod(p45, DEGS_IN_CIRCLE)
+ 
+    # nutation and longitude pert
+	p11 = 296.104608
+	p12 = 1325 * DEGS_IN_CIRCLE
+	p13 = 198.8491083
+	p14 = 0.00919167
+	p15 = 1.4388e-5
+	p28 = p11 + fmod(p12 * p23, DEGS_IN_CIRCLE)
+		+ p23 * (p13 + p23 * (p14 + p15 * p23))
+	p28 = fmod(p28, DEGS_IN_CIRCLE)
+ 
+    # mean elongation of moon - p30
+	p11 = 350.737486
+	p12 = 1236 * DEGS_IN_CIRCLE
+	p13 = 307.1142167
+	p14 = 1.436e-3
+	p30 = p11 + fmod(p12 * p23, DEGS_IN_CIRCLE) + p23 * (p13 + p14 * p23)
+	p30 = fmod(p30, DEGS_IN_CIRCLE)
+ 
+    # moon long of ascending node - p31
+	p11 = 259.183275
+	p12 = -5 * DEGS_IN_CIRCLE
+	p13 = -134.142008
+	p14 = 2.0778e-3
+	p31 = p11 + fmod(p12 * p23, DEGS_IN_CIRCLE) + p23 * (p13 + p14 * p23)
+	p31 = fmod(p31, DEGS_IN_CIRCLE)
+ 
+    # mean long of moon - p31
+	p11 = 270.434164
+	p12 = 1336 * DEGS_IN_CIRCLE
+	p13 = 307.8831417
+	p14 = -1.1333e-3
+	p32 = p11 + fmod(p12 * p23, DEGS_IN_CIRCLE) + p23 * (p13 + p14 * p23)
+	p32 = fmod(p32, DEGS_IN_CIRCLE)
+ 
+    # moon perturbation of sun long - p33
+	p33 = 6.454 * sin(p30 * degrd) + 0.013 * sin(3 * p30 * degrd) +
+		0.177 * sin((p30 + p28) * degrd) -
+		0.424 * sin((p30 - p28) * degrd)
+	p33 = SEC_TO_HR(p33)
+ 
+    # nutation of long - p34
+	p34 = -(17.234 - 0.017 * p23) * sin(p31 * degrd) +
+		0.209 * sin(2 * p31 * degrd) -
+		0.204 * sin(2 * p32 * degrd)
+	p34 = p34 - 1.257 * sin(2 * p24 * degrd) + 0.127 * sin(p28 * degrd)
+	p34 = SEC_TO_HR(p34)
+ 
+    # nutation in obliquity - p34
+	p35 = 9.214 * cos(p31 * degrd) + 0.546 * cos(2 * p24 * degrd) -
+		.09 * cos(2 * p31 * degrd) + 0.088 * cos(2 * p32 * degrd)
+	p35 = SEC_TO_HR(p35)
+ 
+    # inequalities of long period - p36
+	p36 = 0.266 * sin((31.8 + 119 * p23) * degrd) +
+		((1.882 - 0.016 * p23) * degrd) *
+		sin((57.24 + 150.27 * p23) * degrd)
+	p36 = p36 + 0.202 * sin((315.6 + 893.3 * p23) * degrd) +
+		1.089 * p23 * p23 + 6.4 * sin((231.19 + 20.2 * p23) * degrd)
+	p36 = SEC_TO_HR(p36)
+
+    # apparent longitude - p41
+	p41 = p27 - p25 + p24 + p29 + p33 + p36 + p34
+
+	p43 += p35
+ 
+    # apparent right ascension - p44
+	p44 = atan(tan(p41 * degrd) * cos(p43 * degrd)) / degrd
+	if (dsign(one, p44) != dsign(one, sin(p41 * degrd)))
+		p44 += 1.8e2
+	if (p44 < 0.)
+		p44 += DEGS_IN_CIRCLE
+
+    # equation of time - p46
+	p46 = p45 - p44
+	if (p46 > 1.8e2)
+		p46 -= DEGS_IN_CIRCLE
+
+    # declination - p47
+	p47 = asin(sin(p41 * degrd) * sin(p43 * degrd))
+	declin = p47
+ 
+    # hour angle in degrees - p48
+	p48 = p51 + p46 - 1.8e2
+	if (p48 > 180)
+		p48 -= DEGS_IN_CIRCLE
+	else if (p48 < -180)
+		p48 += DEGS_IN_CIRCLE
+	omega = -p48 * degrd
+
+	return declin, omega
