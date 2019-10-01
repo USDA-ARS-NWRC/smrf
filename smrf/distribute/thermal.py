@@ -265,7 +265,7 @@ class th(image_data.image_data):
         if self.clear_sky_method == 'marks1979':
             cth = np.zeros_like(air_temp, dtype=np.float64)
             envphys_c.ctopotherm(air_temp, dew_point, self.dem, self.sky_view,
-                                 cth, self.config['marks1979_nthread'])
+                                 cth, self.config['marks1979_nthreads'])
 
         elif self.clear_sky_method == 'dilley1998':
             cth = thermal_radiation.Dilly1998(air_temp, vapor_pressure/1000)
