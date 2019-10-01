@@ -74,40 +74,42 @@ class TestRadiation(SMRFTestCase):
         self.assertEqual(round(r, 9), 0.987871247)
 
 
-    # The code that generated the figures in the PR for comparison
-    # between the IPW version and the Pysolar version
-    def test_sunang_timeseries(self):
-        """ Sunang calculation timeseries """ 
+    # # The code that generated the figures in the PR for comparison
+    # # between the IPW version and the Pysolar version
+    # def test_sunang_timeseries(self):
+    #     """ Sunang calculation timeseries """ 
 
-        # RME basin lat/lon
-        lon = -116.7547
-        lat = 43.067
+    #     # RME basin lat/lon
+    #     lon = -116.7547
+    #     lat = 43.067
 
-        date_time = pd.date_range('2015-10-01 00:00', '2016-09-30 00:00', freq='H', tz='UTC')
+    #     date_time = pd.date_range('2015-10-01 00:00', '2016-09-30 00:00', freq='H', tz='UTC')
         
-        df = pd.DataFrame(
-            index=date_time,
-            columns=['ipw_cosz', 'ipw_az', 'py_cosz', 'py_az']
-            )
+    #     df = pd.DataFrame(
+    #         index=date_time,
+    #         columns=['ipw_cosz', 'ipw_az', 'py_cosz', 'py_az']
+    #         )
 
-        for dt in date_time:
-            print(dt)
-            result = radiation.sunang(dt, lat, lon)
-            df.loc[dt, ['ipw_cosz', 'ipw_az']] = result
+    #     for dt in date_time:
+    #         print(dt)
+    #         result = radiation.sunang(dt, lat, lon)
+    #         df.loc[dt, ['ipw_cosz', 'ipw_az']] = result
 
-            result = sunang.sunang(dt, lat, lon)
-            df.loc[dt, ['py_cosz', 'py_az']] = result
+    #         presult = sunang.sunang(dt, lat, lon)
+    #         # df.loc[dt, ['py_cosz', 'py_az']] = [round(presult[0], 6), round(presult[1], 3)]
+    #         df.loc[dt, ['py_cosz', 'py_az']] = presult[0:2]
 
-        df['zen_diff'] = (df['ipw_cosz'] - df['py_cosz']) * 180 / np.pi
-        df['az_diff'] = df['ipw_az'] - df['py_az']
+    #     df['zen_diff'] = (df['ipw_cosz'] - df['py_cosz']) * 180 / np.pi
+    #     df['az_diff'] = df['ipw_az'] - df['py_az']
 
-        df.to_csv('sunang_comparison.csv')
+    #     df.to_csv('sunang_comparison.csv')
 
-        ax = df['zen_diff'].hist(bins=50)
-        ax.set_title('IPW zenith - Python zenith')
-        ax.set_xlabel('Zenith difference, degrees')
+    #     ax = df['zen_diff'].hist(bins=50)
+    #     ax.set_title('IPW zenith - Python zenith')
+    #     ax.set_xlabel('Zenith difference, degrees')
         
-        ax = df['az_diff'].hist(bins=50)
-        ax.set_title('IPW azimuth - Python azimuth')
-        ax.set_xlabel('Azimuth difference, degrees')
+    #     ax = df['az_diff'].hist(bins=50)
+    #     ax.set_title('IPW azimuth - Python azimuth')
+    #     ax.set_xlabel('Azimuth difference, degrees')
+
         
