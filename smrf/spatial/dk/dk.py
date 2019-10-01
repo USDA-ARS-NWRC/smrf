@@ -188,7 +188,7 @@ class DK:
         # calculate the weights
         wg = np.zeros_like(dgrid)
         detrended_kriging.call_grid(self.ad, self.dgrid, mz.astype(np.double),
-                                    wg, self.config['dk_nthreads'])
+                                    wg, self.config['dk_ncores'])
 
         # reshape the weights
         self.weights = np.zeros((self.GridX.shape[0],

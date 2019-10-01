@@ -84,7 +84,7 @@ class solar(image_data.image_data):
     Attributes:
         config: configuration from [cloud_factor] section
         albedoConfig: configuration from [albedo] section
-        solarConfig: configuration from [albedo] section
+        config: configuration from [albedo] section
 
         stoporad_in: file path to the stoporad_in file created from
             :mod:`smrf.data.loadTopo.topo`
@@ -203,14 +203,13 @@ class solar(image_data.image_data):
     # be written during main distribute loop
     post_process_variables = {}
 
-    def __init__(self, config, cloud_factor, stoporad_in, tempDir=None):
+    def __init__(self, config, stoporad_in, tempDir=None):
 
         # extend the base class
         image_data.image_data.__init__(self, self.variable)
         self._logger = logging.getLogger(__name__)
 
         self.config = config["solar"]
-        self.cloud_factor = cloud_factor
         self.albedoConfig = config["albedo"]
 
         self.stoporad_in = stoporad_in
@@ -251,7 +250,7 @@ class solar(image_data.image_data):
         self.veg_tau = topo.veg_tau
         self.veg_k = topo.veg_k
 
-    def distribute(self, data, illum_ang, cosz, azimuth, min_storm_day,
+    def distribute(self, t, cloud_factor, illum_ang, cosz, azimuth, min_storm_day,
                    albedo_vis, albedo_ir):
         """
         Distribute air temperature given a Panda's dataframe for a single time
@@ -260,19 +259,18 @@ class solar(image_data.image_data):
         If the sun is up, i.e. ``cosz > 0``, then the following steps are
         performed:
 
-        1. Distribute cloud factor
-        2. Model clear sky radiation
-        3. Cloud correct with :mod:`!smrf.distribute.solar.solar.cloud_correct`
-        4. vegetation correct with
+        1. Model clear sky radiation
+        2. Cloud correct with :mod:`!smrf.distribute.solar.solar.cloud_correct`
+        3. vegetation correct with
             :mod:`!smrf.distribute.solar.solar.veg_correct`
-        5. Calculate net radiation with
+        4. Calculate net radiation with
             :mod:`!smrf.distribute.solar.solar.calc_net`
 
         If sun is down, then all calculated values will be set to ``None``,
         signaling the output functions to put zeros in their place.
 
         Args:
-            data: Pandas dataframe for a single time step from cloud_factor
+            cloud_factor: Numpy array of the domain for cloud factor
             cosz: cosine of the zenith angle for the basin, from
                 :mod:`smrf.envphys.radiation.sunang`
             azimuth: azimuth to the sun for the basin, from
@@ -286,12 +284,13 @@ class solar(image_data.image_data):
 
         """
 
-        self._logger.debug('%s Distributing solar' % data.index)
+        self._logger.debug('%s Distributing solar' % t)
+        self.cloud_factor = cloud_factor.copy()
 
-        # only need to calculate solar if the sun is up
+        # Only calculate solar if the sun is up
         if cosz > 0:
 
-            wy_day, wyear, tz_min_west = self.radiation_dates(data.name)
+            wy_day, wyear, tz_min_west = self.radiation_dates(t)
 
             # --------------------------------------------
             # calculate clear sky radiation
@@ -315,7 +314,7 @@ class solar(image_data.image_data):
 
             # --------------------------------------------
             # correct clear sky for cloud
-            if self.solarConfig['correct_cloud']:
+            if self.config['correct_cloud']:
                 self.cloud_correct()
                 # copy output for output variables
                 self.cloud_vis_beam = self.vis_beam.copy()
@@ -325,7 +324,7 @@ class solar(image_data.image_data):
 
             # --------------------------------------------
             # correct cloud for veg
-            if self.solarConfig['correct_veg']:
+            if self.config['correct_veg']:
                 self.veg_correct(illum_ang)
                 self.veg_vis_beam = self.vis_beam.copy()
                 self.veg_vis_diffuse = self.vis_diffuse.copy()
@@ -403,7 +402,7 @@ class solar(image_data.image_data):
                 self.vis_diffuse = self.clear_vis_diffuse.copy()
 
                 # correct clear sky for cloud
-                if self.solarConfig['correct_cloud'] == True:
+                if self.config['correct_cloud'] == True:
                     self.cloud_correct()
                     # copy output for output variables
                     self.cloud_vis_beam = self.vis_beam.copy()
@@ -413,7 +412,7 @@ class solar(image_data.image_data):
 
                 # correct cloud for veg
                 illum_ang = queue['illum_ang'].get(t)
-                if self.solarConfig['correct_veg'] == True:
+                if self.config['correct_veg'] == True:
                     self.veg_correct(illum_ang)
                     # copy output for output variables
                     self.veg_vis_beam = self.vis_beam.copy()
@@ -430,25 +429,27 @@ class solar(image_data.image_data):
 
             else:
                 self.net_solar = None
-                if self.solarConfig['correct_veg'] == True:
+
+                if self.config['correct_veg'] == True:
                     self.veg_vis_beam = None
                     self.veg_vis_diffuse = None
                     self.veg_ir_beam = None
                     self.veg_ir_diffuse = None
-                if self.solarConfig['correct_cloud'] == True:
+
+                if self.config['correct_cloud'] == True:
                     self.cloud_vis_beam = None
                     self.cloud_vis_diffuse = None
                     self.cloud_ir_beam = None
                     self.cloud_ir_diffuse = None
 
 
-            if self.solarConfig['correct_veg'] == True:
+            if self.config['correct_veg'] == True:
                 queue['veg_vis_beam'].put([t, self.veg_vis_beam])
                 queue['veg_vis_diffuse'].put([t, self.veg_vis_diffuse])
                 queue['veg_ir_beam'].put([t, self.veg_ir_beam])
                 queue['veg_ir_diffuse'].put([t, self.veg_ir_diffuse])
 
-            if self.solarConfig['correct_cloud'] == True:
+            if self.config['correct_cloud'] == True:
                 queue['cloud_vis_beam'].put([t, self.cloud_vis_beam])
                 queue['cloud_vis_diffuse'].put([t, self.cloud_vis_diffuse])
                 queue['cloud_ir_beam'].put([t, self.cloud_ir_beam])
@@ -515,12 +516,12 @@ class solar(image_data.image_data):
 
         self._logger.debug('Correcting clear sky radiation for clouds')
         self.vis_beam, self.vis_diffuse = radiation.cf_cloud(self.vis_beam,
-                                                                         self.vis_diffuse,
-                                                                         self.cloud_factor)
+                                                             self.vis_diffuse,
+                                                             self.cloud_factor)
 
         self.ir_beam, self.ir_diffuse = radiation.cf_cloud(self.ir_beam,
-                                                                       self.ir_diffuse,
-                                                                       self.cloud_factor)
+                                                           self.ir_diffuse,
+                                                           self.cloud_factor)
 
     def veg_correct(self, illum_ang):
         """
@@ -608,10 +609,10 @@ class solar(image_data.image_data):
 
         ir_cmd = 'stoporad -z %i -t %s -w %s -g %s -x 0.7,2.8 -s %s'\
             ' -d %s -f %i -y %i -A %f,%f -a %i -m %i -c %i -D %s > %s' \
-            % (self.solarConfig['clear_opt_depth'],
-               str(self.solarConfig['clear_tau']),
-               str(self.solarConfig['clear_omega']),
-               str(self.solarConfig['clear_gamma']),
+            % (self.config['clear_opt_depth'],
+               str(self.config['clear_tau']),
+               str(self.config['clear_omega']),
+               str(self.config['clear_gamma']),
                str(min_storm_day),
                str(wy_day),
                tz_min_west, wyear,
@@ -622,7 +623,7 @@ class solar(image_data.image_data):
                self.stoporad_in,
                self.ir_file)
 
-#         self._logger.debug(ir_cmd)
+        #self._logger.debug(ir_cmd)
 
         irp = sp.Popen(ir_cmd,
                        shell=True,
@@ -662,10 +663,10 @@ class solar(image_data.image_data):
 
         vis_cmd = 'stoporad -z %i -t %s -w %s -g %s -x 0.28,0.7 -s %s'\
             ' -d %s -f %i -y %i -A %f,%f -a %i -m %i -c %i -D %s > %s' \
-            % (self.solarConfig['clear_opt_depth'],
-               str(self.solarConfig['clear_tau']),
-               str(self.solarConfig['clear_omega']),
-               str(self.solarConfig['clear_gamma']),
+            % (self.config['clear_opt_depth'],
+               str(self.config['clear_tau']),
+               str(self.config['clear_omega']),
+               str(self.config['clear_gamma']),
                str(min_storm_day),
                str(wy_day),
                tz_min_west,

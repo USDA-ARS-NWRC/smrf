@@ -195,7 +195,7 @@ class output_netcdf():
         f.variables['time'][index] = t
 
         # insert the data
-        if self.outConfig['mask']:
+        if self.outConfig['mask_output']:
             f.variables[variable][index, :] = data*self.mask
         else:
             f.variables[variable][index, :] = data
