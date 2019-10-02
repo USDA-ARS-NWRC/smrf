@@ -32,7 +32,7 @@ import pandas as pd
 import numpy as np
 import pytz
 from smrf import data, distribute, output, __core_config__, __recipes__
-from smrf.envphys import radiation
+from smrf.envphys import radiation, sunang
 from smrf.utils import queue, io
 from smrf.utils.utils import backup_input, getqotw, check_station_colocation
 from threading import Thread
@@ -544,9 +544,9 @@ class SMRF():
 
             self._logger.info('Distributing time step %s' % t)
             # 0.1 sun angle for time step
-            cosz, azimuth = radiation.pysolar_sunang(t.astimezone(pytz.utc),
-                                                    self.topo.topoConfig['basin_lat'],
-                                                    self.topo.topoConfig['basin_lon'])
+            cosz, azimuth, rad_vec = sunang.sunang(t.astimezone(pytz.utc),
+                                            self.topo.topoConfig['basin_lat'],
+                                            self.topo.topoConfig['basin_lon'])
 
             # 0.2 illumination angle
             illum_ang = None
@@ -699,7 +699,7 @@ class SMRF():
         # Distribute the data
 
         # 0.1 sun angle for time step
-        t.append(Thread(target=radiation.pysolar_sunang_thread,
+        t.append(Thread(target=sunang.sunang_thread,
                         name='sun_angle',
                         args=(q, self.date_time,
                               self.topo.topoConfig['basin_lat'],

@@ -1,5 +1,7 @@
 import numpy as np
 from math import fmod, tan, atan, cos, sin, asin, sqrt
+import logging
+import pytz
 
 JULIAN_CENTURY = 36525		# days in Julian century
 DEGS_IN_CIRCLE = 3.6e2        # degrees in circle
@@ -9,15 +11,16 @@ M_PI_2 = 2 * M_PI
 MAX_DECLINATION = 23.6
 
 
-def sunang(date_time, latitude, longitude):
+def sunang(date_time, latitude, longitude, truncate=True):
     """
     Args:
         date_time: python datetime object
         latitude: in degrees
         longitude: in degrees
+        truncate: True will replicate the IPW output precision
 
     Returns
-        cosz, azimuth
+        cosz, azimuth, rad_vec
     """
 
     # Calculate the ephemeris parameters
@@ -30,7 +33,39 @@ def sunang(date_time, latitude, longitude):
 
     azimuth = azimuth * 180 / M_PI
 
+    if truncate:
+        mu = float('{0:.6f}'.format(mu))
+        azimuth = float('{0:.5g}'.format(azimuth))
+        rad_vec = float('{0:.5g}'.format(rad_vec))
+
     return mu, azimuth, rad_vec
+
+
+def sunang_thread(queue, date, lat, lon):
+    """
+    See sunang for input descriptions
+
+    Args:
+        queue: queue with cosz, azimuth
+        date: loop through dates to accesss queue, must be same as rest of queues
+
+    """
+
+    if 'cosz' not in queue.keys():
+        raise ValueError('queue must have cosz key')
+    if 'azimuth' not in queue.keys():
+        raise ValueError('queue must have cosz key')
+
+    log = logging.getLogger(__name__)
+
+    for t in date:
+
+        log.debug('%s Calculating sun angle' % t)
+
+        cosz, azimuth, rad_vec = sunang(t.astimezone(pytz.utc), lat, lon)
+
+        queue['cosz'].put([t, cosz])
+        queue['azimuth'].put([t, azimuth])
 
 
 def sunpath(latitude, longitude, declination, omega):

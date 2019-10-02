@@ -13,7 +13,6 @@ import logging
 import pytz
 from smrf.utils import utils
 from smrf.utils.io import isint
-from pysolar.solar import get_position
 
 on_rtd = os.environ.get('READTHEDOCS') == 'True'
 if on_rtd:
@@ -648,60 +647,6 @@ def sunang_thread(queue, date, lat, lon, zone=0, slope=0, aspect=0):
 
         cosz, azimuth = sunang(t.astimezone(pytz.utc), lat, lon,
                                zone, slope, aspect)
-
-        queue['cosz'].put([t, cosz])
-        queue['azimuth'].put([t, azimuth])
-
-
-def pysolar_sunang(date_time, lat, lon):
-    """
-    Calculate the sun angles using [Pysolar](https://pysolar.readthedocs.io).
-    The refrence frame for pysolar is azimuth is 0 to the North and positive
-    east of north, negative or >180 are west of north. Altitude is the angle
-    from the horizon.
-
-    Args:
-        date - date to calculate sun angle for (datetime object)
-        lat - latitude in decimal degrees
-        lon - longitude in decimal degrees
-
-    Returns:
-        cosz - cosine of the zeinith angle
-        azimuth - solar azimuth
-    """
-
-    # Altitude as a zenith
-    azimuth_deg, altitude_deg = get_position(lat, lon, date_time)
-    cosz = np.cos((90 - altitude_deg) * np.pi / 180)
-        
-    # azimuth
-    # Reference is north is 0
-    azimuth = 180 - azimuth_deg
-
-    return cosz, azimuth
-
-def pysolar_sunang_thread(queue, date, lat, lon):
-    """
-    See sunang for input descriptions
-
-    Args:
-        queue: queue with cosz, azimuth
-        date: loop through dates to accesss queue, must be same as rest of queues
-
-    """
-
-    if 'cosz' not in queue.keys():
-        raise ValueError('queue must have cosz key')
-    if 'azimuth' not in queue.keys():
-        raise ValueError('queue must have cosz key')
-
-    log = logging.getLogger(__name__)
-
-    for t in date:
-
-        log.debug('%s Calculating sun angle' % t)
-
-        cosz, azimuth = pysolar_sunang(t.astimezone(pytz.utc), lat, lon)
 
         queue['cosz'].put([t, cosz])
         queue['azimuth'].put([t, azimuth])

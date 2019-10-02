@@ -16,15 +16,15 @@ class TestRadiation(SMRFTestCase):
 
         # replicate the sun angle calculation from the sunang man page
         # for Santa Barbara on Feb 15, 1990 at 20:30 UTC
-        # The difference between IPW sunang and Pysolar for the following
-        # example are:
-        #           | IPW       | PySolar
-        # zenith    | 47.122    | 47.107
-        # cosz      | 0.680436  | 0.680631
-        # azimuth   | -5.413    | -5.416
+        # 
+        #           | IPW       
+        # zenith    | 47.122    
+        # cosz      | 0.680436
+        # azimuth   | -5.413
         #
-        # The differences for this one instance is hundredths of degrees
-        # in zenith and thousandths in azimuth
+        # The differences between the IPW version and python version
+        # are insignificant and are only different because of the
+        # values are pulled from stdout for IPW which uses printf
 
         date_time = pd.to_datetime('2/15/1990 20:30')
         date_time = date_time.tz_localize('UTC')
@@ -33,9 +33,6 @@ class TestRadiation(SMRFTestCase):
         ipw_cosz = 0.680436
         ipw_azimuth = -5.413
         ipw_rad_vector = 0.98787
-        cosz = 0.6806311288888297
-        zenith = 47.107
-        az = -5.416396416371043
         
         result = radiation.sunang(date_time, lat, lon)
         self.assertTrue(result[0] == ipw_cosz)
@@ -43,14 +40,9 @@ class TestRadiation(SMRFTestCase):
 
         # try out the python version
         result = sunang.sunang(date_time, lat, lon)
-        self.assertTrue(round(result[0], 6), ipw_cosz)
-        self.assertTrue(round(result[1], 3), ipw_azimuth)
-        self.assertTrue(round(result[2], 5), ipw_rad_vector)
-
-
-        # result = radiation.pysolar_sunang(date_time, lat, lon)
-        # self.assertTrue(result[0] == cosz)
-        # self.assertTrue(result[1] == az)
+        self.assertTrue(result[0], ipw_cosz)
+        self.assertTrue(result[1], ipw_azimuth)
+        self.assertTrue(result[2], ipw_rad_vector)
 
     
     def test_sunang_functions(self):
