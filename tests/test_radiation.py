@@ -2,12 +2,11 @@ from copy import deepcopy
 import unittest
 import pandas as pd
 import numpy as np
+import utm
 
+from smrf.data import loadTopo
 from smrf.envphys import radiation, sunang
 from tests.test_configurations import SMRFTestCase
-
-from pysolar.solar import get_altitude, get_azimuth
-
 
 class TestRadiation(SMRFTestCase):
 
@@ -64,6 +63,38 @@ class TestRadiation(SMRFTestCase):
         self.assertEqual(round(declin, 9), -0.218992538)
         self.assertEqual(round(omega, 9), -2.163529935)
         self.assertEqual(round(r, 9), 0.987871247)
+
+    
+    def test_sunang_array(self):
+        """ Sunang as a numpy array """
+
+        date_time = pd.to_datetime('2/15/1990 20:30')
+        date_time = date_time.tz_localize('UTC')
+
+        topo_config = {
+            'basin_lon': -116.7547,
+            'basin_lat': 43.067,
+            'filename': 'tests/RME/topo/topo.nc',
+            'type': 'netcdf',
+            'threading': False
+        }
+        topo = loadTopo.topo(topo_config, calcInput=False, tempDir='tests/RME/output')
+
+        # convert from UTM to lat/long
+        lat, lon = utm.to_latlon(topo.X[0,0], topo.Y[0,0], 11, 'N')
+        lat = np.nan * np.zeros_like(topo.X)
+        lon = np.nan * np.zeros_like(topo.X)
+        for idx, x in np.ndenumerate(topo.X):
+            lat[idx], lon[idx] = utm.to_latlon(topo.X[idx], topo.Y[idx], 11, 'N')
+
+        self.assertFalse(np.any(np.isnan(lat)))
+        self.assertFalse(np.any(np.isnan(lon)))
+
+        cosz, azimuth, rad_vec = sunang.sunang(date_time, lat, lon)
+        
+        self.assertTrue(isinstance(cosz, np.ndarray))
+        self.assertTrue(isinstance(azimuth, np.ndarray))
+        self.assertTrue(isinstance(rad_vec, float))
 
 
     # # The code that generated the figures in the PR for comparison

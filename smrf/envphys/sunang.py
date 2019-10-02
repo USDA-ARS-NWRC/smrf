@@ -33,7 +33,7 @@ def sunang(date_time, latitude, longitude, truncate=True):
 
     azimuth = azimuth * 180 / M_PI
 
-    if truncate:
+    if truncate and not isinstance(mu, np.ndarray):
         mu = float('{0:.6f}'.format(mu))
         azimuth = float('{0:.5g}'.format(azimuth))
         rad_vec = float('{0:.5g}'.format(rad_vec))
@@ -80,11 +80,19 @@ def sunpath(latitude, longitude, declination, omega):
         cosz, azimuth in radians
     """
 
-    if np.abs(latitude) > M_PI_2:
-        raise ValueError("latitude ({} deg) not between -90 and +90 degrees".format(latitude*180/M_PI))
+    if isinstance(latitude, np.ndarray):
+        if np.any(np.abs(latitude) > M_PI_2):
+            raise ValueError("latitude array not between -90 and +90 degrees")
 
-    if np.abs(longitude) > M_PI:
-        raise ValueError("longitude ({} deg) not between -180 and +180 degrees".format(longitude*180/M_PI))
+        if np.any(np.abs(longitude) > M_PI):
+            raise ValueError("longitude array not between -180 and +180 degrees")
+
+    else:
+        if np.abs(latitude) > M_PI_2:
+            raise ValueError("latitude ({} deg) not between -90 and +90 degrees".format(latitude*180/M_PI))
+
+        if np.abs(longitude) > M_PI:
+            raise ValueError("longitude ({} deg) not between -180 and +180 degrees".format(longitude*180/M_PI))
 
     if np.abs(declination) > M_PI*MAX_DECLINATION/180:
         raise ValueError("declination ({} deg) > maximum declination ({} deg)".format(declination*180/M_PI, MAX_DECLINATION))
@@ -354,14 +362,22 @@ def rotate(mu, azm, mu_r, lam_r):
     if mu < -1.0 or mu > 1.0:
         raise ValueError("rotate: mu = cos(theta) = {} is not between -1 and +1".format(mu))
 
-    if mu_r < -1.0 or mu_r > 1.0:
-        raise ValueError("rotate: mu_rotate = cos(theta-sub-r) = {} is not between -1 and +1".format(mu_r))
+    if isinstance(mu_r, np.ndarray):
+        if np.any(mu_r < -1.0) or np.any(mu_r > 1.0):
+            raise ValueError("rotate, mu_r array is not between -1 and +1")
+    else:
+        if mu_r < -1.0 or mu_r > 1.0:
+            raise ValueError("rotate: mu_rotate = cos(theta-sub-r) = {} is not between -1 and +1".format(mu_r))
 
     if np.abs(azm) > (2 * np.pi):
         raise ValueError("rotate: azimuth ({} deg) is not between -360 and 360".format(180 * (azm * 360) / np.pi))
 
-    if np.abs(lam_r) > (2 * np.pi):
-        raise ValueError("rotate: lam_r ({} deg) = axis rotation, is not between -360 and 360".format(180 * lam_r / np.pi))
+    if isinstance(lam_r, np.ndarray):
+        if np.any(np.abs(lam_r) > (2 * np.pi)):
+            raise ValueError("rotate, lam_r array is not between -360 and 360")
+    else:
+        if np.abs(lam_r) > (2 * np.pi):
+            raise ValueError("rotate: lam_r ({} deg) = axis rotation, is not between -360 and 360".format(180 * lam_r / np.pi))
 
     # difference between azimuth and rotation angle of x-axis
     omega = lam_r - azm
@@ -377,15 +393,12 @@ def rotate(mu, azm, mu_r, lam_r):
     #Output:
     #azimuth and cosine of angle in rotated axis system.
     #(bug if trig routines trigger error)
-    aPrime = -np.arctan2(sinTheta * sin(omega),
+    aPrime = -np.arctan2(sinTheta * np.sin(omega),
                 mu_r * sinTheta * cosOmega - mu * sinThr)
     muPrime = sinTheta * sinThr * cosOmega + mu * mu_r
     
     return muPrime, aPrime
 
-
-
- 
 
 def yearday(year, month, day):
     """
