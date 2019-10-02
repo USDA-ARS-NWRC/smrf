@@ -77,9 +77,9 @@ def albedo(telapsed, cosz, gsize, maxgsz, dirt=2):
         tuple:
         Returns a tuple containing the visible and IR spectral albedo
 
-        - alb_v (*numpy.array*) - albedo for visible specturm
+        - **alb_v** (*numpy.array*) - albedo for visible specturm
 
-        - alb_ir (*numpy.array*) -  albedo for ir spectrum
+        - **alb_ir** (*numpy.array*) -  albedo for ir spectrum
 
     Created April 17, 2015
     Modified July 23, 2015 - take image of cosz and calculate albedo for
@@ -160,9 +160,9 @@ def decay_alb_power(veg, veg_type, start_decay, end_decay, t_curr, pwr, alb_v, a
         tuple:
         Returns a tuple containing the corrected albedo arrays
         based on date, veg type
-        - alb_v (*numpy.array*) - albedo for visible specturm
+        - **alb_v** (*numpy.array*) - albedo for visible specturm
 
-        - alb_ir (*numpy.array*) -  albedo for ir spectrum
+        - **alb_ir** (*numpy.array*) -  albedo for ir spectrum
 
 
     Created July 18, 2017
@@ -195,13 +195,13 @@ def decay_alb_power(veg, veg_type, start_decay, end_decay, t_curr, pwr, alb_v, a
     else:
         # Use defaults
         max_dec = veg['default']
-        tao = (t_decay_hr) / (max_dec(1.0/pwr))
+        tao = (t_decay_hr) / (max_dec**(1.0/pwr))
         # Add default decay to array of zeros
         alb_dec = alb_dec + ((t_diff_hr) / tao)**pwr
         # Decay based on veg type
         for k,v in veg.items():
             max_dec = v
-            tao = (t_decay_hr) / (max_dec(1.0/pwr))
+            tao = (t_decay_hr) / (max_dec**(1.0/pwr))
             # Set albedo decay at correct veg types
             if isint(k):
                 alb_dec[veg_type == int(k)] = ((t_diff_hr) / tao)**pwr
@@ -240,9 +240,9 @@ def decay_alb_hardy(litter, veg_type, storm_day, alb_v, alb_ir):
         tuple:
         Returns a tuple containing the corrected albedo arrays
         based on date, veg type
-        - alb_v (*numpy.array*) - albedo for visible specturm
+        - **alb_v** (*numpy.array*) - albedo for visible specturm
 
-        - alb_ir (*numpy.array*) -  albedo for ir spectrum
+        - **alb_ir** (*numpy.array*) -  albedo for ir spectrum
 
     Created July 19, 2017
     Micah Sandusky
@@ -254,13 +254,13 @@ def decay_alb_hardy(litter, veg_type, storm_day, alb_v, alb_ir):
     l_rate = litter['default']
     alb_litter = litter['albedo']
 
-    sc = sc + (1.0-l_rate)(storm_day)
+    sc = sc + (1.0-l_rate)**(storm_day)
     # calculate snow coverage based on veg type
     for k, v in litter.items():
         #self._logger.debug('litter {0}: {1}'.format(v, self.config['litter'][v] ) )
         l_rate = litter[k]
         if isint(k):
-            sc[veg_type == int(k)] = (1.0 - l_rate)(storm_day[veg_type == int(k)])
+            sc[veg_type == int(k)] = (1.0 - l_rate)**(storm_day[veg_type == int(k)])
     # calculate litter coverage
     lc = np.ones_like(alb_v) - sc
     # weighted average to find decayed albedo
@@ -503,7 +503,7 @@ def hor1f(x, z, offset=1):
 
         # Start with next-to-adjacent point in either forward or backward
         # direction, depending on which way loop is running. Note that we
-        # don't consider the adjacent point this seems to help reduce noise.
+        # don't consider the adjacent point; this seems to help reduce noise.
         k = i + offset
 
         if k >= N:
@@ -519,14 +519,14 @@ def hor1f(x, z, offset=1):
             sij = _slope(x[i], zi, x[j], z[j])
             sihj = _slope(x[i], zi, x[k], z[k])
 
-            # if slope(i,j) >= slope(i,h[j]), horizon has been found otherwise
+            # if slope(i,j) >= slope(i,h[j]), horizon has been found; otherwise
             # set j to k (=h[j]) and loop again
             # or if we are at the end of the section
             if sij > sihj:  # or k == N-1:
                 break
 
-        # if slope(i,j) > slope(j,h[j]), j is i's horizon else if slope(i,j)
-        # is zero, i is its own horizon otherwise slope(i,j) = slope(i,h[j])
+        # if slope(i,j) > slope(j,h[j]), j is i's horizon; else if slope(i,j)
+        # is zero, i is its own horizon; otherwise slope(i,j) = slope(i,h[j])
         # so h[j] is i's horizon
         if sij > sihj:
             h[i] = j
@@ -859,7 +859,7 @@ def twostream(mu0, S0, tau=0.2, omega=0.85, g=0.3, R0=0.5, d=False):
 
     Args:
         mu0 - The cosine of the incidence angle is cos (from program sunang).
-        0 - Do not force an error if mu0 is <= 0.0 set all outputs to 0.0 and
+        0 - Do not force an error if mu0 is <= 0.0; set all outputs to 0.0 and
             go on. Program will fail if incidence angle is <= 0.0, unless -0
             has been set.
         tau - The optical depth is tau.  0 implies an infinite optical depth.

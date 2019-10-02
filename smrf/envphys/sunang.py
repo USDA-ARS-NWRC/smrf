@@ -13,14 +13,22 @@ MAX_DECLINATION = 23.6
 
 def sunang(date_time, latitude, longitude, truncate=True):
     """
+    Calculate the sun angle (the azimuth and zenith angles of
+    the sun's position) for a given geodetic location for a single
+    date time and coordinates. The function can take either latitude
+    longitude position as a single point or numpy array.
+
     Args:
         date_time: python datetime object
-        latitude: in degrees
-        longitude: in degrees
-        truncate: True will replicate the IPW output precision
+        latitude: value or np.ndarray (in degrees)
+        longitude: value or np.ndarray (in degrees)
+        truncate: True will replicate the IPW output precision, not applied
+            if position is an array
 
     Returns
-        cosz, azimuth, rad_vec
+        cosz - cosine of the zeinith angle, same shape as input position
+        azimuth - solar azimuth, same shape as input position
+        rad_vec - Earth-Sun radius vector
     """
 
     # Calculate the ephemeris parameters
@@ -70,14 +78,17 @@ def sunang_thread(queue, date, lat, lon):
 
 def sunpath(latitude, longitude, declination, omega):
     """
+    Sun angle from solar declination and longtitude
+
     Args:
         latitude: in radians
         longitude: in radians
-        declination
-        omega
+        declination: solar declination (radians)
+        omega: solar longitude (radians)
 
     Returns
-        cosz, azimuth in radians
+        cosz: cosine of solar zenith
+        azimuth: solar azimuth in radians
     """
 
     if isinstance(latitude, np.ndarray):
@@ -118,33 +129,22 @@ def dsign(a, b):
 
 def ephemeris(dt):
     """
-    NAME
-        ephemeris - calculates ephemeris data
+    Calculates radius vector, declination, and apparent longitude
+    of sun, as function of the given date and time.
 
-    SYNOPSIS
-        #include "solar.h"
+    The routine is adapted from:
 
-        int
-        ephemeris(
-            datetime_t  *dt,	|* date-time (GMT)		 *|
-            double      *r,		|* radius vector		 *|
-            double      *declin,	|* declination (radians, +north) *|
-            double      *omega)	|* sun longitude (radians +east) *|
+    W. H. Wilson, Solar ephemeris algorithm, Reference 80-13, 70
+        pp., Scripps Institution of Oceanography, University of
+        California, San Diego, La Jolla, CA, 1980.
 
-    DESCRIPTION
-        Calculates radius vector, declination, and apparent longitude
-        of sun, as function of the given date and time.
+    Args:
+        dt: date time python object
 
-        The routine is adapted from:
-
-        W. H. Wilson, Solar ephemeris algorithm, Reference 80-13, 70
-            pp., Scripps Institution of Oceanography, University of
-            California, San Diego, La Jolla, CA, 1980.
-
-    RETURN VALUE
-        OK	calculations succeeded, and output parameters assigned.
-
-        ERROR   error occurred, and message stored via 'usrerr' routine.
+    Returns:
+        declin: solar declination angle, in radians
+        omega: sun longitude, in radians
+        r: Earth-Sun radius vector
     """
         
     one = 1.0
@@ -313,49 +313,21 @@ def ephemeris(dt):
 
 def rotate(mu, azm, mu_r, lam_r):
     """
-    NAME
-	rotate - rotation of spherical coordinates
+    Calculates new spherical coordinates if system rotated about
+    origin.  Coordinates are right-hand system.  All angles are in
+    radians.
 
-    SYNOPSIS
-        #include "ipw.h"
+    Args:
+        mu: cosine of angle theta from z-axis in old coordinate 
+            system, sin(declination)
+        azm: azimuth (+ccw from x-axis) in old coordinate system, 
+            hour angle of sun (long. where sun is vertical)
+        mu_r: cosine of angle theta_r of rotation of z-axis, sin(latitude)
+        lam_r: azimuth (+ccw) of rotation of x-axis, longitude
 
-        int
-        rotate(
-            double    mu,		|* cosine of angle theta from z-axis *|
-            double    azm,		|* azimuth (+ccw from x-axis) 	     *|
-            double    mu_r,		|* cosine of angle theta_r of
-                        rotation of z-axis		     *|
-            double    lam_r,	|* azimuth (+ccw) of x-axis rotation *|
-            double   *muPrime,	|* new cosine of angle from z'-axis  *|
-            double   *aPrime)	|* new azimuth from x'-axis	     *|
-
-    DESCRIPTION
-        Calculates new spherical coordinates if system rotated about
-        origin.  Coordinates are right-hand system.  All angles are in
-        radians.
-
-        input --
-        mu	cosine of angle theta from z-axis in old coordinate system
-        azm	azimuth (+ccw from x-axis) in old coordinate system
-        mu_r	cosine of angle theta_r of rotation of z-axis
-        lam_r	azimuth (+ccw) of rotation of x-axis
-
-        output --
-        muPrime	new value of cosine of angle from z'-axis
-        aPrime	new value of azimuth from x'-axis
-
-        for example, to use this program to calculate sun angles, set:
-
-        mu	= sin(declination)
-        azm	= hour angle of sun (long. where sun is vertical)
-        mu_r	= sin(latitude)
-        lam_r	= longitude
-
-        output will be muPrime = cosZ and aPrime = solar azimuth
-
-    RETURN VALUE
-        cosZ
-        solar azimuth
+    Returns:
+        muPrime: cosine of the solar zenith
+        aPrime: solar azimuth in radians
     """
 
     # Check input values: mu = cos(theta) mu_r = cos(theta-sub-r)
@@ -402,24 +374,17 @@ def rotate(mu, azm, mu_r, lam_r):
 
 def yearday(year, month, day):
     """
-    NAME
-        yearday -- returns the yearday (day of year) for a given date
+    yearday returns the yearday for the given date.  yearday is
+    the 'day of the year', sometimes called (incorrectly) 'julian day'.
 
-    SYNOPSIS
-        #include "ipw.h"
+    Args:
+        year
+        month
+        day
 
-        int
-        yearday(
-            int 	year,		|* e.g., 1997		*|
-            int 	month,		|* [1 - 12]		*|
-            int 	day)		|* [1 - 31]		*|
-
-    DESCRIPTION
-        yearday returns the yearday for the given date.  yearday is
-        the 'day of the year', sometimes called (incorrectly) 'julian day'.
-
-    RETURN VALUE
-        1 - 366
+    Returns:
+        yday: day of year
+        
     """
 
     assert(year >= 0)
@@ -437,23 +402,15 @@ def yearday(year, month, day):
 
 def numdays(year, month):
     """
-     NAME
-        numdays - return number of days in a month
-    
-    SYNOPSIS
-        #include "ipw.h"
+    numdays returns the number of days in the given month of
+    the given year.
 
-        int
-        numdays(
-            int		year,		|* year			*|
-            int		month)		|* month (1 to 12)	*|
+    Args:
+        year
+        month
     
-    DESCRIPTION
-        numdays retuns the number of days in the given month of
-        the given year.
-    
-    RETURN VALUE
-        number of days in month
+    Returns:
+        ndays: number of days in month
     """
 
     NDAYS = list([31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31])
@@ -472,25 +429,15 @@ def numdays(year, month):
 
 def leapyear(year):
     """
-    NAME
-        leapyear -- is a given year a leap year?
+    leapyear determines if the given year is a leap year or not.
+    year must be positive, and must not be abbreviated; i.e.
+    89 is 89 A.D. not 1989.
 
-    SYNOPSIS
-        #include "ipw.h"
+    Args:
+        year
 
-        bool_t
-        leapyear(
-            int 	year)
-
-    DESCRIPTION
-        leapyear determines if the given year is a leap year or not.
-        year must be positive, and must not be abbreviated; i.e.
-        89 is 89 A.D. not 1989.
-
-    RETURN VALUE
-        TRUE	if a leap year
-
-        FALSE	if not a leap year
+    Returns:
+        True if a leap year, False if not a leap year
     """
 
     assert(year >= 0)
