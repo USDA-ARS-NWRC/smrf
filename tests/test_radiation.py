@@ -96,6 +96,54 @@ class TestRadiation(SMRFTestCase):
         self.assertTrue(isinstance(azimuth, np.ndarray))
         self.assertTrue(isinstance(rad_vec, float))
 
+    
+    def test_solar(self):
+        """ Test the solar function """
+
+        # output from solar IPW function
+        sin = 150.214
+
+        # The example in solar
+        date_time = pd.to_datetime('6/22/1990 00:00')
+        date_time = date_time.tz_localize('UTC')
+
+        # IPW version
+        sipw = radiation.solar_ipw(date_time, w=[0.58, 0.68])
+        self.assertTrue(sipw == sin)
+
+        # Python version
+        spy = radiation.solar(date_time, w=[0.58, 0.68])
+        self.assertTrue(np.abs(spy - sin) <= 0.021)
+
+        
+    def test_solar_timeseries(self):
+        """ solar calculation timeseries """
+
+        date_time = pd.date_range('2015-10-01 00:00', '2016-09-30 00:00', freq='H', tz='UTC')
+
+        df = pd.DataFrame(
+            index=date_time,
+            columns=['solar_ipw', 'pysolar']
+            )
+
+        for dt in date_time:
+            print(dt)
+            result = radiation.solar_ipw(dt)
+            df.loc[dt, 'solar_ipw'] = result
+
+            presult = radiation.solar(dt)
+            df.loc[dt, 'pysolar'] = presult
+
+        df['solar_diff'] = df['solar_ipw'] - df['pysolar']
+
+        df.to_csv('solar_comparison.csv')
+
+        import matplotlib.pyplot as plt
+        ax = df['solar_diff'].hist(bins=50)
+        ax.set_title('IPW solar - Python solar')
+        ax.set_xlabel('Difference exoatmospheric direct solar irradiance [W/m2]')
+        plt.show()
+
 
     # # The code that generated the figures in the PR for comparison
     # # between the IPW version and the Pysolar version
@@ -134,5 +182,3 @@ class TestRadiation(SMRFTestCase):
     #     ax = df['az_diff'].hist(bins=50)
     #     ax.set_title('IPW azimuth - Python azimuth')
     #     ax.set_xlabel('Azimuth difference, degrees')
-
-        
