@@ -165,6 +165,7 @@ class albedo(image_data.image_data):
             Changes the queue albedo_vis, albedo_ir
                 for the given date
         """
+        self._logger.info("Distributing {}".format(self.variable))
 
         for t in date:
 

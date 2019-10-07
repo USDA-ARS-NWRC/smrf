@@ -451,12 +451,14 @@ class ppt(image_data.image_data):
             queue: queue dictionary for all variables
             data: pandas dataframe for all data, indexed by date time
         """
+        self._logger.info("Distributing {}".format(self.variable))
 
         for t in data.precip.index:
 
             dpt = queue['dew_point'].get(t)
             precip_temp = queue['precip_temp'].get(t)
             ta = queue['air_temp'].get(t)
+
             # variables for wind redistribution
             az = queue['wind_direction'].get(t)
             wind_speed = queue['wind_speed'].get(t)

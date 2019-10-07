@@ -174,6 +174,7 @@ class vp(image_data.image_data):
             queue: queue dictionary for all variables
             data: pandas dataframe for all data, indexed by date time
         """
+        self._logger.info("Distributing {}".format(self.variable))
 
         for t in data.index:
 

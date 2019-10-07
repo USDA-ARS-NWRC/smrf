@@ -42,7 +42,6 @@ from inicheck.config import UserConfig
 from inicheck.output import print_config_report,generate_config, print_recipe_summary
 
 
-
 class SMRF():
     """
     SMRF - Spatial Modeling for Resources Framework
@@ -70,6 +69,7 @@ class SMRF():
                'precip',
                'soil_temp',
                'solar',
+               'cloud_factor',
                'thermal',
                'vapor_pressure',
                'wind']
@@ -201,15 +201,15 @@ class SMRF():
                                           full_config_out,fname))
 
         self._logger.info("Writing config file with full options.")
-        generate_config(self.ucfg,full_config_out)
+        generate_config(self.ucfg, full_config_out)
 
         # process the system variables
         for k,v in self.config['system'].items():
-            setattr(self,k,v)
+            setattr(self, k, v)
 
         os.environ['WORKDIR'] = self.temp_dir
 
-        # Get the time sectionutils
+        # Get the time section utils
         self.start_date = pd.to_datetime(self.config['time']['start_date'])
         self.end_date = pd.to_datetime(self.config['time']['end_date'])
 
@@ -447,7 +447,7 @@ class SMRF():
             self.data.metadata['yi'] = \
                 self.data.metadata.apply(lambda row: find_pixel_location(row,
                                                                      self.topo.y,
-                                                                                 'Y'), axis=1)
+                                                                     'Y'), axis=1)
 
         # Pre-filter the data to only the desired stations
         if flag:
@@ -634,7 +634,7 @@ class SMRF():
         distributed values into the
         :func:`DateQueue <smrf.utils.queue.DateQueue_Threading>`.
         """
-        #Create threads for distribution
+        # Create threads for distribution
         t,q = self.create_distributed_threads()
 
         # output thread
@@ -669,6 +669,8 @@ class SMRF():
 
         # -------------------------------------
         # Initialize the distibutions
+        self._logger.info("Initializing distributed variables...")
+
         for v in self.distribute:
             self.distribute[v].initialize(self.topo, self.data)
 
@@ -677,22 +679,25 @@ class SMRF():
         q = {}
         t = []
 
+        # Add threaded variables on the fly
         self.thread_variables += ['storm_total']
-        if self.distribute['precip'].nasde_model == 'marks2017':
-            self.thread_variables += ['storm_id']
-
-        #Add threaded variables on the fly
-        if self.distribute['thermal'].correct_cloud:
-            self.thread_variables += ['thermal_cloud']
-        if self.distribute['thermal'].correct_veg:
-            self.thread_variables += ['thermal_veg']
-
-        # add some variables to thread_variables based on what we're doing
         self.thread_variables += ['flatwind']
         self.thread_variables += ['cellmaxus', 'dir_round_cell']
 
+        if self.distribute['precip'].nasde_model == 'marks2017':
+            self.thread_variables += ['storm_id']
+
+        if self.distribute['thermal'].correct_cloud:
+            self.thread_variables += ['thermal_cloud']
+
+        if self.distribute['thermal'].correct_veg:
+            self.thread_variables += ['thermal_veg']
+
+        self._logger.info("Staging {} threaded variables...".format(len(self.thread_variables)))
         for v in self.thread_variables:
-            q[v] = queue.DateQueue_Threading(self.queue_max_values, self.time_out)
+            q[v] = queue.DateQueue_Threading(self.queue_max_values,
+                                             self.time_out,
+                                             name=v)
 
         # -------------------------------------
         # Distribute the data

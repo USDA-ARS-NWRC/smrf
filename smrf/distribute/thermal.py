@@ -401,6 +401,8 @@ class th(image_data.image_data):
 
         """
 
+        self._logger.info("Distributing {}".format(self.variable))
+
         for t in data.index:
 
             air_temp = queue['air_temp'].get(t)

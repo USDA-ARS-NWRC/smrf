@@ -75,14 +75,13 @@ class solar(image_data.image_data):
     Args:
         config: full configuration dictionary contain at least the sections
                 albedo, and solar
-        cloud_factor: Numpy array representing cloud_factor
         stoporad_in: file path to the stoporad_in file created from
             :mod:`smrf.data.loadTopo.topo`
         tempDir: location of temp/working directory (default=None, which is the
             'WORKDIR' environment variable)
 
     Attributes:
-        config: configuration from [cloud_factor] section
+        config: configuration from solar section
         albedoConfig: configuration from [albedo] section
         config: configuration from [albedo] section
 
@@ -104,7 +103,7 @@ class solar(image_data.image_data):
         metadata: metadata for the station data
         net_solar: numpy array for the calculated net solar radiation
         output_variables: Dictionary of the variables held within class
-            :mod:`!smrf.distribute.air_temp.ta` that specifies the ``units``
+            :mod:`!smrf.distribute.solar.solar` that specifies the ``units``
             and ``long_name`` for creating the NetCDF output file.
         stations: stations to be used in alphabetical order
         stoporad_in: file path to the stoporad_in file created from
@@ -285,17 +284,17 @@ class solar(image_data.image_data):
         """
 
         self._logger.debug('%s Distributing solar' % t)
-        self.cloud_factor = cloud_factor.copy()
 
         # Only calculate solar if the sun is up
         if cosz > 0:
+            self.cloud_factor = cloud_factor.copy()
 
             wy_day, wyear, tz_min_west = self.radiation_dates(t)
 
             # --------------------------------------------
             # calculate clear sky radiation
 
-            # not all the clean but it will work for now
+            # Not all the clean but it will work for now
             val_beam, val_diffuse = self.calc_ir(min_storm_day, wy_day,
                                                  tz_min_west, wyear, cosz,
                                                  azimuth)
@@ -333,7 +332,6 @@ class solar(image_data.image_data):
 
             # --------------------------------------------
             # calculate net radiation
-
             self.calc_net(albedo_vis, albedo_ir)
 
         else:
@@ -371,18 +369,17 @@ class solar(image_data.image_data):
         data queues puts the distributed data into:
 
         * :py:attr:`net_solar`
-        * :py:attr:`cloud_factor`
-
 
         Args:
             queue: queue dictionary for all variables
             data: pandas dataframe for all data, indexed by date time
         """
-
+        self._logger.info("Distributing {}".format(self.variable))
         for t in data.index:
 
             # check if sun is up or not
             cosz = queue['cosz'].get(t)
+            self.cloud_factor = queue['cloud_factor'].get(t)
 
             if cosz > 0:
 
@@ -401,27 +398,32 @@ class solar(image_data.image_data):
                 self.vis_beam = self.clear_vis_beam.copy()
                 self.vis_diffuse = self.clear_vis_diffuse.copy()
 
-                # correct clear sky for cloud
+                # Correct clear sky for cloud effects
                 if self.config['correct_cloud'] == True:
                     self.cloud_correct()
-                    # copy output for output variables
+
+                    # Copy output for output variables
                     self.cloud_vis_beam = self.vis_beam.copy()
                     self.cloud_vis_diffuse = self.vis_diffuse.copy()
                     self.cloud_ir_beam = self.ir_beam.copy()
                     self.cloud_ir_diffuse = self.ir_diffuse.copy()
 
-                # correct cloud for veg
+
+                # correct for vegetation effects
                 illum_ang = queue['illum_ang'].get(t)
                 if self.config['correct_veg'] == True:
                     self.veg_correct(illum_ang)
+
                     # copy output for output variables
                     self.veg_vis_beam = self.vis_beam.copy()
                     self.veg_vis_diffuse = self.vis_diffuse.copy()
                     self.veg_ir_beam = self.ir_beam.copy()
                     self.veg_ir_diffuse = self.ir_diffuse.copy()
 
-                # get the albedo from the queue
+                # Get the albedo from the queue
+                self._logger.debug("Getting alebdo_vis")
                 albedo_vis = queue['albedo_vis'].get(t)
+                self._logger.debug("Getting alebdo_ir")
                 albedo_ir = queue['albedo_ir'].get(t)
 
                 # calculate net radiation
@@ -442,13 +444,14 @@ class solar(image_data.image_data):
                     self.cloud_ir_beam = None
                     self.cloud_ir_diffuse = None
 
-
+            # Add the veg correct variables to the queue if requested
             if self.config['correct_veg'] == True:
                 queue['veg_vis_beam'].put([t, self.veg_vis_beam])
                 queue['veg_vis_diffuse'].put([t, self.veg_vis_diffuse])
                 queue['veg_ir_beam'].put([t, self.veg_ir_beam])
                 queue['veg_ir_diffuse'].put([t, self.veg_ir_diffuse])
 
+            # Add the cloud corrected variables to the queue if requested
             if self.config['correct_cloud'] == True:
                 queue['cloud_vis_beam'].put([t, self.cloud_vis_beam])
                 queue['cloud_vis_diffuse'].put([t, self.cloud_vis_diffuse])
@@ -469,16 +472,14 @@ class solar(image_data.image_data):
         * :py:attr:`clear_ir_diffuse`
 
         """
-
         # the variable names
         beam = '%s_beam' % calc_type
         diffuse = '%s_diffuse' % calc_type
 
         for t in data.index:
-
-            # check if sun is up or not
             cosz = queue['cosz'].get(t)
 
+            # check if sun is up or not
             if cosz > 0:
 
                 # get the rest of the information
