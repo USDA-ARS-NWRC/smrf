@@ -317,10 +317,10 @@ def dist_precip_wind(precip, precip_temp, az, dir_round_cell, wind_speed,
     """
     # thresholds
     tbreak_threshold =  cfg['tbreak_threshold']
-    min_scour = cfg['min_scour']
-    max_scour = cfg['max_scour']
-    min_drift = cfg['min_drift']
-    max_drift = cfg['max_drift']
+    min_scour = cfg['winstral_min_scour']
+    max_scour = cfg['winstral_max_scour']
+    min_drift = cfg['winstral_min_drift']
+    max_drift = cfg['winstral_max_drift']
     precip_temp_threshold = 0.5
     # polynomial factors
     drift_poly = {}
