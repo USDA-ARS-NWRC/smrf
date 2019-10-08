@@ -115,6 +115,56 @@ class TestRadiation(SMRFTestCase):
         spy = radiation.solar(date_time, w=[0.58, 0.68])
         self.assertTrue(np.abs(spy - sin) <= 0.021)
 
+    def test_twostream(self):
+        """ Twostream calculation """
+
+        # IPW command from man twostream is the first test
+        # twostream -u 0.68 -t 0.2 -w 0.85 -g 0.3 -r 0.5 -s 159
+        # twostream -u 0.05 -t 0.3 -w 0.8 -g 0.35 -r 0.6 -s 60
+        # twostream -u 0.88 -t 0.2 -w 0.7 -g 0.3 -r 0.55 -s 1200
+
+        # inputs
+        cosz = [0.68, 0.05, 0.88]
+        tau = [0.2, 0.3, 0.2]
+        omega = [0.85, 0.8, 0.7]
+        g = [0.3, 0.35, 0.3]
+        R0 = [0.5, 0.6, 0.55]
+        S0 = [159, 60, 1200]
+
+        # outputs
+        reflectance = [0.472814, 0.577519, 0.465302]
+        transmittance = [0.912634, 0.365645, 0.912601]
+        direct_transmittance = [0.745189, 0.00247875, 0.796703]
+        upwelling_irradiance = [51.1207, 1.73256, 491.359]
+        total_irradiance_at_bottom = [98.674, 1.09694, 963.707]
+        direct_irradiance_normal_to_beam = [118.485, 0.148725, 956.044]
+
+        for n in [0, 1]:
+
+            # IPW way
+            ipw_R = radiation.twostream_ipw(
+                cosz[n], S0[n], tau=tau[n], omega=omega[n], g=g[n], R0=R0[n])
+            self.assertTrue(ipw_R[0] == reflectance[n])
+            self.assertTrue(ipw_R[1] == transmittance[n])
+            self.assertTrue(ipw_R[2] == direct_transmittance[n])
+            self.assertTrue(ipw_R[3] == upwelling_irradiance[n])
+            self.assertTrue(ipw_R[4] == total_irradiance_at_bottom[n])
+            self.assertTrue(ipw_R[5] == direct_irradiance_normal_to_beam[n])
+
+            # Python way
+            py_R = radiation.twostream(
+                cosz[n], S0[n], tau=tau[n], omega=omega[n], g=g[n], R0=R0[n])
+
+            # IPW is printed to %g format so convert
+            for i, r in enumerate(py_R):
+                py_R[i] = float('{:g}'.format(r))
+            self.assertTrue(py_R[0] == reflectance[n])
+            self.assertTrue(py_R[1] == transmittance[n])
+            self.assertTrue(py_R[2] == direct_transmittance[n])
+            self.assertTrue(py_R[3] == upwelling_irradiance[n])
+            self.assertTrue(py_R[4] == total_irradiance_at_bottom[n])
+            self.assertTrue(py_R[5] == direct_irradiance_normal_to_beam[n])
+
     def test_model_solar(self):
         """ Model solar radiation at a point """
 
@@ -127,13 +177,15 @@ class TestRadiation(SMRFTestCase):
         # IPW way
         ipw_cosz, ipw_az = radiation.sunang_ipw(date_time, lat, lon)
         ipw_sol = radiation.solar_ipw(date_time, [0.28, 2.8])
-        ipw_R = radiation.twostream(ipw_cosz, ipw_sol, tau=tau)
+        ipw_R = radiation.twostream_ipw(ipw_cosz, ipw_sol, tau=tau)
         ipw_R[4]
 
         # Python way
         py_cosz, py_az, py_rad_vec = sunang.sunang(date_time, lat, lon)
         py_sol = radiation.solar(date_time, [0.28, 2.8])
-        py_R = radiation.pytwostream(py_cosz, py_sol, tau=tau)
+        py_R = radiation.twostream(py_cosz, py_sol, tau=tau)
+
+        py_R
 
     # def test_solar_timeseries(self):
     #     """ solar calculation timeseries """

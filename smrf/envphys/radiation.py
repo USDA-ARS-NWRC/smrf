@@ -46,7 +46,7 @@ SEA_LEVEL = 1.013246e5  # sea level pressure
 RGAS = 8.31432e3        # gas constant (J / kmole / deg)
 GRAVITY = 9.80665       # gravity (m/s^2)
 MOL_AIR = 28.9644       # molecular weight of air (kg / kmole)
-SOLAR_CONSTANT = 1368.0 # solar constant in W/m**2
+SOLAR_CONSTANT = 1368.0  # solar constant in W/m**2
 
 
 def growth(t):
@@ -140,6 +140,7 @@ def albedo(telapsed, cosz, gsize, maxgsz, dirt=2):
 
     return alb_v, alb_ir
 
+
 def decay_alb_power(veg, veg_type, start_decay, end_decay, t_curr, pwr, alb_v, alb_ir):
     """
     Find a decrease in albedo due to litter acccumulation. Decay is based on max
@@ -176,10 +177,11 @@ def decay_alb_power(veg, veg_type, start_decay, end_decay, t_curr, pwr, alb_v, a
     """
     # Calculate hour past start of decay
     t_diff_hr = t_curr - start_decay
-    t_diff_hr = t_diff_hr.days*24.0 + t_diff_hr.seconds/3600.0 #only need hours here
+    t_diff_hr = t_diff_hr.days*24.0 + t_diff_hr.seconds/3600.0  # only need hours here
     # Calculate total time of decay
     t_decay_hr = (end_decay - start_decay)
-    t_decay_hr = t_decay_hr.days*24.0 + t_decay_hr.seconds/3600.0 #only need hours here
+    t_decay_hr = t_decay_hr.days*24.0 + \
+        t_decay_hr.seconds/3600.0  # only need hours here
     # correct for veg
     alb_dec = np.zeros_like(alb_v)
 
@@ -192,7 +194,7 @@ def decay_alb_power(veg, veg_type, start_decay, end_decay, t_curr, pwr, alb_v, a
         # Use default
         alb_dec = alb_dec + veg['default']
         # Decay based on veg type
-        for k,v in veg.items():
+        for k, v in veg.items():
             if isint(k):
                 alb_dec[veg_type == int(k)] = v
 
@@ -204,7 +206,7 @@ def decay_alb_power(veg, veg_type, start_decay, end_decay, t_curr, pwr, alb_v, a
         # Add default decay to array of zeros
         alb_dec = alb_dec + ((t_diff_hr) / tao)**pwr
         # Decay based on veg type
-        for k,v in veg.items():
+        for k, v in veg.items():
             max_dec = v
             tao = (t_decay_hr) / (max_dec**(1.0/pwr))
             # Set albedo decay at correct veg types
@@ -216,6 +218,7 @@ def decay_alb_power(veg, veg_type, start_decay, end_decay, t_curr, pwr, alb_v, a
     alb_ir_d = alb_ir - alb_dec
 
     return alb_v_d, alb_ir_d
+
 
 def decay_alb_hardy(litter, veg_type, storm_day, alb_v, alb_ir):
     """
@@ -262,10 +265,11 @@ def decay_alb_hardy(litter, veg_type, storm_day, alb_v, alb_ir):
     sc = sc + (1.0-l_rate)**(storm_day)
     # calculate snow coverage based on veg type
     for k, v in litter.items():
-        #self._logger.debug('litter {0}: {1}'.format(v, self.config['litter'][v] ) )
+        # self._logger.debug('litter {0}: {1}'.format(v, self.config['litter'][v] ) )
         l_rate = litter[k]
         if isint(k):
-            sc[veg_type == int(k)] = (1.0 - l_rate)**(storm_day[veg_type == int(k)])
+            sc[veg_type == int(k)] = (
+                1.0 - l_rate)**(storm_day[veg_type == int(k)])
     # calculate litter coverage
     lc = np.ones_like(alb_v) - sc
     # weighted average to find decayed albedo
@@ -273,6 +277,7 @@ def decay_alb_hardy(litter, veg_type, storm_day, alb_v, alb_ir):
     alb_ir_d = alb_ir*sc + alb_litter*lc
 
     return alb_v_d, alb_ir_d
+
 
 def ihorizon(x, y, Z, azm, mu=0, offset=2, ncores=0):
     """
@@ -303,7 +308,7 @@ def ihorizon(x, y, Z, azm, mu=0, offset=2, ncores=0):
     # transform the x,y into the azm direction xr,yr
     xi, yi = np.arange(-n/2, n/2), np.arange(-m/2, m/2)
     X, Y = np.meshgrid(xi, yi)
-    xr = X*np.cos(azm) -  Y*np.sin(azm)
+    xr = X*np.cos(azm) - Y*np.sin(azm)
     yr = X*np.sin(azm) + Y*np.cos(azm)
 
     # xr is the "new" column index for the profiles
@@ -851,7 +856,243 @@ def veg_diffuse(data, tau):
     return tau * data
 
 
-def twostream(mu0, S0, tau=0.2, omega=0.85, g=0.3, R0=0.5, d=False):
+def twostream(cosz, S0, tau=0.2, omega=0.85, g=0.3, R0=0.5):
+    """
+    Provides twostream solution for single-layer atmosphere over horizontal
+    surface, using solution method in: Two-stream approximations to radiative
+    transfer in planetary atmospheres: a unified description of existing
+    methods and a new improvement, Meador & Weaver, 1980, or will use the
+    delta-Eddington  method, if the -d flag is set (see: Wiscombe & Joseph
+    1977).
+
+    Args:
+        cosz: The cosine of the incidence angle is cos (from program sunang).
+            An error if cosz is <= 0.0; set all outputs to 0.0 and
+            go on. Program will fail if incidence angle is <= 0.0, unless -0
+            has been set.
+        S0: The direct beam irradiance is S0 This is usually the solar
+            constant for the specified wavelength band, on the specified date,
+            at the top of the atmosphere, from radiation.solar.
+        tau: The optical depth is tau.  0 implies an infinite optical depth.
+        omega: The single-scattering albedo
+        g: The asymmetry factor is g.
+        R0: The reflectance of the substrate is R0.  If R0 is negative, it
+            will be set to zero.
+
+    Returns:
+        R[0] - reflectance
+        R[1] - transmittance
+        R[2] - direct transmittance
+        R[3] - upwelling irradiance
+        R[4] - total irradiance at bottom
+        R[5] - direct irradiance normal to beam
+    """
+
+    if cosz <= 0:
+        raise ValueError('Cosine of incidence angle is less than 0')
+
+    if S0 <= 0:
+        raise ValueError('The direct beam irradiance (S0) is less than 0')
+
+    if tau == 0:
+        tau = 1e15
+
+    if R0 < 0:
+        R0 = 0
+
+    # gamma's for phase function for all input
+    gamma = mwgamma(cosz, omega, g)
+
+    # Calcuate twostream (from libmodel/radiation/twostream.c)
+    gam1 = gamma[0]
+    gam2 = gamma[1]
+    gam3 = gamma[2]
+    gam4 = gamma[3]
+    alph1 = gam1 * gam4 + gam2 * gam3
+    alph2 = gam2 * gam4 + gam1 * gam3
+    if gam1 < gam2:
+        raise ValueError("gam1 ({}) < gam2 ({})".format(gam1, gam2))
+
+    # (Hack - gam1 = gam2 with conservative scattering.  Need to fix this.
+    # Ruh-roh...
+    if gam1 == gam2:
+        gam1 += 2.2204460492503131e-16
+
+    xi = np.sqrt((gam1 - gam2) * (gam2 + gam1))
+    em = np.exp(-tau * xi)
+    et = np.exp(-tau / cosz)
+    ep = np.exp(tau * xi)
+    gpx = xi + gam1
+    opx = cosz * xi + 1
+
+    # semi-infinite?
+    if (em == 0 and et == 0) or (ep >= 1e15):
+        refl = omega * (gam3 * xi + alph2) / (gpx * opx)
+        btrans = trans = 0
+
+    else:
+
+        # more intermediate variables, needed only for finite case
+        omx = 1 - cosz * xi
+        gmx = gam1 - xi
+        rm = gam2 - gmx * R0
+        rp = gam2 - gpx * R0
+
+        # denominator for reflectance and transmittance
+        denrt = ep * gpx * rm - em * gmx * rp
+
+        # reflectance
+        refl = (omega * (ep * rm * (gam3 * xi + alph2) / opx
+            - em * rp * (alph2 - gam3 * xi) / omx) \
+            + 2 * et * gam2 \
+            * (R0 - ((alph1 * R0 - alph2) * cosz + gam4 \
+            * R0 + gam3) * omega / (omx * opx)) * xi) / denrt
+
+        # transmittance
+        trans = (et * (ep * gpx * (gam2 - omega * (alph2
+            - gam3 * xi) / omx) \
+            - em * gmx * (gam2 - omega * (gam3 * xi + alph2) / opx)) \
+            + 2 * gam2 * (alph1 * cosz + gam4) * omega * xi / \
+            (omx * opx)) / denrt
+
+        # direct transmittance
+        btrans = et
+
+        assert(refl >= 0)
+        assert(trans >= 0)
+        assert(btrans >= 0)
+        assert(trans >= btrans * cosz)
+
+    r = [refl,
+        trans,
+        btrans,
+        refl * cosz * S0,
+        trans * cosz * S0,
+        btrans * S0]
+
+    return r
+
+
+def mwgamma(cosz, omega, g):
+    """
+    gamma's for phase function for input using the MEADOR WEAVER method
+
+    Two-stream approximations to radiative transfer in planetary
+    atmospheres: a unified description of existing methods and a
+    new improvement, Meador & Weaver, 1980
+
+    Args:
+        cosz: cosine illumination angle
+        omega: single-scattering albedo
+        g: scattering asymmetry param
+
+    Returns
+        gamma values
+    """
+
+    # Meador-Weaver hybrid approx
+    b0 = beta_0(cosz, g)
+
+    # hd is denom for hybrid g1,g2
+    hd = 4 * (1 - g * g * (1 - cosz))
+
+    # these are Horner expressions corresponding to Meador-Weaver Table 1)
+    if g == 1:
+        g1 = g2 = (g * ((3 * (g - 1) + 4 * b0) * g - 3) + 3) / hd
+    else:
+        g1 = (g * (g * ((3 * g + 4 * b0) * omega - 3) - \
+              3 * omega) - 4 * omega + 7) / hd
+
+        g2 = (g * (g * ((3 * g + 4 * (b0 - 1)) * omega + 1) - \
+              3 * omega) + 4 * omega - 1) / hd
+
+    g3 = b0
+    g4 = 1 - g3
+    g = [g1, g2, g3, g4]
+    return g
+
+
+def beta_0(cosz, g):
+    """
+    we find the integral-sum
+
+    sum (n=0 to inf) g^n * (2*n+1) * Pn(u0) * int (u'=0 to 1) Pn(u')
+
+    note that int of Pn vanishes for even values of n (Abramowitz &
+    Stegun, eq 22.13.8-9); therefore the series becomes
+
+    sum (n=0 to inf) g^n * (2*n+1) * Pn(u0) * f(m)
+
+    where 2*m+1 = n and the f's are computed recursively
+
+    Args:
+        cosz: cosine illumination angle
+        g: scattering asymmetry param
+
+    Returns:
+        beta_0
+
+    """
+
+    MAXNO = 2048
+    TOL = 1e-9
+
+    assert(cosz > 0 and cosz <= 1)
+    assert(g >= 0 and g <= 1)
+
+    # Legendre polynomials of degree 0 and 1
+
+    pnm2 = 1
+    pnm1 = cosz
+
+    # first coefficients and initial sum
+    fm = -1/8
+    gn = 7 * g * g * g
+    the_sum = 3 * g * cosz / 2
+
+    # sum until convergence; we use the even terms only for the recursive
+    # calculation of the Legendre polynomials
+    if (g != 0 and cosz != 0):
+        for n in range(2, MAXNO):
+
+            # order n Legendre polynomial
+            pn = ((2 * n - 1) * cosz * pnm1 + (1 - n) * pnm2) / n
+
+            # even terms vanish
+            if (n % 2) == 1:
+                last = the_sum
+                the_sum = last + gn * fm * pn
+                if (np.abs((the_sum - last) / the_sum) < TOL and the_sum <= 1):
+                    break
+
+                # recursively find next f(m) and gn coefficients
+                # n = 2 * m + 1
+                m = (n - 1) / 2
+                fm *= -(2 * m + 1) / (2 * (m + 2))
+                gn *= g * g * (4 * m + 7) / (4 * m + 3)
+
+            # ready to compute next Legendre polynomial
+            pnm2 = pnm1
+            pnm1 = pn
+
+        # warn if no convergence
+        if n == MAXNO:
+            print("%s: %s - cosz=%g g=%g sum=%g last=%g fm=%g",
+                  "betanaught", "no convergence",
+                    cosz, g, the_sum, last, fm)
+            if the_sum > 1:
+                the_sum = 1
+
+        else:
+            assert(the_sum >= 0 and the_sum <= 1)
+
+    else:
+        the_sum = 0
+
+    return (1 - the_sum) / 2
+
+
+def twostream_ipw(mu0, S0, tau=0.2, omega=0.85, g=0.3, R0=0.5, d=False):
     """
     Wrapper for the twostream.c IPW function
 
@@ -935,14 +1176,15 @@ def solar(d, w=[0.28, 2.8]):
 
     # Adjust date time for solar noon
     d = d.replace(hour=12, minute=0, second=0)
-    
+
     # Calculate the ephemeris parameters
     declination, omega, rad_vec = sunang.ephemeris(d)
 
     # integral over a wavelength range
-    s = solint(w[0], w[1]) / rad_vec **2
+    s = solint(w[0], w[1]) / rad_vec ** 2
 
     return s
+
 
 def solint(a, b):
     """
@@ -951,12 +1193,12 @@ def solint(a, b):
     This uses scipy functions which will produce different results
     from the IPW equvialents of 'akcoef' and 'splint'
     """
-    
+
     # Solar data
     data = solar_data()
-    
-    wave = data[:,0]
-    val = data[:,1]
+
+    wave = data[:, 0]
+    val = data[:, 1]
 
     # calcualte splines
     c = Akima1DInterpolator(wave, val)
@@ -965,7 +1207,7 @@ def solint(a, b):
     intgrl, ierror = quad(c, a, b, limit=120)
 
     return intgrl * SOLAR_CONSTANT
-    
+
 
 def solar_ipw(d, w=[0.28, 2.8]):
     """
@@ -1002,7 +1244,7 @@ def solar_ipw(d, w=[0.28, 2.8]):
 
     cmd_str = 'solar -w %s -d %s -a' % (w, dstr)
 
-    #p = sp.Popen(cmd_str, stdout=sp.PIPE, shell=True, env={"PATH": IPW})
+    # p = sp.Popen(cmd_str, stdout=sp.PIPE, shell=True, env={"PATH": IPW})
     out = sp.check_output([cmd_str], shell=True, universal_newlines=True)
     # get the results
     # out, err = p.communicate()
@@ -1063,12 +1305,12 @@ def get_hrrr_cloud(df_solar, df_meta, logger, lat, lon):
     for idt, dt in enumerate(dates):
         # get solar using twostream
         dtt = pd.to_datetime(dt)
-        basin_sol.iloc[idt, :] =  model_solar(dtt, lat, lon)
-    
+        basin_sol.iloc[idt, :] = model_solar(dtt, lat, lon)
+
     # if it's close to sun down or sun up, then the cloud factor gets difficult to calculate
     basin_sol[basin_sol < 50] = 0
     df_solar[basin_sol < 50] = 0
-    
+
     # This would be the proper way to do this but it's too computationally expensive
     # cs_solar = df_solar.copy()
     # for dt, row in cs_solar.iterrows():
@@ -1087,8 +1329,6 @@ def get_hrrr_cloud(df_solar, df_meta, logger, lat, lon):
     # Clean up the dataframe to be between 0 and 1
     df_cf[df_cf > 1.0] = 1.0
     df_cf[df_cf < 0.0] = 0.0
-
-    
 
     # # create cloud factor dataframe
     # df_cf = df_solar.copy()
@@ -1142,15 +1382,14 @@ def get_hrrr_cloud(df_solar, df_meta, logger, lat, lon):
     return df_cf
 
 
-  
 def solar_data():
     """
     Solar data from Thekaekara, NASA TR-R-351, 1979
     """
 
     return np.array([[0.00e+0, 0.0000000000000000e+0],
-        [1.20e-1, 7.2064702602003287e-5],
-	    [1.40e-1, 2.1619410780600986e-5],
+                     [1.20e-1, 7.2064702602003287e-5],
+                     [1.40e-1, 2.1619410780600986e-5],
         [1.50e-1, 5.0445291821402301e-5],
         [1.60e-1, 1.6574881598460755e-4],
         [1.70e-1, 4.5400762639262068e-4],
@@ -1164,7 +1403,7 @@ def solar_data():
         [2.35e-1, 4.2734368642987949e-2],
         [2.40e-1, 4.5400762639262071e-2],
         [2.45e-1, 5.2102779981248376e-2],
-        [2.50e-1, 5.0733550631810313e-2], 
+        [2.50e-1, 5.0733550631810313e-2],
         [2.55e-1, 7.4947290706083422e-2],
         [2.60e-1, 9.3684113382604272e-2],
         [2.65e-1, 1.3331969981370607e-1],
@@ -1320,5 +1559,3 @@ def solar_data():
         [8.00e+1, 5.0445291821402299e-8],
         [1.00e+2, 2.1619410780600986e-8],
         [1.00e+3, 0.0000000000000000e+0]])
-
-
