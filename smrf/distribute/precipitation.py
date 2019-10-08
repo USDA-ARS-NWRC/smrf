@@ -198,19 +198,19 @@ class ppt(image_data.image_data):
 
         # if redistributing due to wind
         if self.config['precip_rescaling_model'] == 'winstral':
-            self._tbreak_file = nc.Dataset(self.config['tbreak_netcdf'], 'r')
+            self._tbreak_file = nc.Dataset(self.config['winstral_tbreak_netcdf'], 'r')
             self.tbreak = self._tbreak_file.variables['tbreak'][:]
             self.tbreak_direction = self._tbreak_file.variables['direction'][:]
             self._tbreak_file.close()
             self._logger.debug('Read data from {}'
-                               .format(self.config['tbreak_netcdf']))
+                               .format(self.config['winstral_tbreak_netcdf']))
 
             # get the veg values
             self.veg_type = topo.veg_type
-            matching = [s for s in self.config.keys() if "veg_" in s]
+            matching = [s for s in self.config.keys() if "winstral_veg_" in s]
             v = {}
             for m in matching:
-                if m != 'veg_default':
+                if m != 'winstral_veg_default':
                     ms = m.split('_')
                     # v[ms[1]] = float(self.config[m])
                     if type(self.config[m]) == list:
