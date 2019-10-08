@@ -1094,7 +1094,7 @@ def model_solar(dt, lat, lon, tau=0.2, tzone=0):
     """
 
     # determine the sun angle
-    cosz, az = sunang.sunang(dt, lat, lon)
+    cosz, az, rad_vec = sunang.sunang(dt, lat, lon)
 
     # calculate the solar irradiance
     sol = solar(dt, [0.28, 2.8])

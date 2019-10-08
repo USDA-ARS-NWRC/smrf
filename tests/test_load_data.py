@@ -25,7 +25,7 @@ class TestLoadData(SMRFTestCase):
                'wind_direction': 'wind_direction',
                'cloud_factor': 'cloud_factor',
                'port': '32768'
-            }
+               }
 
 #     def test_station_start_date(self):
 #         """
@@ -177,7 +177,6 @@ class TestLoadData(SMRFTestCase):
 #         result = can_i_run_smrf(config)
 #         self.assertFalse(result)
 
-
     def test_grid_wrf(self):
         """ WRF NetCDF loading """
 
@@ -194,9 +193,10 @@ class TestLoadData(SMRFTestCase):
 #         config.raw_cfg['system']['timeout'] = 10
 
         # set the distrition to grid, thermal defaults will be fine
-        variables = ['air_temp', 'vapor_pressure', 'wind', 'precip', 'solar', 'thermal']
+        variables = ['air_temp', 'vapor_pressure',
+                     'wind', 'precip', 'solar', 'thermal']
         for v in variables:
-             config.raw_cfg[v]['mask'] = False
+            config.raw_cfg[v]['mask'] = False
 
         config.raw_cfg['precip']['adjust_for_undercatch'] = False
         config.raw_cfg['thermal']['correct_cloud'] = False
@@ -208,9 +208,9 @@ class TestLoadData(SMRFTestCase):
         config.apply_recipes()
         config = cast_all_variables(config, config.mcfg)
 
-
         # ensure that the recipes are used
-        self.assertTrue(config.raw_cfg['precip']['adjust_for_undercatch'] == False)
+        self.assertTrue(config.raw_cfg['precip']
+                        ['adjust_for_undercatch'] == False)
         self.assertTrue(config.raw_cfg['thermal']['correct_cloud'] == False)
         self.assertTrue(config.raw_cfg['thermal']['correct_veg'] == True)
 
@@ -224,16 +224,17 @@ class TestLoadData(SMRFTestCase):
         del config.raw_cfg['csv']
 
         hrrr_grid = {'data_type': 'hrrr',
-                    'directory': './RME/gridded/hrrr_test/',
-                    'zone_number': 11,
-                    'zone_letter': 'N'}
+                     'directory': './RME/gridded/hrrr_test/',
+                     'zone_number': 11,
+                     'zone_letter': 'N'}
         config.raw_cfg['gridded'] = hrrr_grid
     #         config.raw_cfg['system']['max_values'] = 2
         config.raw_cfg['system']['threading'] = False
     #         config.raw_cfg['system']['timeout'] = 10
 
         # set the distrition to grid, thermal defaults will be fine
-        variables = ['air_temp', 'vapor_pressure', 'wind', 'precip', 'solar', 'thermal']
+        variables = ['air_temp', 'vapor_pressure',
+                     'wind', 'precip', 'solar', 'thermal']
         for v in variables:
             config.raw_cfg[v]['mask'] = False
 
@@ -251,7 +252,8 @@ class TestLoadData(SMRFTestCase):
         config = cast_all_variables(config, config.mcfg)
 
         # ensure that the recipes are used
-        self.assertTrue(config.raw_cfg['precip']['adjust_for_undercatch'] == False)
+        self.assertTrue(config.raw_cfg['precip']
+                        ['adjust_for_undercatch'] == False)
         self.assertTrue(config.raw_cfg['thermal']['correct_cloud'] == True)
         self.assertTrue(config.raw_cfg['thermal']['correct_veg'] == True)
 
@@ -265,9 +267,9 @@ class TestLoadData(SMRFTestCase):
         del config.raw_cfg['csv']
 
         hrrr_grid = {'data_type': 'hrrr',
-                    'directory': './RME/gridded/hrrr_test/',
-                    'zone_number': 11,
-                    'zone_letter': 'N'}
+                     'directory': './RME/gridded/hrrr_test/',
+                     'zone_number': 11,
+                     'zone_letter': 'N'}
         config.raw_cfg['gridded'] = hrrr_grid
     #         config.raw_cfg['system']['max_values'] = 2
         config.raw_cfg['system']['threading'] = False
@@ -275,17 +277,19 @@ class TestLoadData(SMRFTestCase):
     #         config.raw_cfg['system']['timeout'] = 10
 
         # set the distrition to grid, thermal defaults will be fine
-        variables = ['air_temp', 'vapor_pressure', 'wind', 'precip', 'solar', 'thermal']
+        variables = ['air_temp', 'vapor_pressure',
+                     'wind', 'precip', 'solar', 'thermal']
         for v in variables:
             config.raw_cfg[v]['distribution'] = 'grid'
             config.raw_cfg[v]['mask'] = False
 
         # local gradient
         config.raw_cfg['air_temp']['grid_local'] = True
-        config.raw_cfg['air_temp']['grid_local_n'] = 25 # only 47 grid cells
+        config.raw_cfg['air_temp']['grid_local_n'] = 25  # only 47 grid cells
 
         config.raw_cfg['vapor_pressure']['grid_local'] = True
-        config.raw_cfg['vapor_pressure']['grid_local_n'] = 25 # only 47 grid cells
+        # only 47 grid cells
+        config.raw_cfg['vapor_pressure']['grid_local_n'] = 25
 
         config.raw_cfg['precip']['adjust_for_undercatch'] = False
         config.raw_cfg['precip']['grid_local'] = True
@@ -301,7 +305,8 @@ class TestLoadData(SMRFTestCase):
         config = cast_all_variables(config, config.mcfg)
 
         # ensure that the recipes are used
-        self.assertTrue(config.raw_cfg['precip']['adjust_for_undercatch'] == False)
+        self.assertTrue(config.raw_cfg['precip']
+                        ['adjust_for_undercatch'] == False)
         self.assertTrue(config.raw_cfg['thermal']['correct_cloud'] == True)
         self.assertTrue(config.raw_cfg['thermal']['correct_veg'] == True)
 
@@ -328,10 +333,11 @@ class TestLoadData(SMRFTestCase):
         config.raw_cfg['gridded'] = wrf_grid
         config.raw_cfg['system']['time_out'] = 10
         config.raw_cfg['system']['max_values'] = 1
-        config.raw_cfg['system']['threading'] = False # Doesn't work with true
+        config.raw_cfg['system']['threading'] = False  # Doesn't work with true
 
         # set the distrition to grid, thermal defaults will be fine
-        variables = ['air_temp', 'vapor_pressure', 'wind', 'precip', 'solar', 'thermal']
+        variables = ['air_temp', 'vapor_pressure',
+                     'wind', 'precip', 'solar', 'thermal']
         for v in variables:
             config.raw_cfg[v]['distribution'] = 'grid'
             config.raw_cfg[v]['mask'] = False
@@ -348,12 +354,14 @@ class TestLoadData(SMRFTestCase):
         config = cast_all_variables(config, config.mcfg)
 
         # ensure that the recipes are used
-        self.assertTrue(config.raw_cfg['precip']['adjust_for_undercatch'] == False)
+        self.assertTrue(config.raw_cfg['precip']
+                        ['adjust_for_undercatch'] == False)
         self.assertTrue(config.raw_cfg['thermal']['correct_cloud'] == False)
         self.assertTrue(config.raw_cfg['thermal']['correct_veg'] == True)
 
         result = can_i_run_smrf(config)
         self.assertTrue(result)
+
 
 if __name__ == '__main__':
     unittest.main()

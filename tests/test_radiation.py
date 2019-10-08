@@ -34,7 +34,7 @@ class TestRadiation(SMRFTestCase):
         ipw_azimuth = -5.413
         ipw_rad_vector = 0.98787
 
-        result = radiation.sunang(date_time, lat, lon)
+        result = radiation.sunang_ipw(date_time, lat, lon)
         self.assertTrue(result[0] == ipw_cosz)
         self.assertTrue(result[1] == ipw_azimuth)
 
