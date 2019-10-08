@@ -582,50 +582,50 @@ def _cosz(x1, z1, x2, z2):
     return v
 
 
-# def sunang(date, lat, lon, zone=0, slope=0, aspect=0):
-#     """
-#     Wrapper for the IPW sunang function
+def sunang_ipw(date, lat, lon, zone=0, slope=0, aspect=0):
+    """
+    Wrapper for the IPW sunang function
 
-#     Args:
-#         date - date to calculate sun angle for (datetime object)
-#         lat - latitude in decimal degrees
-#         lon - longitude in decimal degrees
-#         zone - The  time  values  are  in the time zone which is min minutes
-#             west of Greenwich (default: 0).  For example, if input times are
-#             in Pacific Standard Time, then min would be 480.
-#         slope (default=0) - slope of surface
-#         aspect (default=0) - aspect of surface
+    Args:
+        date - date to calculate sun angle for (datetime object)
+        lat - latitude in decimal degrees
+        lon - longitude in decimal degrees
+        zone - The  time  values  are  in the time zone which is min minutes
+            west of Greenwich (default: 0).  For example, if input times are
+            in Pacific Standard Time, then min would be 480.
+        slope (default=0) - slope of surface
+        aspect (default=0) - aspect of surface
 
-#     Returns:
-#         cosz - cosine of the zeinith angle
-#         azimuth - solar azimuth
+    Returns:
+        cosz - cosine of the zeinith angle
+        azimuth - solar azimuth
 
-#     Created April 17, 2015
-#     Scott Havens
-#     """
+    Created April 17, 2015
+    Scott Havens
+    """
 
-#     # date string
-#     dstr = date.strftime('%Y,%m,%d,%H,%M,%S')
+    # date string
+    dstr = date.strftime('%Y,%m,%d,%H,%M,%S')
 
-#     # degree strings
-#     d, m, sd = deg_to_dms(lat)
-#     lat_str = str(d) + ',' + str(m) + ',' + '%02.1i' % sd
+    # degree strings
+    d, m, sd = deg_to_dms(lat)
+    lat_str = str(d) + ',' + str(m) + ',' + '%02.1i' % sd
 
-#     d, m, sd = deg_to_dms(lon)
-#     lon_str = str(d) + ',' + str(m) + ',' + '%02.1i' % sd
+    d, m, sd = deg_to_dms(lon)
+    lon_str = str(d) + ',' + str(m) + ',' + '%02.1i' % sd
 
-#     # prepare the command
-#     cmd_str = 'sunang -b %s -l %s -t %s -s %i -a %i -z %i' % \
-#         (lat_str, lon_str, dstr, slope, aspect, zone)
+    # prepare the command
+    cmd_str = 'sunang -b %s -l %s -t %s -s %i -a %i -z %i' % \
+        (lat_str, lon_str, dstr, slope, aspect, zone)
 
-#     out = sp.check_output([cmd_str], shell=True, universal_newlines=True)
+    out = sp.check_output([cmd_str], shell=True, universal_newlines=True)
 
-#     c = out.rstrip().split(' ')
+    c = out.rstrip().split(' ')
 
-#     cosz = float(c[1])
-#     azimuth = float(c[3])
+    cosz = float(c[1])
+    azimuth = float(c[3])
 
-#     return cosz, azimuth
+    return cosz, azimuth
 
 
 # def sunang_thread(queue, date, lat, lon, zone=0, slope=0, aspect=0):
