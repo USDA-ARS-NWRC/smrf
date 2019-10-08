@@ -99,5 +99,4 @@ class cf(image_data.image_data):
         for t in data.index:
 
             self.distribute(data.loc[t])
-            [self._logger.debug("{} - {}".format(v,lst._qsize())) for v, lst in queue.items()]
             queue[self.variable].put([t, self.cloud_factor])

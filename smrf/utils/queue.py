@@ -109,16 +109,16 @@ class DateQueue_Threading(Queue):
                 endtime = _time() + self.timeout
 
                 while index not in self.queue.keys():
-                    remaining = endtime - _time()
+                    self.remaining = endtime - _time()
                     # Time out has occurred
-                    self._logger.debug("get - {}s".format(remaining))
-                    if remaining <= 0.0:
-                        self._logger.error("Timeout occurred while removing"
+                    #self._logger.debug("get - {}s".format(self.remaining))
+                    if self.remaining <= 0.0:
+                        self._logger.error("Timeout occurred while retrieving"
                                             " an item at {} from queue".format(index))
                         timed_out = True
                         raise Empty
 
-                    self.not_empty.wait(remaining)
+                    self.not_empty.wait(self.remaining)
 
             item = self._get(index)
 
@@ -158,9 +158,6 @@ class DateQueue_Threading(Queue):
             # Is there anything in the Queue
             if self.maxsize > 0:
 
-                if self._qsize() == self.maxsize:
-                    self._logger.debug("Threaded queue full...")
-
                 # Working with a thread set to block other threads until complete
                 if not block:
                     if self._qsize() == self.maxsize:
@@ -176,17 +173,17 @@ class DateQueue_Threading(Queue):
                     endtime = _time() + self.timeout
 
                     while self._qsize() == self.maxsize:
-                        remaining = endtime - _time()
-                        self._logger.debug("put - {}s".format(remaining))
+                        self.remaining = endtime - _time()
+                        #self._logger.debug("put - {}s".format(self.remaining))
 
-                        if remaining <= 0.0:
+                        if self.remaining <= 0.0:
                             self._logger.error("Timeout occurred while putting"
                                                " {} in the queue."
                                                "".format(item[0]))
                             timed_out=True
                             raise Full
 
-                        self.not_full.wait(remaining)
+                        self.not_full.wait(self.remaining)
             self._put(item)
 
             self.unfinished_tasks += 1
@@ -231,13 +228,13 @@ class QueueCleaner(threading.Thread):
             # first do a get on all the data, this will ensure that
             # there is data there to be had
             for v in self.queues.keys():
-                self._logger.debug('Clean checking %s -- %s' % (t, v))
+                #self._logger.debug('Clean checking %s -- %s' % (t, v))
                 self.queues[v].get(t)
 
             # now that we know there is data in all of the queues
             # that have the same time, clean up those times
             for v in self.queues.keys():
-                self._logger.debug('Clean cleaning %s -- %s' % (t, v))
+                #self._logger.debug('Clean cleaning %s -- %s' % (t, v))
                 self.queues[v].clean(t)
 
             self._logger.debug('%s Cleaned from queues' % t)
