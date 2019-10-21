@@ -37,7 +37,7 @@ class output_netcdf():
         # go through the variable list and make full file names
         for v in variable_list:
             variable_list[v]['file_name'] = \
-                variable_list[v]['out_location'] + '.nc'
+                str(variable_list[v]['out_location'] + '.nc')
 
         self.variable_list = variable_list
 
@@ -57,7 +57,6 @@ class output_netcdf():
         for v in self.variable_list:
 
             f = self.variable_list[v]
-
             if os.path.isfile(f['file_name']):
                 self._logger.warning('Opening {}, data may be overwritten!'
                                   .format(f['file_name']))
