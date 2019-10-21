@@ -230,7 +230,7 @@ class SMRF():
         self.time_steps = len(self.date_time)
 
         # need to align date time
-        if self.config['albedo']['date_method_start_decay'] is not None:
+        if 'date_method_start_decay' in self.config['albedo'].keys():
             self.config['albedo']['date_method_start_decay'] = \
             self.config['albedo']['date_method_start_decay'].replace(tzinfo=tzinfo)
             self.config['albedo']['date_method_end_decay'] = \
