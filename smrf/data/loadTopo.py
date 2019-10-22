@@ -60,7 +60,7 @@ class topo():
         # read images
         img_type = self.topoConfig['type']
         if img_type == 'ipw':
-            #self.readImages()
+            # self.readImages()
             raise IOError('IPW topos are deprecated as of SMRF 0.8.0')
         elif img_type == 'netcdf':
             self.readNetCDF()
@@ -140,7 +140,6 @@ class topo():
                 else:
                     result = f.variables[v_file][:].astype(np.float64)
 
-
             setattr(self, v_smrf, result)
 
         # get some general information about the model domain from the dem
@@ -176,22 +175,23 @@ class topo():
         # calculate the skyview
         svfile = os.path.abspath(os.path.expanduser(
             os.path.join(self.tempDir, 'sky_view.ipw')
-            ))
+        ))
         self._logger.debug('sky view file - %s' % svfile)
 
         # calculate the gradient
         gfile = os.path.abspath(os.path.expanduser(
             os.path.join(self.tempDir, 'gradient.ipw')
-            ))
+        ))
         self._logger.debug('gradient file - %s' % gfile)
 
         if self.threaded:
 
-            ts = Process(target=self._viewf, args=(self.topoConfig['dem'], svfile))
+            ts = Process(target=self._viewf, args=(
+                self.topoConfig['dem'], svfile))
             ts.start()
 
             tg = Process(target=self._gradient,
-                     args=(self.topoConfig['dem'], gfile))
+                         args=(self.topoConfig['dem'], gfile))
             tg.start()
 
             # wait for the processes to stop
@@ -205,7 +205,7 @@ class topo():
         # combine into a value
         sfile = os.path.abspath(os.path.expanduser(
             os.path.join(self.tempDir, 'stoporad_in.ipw')
-            ))
+        ))
         self._logger.debug('stoporad in file - %s' % sfile)
 
         cmd = 'mux %s %s %s > %s' % (self.topoConfig['dem'],
