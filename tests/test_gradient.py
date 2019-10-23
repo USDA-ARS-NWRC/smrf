@@ -209,34 +209,35 @@ class TestGradient(SMRFTestCase):
         self.assertTrue(np.all(asp == 45))
         self.assertTrue(np.all(ipw_a == (np.pi/2 + np.pi/4)))
 
-    def test_gradient(self):
-        """ Test the gradient methods """
+    # Used to bulid comparisons for the Pull Request
+    # def test_gradient(self):
+    #     """ Test the gradient methods """
 
-        topo_config = {
-            'basin_lon': -116.7547,
-            'basin_lat': 43.067,
-            'filename': 'tests/RME/topo/topo.nc',
-            'type': 'netcdf',
-            'gradient_method': 'gradient_d8'
-        }
+    #     topo_config = {
+    #         'basin_lon': -116.7547,
+    #         'basin_lat': 43.067,
+    #         'filename': 'tests/RME/topo/topo.nc',
+    #         'type': 'netcdf',
+    #         'gradient_method': 'gradient_d8'
+    #     }
 
-        # IPW topo calc
-        # First converts DEM to ipw 16-bit image
-        # Gradient output is 8-bit image
-        topo = loadTopo.topo(topo_config, calcInput=True,
-                             tempDir='tests/RME/output')
+    #     # IPW topo calc
+    #     # First converts DEM to ipw 16-bit image
+    #     # Gradient output is 8-bit image
+    #     topo = loadTopo.topo(topo_config, calcInput=True,
+    #                          tempDir='tests/RME/output')
 
-        # IPW slope is sin(S)
-        # ipw_slope = np.arcsin(topo.slope)
-        ipw_slope = topo.slope
-        ipw_aspect = topo.aspect
+    #     # IPW slope is sin(S)
+    #     # ipw_slope = np.arcsin(topo.slope)
+    #     ipw_slope = topo.slope
+    #     ipw_aspect = topo.aspect
 
-        # python calculation
-        dx = np.mean(np.diff(topo.x))
-        dy = np.mean(np.diff(topo.y))
+    #     # python calculation
+    #     dx = np.mean(np.diff(topo.x))
+    #     dy = np.mean(np.diff(topo.y))
 
-        py_slope4, a4 = gradient.gradient_d4(topo.dem, dx, dy, aspect_rad=True)
-        py_slope8, a8 = gradient.gradient_d8(topo.dem, dx, dy, aspect_rad=True)
+    #     py_slope4, a4 = gradient.gradient_d4(topo.dem, dx, dy, aspect_rad=True)
+    #     py_slope8, a8 = gradient.gradient_d8(topo.dem, dx, dy, aspect_rad=True)
 
         # fig, axs = plt.subplots(3, 2)
         # im = axs[0, 0].imshow(180 * (ipw_slope - py_slope4) / np.pi)
