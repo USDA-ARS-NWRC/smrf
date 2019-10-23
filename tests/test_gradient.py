@@ -217,7 +217,7 @@ class TestGradient(SMRFTestCase):
             'basin_lat': 43.067,
             'filename': 'tests/RME/topo/topo.nc',
             'type': 'netcdf',
-            'threading': False
+            'gradient_method': 'gradient_d8'
         }
 
         # IPW topo calc
