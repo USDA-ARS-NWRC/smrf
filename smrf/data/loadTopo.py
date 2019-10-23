@@ -7,6 +7,8 @@ from multiprocessing import Process
 import os
 import logging
 
+from smrf.utils import gradient
+
 
 class topo():
     """
@@ -48,7 +50,6 @@ class topo():
 
     def __init__(self, topoConfig, calcInput=True, tempDir=None):
         self.topoConfig = topoConfig
-        self.threaded = self.topoConfig['threading']
 
         if (tempDir is None) | (tempDir == 'WORKDIR'):
             tempDir = os.environ['WORKDIR']
@@ -172,35 +173,22 @@ class topo():
 
             self.topoConfig['dem'] = f
 
-        # calculate the skyview
-        svfile = os.path.abspath(os.path.expanduser(
-            os.path.join(self.tempDir, 'sky_view.ipw')
-        ))
-        self._logger.debug('sky view file - %s' % svfile)
-
         # calculate the gradient
         gfile = os.path.abspath(os.path.expanduser(
             os.path.join(self.tempDir, 'gradient.ipw')
         ))
         self._logger.debug('gradient file - %s' % gfile)
 
-        if self.threaded:
+        # self._gradient(self.topoConfig['dem'], gfile)
+        self.gradient(gfile)
 
-            ts = Process(target=self._viewf, args=(
-                self.topoConfig['dem'], svfile))
-            ts.start()
+        # calculate the view factor
+        svfile = os.path.abspath(os.path.expanduser(
+            os.path.join(self.tempDir, 'sky_view.ipw')
+        ))
+        self._logger.debug('sky view file - %s' % svfile)
 
-            tg = Process(target=self._gradient,
-                         args=(self.topoConfig['dem'], gfile))
-            tg.start()
-
-            # wait for the processes to stop
-            tg.join()
-            ts.join()
-
-        else:
-            self._viewf(self.topoConfig['dem'], svfile)
-            self._gradient(self.topoConfig['dem'], gfile)
+        self._viewf(self.topoConfig['dem'], svfile)
 
         # combine into a value
         sfile = os.path.abspath(os.path.expanduser(
@@ -220,8 +208,8 @@ class topo():
         # read in the stoporad file to store in memory
         self.stoporad_in = ipw.IPW(sfile)
         self.stoporad_in_file = sfile
-        self.slope = self.stoporad_in.bands[1].data.astype(np.float64)
-        self.aspect = self.stoporad_in.bands[2].data.astype(np.float64)
+        # self.slope = self.stoporad_in.bands[1].data.astype(np.float64)
+        # self.aspect = self.stoporad_in.bands[2].data.astype(np.float64)
         self.sky_view = self.stoporad_in.bands[3].data.astype(np.float64)
 
         # clean up the WORKDIR
@@ -239,6 +227,69 @@ class topo():
 
         if proc != 0:
             raise OSError('gradient failed')
+
+    def gradient(self, gfile):
+        """ 
+        Calculate the gradient and aspect
+
+        Args:
+            gfile: IPW file to write the results to
+        """
+
+        func = self.topoConfig['gradient_method']
+        dx = np.mean(np.diff(self.x))
+        dy = np.mean(np.diff(self.x))
+
+        # calculate the gradient and aspect
+        g, a = getattr(gradient, func)(self.dem, dx, dy, aspect_rad=True)
+        self.slope = g
+        self.aspect = a
+
+        # convert to ipw images for stoporad, the spatialnc package
+        # will only use the max/min floats for the LQ hearder, however
+        # the shade function checks the lq header max and will error
+        # with these slopes
+        sfile = os.path.abspath(os.path.expanduser(
+            os.path.join(self.tempDir, 'slope.ipw')
+        ))
+        i = ipw.IPW()
+        i.new_band(g)
+        i.add_geo_hdr([self.x[0], self.y[0]],
+                      [np.mean(np.diff(self.x)), np.mean(np.diff(self.y))],
+                      'm', 'UTM')
+        i.write(sfile, 8)
+
+        # aspect
+        afile = os.path.abspath(os.path.expanduser(
+            os.path.join(self.tempDir, 'aspect.ipw')
+        ))
+        i = ipw.IPW()
+        i.new_band(a)
+        i.add_geo_hdr([self.x[0], self.y[0]],
+                      [np.mean(np.diff(self.x)), np.mean(np.diff(self.y))],
+                      'm', 'UTM')
+        i.bands[0].units = 'radians'
+        i.write(afile, 8)
+
+        # modify the LQ headers
+        sfile2 = os.path.abspath(os.path.expanduser(
+            os.path.join(self.tempDir, 'slope2.ipw')
+        ))
+        cmd = 'requant -m 0,1 {} > {}'.format(sfile, sfile2)
+        proc = sp.Popen(cmd, shell=True, env=os.environ.copy()).wait()
+        if proc != 0:
+            raise OSError('slope LQ header modification failed')
+
+        # mux together for gradient
+        cmd = 'mux {} {} > {}'.format(sfile2, afile, gfile)
+        proc = sp.Popen(cmd, shell=True, env=os.environ.copy()).wait()
+        if proc != 0:
+            raise OSError('gradient mux failed')
+
+        # clean up
+        os.remove(sfile)
+        os.remove(sfile2)
+        os.remove(afile)
 
     def _viewf(self, demFile, viewfFile):
         # calculate the sky view file
