@@ -198,11 +198,14 @@ class th(image_data.image_data):
         self.min = thermalConfig['min']
         self.max = thermalConfig['max']
 
-        self.clear_sky_method = self.config['clear_sky_method']
         self.correct_cloud = self.config['correct_cloud']
-        self.cloud_method = self.config['cloud_method']
         self.correct_veg = self.config['correct_veg']
         self.correct_terrain = self.config['correct_terrain']
+
+        if self.correct_cloud:
+            self.cloud_method = self.config['cloud_method']
+
+        self.clear_sky_method = self.config['clear_sky_method']
 
         self._logger.debug('Created distribute.thermal')
 

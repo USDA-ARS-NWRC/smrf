@@ -129,7 +129,7 @@ class wind(image_data.image_data):
 
             # wind ninja parameters
             self.wind_ninja_dir = self.config['wind_ninja_dir']
-            self.wind_ninja_dxy = self.config['wind_ninja_dxy']
+            self.wind_ninja_dxy = self.config['wind_ninja_dxdy']
             self.wind_ninja_pref = self.config['wind_ninja_pref']
             if self.config['wind_ninja_tz'] is not None:
                 self.wind_ninja_tz = pytz.timezone(self.config['wind_ninja_tz'].title())
