@@ -257,34 +257,37 @@ class ppt(image_data.image_data):
         self._logger.debug('%s Distributing all precip' % data.name)
         data = data[self.stations]
 
-        if self.nasde_model == 'marks2017':
-            # Adjust the precip for undercatchment
-            if self.config['station_adjust_for_undercatch']:
-                self._logger.debug('%s Adjusting precip for undercatch...' % data.name)
-                self.corrected_precip.loc[time] = \
-                    precip.adjust_for_undercatch(self.corrected_precip.loc[time],
-                                                 wind,
-                                                 temp,
-                                                 self.config,
-                                                 self.metadata)
+        if self.config['distribution'] != 'grid':
+            if self.nasde_model == 'marks2017':
+                # Adjust the precip for undercatchment
+                if self.config['station_adjust_for_undercatch']:
+                    self._logger.debug('%s Adjusting precip for undercatch...' % data.name)
+                    self.corrected_precip.loc[time] = \
+                        precip.adjust_for_undercatch(self.corrected_precip.loc[time],
+                                                     wind,
+                                                     temp,
+                                                     self.config,
+                                                     self.metadata)
 
-            # Use the clipped and corrected precip
-            self.distribute_for_marks2017(self.corrected_precip.loc[time],
-                                          precip_temp,
-                                          ta,
-                                          time,
-                                          mask=mask)
+                # Use the clipped and corrected precip
+                self.distribute_for_marks2017(self.corrected_precip.loc[time],
+                                              precip_temp,
+                                              ta,
+                                              time,
+                                              mask=mask)
 
+            else:
+                # Adjust the precip for undercatchment
+                if self.config['station_adjust_for_undercatch']:
+                    self._logger.debug('%s Adjusting precip for undercatch...' % data.name)
+                    data = precip.adjust_for_undercatch(data,
+                                                        wind,
+                                                        temp,
+                                                        self.config,
+                                                        self.metadata)
+
+                    self.distribute_for_susong1999(data, precip_temp, time, mask=mask)
         else:
-            # Adjust the precip for undercatchment
-            if self.config['station_adjust_for_undercatch']:
-                self._logger.debug('%s Adjusting precip for undercatch...' % data.name)
-                data = precip.adjust_for_undercatch(data,
-                                                    wind,
-                                                    temp,
-                                                    self.config,
-                                                    self.metadata)
-
             self.distribute_for_susong1999(data, precip_temp, time, mask=mask)
 
         # redistribute due to wind to account for driftin

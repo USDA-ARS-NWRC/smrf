@@ -25,6 +25,7 @@ class wxdata():
                  'wind_speed',
                  'wind_direction',
                  'cloud_factor']
+
     db_config_vars = ['user',
                       'password',
                       'host',
@@ -117,7 +118,7 @@ class wxdata():
                         dp = dp_full[dp_full.columns[(dp_full.columns.str.upper()).isin(sta)]]
                     else:
                         dp = dp_full
-                        
+
                     # check that the start and end date are within the data
                     if self.start_date not in dp.index:
                         raise Exception("start_date in config file is not "
@@ -134,7 +135,7 @@ class wxdata():
                                         "".format(self.start_date,
                                                   dp.index[0],
                                                   dp.index[-1]))
-                        
+
                     # only get the desired dates
                     dp_final = dp[self.start_date:self.end_date]
 

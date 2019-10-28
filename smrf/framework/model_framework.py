@@ -238,9 +238,11 @@ class SMRF():
 
         # if a gridded dataset will be used
         self.gridded = False
+        self.forecast_flag = False
         if 'gridded' in self.config:
             self.gridded = True
-            self.forecast_flag = self.config['gridded']['hrrr_forecast_flag']
+            if self.config['gridded']['data_type'] in ['hrrr_netcdf','hrrr_grib']:
+                self.forecast_flag = self.config['gridded']['hrrr_forecast_flag']
 
             # hours from start of day
             self.day_hour = self.start_date - pd.to_datetime(d[0].strftime("%Y%m%d"))
