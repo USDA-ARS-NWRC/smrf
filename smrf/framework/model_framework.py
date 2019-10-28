@@ -240,7 +240,7 @@ class SMRF():
         self.gridded = False
         if 'gridded' in self.config:
             self.gridded = True
-            self.forecast_flag = self.config['gridded']['forecast_flag']
+            self.forecast_flag = self.config['gridded']['hrrr_forecast_flag']
 
             # hours from start of day
             self.day_hour = self.start_date - pd.to_datetime(d[0].strftime("%Y%m%d"))
@@ -996,7 +996,7 @@ def can_i_run_smrf(config):
         run_smrf(config)
         return True
     except Exception as e:
-        print(e)
+        raise e
         return False
 
 
