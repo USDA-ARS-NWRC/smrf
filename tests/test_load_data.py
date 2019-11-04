@@ -11,41 +11,51 @@ from tests.test_configurations import SMRFTestCase
 class TestLoadData(SMRFTestCase):
     dist_variables = ['air_temp', 'vapor_pressure', 'wind', 'precip',
                       'cloud_factor', 'thermal']
-    # options = {'user': 'unittest_user',
-    #            'password': 'WsyR4Gp9JlFee6HwOHAQ',
-    #            'host': '10.200.28.137',
-    #            'database': 'weather_db',
-    #            'metadata': 'tbl_metadata',
-    #            'data_table': 'tbl_level2',
-    #            'station_table': 'tbl_stations',
-    #            'air_temp': 'air_temp',
-    #            'vapor_pressure': 'vapor_pressure',
-    #            'precip': 'precip_accum',
-    #            'solar': 'solar_radiation',
-    #            'wind_speed': 'wind_speed',
-    #            'wind_direction': 'wind_direction',
-    #            'cloud_factor': 'cloud_factor',
-    #            'port': '32768'
-    #         }
-    #
-#     def test_station_start_date(self):
-#         """
-#         Test the start date
-#         """
-#
-#         # test the start date
-#         config = deepcopy(self.base_config)
-#         config.raw_cfg['time']['start_date'] = '2018-01-01 00:00'
-#         config.raw_cfg['time']['end_date'] = '2018-02-01 00:00'
-#
-#         # apply the new recipies
-#         config.apply_recipes()
-#         config = cast_all_variables(config, config.mcfg)
-#
-#         # test the base run with the config file
-#         result = can_i_run_smrf(config)
-#         self.assertFalse(result)
-#
+    options = {'user': 'unittest_user',
+               'password': 'WsyR4Gp9JlFee6HwOHAQ',
+               'host': '10.200.28.137',
+               'database': 'weather_db',
+               'metadata': 'tbl_metadata',
+               'data_table': 'tbl_level2',
+               'station_table': 'tbl_stations',
+               'air_temp': 'air_temp',
+               'vapor_pressure': 'vapor_pressure',
+               'precip': 'precip_accum',
+               'solar': 'solar_radiation',
+               'wind_speed': 'wind_speed',
+               'wind_direction': 'wind_direction',
+               'cloud_factor': 'cloud_factor',
+               'port': '32768'
+            }
+    def can_i_run_smrf(self, config):
+        """
+        Test whether a config is possible to run
+        """
+        try:
+            run_smrf(config)
+            return True
+
+        except Exception as e:
+            return False
+
+    def test_station_start_date(self):
+        """
+        Test the start date
+        """
+
+        # Test the start date
+        config = deepcopy(self.base_config)
+        # Use dates not in the dataset, expecting an error
+        config.raw_cfg['time']['start_date'] = '2018-01-01 00:00'
+        config.raw_cfg['time']['end_date'] = '2018-02-01 00:00'
+
+        # apply the new recipies
+        config.apply_recipes()
+        config = cast_all_variables(config, config.mcfg)
+
+        # test the base run with the config file
+        self.assertFalse(self.can_i_run_smrf(config))
+
 #     def test_station_end_date(self):
 #         """
 #         Test the end date
@@ -178,30 +188,7 @@ class TestLoadData(SMRFTestCase):
 #         result = can_i_run_smrf(config)
 #         self.assertFalse(result)
 
-    def build_grid_config(self, raw_grid_cfg,):
-        """
-        """
-
-        config = deepcopy(self.base_config)
-        del config.raw_cfg['csv']
-        config.raw_cfg['gridded'] = raw_grid_cfg
-        config.raw_cfg['system']['threading'] = 'False'
-        config.raw_cfg['system']['log_file'] = 'none'
-
-        # set the distrition to grid, thermal defaults will be fine
-        for v in self.dist_variables:
-             config.raw_cfg[v]['grid_mask'] = 'False'
-
-        config.raw_cfg['precip']['station_adjust_for_undercatch'] = 'False'
-        config.raw_cfg['thermal']['correct_cloud'] = 'False'
-        config.raw_cfg['thermal']['correct_veg'] = 'True'
-
-        # Fix the time to that of the WRF_test.nc
-
-        config.apply_recipes()
-        return cast_all_variables(config, config.mcfg)
-
-    @unittest.skip(" Skipping over WRF test for issues with when to detrend")
+    #@unittest.skip(" Skipping over WRF test for issues with when to detrend")
     def test_grid_wrf(self):
         """ WRF NetCDF loading """
 
@@ -214,10 +201,11 @@ class TestLoadData(SMRFTestCase):
                     'zone_letter': 'N'}
         config.raw_cfg['gridded'] = wrf_grid
         config.raw_cfg['system']['threading'] = 'False'
+        config.raw_cfg['system']['log_file'] = './log.txt'
 
         # set the distribution to grid, thermal defaults will be fine
         for v in self.dist_variables:
-             config.raw_cfg[v]['mask'] = 'False'
+             config.raw_cfg[v]['grid_mask'] = 'False'
 
         config.raw_cfg['precip']['station_adjust_for_undercatch'] = 'False'
         config.raw_cfg['thermal']['correct_cloud'] = 'False'
@@ -237,7 +225,7 @@ class TestLoadData(SMRFTestCase):
         result = can_i_run_smrf(config)
         self.assertTrue(result)
 
-    @unittest.skip(" Skipping over hrrr_local test for issues with weather_forecast_retrieval")
+    #@unittest.skip(" Skipping over hrrr_local test for issues with weather_forecast_retrieval")
     def test_grid_hrrr(self):
         """ HRRR grib2 loading """
 
@@ -277,7 +265,7 @@ class TestLoadData(SMRFTestCase):
         result = can_i_run_smrf(config)
         self.assertTrue(result)
 
-    @unittest.skip(" Skipping over hrrr_local test for issues with weather_forecast_retrieval")
+    #@unittest.skip(" Skipping over hrrr_local test for issues with weather_forecast_retrieval")
     def test_grid_hrrr_local(self):
         """ HRRR grib2 loading with local elevation gradient """
 
