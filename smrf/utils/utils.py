@@ -27,7 +27,7 @@ class CheckStation(CheckType):
     Custom check for ensuring our stations are always capitalized
     """
     def __init__(self,**kwargs):
-        super(CheckStation,self).__init__(**kwargs)
+        super(CheckStation, self).__init__(**kwargs)
 
 
     def type_func(self, value):

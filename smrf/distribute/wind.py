@@ -508,8 +508,9 @@ class wind(image_data.image_data):
 
             # maxus value at the station
             if not pd.isnull(data_direction[m]):
-                if m.upper() in self.config['station_peak']:
-                    val_maxus = np.min(self.maxus[:, yi, xi] + e)
+                if self.config['station_peak'] != None:
+                    if m.upper() in self.config['station_peak']:
+                        val_maxus = np.min(self.maxus[:, yi, xi] + e)
 
                 else:
                     idx = int(np.ceil((data_direction[m] - self.nstep/2) /

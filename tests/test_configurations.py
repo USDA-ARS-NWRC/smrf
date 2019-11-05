@@ -2,7 +2,7 @@ import unittest
 import os, shutil
 from inicheck.tools import get_user_config, check_config
 
-from smrf.framework.model_framework import can_i_run_smrf
+from smrf.framework.model_framework import run_smrf, can_i_run_smrf
 
 
 class SMRFTestCase(unittest.TestCase):
@@ -10,6 +10,20 @@ class SMRFTestCase(unittest.TestCase):
     The base test case for SMRF that will load in the configuration file and store as
     the base config. Also will remove the output directory upon tear down.
     """
+    dist_variables = ['air_temp', 'vapor_pressure', 'wind', 'precip',
+                      'cloud_factor', 'thermal']
+
+    def can_i_run_smrf(self, config):
+        """
+        Test whether a config is possible to run
+        """
+        try:
+            run_smrf(config)
+            return True
+
+        except Exception as e:
+            # print(e)
+            return False
 
     def setUp(self):
         """
@@ -46,8 +60,7 @@ class SMRFTestCase(unittest.TestCase):
                     os.unlink(file_path)
                 elif os.path.isdir(file_path): shutil.rmtree(file_path)
             except Exception as e:
-                print(e)
-
+                raise e
 
 
 class TestConfigurations(SMRFTestCase):
