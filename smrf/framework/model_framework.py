@@ -394,7 +394,6 @@ class SMRF():
                                      self.start_date,
                                      self.end_date,
                                      time_zone=self.config['time']['time_zone'],
-                                     stations=self.config['csv']['stations'],
                                      dataType='csv')
 
         elif 'mysql' in self.config:
@@ -402,7 +401,6 @@ class SMRF():
                                      self.start_date,
                                      self.end_date,
                                      time_zone=self.config['time']['time_zone'],
-                                     stations=self.config['mysql']['stations'],
                                      dataType='mysql')
 
         elif 'gridded' in self.config:
