@@ -72,7 +72,3 @@ class TestConfigurations(SMRFTestCase):
         # test the base run with the config file
         result = can_i_run_smrf(self.config_file)
         self.assertTrue(result)
-
-        # test the base run with the config file
-        result = can_i_run_smrf(self.base_config)
-        self.assertTrue(result)
