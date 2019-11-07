@@ -1,14 +1,25 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+
+"""
+test_load_data
+----------------------------------
+
+Tests for `data.load_data` module.
+"""
+
+
+import unittest
 from copy import deepcopy
 from inicheck.tools import cast_all_variables
 from inicheck.utilities import pcfg
-import unittest
 
-from smrf.framework.model_framework import can_i_run_smrf
+from smrf.framework.model_framework import can_i_run_smrf, run_smrf
+from test_configurations import SMRFTestCase
 
-from tests.test_configurations import SMRFTestCase
 
-# @unittest.skip(" Skipping over MYSQL tests for testing outside of NWRC")
-class TestLoadMYSQLData(SMRFTestCase):
+class TestLoadMySQLData(SMRFTestCase):
+
     options = {'user': 'unittest_user',
                'password': 'WsyR4Gp9JlFee6HwOHAQ',
                'host': '10.200.28.137',
@@ -26,7 +37,7 @@ class TestLoadMYSQLData(SMRFTestCase):
                'port': '32768'
             }
 
-    def test_mysql_data_w_stations(self):
+    def test_mysql_data_w_stations_test(self):
         """
         Use a simple user tester on the weather database to ensure loading is
         performed correctly. This will not work outside of NWRC until we
@@ -44,7 +55,8 @@ class TestLoadMYSQLData(SMRFTestCase):
         config.apply_recipes()
         config = cast_all_variables(config, config.mcfg)
 
-        result = can_i_run_smrf(config)
+        result = self.can_i_run_smrf(config)
+
         self.assertTrue(result)
 
     def test_mysql_data_w_client(self):
@@ -66,43 +78,6 @@ class TestLoadMYSQLData(SMRFTestCase):
         result = can_i_run_smrf(config)
         assert result
 
-
-    def test_mysql_wrong_password(self):
-        """ wrong password to mysql """
-
-        config = deepcopy(self.base_config)
-        options = deepcopy(self.options)
-        config.raw_cfg['mysql'] = options
-
-        config.raw_cfg['mysql']['stations'] = ['RMESP', 'RME_176']
-        del config.raw_cfg['csv']
-
-        # test wrong password
-        options['password'] = 'not_the_right_password'
-
-        config.apply_recipes()
-        config = cast_all_variables(config, config.mcfg)
-
-        result = can_i_run_smrf(config)
-        self.assertFalse(result)
-
-    def test_mysql_wrong_port(self):
-        """ test with wrong port to trigger different error """
-
-        config = deepcopy(self.base_config)
-        options = deepcopy(self.options)
-        config.raw_cfg['mysql'] = options
-
-        config.raw_cfg['mysql']['stations'] = ['RMESP', 'RME_176']
-        del config.raw_cfg['csv']
-        options['port'] = '123456'
-
-        config.apply_recipes()
-        config = cast_all_variables(config, config.mcfg)
-
-        result = can_i_run_smrf(config)
-        self.assertFalse(result)
-
     def test_mysql_metadata_error(self):
         """ test no metadata found """
 
@@ -116,8 +91,8 @@ class TestLoadMYSQLData(SMRFTestCase):
         config.apply_recipes()
         config = cast_all_variables(config, config.mcfg)
 
-        result = can_i_run_smrf(config)
-        self.assertFalse(result)
+        with self.assertRaises(Exception):
+            result = run_smrf(config)
 
     def test_mysql_data_error(self):
         """ test no data found """
@@ -136,8 +111,8 @@ class TestLoadMYSQLData(SMRFTestCase):
         config.apply_recipes()
         config = cast_all_variables(config, config.mcfg)
 
-        result = can_i_run_smrf(config)
-        self.assertFalse(result)
+        with self.assertRaises(Exception):
+            result = run_smrf(config)
 
 class TestLoadCSVData(SMRFTestCase):
 
@@ -181,7 +156,7 @@ class TestLoadCSVData(SMRFTestCase):
         assert result
 
 
-class TestLoadGridData(SMRFTestCase):
+class TestLoadGrid(SMRFTestCase):
 
     def test_grid_wrf(self):
         """ WRF NetCDF loading """
@@ -220,7 +195,7 @@ class TestLoadGridData(SMRFTestCase):
         result = can_i_run_smrf(config)
         self.assertTrue(result)
 
-    #@unittest.skip(" Skipping over hrrr tests for issues with eccodes")
+    @unittest.skip(" Skipping over hrrr tests for issues with eccodes")
     def test_grid_hrrr(self):
         """ HRRR grib2 loading """
 
@@ -253,7 +228,9 @@ class TestLoadGridData(SMRFTestCase):
         config = cast_all_variables(config, config.mcfg)
 
         # ensure that the recipes are used
-        self.assertTrue('station_adjust_for_undercatch' not in config.cfg['precip'].keys())
+        result = ('station_adjust_for_undercatch' \
+                   not in config.cfg['precip'].keys())
+        self.assertTrue(result)
         self.assertTrue(config.cfg['thermal']['correct_cloud'] == True)
         self.assertTrue(config.cfg['thermal']['correct_veg'] == True)
 
