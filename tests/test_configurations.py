@@ -3,7 +3,7 @@ import os, shutil
 from inicheck.tools import get_user_config, check_config
 
 from smrf.framework.model_framework import run_smrf, can_i_run_smrf
-
+import smrf
 
 class SMRFTestCase(unittest.TestCase):
     """
@@ -31,15 +31,13 @@ class SMRFTestCase(unittest.TestCase):
         """
 
         # check whether or not this is being ran as a single test or part of the suite
+        base = os.path.dirname(smrf.__file__)
+        self.test_dir = os.path.join(base,'../','tests')
+
         config_file = 'test_base_config.ini'
-        if os.path.isfile(config_file):
-            self.test_dir = ''
+        config_file = os.path.join(self.test_dir, config_file)
 
-        elif os.path.isfile(os.path.join('tests', config_file)):
-            config_file = os.path.join('tests', config_file)
-            self.test_dir = 'tests'
-
-        else:
+        if not os.path.isfile(config_file):
             raise Exception('Configuration file not found for testing')
 
         self.config_file = config_file
@@ -51,16 +49,9 @@ class SMRFTestCase(unittest.TestCase):
         """
         Clean up the output directory
         """
+        folder = os.path.join(self.base_config.cfg['output']['out_location'])
+        shutil.rmtree(folder)
 
-        folder = os.path.join(self.test_dir, 'RME', 'output')
-        for the_file in os.listdir(folder):
-            file_path = os.path.join(folder, the_file)
-            try:
-                if os.path.isfile(file_path):
-                    os.unlink(file_path)
-                elif os.path.isdir(file_path): shutil.rmtree(file_path)
-            except Exception as e:
-                raise e
 
 
 class TestConfigurations(SMRFTestCase):
