@@ -31,10 +31,10 @@ class database:
 
         except mysql.connector.Error as err:
             if err.errno == 1045:  # errorcode.ER_ACCESS_DENIED_ERROR:
-                logging.error('''Something is wrong with your
-                                user name or password''')
+                logging.error('Something is wrong with your user name or '
+                              ' password')
             elif err.errno == 1049:  # errorcode.ER_BAD_DB_ERROR:
-                logging.error("Database does not exist")
+                logging.error('Database does not exist')
             else:
                 logging.error(err)
 
