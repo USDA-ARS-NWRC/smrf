@@ -25,6 +25,7 @@ Example:
 
 import logging
 import os
+from os.path import dirname, basename, join, abspath
 import sys
 import coloredlogs
 from datetime import datetime, timedelta
@@ -99,14 +100,9 @@ class SMRF():
                 raise Exception('Configuration file does not exist --> {}'
                                 .format(config))
             configFile = config
-            # try:
+
             # Read in the original users config
             ucfg = get_user_config(config, modules='smrf')
-
-            # except UnicodeDecodeError as e:
-                # print(e)
-                # raise Exception(('The configuration file is not encoded in '
-                                    # 'UTF-8, please change and retry'))
 
         elif isinstance(config, UserConfig):
             ucfg = config
@@ -132,12 +128,12 @@ class SMRF():
             if ucfg.cfg['system']['log_file']!= None:
                 logfile = ucfg.cfg['system']['log_file']
                 if not os.path.isabs(logfile):
-                    logfile = os.path.abspath(os.path.join(
-                                            os.path.dirname(configFile),
+                    logfile = abspath(join(
+                                            dirname(configFile),
                                             ucfg.cfg['system']['log_file']))
 
-                if not os.path.isdir(os.path.dirname(logfile)):
-                    os.makedirs(os.path.dirname(logfile))
+                if not os.path.isdir(dirname(logfile)):
+                    os.makedirs(dirname(logfile))
 
                 if not os.path.isfile(logfile):
                     with open(logfile,'w+') as f:
@@ -167,11 +163,12 @@ class SMRF():
         out = ucfg.cfg['output']['out_location']
 
         # Make the tmp and output directories if they do not exist
-        makeable_dirs = [out,os.path.join(out,'tmp')]
+        makeable_dirs = [out, join(out,'tmp')]
         for path in makeable_dirs:
             if not os.path.isdir(path):
                 try:
-                    #self._logger.info("Directory does not exist, \nCreating {0}".format(path))
+                    self._logger.info("Directory does not exist, Creating:\n{}"
+                                      "".format(path))
                     os.makedirs(path)
 
                 except OSError as e:
@@ -183,8 +180,8 @@ class SMRF():
         self._logger.info("Checking config file for issues...")
         warnings, errors = check_config(ucfg)
         print_config_report(warnings, errors, logger=self._logger)
-        self.config = ucfg.cfg
         self.ucfg = ucfg
+        self.config = self.ucfg.cfg
 
         # Exit SMRF if config file has errors
         if len(errors) > 0:
@@ -193,17 +190,12 @@ class SMRF():
             sys.exit()
 
         # Write the config file to the output dir no matter where the project is
-        fname = 'config.ini'
-        full_config_out = self.config['output']['out_location']
-
-        full_config_out = os.path.abspath(os.path.join(
-                                          os.path.dirname(configFile),
-                                          full_config_out,fname))
+        full_config_out = abspath(join(out,'config.ini'))
 
         self._logger.info("Writing config file with full options.")
         generate_config(self.ucfg, full_config_out)
 
-        # process the system variables
+        # Process the system variables
         for k,v in self.config['system'].items():
             setattr(self, k, v)
 
@@ -212,10 +204,6 @@ class SMRF():
         # Get the time section utils
         self.start_date = pd.to_datetime(self.config['time']['start_date'])
         self.end_date = pd.to_datetime(self.config['time']['end_date'])
-
-        # Check to see if user specified a real end time.
-        if self.start_date > self.end_date:
-            raise ValueError("start_date cannot be larger than end_date.")
 
         # Get the timesetps correctly in the time zone
         d = data.mysql_data.date_range(self.start_date, self.end_date,
@@ -780,34 +768,15 @@ class SMRF():
         Initialize the output files based on the configFile section ['output'].
         Currently only :func:`NetCDF files <smrf.output.output_netcdf>` is supported.
         """
+        out = self.config['output']['out_location']
 
         if self.config['output']['frequency'] is not None:
 
-            # check the out location
-            pth = os.path.abspath(os.path.expanduser(
-                self.config['output']['out_location']))
-            if 'out_location' not in self.config['output']:
-                raise Exception('''out_location must be specified
-                                for variable outputs''')
-            elif self.config['output']['out_location'] == 'WORKDIR':
-                pth = os.environ['WORKDIR']
-            elif not os.path.isdir(pth):
-                os.makedirs(pth)
-
-            self.config['output']['out_location'] = pth
-
-            # frequency of outputs
-            self.config['output']['frequency'] = \
-                int(self.config['output']['frequency'])
-
             # determine the variables to be output
-            self._logger.info('{} variables will be output'
-                              .format(self.config['output']['variables']))
+            s_var_list = ", ".join(self.config['output']['variables'])
+            self._logger.info('{} variables will be output'.format(s_var_list))
 
             output_variables = self.config['output']['variables']
-#             output_variables = list(map(str.strip, output_variables))
-            if not isinstance(output_variables, list):
-                output_variables = output_variables.split(',')
 
             # determine which variables belong where
             variable_list = {}
@@ -818,14 +787,12 @@ class SMRF():
 
                         if v in self.distribute[m].output_variables.keys():
 
-                            # if there is a key in the config file,
+                            # if there is a key in the config files output sec,
                             # then change the output file name
                             if v in self.config['output'].keys():
-                                fname = os.path.join(self.config['output']['out_location'],
-                                                     self.config['output'][v])
+                                fname = join(out, self.config['output'][v])
                             else:
-                                fname = os.path.join(self.config['output']['out_location'],
-                                                     v)
+                                fname = join(out, v)
 
                             d = {'variable': v,
                                  'module': m,
