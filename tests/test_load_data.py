@@ -15,9 +15,9 @@ from inicheck.tools import cast_all_variables
 from inicheck.utilities import pcfg
 
 from smrf.framework.model_framework import can_i_run_smrf, run_smrf
-from test_configurations import SMRFTestCase
+from tests.test_configurations import SMRFTestCase
 
-
+@unittest.skip(" Skipping over MYSQL tests since the do not work outside of NWRC")
 class TestLoadMySQLData(SMRFTestCase):
 
     options = {'user': 'unittest_user',
@@ -304,10 +304,9 @@ class TestLoadGrid(SMRFTestCase):
                     'thermal': 'thermal',
                     'cloud_factor': 'cloud_factor'}
         config.raw_cfg['gridded'] = generic_grid
-        config.raw_cfg['system']['time_out'] = '10'
-        config.raw_cfg['system']['queue_max_values'] = '1'
-        config.raw_cfg['system']['threading'] = 'True' # Doesn't work with true
-        config.raw_cfg['output']['variable'] = ['air_temp']
+        config.raw_cfg['system']['time_out'] = '25'
+        config.raw_cfg['system']['queue_max_values'] = '2'
+        config.raw_cfg['system']['threading'] = 'False' # Doesn't work with true
 
         #config.raw_cfg['system']['log_file'] = 'none'
 
