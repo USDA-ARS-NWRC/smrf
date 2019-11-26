@@ -17,7 +17,25 @@ from inicheck.utilities import pcfg
 from smrf.framework.model_framework import can_i_run_smrf, run_smrf
 from tests.test_configurations import SMRFTestCase
 
-@unittest.skip(" Skipping over MYSQL tests since the do not work outside of NWRC")
+import requests
+
+def is_at_NWRC(url):
+    """
+    Checks that were on the NWRC network
+    """
+
+    try:
+        r = requests.get(url)
+        code = r.status_code
+
+    except Exception as e:
+        # print(e)
+        code = 404
+
+    return code==200
+
+
+
 class TestLoadMySQLData(SMRFTestCase):
 
     options = {'user': 'unittest_user',
@@ -35,16 +53,22 @@ class TestLoadMySQLData(SMRFTestCase):
                'wind_direction': 'wind_direction',
                'cloud_factor': 'cloud_factor',
                'port': '32768'
-            }
+               }
 
-    def test_mysql_data_w_stations_test(self):
+
+    url = 'http://' + options['host']
+    url = 'http://10.200.28.137'
+    on_network = is_at_NWRC(url)
+
+
+    @unittest.skipIf(not on_network, "Skipping b/c we are not on the NWRC network")
+    def test_mysql_data_w_stations(self):
         """
         Use a simple user tester on the weather database to ensure loading is
         performed correctly. This will not work outside of NWRC until we
         convert so SQLalchemy.
         """
-
-        # test a succesful run specifiying stations
+        # test a successful run specifying stations
         config = deepcopy(self.base_config)
         options = deepcopy(self.options)
         config.raw_cfg['mysql'] = options
@@ -59,6 +83,7 @@ class TestLoadMySQLData(SMRFTestCase):
 
         self.assertTrue(result)
 
+    @unittest.skipIf(not on_network, "Skipping b/c we are not on the NWRC network")
     def test_mysql_data_w_client(self):
         """
         Run SMRF with MYSQL data from client, also can only be run from inside
@@ -78,6 +103,7 @@ class TestLoadMySQLData(SMRFTestCase):
         result = can_i_run_smrf(config)
         assert result
 
+    @unittest.skipIf(not on_network, "Skipping b/c we are not on the NWRC network")
     def test_mysql_metadata_error(self):
         """ test no metadata found """
 
@@ -94,6 +120,7 @@ class TestLoadMySQLData(SMRFTestCase):
         with self.assertRaises(Exception):
             result = run_smrf(config)
 
+    @unittest.skipIf(not on_network, "Skipping b/c we are not on the NWRC network")
     def test_mysql_data_error(self):
         """ test no data found """
 
