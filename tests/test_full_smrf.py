@@ -40,7 +40,9 @@ def compare_image(v_name, gold_dir, test_dir, msg):
     rough = d2.variables[v_name][:]
     d2.close()
 
-    np.testing.assert_almost_equal(rough, gold, decimal=7, err_msg=msg)
+    result = np.abs(gold - rough)
+    return  not np.any(result > 0)
+    #np.testing.assert_almost_equal(rough, gold, decimal=7, err_msg=msg)
 
 class TestRME(unittest.TestCase):
     """
