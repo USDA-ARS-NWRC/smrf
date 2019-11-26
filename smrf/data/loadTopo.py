@@ -65,42 +65,7 @@ class topo():
         else:
             self.stoporad_in_file = None
 
-    # def readImages(self):
-    #     """
-    #     Read in the images from the config file
-    #     """
-    #     if 'dem' not in self.topoConfig:
-    #         raise ValueError('DEM file not specified')
-    #
-    #     # read in the images
-    #     for v in self.images:
-    #         if v in self.topoConfig:
-    #             i = ipw.IPW(self.topoConfig[v])
-    #
-    #             if v == 'veg_type':
-    #                 setattr(self, v, i.bands[0].data.astype(int))
-    #             else:
-    #                 setattr(self, v, i.bands[0].data.astype(np.float64))
-    #
-    #             if v == 'dem':
-    #                 # get some general information about the model
-    #                 # domain from the dem
-    #                 self.ny = i.nlines
-    #                 self.nx = i.nsamps
-    #                 self.u = i.bands[0].bline
-    #                 self.v = i.bands[0].bsamp
-    #                 self.du = i.bands[0].dline
-    #                 self.dv = i.bands[0].dsamp
-    #                 self.units = i.bands[0].geounits
-    #                 self.coord_sys_ID = i.bands[0].coord_sys_ID
-    #
-    #         else:
-    #             setattr(self, v, None)
-    #
-    #     # create the x,y vectors
-    #     self.x = self.v + self.dv*np.arange(self.nx)
-    #     self.y = self.u + self.du*np.arange(self.ny)
-    #     [self.X, self.Y] = np.meshgrid(self.x, self.y)
+    # IPW Support has been deprecated since 0.8.0, but it now has been fully removed.
 
     def readNetCDF(self):
         """
