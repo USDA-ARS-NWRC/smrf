@@ -584,7 +584,7 @@ class SMRF():
 
             # 7. thermal radiation
             if self.distribute['thermal'].gridded and \
-               self.config['gridded']['data_type'] != 'hrrr':
+               self.config['gridded']['data_type'] in ['wrf','netcdf']:
                 self.distribute['thermal'].distribute_thermal(self.data.thermal.loc[t],
                                                               self.distribute['air_temp'].air_temp)
             else:

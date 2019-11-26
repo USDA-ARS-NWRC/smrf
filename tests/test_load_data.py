@@ -222,7 +222,7 @@ class TestLoadGrid(SMRFTestCase):
         result = can_i_run_smrf(config)
         self.assertTrue(result)
 
-    @unittest.skip(" Skipping over hrrr tests for issues with eccodes")
+    #@unittest.skip(" Skipping over hrrr tests for issues with eccodes")
     def test_grid_hrrr(self):
         """ HRRR grib2 loading """
 
@@ -249,7 +249,8 @@ class TestLoadGrid(SMRFTestCase):
         config.raw_cfg['time']['start_date'] = '2018-07-22 16:00'
         config.raw_cfg['time']['end_date'] = '2018-07-22 20:00'
 
-        config.raw_cfg['topo']['threading'] = 'False'
+        config.raw_cfg['topo']['topo_threading'] = 'False'
+        #config.raw_cfg['system']['log_file'] = 'none'
 
         config.apply_recipes()
         config = cast_all_variables(config, config.mcfg)
@@ -264,7 +265,7 @@ class TestLoadGrid(SMRFTestCase):
         result = can_i_run_smrf(config)
         self.assertTrue(result)
 
-    @unittest.skip(" Skipping over hrrr tests for issues with local testing and eccodes")
+    #@unittest.skip(" Skipping over hrrr tests for issues with local testing and eccodes")
     def test_grid_hrrr_local(self):
         """ HRRR grib2 loading with local elevation gradient """
 
