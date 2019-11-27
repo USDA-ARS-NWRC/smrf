@@ -134,8 +134,8 @@ class vp(image_data.image_data):
         dpt = np.zeros_like(self.vapor_pressure, dtype=np.float64)
         envphys_c.cdewpt(self.vapor_pressure,
                          dpt,
-                         self.config['tolerance'],
-                         self.config['nthreads'])
+                         self.config['dew_point_tolerance'],
+                         self.config['dew_point_nthreads'])
 
         # find where dpt > ta
         ind = dpt >= ta
@@ -151,8 +151,8 @@ class vp(image_data.image_data):
             wet_bulb = np.zeros_like(self.vapor_pressure, dtype=np.float64)
             # calculate wet_bulb
             envphys_c.cwbt(ta, dpt, self.dem,
-                           wet_bulb, self.config['tolerance'],
-                           self.config['nthreads'])
+                           wet_bulb, self.config['dew_point_tolerance'],
+                           self.config['dew_point_nthreads'])
             # # store last time step of wet_bulb
             # self.wet_bulb_old = wet_bulb.copy()
             # store in precip temp for use in precip
@@ -174,6 +174,7 @@ class vp(image_data.image_data):
             queue: queue dictionary for all variables
             data: pandas dataframe for all data, indexed by date time
         """
+        self._logger.info("Distributing {}".format(self.variable))
 
         for t in data.index:
 
