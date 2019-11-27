@@ -267,8 +267,6 @@ def adjust_for_undercatch(p_vec, wind, temp, sta_type, metadata):
     """
     adj_precip = p_vec.copy()
     for sta in p_vec.index:
-        # ws = wind[metadata['yi'][sta],metadata['xi'][sta]]
-        # T = temp[metadata['yi'][sta],metadata['xi'][sta]]n
         if sta in temp.keys():
             T = temp[sta]
             if sta in wind.keys():
@@ -284,7 +282,7 @@ def adjust_for_undercatch(p_vec, wind, temp, sta_type, metadata):
                 if sta in sta_type.keys():
                     gauge_type = sta_type[sta]
                 else:
-                    gauge_type = sta_type['catchment_model_default']
+                    gauge_type = sta_type['station_undercatch_model_default']
 
                 cr = catchment_ratios(ws,gauge_type,snowing)
                 adj_precip[sta] = p_vec[sta]/cr
@@ -319,21 +317,21 @@ def dist_precip_wind(precip, precip_temp, az, dir_round_cell, wind_speed,
     """
     # thresholds
     tbreak_threshold =  cfg['tbreak_threshold']
-    min_scour = cfg['min_scour']
-    max_scour = cfg['max_scour']
-    min_drift = cfg['min_drift']
-    max_drift = cfg['max_drift']
+    min_scour = cfg['winstral_min_scour']
+    max_scour = cfg['winstral_max_scour']
+    min_drift = cfg['winstral_min_drift']
+    max_drift = cfg['winstral_max_drift']
     precip_temp_threshold = 0.5
     # polynomial factors
     drift_poly = {}
-    drift_poly['a'] = cfg['drift_poly_a']
-    drift_poly['b'] = cfg['drift_poly_b']
-    drift_poly['c'] = cfg['drift_poly_c']
+    drift_poly['a'] = 0.0289
+    drift_poly['b'] = -0.0956
+    drift_poly['c'] = 1.000761
     ppt_poly = {}
-    ppt_poly['a'] = cfg['ppt_poly_a']
-    ppt_poly['b'] = cfg['ppt_poly_b']
-    ppt_poly['c'] = cfg['ppt_poly_c']
-    ppt_poly['d'] = cfg['ppt_poly_d']
+    ppt_poly['a'] = 0.0001737
+    ppt_poly['b'] = 0.002549
+    ppt_poly['c'] = 0.03265
+    ppt_poly['d'] = 0.5929
 
     # initialize arrays
     celltbreak = np.ones(dir_round_cell.shape)

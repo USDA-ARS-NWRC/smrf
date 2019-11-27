@@ -27,22 +27,24 @@ class database:
                                           password=password,
                                           host=host,
                                           database=db,
-                                          port = port)
+                                          port=port)
 
         except mysql.connector.Error as err:
             if err.errno == 1045:  # errorcode.ER_ACCESS_DENIED_ERROR:
-                logging.error('''Something is wrong with your
-                                user name or password''')
+                logging.error('Something is wrong with your user name or '
+                              ' password')
             elif err.errno == 1049:  # errorcode.ER_BAD_DB_ERROR:
-                logging.error("Database does not exist")
+                logging.error('Database does not exist')
             else:
                 logging.error(err)
+
+            raise err
 
         self._db_connection = cnx
         self._db_cur = self._db_connection.cursor()
 
         self._logger = logging.getLogger(__name__)
-        self._logger.debug('Connected to MySQL database')
+        self._logger.info('Connected to MySQL database')
 
     def metadata(self, table, station_ids=None,
                  client=None, station_table=None):
@@ -73,14 +75,11 @@ class database:
 
         self._logger.debug(qry)
 
-        # execute the query
+        # Execute the query
         d = pd.read_sql(qry, self._db_connection, index_col='primary_id')
 
         if d.empty:
             raise Exception('No metadata found for query')
-
-        # check to see if UTM locations are calculated
-        #d[['utm_x', 'utm_y']] = d.apply(to_utm, axis=1)
 
         return d
 
@@ -148,20 +147,6 @@ class database:
 
     def __del__(self):
         self._db_connection.close()
-
-
-# def to_utm(row):
-#     """
-#     Convert a row from data frame to X,Y
-#     """
-#     if (row['X'] is None) and (row['Y'] is None):
-#         return pd.Series(utm.from_latlon(row['latitude'],
-#                                          row['longitude'])[:2])
-#     elif np.isnan(row['X']) and np.isnan(row['Y']):
-#         return pd.Series(utm.from_latlon(row['latitude'],
-#                                          row['longitude'])[:2])
-#     else:
-#         return pd.Series([row['X'], row['Y']])
 
 
 def date_range(start_date, end_date, increment):
