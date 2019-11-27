@@ -13,10 +13,8 @@ import unittest
 from copy import deepcopy
 from inicheck.tools import cast_all_variables
 from inicheck.utilities import pcfg
-
 from smrf.framework.model_framework import can_i_run_smrf, run_smrf
 from tests.test_configurations import SMRFTestCase
-
 import requests
 
 def is_at_NWRC(url):
@@ -29,7 +27,6 @@ def is_at_NWRC(url):
         code = r.status_code
 
     except Exception as e:
-        # print(e)
         code = 404
 
     return code==200
@@ -57,7 +54,6 @@ class TestLoadMySQLData(SMRFTestCase):
 
 
     url = 'http://' + options['host']
-    url = 'http://10.200.28.137'
     on_network = is_at_NWRC(url)
 
 
@@ -222,7 +218,6 @@ class TestLoadGrid(SMRFTestCase):
         result = can_i_run_smrf(config)
         self.assertTrue(result)
 
-    #@unittest.skip(" Skipping over hrrr tests for issues with eccodes")
     def test_grid_hrrr(self):
         """ HRRR grib2 loading """
 
@@ -265,7 +260,6 @@ class TestLoadGrid(SMRFTestCase):
         result = can_i_run_smrf(config)
         self.assertTrue(result)
 
-    #@unittest.skip(" Skipping over hrrr tests for issues with local testing and eccodes")
     def test_grid_hrrr_local(self):
         """ HRRR grib2 loading with local elevation gradient """
 
@@ -279,7 +273,6 @@ class TestLoadGrid(SMRFTestCase):
         config.raw_cfg['gridded'] = hrrr_grid
         config.raw_cfg['system']['threading'] = 'False'
         config.raw_cfg['system']['log_file'] = './output/log.txt'
-        # config.raw_cfg['system']['timeout'] = 10
 
         # set the distribution to grid, thermal defaults will be fine
         for v in self.dist_variables:
@@ -336,9 +329,7 @@ class TestLoadGrid(SMRFTestCase):
         config.raw_cfg['system']['queue_max_values'] = '2'
         config.raw_cfg['system']['threading'] = 'False' # Doesn't work with true
 
-        #config.raw_cfg['system']['log_file'] = 'none'
-
-        # set the distrition to grid, thermal defaults will be fine
+        # set the distribution to grid, thermal defaults will be fine
         for v in self.dist_variables:
             config.raw_cfg[v]['distribution'] = 'grid'
             config.raw_cfg[v]['grid_mask'] = 'False'
