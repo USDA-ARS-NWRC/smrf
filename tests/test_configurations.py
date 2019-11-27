@@ -52,7 +52,9 @@ class SMRFTestCase(unittest.TestCase):
 
             # only compare those that are floats
             if gold.variables[var_name].datatype != np.dtype('S1'):
-                self.assertTrue(np.allclose(gold.variables[var_name][:], test.variables[var_name][:], atol=atol))
+                result = np.abs(gold.variables[var_name][:] - test.variables[var_name][:])
+                self.assertTrue(not np.any(result > 0))
+                # self.assertTrue(np.allclose(gold.variables[var_name][:], test.variables[var_name][:], atol=atol))
 
         gold.close()
         test.close()

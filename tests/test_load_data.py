@@ -10,12 +10,15 @@ Tests for `data.load_data` module.
 
 
 import unittest
+import os
+from glob import glob
 from copy import deepcopy
+import requests
 from inicheck.tools import cast_all_variables
 from inicheck.utilities import pcfg
+
 from smrf.framework.model_framework import can_i_run_smrf, run_smrf
 from tests.test_configurations import SMRFTestCase
-import requests
 
 
 def is_at_NWRC(url):
@@ -179,6 +182,30 @@ class TestLoadCSVData(SMRFTestCase):
 
 class TestLoadGrid(SMRFTestCase):
 
+    def compare_hrrr_gold(self, out_dir):
+        """
+        Compare the model results with the gold standard
+        
+        Args:
+            out_dir: the output directory for the model run
+        """
+
+        output_dir = os.path.join(self.test_dir, out_dir)
+        s = os.path.join(output_dir, '*.nc')
+        file_names = glob(os.path.realpath(s))
+
+        # path to the gold standard
+        gold_path = os.path.realpath(os.path.join(self.test_dir, 'RME', 'gold_hrrr'))
+
+        for file_name in file_names:
+            nc_name = file_name.split('/')[-1]
+            v = nc_name.split('.')[0]
+            gold_file = os.path.join(gold_path, nc_name)
+            print('Comparing {}'.format(v))
+
+            atol = 0
+            self.compare_netcdf_files(gold_file, file_name, atol=atol)
+
     def test_grid_wrf(self):
         """ WRF NetCDF loading """
 
@@ -208,57 +235,56 @@ class TestLoadGrid(SMRFTestCase):
         config = cast_all_variables(config, config.mcfg)
 
         # ensure that the recipes are used
-        assert 'station_adjust_for_undercatch' not in config.cfg['precip'].keys(
-        )
+        assert 'station_adjust_for_undercatch' not in config.cfg['precip'].keys()
         self.assertTrue(config.cfg['thermal']['correct_cloud'] == False)
         self.assertTrue(config.cfg['thermal']['correct_veg'] == True)
 
         result = can_i_run_smrf(config)
         self.assertTrue(result)
 
-    # def test_grid_hrrr(self):
-    #     """ HRRR grib2 loading """
+    # # def test_grid_hrrr(self):
+    # #     """ HRRR grib2 loading """
 
-    #     config = deepcopy(self.base_config)
-    #     del config.raw_cfg['csv']
+    # #     config = deepcopy(self.base_config)
+    # #     del config.raw_cfg['csv']
 
-        hrrr_grid = {'data_type': 'hrrr_grib',
-                     'hrrr_directory': './RME/gridded/hrrr_test/',
-                     'zone_number': '11',
-                     'zone_letter': 'N'}
-        config.raw_cfg['gridded'] = hrrr_grid
-        config.raw_cfg['system']['threading'] = 'False'
+    #     hrrr_grid = {'data_type': 'hrrr_grib',
+    #                  'hrrr_directory': './RME/gridded/hrrr_test/',
+    #                  'zone_number': '11',
+    #                  'zone_letter': 'N'}
+    #     config.raw_cfg['gridded'] = hrrr_grid
+    #     config.raw_cfg['system']['threading'] = 'False'
 
-        # set the distribution to grid, thermal defaults will be fine
-        for v in self.dist_variables:
-            config.raw_cfg[v]['distribution'] = 'grid'
-            config.raw_cfg[v]['grid_mask'] = 'False'
+    #     # set the distribution to grid, thermal defaults will be fine
+    #     for v in self.dist_variables:
+    #         config.raw_cfg[v]['distribution'] = 'grid'
+    #         config.raw_cfg[v]['grid_mask'] = 'False'
 
-        config.raw_cfg['precip']['station_adjust_for_undercatch'] = 'False'
-        config.raw_cfg['thermal']['correct_cloud'] = 'True'
-        config.raw_cfg['thermal']['correct_veg'] = 'True'
+    #     config.raw_cfg['precip']['station_adjust_for_undercatch'] = 'False'
+    #     config.raw_cfg['thermal']['correct_cloud'] = 'True'
+    #     config.raw_cfg['thermal']['correct_veg'] = 'True'
 
-    #     # fix the time to that of the WRF_test.nc
-    #     config.raw_cfg['time']['start_date'] = '2018-07-22 16:00'
-    #     config.raw_cfg['time']['end_date'] = '2018-07-22 20:00'
+    # #     # fix the time to that of the WRF_test.nc
+    # #     config.raw_cfg['time']['start_date'] = '2018-07-22 16:00'
+    # #     config.raw_cfg['time']['end_date'] = '2018-07-22 20:00'
 
-        config.raw_cfg['topo']['topo_threading'] = 'False'
-        #config.raw_cfg['system']['log_file'] = 'none'
+    #     config.raw_cfg['topo']['topo_threading'] = 'False'
+    #     #config.raw_cfg['system']['log_file'] = 'none'
 
-    #     config.apply_recipes()
-    #     config = cast_all_variables(config, config.mcfg)
+    # #     config.apply_recipes()
+    # #     config = cast_all_variables(config, config.mcfg)
 
-        # ensure that the recipes are used
-        result = ('station_adjust_for_undercatch'
-                  not in config.cfg['precip'].keys())
-        self.assertTrue(result)
-        self.assertTrue(config.cfg['thermal']['correct_cloud'] == True)
-        self.assertTrue(config.cfg['thermal']['correct_veg'] == True)
-
-    #     result = can_i_run_smrf(config)
+    #     # ensure that the recipes are used
+    #     result = ('station_adjust_for_undercatch'
+    #               not in config.cfg['precip'].keys())
     #     self.assertTrue(result)
+    #     self.assertTrue(config.cfg['thermal']['correct_cloud'] == True)
+    #     self.assertTrue(config.cfg['thermal']['correct_veg'] == True)
 
-    #     self.compare_hrrr_gold(config.raw_cfg['output']['out_location'][0])
+    # #     result = can_i_run_smrf(config)
+    # #     self.assertTrue(result)
+
+    # #     self.compare_hrrr_gold(config.raw_cfg['output']['out_location'][0])
 
     def test_grid_hrrr_local(self):
         """ HRRR grib2 loading with local elevation gradient """

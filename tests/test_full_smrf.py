@@ -77,8 +77,9 @@ class TestRME(unittest.TestCase):
                      'snow_density', 'vapor_pressure']
 
         for v in variables:
+            print('Comparing {}'.format(v))
             msg = "{} does not match the gold file".format(v)
-            compare_image(v, self.gold, self.output, msg)
+            self.assertTrue(compare_image(v, self.gold, self.output, msg))
 
 if __name__ == '__main__':
     unittest.main()
