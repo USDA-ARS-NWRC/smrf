@@ -8,11 +8,13 @@ import numpy as np
 import logging
 import os
 from datetime import datetime
+import pytz
 from smrf.utils import utils
 from spatialnc.proj import add_proj, add_proj_from_file
 # import pandas as pd
 
 from smrf import __version__
+
 
 class output_netcdf():
     """
@@ -64,7 +66,7 @@ class output_netcdf():
 
             if os.path.isfile(f['file_name']):
                 self._logger.warning('Opening {}, data may be overwritten!'
-                                  .format(f['file_name']))
+                                     .format(f['file_name']))
 
                 # open in append mode
                 s = nc.Dataset(f['file_name'], 'a')
@@ -77,7 +79,7 @@ class output_netcdf():
             else:
                 self._logger.debug('Creating %s' % f['file_name'])
                 s = nc.Dataset(f['file_name'], 'w', format='NETCDF4',
-                                                    clobber=True)
+                               clobber=True)
 
                 # add dimensions
                 s.createDimension(dimensions[0], None)
@@ -94,33 +96,33 @@ class output_netcdf():
 
                 # # define some attributes
                 s.variables['time'].setncattr(
-                        'units',
-                        'hours since {}'.format(time['start_date']))
+                    'units',
+                    'hours since {}'.format(time['start_date']))
                 s.variables['time'].setncattr('calendar', 'standard')
-                s.variables['time'].setncattr('time_zone', time['time_zone'])
+                s.variables['time'].setncattr(
+                    'time_zone', pytz.timezone(time['time_zone']).zone)
                 s.variables['time'].setncattr('long_name', 'time')
 
                 # the y variable attributes
-                s.variables['y'].setncattr('units','meters')
-                s.variables['y'].setncattr('description','UTM, north south')
-                s.variables['y'].setncattr('long_name','y coordinate')
+                s.variables['y'].setncattr('units', 'meters')
+                s.variables['y'].setncattr('description', 'UTM, north south')
+                s.variables['y'].setncattr('long_name', 'y coordinate')
 
                 # the x variable attributes
-                s.variables['x'].setncattr('units','meters')
-                s.variables['x'].setncattr('description','UTM, east west')
-                s.variables['x'].setncattr('long_name','x coordinate')
+                s.variables['x'].setncattr('units', 'meters')
+                s.variables['x'].setncattr('description', 'UTM, east west')
+                s.variables['x'].setncattr('long_name', 'x coordinate')
 
                 # the variable attributes
                 s.variables[f['variable']].setncattr(
-                        'module',
-                        f['module'])
+                    'module',
+                    f['module'])
                 s.variables[f['variable']].setncattr(
-                        'units',
-                        f['info']['units'])
+                    'units',
+                    f['info']['units'])
                 s.variables[f['variable']].setncattr(
-                        'long_name',
-                        f['info']['long_name'])
-
+                    'long_name',
+                    f['info']['long_name'])
 
                 # define some global attribute
                 s.setncattr_string('Conventions', 'CF-1.6')
@@ -128,7 +130,7 @@ class output_netcdf():
                 s.setncattr_string('title', 'Distributed {0} data from SMRF'
                                             ''.format(f['info']['long_name']))
                 s.setncattr_string('history', ('[{}] Create netCDF4 file'
-                                              '').format(now_str))
+                                               '').format(now_str))
                 s.setncattr_string('institution', ('USDA Agricultural Research'
                                                    ' Service, Northwest'
                                                    ' Watershed Research'
@@ -136,14 +138,14 @@ class output_netcdf():
                 s = add_proj(s, map_meta=map_meta)
 
                 s.setncattr_string('references',
-                        'Online documentation smrf.readthedocs.io;'
-                        ' https://doi.org/10.1016/j.cageo.2017.08.016')
+                                   'Online documentation smrf.readthedocs.io;'
+                                   ' https://doi.org/10.1016/j.cageo.2017.08.016')
 
                 s.variables['y'][:] = y
                 s.variables['x'][:] = x
 
             s.setncattr_string('source',
-                    'SMRF {}'.format(utils.getgitinfo()))
+                               'SMRF {}'.format(utils.getgitinfo()))
             s.close()
 
     def output(self, variable, data, date_time):
