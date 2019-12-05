@@ -2,7 +2,7 @@
 '''
 SMRF - Snow Modeling Resource Framework
 '''
-__version__ = '0.8.12'
+__version__ = '0.9.0'
 
 import os
 
