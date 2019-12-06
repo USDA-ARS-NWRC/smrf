@@ -19,6 +19,9 @@ from copy import deepcopy
 import numpy as np
 from netCDF4 import Dataset
 
+from tests.test_configurations import SMRFTestCase
+
+
 def compare_image(v_name, gold_dir, test_dir, msg):
     """
     Compares two netcdfs images to and determines if they are the same.
@@ -41,10 +44,11 @@ def compare_image(v_name, gold_dir, test_dir, msg):
     d2.close()
 
     result = np.abs(gold - rough)
-    return  not np.any(result > 0)
+    return not np.any(result > 0)
     #np.testing.assert_almost_equal(rough, gold, decimal=7, err_msg=msg)
 
-class TestRME(unittest.TestCase):
+
+class TestRME(SMRFTestCase):
     """
     Integration test for SMRF using reynolds mountain east
     """
@@ -57,14 +61,13 @@ class TestRME(unittest.TestCase):
 
         self.gold = abspath(join(run_dir, 'gold'))
 
-
-        self.output = join(run_dir,'output')
+        self.output = join(run_dir, 'output')
 
         # Remove any potential files to ensure fresh run
         if os.path.isdir(self.output):
             shutil.rmtree(self.output)
 
-        config = join(run_dir,'config.ini')
+        config = join(run_dir, 'config.ini')
 
         run_smrf(config)
 
@@ -72,14 +75,14 @@ class TestRME(unittest.TestCase):
         """
         Compare that the air temperature is the same as the gold file provided.
         """
-        variables = ['air_temp','precip_temp','net_solar','percent_snow',
-                     'precip', 'thermal', 'wind_speed','wind_direction',
+        variables = ['air_temp', 'precip_temp', 'net_solar', 'percent_snow',
+                     'precip', 'thermal', 'wind_speed', 'wind_direction',
                      'snow_density', 'vapor_pressure']
 
         for v in variables:
-            print('Comparing {}'.format(v))
             msg = "{} does not match the gold file".format(v)
             self.assertTrue(compare_image(v, self.gold, self.output, msg))
+
 
 if __name__ == '__main__':
     unittest.main()
