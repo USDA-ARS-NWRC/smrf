@@ -27,14 +27,16 @@ class CheckStation(CheckType):
     Custom check for ensuring our stations are always capitalized
     """
     def __init__(self,**kwargs):
-        super(CheckStation,self).__init__(**kwargs)
+        super(CheckStation, self).__init__(**kwargs)
 
-    def cast(self):
-        if self.value.lower() != 'none':
-            return self.value.upper()
-        else:
-            return self.value
+    def type_func(self, value):
+        """
+        Attempt to convert all the values to upper case
+        """
 
+        value = value.upper()
+
+        return value
 
 def find_configs(directory):
     """
@@ -205,6 +207,7 @@ def backup_input(data, config_obj):
         #backup_config_obj.apply_recipes()
     if 'mysql' in backup_config_obj.cfg.keys():
         del backup_config_obj.cfg['mysql']
+
     if 'stations' in backup_config_obj.cfg.keys():
         if 'client' in backup_config_obj.cfg['stations']:
             del backup_config_obj.cfg['stations']['client']
@@ -222,7 +225,7 @@ def backup_input(data, config_obj):
         backup_config_obj.cfg['csv'][k] = fname
 
     # Copy topo files over to backup
-    ignore = ['basin_lon', 'basin_lat', 'type', 'threading']
+    ignore = ['basin_lon', 'basin_lat', 'type', 'topo_threading']
     for s in backup_config_obj.cfg['topo'].keys():
         src = backup_config_obj.cfg['topo'][s]
         # make not a list if lenth is 1

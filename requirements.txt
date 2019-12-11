@@ -1,6 +1,6 @@
 coloredlogs==6.1
 Cython==0.28.4
-inicheck>=0.3.3,<0.4.0
+inicheck>=0.7.0,<0.8.0
 mock==2.0.0
 mysql-connector-python-rf==2.2.2
 netCDF4==1.2.9

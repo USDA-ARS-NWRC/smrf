@@ -25,8 +25,9 @@ class TestNASDE(unittest.TestCase):
         r = [79,115,247,0]
 
         for i,rho in enumerate(s['rho_s']):
-            msg = "NASDE Model Failed: marks2017({0},{3}) == {1}\nExpected {2}".format(T[i],rho,r[i],PP[i])
-            self.assertAlmostEqual(rho, r[i], places = 0, msg= msg)
+            msg = ("NASDE Model Failed: marks2017({0},{3}) == ""{1}\nExpected "
+                   "{2}".format(T[i],rho,r[i],PP[i]))
+            self.assertAlmostEqual(rho, r[i], places=0, msg=msg)
 
     def testSusong1999(self):
         """
@@ -39,10 +40,10 @@ class TestNASDE(unittest.TestCase):
         s = snow.susong1999(T, PP)
         r = [100,150,250]
         for i,rho in enumerate(s['rho_s']):
-            msg = "NASDE Model Failed: susong1999({0},{3}) == {1}\nExpected {2}".format(T[i],rho,r[i],PP[i])
-            self.assertAlmostEqual(rho, r[i],places = 0, msg= msg)
+            msg = ("NASDE Model Failed: susong1999({0},{3}) == {1}\nExpected "
+                   "{2}".format(T[i],rho,r[i],PP[i]))
+            self.assertAlmostEqual(rho, r[i], places=0, msg=msg)
 
 
 if __name__ == '__main__':
-    import sys
-    sys.exit(unittest.main())
+    unittest.main()
