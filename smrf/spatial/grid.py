@@ -75,7 +75,7 @@ class GRID:
 
         # mask
         self.mask = np.zeros_like(self.mx, dtype=bool)
-        if config['mask']:
+        if config['grid_mask']:
 
             assert(mask.shape == GridX.shape)
             mask = mask.astype(bool)

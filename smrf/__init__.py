@@ -6,8 +6,9 @@ __version__ = '0.9.0'
 
 import os
 
-__core_config__ = os.path.abspath(os.path.dirname(__file__)+'/framework/CoreConfig.ini')
-__recipes__ = os.path.abspath(os.path.dirname(__file__)+'/framework/recipes.ini')
+__core_config__ = os.path.abspath(os.path.dirname(__file__) + '/framework/CoreConfig.ini')
+__recipes__ = os.path.abspath(os.path.dirname(__file__) + '/framework/recipes.ini')
+__config_changelog__ = os.path.abspath(os.path.dirname(__file__) + '/framework/changelog.ini')
 
 from . import data
 from . import distribute
@@ -23,17 +24,18 @@ __config_titles__ = {
                 "stations":"Stations to use",
                 "csv":"CSV section configurations",
                 "mysql":"MySQL database",
+                "gridded":"Gridded datasets configurations",
                 "air_temp":"Air temperature distribution",
                 "vapor_pressure":"Vapor pressure distribution",
                 "wind": "Wind speed and wind direction distribution",
                 "precip": "Precipitation distribution",
                 "albedo":"Albedo distribution",
-                "solar":"Solar radiation distribution",
-                "thermal":"Thermal radiation distribution",
+                "cloud_factor": "Cloud Factor - Fraction used to limit solar radiation Cloudy (0) - Sunny (1)",
+                "solar":"Solar radiation",
+                "thermal":"Incoming thermal radiation",
                 "soil_temp":"Soil temperature",
                 "output":"Output variables",
-                "logging":"Logging",
-                "system":"System variables"
+                "system":"System variables and Logging"
 }
 
 __config_header__ = utils.utils.getConfigHeader()

@@ -635,9 +635,9 @@ def sunang_thread(queue, date, lat, lon, zone=0, slope=0, aspect=0):
     """
 
     if 'cosz' not in queue.keys():
-        raise ValueError('queue must have cosz key')
+        raise ValueError('Queue must have cosz key')
     if 'azimuth' not in queue.keys():
-        raise ValueError('queue must have cosz key')
+        raise ValueError('Queue must have azimuth key')
 
     log = logging.getLogger(__name__)
 
@@ -645,8 +645,8 @@ def sunang_thread(queue, date, lat, lon, zone=0, slope=0, aspect=0):
 
         log.debug('%s Calculating sun angle' % t)
 
-        cosz, azimuth = sunang(t.astimezone(pytz.utc), lat, lon,
-                               zone, slope, aspect)
+        cosz, azimuth = sunang(t.astimezone(pytz.utc), lat, lon, zone, slope,
+                                                                       aspect)
 
         queue['cosz'].put([t, cosz])
         queue['azimuth'].put([t, azimuth])
@@ -740,12 +740,10 @@ def shade_thread(queue, date, slope, aspect, zenith=None):
     20160325 Scott Havens
     """
 
-    if 'cosz' not in queue.keys():
-        raise ValueError('queue must have cosz key')
-    if 'azimuth' not in queue.keys():
-        raise ValueError('queue must have cosz key')
-    if 'illum_ang' not in queue.keys():
-        raise ValueError('queue must have illum_ang key')
+    for v in ['cosz','azimuth','illum_ang']:
+        if v not in queue.keys():
+            raise ValueError('Queue must have {} key'.format(v))
+
 
     log = logging.getLogger(__name__)
 
@@ -1000,11 +998,11 @@ def get_hrrr_cloud(df_solar, df_meta, logger, lat, lon):
         # get solar using twostream
         dtt = pd.to_datetime(dt)
         basin_sol.iloc[idt, :] =  model_solar(dtt, lat, lon)
-    
+
     # if it's close to sun down or sun up, then the cloud factor gets difficult to calculate
     basin_sol[basin_sol < 50] = 0
     df_solar[basin_sol < 50] = 0
-    
+
     # This would be the proper way to do this but it's too computationally expensive
     # cs_solar = df_solar.copy()
     # for dt, row in cs_solar.iterrows():
@@ -1024,7 +1022,7 @@ def get_hrrr_cloud(df_solar, df_meta, logger, lat, lon):
     df_cf[df_cf > 1.0] = 1.0
     df_cf[df_cf < 0.0] = 0.0
 
-    
+
 
     # # create cloud factor dataframe
     # df_cf = df_solar.copy()

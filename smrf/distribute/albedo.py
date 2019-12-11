@@ -74,12 +74,11 @@ class albedo(image_data.image_data):
             matching = [s for s in albedoConfig.keys() if "{0}_".format(d) in s]
             for m in matching:
                 ms = m.split('_')
-                v[ms[1]] = albedoConfig[m]
+                v[ms[-1]] = albedoConfig[m]
 
-            #create self.litter,self.veg
-            setattr(self,d,v)
+            # Create self.litter,self.veg
+            setattr(self, d, v)
 
-        #Add time zone
         self.config = albedoConfig
         self.min = self.config['min']
         self.max = self.config['max']
@@ -96,9 +95,11 @@ class albedo(image_data.image_data):
 
         """
 
-#         self._initialize(topo, metadata)
         self._logger.debug('Initializing distribute.albedo')
         self.veg_type = topo.veg_type
+
+        if self.config["decay_method"] == None:
+            self._logger.warning("No decay method is set!")
 
     def distribute(self, current_time_step, cosz, storm_day):
         """
@@ -126,21 +127,15 @@ class albedo(image_data.image_data):
 
             # Perform litter decay
             if self.config['decay_method'] == 'date_method':
-                if (self.config['start_decay'] is not None and
-                        self.config['end_decay'] is not None and
-                        self.config['end_decay'] > self.config['start_decay']):
-
-                    alb_v_d, alb_ir_d = radiation.decay_alb_power(self.veg,
-                                            self.veg_type,
-                                            self.config['start_decay'],
-                                            self.config['end_decay'],
-                                            current_time_step,
-                                            self.config['decay_power'], alb_v, alb_ir)
-                    alb_v = alb_v_d
-                    alb_ir = alb_ir_d
-                else:
-                    self._logger.error('Need correct inputs for decay method: {0}. Check your dates!'.format(self.config['decay_method']))
-                    raise ValueError('Albedo decay dates are not correct!')
+                alb_v_d, alb_ir_d = radiation.decay_alb_power(self.veg,
+                                        self.veg_type,
+                                        self.config['date_method_start_decay'],
+                                        self.config['date_method_end_decay'],
+                                        current_time_step,
+                                        self.config['date_method_decay_power'],
+                                        alb_v, alb_ir)
+                alb_v = alb_v_d
+                alb_ir = alb_ir_d
 
             elif self.config['decay_method'] == 'hardy2000':
                 alb_v_d, alb_ir_d = radiation.decay_alb_hardy(self.litter,
@@ -151,8 +146,8 @@ class albedo(image_data.image_data):
                 alb_v = alb_v_d
                 alb_ir = alb_ir_d
 
-            self.albedo_vis = utils.set_min_max(alb_v,self.min,self.max)
-            self.albedo_ir = utils.set_min_max(alb_ir,self.min,self.max)
+            self.albedo_vis = utils.set_min_max(alb_v, self.min, self.max)
+            self.albedo_ir = utils.set_min_max(alb_ir, self.min, self.max)
 
         else:
             self.albedo_vis = np.zeros(storm_day.shape)
@@ -170,6 +165,7 @@ class albedo(image_data.image_data):
             Changes the queue albedo_vis, albedo_ir
                 for the given date
         """
+        self._logger.info("Distributing {}".format(self.variable))
 
         for t in date:
 

@@ -79,3 +79,11 @@ History
 * Expanded tests to HRRR input data
 * Performance improvements to the gridded input data calculations
 *
+
+0.10.0 (TBD)
+------------------
+
+* Cloud factor was removed from solar and made its own module
+* IPW Topo has been fully dperecated and removed
+* Dozens config file options were renamed in favor of verbosity
+
