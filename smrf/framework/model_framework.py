@@ -40,7 +40,6 @@ import shutil
 from inicheck.tools import get_user_config, check_config
 from inicheck.config import UserConfig
 from inicheck.output import print_config_report,generate_config, print_recipe_summary
-from inicheck.utilities import pcfg, get_relative_to_cfg
 
 
 class SMRF():
@@ -164,7 +163,7 @@ class SMRF():
         for line in title:
             self._logger.info(line)
 
-        out = get_relative_to_cfg(ucfg.cfg['output']['out_location'],ucfg.filename)
+        out = ucfg.cfg['output']['out_location']
 
         #Make the tmp and output directories if they do not exist
         makeable_dirs = [out,os.path.join(out,'tmp')]
@@ -195,16 +194,13 @@ class SMRF():
         # Write the config file to the output dir no matter where the project is
         fname = 'config.ini'
         full_config_out = self.config['output']['out_location']
+
         full_config_out = os.path.abspath(os.path.join(
                                           os.path.dirname(configFile),
                                           full_config_out,fname))
 
         self._logger.info("Writing config file with full options.")
         generate_config(self.ucfg,full_config_out)
-
-        # After writing update the paths to be full abs paths.
-        self.config = self.ucfg.update_config_paths()
-
 
         # process the system variables
         for k,v in self.config['system'].items():
