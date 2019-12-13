@@ -1,3 +1,4 @@
+
 """
 20160104 Scott Havens
 
@@ -44,6 +45,9 @@ class CheckStation(CheckType):
 
         return value
 
+        value = value.upper()
+
+        return value
 
 def find_configs(directory):
     """
