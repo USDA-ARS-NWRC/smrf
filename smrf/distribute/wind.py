@@ -132,7 +132,7 @@ class wind(image_data.image_data):
             self.wind_ninja_dxy = self.config['wind_ninja_dxdy']
             self.wind_ninja_pref = self.config['wind_ninja_pref']
             if self.config['wind_ninja_tz'] is not None:
-                self.wind_ninja_tz = pytz.timezone(self.config['wind_ninja_tz'])
+                self.wind_ninja_tz = pytz.timezone(self.config['wind_ninja_tz'].title())
 
             self.start_date = pd.to_datetime(wholeConfig['time']['start_date'])
             self.grid_data = wholeConfig['gridded']['data_type']

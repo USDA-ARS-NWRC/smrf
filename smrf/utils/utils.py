@@ -1,3 +1,4 @@
+
 """
 20160104 Scott Havens
 
@@ -29,10 +30,20 @@ class CheckStation(CheckType):
     def __init__(self,**kwargs):
         super(CheckStation, self).__init__(**kwargs)
 
+
     def type_func(self, value):
         """
-        Attempt to convert all the values to upper case
+        Attempt to convert all the values to upper case.
+
+        Args:
+            value: A single string in a a config entry representing a station name
+        Returns:
+            value: A single station name all upper case
         """
+
+        value = value.upper()
+
+        return value
 
         value = value.upper()
 

@@ -40,8 +40,7 @@ from threading import Thread
 import shutil
 from inicheck.tools import get_user_config, check_config
 from inicheck.config import UserConfig
-from inicheck.output import print_config_report, generate_config, print_recipe_summary, print_change_report
-from inicheck.utilities import pcfg, get_relative_to_cfg
+from inicheck.output import print_config_report,generate_config, print_recipe_summary
 
 
 class SMRF():
