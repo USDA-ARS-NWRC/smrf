@@ -44,6 +44,9 @@ class grid():
         self.time_zone = time_zone
         self.forecast_flag = forecast_flag
         self.day_hour = day_hour
+
+        # WARNING: The value here is inferred in AWSM.interface. A change here
+        # requires a change there
         self.n_forecast_hours = n_forecast_hours
 
         # degree offset for a buffer around the model domain
