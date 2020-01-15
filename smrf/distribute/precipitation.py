@@ -278,6 +278,7 @@ class ppt(image_data.image_data):
 
             else:
                 # Adjust the precip for undercatchment
+
                 if self.config['station_adjust_for_undercatch']:
                     self._logger.debug('%s Adjusting precip for undercatch...' % data.name)
                     data = precip.adjust_for_undercatch(data,
@@ -286,10 +287,10 @@ class ppt(image_data.image_data):
                                                         self.config,
                                                         self.metadata)
 
-                    self.distribute_for_susong1999(data, precip_temp, time, mask=mask)
+                self.distribute_for_susong1999(data, precip_temp, time, mask=mask)
+
         else:
             self.distribute_for_susong1999(data, precip_temp, time, mask=mask)
-
         # redistribute due to wind to account for driftin
         if self.config['precip_rescaling_model'] == 'winstral':
             self._logger.debug('%s Redistributing due to wind' % data.name)
@@ -435,7 +436,6 @@ class ppt(image_data.image_data):
             self.last_storm_day_basin = np.max(mask * self.last_storm_day)
         else:
             self.last_storm_day_basin = np.max(self.last_storm_day)
-
 
     def distribute_thread(self, queue, data, date, mask=None):
         """
