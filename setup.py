@@ -110,7 +110,7 @@ ext_modules += [
 
 setup(
     name='smrf',
-    version='0.8.12',
+    version='0.9.1',
     description="Distributed snow modeling for water resources",
     author="Scott Havens",
     author_email='scott.havens@ars.usda.gov',
@@ -130,7 +130,8 @@ setup(
         ],
     include_package_data=True,
     package_data={'smrf':['./framework/CoreConfig.ini',
-			  './framework/.qotw', './framework/recipes.ini']},
+			  './framework/.qotw', './framework/recipes.ini',
+              './framework/changelog.ini']},
     license="CC0 1.0",
     zip_safe=False,
     keywords='smrf',

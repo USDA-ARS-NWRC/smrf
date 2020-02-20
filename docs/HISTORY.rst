@@ -66,3 +66,24 @@ History
 * Added local gradient interpolation option for use with gridded data
 * Removed ipw package to installed spatialnc dependency
 * Added projection info to output files
+
+
+0.9.0 (2019-12-05)
+------------------
+
+* First formal release under new branching model
+* Updated Weather forecast retrieval in dockerfile
+* Fixed a bug with tbreak in the wind calc
+* Fixed Cloud Factor typo
+* Reduced designated solar hours to limit dusk and dawn effects
+* Expanded tests to HRRR input data
+* Performance improvements to the gridded input data calculations
+*
+
+0.10.0 (TBD)
+------------------
+
+* Cloud factor was removed from solar and made its own module
+* IPW Topo has been fully dperecated and removed
+* Dozens config file options were renamed in favor of verbosity
+
