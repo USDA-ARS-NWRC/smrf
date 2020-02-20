@@ -1,0 +1,7 @@
+-r requirements.txt
+coveralls>=1.3.0
+flake8==3.5.0
+Sphinx==1.6.6
+sphinx-rtd-theme==0.2.5b1
+sphinxcontrib-bibtex==0.3.5
+sphinxcontrib-websupport==1.0.1
