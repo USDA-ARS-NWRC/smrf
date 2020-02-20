@@ -8,7 +8,7 @@ services:
   - docker
 
 before_install:
-  - docker build -t usdaarsnwrc/smrf .
+  - docker build --build-arg REQUIREMENTS=_dev -t usdaarsnwrc/smrf .
 
 script:
   docker run -it usdaarsnwrc/smrf test
