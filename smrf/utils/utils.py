@@ -23,13 +23,13 @@ import copy
 import scipy.spatial.qhull as qhull
 from scipy.interpolate.interpnd import CloughTocher2DInterpolator, LinearNDInterpolator
 
+
 class CheckStation(CheckType):
     """
     Custom check for ensuring our stations are always capitalized
     """
     def __init__(self,**kwargs):
         super(CheckStation, self).__init__(**kwargs)
-
 
     def type_func(self, value):
         """
@@ -41,13 +41,8 @@ class CheckStation(CheckType):
             value: A single station name all upper case
         """
 
-        value = value.upper()
+        return value.upper()
 
-        return value
-
-        value = value.upper()
-
-        return value
 
 def find_configs(directory):
     """
