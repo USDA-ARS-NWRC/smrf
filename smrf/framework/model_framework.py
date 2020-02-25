@@ -471,6 +471,13 @@ class SMRF():
                             self._logger.error("Stations in the {0} section are colocated.\n{1}".format(key,','.join(colocated[0])))
                             sys.exit()
 
+        # clip the timeseries to the start and end date
+        for key in self.data.variables:
+            if hasattr(self.data, key):
+                d = getattr(self.data, key)
+                d = d[self.start_date:self.end_date]
+                setattr(self.data, key, d)
+
         # Does the user want to create a CSV copy of the station data used.
         if self.config["output"]['input_backup'] == True:
             self._logger.info('Backing up input data...')
