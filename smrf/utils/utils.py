@@ -95,28 +95,29 @@ def handle_run_script_options(config_option):
 
     return configFile
 
+
 def nan_helper(y):
-        """
-        Helper to handle indices and logical indices of NaNs.
+    """
+    Helper to handle indices and logical indices of NaNs.
 
-        Example:
-            >>> # linear interpolation of NaNs
-            >>> nans, x= nan_helper(y)
-            >>> y[nans]= np.interp(x(nans), x(~nans), y[~nans])
+    Example:
+        >>> # linear interpolation of NaNs
+        >>> nans, x= nan_helper(y)
+        >>> y[nans]= np.interp(x(nans), x(~nans), y[~nans])
 
-        Args:
-            y: 1d numpy array with possible NaNs
+    Args:
+        y: 1d numpy array with possible NaNs
 
-        Returns:
-            tuple:
-                **nans** - logical indices of NaNs
-                **index** -  a function, with signature
-                             indices=index(logical_indices) to convert logical
-                             indices of NaNs to 'equivalent' indices
+    Returns:
+        tuple:
+            **nans** - logical indices of NaNs
+            **index** -  a function, with signature
+                         indices=index(logical_indices) to convert logical
+                         indices of NaNs to 'equivalent' indices
 
-        """
+    """
 
-        return np.isnan(y), lambda z: z.nonzero()[0]
+    return np.isnan(y), lambda z: z.nonzero()[0]
 
 
 def set_min_max(data, min_val, max_val):
