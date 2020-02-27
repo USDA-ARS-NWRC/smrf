@@ -10,7 +10,6 @@ import pandas as pd
 from datetime import datetime
 import pytz
 import os
-from smrf.utils import io
 from shutil import copyfile
 from .gitinfo import __gitVersion__, __gitPath__
 from smrf import __version__, __core_config__
@@ -23,13 +22,13 @@ import copy
 import scipy.spatial.qhull as qhull
 from scipy.interpolate.interpnd import CloughTocher2DInterpolator, LinearNDInterpolator
 
+
 class CheckStation(CheckType):
     """
     Custom check for ensuring our stations are always capitalized
     """
     def __init__(self,**kwargs):
         super(CheckStation, self).__init__(**kwargs)
-
 
     def type_func(self, value):
         """
@@ -41,13 +40,8 @@ class CheckStation(CheckType):
             value: A single station name all upper case
         """
 
-        value = value.upper()
+        return value.upper()
 
-        return value
-
-        value = value.upper()
-
-        return value
 
 def find_configs(directory):
     """
@@ -100,28 +94,29 @@ def handle_run_script_options(config_option):
 
     return configFile
 
+
 def nan_helper(y):
-        """
-        Helper to handle indices and logical indices of NaNs.
+    """
+    Helper to handle indices and logical indices of NaNs.
 
-        Example:
-            >>> # linear interpolation of NaNs
-            >>> nans, x= nan_helper(y)
-            >>> y[nans]= np.interp(x(nans), x(~nans), y[~nans])
+    Example:
+        >>> # linear interpolation of NaNs
+        >>> nans, x= nan_helper(y)
+        >>> y[nans]= np.interp(x(nans), x(~nans), y[~nans])
 
-        Args:
-            y: 1d numpy array with possible NaNs
+    Args:
+        y: 1d numpy array with possible NaNs
 
-        Returns:
-            tuple:
-                **nans** - logical indices of NaNs
-                **index** -  a function, with signature
-                             indices=index(logical_indices) to convert logical
-                             indices of NaNs to 'equivalent' indices
+    Returns:
+        tuple:
+            **nans** - logical indices of NaNs
+            **index** -  a function, with signature
+                         indices=index(logical_indices) to convert logical
+                         indices of NaNs to 'equivalent' indices
 
-        """
+    """
 
-        return np.isnan(y), lambda z: z.nonzero()[0]
+    return np.isnan(y), lambda z: z.nonzero()[0]
 
 
 def set_min_max(data, min_val, max_val):
