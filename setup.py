@@ -60,7 +60,11 @@ if "CC" not in os.environ:
 
 
 ext_modules = []
-extra_cc_args = ['-fopenmp', '-O3']
+extension_params = dict(
+    include_dirs=[numpy.get_include()],
+    extra_compile_args=['-fopenmp', '-O3'],
+    extra_link_args=['-fopenmp', '-O3'],
+)
 
 # detrended kriging
 source_folder = 'smrf/spatial/dk'
@@ -73,9 +77,7 @@ ext_modules += [
             "lusolv.c",
             "array.c"
         ]],
-        include_dirs=[numpy.get_include()],
-        extra_compile_args=extra_cc_args,
-        extra_link_args=extra_cc_args,
+        **extension_params
     ),
 ]
 
@@ -90,9 +92,7 @@ ext_modules += [
             "dewpt.c",
             "iwbt.c"
         ]],
-        include_dirs=[numpy.get_include()],
-        extra_compile_args=extra_cc_args,
-        extra_link_args=extra_cc_args,
+        **extension_params
     ),
 ]
 
@@ -106,9 +106,7 @@ ext_modules += [
             "breshen.c",
             "calc_wind.c"
         ]],
-        include_dirs=[numpy.get_include()],
-        extra_compile_args=extra_cc_args,
-        extra_link_args=extra_cc_args,
+        **extension_params
     ),
 ]
 
