@@ -48,69 +48,70 @@ if sys.argv[-1] != 'test':
         f.write("__gitVersion__='{0}'\n".format(gitVersion[:nchars]))
         f.close()
 
+
+def c_name_from_path(location, name):
+    return os.path.join(location, name).replace('/', '.')
+
+
 # Give user option to specify his local compiler name
 if "CC" not in os.environ:
     # force the compiler to use gcc
     os.environ["CC"] = "gcc"
+
 
 cmdclass = {}
 ext_modules = []
 extra_cc_args = ['-fopenmp', '-O3']
 
 # detrended kriging
-loc = 'smrf/spatial/dk'  # location of the dk folder
-mname = os.path.join(loc, 'detrended_kriging')
-mname = mname.replace('/', '.')
-
+source_folder = 'smrf/spatial/dk'
 ext_modules += [
-    Extension(mname,
-              sources=[os.path.join(loc, val) for val in [
-                  "detrended_kriging.pyx",
-                  "krige.c",
-                  "lusolv.c",
-                  "array.c"
-              ]],
-              include_dirs=[numpy.get_include()],
-              extra_compile_args=extra_cc_args,
-              extra_link_args=extra_cc_args,
-              ),
+    Extension(
+        c_name_from_path(source_folder, 'detrended_kriging'),
+        sources=[os.path.join(source_folder, val) for val in [
+            "detrended_kriging.pyx",
+            "krige.c",
+            "lusolv.c",
+            "array.c"
+        ]],
+        include_dirs=[numpy.get_include()],
+        extra_compile_args=extra_cc_args,
+        extra_link_args=extra_cc_args,
+    ),
 ]
 cmdclass.update({'build_ext': build_ext})
 
 # envphys core c functions
-loc = 'smrf/envphys/core'  # location of the folder
-mname = os.path.join(loc, 'envphys_c')
-mname = mname.replace('/', '.')
+source_folder = 'smrf/envphys/core'
 ext_modules += [
-    Extension(mname,
-              sources=[os.path.join(loc, val) for val in [
-                  "envphys_c.pyx",
-                  "topotherm.c",
-                  "dewpt.c",
-                  "iwbt.c"
-              ]],
-              include_dirs=[numpy.get_include()],
-              extra_compile_args=extra_cc_args,
-              extra_link_args=extra_cc_args,
-              ),
+    Extension(
+        c_name_from_path(source_folder, 'envphys_c'),
+        sources=[os.path.join(source_folder, val) for val in [
+            "envphys_c.pyx",
+            "topotherm.c",
+            "dewpt.c",
+            "iwbt.c"
+        ]],
+        include_dirs=[numpy.get_include()],
+        extra_compile_args=extra_cc_args,
+        extra_link_args=extra_cc_args,
+    ),
 ]
 
 # wind model c functions
-loc = 'smrf/utils/wind'  # location of the folder
-mname = os.path.join(loc, 'wind_c')
-mname = mname.replace('/', '.')
-
+source_folder = 'smrf/utils/wind'
 ext_modules += [
-    Extension(mname,
-              sources=[os.path.join(loc, val) for val in [
-                  "wind_c.pyx",
-                  "breshen.c",
-                  "calc_wind.c"
-              ]],
-              include_dirs=[numpy.get_include()],
-              extra_compile_args=extra_cc_args,
-              extra_link_args=extra_cc_args,
-              ),
+    Extension(
+        c_name_from_path(source_folder, 'wind_c'),
+        sources=[os.path.join(source_folder, val) for val in [
+            "wind_c.pyx",
+            "breshen.c",
+            "calc_wind.c"
+        ]],
+        include_dirs=[numpy.get_include()],
+        extra_compile_args=extra_cc_args,
+        extra_link_args=extra_cc_args,
+    ),
 ]
 
 setup(
