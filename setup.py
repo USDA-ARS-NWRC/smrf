@@ -48,8 +48,10 @@ if sys.argv[-1] != 'test':
         f.write("__gitVersion__='{0}'\n".format(gitVersion[:nchars]))
         f.close()
 
-# force the compiler to use gcc
-os.environ["CC"] = "gcc"
+# Give user option to specify his local compiler name
+if "CC" not in os.environ:
+    # force the compiler to use gcc
+    os.environ["CC"] = "gcc"
 
 cmdclass = {}
 ext_modules = []
