@@ -55,6 +55,7 @@ if "CC" not in os.environ:
 
 cmdclass = {}
 ext_modules = []
+extra_cc_args = ['-fopenmp', '-O3']
 
 # detrended kriging
 loc = 'smrf/spatial/dk'  # location of the dk folder
@@ -70,8 +71,8 @@ ext_modules += [
                   "array.c"
               ]],
               include_dirs=[numpy.get_include()],
-              extra_compile_args=['-fopenmp', '-O3'],
-              extra_link_args=['-fopenmp', '-O3']
+              extra_compile_args=extra_cc_args,
+              extra_link_args=extra_cc_args,
               ),
 ]
 cmdclass.update({'build_ext': build_ext})
@@ -89,8 +90,8 @@ ext_modules += [
                   "iwbt.c"
               ]],
               include_dirs=[numpy.get_include()],
-              extra_compile_args=['-fopenmp', '-O3'],
-              extra_link_args=['-fopenmp', '-O3']
+              extra_compile_args=extra_cc_args,
+              extra_link_args=extra_cc_args,
               ),
 ]
 
@@ -107,8 +108,8 @@ ext_modules += [
                   "calc_wind.c"
               ]],
               include_dirs=[numpy.get_include()],
-              extra_compile_args=['-fopenmp', '-O3'],
-              extra_link_args=['-fopenmp', '-O3']
+              extra_compile_args=extra_cc_args,
+              extra_link_args=extra_cc_args,
               ),
 ]
 
