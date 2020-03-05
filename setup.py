@@ -59,7 +59,6 @@ if "CC" not in os.environ:
     os.environ["CC"] = "gcc"
 
 
-cmdclass = {}
 ext_modules = []
 extra_cc_args = ['-fopenmp', '-O3']
 
@@ -79,7 +78,6 @@ ext_modules += [
         extra_link_args=extra_cc_args,
     ),
 ]
-cmdclass.update({'build_ext': build_ext})
 
 # envphys core c functions
 source_folder = 'smrf/envphys/core'
@@ -159,7 +157,9 @@ setup(
     ],
     test_suite='tests',
     # tests_require=test_requirements,
-    cmdclass=cmdclass,
+    cmdclass={
+        'build_ext': build_ext
+    },
     ext_modules=ext_modules,
     scripts=[
         'scripts/update_configs',
