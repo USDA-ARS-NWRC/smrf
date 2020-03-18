@@ -25,6 +25,7 @@ class wxdata():
                  'wind_speed',
                  'wind_direction',
                  'cloud_factor']
+
     db_config_vars = ['user',
                       'password',
                       'host',
@@ -32,10 +33,12 @@ class wxdata():
                       'port',
                       'metadata',
                       'data_table',
-                      'station_table']
+                      'station_table',
+                      'stations',
+                      'client']
 
     def __init__(self, dataConfig, start_date, end_date, time_zone='UTC',
-                 stations=None, dataType=None):
+                                                         dataType=None):
 
         if dataType is None:
             raise Exception('''loadData.data() must have a specified dataType
@@ -46,9 +49,9 @@ class wxdata():
         self.start_date = start_date
         self.end_date = end_date
         self.time_zone = time_zone
-        self.stations = stations
 
         self._logger = logging.getLogger(__name__)
+        self.stations = self.dataConfig['stations']
 
         # load the data
         if dataType == 'csv':
@@ -79,13 +82,11 @@ class wxdata():
 
         self._logger.info('Reading data coming from CSV files')
 
-        sta = None
-        if self.stations is not None:
-            if 'stations' in self.stations:
-                sta = [s.upper() for s in self.stations['stations']]
-                self._logger.debug('Using only stations {0}'.format(
-                    self.stations['stations']
-                    ))
+        sta = self.stations
+
+        if sta != None:
+            msta = ", ".join(sta)
+            self._logger.debug('Using only stations {0}'.format(msta))
 
         # load the data
         v = list(self.variables)
@@ -106,36 +107,18 @@ class wxdata():
                                      parse_dates=[0])
                     dp_full.columns = [s.upper() for s in dp_full.columns]
 
-                    # check to see if pandas read in the date time correctly
-                    if not isinstance(dp_full.index[0], pd.Timestamp):
-                        raise Exception('''Pandas could not convert
-                                        date_time to timestamp.
-                                        Try using %Y-%m-%d %H:%M:%S format''')
-
                     if sta is not None:
-                        self.stations = [s for s in dp_full.columns.str.upper() if s in sta]
-                        dp = dp_full[dp_full.columns[(dp_full.columns.str.upper()).isin(sta)]]
+
+                        data_sta = dp_full.columns.str.upper()
+
+                        # Grab IDs from user list thats also in Data
+                        self.stations = [s for s in data_sta if s in sta]
+                        dp = dp_full[dp_full.columns[(data_sta).isin(sta)]]
+
                     else:
                         dp = dp_full
-                        
-                    # check that the start and end date are within the data
-                    if self.start_date not in dp.index:
-                        raise Exception("start_date in config file is not "
-                                        "inside of available date range "
-                                        "\n{0} not w/in {1} and {2}"
-                                        "".format(self.start_date,
-                                                  dp.index[0],
-                                                  dp.index[-1]))
 
-                    if self.end_date not in dp.index:
-                        raise Exception("end_date in config file is not "
-                                        "inside of available date range "
-                                        "\n{0} not w/in {1} and {2}"
-                                        "".format(self.start_date,
-                                                  dp.index[0],
-                                                  dp.index[-1]))
-                        
-                    # only get the desired dates
+                    # Only get the desired dates
                     dp_final = dp[self.start_date:self.end_date]
 
                     if dp_final.empty:
@@ -143,13 +126,6 @@ class wxdata():
                                         "".format(i))
 
                 setattr(self, i, dp_final)
-
-        # check that metadata is there
-        # This is now handled by inicheck. Leaving out the metadata in the config will error in inicheck
-#         try:
-#             self.metadata
-#         except:
-#             raise AttributeError('Metadata missing from configuration file')
 
     def load_from_mysql(self):
         """
@@ -167,22 +143,22 @@ class wxdata():
 
         # ---------------------------------------------------
         # determine if it's stations or client
-        sta = None
-        if 'stations' in self.stations:
-            sta = self.stations['stations']
+        sta = self.stations
 
         c = None
         stable = None
-        if 'client' in self.stations:
-            c = self.stations['client']
+        if 'client' in self.dataConfig.keys():
+            c = self.dataConfig['client']
             stable = self.dataConfig['station_table']
 
-        # determine what table for the metadata
+        # Determine what table for the metadata
         mtable = self.dataConfig['metadata']
 
+        # Raise an error if neither stations or client provided
         if (sta is None) & (c is None):
-            raise Exception('''Error in configuration file for [mysql],
-                            must specify either "stations" or "client"''')
+            raise Exception('Error in configuration file for [mysql],'
+                            ' must specify either "stations" or "client"')
+
         self._logger.debug('Loading metadata from table %s' % mtable)
 
         # ---------------------------------------------------
@@ -195,6 +171,7 @@ class wxdata():
         # ---------------------------------------------------
         # get a list of the stations
         station_ids = self.metadata.index.tolist()
+
         # get the correct column names if specified, along with variable names
         db_var_names = [val for key, val in self.dataConfig.items()
                         if key not in self.db_config_vars]
@@ -202,6 +179,7 @@ class wxdata():
                      if x not in self.db_config_vars]
 
         # get the data
+
         dp = data.get_data(self.dataConfig['data_table'], station_ids,
                            self.start_date, self.end_date, db_var_names)
 

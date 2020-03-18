@@ -1,3 +1,4 @@
+
 """
 20160104 Scott Havens
 
@@ -9,7 +10,6 @@ import pandas as pd
 from datetime import datetime
 import pytz
 import os
-from smrf.utils import io
 from shutil import copyfile
 from .gitinfo import __gitVersion__, __gitPath__
 from smrf import __version__, __core_config__
@@ -22,18 +22,25 @@ import copy
 import scipy.spatial.qhull as qhull
 from scipy.interpolate.interpnd import CloughTocher2DInterpolator, LinearNDInterpolator
 
+
 class CheckStation(CheckType):
     """
     Custom check for ensuring our stations are always capitalized
     """
     def __init__(self,**kwargs):
-        super(CheckStation,self).__init__(**kwargs)
+        super(CheckStation, self).__init__(**kwargs)
 
-    def cast(self):
-        if self.value.lower() != 'none':
-            return self.value.upper()
-        else:
-            return self.value
+    def type_func(self, value):
+        """
+        Attempt to convert all the values to upper case.
+
+        Args:
+            value: A single string in a a config entry representing a station name
+        Returns:
+            value: A single station name all upper case
+        """
+
+        return value.upper()
 
 
 def find_configs(directory):
@@ -87,28 +94,29 @@ def handle_run_script_options(config_option):
 
     return configFile
 
+
 def nan_helper(y):
-        """
-        Helper to handle indices and logical indices of NaNs.
+    """
+    Helper to handle indices and logical indices of NaNs.
 
-        Example:
-            >>> # linear interpolation of NaNs
-            >>> nans, x= nan_helper(y)
-            >>> y[nans]= np.interp(x(nans), x(~nans), y[~nans])
+    Example:
+        >>> # linear interpolation of NaNs
+        >>> nans, x= nan_helper(y)
+        >>> y[nans]= np.interp(x(nans), x(~nans), y[~nans])
 
-        Args:
-            y: 1d numpy array with possible NaNs
+    Args:
+        y: 1d numpy array with possible NaNs
 
-        Returns:
-            tuple:
-                **nans** - logical indices of NaNs
-                **index** -  a function, with signature
-                             indices=index(logical_indices) to convert logical
-                             indices of NaNs to 'equivalent' indices
+    Returns:
+        tuple:
+            **nans** - logical indices of NaNs
+            **index** -  a function, with signature
+                         indices=index(logical_indices) to convert logical
+                         indices of NaNs to 'equivalent' indices
 
-        """
+    """
 
-        return np.isnan(y), lambda z: z.nonzero()[0]
+    return np.isnan(y), lambda z: z.nonzero()[0]
 
 
 def set_min_max(data, min_val, max_val):
@@ -205,6 +213,7 @@ def backup_input(data, config_obj):
         #backup_config_obj.apply_recipes()
     if 'mysql' in backup_config_obj.cfg.keys():
         del backup_config_obj.cfg['mysql']
+
     if 'stations' in backup_config_obj.cfg.keys():
         if 'client' in backup_config_obj.cfg['stations']:
             del backup_config_obj.cfg['stations']['client']
@@ -222,7 +231,7 @@ def backup_input(data, config_obj):
         backup_config_obj.cfg['csv'][k] = fname
 
     # Copy topo files over to backup
-    ignore = ['basin_lon', 'basin_lat', 'type', 'threading']
+    ignore = ['basin_lon', 'basin_lat', 'type', 'topo_threading']
     for s in backup_config_obj.cfg['topo'].keys():
         src = backup_config_obj.cfg['topo'][s]
         # make not a list if lenth is 1

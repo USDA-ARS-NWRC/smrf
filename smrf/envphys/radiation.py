@@ -675,12 +675,10 @@ def shade_thread(queue, date, slope, aspect, zenith=None):
     20160325 Scott Havens
     """
 
-    if 'cosz' not in queue.keys():
-        raise ValueError('queue must have cosz key')
-    if 'azimuth' not in queue.keys():
-        raise ValueError('queue must have cosz key')
-    if 'illum_ang' not in queue.keys():
-        raise ValueError('queue must have illum_ang key')
+    for v in ['cosz','azimuth','illum_ang']:
+        if v not in queue.keys():
+            raise ValueError('Queue must have {} key'.format(v))
+
 
     log = logging.getLogger(__name__)
 
@@ -1130,7 +1128,7 @@ def get_hrrr_cloud(df_solar, df_meta, logger, lat, lon):
     for idt, dt in enumerate(dates):
         # get solar using twostream
         dtt = pd.to_datetime(dt)
-        basin_sol.iloc[idt, :] = model_solar(dtt, lat, lon)
+        basin_sol.iloc[idt, :] =  model_solar(dtt, lat, lon)
 
     # if it's close to sun down or sun up, then the cloud factor gets difficult to calculate
     basin_sol[basin_sol < 50] = 0
@@ -1154,6 +1152,8 @@ def get_hrrr_cloud(df_solar, df_meta, logger, lat, lon):
     # Clean up the dataframe to be between 0 and 1
     df_cf[df_cf > 1.0] = 1.0
     df_cf[df_cf < 0.0] = 0.0
+
+
 
     # # create cloud factor dataframe
     # df_cf = df_solar.copy()
