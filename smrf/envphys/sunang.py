@@ -26,7 +26,7 @@ def sunang(date_time, latitude, longitude, truncate=True):
             if position is an array
 
     Returns
-        cosz - cosine of the zeinith angle, same shape as input position
+        cosz - cosine of the zenith angle, same shape as input position
         azimuth - solar azimuth, same shape as input position
         rad_vec - Earth-Sun radius vector
     """
