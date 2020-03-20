@@ -1,10 +1,12 @@
 from __future__ import print_function
-import numpy as np
+
 import os
-import netCDF4 as nc
 # import matplotlib.pyplot as plt
 # import progressbar
 from datetime import datetime
+
+import netCDF4 as nc
+import numpy as np
 
 from . import wind_c
 

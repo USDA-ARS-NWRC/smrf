@@ -25,22 +25,25 @@ Example:
 
 import logging
 import os
-from os.path import dirname, basename, join, abspath
-import sys
-import coloredlogs
-from datetime import datetime, timedelta
-import pandas as pd
-import numpy as np
-import pytz
-from smrf import data, distribute, output, __core_config__, __recipes__
-from smrf.envphys import radiation
-from smrf.utils import queue, io
-from smrf.utils.utils import backup_input, getqotw, check_station_colocation
-from threading import Thread
 import shutil
-from inicheck.tools import get_user_config, check_config
+import sys
+from datetime import datetime, timedelta
+from os.path import abspath, basename, dirname, join
+from threading import Thread
+
+import coloredlogs
+import numpy as np
+import pandas as pd
+import pytz
 from inicheck.config import UserConfig
-from inicheck.output import print_config_report,generate_config, print_recipe_summary
+from inicheck.output import (generate_config, print_config_report,
+                             print_recipe_summary)
+from inicheck.tools import check_config, get_user_config
+
+from smrf import __core_config__, __recipes__, data, distribute, output
+from smrf.envphys import radiation
+from smrf.utils import io, queue
+from smrf.utils.utils import backup_input, check_station_colocation, getqotw
 
 
 class SMRF():

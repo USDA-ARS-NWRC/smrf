@@ -1,12 +1,14 @@
-import unittest
 import os
 import shutil
-from inicheck.tools import get_user_config, check_config
+import unittest
+
 import netCDF4 as nc
 import numpy as np
+from inicheck.tools import check_config, get_user_config
 
-from smrf.framework.model_framework import run_smrf, can_i_run_smrf
 import smrf
+from smrf.framework.model_framework import can_i_run_smrf, run_smrf
+
 
 class SMRFTestCase(unittest.TestCase):
     """

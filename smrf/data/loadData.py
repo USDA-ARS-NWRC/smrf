@@ -1,6 +1,9 @@
-from smrf.data import mysql_data
 import logging
+
 import pandas as pd
+
+from smrf.data import mysql_data
+
 
 class wxdata():
     """

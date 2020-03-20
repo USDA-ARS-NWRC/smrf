@@ -9,11 +9,13 @@ try:
 except:
     from queue import Queue, Empty, Full
 
-import numpy as np
-import threading
-from time import time as _time
 import logging
 import sys
+import threading
+from time import time as _time
+
+import numpy as np
+
 
 class DateQueue_Threading(Queue):
     """

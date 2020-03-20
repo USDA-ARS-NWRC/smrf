@@ -11,11 +11,14 @@ Tests for `data.load_data` module.
 
 import unittest
 from copy import deepcopy
+
+import requests
 from inicheck.tools import cast_all_variables
 from inicheck.utilities import pcfg
+
 from smrf.framework.model_framework import can_i_run_smrf, run_smrf
 from tests.test_configurations import SMRFTestCase
-import requests
+
 
 def is_at_NWRC(url):
     """

@@ -18,9 +18,12 @@
 
 import os
 import sys
-from smrf.utils.utils import get_config_doc_section_hdr
-from inicheck.tools import config_documentation
 
+from inicheck.tools import config_documentation
+# -- Have to do a mock install of some modules that RTD doesn't have --------
+from mock import Mock as MagicMock
+
+from smrf.utils.utils import get_config_doc_section_hdr
 
 config_documentation('./auto_config.rst',
 					 modules='smrf',
@@ -31,8 +34,6 @@ if os.environ.get('READTHEDOCS') == 'True':
 else:
     sys.path.insert(0, os.path.abspath('../'))
 
-# -- Have to do a mock install of some modules that RTD doesn't have --------
-from mock import Mock as MagicMock
 
 class Mock(MagicMock):
     @classmethod

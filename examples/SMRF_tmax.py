@@ -5,11 +5,11 @@ Distribute the point forcing data to the DEM
 '''
 
 
-import smrf
-
-from datetime import datetime
-import sys
 import faulthandler
+import sys
+from datetime import datetime
+
+import smrf
 
 faulthandler.enable()
 

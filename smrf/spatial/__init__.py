@@ -1,4 +1,3 @@
 # -*- coding: utf-8 -*-
-from . import idw
-from . import grid
+from . import grid, idw
 from .dk import dk

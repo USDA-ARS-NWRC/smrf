@@ -10,8 +10,10 @@ Tests for `envphys.snow` module.
 
 import unittest
 
-from smrf.envphys import snow
 import numpy as np
+
+from smrf.envphys import snow
+
 
 class TestNASDE(unittest.TestCase):
     def testMarks2017(self):

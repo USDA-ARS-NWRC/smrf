@@ -6,11 +6,12 @@ the methods.
 20170515 Scott Havens
 """
 
-import smrf
 import sys
+
 import matplotlib.pyplot as plt
 import numpy as np
 
+import smrf
 
 # the different methods that can be used, the Marks1979 will be used for 
 # the base comparison of clear sky thermal radiation
@@ -114,9 +115,3 @@ def main():
         
 if __name__ == '__main__':
     main()
-
-    
-    
-    
-    
-    

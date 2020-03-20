@@ -1,8 +1,9 @@
 
-import unittest
 import os
-from glob import glob
+import unittest
 from copy import deepcopy
+from glob import glob
+
 import requests
 from inicheck.tools import cast_all_variables
 from inicheck.utilities import pcfg
