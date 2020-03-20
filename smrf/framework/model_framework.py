@@ -41,7 +41,7 @@ from inicheck.output import (generate_config, print_config_report,
 from inicheck.tools import check_config, get_user_config
 
 from smrf import __core_config__, __recipes__, data, distribute, output
-from smrf.envphys import radiation
+from smrf.envphys import radiation, sunang
 from smrf.utils import io, queue
 from smrf.utils.utils import backup_input, check_station_colocation, getqotw
 

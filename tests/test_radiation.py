@@ -7,10 +7,9 @@ import utm
 
 from smrf.data import loadTopo
 from smrf.envphys import radiation, sunang
-from tests.test_configurations import SMRFTestCase
 
 
-class TestRadiation(SMRFTestCase):
+class TestRadiation(unittest.TestCase):
 
     def test_sunang(self):
         """ Sunang calculation """
@@ -76,7 +75,7 @@ class TestRadiation(SMRFTestCase):
             'basin_lat': 43.067,
             'filename': 'tests/RME/topo/topo.nc',
             'type': 'netcdf',
-            'threading': False
+            'topo_threading': False
         }
         topo = loadTopo.topo(topo_config, calcInput=False,
                              tempDir='tests/RME/output')
