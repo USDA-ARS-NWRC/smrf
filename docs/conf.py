@@ -21,7 +21,7 @@ import sys
 
 from inicheck.tools import config_documentation
 # -- Have to do a mock install of some modules that RTD doesn't have --------
-from unittest.mock import MagicMock
+from unittest.mock import Mock
 
 from smrf.utils.utils import get_config_doc_section_hdr
 
@@ -35,10 +35,10 @@ else:
     sys.path.insert(0, os.path.abspath('../'))
 
 
-class Mock(MagicMock):
-    @classmethod
-    def __getattr__(cls, name):
-            return Mock()
+# class Mock(MagicMock):
+#     @classmethod
+#     def __getattr__(cls, name):
+#             return Mock()
 MOCK_MODULES = ['netCDF4', 'matplotlib', 'matplotlib.pyplot', 'pandas','pykrige']
 
 sys.modules.update((mod_name, Mock()) for mod_name in MOCK_MODULES)
