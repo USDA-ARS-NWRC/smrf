@@ -1,6 +1,9 @@
 import unittest
-import os, shutil
+import os
+import shutil
 from inicheck.tools import get_user_config, check_config
+import netCDF4 as nc
+import numpy as np
 
 from smrf.framework.model_framework import run_smrf, can_i_run_smrf
 import smrf
@@ -25,6 +28,39 @@ class SMRFTestCase(unittest.TestCase):
             # print(e)
             return False
 
+    def compare_netcdf_files(self, gold_file, test_file):
+        """
+        Compare two netcdf files to ensure that they are identical. The
+        tests will compare the attributes of each variable and ensure that
+        the values are exact
+        """
+
+        # open the gold and compare
+        gold = nc.Dataset(gold_file)
+        test = nc.Dataset(test_file)
+
+        # compare the time first
+        self.assertEqual(len(gold.variables['time']), len(
+            test.variables['time']))
+
+        # go through all variables and compare everything including the attributes and data
+        for var_name, v in gold.variables.items():
+
+            # compare the dimensions
+            for att in gold.variables[var_name].ncattrs():
+                self.assertEqual(
+                    getattr(gold.variables[var_name], att),
+                    getattr(test.variables[var_name], att))
+
+            # only compare those that are floats
+            if gold.variables[var_name].datatype != np.dtype('S1'):
+                result = np.abs(
+                    gold.variables[var_name][:] - test.variables[var_name][:])
+                self.assertTrue(not np.any(result > 0))
+
+        gold.close()
+        test.close()
+
     def setUp(self):
         """
         Runs the short simulation over reynolds mountain east
@@ -32,7 +68,7 @@ class SMRFTestCase(unittest.TestCase):
 
         # check whether or not this is being ran as a single test or part of the suite
         base = os.path.dirname(smrf.__file__)
-        self.test_dir = os.path.join(base,'../','tests')
+        self.test_dir = os.path.join(base, '../', 'tests')
 
         config_file = 'test_base_config.ini'
         config_file = os.path.join(self.test_dir, config_file)
