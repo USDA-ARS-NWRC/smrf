@@ -5,11 +5,13 @@ Originally written by Scott Havens in 2015
 """
 
 
-import numpy as np
 import os
 from datetime import datetime
+
+import numpy as np
 import pandas as pd
 import pytz
+
 
 def storms(precipitation, perc_snow, mass=1, time=4,
            stormDays=None, stormPrecip=None, ps_thresh=0.5):

@@ -44,6 +44,9 @@ clean-test:
 	rm -fr .tox/
 	rm -f .coverage
 	rm -fr htmlcov/
+	
+isort: ## using isort to sort imports
+	isort -rc -vb .
 
 lint:
 	flake8 smrf tests

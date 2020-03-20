@@ -17,6 +17,7 @@ from netCDF4 import Dataset
 
 import smrf
 from smrf.framework.model_framework import run_smrf
+from tests.test_configurations import SMRFTestCase
 
 
 def compare_image(v_name, gold_dir, test_dir):
@@ -46,7 +47,7 @@ def compare_image(v_name, gold_dir, test_dir):
     return not np.any(result > 0)
 
 
-class TestRME(unittest.TestCase):
+class TestRME(SMRFTestCase):
     """
     Integration test for SMRF using reynolds mountain east
     """
