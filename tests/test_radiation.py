@@ -1,7 +1,8 @@
-from copy import deepcopy
 import unittest
-import pandas as pd
+from copy import deepcopy
+
 import numpy as np
+import pandas as pd
 import utm
 
 from smrf.data import loadTopo

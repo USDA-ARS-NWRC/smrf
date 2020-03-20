@@ -1,6 +1,7 @@
-import numpy as np
-from math import fmod, tan, atan, cos, sin, asin, sqrt
 import logging
+from math import asin, atan, cos, fmod, sin, sqrt, tan
+
+import numpy as np
 import pytz
 
 JULIAN_CENTURY = 36525		# days in Julian century
@@ -446,4 +447,3 @@ def leapyear(year):
         return True
     else:
         return False
-	

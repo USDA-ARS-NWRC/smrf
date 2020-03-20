@@ -12,12 +12,12 @@ import subprocess as sp
 import numpy as np
 import pandas as pd
 import pytz
-from scipy.interpolate import Akima1DInterpolator
 from scipy.integrate import quad
+from scipy.interpolate import Akima1DInterpolator
 
+from smrf.envphys import sunang
 from smrf.utils import utils
 from smrf.utils.io import isint
-from smrf.envphys import sunang
 
 on_rtd = os.environ.get('READTHEDOCS') == 'True'
 if on_rtd:
