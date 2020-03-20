@@ -1,12 +1,14 @@
 
-import numpy as np
 import logging
+import os
+
 import netCDF4 as nc
+import numpy as np
+
 from smrf.distribute import image_data
-from smrf.envphys import snow,storms,precip
+from smrf.envphys import precip, snow, storms
 from smrf.envphys.core import envphys_c
 from smrf.utils import utils
-import os
 
 
 class ppt(image_data.image_data):

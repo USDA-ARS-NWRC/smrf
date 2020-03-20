@@ -10,13 +10,6 @@ __core_config__ = os.path.abspath(os.path.dirname(__file__) + '/framework/CoreCo
 __recipes__ = os.path.abspath(os.path.dirname(__file__) + '/framework/recipes.ini')
 __config_changelog__ = os.path.abspath(os.path.dirname(__file__) + '/framework/changelog.ini')
 
-from . import data
-from . import distribute
-from . import envphys
-from . import framework
-from . import spatial
-from . import utils
-from . import output
 
 __config_titles__ = {
                 "topo":"Files for DEM and vegetation",
@@ -37,6 +30,8 @@ __config_titles__ = {
                 "output":"Output variables",
                 "system":"System variables and Logging"
 }
+
+from . import data, distribute, envphys, framework, output, spatial, utils # isort:skip
 
 __config_header__ = utils.utils.getConfigHeader()
 __config_checkers__ = 'utils.utils'

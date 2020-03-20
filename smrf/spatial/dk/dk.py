@@ -4,10 +4,12 @@
 Distributed forcing data over a grid using detrended kriging
 """
 
-import numpy as np
-from . import detrended_kriging
 import logging
+
+import numpy as np
 import pandas as pd
+
+from . import detrended_kriging
 
 
 class DK:

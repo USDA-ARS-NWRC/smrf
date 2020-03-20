@@ -6,13 +6,14 @@ The table columns will most likely be hardcoded for ease
 of development and users will require the specific table setup
 """
 
-import numpy as np
-import scipy.stats as stats
-import pandas as pd
-import utm
-import mysql.connector
-from datetime import datetime, timedelta
 import logging
+from datetime import datetime, timedelta
+
+import mysql.connector
+import numpy as np
+import pandas as pd
+import scipy.stats as stats
+import utm
 
 
 class database:

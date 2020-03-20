@@ -4,12 +4,14 @@ Create the inital condition file
 20160420 Scott Havens
 '''
 
-from smrf import ipw
+import os
+from datetime import datetime
+
 import netCDF4 as nc
 import numpy as np
-import os
 
-from datetime import datetime
+from smrf import ipw
+
 startTime = datetime.now()
 
 # location to save to
@@ -77,8 +79,3 @@ i.write('init.ipw', nbits)
 
 
 print datetime.now() - startTime
-
-
-
-
-

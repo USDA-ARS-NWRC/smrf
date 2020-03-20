@@ -2,17 +2,20 @@
 Functions to output as a netCDF
 """
 
-import netCDF4 as nc
-import numpy as np
 # from scipy import stats
 import logging
 import os
 from datetime import datetime
-from smrf.utils import utils
+
+import netCDF4 as nc
+import numpy as np
 from spatialnc.proj import add_proj, add_proj_from_file
-# import pandas as pd
 
 from smrf import __version__
+from smrf.utils import utils
+
+# import pandas as pd
+
 
 class output_netcdf():
     """

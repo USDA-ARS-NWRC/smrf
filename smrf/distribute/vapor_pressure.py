@@ -1,9 +1,11 @@
 
-import numpy as np
 import logging
+
+import numpy as np
+
 from smrf.distribute import image_data
-from smrf.utils import utils
 from smrf.envphys.core import envphys_c
+from smrf.utils import utils
 
 
 class vp(image_data.image_data):

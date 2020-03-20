@@ -4,11 +4,13 @@ Distribute thermal long wave using only 1 method
 20170731 Micah Sandusky
 """
 
-import smrf
 import sys
+from datetime import datetime
+
 import matplotlib.pyplot as plt
 import numpy as np
-from datetime import datetime
+
+import smrf
 
 
 def main():

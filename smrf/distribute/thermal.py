@@ -1,10 +1,13 @@
 
-import numpy as np
 import logging
+
+import numpy as np
+
 from smrf.distribute import image_data
 from smrf.envphys import thermal_radiation
 from smrf.envphys.core import envphys_c
 from smrf.utils import utils
+
 
 class th(image_data.image_data):
     """

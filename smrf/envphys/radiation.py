@@ -3,13 +3,14 @@ Created on Apr 17, 2015
 @author: scott
 """
 
-import numpy as np
-import pandas as pd
-import subprocess as sp
-import math
-import os
 import datetime
 import logging
+import math
+import os
+import subprocess as sp
+
+import numpy as np
+import pandas as pd
 import pytz
 from scipy.interpolate import Akima1DInterpolator
 from scipy.integrate import quad

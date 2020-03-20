@@ -5,22 +5,26 @@
 Collection of utility functions
 """
 
-import numpy as np
-import pandas as pd
-from datetime import datetime
-import pytz
+import copy
 import os
-from shutil import copyfile
-from .gitinfo import __gitVersion__, __gitPath__
-from smrf import __version__, __core_config__
 import random
 import sys
+from datetime import datetime
+from shutil import copyfile
+
+import numpy as np
+import pandas as pd
+import pytz
+import scipy.spatial.qhull as qhull
 from inicheck.checkers import CheckType
 from inicheck.output import generate_config
 from inicheck.utilities import mk_lst
-import copy
-import scipy.spatial.qhull as qhull
-from scipy.interpolate.interpnd import CloughTocher2DInterpolator, LinearNDInterpolator
+from scipy.interpolate.interpnd import (CloughTocher2DInterpolator,
+                                        LinearNDInterpolator)
+
+from smrf import __core_config__, __version__
+
+from .gitinfo import __gitPath__, __gitVersion__
 
 
 class CheckStation(CheckType):

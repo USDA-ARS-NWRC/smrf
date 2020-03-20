@@ -3,6 +3,7 @@ import numpy as np
 import pandas as pd
 from pykrige.ok import OrdinaryKriging
 
+
 class KRIGE:
     '''
     Kriging class based on the pykrige package
