@@ -1,7 +1,9 @@
-import sys
-import pandas as pd
 import os
+import sys
+
+import pandas as pd
 from matplotlib import pyplot as plt
+
 if len(sys.argv)==2:
 	if os.path.isfile(sys.argv[1]):
 		f = sys.argv[1]

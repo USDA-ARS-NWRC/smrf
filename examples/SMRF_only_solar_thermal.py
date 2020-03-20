@@ -4,14 +4,16 @@ Distribute thermal long wave using only 1 method
 20170731 Micah Sandusky
 """
 
-import smrf
 import sys
-import matplotlib.pyplot as plt
-import numpy as np
 from datetime import datetime
+
+import matplotlib.pyplot as plt
 import netCDF4 as nc
-from smrf.envphys import radiation
+import numpy as np
 import pytz
+
+import smrf
+from smrf.envphys import radiation
 
 
 def main():

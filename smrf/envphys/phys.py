@@ -7,7 +7,9 @@ Collection of functions to calculate various physical parameters
 """
 
 import numpy as np
+
 from smrf.envphys import thermal_radiation
+
 
 def idewpt(vp):
     """
@@ -66,4 +68,3 @@ def satvp(dpt):
     """
     
     return thermal_radiation.sati(dpt + 273.15)
-    

@@ -1,7 +1,8 @@
-import pandas as pd
+import os
 from datetime import datetime
 from subprocess import check_output
-import os
+
+import pandas as pd
 
 """
 Script for converting the 25 year RME dataset to be ran with SMRF

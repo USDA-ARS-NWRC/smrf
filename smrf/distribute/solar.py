@@ -1,12 +1,15 @@
 
-import numpy as np
-import logging, os
+import logging
+import os
 import subprocess as sp
 from multiprocessing import Process
+
+import numpy as np
+from spatialnc import ipw
+
 from smrf.distribute import image_data
 from smrf.envphys import radiation
 from smrf.utils import utils
-from spatialnc import ipw
 
 
 class solar(image_data.image_data):

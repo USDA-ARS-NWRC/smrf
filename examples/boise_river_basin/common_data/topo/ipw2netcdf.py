@@ -5,10 +5,11 @@ Convert the IPW images for the topo input into a netCDF file
 """
 
 
-import netCDF4 as nc
-from smrf import ipw
 from datetime import datetime
 
+import netCDF4 as nc
+
+from smrf import ipw
 
 file_name = 'topo.nc'
 

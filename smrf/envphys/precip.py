@@ -5,7 +5,9 @@ Created on Apr 15, 2015
 '''
 
 import numpy as np
+
 from smrf.utils import utils
+
 
 def mkprecip(precipitation, temperature):
     '''

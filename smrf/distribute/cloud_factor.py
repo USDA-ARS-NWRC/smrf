@@ -1,8 +1,10 @@
 
 # import numpy as np
 import logging
+
 from smrf.distribute import image_data
 from smrf.utils import utils
+
 
 class cf(image_data.image_data):
     """

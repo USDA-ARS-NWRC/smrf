@@ -1,11 +1,12 @@
 
-from spatialnc import ipw
-import numpy as np
-from netCDF4 import Dataset
+import logging
+import os
 import subprocess as sp
 from multiprocessing import Process
-import os
-import logging
+
+import numpy as np
+from netCDF4 import Dataset
+from spatialnc import ipw
 
 
 class topo():

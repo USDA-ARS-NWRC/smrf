@@ -1,10 +1,11 @@
-import netCDF4 as nc
-import pandas as pd
-import numpy as np
 import os
 from datetime import datetime
-from smrf.envphys.phys import satvp
 
+import netCDF4 as nc
+import numpy as np
+import pandas as pd
+
+from smrf.envphys.phys import satvp
 
 input_file = '../../tests/RME/gridded/WRF_test.nc'
 output_file = '../../tests/RME/gridded/netcdf_test.nc'

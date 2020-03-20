@@ -1,13 +1,15 @@
 
-import numpy as np
-import pandas as pd
+import glob
 import logging
 import os
+
+import netCDF4 as nc
+import numpy as np
+import pandas as pd
+import pytz
+
 from smrf.distribute import image_data
 from smrf.utils import utils
-import netCDF4 as nc
-import pytz
-import glob
 
 
 class wind(image_data.image_data):

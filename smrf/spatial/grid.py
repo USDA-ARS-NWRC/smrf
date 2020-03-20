@@ -6,10 +6,12 @@ Distributed forcing data over a grid using interpolation
 
 import numpy as np
 import pandas as pd
+import scipy.spatial.qhull as qhull
 from scipy.interpolate import griddata
 from scipy.interpolate.interpnd import _ndim_coords_from_arrays
-import scipy.spatial.qhull as qhull
+
 from smrf.utils.utils import grid_interpolate_deconstructed
+
 
 class GRID:
     '''

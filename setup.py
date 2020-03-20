@@ -1,12 +1,13 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-from setuptools import setup, Extension
-from Cython.Distutils import build_ext
-import numpy
 import os
 import sys
 from subprocess import check_output
+
+import numpy
+from Cython.Distutils import build_ext
+from setuptools import Extension, setup
 
 if sys.argv[-1] != 'test':
 

@@ -4,11 +4,9 @@ Compare the maxus netCDF files
 
 
 
-import numpy as np
-import netCDF4 as nc
 import matplotlib.pyplot as plt
-
-
+import netCDF4 as nc
+import numpy as np
 
 #------------------------------------------------------------------------------
 # compare with the original outputs
