@@ -56,17 +56,17 @@ class TestRME(SMRFTestCase):
         """
         Runs the short simulation over reynolds mountain east
         """
-        run_dir = abspath(join(dirname(smrf.__file__), '../tests', 'RME'))
+        run_dir = abspath(join(dirname(smrf.__file__), '../tests'))
 
-        self.gold = abspath(join(run_dir, 'gold'))
+        self.gold = abspath(join(run_dir, 'RME', 'gold'))
 
-        self.output = join(run_dir, 'output')
+        self.output = join(run_dir, 'RME', 'output')
 
         # Remove any potential files to ensure fresh run
         if isdir(self.output):
             shutil.rmtree(self.output)
 
-        config = join(run_dir, 'config.ini')
+        config = join(run_dir, 'test_base_config.ini')
 
         run_smrf(config)
 
