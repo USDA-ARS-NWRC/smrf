@@ -112,7 +112,8 @@ def gradient_d8(dem, dx, dy, aspect_rad=False):
 
     # finite difference in the y direction
     dz_dy = ((dem_pad[2:, :-2] + 2*dem_pad[2:, 1:-1] + dem_pad[2:, 2:]) -
-             (dem_pad[:-2, :-2] + 2*dem_pad[:-2, 1:-1] + dem_pad[:-2, 2:])) / (8 * dy)
+             (dem_pad[:-2, :-2] + 2*dem_pad[:-2, 1:-1] +
+             dem_pad[:-2, 2:])) / (8 * dy)
 
     # finite difference in the x direction
     dz_dx = ((dem_pad[:-2, 2:] + 2*dem_pad[1:-1, 2:] + dem_pad[2:, 2:]) -
@@ -161,7 +162,7 @@ def aspect_to_ipw_radians(a):
     to the IPW definition.
 
     Aspect is radians from south (aspect 0 is toward
-    the south) with range from -pi to pi, with negative 
+    the south) with range from -pi to pi, with negative
     values to the west and positive values to the east
 
     Args:

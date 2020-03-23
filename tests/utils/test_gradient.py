@@ -1,6 +1,5 @@
 import numpy as np
 
-from smrf.data import loadTopo
 from smrf.utils import gradient
 
 from tests.test_configurations import SMRFTestCase
@@ -45,6 +44,7 @@ class TestGradient(SMRFTestCase):
         for i in range(dem_size):
             dem[i, :] = np.arange(i+dem_size, i, -1)
         return dem
+
 
 class TestGradientD4(TestGradient):
 
@@ -207,7 +207,6 @@ class TestGradientD8(TestGradient):
         self.assertTrue(np.all(asp == 315))
         self.assertTrue(np.all(ipw_a == (-np.pi/2 - np.pi/4)))
 
-
     def test_gradient_d8_sw(self):
         """ Test for the gradient_d8 for sw """
 
@@ -271,8 +270,10 @@ class TestGradientD8(TestGradient):
     #     self.dx = np.mean(np.diff(topo.x))
     #     self.dy = np.mean(np.diff(topo.y))
 
-    #     py_slope4, a4 = gradient.gradient_d4(topo.dem, self.dx, self.dy, aspect_rad=True)
-    #     py_slope8, a8 = gradient.gradient_d8(topo.dem, self.dx, self.dy, aspect_rad=True)
+    #     py_slope4, a4 = gradient.gradient_d4(topo.dem, self.dx,
+    # self.dy, aspect_rad=True)
+    #     py_slope8, a8 = gradient.gradient_d8(topo.dem, self.dx,
+    # self.dy, aspect_rad=True)
 
         # fig, axs = plt.subplots(3, 2)
         # im = axs[0, 0].imshow(180 * (ipw_slope - py_slope4) / np.pi)
@@ -308,14 +309,16 @@ class TestGradientD8(TestGradient):
         #     180 * (ipw_slope - py_slope4).flatten() / np.pi, bins=30)
         # axs[0, 0].set_title('IPW - Python gradient_d4 [deg]')
 
-        # im = axs[0, 1].hist(180 * (ipw_aspect - a4).flatten() / np.pi, bins=30)
+        # im = axs[0, 1].hist(180 * (ipw_aspect - a4).flatten() /
+        # np.pi, bins=30)
         # axs[0, 1].set_title('Aspect IPW - Python gradient_d4 [deg]')
 
         # im = axs[1, 0].hist(
         #     180 * (ipw_slope - py_slope8).flatten() / np.pi, bins=30)
         # axs[1, 0].set_title('IPW - Python gradient_d8 [deg]')
 
-        # im = axs[1, 1].hist(180 * (ipw_aspect - a8).flatten() / np.pi, bins=30)
+        # im = axs[1, 1].hist(180 * (ipw_aspect - a8).flatten() /
+        # np.pi, bins=30)
         # axs[1, 1].set_title('Aspect IPW - Python gradient_d8 [deg]')
 
         # im = axs[2, 0].hist(
