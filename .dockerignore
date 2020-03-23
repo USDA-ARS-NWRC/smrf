@@ -1,5 +1,6 @@
-#.git
+# .git
 Dockerfile
+.venv/
 
 # Eclipse files
 .project
@@ -15,7 +16,7 @@ test_data/stoporad.ip
 
 test_data/wrfout_d02_2016-03-10.nc
 test_data/stoporad*
-examples/*.nc
+examples/
 maxus.nc
 test_data/topo/maxus*.nc
 

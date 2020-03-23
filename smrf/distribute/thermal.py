@@ -1,10 +1,13 @@
 
-import numpy as np
 import logging
+
+import numpy as np
+
 from smrf.distribute import image_data
 from smrf.envphys import thermal_radiation
 from smrf.envphys.core import envphys_c
 from smrf.utils import utils
+
 
 class th(image_data.image_data):
     """
@@ -198,11 +201,14 @@ class th(image_data.image_data):
         self.min = thermalConfig['min']
         self.max = thermalConfig['max']
 
-        self.method = self.config['method']
         self.correct_cloud = self.config['correct_cloud']
-        self.cloud_method = self.config['cloud_method']
         self.correct_veg = self.config['correct_veg']
         self.correct_terrain = self.config['correct_terrain']
+
+        if self.correct_cloud:
+            self.cloud_method = self.config['cloud_method']
+
+        self.clear_sky_method = self.config['clear_sky_method']
 
         self._logger.debug('Created distribute.thermal')
 
@@ -262,22 +268,22 @@ class th(image_data.image_data):
         self._logger.debug('%s Distributing thermal' % date_time)
 
         # calculate clear sky thermal
-        if self.method == 'marks1979':
+        if self.clear_sky_method == 'marks1979':
             cth = np.zeros_like(air_temp, dtype=np.float64)
             envphys_c.ctopotherm(air_temp, dew_point, self.dem, self.sky_view,
-                                 cth, self.config['nthreads'])
+                                 cth, self.config['marks1979_nthreads'])
 
-        elif self.method == 'dilley1998':
+        elif self.clear_sky_method == 'dilley1998':
             cth = thermal_radiation.Dilly1998(air_temp, vapor_pressure/1000)
 
-        elif self.method == 'prata1996':
+        elif self.clear_sky_method == 'prata1996':
             cth = thermal_radiation.Prata1996(air_temp, vapor_pressure/1000)
 
-        elif self.method == 'angstrom1918':
+        elif self.clear_sky_method == 'angstrom1918':
             cth = thermal_radiation.Angstrom1918(air_temp, vapor_pressure/1000)
 
         # terrain factor correction
-        if (self.sky_view is not None) and (self.method != 'marks1979'):
+        if (self.sky_view is not None) and (self.clear_sky_method != 'marks1979'):
             # apply (emiss * skvfac) + (1.0 - skvfac) to the longwave
             cth = cth * self.sky_view + (1.0 - self.sky_view) * \
                 thermal_radiation.STEF_BOLTZ * air_temp**4
@@ -375,7 +381,7 @@ class th(image_data.image_data):
         # assign the input thermal radiation to clear thermal, this may not be the case
         # but will be the assumption for now
         self._distribute(data, other_attribute='thermal_clear')
-        
+
         self.thermal_cloud = self.thermal_clear.copy()
         self.thermal = self.thermal_clear.copy()
 
@@ -400,6 +406,8 @@ class th(image_data.image_data):
             data: pandas dataframe for all data, indexed by date time
 
         """
+
+        self._logger.info("Distributing {}".format(self.variable))
 
         for t in data.index:
 

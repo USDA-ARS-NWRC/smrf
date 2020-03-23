@@ -3,9 +3,9 @@ The module contains various physics calculations needed for estimating
 the thermal radition and associated values.
 """
 
-import numpy as np
 import os
 
+import numpy as np
 
 on_rtd = os.environ.get('READTHEDOCS') == 'True'
 if on_rtd:

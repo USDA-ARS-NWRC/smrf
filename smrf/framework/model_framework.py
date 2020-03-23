@@ -25,22 +25,25 @@ Example:
 
 import logging
 import os
-import sys
-import coloredlogs
-from datetime import datetime, timedelta
-import pandas as pd
-import numpy as np
-import pytz
-from smrf import data, distribute, output, __core_config__, __recipes__
-from smrf.envphys import radiation
-from smrf.utils import queue, io
-from smrf.utils.utils import backup_input, getqotw, check_station_colocation
-from threading import Thread
 import shutil
-from inicheck.tools import get_user_config, check_config
+import sys
+from datetime import datetime, timedelta
+from os.path import abspath, basename, dirname, join
+from threading import Thread
+
+import coloredlogs
+import numpy as np
+import pandas as pd
+import pytz
 from inicheck.config import UserConfig
-from inicheck.output import print_config_report,generate_config, print_recipe_summary
-from inicheck.utilities import pcfg, get_relative_to_cfg
+from inicheck.output import (generate_config, print_config_report,
+                             print_recipe_summary)
+from inicheck.tools import check_config, get_user_config
+
+from smrf import __core_config__, __recipes__, data, distribute, output
+from smrf.envphys import radiation, sunang
+from smrf.utils import io, queue
+from smrf.utils.utils import backup_input, check_station_colocation, getqotw
 
 
 class SMRF():
@@ -61,7 +64,7 @@ class SMRF():
         config: Configuration file read in as dictionary
         distribute: Dictionary the contains all the desired variables to
             distribute and is initialized in
-            :func:`~smrf.framework.model_framework.initializeDistirbution`
+            :func:`~smrf.framework.model_framework.initializeDistribution`
     """
 
     # These are the modules that the user can modify and use different methods
@@ -70,6 +73,7 @@ class SMRF():
                'precip',
                'soil_temp',
                'solar',
+               'cloud_factor',
                'thermal',
                'vapor_pressure',
                'wind']
@@ -99,27 +103,22 @@ class SMRF():
                 raise Exception('Configuration file does not exist --> {}'
                                 .format(config))
             configFile = config
-            try:
-                #Read in the original users config
-                ucfg = get_user_config(config, modules = 'smrf')
 
-            except UnicodeDecodeError as e:
-                print(e)
-                raise Exception(('The configuration file is not encoded in '
-                                    'UTF-8, please change and retry'))
+            # Read in the original users config
+            ucfg = get_user_config(config, modules='smrf')
 
         elif isinstance(config, UserConfig):
             ucfg = config
             configFile = config.filename
 
         else:
-            raise Exception('Config passed to SMRF is neither file name nor UserConfig instance')
-
+            raise Exception('Config passed to SMRF is neither file name nor '
+                            ' UserConfig instance')
         # start logging
         if external_logger == None:
 
-            if 'log_level' in ucfg.cfg['logging']:
-                loglevel = ucfg.cfg['logging']['log_level'].upper()
+            if 'log_level' in ucfg.cfg['system']:
+                loglevel = ucfg.cfg['system']['log_level'].upper()
             else:
                 loglevel = 'INFO'
 
@@ -129,15 +128,15 @@ class SMRF():
 
             # setup the logging
             logfile = None
-            if ucfg.cfg['logging']['log_file']!= None:
-                logfile = ucfg.cfg['logging']['log_file']
+            if ucfg.cfg['system']['log_file']!= None:
+                logfile = ucfg.cfg['system']['log_file']
                 if not os.path.isabs(logfile):
-                    logfile = os.path.abspath(os.path.join(
-                                            os.path.dirname(configFile),
-                                            ucfg.cfg['logging']['log_file']))
+                    logfile = abspath(join(
+                                            dirname(configFile),
+                                            ucfg.cfg['system']['log_file']))
 
-                if not os.path.isdir(os.path.dirname(logfile)):
-                    os.makedirs(os.path.dirname(logfile))
+                if not os.path.isdir(dirname(logfile)):
+                    os.makedirs(dirname(logfile))
 
                 if not os.path.isfile(logfile):
                     with open(logfile,'w+') as f:
@@ -164,14 +163,15 @@ class SMRF():
         for line in title:
             self._logger.info(line)
 
-        out = get_relative_to_cfg(ucfg.cfg['output']['out_location'],ucfg.filename)
+        out = ucfg.cfg['output']['out_location']
 
-        #Make the tmp and output directories if they do not exist
-        makeable_dirs = [out,os.path.join(out,'tmp')]
+        # Make the tmp and output directories if they do not exist
+        makeable_dirs = [out, join(out,'tmp')]
         for path in makeable_dirs:
             if not os.path.isdir(path):
                 try:
-                    #self._logger.info("Directory does not exist, \nCreating {0}".format(path))
+                    self._logger.info("Directory does not exist, Creating:\n{}"
+                                      "".format(path))
                     os.makedirs(path)
 
                 except OSError as e:
@@ -182,9 +182,9 @@ class SMRF():
         # Check the user config file for errors and report issues if any
         self._logger.info("Checking config file for issues...")
         warnings, errors = check_config(ucfg)
-        print_config_report(warnings, errors, logger = self._logger)
-        self.config = ucfg.cfg
+        print_config_report(warnings, errors, logger=self._logger)
         self.ucfg = ucfg
+        self.config = self.ucfg.cfg
 
         # Exit SMRF if config file has errors
         if len(errors) > 0:
@@ -193,32 +193,20 @@ class SMRF():
             sys.exit()
 
         # Write the config file to the output dir no matter where the project is
-        fname = 'config.ini'
-        full_config_out = self.config['output']['out_location']
-        full_config_out = os.path.abspath(os.path.join(
-                                          os.path.dirname(configFile),
-                                          full_config_out,fname))
+        full_config_out = abspath(join(out,'config.ini'))
 
         self._logger.info("Writing config file with full options.")
-        generate_config(self.ucfg,full_config_out)
+        generate_config(self.ucfg, full_config_out)
 
-        # After writing update the paths to be full abs paths.
-        self.config = self.ucfg.update_config_paths()
-
-
-        # process the system variables
+        # Process the system variables
         for k,v in self.config['system'].items():
-            setattr(self,k,v)
+            setattr(self, k, v)
 
         os.environ['WORKDIR'] = self.temp_dir
 
-        # Get the time sectionutils
+        # Get the time section utils
         self.start_date = pd.to_datetime(self.config['time']['start_date'])
         self.end_date = pd.to_datetime(self.config['time']['end_date'])
-
-        # Check to see if user specified a real end time.
-        if self.start_date > self.end_date:
-            raise ValueError("start_date cannot be larger than end_date.")
 
         # Get the timesetps correctly in the time zone
         d = data.mysql_data.date_range(self.start_date, self.end_date,
@@ -229,16 +217,20 @@ class SMRF():
         self.time_steps = len(self.date_time)
 
         # need to align date time
-        if self.config['albedo']['start_decay'] is not None:
-            self.config['albedo']['start_decay'] = self.config['albedo']['start_decay'].replace(tzinfo=tzinfo)
-            self.config['albedo']['end_decay'] = self.config['albedo']['end_decay'].replace(tzinfo=tzinfo)
+        if 'date_method_start_decay' in self.config['albedo'].keys():
+            self.config['albedo']['date_method_start_decay'] = \
+            self.config['albedo']['date_method_start_decay'].replace(tzinfo=tzinfo)
+            self.config['albedo']['date_method_end_decay'] = \
+            self.config['albedo']['date_method_end_decay'].replace(tzinfo=tzinfo)
 
         # if a gridded dataset will be used
         self.gridded = False
+        self.forecast_flag = False
         if 'gridded' in self.config:
             self.gridded = True
-            self.forecast_flag = self.config['gridded']['forecast_flag']
-            self.n_forecast_hours = self.config['gridded']['n_forecast_hours']
+            if self.config['gridded']['data_type'] in ['hrrr_netcdf','hrrr_grib']:
+                self.forecast_flag = self.config['gridded']['hrrr_forecast_flag']
+
             # hours from start of day
             self.day_hour = self.start_date - pd.to_datetime(d[0].strftime("%Y%m%d"))
             self.day_hour = int(self.day_hour / np.timedelta64(1, 'h'))
@@ -250,7 +242,7 @@ class SMRF():
 
         self.distribute = {}
 
-        if self.config['logging']['qotw']:
+        if self.config['system']['qotw']:
             self._logger.info(getqotw())
 
         # Initialize the distribute dict
@@ -327,9 +319,13 @@ class SMRF():
                                          self.config['precip']['precip_temp_method'])
 
         # 3. Wind
+        distribute_drifts = False
+        if self.config["precip"]["precip_rescaling_model"] == "winstral":
+            distribute_drifts = True
+
         self.distribute['wind'] = \
             distribute.wind.wind(self.config['wind'],
-                                 self.config['precip']['distribute_drifts'],
+                                 distribute_drifts,
                                  self.config,
                                  tempDir=self.temp_dir)
 
@@ -343,18 +339,21 @@ class SMRF():
         self.distribute['albedo'] = \
             distribute.albedo.albedo(self.config['albedo'])
 
-        # 6. Solar radiation
+        # 6. cloud_factor
+        self.distribute['cloud_factor'] = \
+            distribute.cloud_factor.cf(self.config['cloud_factor'])
+
+        #7. Solar radiation
         self.distribute['solar'] = \
-            distribute.solar.solar(self.config['solar'],
-                                   self.distribute['albedo'].config,
+            distribute.solar.solar(self.config,
                                    self.topo.stoporad_in_file,
                                    self.temp_dir)
 
-        # 7. thermal radiation
+        # 8. thermal radiation
         self.distribute['thermal'] = \
             distribute.thermal.th(self.config['thermal'])
 
-        # 8. soil temperature
+        # 9. soil temperature
         self.distribute['soil_temp'] = \
             distribute.soil_temp.ts(self.config['soil_temp'])
 
@@ -382,7 +381,6 @@ class SMRF():
                                      self.start_date,
                                      self.end_date,
                                      time_zone=self.config['time']['time_zone'],
-                                     stations=self.config['stations'],
                                      dataType='csv')
 
         elif 'mysql' in self.config:
@@ -390,12 +388,7 @@ class SMRF():
                                      self.start_date,
                                      self.end_date,
                                      time_zone=self.config['time']['time_zone'],
-                                     stations=self.config['stations'],
                                      dataType='mysql')
-
-            #Add stations to stations in config for input backup
-            self.config['stations']['stations'] = \
-                                               self.data.metadata.index.tolist()
 
         elif 'gridded' in self.config:
             flag = False
@@ -407,8 +400,7 @@ class SMRF():
                                    dataType=self.config['gridded']['data_type'],
                                    tempDir=self.temp_dir,
                                    forecast_flag=self.forecast_flag,
-                                   day_hour=self.day_hour,
-                                   n_forecast_hours=self.n_forecast_hours)
+                                   day_hour=self.day_hour)
 
             # set the stations in the distribute
             try:
@@ -446,51 +438,50 @@ class SMRF():
             self.data.metadata['yi'] = \
                 self.data.metadata.apply(lambda row: find_pixel_location(row,
                                                                      self.topo.y,
-                                                                                 'Y'), axis=1)
+                                                                     'Y'), axis=1)
 
-        # pre filter the data to only the desired stations
+        # Pre-filter the data to only the desired stations
         if flag:
-            try:
-                for key in self.distribute.keys():
-                    if key in self.data.variables:
-                        # Pull out the loaded data
-                        d = getattr(self.data, key)
+            for key in self.distribute.keys():
+                if key in self.data.variables:
+                    # Pull out the loaded data
+                    d = getattr(self.data, key)
 
-                        # Check to find the matching stations
+                    # Check to find the matching stations
+                    if self.distribute[key].stations != None:
+
                         match = d.columns.isin(self.distribute[key].stations)
                         sta_match = d.columns[match]
 
                         # Update the dataframe and the distribute stations
                         self.distribute[key].stations = sta_match.tolist()
                         setattr(self.data, key, d[sta_match])
+                    else:
+                       self._logger.warning("Distribution not initialized,"
+                                            " data not filtered to desired"
+                                            " stations in variable {}"
+                                            "".format(key))
 
-
-                if hasattr(self.data, 'cloud_factor'):
-                    d = getattr(self.data, 'cloud_factor')
-                    setattr(self.data,
-                            'cloud_factor',
-                            d[self.distribute['solar'].stations])
-
-            except Exception as e:
-               self._logger.warning("Distribution not initialized, data not "
-                                   "filtered to desired stations in variable {}".format(key))
-               self._logger.error(e)
-
-
-            #Check all sections for stations that are colocated
+            # Check all sections for stations that are colocated
             for key in self.distribute.keys():
                 if key in self.data.variables:
                     if self.distribute[key].stations != None:
-                        if self.config['stations']['check_colocation']:
-                            # Confirm out stations all have a unique position for each section
-                            colocated = check_station_colocation(metadata=self.data.metadata.loc[self.distribute[key].stations])
+                        # Confirm out stations all have a unique position for each section
+                        colocated = check_station_colocation(metadata=self.data.metadata.loc[self.distribute[key].stations])
 
-                            # Stations are co-located, throw error
-                            if colocated != None:
-                                self._logger.error("Stations in the {0} section are colocated.\n{1}".format(key,','.join(colocated[0])))
-                                sys.exit()
+                        # Stations are co-located, throw error
+                        if colocated != None:
+                            self._logger.error("Stations in the {0} section are colocated.\n{1}".format(key,','.join(colocated[0])))
+                            sys.exit()
 
-        #Does the user want to create a CSV copy of the station data used.
+        # clip the timeseries to the start and end date
+        for key in self.data.variables:
+            if hasattr(self.data, key):
+                d = getattr(self.data, key)
+                d = d[self.start_date:self.end_date]
+                setattr(self.data, key, d)
+
+        # Does the user want to create a CSV copy of the station data used.
         if self.config["output"]['input_backup'] == True:
             self._logger.info('Backing up input data...')
             backup_input(self.data, self.ucfg)
@@ -524,10 +515,11 @@ class SMRF():
             4. Vapor pressure
             5. Wind direction and speed
             6. Precipitation
-            7. Solar radiation
-            8. Thermal radiation
-            9. Soil temperature
-            10. Output time step if needed
+            7. Cloud Factor
+            8. Solar radiation
+            9. Thermal radiation
+            10. Soil temperature
+            11. Output time step if needed
         """
 
         # -------------------------------------
@@ -544,12 +536,9 @@ class SMRF():
 
             self._logger.info('Distributing time step %s' % t)
             # 0.1 sun angle for time step
-            cosz, azimuth = radiation.sunang(t.astimezone(pytz.utc),
-                                             self.topo.topoConfig['basin_lat'],
-                                             self.topo.topoConfig['basin_lon'],
-                                             zone=0,
-                                             slope=0,
-                                             aspect=0)
+            cosz, azimuth, rad_vec = sunang.sunang(t.astimezone(pytz.utc),
+                                            self.topo.topoConfig['basin_lat'],
+                                            self.topo.topoConfig['basin_lon'])
 
             # 0.2 illumination angle
             illum_ang = None
@@ -570,7 +559,6 @@ class SMRF():
             self.distribute['wind'].distribute(self.data.wind_speed.loc[t],
                                                self.data.wind_direction.loc[t],
                                                t)
-#self, data, dpt, time, wind, temp, mask=None
             # 4. Precipitation
             self.distribute['precip'].distribute(self.data.precip.loc[t],
                                                 self.distribute['vapor_pressure'].dew_point,
@@ -588,9 +576,12 @@ class SMRF():
             self.distribute['albedo'].distribute(t,
                                                  illum_ang,
                                                  self.distribute['precip'].storm_days)
+            # 6. cloud_factor
+            self.distribute['cloud_factor'].distribute(self.data.cloud_factor.loc[t])
 
-            # 6. Solar
-            self.distribute['solar'].distribute(self.data.cloud_factor.loc[t],
+            # 7. Solar
+            self.distribute['solar'].distribute(t,
+                                                self.distribute["cloud_factor"].cloud_factor,
                                                 illum_ang,
                                                 cosz,
                                                 azimuth,
@@ -600,7 +591,7 @@ class SMRF():
 
             # 7. thermal radiation
             if self.distribute['thermal'].gridded and \
-               self.config['gridded']['data_type'] != 'hrrr':
+               self.config['gridded']['data_type'] in ['wrf','netcdf']:
                 self.distribute['thermal'].distribute_thermal(self.data.thermal.loc[t],
                                                               self.distribute['air_temp'].air_temp)
             else:
@@ -608,7 +599,7 @@ class SMRF():
                                                       self.distribute['air_temp'].air_temp,
                                                       self.distribute['vapor_pressure'].vapor_pressure,
                                                       self.distribute['vapor_pressure'].dew_point,
-                                                      self.distribute['solar'].cloud_factor)
+                                                      self.distribute['cloud_factor'].cloud_factor)
 
             # 8. Soil temperature
             self.distribute['soil_temp'].distribute()
@@ -638,7 +629,7 @@ class SMRF():
         distributed values into the
         :func:`DateQueue <smrf.utils.queue.DateQueue_Threading>`.
         """
-        #Create threads for distribution
+        # Create threads for distribution
         t,q = self.create_distributed_threads()
 
         # output thread
@@ -673,6 +664,8 @@ class SMRF():
 
         # -------------------------------------
         # Initialize the distibutions
+        self._logger.info("Initializing distributed variables...")
+
         for v in self.distribute:
             self.distribute[v].initialize(self.topo, self.data)
 
@@ -681,33 +674,35 @@ class SMRF():
         q = {}
         t = []
 
+        # Add threaded variables on the fly
         self.thread_variables += ['storm_total']
-        if self.distribute['precip'].nasde_model == 'marks2017':
-            self.thread_variables += ['storm_id']
-
-        #Add threaded variables on the fly
-        if self.distribute['thermal'].correct_cloud:
-            self.thread_variables += ['thermal_cloud']
-        if self.distribute['thermal'].correct_veg:
-            self.thread_variables += ['thermal_veg']
-
-        # add some variables to thread_variables based on what we're doing
         self.thread_variables += ['flatwind']
         self.thread_variables += ['cellmaxus', 'dir_round_cell']
 
+        if self.distribute['precip'].nasde_model == 'marks2017':
+            self.thread_variables += ['storm_id']
+
+        if self.distribute['thermal'].correct_cloud:
+            self.thread_variables += ['thermal_cloud']
+
+        if self.distribute['thermal'].correct_veg:
+            self.thread_variables += ['thermal_veg']
+
+        self._logger.info("Staging {} threaded variables...".format(len(self.thread_variables)))
         for v in self.thread_variables:
-            q[v] = queue.DateQueue_Threading(self.max_values, self.time_out)
+            q[v] = queue.DateQueue_Threading(self.queue_max_values,
+                                             self.time_out,
+                                             name=v)
 
         # -------------------------------------
         # Distribute the data
 
         # 0.1 sun angle for time step
-        t.append(Thread(target=radiation.sunang_thread,
+        t.append(Thread(target=sunang.sunang_thread,
                         name='sun_angle',
                         args=(q, self.date_time,
                               self.topo.topoConfig['basin_lat'],
-                              self.topo.topoConfig['basin_lon'],
-                              0, 0, 0)))
+                              self.topo.topoConfig['basin_lon'])))
 
         # 0.2 illumination angle
         t.append(Thread(target=radiation.shade_thread,
@@ -742,17 +737,22 @@ class SMRF():
                         name='albedo',
                         args=(q, self.date_time)))
 
-        # 6.1 Clear sky visible
+        # 6.Cloud Factor
+        t.append(Thread(target=self.distribute['cloud_factor'].distribute_thread,
+                        name='cloud_factor',
+                        args=(q, self.data.cloud_factor)))
+
+        # 7.1 Clear sky visible
         t.append(Thread(target=self.distribute['solar'].distribute_thread_clear,
                         name='clear_vis',
                         args=(q, self.data.cloud_factor, 'clear_vis')))
 
-        # 6.2 Clear sky ir
+        # 7.2 Clear sky ir
         t.append(Thread(target=self.distribute['solar'].distribute_thread_clear,
                         name='clear_ir',
                         args=(q, self.data.cloud_factor, 'clear_ir')))
 
-        # 6.3 Net radiation
+        # 7.3 Net radiation
         t.append(Thread(target=self.distribute['solar'].distribute_thread,
                         name='solar',
                         args=(q, self.data.cloud_factor)))
@@ -774,34 +774,15 @@ class SMRF():
         Initialize the output files based on the configFile section ['output'].
         Currently only :func:`NetCDF files <smrf.output.output_netcdf>` is supported.
         """
+        out = self.config['output']['out_location']
 
         if self.config['output']['frequency'] is not None:
 
-            # check the out location
-            pth = os.path.abspath(os.path.expanduser(
-                self.config['output']['out_location']))
-            if 'out_location' not in self.config['output']:
-                raise Exception('''out_location must be specified
-                                for variable outputs''')
-            elif self.config['output']['out_location'] == 'WORKDIR':
-                pth = os.environ['WORKDIR']
-            elif not os.path.isdir(pth):
-                os.makedirs(pth)
-
-            self.config['output']['out_location'] = pth
-
-            # frequency of outputs
-            self.config['output']['frequency'] = \
-                int(self.config['output']['frequency'])
-
             # determine the variables to be output
-            self._logger.info('{} variables will be output'
-                              .format(self.config['output']['variables']))
+            s_var_list = ", ".join(self.config['output']['variables'])
+            self._logger.info('{} variables will be output'.format(s_var_list))
 
             output_variables = self.config['output']['variables']
-#             output_variables = list(map(str.strip, output_variables))
-            if not isinstance(output_variables, list):
-                output_variables = output_variables.split(',')
 
             # determine which variables belong where
             variable_list = {}
@@ -812,14 +793,12 @@ class SMRF():
 
                         if v in self.distribute[m].output_variables.keys():
 
-                            # if there is a key in the config file,
+                            # if there is a key in the config files output sec,
                             # then change the output file name
                             if v in self.config['output'].keys():
-                                fname = os.path.join(self.config['output']['out_location'],
-                                                     self.config['output'][v])
+                                fname = join(out, self.config['output'][v])
                             else:
-                                fname = os.path.join(self.config['output']['out_location'],
-                                                     v)
+                                fname = join(out, v)
 
                             d = {'variable': v,
                                  'module': m,
@@ -986,7 +965,7 @@ def can_i_run_smrf(config):
         run_smrf(config)
         return True
     except Exception as e:
-        print(e)
+        raise e
         return False
 
 

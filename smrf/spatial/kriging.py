@@ -3,6 +3,7 @@ import numpy as np
 import pandas as pd
 from pykrige.ok import OrdinaryKriging
 
+
 class KRIGE:
     '''
     Kriging class based on the pykrige package
@@ -38,17 +39,17 @@ class KRIGE:
         self.config = config
 
         # kriging parameters for pykrige
-        self.variogram_model = self.config['variogram_model'] #'linear'
+        self.variogram_model = self.config['krig_variogram_model'] #'linear'
         self.variogram_parameters = None
         self.variogram_function = None
-        self.nlags = self.config['nlags']#np.min([np.round(len(mx)/2), 6])
+        self.nlags = self.config['krig_nlags']#np.min([np.round(len(mx)/2), 6])
         self.weight = self.config['krig_weight']
-        self.anisotropy_scaling = self.config['anisotropy_scaling'] #1.0
-        self.anisotropy_angle = self.config['anisotropy_angle'] #0.0
+        self.anisotropy_scaling = self.config['krig_anisotropy_scaling'] #1.0
+        self.anisotropy_angle = self.config['krig_anisotropy_angle'] #0.0
         self.verbose = False
         self.enable_plotting = False
         self.enable_statistics = False
-        self.coordinates_type = self.config['coordinates_type'] # not in the pypi release of PyKrige
+        self.coordinates_type = self.config['krig_coordinates_type'] # not in the pypi release of PyKrige
 
         # pykrige execution
         self.backend = 'vectorized'

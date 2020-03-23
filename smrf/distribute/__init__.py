@@ -1,10 +1,3 @@
 # -*- coding: utf-8 -*-
-from . import image_data
-from . import air_temp
-from . import albedo
-from . import vapor_pressure
-from . import wind
-from . import precipitation
-from . import solar
-from . import thermal
-from . import soil_temp
+from . import (air_temp, albedo, cloud_factor, image_data, precipitation,
+               soil_temp, solar, thermal, vapor_pressure, wind)

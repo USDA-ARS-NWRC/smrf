@@ -1,26 +1,31 @@
+
 """
 20160104 Scott Havens
 
 Collection of utility functions
 """
 
-import numpy as np
-import pandas as pd
-from datetime import datetime
-import pytz
+import copy
 import os
-from smrf.utils import io
-from shutil import copyfile
-from .gitinfo import __gitVersion__, __gitPath__
-from smrf import __version__, __core_config__
 import random
 import sys
+from datetime import datetime
+from shutil import copyfile
+
+import numpy as np
+import pandas as pd
+import pytz
+import scipy.spatial.qhull as qhull
 from inicheck.checkers import CheckType
 from inicheck.output import generate_config
 from inicheck.utilities import mk_lst
-import copy
-import scipy.spatial.qhull as qhull
-from scipy.interpolate.interpnd import CloughTocher2DInterpolator, LinearNDInterpolator
+from scipy.interpolate.interpnd import (CloughTocher2DInterpolator,
+                                        LinearNDInterpolator)
+
+from smrf import __core_config__, __version__
+
+from .gitinfo import __gitPath__, __gitVersion__
+
 
 
 class CheckStation(CheckType):
@@ -31,11 +36,17 @@ class CheckStation(CheckType):
     def __init__(self, **kwargs):
         super(CheckStation, self).__init__(**kwargs)
 
-    def cast(self):
-        if self.value.lower() != 'none':
-            return self.value.upper()
-        else:
-            return self.value
+    def type_func(self, value):
+        """
+        Attempt to convert all the values to upper case.
+
+        Args:
+            value: A single string in a a config entry representing a station name
+        Returns:
+            value: A single station name all upper case
+        """
+
+        return value.upper()
 
 
 def find_configs(directory):
@@ -208,6 +219,7 @@ def backup_input(data, config_obj):
         # backup_config_obj.apply_recipes()
     if 'mysql' in backup_config_obj.cfg.keys():
         del backup_config_obj.cfg['mysql']
+
     if 'stations' in backup_config_obj.cfg.keys():
         if 'client' in backup_config_obj.cfg['stations']:
             del backup_config_obj.cfg['stations']['client']

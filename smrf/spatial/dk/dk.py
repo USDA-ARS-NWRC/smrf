@@ -4,10 +4,12 @@
 Distributed forcing data over a grid using detrended kriging
 """
 
-import numpy as np
-from . import detrended_kriging
 import logging
+
+import numpy as np
 import pandas as pd
+
+from . import detrended_kriging
 
 
 class DK:
@@ -188,7 +190,7 @@ class DK:
         # calculate the weights
         wg = np.zeros_like(dgrid)
         detrended_kriging.call_grid(self.ad, self.dgrid, mz.astype(np.double),
-                                    wg, self.config['dk_nthreads'])
+                                    wg, self.config['dk_ncores'])
 
         # reshape the weights
         self.weights = np.zeros((self.GridX.shape[0],
@@ -205,13 +207,12 @@ class DK:
         """
 
         # calculate the trend on any real data
-        if self.config['regression_method'] == 1:
-            pv = np.polyfit(self.mz[~self.nan_val], data[~self.nan_val], 1)
+        pv = np.polyfit(self.mz[~self.nan_val], data[~self.nan_val], 1)
 
         # apply trend constraints
-        if self.config['slope'] == 1 and pv[0] < 0:
+        if self.config['detrend_slope'] == 1 and pv[0] < 0:
             pv = np.array([0, 0])
-        elif (self.config['slope'] == -1 and pv[0] > 0):
+        elif (self.config['detrend_slope'] == -1 and pv[0] > 0):
             pv = np.array([0, 0])
 
         self.pv = pv

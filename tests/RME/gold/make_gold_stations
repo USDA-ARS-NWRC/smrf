@@ -1,0 +1,27 @@
+#!/usr/bin/env bash
+
+# A script to create the gold files needed for SMRF
+# Run this script in the main smrf directory, the config
+# file will put the outputs in the correct place
+#
+# Run as:
+#     $ ./tests/RME/gold/make_gold_stations
+
+read -r -p "Recreating gold standard, are you sure? [y/N] " response
+if [[ "$response" = "yes" || "$response" = "y" ]]
+then
+    echo "Updating RME station gold files"
+    echo "Removing old gold files"
+    rm tests/RME/gold/*.nc
+    
+    echo "Running SMRF"
+    run_smrf tests/RME/gold/gold_config.ini
+
+    echo "Cleaning up"
+    rm tests/RME/gold/log.txt
+    rm tests/RME/gold/config.ini
+    rm -rf tests/RME/gold/input_backup
+else
+    echo "RME station gold files not updated"
+fi
+

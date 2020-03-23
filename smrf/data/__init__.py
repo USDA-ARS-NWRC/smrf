@@ -1,5 +1,2 @@
 # -*- coding: utf-8 -*-
-from . import mysql_data
-from . import loadTopo
-from . import loadData
-from . import loadGrid
+from . import loadData, loadGrid, loadTopo, mysql_data

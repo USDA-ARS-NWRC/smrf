@@ -1,10 +1,12 @@
-import numpy as np
-import netCDF4 as nc
-import pandas as pd
 import logging
 import os
-import utm
+
+import netCDF4 as nc
+import numpy as np
+import pandas as pd
 import pytz
+import utm
+
 from smrf.envphys import phys
 from smrf.envphys.radiation import get_hrrr_cloud
 
@@ -87,7 +89,7 @@ class grid():
             self.load_from_wrf()
         elif dataType == 'netcdf':
             self.load_from_netcdf()
-        elif dataType == 'hrrr':
+        elif dataType == 'hrrr_grib':
             self.load_from_hrrr()
         else:
             raise Exception('Could not resolve dataType')
@@ -135,7 +137,7 @@ class grid():
         """
 
         self._logger.info('Reading data from from HRRR directory: {}'.format(
-            self.dataConfig['directory']
+            self.dataConfig['hrrr_directory']
             ))
 
         # forecast hours for each run hour
@@ -148,7 +150,7 @@ class grid():
             self.start_date,
             self.end_date,
             self.bbox,
-            output_dir=self.dataConfig['directory'],
+            output_dir=self.dataConfig['hrrr_directory'],
             force_zone_number=self.force_zone_number,
             forecast=fcast,
             forecast_flag=self.forecast_flag,
@@ -212,10 +214,10 @@ class grid():
         """
 
         self._logger.info('Reading data coming from netcdf: {}'.format(
-                            self.dataConfig['file'])
+                            self.dataConfig['netcdf_file'])
                           )
 
-        f = nc.Dataset(self.dataConfig['file'], 'r')
+        f = nc.Dataset(self.dataConfig['netcdf_file'], 'r')
 
         # GET THE LAT, LON, ELEV FROM THE FILE
         mlat = f.variables['lat'][:]
@@ -326,9 +328,9 @@ class grid():
 
 
         self._logger.info('Reading data coming from WRF output: {}'.format(
-            self.dataConfig['file']
+            self.dataConfig['wrf_file']
             ))
-        f = nc.Dataset(self.dataConfig['file'])
+        f = nc.Dataset(self.dataConfig['wrf_file'])
 
         # DETERMINE THE MODEL DOMAIN AREA IN THE GRID
         dlat, dlon = self.model_domain_grid()

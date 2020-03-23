@@ -5,11 +5,10 @@ Distribute the gridded forcing data to the DEM
 '''
 
 
-import smrf
-
-from datetime import datetime
 import sys
+from datetime import datetime
 
+import smrf
 
 
 def main():

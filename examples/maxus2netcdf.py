@@ -4,15 +4,18 @@
 Create a netCDF file from the maxus files
 '''
 
-import numpy as np
-import os, glob
-from spatialnc import ipw
-import netCDF4 as nc
+import glob
+import os
 import re
+from datetime import datetime
+
+import netCDF4 as nc
+import numpy as np
 import progressbar
+from spatialnc import ipw
+
 # import multiprocessing as mp
 
-from datetime import datetime
 startTime = datetime.now()
 
 maxus_dir = '/media/Drobo1/BRB/BRB-wy09/spatial_WRF_OG/data/topo/maxus/maxus30m/'

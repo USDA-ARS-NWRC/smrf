@@ -1,8 +1,10 @@
 
 # import numpy as np
 import logging
+
 from smrf.distribute import image_data
 from smrf.utils import utils
+
 
 class ta(image_data.image_data):
     """
@@ -83,11 +85,9 @@ class ta(image_data.image_data):
 
         """
 
-        self._logger.debug('{} -- Distributing air_temp'.format(data.name))
+        self._logger.debug('{} Distributing air_temp'.format(data.name))
 
         self._distribute(data)
-        self.air_temp = utils.set_min_max(self.air_temp,self.min,self.max)
-
         self.air_temp = utils.set_min_max(self.air_temp, self.min, self.max)
 
     def distribute_thread(self, queue, data):
@@ -102,6 +102,7 @@ class ta(image_data.image_data):
             data: pandas dataframe for all data, indexed by date time
 
         """
+        self._logger.info("Distributing {}".format(self.variable))
 
         for t in data.index:
 
