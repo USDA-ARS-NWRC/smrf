@@ -88,7 +88,8 @@ class SMRFTestCase(unittest.TestCase):
         Clean up the output directory
         """
         folder = os.path.join(self.base_config.cfg['output']['out_location'])
-        shutil.rmtree(folder)
+        if os.path.exists(folder):
+            shutil.rmtree(folder)
 
 
 
