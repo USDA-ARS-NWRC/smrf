@@ -18,10 +18,10 @@
 
 import os
 import sys
-
-from inicheck.tools import config_documentation
 # -- Have to do a mock install of some modules that RTD doesn't have --------
 from unittest.mock import Mock
+
+from inicheck.tools import config_documentation
 
 from smrf.utils.utils import get_config_doc_section_hdr
 

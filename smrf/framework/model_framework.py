@@ -41,7 +41,7 @@ from inicheck.output import (generate_config, print_config_report,
 from inicheck.tools import check_config, get_user_config
 
 from smrf import __core_config__, __recipes__, data, distribute, output
-from smrf.envphys import radiation
+from smrf.envphys import radiation, sunang
 from smrf.utils import io, queue
 from smrf.utils.utils import backup_input, check_station_colocation, getqotw
 
@@ -536,12 +536,9 @@ class SMRF():
 
             self._logger.info('Distributing time step %s' % t)
             # 0.1 sun angle for time step
-            cosz, azimuth = radiation.sunang(t.astimezone(pytz.utc),
-                                             self.topo.topoConfig['basin_lat'],
-                                             self.topo.topoConfig['basin_lon'],
-                                             zone=0,
-                                             slope=0,
-                                             aspect=0)
+            cosz, azimuth, rad_vec = sunang.sunang(t.astimezone(pytz.utc),
+                                            self.topo.topoConfig['basin_lat'],
+                                            self.topo.topoConfig['basin_lon'])
 
             # 0.2 illumination angle
             illum_ang = None
@@ -701,12 +698,11 @@ class SMRF():
         # Distribute the data
 
         # 0.1 sun angle for time step
-        t.append(Thread(target=radiation.sunang_thread,
+        t.append(Thread(target=sunang.sunang_thread,
                         name='sun_angle',
                         args=(q, self.date_time,
                               self.topo.topoConfig['basin_lat'],
-                              self.topo.topoConfig['basin_lon'],
-                              0, 0, 0)))
+                              self.topo.topoConfig['basin_lon'])))
 
         # 0.2 illumination angle
         t.append(Thread(target=radiation.shade_thread,
