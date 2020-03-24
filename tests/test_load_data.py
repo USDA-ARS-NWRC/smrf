@@ -247,7 +247,6 @@ class TestLoadGrid(SMRFTestCase):
         config.raw_cfg['time']['start_date'] = '2018-07-22 16:00'
         config.raw_cfg['time']['end_date'] = '2018-07-22 20:00'
 
-        config.raw_cfg['topo']['topo_threading'] = 'False'
         #config.raw_cfg['system']['log_file'] = 'none'
 
         config.apply_recipes()

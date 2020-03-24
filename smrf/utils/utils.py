@@ -27,11 +27,13 @@ from smrf import __core_config__, __version__
 from .gitinfo import __gitPath__, __gitVersion__
 
 
+
 class CheckStation(CheckType):
     """
     Custom check for ensuring our stations are always capitalized
     """
-    def __init__(self,**kwargs):
+
+    def __init__(self, **kwargs):
         super(CheckStation, self).__init__(**kwargs)
 
     def type_func(self, value):
@@ -62,7 +64,7 @@ def find_configs(directory):
 
     for f in os.listdir(directory):
         if f.split('.')[-1] == 'ini':
-            configs.append(os.path.join(directory,f))
+            configs.append(os.path.join(directory, f))
     return configs
 
 
@@ -77,7 +79,7 @@ def handle_run_script_options(config_option):
     """
     config_option = os.path.abspath(os.path.expanduser(config_option))
 
-    #User passes a directory
+    # User passes a directory
     if os.path.isdir(config_option):
         configs = find_configs(config_option)
 
@@ -214,7 +216,7 @@ def backup_input(data, config_obj):
     if 'csv' not in backup_config_obj.cfg.keys():
         backup_config_obj.cfg['csv'] = {}
         # With a new section added, we need to remove the other data sections
-        #backup_config_obj.apply_recipes()
+        # backup_config_obj.apply_recipes()
     if 'mysql' in backup_config_obj.cfg.keys():
         del backup_config_obj.cfg['mysql']
 
@@ -223,26 +225,27 @@ def backup_input(data, config_obj):
             del backup_config_obj.cfg['stations']['client']
 
     # Output station data to CSV
-    csv_var = ['metadata', 'air_temp', 'vapor_pressure', 'precip','wind_speed',
-               'wind_direction','cloud_factor']
+    csv_var = ['metadata', 'air_temp', 'vapor_pressure', 'precip', 'wind_speed',
+               'wind_direction', 'cloud_factor']
 
     for k in csv_var:
-        fname = os.path.join(backup_dir,k + '.csv')
-        v = getattr(data,k)
+        fname = os.path.join(backup_dir, k + '.csv')
+        v = getattr(data, k)
         v.to_csv(fname)
 
         # Adjust and output the inifile
         backup_config_obj.cfg['csv'][k] = fname
 
     # Copy topo files over to backup
-    ignore = ['basin_lon', 'basin_lat', 'type', 'topo_threading']
+    ignore = ['basin_lon', 'basin_lat', 'type', 'gradient_method']
     for s in backup_config_obj.cfg['topo'].keys():
         src = backup_config_obj.cfg['topo'][s]
         # make not a list if lenth is 1
-        if isinstance(src, list): src = mk_lst(src, unlst=True)
+        if isinstance(src, list):
+            src = mk_lst(src, unlst=True)
         # Avoid attempring to copy files that don't exist
         if s not in ignore and src != None:
-            dst =  os.path.join(backup_dir, os.path.basename(src))
+            dst = os.path.join(backup_dir, os.path.basename(src))
             backup_config_obj.cfg["topo"][s] = dst
             copyfile(src, dst)
 
@@ -250,7 +253,8 @@ def backup_input(data, config_obj):
     backup_config_obj.cfg['output']['input_backup'] = False
 
     # Output inifile
-    generate_config(backup_config_obj,os.path.join(backup_dir,'backup_config.ini'))
+    generate_config(backup_config_obj, os.path.join(
+        backup_dir, 'backup_config.ini'))
 
 
 def getgitinfo():
@@ -279,12 +283,12 @@ def getConfigHeader():
     """
 
     cfg_str = ("Config File for SMRF {0}\n"
-              "For more SMRF related help see:\n"
-              "{1}").format(getgitinfo(),'http://smrf.readthedocs.io/en/latest/')
+               "For more SMRF related help see:\n"
+               "{1}").format(getgitinfo(), 'http://smrf.readthedocs.io/en/latest/')
     return cfg_str
 
 
-def check_station_colocation(metadata_csv=None,metadata=None):
+def check_station_colocation(metadata_csv=None, metadata=None):
     """
     Takes in a data frame representing the metadata for the weather stations
     as produced by :mod:`smrf.framework.model_framework.SMRF.loadData` and
@@ -301,13 +305,13 @@ def check_station_colocation(metadata_csv=None,metadata=None):
         metadata = pd.read_csv(metadata_csv)
         metadata.set_index('primary_id', inplace=True)
 
-    #Unique station locations
+    # Unique station locations
     unique_x = list(metadata.xi.unique())
     unique_y = list(metadata.yi.unique())
 
     repeat_sta = []
 
-    #Cycle through all the positions look for multiple  stations at a position
+    # Cycle through all the positions look for multiple  stations at a position
     for x in unique_x:
         for y in unique_y:
             x_search = metadata['xi'] == x
@@ -331,7 +335,7 @@ def get_config_doc_section_hdr():
     hdr_dict = {}
 
     dist_modules = ['air_temp', 'vapor_pressure', 'precip', 'wind', 'albedo',
-                    'thermal','solar','soil_temp']
+                    'thermal', 'solar', 'soil_temp']
 
     for d in dist_modules:
         if d == 'precip':
@@ -380,14 +384,15 @@ def get_asc_stats(fp):
 
 def getqotw():
     p = os.path.dirname(__core_config__)
-    q_f = os.path.abspath(os.path.join('{0}'.format(p),'.qotw'))
+    q_f = os.path.abspath(os.path.join('{0}'.format(p), '.qotw'))
     with open(q_f) as f:
         qs = f.readlines()
         f.close()
-    i = random.randrange(0,len(qs))
+    i = random.randrange(0, len(qs))
     return qs[i]
 
-def interp_weights(xy, uv,d=2):
+
+def interp_weights(xy, uv, d=2):
     """
     Find vertices and weights of LINEAR interpolation for gridded interp.
     This routine follows the methods of scipy.interpolate.griddata as outlined
@@ -415,6 +420,7 @@ def interp_weights(xy, uv,d=2):
 
     return vertices, np.hstack((bary, 1 - bary.sum(axis=1, keepdims=True)))
 
+
 def grid_interpolate(values, vtx, wts, shp, fill_value=np.nan):
     """
     Broken out gridded interpolation from scipy.interpolate.griddata that takes
@@ -436,6 +442,7 @@ def grid_interpolate(values, vtx, wts, shp, fill_value=np.nan):
     ret = ret.reshape(shp[0], shp[1])
 
     return ret
+
 
 def grid_interpolate_deconstructed(tri, values, grid_points, method='linear'):
     """
