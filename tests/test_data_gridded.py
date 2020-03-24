@@ -1,14 +1,10 @@
-
 import os
-import unittest
 from copy import deepcopy
 from glob import glob
 
-import requests
 from inicheck.tools import cast_all_variables
-from inicheck.utilities import pcfg
 
-from smrf.framework.model_framework import can_i_run_smrf, run_smrf
+from smrf.framework.model_framework import can_i_run_smrf
 from tests.test_configurations import SMRFTestCase
 
 
@@ -80,10 +76,11 @@ class TestLoadGrid(SMRFTestCase):
         config = cast_all_variables(config, config.mcfg)
 
         # ensure that the recipes are used
-        assert 'station_adjust_for_undercatch' not in config.cfg['precip'].keys(
+        self.assertTrue(
+            'station_adjust_for_undercatch' not in config.cfg['precip'].keys()
         )
-        self.assertTrue(config.cfg['thermal']['correct_cloud'] == False)
-        self.assertTrue(config.cfg['thermal']['correct_veg'] == True)
+        self.assertFalse(config.cfg['thermal']['correct_cloud'])
+        self.assertTrue(config.cfg['thermal']['correct_veg'])
 
         result = can_i_run_smrf(config)
         self.assertTrue(result)
@@ -144,8 +141,8 @@ class TestLoadGrid(SMRFTestCase):
         # ensure that the recipes are used
         self.assertTrue(
             'station_adjust_for_undercatch' not in config.cfg['precip'].keys())
-        self.assertTrue(config.cfg['thermal']['correct_cloud'] == True)
-        self.assertTrue(config.cfg['thermal']['correct_veg'] == True)
+        self.assertTrue(config.cfg['thermal']['correct_cloud'])
+        self.assertTrue(config.cfg['thermal']['correct_veg'])
 
         result = can_i_run_smrf(config)
         self.assertTrue(result)
@@ -193,8 +190,8 @@ class TestLoadGrid(SMRFTestCase):
         # ensure that the recipes are used
         self.assertTrue(
             'station_adjust_for_undercatch' not in config.cfg['precip'].keys())
-        self.assertTrue(config.cfg['thermal']['correct_cloud'] == False)
-        self.assertTrue(config.cfg['thermal']['correct_veg'] == True)
+        self.assertFalse(config.cfg['thermal']['correct_cloud'])
+        self.assertTrue(config.cfg['thermal']['correct_veg'])
 
         result = can_i_run_smrf(config)
         self.assertTrue(result)
