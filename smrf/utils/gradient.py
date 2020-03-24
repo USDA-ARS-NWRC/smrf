@@ -152,6 +152,12 @@ def aspect(dz_dx, dz_dy):
     aout[a < 0] = 90 - a[a < 0]
     aout[a > 90] = 360 - a[a > 90] + 90
 
+    # if dz_dy and dz_dx are zero, then handle the
+    # special case. Follow the IPW convetion and set
+    # the aspect to south or 180 degrees
+    idx = (dz_dy == 0) & (dz_dx == 0)
+    aout[idx] = 180
+
     return aout
 
 

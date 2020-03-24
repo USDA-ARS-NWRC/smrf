@@ -144,6 +144,18 @@ class TestGradientD4(TestGradient):
         self.assertTrue(np.all(asp == 45))
         self.assertTrue(np.all(ipw_a == (np.pi/2 + np.pi/4)))
 
+    def test_gradient_d4_flat(self):
+        """ Test for the gradient_d4 for flat """
+
+        # test south slope and aspect
+        dem = np.ones((10, 10))
+        py_slope, asp = gradient.gradient_d4(dem, self.dx, self.dy)
+        ipw_a = gradient.aspect_to_ipw_radians(asp)
+
+        self.assertTrue(np.all(py_slope == 0))
+        self.assertTrue(np.all(asp == 180))
+        self.assertTrue(np.all(ipw_a == 0))
+
 
 class TestGradientD8(TestGradient):
 
@@ -242,6 +254,18 @@ class TestGradientD8(TestGradient):
         self.assertTrue(np.all(py_slope == self.slope_val))
         self.assertTrue(np.all(asp == 45))
         self.assertTrue(np.all(ipw_a == (np.pi/2 + np.pi/4)))
+
+    def test_gradient_d8_flat(self):
+        """ Test for the gradient_d8 for flat """
+
+        # test south slope and aspect
+        dem = np.ones((10, 10))
+        py_slope, asp = gradient.gradient_d8(dem, self.dx, self.dy)
+        ipw_a = gradient.aspect_to_ipw_radians(asp)
+
+        self.assertTrue(np.all(py_slope == 0))
+        self.assertTrue(np.all(asp == 180))
+        self.assertTrue(np.all(ipw_a == 0))
 
     # Used to bulid comparisons for the Pull Request
     # def test_gradient(self):
