@@ -28,9 +28,6 @@ class TestLoadGrid(SMRFTestCase):
 
         for file_name in file_names:
             nc_name = file_name.split('/')[-1]
-            print('  Comparing {}'.format(nc_name))
-
-            v = nc_name.split('.')[0]
             gold_file = os.path.join(gold_path, nc_name)
 
             self.compare_netcdf_files(gold_file, file_name)
