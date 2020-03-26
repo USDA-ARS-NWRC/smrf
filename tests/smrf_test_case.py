@@ -63,9 +63,12 @@ class SMRFTestCase(unittest.TestCase):
 
             # only compare those that are floats
             if gold.variables[var_name].datatype != np.dtype('S1'):
-                result = np.abs(
-                    gold.variables[var_name][:] - test.variables[var_name][:])
-                self.assertTrue(not np.any(result > 0))
+                error_msg = f"Variable: {var_name} did not match gold standard"
+                np.testing.assert_array_equal(
+                    test.variables[var_name][:],
+                    gold.variables[var_name][:],
+                    err_msg=error_msg
+                )
 
         gold.close()
         test.close()
