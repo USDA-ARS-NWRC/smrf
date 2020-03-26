@@ -10,14 +10,13 @@ Tests for an entire smrf run. The SMRF integration run!
 
 import shutil
 import unittest
-from os.path import abspath, dirname, isdir, join
+from os.path import abspath, isdir, join
 
 import numpy as np
 from netCDF4 import Dataset
 
-import smrf
 from smrf.framework.model_framework import run_smrf
-from tests.test_configurations import SMRFTestCase
+from tests.smrf_test_case import SMRFTestCase
 
 
 def compare_image(v_name, gold_dir, test_dir):
@@ -52,23 +51,20 @@ class TestRME(SMRFTestCase):
     Integration test for SMRF using reynolds mountain east
     """
     @classmethod
-    def setUpClass(self):
+    def setUpClass(cls):
         """
         Runs the short simulation over reynolds mountain east
         """
-        run_dir = abspath(join(dirname(smrf.__file__), '../tests'))
+        super().setUpClass()
 
-        self.gold = abspath(join(run_dir, 'RME', 'gold'))
-
-        self.output = join(run_dir, 'RME', 'output')
+        cls.gold = abspath(join(cls.test_dir, 'RME', 'gold'))
+        cls.output = join(cls.test_dir, 'RME', 'output')
 
         # Remove any potential files to ensure fresh run
-        if isdir(self.output):
-            shutil.rmtree(self.output)
+        if isdir(cls.output):
+            shutil.rmtree(cls.output)
 
-        config = join(run_dir, 'test_base_config.ini')
-
-        run_smrf(config)
+        run_smrf(cls.config_file)
 
     def test_variables(self):
         """

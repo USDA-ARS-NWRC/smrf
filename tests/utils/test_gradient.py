@@ -2,7 +2,7 @@ import numpy as np
 
 from smrf.utils import gradient
 
-from tests.test_configurations import SMRFTestCase
+from tests.smrf_test_case import SMRFTestCase
 
 
 class TestGradient(SMRFTestCase):

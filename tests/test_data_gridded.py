@@ -5,7 +5,7 @@ from glob import glob
 from inicheck.tools import cast_all_variables
 
 from smrf.framework.model_framework import run_smrf
-from tests.test_configurations import SMRFTestCase
+from tests.smrf_test_case import SMRFTestCase
 
 
 class TestLoadGrid(SMRFTestCase):

@@ -15,7 +15,7 @@ from inicheck.tools import cast_all_variables
 
 from smrf.framework.model_framework import can_i_run_smrf, run_smrf
 from tests.nwrc_check import NWRCCheck
-from tests.test_configurations import SMRFTestCase
+from tests.smrf_test_case import SMRFTestCase
 
 
 @unittest.skipUnless(
@@ -107,8 +107,6 @@ class TestLoadCSVData(SMRFTestCase):
         """
         Test the start date not in the data
         """
-
-        # Test the start date
         config = deepcopy(self.base_config)
 
         # Use dates not in the dataset, expecting an error
@@ -161,7 +159,7 @@ class TestLoadGrid(SMRFTestCase):
         config.raw_cfg.update(adj_config)
 
         # set the distribution to grid, thermal defaults will be fine
-        for v in self.dist_variables:
+        for v in SMRFTestCase.dist_variables:
             config.raw_cfg[v]['grid_mask'] = 'False'
 
         # fix the time to that of the WRF_test.nc
@@ -189,7 +187,7 @@ class TestLoadGrid(SMRFTestCase):
         config.raw_cfg['system']['threading'] = 'False'
 
         # set the distribution to grid, thermal defaults will be fine
-        for v in self.dist_variables:
+        for v in SMRFTestCase.dist_variables:
             config.raw_cfg[v]['distribution'] = 'grid'
             config.raw_cfg[v]['grid_mask'] = 'False'
 
@@ -231,7 +229,7 @@ class TestLoadGrid(SMRFTestCase):
         config.raw_cfg['system']['log_file'] = './output/log.txt'
 
         # set the distribution to grid, thermal defaults will be fine
-        for v in self.dist_variables:
+        for v in SMRFTestCase.dist_variables:
             config.raw_cfg[v]['distribution'] = 'grid'
             config.raw_cfg[v]['grid_mask'] = 'False'
 
@@ -286,7 +284,7 @@ class TestLoadGrid(SMRFTestCase):
         config.raw_cfg['system']['threading'] = 'False' # Doesn't work with true
 
         # set the distribution to grid, thermal defaults will be fine
-        for v in self.dist_variables:
+        for v in SMRFTestCase.dist_variables:
             config.raw_cfg[v]['distribution'] = 'grid'
             config.raw_cfg[v]['grid_mask'] = 'False'
 
