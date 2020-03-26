@@ -4,7 +4,7 @@ from glob import glob
 
 from inicheck.tools import cast_all_variables
 
-from smrf.framework.model_framework import can_i_run_smrf
+from smrf.framework.model_framework import run_smrf
 from tests.test_configurations import SMRFTestCase
 
 
@@ -18,7 +18,7 @@ class TestLoadGrid(SMRFTestCase):
             out_dir: the output directory for the model run
         """
 
-        output_dir = os.path.join(self.test_dir, out_dir)
+        output_dir = os.path.abspath(os.path.join(self.test_dir, out_dir))
         s = os.path.join(output_dir, '*.nc')
         file_names = glob(os.path.realpath(s))
 
@@ -82,8 +82,7 @@ class TestLoadGrid(SMRFTestCase):
         self.assertFalse(config.cfg['thermal']['correct_cloud'])
         self.assertTrue(config.cfg['thermal']['correct_veg'])
 
-        result = can_i_run_smrf(config)
-        self.assertTrue(result)
+        run_smrf(config)
 
     def test_grid_hrrr_local(self):
         """ HRRR grib2 loading with local elevation gradient """
@@ -144,8 +143,7 @@ class TestLoadGrid(SMRFTestCase):
         self.assertTrue(config.cfg['thermal']['correct_cloud'])
         self.assertTrue(config.cfg['thermal']['correct_veg'])
 
-        result = can_i_run_smrf(config)
-        self.assertTrue(result)
+        run_smrf(config)
 
         self.compare_hrrr_gold(config.raw_cfg['output']['out_location'][0])
 
@@ -193,5 +191,4 @@ class TestLoadGrid(SMRFTestCase):
         self.assertFalse(config.cfg['thermal']['correct_cloud'])
         self.assertTrue(config.cfg['thermal']['correct_veg'])
 
-        result = can_i_run_smrf(config)
-        self.assertTrue(result)
+        run_smrf(config)

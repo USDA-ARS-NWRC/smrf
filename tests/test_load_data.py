@@ -115,14 +115,12 @@ class TestLoadCSVData(SMRFTestCase):
         config.raw_cfg['time']['start_date'] = '1900-01-01 00:00'
         config.raw_cfg['time']['end_date'] = '1900-02-01 00:00'
 
-        # apply the new recipies
+        # apply the new recipes
         config.apply_recipes()
         config = cast_all_variables(config, config.mcfg)
 
-        result = self.can_i_run_smrf(config)
-
-        # test the base run with the config file
-        self.assertFalse(result)
+        with self.assertRaises(Exception):
+            run_smrf(config)
 
     def test_all_stations(self):
         """
@@ -137,9 +135,7 @@ class TestLoadCSVData(SMRFTestCase):
         config.apply_recipes()
         config = cast_all_variables(config, config.mcfg)
 
-        # test the base run with the config file
-        result = self.can_i_run_smrf(config)
-        assert result
+        self.assertIsNone(run_smrf(config))
 
 
 class TestLoadGrid(SMRFTestCase):
@@ -166,8 +162,7 @@ class TestLoadGrid(SMRFTestCase):
 
         # set the distribution to grid, thermal defaults will be fine
         for v in self.dist_variables:
-             config.raw_cfg[v]['grid_mask'] = 'False'
-
+            config.raw_cfg[v]['grid_mask'] = 'False'
 
         # fix the time to that of the WRF_test.nc
         config.apply_recipes()
@@ -178,8 +173,7 @@ class TestLoadGrid(SMRFTestCase):
         self.assertFalse(config.cfg['thermal']['correct_cloud'])
         self.assertTrue(config.cfg['thermal']['correct_veg'])
 
-        result = can_i_run_smrf(config)
-        self.assertTrue(result)
+        self.assertIsNone(run_smrf(config))
 
     def test_grid_hrrr(self):
         """ HRRR grib2 loading """
@@ -220,8 +214,7 @@ class TestLoadGrid(SMRFTestCase):
         self.assertTrue(config.cfg['thermal']['correct_cloud'])
         self.assertTrue(config.cfg['thermal']['correct_veg'])
 
-        result = can_i_run_smrf(config)
-        self.assertTrue(result)
+        self.assertIsNone(run_smrf(config))
 
     def test_grid_hrrr_local(self):
         """ HRRR grib2 loading with local elevation gradient """
@@ -269,8 +262,7 @@ class TestLoadGrid(SMRFTestCase):
         self.assertTrue(config.cfg['thermal']['correct_cloud'])
         self.assertTrue(config.cfg['thermal']['correct_veg'])
 
-        result = can_i_run_smrf(config)
-        self.assertTrue(result)
+        self.assertIsNone(run_smrf(config))
 
     def test_grid_netcdf(self):
         """ Generic NetCDF loading """
@@ -315,8 +307,7 @@ class TestLoadGrid(SMRFTestCase):
         self.assertFalse(config.cfg['thermal']['correct_cloud'])
         self.assertTrue(config.cfg['thermal']['correct_veg'])
 
-        result = can_i_run_smrf(config)
-        self.assertTrue(result)
+        self.assertIsNone(run_smrf(config))
 
 
 if __name__ == '__main__':
