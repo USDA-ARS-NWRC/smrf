@@ -65,12 +65,6 @@ class wxdata():
         else:
             raise Exception('Could not resolve dataType')
 
-        # correct for the timezone
-        for v in self.variables:
-            if hasattr(self, v):
-                d = getattr(self, v)
-                setattr(self, v, d.tz_localize(tz=self.time_zone))
-
     def load_from_csv(self):
         """
         Load the data from a csv file
@@ -108,6 +102,7 @@ class wxdata():
                     dp_full = pd.read_csv(self.dataConfig[i],
                                      index_col='date_time',
                                      parse_dates=[0])
+                    dp_full = dp_full.tz_localize(self.time_zone)
                     dp_full.columns = [s.upper() for s in dp_full.columns]
 
                     if sta is not None:
@@ -183,8 +178,12 @@ class wxdata():
 
         # get the data
 
-        dp = data.get_data(self.dataConfig['data_table'], station_ids,
-                           self.start_date, self.end_date, db_var_names)
+        dp = data.get_data(
+            self.dataConfig['data_table'],
+            station_ids,
+            self.start_date,
+            self.end_date, db_var_names
+        ).tz_localize(tz=self.time_zone)
 
         # go through and extract the data
         for v in variables:

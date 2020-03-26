@@ -204,24 +204,16 @@ class SMRF():
 
         os.environ['WORKDIR'] = self.temp_dir
 
-        # Get the time section utils
-        self.start_date = pd.to_datetime(self.config['time']['start_date'])
-        self.end_date = pd.to_datetime(self.config['time']['end_date'])
-
-        # Get the timesetps correctly in the time zone
-        d = data.mysql_data.date_range(self.start_date, self.end_date,
-                       timedelta(minutes=int(self.config['time']['time_step'])))
-
-        tzinfo = pytz.timezone(self.config['time']['time_zone'])
-        self.date_time = [di.replace(tzinfo=tzinfo) for di in d]
-        self.time_steps = len(self.date_time)
+        self._setup_date_and_time()
 
         # need to align date time
         if 'date_method_start_decay' in self.config['albedo'].keys():
             self.config['albedo']['date_method_start_decay'] = \
-            self.config['albedo']['date_method_start_decay'].replace(tzinfo=tzinfo)
+                self.config['albedo']['date_method_start_decay'].replace(
+                    tzinfo=self.time_zone)
             self.config['albedo']['date_method_end_decay'] = \
-            self.config['albedo']['date_method_end_decay'].replace(tzinfo=tzinfo)
+                self.config['albedo']['date_method_end_decay'].replace(
+                    tzinfo=self.time_zone)
 
         # if a gridded dataset will be used
         self.gridded = False
@@ -232,11 +224,12 @@ class SMRF():
                 self.forecast_flag = self.config['gridded']['hrrr_forecast_flag']
 
             # hours from start of day
-            self.day_hour = self.start_date - pd.to_datetime(d[0].strftime("%Y%m%d"))
+            self.day_hour = self.start_date - self.date_time[0]
             self.day_hour = int(self.day_hour / np.timedelta64(1, 'h'))
 
-        if ((self.start_date > datetime.now() and not self.gridded) or
-           (self.end_date > datetime.now() and not self.gridded)):
+        now = datetime.now().astimezone(self.time_zone)
+        if ((self.start_date > now and not self.gridded) or
+           (self.end_date > now and not self.gridded)):
             raise ValueError("A date set in the future can only be used with"
                              " WRF generated data!")
 
@@ -246,11 +239,31 @@ class SMRF():
             self._logger.info(getqotw())
 
         # Initialize the distribute dict
-        self._logger.info('Started SMRF --> %s' % datetime.now())
+        self._logger.info('Started SMRF --> %s' % now)
         self._logger.info('Model start --> %s' % self.start_date)
         self._logger.info('Model end --> %s' % self.end_date)
         self._logger.info('Number of time steps --> %i' % self.time_steps)
 
+    def _setup_date_and_time(self):
+        self.time_zone = pytz.timezone(self.config['time']['time_zone'])
+        is_utz = self.time_zone == pytz.UTC
+
+        # Get the time section utils
+        self.start_date = pd.to_datetime(
+            self.config['time']['start_date'], utc=is_utz
+        )
+        self.end_date = pd.to_datetime(
+            self.config['time']['end_date'], utc=is_utz
+        )
+
+        # Get the time steps correctly in the time zone
+        self.date_time = pd.date_range(
+            self.start_date,
+            self.end_date,
+            freq=f"{self.config['time']['time_step']}min",
+            tz=self.time_zone
+        ).to_list()
+        self.time_steps = len(self.date_time)
 
     def __enter__(self):
         return self
@@ -380,14 +393,14 @@ class SMRF():
             self.data = data.loadData.wxdata(self.config['csv'],
                                      self.start_date,
                                      self.end_date,
-                                     time_zone=self.config['time']['time_zone'],
+                                     time_zone=self.time_zone,
                                      dataType='csv')
 
         elif 'mysql' in self.config:
             self.data = data.loadData.wxdata(self.config['mysql'],
                                      self.start_date,
                                      self.end_date,
-                                     time_zone=self.config['time']['time_zone'],
+                                     time_zone=self.time_zone,
                                      dataType='mysql')
 
         elif 'gridded' in self.config:
@@ -396,7 +409,7 @@ class SMRF():
                                    self.topo,
                                    self.start_date,
                                    self.end_date,
-                                   time_zone=self.config['time']['time_zone'],
+                                   time_zone=self.time_zone,
                                    dataType=self.config['gridded']['data_type'],
                                    tempDir=self.temp_dir,
                                    forecast_flag=self.forecast_flag,
