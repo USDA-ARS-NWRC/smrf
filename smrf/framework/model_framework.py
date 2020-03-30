@@ -27,8 +27,8 @@ import logging
 import os
 import shutil
 import sys
-from datetime import datetime, timedelta
-from os.path import abspath, basename, dirname, join
+from datetime import datetime
+from os.path import abspath, dirname, join
 from threading import Thread
 
 import coloredlogs
@@ -39,9 +39,9 @@ from inicheck.config import UserConfig
 from inicheck.output import generate_config, print_config_report
 from inicheck.tools import check_config, get_user_config
 
-from smrf import __core_config__, __recipes__, data, distribute, output
+from smrf import data, distribute, output
 from smrf.envphys import radiation, sunang
-from smrf.utils import io, queue
+from smrf.utils import queue
 from smrf.utils.utils import backup_input, check_station_colocation, getqotw
 
 
