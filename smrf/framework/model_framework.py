@@ -36,8 +36,7 @@ import numpy as np
 import pandas as pd
 import pytz
 from inicheck.config import UserConfig
-from inicheck.output import (generate_config, print_config_report,
-                             print_recipe_summary)
+from inicheck.output import generate_config, print_config_report
 from inicheck.tools import check_config, get_user_config
 
 from smrf import __core_config__, __recipes__, data, distribute, output
@@ -255,6 +254,10 @@ class SMRF():
         self.end_date = pd.to_datetime(
             self.config['time']['end_date'], utc=is_utz
         )
+
+        if not is_utz:
+            self.start_date = self.start_date.tz_localize(self.time_zone)
+            self.end_date = self.end_date.tz_localize(self.time_zone)
 
         # Get the time steps correctly in the time zone
         self.date_time = pd.date_range(
