@@ -63,18 +63,14 @@ class grid():
         # the model domain are used
         self.x = topo.x
         self.y = topo.y
-        self.lat = topo.topoConfig['basin_lat']
-        self.lon = topo.topoConfig['basin_lon']
 
-        # get the zone number and the bounding box
-        u = utm.from_latlon(topo.topoConfig['basin_lat'],
-                            topo.topoConfig['basin_lon'],
-                            self.force_zone_number)
-        self.zone_number = u[2]
-        self.zone_letter = u[3]
+        self.lat = topo.basin_lat
+        self.lon = topo.basin_long
+        self.zone_number = topo.zone_number
+        self.northern = topo.northern_hemisphere
 
-        ur = np.array(utm.to_latlon(np.max(self.x), np.max(self.y), self.zone_number, self.zone_letter))
-        ll = np.array(utm.to_latlon(np.min(self.x), np.min(self.y), self.zone_number, self.zone_letter))
+        ur = np.array(utm.to_latlon(np.max(self.x), np.max(self.y), self.zone_number, northern=self.northern))
+        ll = np.array(utm.to_latlon(np.min(self.x), np.min(self.y), self.zone_number, northern=self.northern))
 
         buff = 0.1 # buffer of bounding box in degrees
         ur += buff
@@ -98,11 +94,12 @@ class grid():
         dlat = np.zeros((2,))
         dlon = np.zeros_like(dlat)
         dlat[0], dlon[0] = utm.to_latlon(np.min(self.x), np.min(self.y),
-                                         int(self.dataConfig['zone_number']),
-                                         self.dataConfig['zone_letter'])
+                                        self.zone_number,
+                                         northern=self.northern)
+
         dlat[1], dlon[1] = utm.to_latlon(np.max(self.x), np.max(self.y),
                                          int(self.dataConfig['zone_number']),
-                                         self.dataConfig['zone_letter'])
+                                         northern=self.northern)
         # add a buffer
         dlat[0] -= self.offset
         dlat[1] += self.offset

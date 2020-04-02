@@ -7,9 +7,9 @@ from multiprocessing import Process
 import numpy as np
 from netCDF4 import Dataset
 from spatialnc import ipw
+from utm import to_latlon
 
 from smrf.utils import gradient
-
 
 class topo():
     """
@@ -107,6 +107,19 @@ class topo():
         # create the x,y vectors
         self.x = f.variables['x'][:]
         self.y = f.variables['y'][:]
+
+        # Calculate the center of the domain
+        self.cx = f.variables['x'][:].mean()
+        self.cy = f.variables['y'][:].mean()
+        self.northern_hemisphere = topoConfig['northern_hemisphere']
+
+        # Assign the UTM zone
+        self.zone_number = f.variables['projection'].utm_zone_number
+
+        # Calculate the lat long
+        self.basin_lat, self.basin_long = to_latlon(self.cx, self.cy,
+                                                    self.zone_number)
+
         [self.X, self.Y] = np.meshgrid(self.x, self.y)
 
         f.close()
@@ -185,7 +198,7 @@ class topo():
             raise OSError('gradient failed')
 
     def gradient(self, gfile):
-        """ 
+        """
         Calculate the gradient and aspect
 
         Args:
