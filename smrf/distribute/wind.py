@@ -8,7 +8,6 @@ from smrf.utils import utils
 import netCDF4 as nc
 import pytz
 import glob
-from scipy.interpolate import griddata
 
 
 class wind(image_data.image_data):
