@@ -37,6 +37,9 @@ class TestWind(SMRFTestCaseLakes):
         # meshgrid points
         wn.X = topo.X
         wn.Y = topo.Y
-        
+
         wn.initialize_wind_ninja(topo)
-        wn.convert_wind_ninja(date_time[0])
+        
+        g_vel, g_ang = wn.convert_wind_ninja(date_time[0])
+
+        
