@@ -1,15 +1,11 @@
-
 import os
-import unittest
 from copy import deepcopy
 from glob import glob
 
-import requests
 from inicheck.tools import cast_all_variables
-from inicheck.utilities import pcfg
 
-from smrf.framework.model_framework import can_i_run_smrf, run_smrf
-from tests.test_configurations import SMRFTestCase
+from smrf.framework.model_framework import run_smrf
+from tests.smrf_test_case import SMRFTestCase
 
 
 class TestLoadGrid(SMRFTestCase):
@@ -22,7 +18,7 @@ class TestLoadGrid(SMRFTestCase):
             out_dir: the output directory for the model run
         """
 
-        output_dir = os.path.join(self.test_dir, out_dir)
+        output_dir = os.path.abspath(os.path.join(self.test_dir, out_dir))
         s = os.path.join(output_dir, '*.nc')
         file_names = glob(os.path.realpath(s))
 
@@ -32,9 +28,6 @@ class TestLoadGrid(SMRFTestCase):
 
         for file_name in file_names:
             nc_name = file_name.split('/')[-1]
-            print('  Comparing {}'.format(nc_name))
-
-            v = nc_name.split('.')[0]
             gold_file = os.path.join(gold_path, nc_name)
 
             self.compare_netcdf_files(gold_file, file_name)
@@ -80,13 +73,13 @@ class TestLoadGrid(SMRFTestCase):
         config = cast_all_variables(config, config.mcfg)
 
         # ensure that the recipes are used
-        assert 'station_adjust_for_undercatch' not in config.cfg['precip'].keys(
+        self.assertTrue(
+            'station_adjust_for_undercatch' not in config.cfg['precip'].keys()
         )
-        self.assertTrue(config.cfg['thermal']['correct_cloud'] == False)
-        self.assertTrue(config.cfg['thermal']['correct_veg'] == True)
+        self.assertFalse(config.cfg['thermal']['correct_cloud'])
+        self.assertTrue(config.cfg['thermal']['correct_veg'])
 
-        result = can_i_run_smrf(config)
-        self.assertTrue(result)
+        run_smrf(config)
 
     def test_grid_hrrr_local(self):
         """ HRRR grib2 loading with local elevation gradient """
@@ -144,11 +137,10 @@ class TestLoadGrid(SMRFTestCase):
         # ensure that the recipes are used
         self.assertTrue(
             'station_adjust_for_undercatch' not in config.cfg['precip'].keys())
-        self.assertTrue(config.cfg['thermal']['correct_cloud'] == True)
-        self.assertTrue(config.cfg['thermal']['correct_veg'] == True)
+        self.assertTrue(config.cfg['thermal']['correct_cloud'])
+        self.assertTrue(config.cfg['thermal']['correct_veg'])
 
-        result = can_i_run_smrf(config)
-        self.assertTrue(result)
+        run_smrf(config)
 
         self.compare_hrrr_gold(config.raw_cfg['output']['out_location'][0])
 
@@ -193,8 +185,7 @@ class TestLoadGrid(SMRFTestCase):
         # ensure that the recipes are used
         self.assertTrue(
             'station_adjust_for_undercatch' not in config.cfg['precip'].keys())
-        self.assertTrue(config.cfg['thermal']['correct_cloud'] == False)
-        self.assertTrue(config.cfg['thermal']['correct_veg'] == True)
+        self.assertFalse(config.cfg['thermal']['correct_cloud'])
+        self.assertTrue(config.cfg['thermal']['correct_veg'])
 
-        result = can_i_run_smrf(config)
-        self.assertTrue(result)
+        run_smrf(config)

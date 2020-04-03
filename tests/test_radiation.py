@@ -4,12 +4,14 @@ from copy import deepcopy
 import numpy as np
 import pandas as pd
 import utm
+import os
 
 from smrf.data import loadTopo
 from smrf.envphys import radiation, sunang
+from tests.smrf_test_case import SMRFTestCase
 
 
-class TestRadiation(unittest.TestCase):
+class TestRadiation(SMRFTestCase):
 
     def test_sunang(self):
         """ Sunang calculation """
@@ -73,11 +75,14 @@ class TestRadiation(unittest.TestCase):
         topo_config = {
             'basin_lon': -116.7547,
             'basin_lat': 43.067,
-            'filename': 'tests/RME/topo/topo.nc',
+            'filename': os.path.join(self.test_dir, 'RME/topo/topo.nc'),
             'type': 'netcdf'
         }
-        topo = loadTopo.topo(topo_config, calcInput=False,
-                             tempDir='tests/RME/output')
+        topo = loadTopo.topo(
+            topo_config,
+            calcInput=False,
+            tempDir=os.path.join(self.test_dir, 'RME/output')
+        )
 
         # convert from UTM to lat/long
         lat, lon = utm.to_latlon(topo.X[0, 0], topo.Y[0, 0], 11, 'N')

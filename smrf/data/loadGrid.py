@@ -81,7 +81,6 @@ class grid():
         ll -= buff
         self.bbox = np.append(np.flipud(ll), np.flipud(ur))
 
-
         self._logger = logging.getLogger(__name__)
 
         # load the data
@@ -93,11 +92,6 @@ class grid():
             self.load_from_hrrr()
         else:
             raise Exception('Could not resolve dataType')
-
-#         # correct for the timezone
-#         for v in self.variables:
-#             d = getattr(self, v)
-#             setattr(self, v, d.tz_localize(tz=self.time_zone))
 
     def model_domain_grid(self):
 
@@ -263,7 +257,10 @@ class grid():
         # GET THE TIMES
         t = f.variables['time']
         time = nc.num2date(t[:].astype(int), t.getncattr('units'), t.getncattr('calendar'))
-        time = [tm.replace(microsecond=0) for tm in time] # drop the milliseconds
+        # Drop milliseconds and prepare to use as pandas DataFrame index
+        time = pd.DatetimeIndex(
+            [str(tm.replace(microsecond=0)) for tm in time], tz=self.time_zone
+        )
 
         # subset the times to only those needed
 #         tzinfo = pytz.timezone(self.time_zone)
@@ -296,8 +293,9 @@ class grid():
                     df.replace(fv, np.nan, inplace=True)
                 except:
                     pass
-                df = df[self.start_date:self.end_date]
-                setattr(self, v, df.tz_localize(tz=self.time_zone))
+
+                # Set variable and subset by start and end time
+                setattr(self, v, df[self.start_date:self.end_date])
 
     def load_from_wrf(self):
         """
@@ -378,11 +376,11 @@ class grid():
             raise Exception('Could not convert WRF times to readable format')
 
         times = [v.replace('_', ' ') for v in times]  # remove the underscore
-        time = pd.to_datetime(times)
+        in_utc = str(self.time_zone).lower() == str(pytz.UTC).lower()
+        time = pd.to_datetime(times, utc=in_utc)
 
         # subset the times to only those needed
-        time_ind = (time >= pd.to_datetime(self.start_date)) & \
-                   (time <= pd.to_datetime(self.end_date))
+        time_ind = (time >= self.start_date) & (time <= self.end_date)
         time = time[time_ind]
 
         # GET THE DATA, ONE AT A TIME
@@ -453,7 +451,7 @@ class grid():
         # correct for the timezone and get only the desired dates
         for v in self.variables:
             d = getattr(self, v)
-            setattr(self, v, d.tz_localize(tz=self.time_zone))
+            setattr(self, v, d.tz_convert(tz=self.time_zone))
 
 
 def apply_utm(s, force_zone_number):
