@@ -8,6 +8,8 @@
 .venv
 .vscode/
 .env
+*.ipynb
+.devcontainer
 
 *.lprof
 *.prof
