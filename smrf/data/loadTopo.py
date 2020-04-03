@@ -108,17 +108,28 @@ class topo():
         self.x = f.variables['x'][:]
         self.y = f.variables['y'][:]
 
-        # Calculate the center of the domain
-        self.cx = f.variables['x'][:].mean()
-        self.cy = f.variables['y'][:].mean()
-        self.northern_hemisphere = topoConfig['northern_hemisphere']
+        # Calculate the center of the basin
+        mask_id = np.argwhere(f.variables['mask'][:] == 1)
+        idx = [mask_id[:, 1]]
+        idy = [mask_id[:, 0]]
+
+        self.cx = self.x[idx].mean()
+        self.cy = self.y[idy].mean()
+        # self.cx = self.x.mean()
+        # self.cy = self.y.mean()
+        self.northern_hemisphere = self.topoConfig['northern_hemisphere']
 
         # Assign the UTM zone
-        self.zone_number = f.variables['projection'].utm_zone_number
+        self.zone_number = int(f.variables['projection'].utm_zone_number)
 
         # Calculate the lat long
-        self.basin_lat, self.basin_long = to_latlon(self.cx, self.cy,
-                                                    self.zone_number)
+        self.basin_lat, self.basin_long = to_latlon(self.cx,
+                                            self.cy,
+                                            self.zone_number,
+                                            northern=self.northern_hemisphere)
+
+        self._logger.info('Domain center in UTM Zone {:d} = {:0.1f}m, {:0.1f}m'.format(self.zone_number, self.cx, self.cy))
+        self._logger.info('Domain center as Latitude/Longitude = {:0.5f}, {:0.5f}'.format(self.basin_lat, self.basin_long))
 
         [self.X, self.Y] = np.meshgrid(self.x, self.y)
 

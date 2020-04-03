@@ -73,10 +73,8 @@ class TestRadiation(SMRFTestCase):
         date_time = date_time.tz_localize('UTC')
 
         topo_config = {
-            'basin_lon': -116.7547,
-            'basin_lat': 43.067,
-            'filename': os.path.join(self.test_dir, 'RME/topo/topo.nc'),
-            'type': 'netcdf'
+            'filename': 'tests/RME/topo/topo.nc',
+            'northern_hemisphere':True,
         }
         topo = loadTopo.topo(
             topo_config,
