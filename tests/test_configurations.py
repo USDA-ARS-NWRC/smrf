@@ -72,7 +72,7 @@ class SMRFTestCaseLakes(unittest.TestCase):
         Clean up the output directory
         """
 
-        folder = os.path.join(self.test_dir, 'Lakes', 'output')
+        folder = os.path.join(self.test_dir, 'output')
         for the_file in os.listdir(folder):
             file_path = os.path.join(folder, the_file)
             try:
