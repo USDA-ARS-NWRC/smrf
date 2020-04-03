@@ -8,6 +8,7 @@ from smrf.utils import utils
 import netCDF4 as nc
 import pytz
 import glob
+from scipy.interpolate import griddata
 
 
 class wind(image_data.image_data):
@@ -250,19 +251,21 @@ class wind(image_data.image_data):
 
         # get wind ninja topo stats
         ts2 = utils.get_asc_stats(fp_vel)
-        xwn = ts2['x'][:]
-        ywn = ts2['y'][:]
+        self.windninja_x = ts2['x'][:]
+        self.windninja_y = ts2['y'][:]
 
-        XW, YW = np.meshgrid(xwn, ywn)
+        XW, YW = np.meshgrid(self.windninja_x, self.windninja_y)
         xwint = XW.flatten()
         ywint = YW.flatten()
+        self.wn_mx = xwint
+        self.wn_my = ywint
 
-        xy=np.zeros([XW.shape[0]*XW.shape[1],2])
-        xy[:,1]=ywint
-        xy[:,0]=xwint
-        uv=np.zeros([self.X.shape[0]*self.X.shape[1],2])
-        uv[:,1]=self.Y.flatten()
-        uv[:,0]=self.X.flatten()
+        xy = np.zeros([XW.shape[0]*XW.shape[1],2])
+        xy[:,1] = ywint
+        xy[:,0] = xwint
+        uv = np.zeros([self.X.shape[0]*self.X.shape[1],2])
+        uv[:,1] = self.Y.flatten()
+        uv[:,0] = self.X.flatten()
 
         self.vtx, self.wts = utils.interp_weights(xy, uv,d=2)
         ###### end do this first to speedup the interpolation later ####
@@ -584,7 +587,7 @@ class wind(image_data.image_data):
         data_vel = np.loadtxt(fp_vel, skiprows=6)
         data_vel_int = data_vel.flatten()
 
-        # # interpolate to the SMRF grid from the WindNinja grid
+        # interpolate to the SMRF grid from the WindNinja grid
         g_vel = utils.grid_interpolate(data_vel_int, self.vtx,
                                        self.wts, self.X.shape)
 

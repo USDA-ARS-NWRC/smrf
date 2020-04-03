@@ -370,6 +370,12 @@ def get_asc_stats(fp):
 
     ts['x'] = ts['v'] + ts['dv']*np.arange(ts['nx'])
     ts['y'] = ts['u'] + ts['du']*np.arange(ts['ny'])
+    ts['y'] = ts['y'][::-1]
+
+    # ASCII are lower left coordiante
+    # must shift to cell center for interpolation
+    ts['x'] = ts['x'] + ts['dv']/2
+    ts['y'] = ts['y'] + ts['du']/2
 
     return ts
 

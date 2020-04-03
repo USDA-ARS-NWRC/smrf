@@ -1,4 +1,5 @@
 from datetime import timedelta
+import numpy as np
 
 import pytz
 from inicheck.tools import cast_all_variables, get_user_config
@@ -39,7 +40,14 @@ class TestWind(SMRFTestCaseLakes):
         wn.Y = topo.Y
 
         wn.initialize_wind_ninja(topo)
+
+        # The x values are ascending
+        self.assertTrue(np.all(np.diff(wn.windninja_x) > 0))
+
+        # The y values are descnding
+        self.assertTrue(np.all(np.diff(wn.windninja_y) < 0))
         
+        # run wind ninja but not comparing to anything
         g_vel, g_ang = wn.convert_wind_ninja(date_time[0])
 
         
