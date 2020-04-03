@@ -263,7 +263,7 @@ class SMRF():
         self.date_time = pd.date_range(
             self.start_date,
             self.end_date,
-            freq=f"{self.config['time']['time_step']}min",
+            freq="{[time][time_step]}min".format(self.config),
             tz=self.time_zone
         ).to_list()
         self.time_steps = len(self.date_time)
