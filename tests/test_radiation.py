@@ -71,10 +71,8 @@ class TestRadiation(unittest.TestCase):
         date_time = date_time.tz_localize('UTC')
 
         topo_config = {
-            'basin_lon': -116.7547,
-            'basin_lat': 43.067,
             'filename': 'tests/RME/topo/topo.nc',
-            'type': 'netcdf'
+            'northern_hemisphere':True,
         }
         topo = loadTopo.topo(topo_config, calcInput=False,
                              tempDir='tests/RME/output')
