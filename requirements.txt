@@ -13,7 +13,7 @@ imagesize==0.7.1
 inicheck>=0.7.0.,<0.8.0
 Jinja2>=2.10.1
 latexcodec==1.0.5
-MarkupSafe==1.0
+MarkupSafe
 mccabe==0.6.1
 mock==2.0.0
 mysql-connector-python-rf==2.2.2
