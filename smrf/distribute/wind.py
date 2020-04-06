@@ -8,6 +8,7 @@ from smrf.utils import utils
 import netCDF4 as nc
 import pytz
 import glob
+from scipy.interpolate import griddata
 
 
 class wind(image_data.image_data):
@@ -246,7 +247,7 @@ class wind(image_data.image_data):
         fp_vel = glob.glob(os.path.join(self.wind_ninja_dir,
                                 'data{}'.format(self.start_date.strftime(fmt_d)),
                                 'wind_ninja_data',
-                                '*_vel.asc'))[0]
+                                '*{}m_vel.asc'.format(self.wind_ninja_dxy)))[0]
 
         # get wind ninja topo stats
         ts2 = utils.get_asc_stats(fp_vel)
@@ -589,6 +590,19 @@ class wind(image_data.image_data):
         # interpolate to the SMRF grid from the WindNinja grid
         g_vel = utils.grid_interpolate(data_vel_int, self.vtx,
                                        self.wts, self.X.shape)
+
+        if np.any(np.isnan(g_vel)):
+            # https://stackoverflow.com/questions/9537543/replace-nans-in-numpy-array-with-closest-non-nan-value
+            self._logger.warning('NaN values present in the wind ninja interpolation, replaced with closest value')
+            for i in range(4):
+                mask = np.isnan(g_vel)
+                g_vel[mask] = np.interp(np.flatnonzero(mask), np.flatnonzero(~mask), g_vel[~mask])
+
+                if not np.any(np.isnan(g_vel)):
+                    break
+
+            if i == 3:
+                self._logger.error('NaN values still present in the wind ninja interpolation')
 
         # log law scale
         g_vel = g_vel * self.ln_wind_scale
