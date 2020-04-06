@@ -113,8 +113,8 @@ class topo():
         idx = [mask_id[:, 1]]
         idy = [mask_id[:, 0]]
 
-        self.cx = self.x[idx].mean()
-        self.cy = self.y[idy].mean()
+        self.cx = self.x[tuple(idx)].mean()
+        self.cy = self.y[tuple(idy)].mean()
         # self.cx = self.x.mean()
         # self.cy = self.y.mean()
         self.northern_hemisphere = self.topoConfig['northern_hemisphere']
