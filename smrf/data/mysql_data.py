@@ -124,7 +124,7 @@ class database:
 
         self._logger.debug('Determined data time step to be %f minutes' % m)
 
-        t = date_range(start_date, end_date, timedelta(minutes=m))
+        # t = date_range(start_date, end_date, timedelta(minutes=m))
 
         # now we need to parse the data frame
         df = {}
@@ -133,8 +133,9 @@ class database:
             self._logger.debug('Creating dataframe for {}'.format(v))
 
             # create an empty dataframe
-            dp = pd.DataFrame(index=t, columns=station_ids)
+            dp = pd.DataFrame(columns=station_ids)
             dp.index.name = 'date_time'
+
             for s in station_ids:
                 dp[s] = d[v][d['station_id'] == s].copy()
 
