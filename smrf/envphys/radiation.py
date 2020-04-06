@@ -1068,19 +1068,17 @@ def solint(a, b):
     wave = data[:, 0]
     val = data[:, 1]
 
-    # calcualte splines
+    # calculate splines
     c = Akima1DInterpolator(wave, val)
 
-    with warnings.catch_warnings(record=True) as w:
+    with warnings.catch_warnings(record=True) as messages:
         warnings.simplefilter('always', category=IntegrationWarning)
         # Take the integral between the two wavelengths
         intgrl, ierror = quad(c, a, b, limit=120)
 
-        if len(w):
-            log = logging.getLogger(__name__)
-            log.debug(
-                "Integration warning raised in solar radiation calculation"
-            )
+        log = logging.getLogger(__name__)
+        for warning in messages:
+            log.warning(warning.message)
 
     return intgrl * SOLAR_CONSTANT
 
