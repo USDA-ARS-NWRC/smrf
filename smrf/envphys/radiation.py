@@ -7,12 +7,13 @@ import datetime
 import logging
 import math
 import os
+import warnings
 import subprocess as sp
 
 import numpy as np
 import pandas as pd
 import pytz
-from scipy.integrate import quad
+from scipy.integrate import quad, IntegrationWarning
 from scipy.interpolate import Akima1DInterpolator
 
 from smrf.envphys import sunang
@@ -1067,11 +1068,17 @@ def solint(a, b):
     wave = data[:, 0]
     val = data[:, 1]
 
-    # calcualte splines
+    # calculate splines
     c = Akima1DInterpolator(wave, val)
 
-    # Take the integral between the two wavelengths
-    intgrl, ierror = quad(c, a, b, limit=120)
+    with warnings.catch_warnings(record=True) as messages:
+        warnings.simplefilter('always', category=IntegrationWarning)
+        # Take the integral between the two wavelengths
+        intgrl, ierror = quad(c, a, b, limit=120)
+
+        log = logging.getLogger(__name__)
+        for warning in messages:
+            log.warning(warning.message)
 
     return intgrl * SOLAR_CONSTANT
 
