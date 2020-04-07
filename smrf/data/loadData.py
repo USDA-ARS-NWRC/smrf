@@ -177,14 +177,17 @@ class wxdata():
                      if x not in self.db_config_vars]
 
         # get the data
-
+        # dp is a dictionary of dataframes
         dp = data.get_data(
             self.dataConfig['data_table'],
             station_ids,
             self.start_date,
-            self.end_date, db_var_names
-        ).tz_localize(tz=self.time_zone)
+            self.end_date, db_var_names,
+            time_zone=self.time_zone
+        )
 
         # go through and extract the data
         for v in variables:
-            setattr(self, v, dp[self.dataConfig[v]])
+            # MySQL Data is TZ aware. So convert just in case non utc is passed.
+            dfv = dp[self.dataConfig[v]]
+            setattr(self, v, dfv)

@@ -43,7 +43,6 @@ class database:
 
         self._db_connection = cnx
         self._db_cur = self._db_connection.cursor()
-
         self._logger = logging.getLogger(__name__)
         self._logger.info('Connected to MySQL database')
 
@@ -84,7 +83,8 @@ class database:
 
         return d
 
-    def get_data(self, table, station_ids, start_date, end_date, variables):
+    def get_data(self, table, station_ids, start_date, end_date, variables,
+                 time_zone='UTC'):
         """
         Get data from the database, either for the specified stations
         or for the specific group of stations in client
@@ -95,6 +95,7 @@ class database:
             start_date: start of time period
             end_date: end of time period
             variable: string for variable to get
+            time_zone: String timezone to set the data in
         """
         if isinstance(variables, list):
             variables = ','.join(variables)
@@ -110,7 +111,6 @@ class database:
 
         # loads all the data
         d = pd.read_sql(qry, self._db_connection, index_col='date_time')
-
         if d.empty:
             raise Exception('No data found in database')
 
@@ -119,12 +119,17 @@ class database:
 
         # determine the times
         dt = np.diff(d.index.unique())/60/1e9   # time difference in minutes
+
         dt = dt.astype('float64')
         m = stats.mode(dt)[0][0]  # most likely time steps for the data
 
         self._logger.debug('Determined data time step to be %f minutes' % m)
 
+        # produce an index that is complete and tz aware.
         t = date_range(start_date, end_date, timedelta(minutes=m))
+
+        # Make sure incoming mysql data is also tz aware
+        d = d.tz_localize(time_zone)
 
         # now we need to parse the data frame
         df = {}
@@ -135,6 +140,7 @@ class database:
             # create an empty dataframe
             dp = pd.DataFrame(index=t, columns=station_ids)
             dp.index.name = 'date_time'
+
             for s in station_ids:
                 dp[s] = d[v][d['station_id'] == s].copy()
 
@@ -157,7 +163,9 @@ def date_range(start_date, end_date, increment):
     """
     result = []
     nxt = start_date
+
     while nxt <= end_date:
         result.append(nxt)
         nxt += increment
+
     return np.array(result)

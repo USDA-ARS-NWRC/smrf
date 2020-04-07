@@ -28,7 +28,7 @@ class NWRCCheck(object):
         """
         try:
             response = requests.get(cls.URL, timeout=1)
-            return response.ok()
+            return response.ok
 
         except requests.exceptions.RequestException:
             return False
