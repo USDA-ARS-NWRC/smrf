@@ -182,11 +182,12 @@ class wxdata():
             self.dataConfig['data_table'],
             station_ids,
             self.start_date,
-            self.end_date, db_var_names
+            self.end_date, db_var_names,
+            time_zone=self.time_zone
         )
 
         # go through and extract the data
         for v in variables:
             # MySQL Data is TZ aware. So convert just in case non utc is passed.
-            dfv = dp[self.dataConfig[v]].tz_localize(self.time_zone)
+            dfv = dp[self.dataConfig[v]]
             setattr(self, v, dfv)
