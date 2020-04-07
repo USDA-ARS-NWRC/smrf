@@ -307,25 +307,26 @@ class TestLoadGrid(SMRFTestCase):
 
         self.assertIsNone(run_smrf(config))
 
-    class TestLoadTopo(unittest.TestCase):
-        @classmethod
-        def setUp(self):
-            topo_config = {
-                'filename': os.path.join(self.test_dir, 'RME/topo/topo.nc'),
-                'northern_hemisphere':True,
-            }
+class TestLoadTopo(SMRFTestCase):
+    @classmethod
+    def setUp(self):
+        topo_config = {
+            'filename': os.path.join(self.test_dir, 'RME/topo/topo.nc'),
+            'northern_hemisphere':True,
+        }
 
-            self.topo = loadTopo.topo(
-                topo_config,
-                calcInput=False,
-                tempDir=os.path.join(self.test_dir, 'RME/output')
-            )
-        def test_auto_calc_lat_lon(self):
-            '''
-            Test we calculate the basin lat long correctly
-            '''
+        self.topo = loadTopo.topo(
+            topo_config,
+            calcInput=False,
+            tempDir=os.path.join(self.test_dir, 'RME/output')
+        )
 
-            self.assertTrue(self.topo.basin_lat)
+    def test_auto_calc_lat_lon(self):
+        '''
+        Test we calculate the basin lat long correctly
+        '''
+
+        self.assertTrue(self.topo.basin_lat)
 
 if __name__ == '__main__':
     unittest.main()
