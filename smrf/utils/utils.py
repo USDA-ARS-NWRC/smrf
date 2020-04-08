@@ -464,3 +464,36 @@ def grid_interpolate_deconstructed(tri, values, grid_points, method='linear'):
         return CloughTocher2DInterpolator(tri, values)(grid_points)
     elif method == 'linear':
         return LinearNDInterpolator(tri, values)(grid_points)
+
+def get_center(ds, mask_name=None):
+    '''
+    Function returns the basin center in the native coordinates of the
+    a netcdf object.
+
+    The incoming data set must contain at least and x, y and optionally
+    whatever mask name the user would like to use for calculating .
+    If no mask name is provided then the entire domain is used.
+
+    Args:
+        ds: netCDF4.Dataset object containing at least x,y, optionally
+                a mask variable name
+        mask_name: variable name in the dataset that is a mask where 1 is in
+                  the mask
+    Returns:
+        tuple: x,y of the data center in the datas native coordinates
+    '''
+    x = ds.variables['x'][:]
+    y = ds.variables['y'][:]
+
+    # Calculate the center of the basin
+    if mask_name is not None:
+        mask_id = np.argwhere(f.variables[mask_name][:] == 1)
+
+        # Tuple is required for an upcoming deprecation in numpy
+        idx = tuple([mask_id[:, 1]])
+        idy = tuple([mask_id[:, 0]])
+
+        x = x[idx]
+        y = y[idy]
+
+    return x.mean(), y.mean()

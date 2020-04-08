@@ -16,6 +16,9 @@ from inicheck.tools import cast_all_variables
 from smrf.framework.model_framework import can_i_run_smrf, run_smrf
 from tests.nwrc_check import NWRCCheck
 from tests.smrf_test_case import SMRFTestCase
+import smrf
+from os.path import join, dirname, abspath
+from smrf.data import loadTopo
 
 
 @unittest.skipUnless(
@@ -307,25 +310,31 @@ class TestLoadGrid(SMRFTestCase):
 
         self.assertIsNone(run_smrf(config))
 
-class TestLoadTopo(SMRFTestCase):
+class TestLoadTopo(unittest.TestCase):
     @classmethod
     def setUp(self):
+        base = dirname(smrf.__file__)
+        self.test_dir = abspath(join(base, '../', 'tests'))
         topo_config = {
-            'filename': os.path.join(self.test_dir, 'RME/topo/topo.nc'),
+            'filename': join(self.test_dir, 'RME/topo/topo.nc'),
             'northern_hemisphere':True,
         }
 
         self.topo = loadTopo.topo(
             topo_config,
             calcInput=False,
-            tempDir=os.path.join(self.test_dir, 'RME/output')
+            tempDir= join(self.test_dir, 'RME/output')
         )
 
     def test_auto_calc_lat_lon(self):
         '''
         Test we calculate the basin lat long correctly
         '''
+        # Original RME
+        # basin_lon:                     -116.7547
+        # basin_lat:                     43.067
 
+        print(self.topo.basin_lat, self.topo.basin_long)
         self.assertTrue(self.topo.basin_lat)
 
 if __name__ == '__main__':

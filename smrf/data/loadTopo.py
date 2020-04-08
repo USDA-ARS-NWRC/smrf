@@ -9,7 +9,7 @@ from netCDF4 import Dataset
 from spatialnc import ipw
 from utm import to_latlon
 
-from smrf.utils import gradient
+from smrf.utils import gradient, get_center
 
 class topo():
     """
@@ -107,16 +107,13 @@ class topo():
         # create the x,y vectors
         self.x = f.variables['x'][:]
         self.y = f.variables['y'][:]
+        [self.X, self.Y] = np.meshgrid(self.x, self.y)
+
 
         # Calculate the center of the basin
-        mask_id = np.argwhere(f.variables['mask'][:] == 1)
-        idx = [mask_id[:, 1]]
-        idy = [mask_id[:, 0]]
+        self.cx, self.cy  = get_center(f, mask_name='mask')
 
-        self.cx = self.x[tuple(idx)].mean()
-        self.cy = self.y[tuple(idy)].mean()
-        # self.cx = self.x.mean()
-        # self.cy = self.y.mean()
+        # Is the modeling domain in the northern hemisphere
         self.northern_hemisphere = self.topoConfig['northern_hemisphere']
 
         # Assign the UTM zone
@@ -128,22 +125,10 @@ class topo():
                                             self.zone_number,
                                             northern=self.northern_hemisphere)
 
-        self._logger.info('Domain center in UTM Zone {:d} = {:0.1f}m, {:0.1f}m'.format(self.zone_number, self.cx, self.cy))
-        self._logger.info('Domain center as Latitude/Longitude = {:0.5f}, {:0.5f}'.format(self.basin_lat, self.basin_long))
-
-        # Assign the UTM zone
-        self.zone_number = int(f.variables['projection'].utm_zone_number)
-
-        # Calculate the lat long
-        self.basin_lat, self.basin_long = to_latlon(self.cx,
-                                            self.cy,
-                                            self.zone_number,
-                                            northern=self.northern_hemisphere)
-
-        self._logger.info('Domain center in UTM Zone {:d} = {:0.1f}m, {:0.1f}m'.format(self.zone_number, self.cx, self.cy))
-        self._logger.info('Domain center as Latitude/Longitude = {:0.5f}, {:0.5f}'.format(self.basin_lat, self.basin_long))
-
-        [self.X, self.Y] = np.meshgrid(self.x, self.y)
+        self._logger.info('Domain center in UTM Zone {:d} = {:0.1f}m, {:0.1f}m'
+                          ''.format(self.zone_number, self.cx, self.cy))
+        self._logger.info('Domain center as Latitude/Longitude = {:0.5f}, '
+                          '{:0.5f}'.format(self.basin_lat, self.basin_long))
 
         f.close()
 
