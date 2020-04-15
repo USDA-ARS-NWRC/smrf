@@ -51,10 +51,6 @@ class grid():
         # degree offset for a buffer around the model domain
         self.offset = 0.1
 
-        self.force_zone_number = None
-        if 'zone_number' in dataConfig:
-            self.force_zone_number = dataConfig['zone_number']
-
         # The data that will be output
         self.variables = ['air_temp', 'vapor_pressure', 'precip', 'wind_speed',
                           'wind_direction', 'cloud_factor', 'thermal']
@@ -69,8 +65,10 @@ class grid():
         self.zone_number = topo.zone_number
         self.northern = topo.northern_hemisphere
 
-        ur = np.array(utm.to_latlon(np.max(self.x), np.max(self.y), self.zone_number, northern=self.northern))
-        ll = np.array(utm.to_latlon(np.min(self.x), np.min(self.y), self.zone_number, northern=self.northern))
+        ur = np.array(utm.to_latlon(np.max(self.x), np.max(self.y),
+                                      self.zone_number, northern=self.northern))
+        ll = np.array(utm.to_latlon(np.min(self.x), np.min(self.y),
+                                      self.zone_number, northern=self.northern))
 
         buff = 0.1 # buffer of bounding box in degrees
         ur += buff
@@ -94,11 +92,11 @@ class grid():
         dlat = np.zeros((2,))
         dlon = np.zeros_like(dlat)
         dlat[0], dlon[0] = utm.to_latlon(np.min(self.x), np.min(self.y),
-                                        self.zone_number,
+                                         self.zone_number,
                                          northern=self.northern)
 
         dlat[1], dlon[1] = utm.to_latlon(np.max(self.x), np.max(self.y),
-                                         int(self.dataConfig['zone_number']),
+                                         self.zone_number,
                                          northern=self.northern)
         # add a buffer
         dlat[0] -= self.offset
@@ -142,7 +140,7 @@ class grid():
             self.end_date,
             self.bbox,
             output_dir=self.dataConfig['hrrr_directory'],
-            force_zone_number=self.force_zone_number,
+            force_zone_number=self.zone_number,
             forecast=fcast,
             forecast_flag=self.forecast_flag,
             day_hour=self.day_hour)
@@ -246,7 +244,7 @@ class grid():
         metadata['longitude'] = mlon.flatten()
         metadata['elevation'] = mhgt.flatten()
         metadata = metadata.apply(apply_utm,
-                                  args=(self.force_zone_number,),
+                                  args=(self.zone_number,),
                                   axis=1)
 
         self.metadata = metadata
@@ -355,7 +353,7 @@ class grid():
         metadata['longitude'] = mlon.flatten()
         metadata['elevation'] = mhgt.flatten()
         metadata = metadata.apply(apply_utm,
-                                  args=(self.force_zone_number,),
+                                  args=(self.zone_number,),
                                   axis=1)
 
         self.metadata = metadata
