@@ -42,8 +42,6 @@ class TestLoadGrid(SMRFTestCase):
             'gridded': {
                 'data_type': 'wrf',
                 'wrf_file': './RME/gridded/WRF_test.nc',
-                'zone_number': '11',
-                'zone_letter': 'N'
             },
             'system': {
                 'threading': 'False',
@@ -91,8 +89,6 @@ class TestLoadGrid(SMRFTestCase):
             'gridded': {
                 'data_type': 'hrrr_grib',
                 'hrrr_directory': './RME/gridded/hrrr_test/',
-                'zone_number': 11,
-                'zone_letter': 'N'
             },
             'time': {
                 'start_date': '2018-07-22 16:00',
@@ -152,8 +148,6 @@ class TestLoadGrid(SMRFTestCase):
 
         generic_grid = {'data_type': 'netcdf',
                         'netcdf_file': './RME/gridded/netcdf_test.nc',
-                        'zone_number': '11',
-                        'zone_letter': 'N',
                         'air_temp': 'air_temp',
                         'vapor_pressure': 'vapor_pressure',
                         'precip': 'precip',

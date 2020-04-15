@@ -150,7 +150,6 @@ class TestLoadGrid(SMRFTestCase):
 
         adj_config = {'gridded': {'data_type': 'wrf',
                                   'wrf_file': './RME/gridded/WRF_test.nc',
-                                  'zone_number': '11',
                                   'zone_letter': 'N'},
                       'system': {'threading': 'False',
                                  'log_file': './output/log.txt'},
