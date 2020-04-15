@@ -487,7 +487,7 @@ def get_center(ds, mask_name=None):
 
     # Calculate the center of the basin
     if mask_name is not None:
-        mask_id = np.argwhere(f.variables[mask_name][:] == 1)
+        mask_id = np.argwhere(ds.variables[mask_name][:] == 1)
 
         # Tuple is required for an upcoming deprecation in numpy
         idx = tuple([mask_id[:, 1]])

@@ -19,6 +19,7 @@ from tests.smrf_test_case import SMRFTestCase
 import smrf
 from os.path import join, dirname, abspath
 from smrf.data import loadTopo
+import numpy as np
 
 
 @unittest.skipUnless(
@@ -333,9 +334,8 @@ class TestLoadTopo(unittest.TestCase):
         # Original RME
         # basin_lon:                     -116.7547
         # basin_lat:                     43.067
-
-        print(self.topo.basin_lat, self.topo.basin_long)
-        self.assertTrue(self.topo.basin_lat)
+        self.assertTrue(self.topo.basin_lat == 43.06475372378507)
+        self.assertTrue(self.topo.basin_long == -116.75395420397061)
 
 if __name__ == '__main__':
     unittest.main()
