@@ -49,7 +49,7 @@ class grid():
         self.n_forecast_hours = n_forecast_hours
         self.topo = topo
 
-        # degree offset for a buffer around the model domain
+        # degree offset for a buffer around the model domain in degrees
         self.offset = 0.1
 
         # The data that will be output
@@ -57,19 +57,12 @@ class grid():
                           'wind_direction', 'cloud_factor', 'thermal']
 
 
+        # get the buffer gridded data domain extents in lat long
+        self.dlat, self.dlon = self.model_domain_grid()
 
-        ur = np.array(utm.to_latlon(np.max(self.topo.x), np.max(self.topo.y),
-                                     self.topo.zone_number,
-                                     northern=self.topo.northern_hemisphere))
-
-        ll = np.array(utm.to_latlon(np.min(self.topo.x), np.min(self.topo.y),
-                                    self.topo.zone_number,
-                                    northern=self.topo.northern_hemisphere))
-
-        buff = 0.1 # buffer of bounding box in degrees
-        ur += buff
-        ll -= buff
-        self.bbox = np.append(np.flipud(ll), np.flipud(ur))
+        # This is placed long, lat on purpose as thats the HRRR class expects
+        self.bbox = np.array([self.dlon[0], self.dlat[0],
+                              self.dlon[1], self.dlat[1]])
 
         self._logger = logging.getLogger(__name__)
 
@@ -84,18 +77,24 @@ class grid():
             raise Exception('Could not resolve dataType')
 
     def model_domain_grid(self):
+        '''
+        Retrieve the bounding box for the gridded data by adding a buffer to
+        the extents of the topo domain.
 
+        Returns:
+            tuple: (dlat, dlon) Domain latitude and longitude extents
+        '''
         dlat = np.zeros((2,))
         dlon = np.zeros_like(dlat)
-        dlat[0], dlon[0] = utm.to_latlon(np.min(self.topo.x),
-                                         np.min(self.topo.y),
-                                         self.topo.zone_number,
-                                         northern=self.topo.northern_hemisphere)
 
-        dlat[1], dlon[1] = utm.to_latlon(np.max(self.topo.x),
-                                         np.max(self.topo.y),
-                                         self.topo.zone_number,
-                                         northern=self.topo.northern_hemisphere)
+        # Convert the UTM extents to lat long extents
+        ur = self.get_latlon(np.max(self.topo.x), np.max(self.topo.y))
+        ll = self.get_latlon(np.min(self.topo.x), np.min(self.topo.y))
+
+        # Put into numpy arrays for convenience later
+        dlat[0], dlon[0] = ll
+        dlat[1], dlon[1] = ur
+
         # add a buffer
         dlat[0] -= self.offset
         dlat[1] += self.offset
@@ -181,9 +180,6 @@ class grid():
         self.precip = pd.DataFrame(data['precip_int'], index=idx, columns=cols)
 
         self._logger.debug('Loading solar')
-        # solar_beam = pd.DataFrame(data['solar_beam'], index=idx, columns=cols)
-        # solar_diffuse = pd.DataFrame(data['solar_diffuse'], index=idx, columns=cols)
-        # solar = solar_beam + solar_diffuse
         solar = pd.DataFrame(data['short_wave'], index=idx, columns=cols)
         self._logger.debug('Calculating cloud factor')
         self.cloud_factor = get_hrrr_cloud(solar, self.metadata, self._logger,
@@ -214,14 +210,11 @@ class grid():
         if mlat.ndim != 2 & mlon.ndim !=2:
             [mlon, mlat] = np.meshgrid(mlon, mlat)
 
-        # get that grid cells in the model domain
-        dlat, dlon = self.model_domain_grid()
-
         # get the values that are in the modeling domain
-        ind = (mlat >= dlat[0]) & \
-            (mlat <= dlat[1]) & \
-            (mlon >= dlon[0]) & \
-            (mlon <= dlon[1])
+        ind = (mlat >= self.dlat[0]) & \
+            (mlat <= self.dlat[1]) & \
+            (mlon >= self.dlon[0]) & \
+            (mlon <= self.dlon[1])
 
         mlat = mlat[ind]
         mlon = mlon[ind]
@@ -254,19 +247,6 @@ class grid():
         time = pd.DatetimeIndex(
             [str(tm.replace(microsecond=0)) for tm in time], tz=self.time_zone
         )
-
-        # subset the times to only those needed
-#         tzinfo = pytz.timezone(self.time_zone)
-#         time = []
-#         for t in tt:
-#             time.append(t.replace(tzinfo=tzinfo))
-#         time = np.array(time)
-
-#         time_ind = (time >= pd.to_datetime(self.start_date)) & \
-#                    (time <= pd.to_datetime(self.end_date))
-#         time = time[time_ind]
-
-#         time_idx = np.where(time_ind)[0]
 
         # GET THE DATA, ONE AT A TIME
         for v in self.variables:
@@ -313,24 +293,17 @@ class grid():
 
         self.wrf_variables = ['GLW', 'T2', 'DWPT', 'UGRD',
                               'VGRD', 'CLDFRA', 'RAINNC']
-#         self.variables = ['thermal','air_temp','dew_point','wind_speed',
-#                             'wind_direction','cloud_factor','precip']
-
-
 
         self._logger.info('Reading data coming from WRF output: {}'.format(
             self.dataConfig['wrf_file']
             ))
         f = nc.Dataset(self.dataConfig['wrf_file'])
 
-        # DETERMINE THE MODEL DOMAIN AREA IN THE GRID
-        dlat, dlon = self.model_domain_grid()
-
         # get the values that are in the modeling domain
-        ind = (f.variables['XLAT'] >= dlat[0]) & \
-            (f.variables['XLAT'] <= dlat[1]) & \
-            (f.variables['XLONG'] >= dlon[0]) & \
-            (f.variables['XLONG'] <= dlon[1])
+        ind = (f.variables['XLAT'] >= self.dlat[0]) & \
+            (f.variables['XLAT'] <= self.dlat[1]) & \
+            (f.variables['XLONG'] >= self.dlon[0]) & \
+            (f.variables['XLONG'] <= self.dlon[1])
 
         mlat = f.variables['XLAT'][:][ind]
         mlon = f.variables['XLONG'][:][ind]
@@ -446,6 +419,23 @@ class grid():
             d = getattr(self, v)
             setattr(self, v, d.tz_convert(tz=self.time_zone))
 
+
+    def get_latlon(self, utm_x, utm_y):
+        '''
+        Convert UTM coords to Latitude and longitude
+
+        Args:
+            utm_x: UTM easting in meters in the same zone/letter as the topo
+            utm_y: UTM Northing in meters in the same zone/letter as the topo
+
+        Returns:
+            tuple: (lat,lon) latitude and longitude conversion from the UTM
+                coordinates
+        '''
+
+        lat, lon = utm.to_latlon(utm_x, utm_y, self.topo.zone_number,
+                                        northern=self.topo.northern_hemisphere)
+        return lat, lon
 
 def apply_utm(s, force_zone_number):
     """
