@@ -47,6 +47,7 @@ class grid():
         self.forecast_flag = forecast_flag
         self.day_hour = day_hour
         self.n_forecast_hours = n_forecast_hours
+        self.topo = topo
 
         # degree offset for a buffer around the model domain
         self.offset = 0.1
@@ -55,20 +56,15 @@ class grid():
         self.variables = ['air_temp', 'vapor_pressure', 'precip', 'wind_speed',
                           'wind_direction', 'cloud_factor', 'thermal']
 
-        # get the bounds of the model so that only the values inside
-        # the model domain are used
-        self.x = topo.x
-        self.y = topo.y
 
-        self.lat = topo.basin_lat
-        self.lon = topo.basin_long
-        self.zone_number = topo.zone_number
-        self.northern = topo.northern_hemisphere
 
-        ur = np.array(utm.to_latlon(np.max(self.x), np.max(self.y),
-                                      self.zone_number, northern=self.northern))
-        ll = np.array(utm.to_latlon(np.min(self.x), np.min(self.y),
-                                      self.zone_number, northern=self.northern))
+        ur = np.array(utm.to_latlon(np.max(self.topo.x), np.max(self.topo.y),
+                                     self.topo.zone_number,
+                                     northern=self.topo.northern_hemisphere))
+
+        ll = np.array(utm.to_latlon(np.min(self.topo.x), np.min(self.topo.y),
+                                    self.topo.zone_number,
+                                    northern=self.topo.northern_hemisphere))
 
         buff = 0.1 # buffer of bounding box in degrees
         ur += buff
@@ -91,13 +87,15 @@ class grid():
 
         dlat = np.zeros((2,))
         dlon = np.zeros_like(dlat)
-        dlat[0], dlon[0] = utm.to_latlon(np.min(self.x), np.min(self.y),
-                                         self.zone_number,
-                                         northern=self.northern)
+        dlat[0], dlon[0] = utm.to_latlon(np.min(self.topo.x),
+                                         np.min(self.topo.y),
+                                         self.topo.zone_number,
+                                         northern=self.topo.northern_hemisphere)
 
-        dlat[1], dlon[1] = utm.to_latlon(np.max(self.x), np.max(self.y),
-                                         self.zone_number,
-                                         northern=self.northern)
+        dlat[1], dlon[1] = utm.to_latlon(np.max(self.topo.x),
+                                         np.max(self.topo.y),
+                                         self.topo.zone_number,
+                                         northern=self.topo.northern_hemisphere)
         # add a buffer
         dlat[0] -= self.offset
         dlat[1] += self.offset
@@ -140,7 +138,7 @@ class grid():
             self.end_date,
             self.bbox,
             output_dir=self.dataConfig['hrrr_directory'],
-            force_zone_number=self.zone_number,
+            force_zone_number=self.topo.zone_number,
             forecast=fcast,
             forecast_flag=self.forecast_flag,
             day_hour=self.day_hour)
@@ -189,7 +187,7 @@ class grid():
         solar = pd.DataFrame(data['short_wave'], index=idx, columns=cols)
         self._logger.debug('Calculating cloud factor')
         self.cloud_factor = get_hrrr_cloud(solar, self.metadata, self._logger,
-                                           self.lat, self.lon)
+                                           self.topo.basin_lat, self.topo.basin_long)
 
     def load_from_netcdf(self):
         """
@@ -244,7 +242,7 @@ class grid():
         metadata['longitude'] = mlon.flatten()
         metadata['elevation'] = mhgt.flatten()
         metadata = metadata.apply(apply_utm,
-                                  args=(self.zone_number,),
+                                  args=(self.topo.zone_number,),
                                   axis=1)
 
         self.metadata = metadata
@@ -353,7 +351,7 @@ class grid():
         metadata['longitude'] = mlon.flatten()
         metadata['elevation'] = mhgt.flatten()
         metadata = metadata.apply(apply_utm,
-                                  args=(self.zone_number,),
+                                  args=(self.topo.zone_number,),
                                   axis=1)
 
         self.metadata = metadata

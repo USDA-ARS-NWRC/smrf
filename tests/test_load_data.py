@@ -18,7 +18,6 @@ from tests.nwrc_check import NWRCCheck
 from tests.smrf_test_case import SMRFTestCase
 import smrf
 from os.path import join, dirname, abspath
-from smrf.data import loadTopo
 import numpy as np
 
 
@@ -310,31 +309,6 @@ class TestLoadGrid(SMRFTestCase):
 
         self.assertIsNone(run_smrf(config))
 
-class TestLoadTopo(unittest.TestCase):
-    @classmethod
-    def setUp(self):
-        base = dirname(smrf.__file__)
-        self.test_dir = abspath(join(base, '../', 'tests'))
-        topo_config = {
-            'filename': join(self.test_dir, 'RME/topo/topo.nc'),
-            'northern_hemisphere':True,
-        }
-
-        self.topo = loadTopo.topo(
-            topo_config,
-            calcInput=False,
-            tempDir= join(self.test_dir, 'RME/output')
-        )
-
-    def test_auto_calc_lat_lon(self):
-        '''
-        Test we calculate the basin lat long correctly
-        '''
-        # Original RME
-        # basin_lon:                     -116.7547
-        # basin_lat:                     43.067
-        self.assertTrue(self.topo.basin_lat == 43.06475372378507)
-        self.assertTrue(self.topo.basin_long == -116.75395420397061)
 
 if __name__ == '__main__':
     unittest.main()
