@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 # A script to create the gold files needed for SMRF
 # Run this script in the main smrf directory, the config

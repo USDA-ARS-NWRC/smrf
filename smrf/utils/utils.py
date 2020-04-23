@@ -27,6 +27,7 @@ from smrf import __core_config__, __version__
 from .gitinfo import __gitPath__, __gitVersion__
 
 
+
 class CheckStation(CheckType):
     """
     Custom check for ensuring our stations are always capitalized
@@ -236,7 +237,7 @@ def backup_input(data, config_obj):
         backup_config_obj.cfg['csv'][k] = fname
 
     # Copy topo files over to backup
-    ignore = ['basin_lon', 'basin_lat', 'type', 'topo_threading']
+    ignore = ['basin_lon', 'basin_lat', 'type', 'gradient_method']
     for s in backup_config_obj.cfg['topo'].keys():
         src = backup_config_obj.cfg['topo'][s]
         # make not a list if lenth is 1

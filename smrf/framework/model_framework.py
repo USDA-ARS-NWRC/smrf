@@ -27,8 +27,8 @@ import logging
 import os
 import shutil
 import sys
-from datetime import datetime, timedelta
-from os.path import abspath, basename, dirname, join
+from datetime import datetime
+from os.path import abspath, dirname, join
 from threading import Thread
 
 import coloredlogs
@@ -36,13 +36,12 @@ import numpy as np
 import pandas as pd
 import pytz
 from inicheck.config import UserConfig
-from inicheck.output import (generate_config, print_config_report,
-                             print_recipe_summary)
+from inicheck.output import generate_config, print_config_report
 from inicheck.tools import check_config, get_user_config
 
-from smrf import __core_config__, __recipes__, data, distribute, output
-from smrf.envphys import radiation
-from smrf.utils import io, queue
+from smrf import data, distribute, output
+from smrf.envphys import radiation, sunang
+from smrf.utils import queue
 from smrf.utils.utils import backup_input, check_station_colocation, getqotw
 
 
@@ -204,24 +203,16 @@ class SMRF():
 
         os.environ['WORKDIR'] = self.temp_dir
 
-        # Get the time section utils
-        self.start_date = pd.to_datetime(self.config['time']['start_date'])
-        self.end_date = pd.to_datetime(self.config['time']['end_date'])
-
-        # Get the timesetps correctly in the time zone
-        d = data.mysql_data.date_range(self.start_date, self.end_date,
-                       timedelta(minutes=int(self.config['time']['time_step'])))
-
-        tzinfo = pytz.timezone(self.config['time']['time_zone'])
-        self.date_time = [di.replace(tzinfo=tzinfo) for di in d]
-        self.time_steps = len(self.date_time)
+        self._setup_date_and_time()
 
         # need to align date time
         if 'date_method_start_decay' in self.config['albedo'].keys():
             self.config['albedo']['date_method_start_decay'] = \
-            self.config['albedo']['date_method_start_decay'].replace(tzinfo=tzinfo)
+                self.config['albedo']['date_method_start_decay'].replace(
+                    tzinfo=self.time_zone)
             self.config['albedo']['date_method_end_decay'] = \
-            self.config['albedo']['date_method_end_decay'].replace(tzinfo=tzinfo)
+                self.config['albedo']['date_method_end_decay'].replace(
+                    tzinfo=self.time_zone)
 
         # if a gridded dataset will be used
         self.gridded = False
@@ -232,11 +223,12 @@ class SMRF():
                 self.forecast_flag = self.config['gridded']['hrrr_forecast_flag']
 
             # hours from start of day
-            self.day_hour = self.start_date - pd.to_datetime(d[0].strftime("%Y%m%d"))
+            self.day_hour = self.start_date - self.date_time[0]
             self.day_hour = int(self.day_hour / np.timedelta64(1, 'h'))
 
-        if ((self.start_date > datetime.now() and not self.gridded) or
-           (self.end_date > datetime.now() and not self.gridded)):
+        now = datetime.now().astimezone(self.time_zone)
+        if ((self.start_date > now and not self.gridded) or
+           (self.end_date > now and not self.gridded)):
             raise ValueError("A date set in the future can only be used with"
                              " WRF generated data!")
 
@@ -246,11 +238,35 @@ class SMRF():
             self._logger.info(getqotw())
 
         # Initialize the distribute dict
-        self._logger.info('Started SMRF --> %s' % datetime.now())
+        self._logger.info('Started SMRF --> %s' % now)
         self._logger.info('Model start --> %s' % self.start_date)
         self._logger.info('Model end --> %s' % self.end_date)
         self._logger.info('Number of time steps --> %i' % self.time_steps)
 
+    def _setup_date_and_time(self):
+        self.time_zone = pytz.timezone(self.config['time']['time_zone'])
+        is_utz = self.time_zone == pytz.UTC
+
+        # Get the time section utils
+        self.start_date = pd.to_datetime(
+            self.config['time']['start_date'], utc=is_utz
+        )
+        self.end_date = pd.to_datetime(
+            self.config['time']['end_date'], utc=is_utz
+        )
+
+        if not is_utz:
+            self.start_date = self.start_date.tz_localize(self.time_zone)
+            self.end_date = self.end_date.tz_localize(self.time_zone)
+
+        # Get the time steps correctly in the time zone
+        self.date_time = pd.date_range(
+            self.start_date,
+            self.end_date,
+            freq="{[time][time_step]}min".format(self.config),
+            tz=self.time_zone
+        ).to_list()
+        self.time_steps = len(self.date_time)
 
     def __enter__(self):
         return self
@@ -380,14 +396,14 @@ class SMRF():
             self.data = data.loadData.wxdata(self.config['csv'],
                                      self.start_date,
                                      self.end_date,
-                                     time_zone=self.config['time']['time_zone'],
+                                     time_zone=self.time_zone,
                                      dataType='csv')
 
         elif 'mysql' in self.config:
             self.data = data.loadData.wxdata(self.config['mysql'],
                                      self.start_date,
                                      self.end_date,
-                                     time_zone=self.config['time']['time_zone'],
+                                     time_zone=self.time_zone,
                                      dataType='mysql')
 
         elif 'gridded' in self.config:
@@ -396,7 +412,7 @@ class SMRF():
                                    self.topo,
                                    self.start_date,
                                    self.end_date,
-                                   time_zone=self.config['time']['time_zone'],
+                                   time_zone=self.time_zone,
                                    dataType=self.config['gridded']['data_type'],
                                    tempDir=self.temp_dir,
                                    forecast_flag=self.forecast_flag,
@@ -536,12 +552,9 @@ class SMRF():
 
             self._logger.info('Distributing time step %s' % t)
             # 0.1 sun angle for time step
-            cosz, azimuth = radiation.sunang(t.astimezone(pytz.utc),
-                                             self.topo.topoConfig['basin_lat'],
-                                             self.topo.topoConfig['basin_lon'],
-                                             zone=0,
-                                             slope=0,
-                                             aspect=0)
+            cosz, azimuth, rad_vec = sunang.sunang(t.astimezone(pytz.utc),
+                                            self.topo.topoConfig['basin_lat'],
+                                            self.topo.topoConfig['basin_lon'])
 
             # 0.2 illumination angle
             illum_ang = None
@@ -701,12 +714,11 @@ class SMRF():
         # Distribute the data
 
         # 0.1 sun angle for time step
-        t.append(Thread(target=radiation.sunang_thread,
+        t.append(Thread(target=sunang.sunang_thread,
                         name='sun_angle',
                         args=(q, self.date_time,
                               self.topo.topoConfig['basin_lat'],
-                              self.topo.topoConfig['basin_lon'],
-                              0, 0, 0)))
+                              self.topo.topoConfig['basin_lon'])))
 
         # 0.2 illumination angle
         t.append(Thread(target=radiation.shade_thread,
