@@ -91,7 +91,6 @@ class SMRFTestCase(unittest.TestCase):
         shutil.rmtree(folder)
 
 
-
 class TestConfigurations(SMRFTestCase):
 
     def test_base_run(self):

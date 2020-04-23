@@ -90,24 +90,23 @@ class wind(image_data.image_data):
 
     variable = 'wind'
 
-
     # these are variables that can be output
     output_variables = {'flatwind': {
-                                  'units': 'm/s',
-                                  'standard_name': 'flatwind_wind_speed',
-                                  'long_name': 'Simulated wind on a flat surface'
-                                  },
-                        'wind_speed': {
-                                  'units': 'm/s',
-                                  'standard_name': 'wind_speed',
-                                  'long_name': 'Wind speed'
-                                  },
-                        'wind_direction': {
-                                  'units': 'degrees',
-                                  'standard_name': 'wind_direction',
-                                  'long_name': 'Wind direction'
-                                  }
-                        }
+        'units': 'm/s',
+        'standard_name': 'flatwind_wind_speed',
+        'long_name': 'Simulated wind on a flat surface'
+    },
+        'wind_speed': {
+        'units': 'm/s',
+        'standard_name': 'wind_speed',
+        'long_name': 'Wind speed'
+    },
+        'wind_direction': {
+        'units': 'degrees',
+        'standard_name': 'wind_direction',
+        'long_name': 'Wind direction'
+    }
+    }
     # these are variables that are operate at the end only and do not need to
     # be written during main distribute loop
     post_process_variables = {}
@@ -134,7 +133,8 @@ class wind(image_data.image_data):
             self.wind_ninja_dxy = self.config['wind_ninja_dxdy']
             self.wind_ninja_pref = self.config['wind_ninja_pref']
             if self.config['wind_ninja_tz'] is not None:
-                self.wind_ninja_tz = pytz.timezone(self.config['wind_ninja_tz'].title())
+                self.wind_ninja_tz = pytz.timezone(
+                    self.config['wind_ninja_tz'].title())
 
             self.start_date = pd.to_datetime(wholeConfig['time']['start_date'])
             self.grid_data = wholeConfig['gridded']['data_type']
@@ -147,7 +147,7 @@ class wind(image_data.image_data):
             self._maxus_file.close()
 
             # Maxus must be the the same size as the topo.
-            topo_nc = nc.Dataset(wholeConfig['topo']['filename'],'r')
+            topo_nc = nc.Dataset(wholeConfig['topo']['filename'], 'r')
             t_shape = topo_nc.variables['dem'].shape
             topo_nc.close()
 
@@ -225,7 +225,7 @@ class wind(image_data.image_data):
                 # set roughness that was used in WindNinja simulation
                 # WindNinja uses 0.01m for grass, 0.43 for shrubs, and 1.0 for forest
                 self.wn_roughness = float(self.config['wind_ninja_roughness']) * \
-                                    np.ones_like(topo.dem)
+                    np.ones_like(topo.dem)
 
                 # get our effective veg surface roughness
                 # to use in log law scaling of WindNinja data
@@ -241,33 +241,35 @@ class wind(image_data.image_data):
 
                 # precalculate scale arrays so we don't do it every timestep
                 self.ln_wind_scale = np.log((self.veg_roughness + self.wind_height) / self.veg_roughness) / \
-                                     np.log((self.wn_roughness + self.wind_height) / self.wn_roughness)
+                    np.log((self.wn_roughness + self.wind_height) /
+                           self.wn_roughness)
 
                 ###### do this first to speedup the interpolation later ####
                 # find vertices and weights to speedup interpolation fro ascii file
                 fmt_d = '%Y%m%d'
                 fp_vel = glob.glob(os.path.join(self.wind_ninja_dir,
-                                      'data{}'.format(self.start_date.strftime(fmt_d)),
-                                      'wind_ninja_data',
-                                      '*_vel.asc'))[0]
+                                                'data{}'.format(
+                                                    self.start_date.strftime(fmt_d)),
+                                                'wind_ninja_data',
+                                                '*_vel.asc'))[0]
 
                 # get wind ninja topo stats
                 ts2 = utils.get_asc_stats(fp_vel)
-                xwn = ts2['x'][:]
-                ywn = ts2['y'][:]
+                self.windninja_x = ts2['x'][:]
+                self.windninja_y = ts2['y'][:]
 
-                XW, YW = np.meshgrid(xwn, ywn)
-                xwint = XW.flatten()
-                ywint = YW.flatten()
+                XW, YW = np.meshgrid(self.windninja_x, self.windninja_y)
+                self.wn_mx = XW.flatten()
+                self.wn_my = YW.flatten()
 
-                xy=np.zeros([XW.shape[0]*XW.shape[1],2])
-                xy[:,1]=ywint
-                xy[:,0]=xwint
-                uv=np.zeros([self.X.shape[0]*self.X.shape[1],2])
-                uv[:,1]=self.Y.flatten()
-                uv[:,0]=self.X.flatten()
+                xy = np.zeros([XW.shape[0] * XW.shape[1], 2])
+                xy[:, 1] = self.wn_my
+                xy[:, 0] = self.wn_mx
+                uv = np.zeros([self.X.shape[0] * self.X.shape[1], 2])
+                uv[:, 1] = self.Y.flatten()
+                uv[:, 0] = self.X.flatten()
 
-                self.vtx, self.wts = utils.interp_weights(xy, uv,d=2)
+                self.vtx, self.wts = utils.interp_weights(xy, uv, d=2)
                 ###### end do this first to speedup the interpolation later ####
 
         if not self.distribute_drifts:
@@ -373,8 +375,8 @@ class wind(image_data.image_data):
             queue['wind_speed'].put([t, self.wind_speed])
             queue['wind_direction'].put([t, self.wind_direction])
             queue['flatwind'].put([t, self.flatwind])
-            queue['cellmaxus'].put([t,self.cellmaxus])
-            queue['dir_round_cell'].put([t,self.dir_round_cell])
+            queue['cellmaxus'].put([t, self.cellmaxus])
+            queue['dir_round_cell'].put([t, self.dir_round_cell])
 
     def simulateWind(self, data_speed):
         """
@@ -395,7 +397,8 @@ class wind(image_data.image_data):
         az[az < 0] = az[az < 0] + 360
 
         dir_round_cell = np.ceil((az - self.nstep/2) / self.nstep) * self.nstep
-        dir_round_cell[dir_round_cell < 0] = dir_round_cell[dir_round_cell < 0] + 360
+        dir_round_cell[dir_round_cell <
+                       0] = dir_round_cell[dir_round_cell < 0] + 360
         dir_round_cell[dir_round_cell == -0] = 0
         dir_round_cell[dir_round_cell == 360] = 0
 
@@ -411,7 +414,7 @@ class wind(image_data.image_data):
 
         # correct for veg
         dynamic_mask = np.ones(cellmaxus.shape)
-        for k,v in self.veg.items():
+        for k, v in self.veg.items():
             # Adjust veg types that were specified by the user
             if k != 'default':
                 ind = self.veg_type == int(k)
@@ -582,17 +585,19 @@ class wind(image_data.image_data):
                               'data{}'.format(t.strftime(fmt_d)),
                               'wind_ninja_data',
                               '{}_{}_{:d}m_vel.asc'.format(self.wind_ninja_pref,
-                                                           t_file.strftime(fmt_wn),
+                                                           t_file.strftime(
+                                                               fmt_wn),
                                                            self.wind_ninja_dxy))
 
         # make sure files exist
         if not os.path.isfile(fp_vel):
-            raise ValueError('{} in windninja convert module does not exist!'.format(fp_vel))
+            raise ValueError(
+                '{} in windninja convert module does not exist!'.format(fp_vel))
 
         data_vel = np.loadtxt(fp_vel, skiprows=6)
         data_vel_int = data_vel.flatten()
 
-        # # interpolate to the SMRF grid from the WindNinja grid
+        # interpolate to the SMRF grid from the WindNinja grid
         g_vel = utils.grid_interpolate(data_vel_int, self.vtx,
                                        self.wts, self.X.shape)
 
@@ -607,11 +612,13 @@ class wind(image_data.image_data):
                                   'data{}'.format(t.strftime(fmt_d)),
                                   'wind_ninja_data',
                                   '{}_{}_{:d}m_ang.asc'.format(self.wind_ninja_pref,
-                                                               t_file.strftime(fmt_wn),
+                                                               t_file.strftime(
+                                                                   fmt_wn),
                                                                self.wind_ninja_dxy))
 
             if not os.path.isfile(fp_ang):
-                raise ValueError('{} in windninja convert module does not exist!'.format(fp_ang))
+                raise ValueError(
+                    '{} in windninja convert module does not exist!'.format(fp_ang))
 
             data_ang = np.loadtxt(fp_ang, skiprows=6)
             data_ang_int = data_ang.flatten()
