@@ -16,6 +16,9 @@ from inicheck.tools import cast_all_variables
 from smrf.framework.model_framework import can_i_run_smrf, run_smrf
 from tests.nwrc_check import NWRCCheck
 from tests.smrf_test_case import SMRFTestCase
+import smrf
+from os.path import join, dirname, abspath
+import numpy as np
 
 
 @unittest.skipUnless(
@@ -146,8 +149,7 @@ class TestLoadGrid(SMRFTestCase):
 
         adj_config = {'gridded': {'data_type': 'wrf',
                                   'wrf_file': './RME/gridded/WRF_test.nc',
-                                  'zone_number': '11',
-                                  'zone_letter': 'N'},
+                                  'northern_hemisphere':'True'},
                       'system': {'threading': 'False',
                                  'log_file': './output/log.txt'},
                       'precip': {'station_adjust_for_undercatch': 'False'},
@@ -181,8 +183,7 @@ class TestLoadGrid(SMRFTestCase):
 
         hrrr_grid = {'data_type': 'hrrr_grib',
                      'hrrr_directory': './RME/gridded/hrrr_test/',
-                     'zone_number': '11',
-                     'zone_letter': 'N'}
+                     'northern_hemisphere':'True'}
         config.raw_cfg['gridded'] = hrrr_grid
         config.raw_cfg['system']['threading'] = 'False'
 
@@ -222,8 +223,7 @@ class TestLoadGrid(SMRFTestCase):
 
         hrrr_grid = {'data_type': 'hrrr_grib',
                      'hrrr_directory': './RME/gridded/hrrr_test/',
-                     'zone_number': 11,
-                     'zone_letter': 'N'}
+                     'northern_hemisphere':'True'}
         config.raw_cfg['gridded'] = hrrr_grid
         config.raw_cfg['system']['threading'] = 'False'
         config.raw_cfg['system']['log_file'] = './output/log.txt'
@@ -269,8 +269,7 @@ class TestLoadGrid(SMRFTestCase):
 
         generic_grid = {'data_type': 'netcdf',
                         'netcdf_file': './RME/gridded/netcdf_test.nc',
-                        'zone_number': '11',
-                        'zone_letter': 'N',
+                        'northern_hemisphere':'True',
                         'air_temp': 'air_temp',
                         'vapor_pressure': 'vapor_pressure',
                         'precip': 'precip',
