@@ -92,21 +92,22 @@ class Wind(image_data.image_data):
     variable = 'wind'
 
     # these are variables that can be output
-    output_variables = {'flatwind': {
-        'units': 'm/s',
-        'standard_name': 'flatwind_wind_speed',
-        'long_name': 'Simulated wind on a flat surface'
-    },
+    output_variables = {
+        'flatwind': {
+            'units': 'm/s',
+            'standard_name': 'flatwind_wind_speed',
+            'long_name': 'Simulated wind on a flat surface'
+        },
         'wind_speed': {
-        'units': 'm/s',
-        'standard_name': 'wind_speed',
-        'long_name': 'Wind speed'
-    },
+            'units': 'm/s',
+            'standard_name': 'wind_speed',
+            'long_name': 'Wind speed'
+        },
         'wind_direction': {
-        'units': 'degrees',
-        'standard_name': 'wind_direction',
-        'long_name': 'Wind direction'
-    }
+            'units': 'degrees',
+            'standard_name': 'wind_direction',
+            'long_name': 'Wind direction'
+        }
     }
     # these are variables that are operate at the end only and do not need to
     # be written during main distribute loop
@@ -121,10 +122,6 @@ class Wind(image_data.image_data):
         # check and assign the configuration
         self.smrf_config = config
         self.getConfig(config['wind'])
-
-        # if (tempDir is None) | (tempDir == 'WORKDIR'):
-        #     tempDir = os.environ['WORKDIR']
-        # self.tempDir = tempDir
 
         distribute_drifts = False
         if self.smrf_config["precip"]["precip_rescaling_model"] == "winstral":
@@ -168,69 +165,15 @@ class Wind(image_data.image_data):
 
         self._logger.debug('Initializing distribute.wind')
 
-        if not self.gridded:
+        if not self.gridded or self.config['wind_ninja_dir'] is not None:
             self.wind_model.initialize(topo, data)
 
         else:
-            self.flatwind = None
-
-            if self.config['wind_ninja_dir'] is not None:
-                self.initialize_wind_ninja(topo)
-
-    def initialize_wind_ninja(self, topo):
-
-        # WindNinja output height in meters
-        self.wind_height = float(self.config['wind_ninja_height'])
-        # set roughness that was used in WindNinja simulation
-        # WindNinja uses 0.01m for grass, 0.43 for shrubs, and 1.0 for forest
-        self.wn_roughness = float(self.config['wind_ninja_roughness']) * \
-            np.ones_like(topo.dem)
-
-        # get our effective veg surface roughness
-        # to use in log law scaling of WindNinja data
-        # using the relationship in
-        # https://www.jstage.jst.go.jp/article/jmsj1965/53/1/53_1_96/_pdf
-        self.veg_roughness = topo.veg_height / 7.39
-        # make sure roughness stays reasonable using bounds from
-        # http://www.iawe.org/Proceedings/11ACWE/11ACWE-Cataldo3.pdf
-
-        self.veg_roughness[self.veg_roughness < 0.01] = 0.01
-        self.veg_roughness[np.isnan(self.veg_roughness)] = 0.01
-        self.veg_roughness[self.veg_roughness > 1.6] = 1.6
-
-        # precalculate scale arrays so we don't do it every timestep
-        self.ln_wind_scale = np.log((self.veg_roughness + self.wind_height) / self.veg_roughness) / \
-            np.log((self.wn_roughness + self.wind_height) / self.wn_roughness)
-
-        ###### do this first to speedup the interpolation later ####
-        # find vertices and weights to speedup interpolation fro ascii file
-        fmt_d = '%Y%m%d'
-        fp_vel = glob.glob(os.path.join(self.wind_ninja_dir,
-                                        'data{}'.format(
-                                            self.start_date.strftime(fmt_d)),
-                                        'wind_ninja_data',
-                                        '*{}m_vel.asc'.format(self.wind_ninja_dxy)))[0]
-
-        # get wind ninja topo stats
-        ts2 = utils.get_asc_stats(fp_vel)
-        self.windninja_x = ts2['x'][:]
-        self.windninja_y = ts2['y'][:]
-
-        XW, YW = np.meshgrid(self.windninja_x, self.windninja_y)
-        xwint = XW.flatten()
-        ywint = YW.flatten()
-        self.wn_mx = xwint
-        self.wn_my = ywint
-
-        xy = np.zeros([XW.shape[0]*XW.shape[1], 2])
-        xy[:, 1] = ywint
-        xy[:, 0] = xwint
-        uv = np.zeros([self.X.shape[0]*self.X.shape[1], 2])
-        uv[:, 1] = self.Y.flatten()
-        uv[:, 0] = self.X.flatten()
-
-        self.vtx, self.wts = utils.interp_weights(xy, uv, d=2)
-        ###### end do this first to speedup the interpolation later ####
+            self._initialize(topo, data.metadata)
+            self.wind_model = self
+            self.wind_model.flatwind = None
+            self.wind_model.cellmaxus = None
+            self.wind_model.dir_round_cell = None
 
     def distribute(self, data_speed, data_direction, t):
         """
@@ -262,39 +205,36 @@ class Wind(image_data.image_data):
         data_speed = data_speed[self.wind_model.stations]
         data_direction = data_direction[self.wind_model.stations]
 
-        if self.gridded:
-            # check if running with windninja
-            if self.wind_ninja_dir is not None:
-                wind_speed, wind_direction = self.convert_wind_ninja(t)
-                self.wind_speed = wind_speed
-                self.wind_direction = wind_direction
+        if self.gridded and self.wind_ninja_dir is None:
 
-            else:
-                self._distribute(data_speed, other_attribute='wind_speed')
+            self._distribute(data_speed, other_attribute='wind_speed')
 
-                # wind direction components at the station
-                self.u_direction = np.sin(data_direction * np.pi/180)    # u
-                self.v_direction = np.cos(data_direction * np.pi/180)    # v
+            # wind direction components at the station
+            self.u_direction = np.sin(data_direction * np.pi/180)    # u
+            self.v_direction = np.cos(data_direction * np.pi/180)    # v
 
-                # distribute u_direction and v_direction
-                self._distribute(self.u_direction,
-                                 other_attribute='u_direction_distributed')
-                self._distribute(self.v_direction,
-                                 other_attribute='v_direction_distributed')
+            # distribute u_direction and v_direction
+            self._distribute(self.u_direction,
+                             other_attribute='u_direction_distributed')
+            self._distribute(self.v_direction,
+                             other_attribute='v_direction_distributed')
 
-                # combine u and v to azimuth
-                az = np.arctan2(self.u_direction_distributed,
-                                self.v_direction_distributed)*180/np.pi
-                az[az < 0] = az[az < 0] + 360
-                self.wind_direction = az
-
-            # set min and max
-            self.wind_speed = utils.set_min_max(self.wind_speed,
-                                                self.min,
-                                                self.max)
+            # combine u and v to azimuth
+            az = np.arctan2(self.u_direction_distributed,
+                            self.v_direction_distributed)*180/np.pi
+            az[az < 0] = az[az < 0] + 360
+            self.wind_direction = az
 
         else:
             self.wind_model.distribute(data_speed, data_direction)
+
+        for v in self.output_variables.keys():
+            setattr(self, v, getattr(self.wind_model, v))
+
+        # set min and max
+        self.wind_speed = utils.set_min_max(self.wind_speed,
+                                            self.min,
+                                            self.max)
 
     def distribute_thread(self, queue, data_speed, data_direction):
         """

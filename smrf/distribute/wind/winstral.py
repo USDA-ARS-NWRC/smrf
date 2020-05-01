@@ -66,6 +66,12 @@ class WinstralWindModel(image_data.image_data):
         self.veg = v
 
     def initialize(self, topo, data):
+        """Initialize the model with data
+
+        Arguments:
+            topo {topo class} -- Topo class
+            data {data object} -- SMRF data object
+        """
 
         self._logger.debug('Initializing the WinstralWindModel')
 
@@ -99,6 +105,12 @@ class WinstralWindModel(image_data.image_data):
             self.cellmaxus = None
 
     def distribute(self, data_speed, data_direction):
+        """Distribute the wind for the model
+
+        Arguments:
+            data_speed {DataFrame} -- wind speed data frame
+            data_direction {DataFrame} -- wind direction data frame
+        """
 
         # calculate the maxus at each site
         self.stationMaxus(data_speed, data_direction)

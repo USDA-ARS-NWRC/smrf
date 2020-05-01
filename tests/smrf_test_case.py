@@ -109,6 +109,7 @@ class SMRFTestCase(unittest.TestCase):
         if os.path.exists(folder):
             shutil.rmtree(folder)
 
+
 class SMRFTestCaseLakes(unittest.TestCase):
     """
     The base test case for SMRF that will load in the configuration file and store as
@@ -127,7 +128,7 @@ class SMRFTestCaseLakes(unittest.TestCase):
         cls.config_file = os.path.join(cls.test_dir, 'config.ini')
 
         # read in the base configuration
-        cls.base_config = get_user_config(cls.config_file, modules = 'smrf')
+        cls.base_config = get_user_config(cls.config_file, modules='smrf')
 
 #    def tearDown(self):
 #        """

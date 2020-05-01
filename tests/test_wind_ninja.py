@@ -1,8 +1,6 @@
 from datetime import timedelta
 import numpy as np
-
 import pytz
-from inicheck.tools import cast_all_variables, get_user_config
 
 from smrf.distribute import wind
 from smrf.data.mysql_data import date_range
