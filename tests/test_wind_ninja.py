@@ -8,7 +8,7 @@ from smrf.distribute import wind
 from smrf.data.mysql_data import date_range
 from smrf.data import loadTopo
 
-from tests.test_configurations import SMRFTestCaseLakes
+from tests.smrf_test_case import SMRFTestCaseLakes
 
 
 class TestWind(SMRFTestCaseLakes):
@@ -33,7 +33,7 @@ class TestWind(SMRFTestCaseLakes):
         date_time = [di.replace(tzinfo=tzinfo) for di in d]
 
         wn = wind.wind(config['wind'],
-                       config['precip']['distribute_drifts'],
+                       False,
                        config)
 
         # meshgrid points

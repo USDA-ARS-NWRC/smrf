@@ -146,7 +146,10 @@ class grid():
         # correct for the timezone
         for key in data.keys():
             data[key] = data[key].apply(pd.to_numeric)
-            data[key] = data[key].tz_localize(tz=self.time_zone)
+            # if data[key].index.tzinfo is None:
+            #     data[key] = data[key].tz_localize(tz=self.time_zone)
+            # else:
+            #     data[key] = data[key].tz_convert(tz=self.time_zone)
 
         self.metadata = metadata
 

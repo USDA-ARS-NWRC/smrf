@@ -111,3 +111,7 @@ examples/* *.nc
 examples/reynolds_mountain_east/output/*
 examples/simple_hill/* *.csv
 */tmp/*
+
+# notebooks
+.ipynb_checkpoints
+*.ipynb
