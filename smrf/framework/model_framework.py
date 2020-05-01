@@ -553,8 +553,8 @@ class SMRF():
             self._logger.info('Distributing time step %s' % t)
             # 0.1 sun angle for time step
             cosz, azimuth, rad_vec = sunang.sunang(t.astimezone(pytz.utc),
-                                            self.topo.topoConfig['basin_lat'],
-                                            self.topo.topoConfig['basin_lon'])
+                                            self.topo.basin_lat,
+                                            self.topo.basin_long)
 
             # 0.2 illumination angle
             illum_ang = None
@@ -717,8 +717,8 @@ class SMRF():
         t.append(Thread(target=sunang.sunang_thread,
                         name='sun_angle',
                         args=(q, self.date_time,
-                              self.topo.topoConfig['basin_lat'],
-                              self.topo.topoConfig['basin_lon'])))
+                              self.topo.basin_lat,
+                              self.topo.basin_long)))
 
         # 0.2 illumination angle
         t.append(Thread(target=radiation.shade_thread,
