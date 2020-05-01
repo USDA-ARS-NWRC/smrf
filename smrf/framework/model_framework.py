@@ -335,15 +335,7 @@ class SMRF():
                                          self.config['precip']['precip_temp_method'])
 
         # 3. Wind
-        distribute_drifts = False
-        if self.config["precip"]["precip_rescaling_model"] == "winstral":
-            distribute_drifts = True
-
-        self.distribute['wind'] = \
-            distribute.wind.wind(self.config['wind'],
-                                 distribute_drifts,
-                                 self.config,
-                                 tempDir=self.temp_dir)
+        self.distribute['wind'] = distribute.wind.Wind(self.config)
 
         # 4. Precipitation
         self.distribute['precip'] = \

@@ -32,9 +32,7 @@ class TestWind(SMRFTestCaseLakes):
         tzinfo = pytz.timezone(config['time']['time_zone'])
         date_time = [di.replace(tzinfo=tzinfo) for di in d]
 
-        wn = wind.wind(config['wind'],
-                       False,
-                       config)
+        wn = wind.Wind(config)
 
         # meshgrid points
         wn.X = topo.X

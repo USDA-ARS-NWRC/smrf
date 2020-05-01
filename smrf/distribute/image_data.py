@@ -125,7 +125,7 @@ class image_data():
             self.stations = metadata.index.values
         self.metadata = metadata
 
-        #Old DB used X and Y, New DB uses utm_x, utm_y
+        # Old DB used X and Y, New DB uses utm_x, utm_y
         try:
             self.mx = metadata.utm_x.values
             self.my = metadata.utm_y.values
@@ -144,24 +144,24 @@ class image_data():
             elif self.config['distribution'] == 'dk':
                 # detrended kriging
                 self.dk = dk.DK(self.mx, self.my, self.mz, topo.X, topo.Y,
-                                                                   topo.dem,
-                                                                   self.config)
+                                topo.dem,
+                                self.config)
 
             elif self.config['distribution'] == 'grid':
                 # linear interpolation between points
                 self.grid = grid.GRID(self.config, self.mx, self.my, topo.X,
-                                                                topo.Y,
-                                                                mz=self.mz,
-                                                                GridZ=topo.dem,
-                                                                mask=topo.mask,
-                                                                metadata=metadata)
+                                      topo.Y,
+                                      mz=self.mz,
+                                      GridZ=topo.dem,
+                                      mask=topo.mask,
+                                      metadata=metadata)
 
             elif self.config['distribution'] == 'kriging':
                 # generic kriging
                 self.kriging = kriging.KRIGE(self.mx, self.my, self.mz, topo.X,
-                                                                        topo.Y,
-                                                                        topo.dem,
-                                                                        self.config)
+                                             topo.Y,
+                                             topo.dem,
+                                             self.config)
 
             else:
                 raise Exception("Could not determine the distribution method for "
