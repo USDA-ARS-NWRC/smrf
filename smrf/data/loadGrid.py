@@ -6,15 +6,10 @@ import numpy as np
 import pandas as pd
 import pytz
 import utm
+from weather_forecast_retrieval import hrrr
 
 from smrf.envphys import phys
 from smrf.envphys.radiation import get_hrrr_cloud
-
-try:
-    from weather_forecast_retrieval import hrrr
-except:
-    pass
-
 
 
 class grid():
@@ -146,10 +141,7 @@ class grid():
         # correct for the timezone
         for key in data.keys():
             data[key] = data[key].apply(pd.to_numeric)
-            # if data[key].index.tzinfo is None:
-            #     data[key] = data[key].tz_localize(tz=self.time_zone)
-            # else:
-            #     data[key] = data[key].tz_convert(tz=self.time_zone)
+            data[key] = data[key].tz_localize(tz=self.time_zone)
 
         self.metadata = metadata
 

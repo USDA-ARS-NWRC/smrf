@@ -2,7 +2,7 @@ coloredlogs==6.1
 Cython==0.28.4
 inicheck>=0.7.0,<0.8.0
 mysql-connector-python-rf==2.2.2
-netCDF4==1.2.9
+netCDF4>=1.2.9
 numpy>=1.14.0
 pandas>=1.0.0
 pytz==2017.3
@@ -10,4 +10,4 @@ scipy>=1.0.0
 utm==0.4.0
 git+https://github.com/USDA-ARS-NWRC/PyKrige.git@master
 spatialnc>=0.2.12,<0.3.0
-weather-forecast-retrieval
+weather-forecast-retrieval>=0.6.0
