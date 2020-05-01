@@ -31,18 +31,13 @@ class TestWind(SMRFTestCaseLakes):
         date_time = [di.replace(tzinfo=tzinfo) for di in d]
 
         wn = wind.Wind(config)
-
-        # meshgrid points
-        wn.X = topo.X
-        wn.Y = topo.Y
-
-        wn.initialize_wind_ninja(topo)
+        wn.wind_model.initialize(topo, None)
 
         # The x values are ascending
-        self.assertTrue(np.all(np.diff(wn.windninja_x) > 0))
+        self.assertTrue(np.all(np.diff(wn.wind_model.windninja_x) > 0))
 
         # The y values are descnding
-        self.assertTrue(np.all(np.diff(wn.windninja_y) < 0))
+        self.assertTrue(np.all(np.diff(wn.wind_model.windninja_y) < 0))
 
         # run wind ninja but not comparing to anything
-        g_vel, g_ang = wn.convert_wind_ninja(date_time[0])
+        g_vel, g_ang = wn.wind_model.convert_wind_ninja(date_time[0])

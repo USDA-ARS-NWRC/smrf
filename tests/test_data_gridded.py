@@ -50,6 +50,9 @@ class TestLoadGrid(SMRFTestCase):
             'precip': {
                 'station_adjust_for_undercatch': 'False'
             },
+            'wind': {
+                'wind_model': 'interp'
+            },
             'thermal': {
                 'correct_cloud': 'False',
                 'correct_veg': 'True'
@@ -111,6 +114,9 @@ class TestLoadGrid(SMRFTestCase):
                 'grid_local_n': 25,
                 'precip_temp_method': 'dew_point'
             },
+            'wind': {
+                'wind_model': 'interp'
+            },
             'thermal': {
                 'correct_cloud': True,
                 'correct_veg': True
@@ -146,15 +152,17 @@ class TestLoadGrid(SMRFTestCase):
         config = deepcopy(self.base_config)
         del config.raw_cfg['csv']
 
-        generic_grid = {'data_type': 'netcdf',
-                        'netcdf_file': './RME/gridded/netcdf_test.nc',
-                        'air_temp': 'air_temp',
-                        'vapor_pressure': 'vapor_pressure',
-                        'precip': 'precip',
-                        'wind_speed': 'wind_speed',
-                        'wind_direction': 'wind_direction',
-                        'thermal': 'thermal',
-                        'cloud_factor': 'cloud_factor'}
+        generic_grid = {
+            'data_type': 'netcdf',
+            'netcdf_file': './RME/gridded/netcdf_test.nc',
+            'air_temp': 'air_temp',
+            'vapor_pressure': 'vapor_pressure',
+            'precip': 'precip',
+            'wind_speed': 'wind_speed',
+            'wind_direction': 'wind_direction',
+            'thermal': 'thermal',
+            'cloud_factor': 'cloud_factor'
+        }
         config.raw_cfg['gridded'] = generic_grid
         config.raw_cfg['system']['time_out'] = '25'
         config.raw_cfg['system']['queue_max_values'] = '2'
@@ -168,6 +176,8 @@ class TestLoadGrid(SMRFTestCase):
 
         config.raw_cfg['thermal']['correct_cloud'] = 'False'
         config.raw_cfg['thermal']['correct_veg'] = 'True'
+
+        config.raw_cfg['wind']['wind_model'] = 'interp'
 
         # fix the time to that of the WRF_test.nc
         config.raw_cfg['time']['start_date'] = '2015-03-03 00:00'

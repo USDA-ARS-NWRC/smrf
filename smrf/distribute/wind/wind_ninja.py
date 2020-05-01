@@ -2,6 +2,7 @@ import logging
 import glob
 import os
 
+import pytz
 import numpy as np
 import pandas as pd
 
@@ -27,20 +28,35 @@ class WindNinjaModel(image_data.image_data):
         image_data.image_data.__init__(self, self.variable)
 
         self._logger = logging.getLogger(__name__)
+        self._logger.debug('Creating the WindNinjaModel')
 
         self.smrf_config = smrf_config
         self.getConfig(smrf_config['wind'])
         self.distribute_drifts = distribute_drifts
 
-        self._logger.debug('Creating the WindNinjaModel')
+        # wind ninja parameters
+        self.wind_ninja_dir = self.config['wind_ninja_dir']
+        self.wind_ninja_dxy = self.config['wind_ninja_dxdy']
+        self.wind_ninja_pref = self.config['wind_ninja_pref']
+        if self.config['wind_ninja_tz'] is not None:
+            self.wind_ninja_tz = pytz.timezone(
+                self.config['wind_ninja_tz'].title())
 
-    def initialize(self, topo, data):
+        self.start_date = pd.to_datetime(
+            self.smrf_config['time']['start_date'])
+        self.grid_data = self.smrf_config['gridded']['data_type']
+
+    def initialize(self, topo, data=None):
         """Initialize the model with data
 
         Arguments:
             topo {topo class} -- Topo class
-            data {data object} -- SMRF data object
+            data {None} -- Not used but needs to be there
         """
+
+        # meshgrid points
+        self.X = topo.X
+        self.Y = topo.Y
 
         # WindNinja output height in meters
         self.wind_height = float(self.config['wind_ninja_height'])
@@ -105,3 +121,77 @@ class WindNinjaModel(image_data.image_data):
         wind_speed, wind_direction = self.convert_wind_ninja(t)
         self.wind_speed = wind_speed
         self.wind_direction = wind_direction
+
+    def convert_wind_ninja(self, t):
+        """
+        Convert the WindNinja ascii grids back to the SMRF grids and into the
+        SMRF data streamself.
+
+        Args:
+            t:              datetime of timestep
+
+        Returns:
+            ws: wind speed numpy array
+            wd: wind direction numpy array
+
+        """
+        # fmt_wn = '%Y-%m-%d_%H%M'
+        fmt_wn = '%m-%d-%Y_%H%M'
+        fmt_d = '%Y%m%d'
+
+        # get the ascii files that need converted
+        # file example tuol_09-20-2018_1900_200m_vel.prj
+        # find timestamp of WindNinja file
+        t_file = t.astimezone(self.wind_ninja_tz)
+
+        fp_vel = os.path.join(self.wind_ninja_dir,
+                              'data{}'.format(t.strftime(fmt_d)),
+                              'wind_ninja_data',
+                              '{}_{}_{:d}m_vel.asc'.format(self.wind_ninja_pref,
+                                                           t_file.strftime(
+                                                               fmt_wn),
+                                                           self.wind_ninja_dxy))
+
+        # make sure files exist
+        if not os.path.isfile(fp_vel):
+            raise ValueError(
+                '{} in windninja convert module does not exist!'.format(fp_vel))
+
+        data_vel = np.loadtxt(fp_vel, skiprows=6)
+        data_vel_int = data_vel.flatten()
+
+        # interpolate to the SMRF grid from the WindNinja grid
+        g_vel = utils.grid_interpolate(data_vel_int, self.vtx,
+                                       self.wts, self.X.shape)
+
+        # flip because it comes out upsidedown
+        g_vel = np.flipud(g_vel)
+        # log law scale
+        g_vel = g_vel * self.ln_wind_scale
+
+        # Don't get angle if not distributing drifts
+        if self.distribute_drifts:
+            fp_ang = os.path.join(self.wind_ninja_dir,
+                                  'data{}'.format(t.strftime(fmt_d)),
+                                  'wind_ninja_data',
+                                  '{}_{}_{:d}m_ang.asc'.format(self.wind_ninja_pref,
+                                                               t_file.strftime(
+                                                                   fmt_wn),
+                                                               self.wind_ninja_dxy))
+
+            if not os.path.isfile(fp_ang):
+                raise ValueError(
+                    '{} in windninja convert module does not exist!'.format(fp_ang))
+
+            data_ang = np.loadtxt(fp_ang, skiprows=6)
+            data_ang_int = data_ang.flatten()
+
+            g_ang = utils.grid_interpolate(data_ang_int, self.vtx,
+                                           self.wts, self.X.shape)
+
+            g_ang = np.flipud(g_ang)
+
+        else:
+            g_ang = None
+
+        return g_vel, g_ang

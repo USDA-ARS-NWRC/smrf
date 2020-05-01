@@ -11,6 +11,7 @@ import pytz
 from smrf.distribute import image_data
 from smrf.utils import utils
 from smrf.distribute.wind.winstral import WinstralWindModel
+from smrf.distribute.wind.wind_ninja import WindNinjaModel
 
 
 class Wind(image_data.image_data):
@@ -127,23 +128,18 @@ class Wind(image_data.image_data):
         if self.smrf_config["precip"]["precip_rescaling_model"] == "winstral":
             distribute_drifts = True
 
-        if self.config['distribution'] == 'grid':
-            self.gridded = True
-            self.distribute_drifts = False
+        if self.config['wind_model'] == 'interp':
+            # Straight interpolation of the wind
+            self.wind_model = self
+            self.wind_model.flatwind = None
+            self.wind_model.cellmaxus = None
+            self.wind_model.dir_round_cell = None
 
-            # wind ninja parameters
-            self.wind_ninja_dir = self.config['wind_ninja_dir']
-            self.wind_ninja_dxy = self.config['wind_ninja_dxdy']
-            self.wind_ninja_pref = self.config['wind_ninja_pref']
-            if self.config['wind_ninja_tz'] is not None:
-                self.wind_ninja_tz = pytz.timezone(
-                    self.config['wind_ninja_tz'].title())
+        elif self.config['wind_model'] == 'wind_ninja':
+            self.wind_model = WindNinjaModel(
+                self.smrf_config, distribute_drifts)
 
-            self.start_date = pd.to_datetime(
-                self.smrf_config['time']['start_date'])
-            self.grid_data = self.smrf_config['gridded']['data_type']
-
-        else:
+        elif self.config['wind_model'] == 'winstral':
             self.wind_model = WinstralWindModel(
                 self.smrf_config, distribute_drifts)
 
@@ -165,15 +161,10 @@ class Wind(image_data.image_data):
 
         self._logger.debug('Initializing distribute.wind')
 
-        if not self.gridded or self.config['wind_ninja_dir'] is not None:
-            self.wind_model.initialize(topo, data)
-
+        if self.config['wind_model'] == 'interp':
+            self.wind_model._initialize(topo, data.metadata)
         else:
-            self._initialize(topo, data.metadata)
-            self.wind_model = self
-            self.wind_model.flatwind = None
-            self.wind_model.cellmaxus = None
-            self.wind_model.dir_round_cell = None
+            self.wind_model.initialize(topo, data)
 
     def distribute(self, data_speed, data_direction, t):
         """
@@ -205,7 +196,7 @@ class Wind(image_data.image_data):
         data_speed = data_speed[self.wind_model.stations]
         data_direction = data_direction[self.wind_model.stations]
 
-        if self.gridded and self.wind_ninja_dir is None:
+        if self.config['wind_model'] == 'interp':
 
             self._distribute(data_speed, other_attribute='wind_speed')
 
@@ -233,8 +224,8 @@ class Wind(image_data.image_data):
 
         # set min and max
         self.wind_speed = utils.set_min_max(self.wind_speed,
-                                            self.min,
-                                            self.max)
+                                            self.wind_model.min,
+                                            self.wind_model.max)
 
     def distribute_thread(self, queue, data_speed, data_direction):
         """
@@ -258,77 +249,3 @@ class Wind(image_data.image_data):
             queue['flatwind'].put([t, self.wind_model.flatwind])
             queue['cellmaxus'].put([t, self.wind_model.cellmaxus])
             queue['dir_round_cell'].put([t, self.wind_model.dir_round_cell])
-
-    def convert_wind_ninja(self, t):
-        """
-        Convert the WindNinja ascii grids back to the SMRF grids and into the
-        SMRF data streamself.
-
-        Args:
-            t:              datetime of timestep
-
-        Returns:
-            ws: wind speed numpy array
-            wd: wind direction numpy array
-
-        """
-        # fmt_wn = '%Y-%m-%d_%H%M'
-        fmt_wn = '%m-%d-%Y_%H%M'
-        fmt_d = '%Y%m%d'
-
-        # get the ascii files that need converted
-        # file example tuol_09-20-2018_1900_200m_vel.prj
-        # find timestamp of WindNinja file
-        t_file = t.astimezone(self.wind_ninja_tz)
-
-        fp_vel = os.path.join(self.wind_ninja_dir,
-                              'data{}'.format(t.strftime(fmt_d)),
-                              'wind_ninja_data',
-                              '{}_{}_{:d}m_vel.asc'.format(self.wind_ninja_pref,
-                                                           t_file.strftime(
-                                                               fmt_wn),
-                                                           self.wind_ninja_dxy))
-
-        # make sure files exist
-        if not os.path.isfile(fp_vel):
-            raise ValueError(
-                '{} in windninja convert module does not exist!'.format(fp_vel))
-
-        data_vel = np.loadtxt(fp_vel, skiprows=6)
-        data_vel_int = data_vel.flatten()
-
-        # interpolate to the SMRF grid from the WindNinja grid
-        g_vel = utils.grid_interpolate(data_vel_int, self.vtx,
-                                       self.wts, self.X.shape)
-
-        # flip because it comes out upsidedown
-        g_vel = np.flipud(g_vel)
-        # log law scale
-        g_vel = g_vel * self.ln_wind_scale
-
-        # Don't get angle if not distributing drifts
-        if self.distribute_drifts:
-            fp_ang = os.path.join(self.wind_ninja_dir,
-                                  'data{}'.format(t.strftime(fmt_d)),
-                                  'wind_ninja_data',
-                                  '{}_{}_{:d}m_ang.asc'.format(self.wind_ninja_pref,
-                                                               t_file.strftime(
-                                                                   fmt_wn),
-                                                               self.wind_ninja_dxy))
-
-            if not os.path.isfile(fp_ang):
-                raise ValueError(
-                    '{} in windninja convert module does not exist!'.format(fp_ang))
-
-            data_ang = np.loadtxt(fp_ang, skiprows=6)
-            data_ang_int = data_ang.flatten()
-
-            g_ang = utils.grid_interpolate(data_ang_int, self.vtx,
-                                           self.wts, self.X.shape)
-
-            g_ang = np.flipud(g_ang)
-
-        else:
-            g_ang = None
-
-        return g_vel, g_ang
