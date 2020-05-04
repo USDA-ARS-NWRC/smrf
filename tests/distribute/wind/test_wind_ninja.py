@@ -9,7 +9,7 @@ from smrf.data import loadTopo
 from tests.smrf_test_case import SMRFTestCaseLakes
 
 
-class TestWind(SMRFTestCaseLakes):
+class TestWindNinja(SMRFTestCaseLakes):
 
     def test_wind_ninja(self):
         """Test the wind ninja functions

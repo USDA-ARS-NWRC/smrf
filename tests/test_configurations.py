@@ -1,6 +1,7 @@
 from smrf.framework.model_framework import can_i_run_smrf
 from tests.smrf_test_case import SMRFTestCase
 
+
 class TestConfigurations(SMRFTestCase):
 
     def test_base_run(self):

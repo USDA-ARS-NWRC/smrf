@@ -1,0 +1,26 @@
+#!/usr/bin/env bash
+
+# A script to create the gold files needed for SMRF
+# Run this script in the main smrf directory, the config
+# file will put the outputs in the correct place
+#
+# Run as:
+#     $ ./tests/Lakes/gold_hrrr/make_gold_hrrr
+
+read -r -p "Recreating Lakes HRRR gold standard, are you sure? [y/N] " response
+if [[ "$response" = "yes" || "$response" = "y" ]]
+then
+    echo "Updating Lakes HRRR gold files"
+    echo "Removing old gold files"
+    rm tests/Lakes/gold_hrrr/*.nc
+    
+    echo "Running SMRF"
+    run_smrf tests/Lakes/gold_hrrr/gold_config.ini
+
+    echo "Cleaning up"
+    rm tests/Lakes/gold_hrrr/log.txt
+    rm tests/Lakes/gold_hrrr/config.ini
+else
+    echo "Lakes HRRR gold files not updated"
+fi
+

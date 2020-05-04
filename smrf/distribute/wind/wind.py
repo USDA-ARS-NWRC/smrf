@@ -113,9 +113,11 @@ class Wind(image_data.image_data):
 
         self._logger.debug('Initializing distribute.wind')
 
-        if self.config['wind_model'] == 'interp':
-            self.wind_model._initialize(topo, data.metadata)
-        else:
+        self.wind_model._initialize(topo, data.metadata)
+
+        if self.config['wind_model'] != 'interp':
+            #     self.wind_model._initialize(topo, data.metadata)
+            # else:
             self.wind_model.initialize(topo, data)
 
     def distribute(self, data_speed, data_direction, t):
@@ -134,9 +136,6 @@ class Wind(image_data.image_data):
 
         self._logger.debug('{} Distributing wind_direction and wind_speed'
                            .format(data_speed.name))
-
-        data_speed = data_speed[self.wind_model.stations]
-        data_direction = data_direction[self.wind_model.stations]
 
         if self.config['wind_model'] == 'interp':
 

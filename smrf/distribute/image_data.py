@@ -84,7 +84,7 @@ class image_data():
 
         # determine the stations that will be used, alphabetical order
         if "stations" in config.keys():
-            if config["stations"] != None:
+            if config["stations"] is not None:
                 stations = config['stations'].sort()
 
         self.stations = stations
@@ -111,11 +111,11 @@ class image_data():
         """
 
         self.min = self.config['min']
-        if self.min == None:
+        if self.min is None:
             self.min = -np.inf
 
         self.max = self.config['max']
-        if self.max == None:
+        if self.max is None:
             self.max = np.inf
 
         # pull out the metadata subset

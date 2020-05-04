@@ -1,13 +1,27 @@
 import logging
-import glob
 import os
 
 import pytz
 import numpy as np
-import pandas as pd
+from scipy import interpolate
 
 from smrf.distribute import image_data
 from smrf.utils import utils
+
+
+def interpx(yi, xi, x):
+    """Interpolate in on direction
+
+    Arguments:
+        yi {array} -- y data to fit
+        xi {array} -- x data to fit
+        x {array} -- x data to interpolate over
+
+    Returns:
+        array -- y values evaluated at x
+    """
+    s = interpolate.interp1d(xi, yi, fill_value='extrapolate')
+    return s(x)
 
 
 class WindNinjaModel(image_data.image_data):
@@ -54,6 +68,9 @@ class WindNinjaModel(image_data.image_data):
         # self.grid_data = self.smrf_config['gridded']['data_type']
 
         self.init_interp = True
+        self.flatwind = None
+        self.dir_round_cell = None
+        self.cellmaxus = None
 
     def wind_ninja_path(self, dt, file_type):
         """Generate the path to the wind ninja data and ensure
@@ -94,6 +111,8 @@ class WindNinjaModel(image_data.image_data):
         # meshgrid points
         self.X = topo.X
         self.Y = topo.Y
+
+        self.model_dxdy = np.mean(np.diff(topo.x))
 
         # WindNinja output height in meters
         self.wind_height = float(self.config['wind_ninja_height'])
@@ -161,7 +180,7 @@ class WindNinjaModel(image_data.image_data):
             data_direction {DataFrame} -- wind direction data frame
         """
 
-        t = data_speed.index
+        t = data_speed.name
 
         if self.init_interp:
             self.initialize_interp(t)
@@ -191,27 +210,72 @@ class WindNinjaModel(image_data.image_data):
         data_vel_int = data_vel.flatten()
 
         # interpolate to the SMRF grid from the WindNinja grid
-        g_vel = utils.grid_interpolate(data_vel_int, self.vtx,
-                                       self.wts, self.X.shape)
+        g_vel = utils.grid_interpolate(
+            data_vel_int, self.vtx,
+            self.wts, self.X.shape)
 
-        # flip because it comes out upsidedown
-        g_vel = np.flipud(g_vel)
+        # There will be NaN's around the edge, hanlde those first
+        if self.model_dxdy != self.wind_ninja_dxy:
+            self._logger.debug('Wind speed from WindNinja has NaN, filling')
+
+            g_vel = self.fill_data(g_vel)
+
         # log law scale
         g_vel = g_vel * self.ln_wind_scale
 
-        # Don't get angle if not distributing drifts
-        if self.distribute_drifts:
-            fp_ang = self.wind_ninja_path(t, 'ang')
+        # wind direction from angle
+        fp_ang = self.wind_ninja_path(t, 'ang')
 
-            data_ang = np.loadtxt(fp_ang, skiprows=6)
-            data_ang_int = data_ang.flatten()
+        data_ang = np.loadtxt(fp_ang, skiprows=6)
+        data_ang_int = data_ang.flatten()
 
-            g_ang = utils.grid_interpolate(data_ang_int, self.vtx,
-                                           self.wts, self.X.shape)
+        g_ang = utils.grid_interpolate(
+            data_ang_int, self.vtx,
+            self.wts, self.X.shape)
 
-            g_ang = np.flipud(g_ang)
-
-        else:
-            g_ang = None
+        g_ang = self.fill_data(g_ang)
 
         return g_vel, g_ang
+
+    def fill_data(self, g_vel):
+        """Fill the WindNinja array that has NaN's.
+        This makes an assumption that all the NaN values are along
+        the left and bottom edge. This will be the case in the Northern
+        hemisphere. First fill the Y direction with 1d interpolation
+        exprapolated to the edges, then do the same in the X direction.
+        At the end, it will check to ensure that there are no NaN values
+        left.
+
+        Arguments:
+            g_vel {np.array} -- numpy array to fill
+
+        Raises:
+            ValueError: If there are still NaN values after filling
+
+        Returns:
+            np.array -- filled numpy array
+        """
+
+        ix = np.sum(np.isnan(g_vel[0, :]))
+        iy = np.sum(np.isnan(g_vel[:, ix+1]))
+
+        #  first go in the Y direction
+        yi = g_vel[:, ix:ix+10]
+        xi = self.X[0, ix:ix+10]
+        x = self.X[0, :ix]
+
+        o = np.apply_along_axis(interpx, axis=1, arr=yi, xi=xi, x=x)
+        g_vel[:, :ix] = o
+
+        #  first go in the X direction
+        yi = g_vel[-iy-10:-iy, :]
+        xi = self.Y[-iy-10:-iy, 0]
+        x = self.Y[-iy:, 0]
+
+        o = np.apply_along_axis(interpx, axis=0, arr=yi, xi=xi, x=x)
+        g_vel[-iy:, :] = o
+
+        if np.any(np.isnan(g_vel)):
+            raise ValueError('WindNinja data still has NaN values')
+
+        return g_vel

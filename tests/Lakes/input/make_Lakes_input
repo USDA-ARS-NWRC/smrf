@@ -1,0 +1,68 @@
+#!/usr/bin/env bash
+
+# A script to create the input HRRR files for the Lakes
+#
+# Run as:
+#     $ ./tests/Lakes/input/make_Lakes_input
+set -x
+
+# Lakes with a >>20km buffer around center
+lonw=-119.0
+lone=-118.0
+latn=38.0
+lats=37.0
+
+# data location
+data_path="/data/snowpack/forecasts/hrrr/hrrr.20191001"
+input_path="tests/Lakes/input"
+output_path=$input_path"/hrrr.20191001"
+wn_output="tests/Lakes/output"
+
+tmp_file_name=$input_path"/tmp"
+
+katana_image=usdaarsnwrc/katana:0.4.0
+
+read -r -p "Recreating Lakes input, are you sure? [y/N] " response
+if [[ "$response" = "yes" || "$response" = "y" ]]
+then
+    echo "Updating Lakes HRRR test input files"
+    echo "Removing old files"
+    rm -rf $output_path
+    mkdir $output_path
+
+    for hr in {14..17}
+    do
+        for fx in 0 1
+            do
+            file_name=hrrr.t${hr}z.wrfsfcf0${fx}.grib2
+            echo "$file_name"
+            echo "Picking out variables"
+            
+            wgrib2 $data_path/$file_name -match 'TMP:2 m|RH:2 m|UGRD:10 m|VGRD:10 m|TCDC:|APCP:surface|DSWRF:surface|HGT:surface' -GRIB $tmp_file_name
+            
+            echo "Cropping HRRR files to bbox"
+            wgrib2 $tmp_file_name -small_grib $lonw:$lone $lats:$latn $output_path/$file_name
+        done
+    done
+
+    echo "Running Katana"
+    GID=$(id -g $UID)
+
+    mkdir $wn_output
+    docker pull $katana_image
+    docker run --rm -v $PWD/tests/Lakes/topo:/data/topo -v $PWD/$input_path:/data/input -v $PWD/$wn_output:/data/output --user $UID:$GID $katana_image /data/topo/katana_config.ini
+
+    echo "Moving files around"
+    rm -r $input_path/data20191001
+    mv $wn_output/data20191001 $input_path
+
+    echo "Cleaning up"
+    rm $input_path/tmp
+    rm -r $input_path/data20191001/wind_ninja_data/hrrr.20191001/
+    rm $input_path/data20191001/wind_ninja_data/*_cld*
+    rm tests/Lakes/topo/topo_windninja*
+    rm -r $wn_output
+else
+    echo "Lakes input files not updated"
+fi
+

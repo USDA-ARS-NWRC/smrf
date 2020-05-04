@@ -110,7 +110,7 @@ class SMRFTestCase(unittest.TestCase):
             shutil.rmtree(folder)
 
 
-class SMRFTestCaseLakes(unittest.TestCase):
+class SMRFTestCaseLakes(SMRFTestCase):
     """
     The base test case for SMRF that will load in the configuration file and store as
     the base config. Also will remove the output directory upon tear down.
@@ -129,6 +129,23 @@ class SMRFTestCaseLakes(unittest.TestCase):
 
         # read in the base configuration
         cls.base_config = get_user_config(cls.config_file, modules='smrf')
+
+        cls.gold = os.path.abspath(os.path.join(cls.test_dir, 'gold_hrrr'))
+        cls.output = os.path.join(cls.test_dir, 'output')
+
+        # Remove any potential files to ensure fresh run
+        if os.path.isdir(cls.output):
+            shutil.rmtree(cls.output)
+
+    @classmethod
+    def tearDownClass(cls):
+        """
+        Clean up the output directory
+        """
+        folder = os.path.join(cls.base_config.cfg['output']['out_location'])
+        if os.path.exists(folder):
+            shutil.rmtree(folder)
+
 
 #    def tearDown(self):
 #        """
