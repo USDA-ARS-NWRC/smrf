@@ -32,6 +32,7 @@ class TestWind(SMRFTestCaseLakes):
 
         wn = wind.Wind(config)
         wn.wind_model.initialize(topo, None)
+        wn.wind_model.initialize_interp(date_time[0])
 
         # The x values are ascending
         self.assertTrue(np.all(np.diff(wn.wind_model.windninja_x) > 0))

@@ -11,8 +11,15 @@ from smrf.utils import utils
 
 
 class WindNinjaModel(image_data.image_data):
+    """The `WindNinjaModel` loads data from a WindNinja simulation.
+    The WindNinja is ran externally to SMRF and the configuration
+    points to the location of the output ascii files. SMRF takes the
+    files and interpolates to the model domain.
+    """
 
     variable = 'wind'
+    WN_DATE_FORMAT = '%m-%d-%Y_%H%M'
+    DATE_FORMAT = '%Y%m%d'
 
     def __init__(self, smrf_config, distribute_drifts):
         """Initialize the WinstralWindModel
@@ -42,9 +49,39 @@ class WindNinjaModel(image_data.image_data):
             self.wind_ninja_tz = pytz.timezone(
                 self.config['wind_ninja_tz'].title())
 
-        self.start_date = pd.to_datetime(
-            self.smrf_config['time']['start_date'])
-        self.grid_data = self.smrf_config['gridded']['data_type']
+        # self.start_date = pd.to_datetime(
+        #     self.smrf_config['time']['start_date'])
+        # self.grid_data = self.smrf_config['gridded']['data_type']
+
+        self.init_interp = True
+
+    def wind_ninja_path(self, dt, file_type):
+        """Generate the path to the wind ninja data and ensure
+        it exists.
+
+        Arguments:
+            file_type {str} -- type of file to get
+        """
+
+        # convert the SMRF date time to the WindNinja time
+        t_file = dt.astimezone(self.wind_ninja_tz)
+
+        f_path = os.path.join(
+            self.wind_ninja_dir,
+            'data{}'.format(dt.strftime(self.DATE_FORMAT)),
+            'wind_ninja_data',
+            '{}_{}_{:d}m_{}.asc'.format(
+                self.wind_ninja_pref,
+                t_file.strftime(self.WN_DATE_FORMAT),
+                self.wind_ninja_dxy,
+                file_type
+            ))
+
+        if not os.path.isfile(f_path):
+            raise ValueError(
+                'WindNinja file does not exist: {}!'.format(f_path))
+
+        return f_path
 
     def initialize(self, topo, data=None):
         """Initialize the model with data
@@ -60,6 +97,7 @@ class WindNinjaModel(image_data.image_data):
 
         # WindNinja output height in meters
         self.wind_height = float(self.config['wind_ninja_height'])
+
         # set roughness that was used in WindNinja simulation
         # WindNinja uses 0.01m for grass, 0.43 for shrubs, and 1.0 for forest
         self.wn_roughness = float(self.config['wind_ninja_roughness']) * \
@@ -70,25 +108,30 @@ class WindNinjaModel(image_data.image_data):
         # using the relationship in
         # https://www.jstage.jst.go.jp/article/jmsj1965/53/1/53_1_96/_pdf
         self.veg_roughness = topo.veg_height / 7.39
+
         # make sure roughness stays reasonable using bounds from
         # http://www.iawe.org/Proceedings/11ACWE/11ACWE-Cataldo3.pdf
-
         self.veg_roughness[self.veg_roughness < 0.01] = 0.01
         self.veg_roughness[np.isnan(self.veg_roughness)] = 0.01
         self.veg_roughness[self.veg_roughness > 1.6] = 1.6
 
         # precalculate scale arrays so we don't do it every timestep
-        self.ln_wind_scale = np.log((self.veg_roughness + self.wind_height) / self.veg_roughness) / \
-            np.log((self.wn_roughness + self.wind_height) / self.wn_roughness)
+        self.ln_wind_scale = np.log(
+            (self.veg_roughness + self.wind_height) / self.veg_roughness
+        ) / np.log(
+            (self.wn_roughness + self.wind_height) / self.wn_roughness
+        )
 
-        # do this first to speedup the interpolation later #
+    def initialize_interp(self, t):
+        """Initialize the interpolation weights
+
+        Arguments:
+            t {datetime} -- initialize with this file
+        """
+
+        # do this first to speedup the interpolation later
         # find vertices and weights to speedup interpolation fro ascii file
-        fmt_d = '%Y%m%d'
-        fp_vel = glob.glob(os.path.join(self.wind_ninja_dir,
-                                        'data{}'.format(
-                                            self.start_date.strftime(fmt_d)),
-                                        'wind_ninja_data',
-                                        '*{}m_vel.asc'.format(self.wind_ninja_dxy)))[0]
+        fp_vel = self.wind_ninja_path(t, 'vel')
 
         # get wind ninja topo stats
         ts2 = utils.get_asc_stats(fp_vel)
@@ -96,19 +139,19 @@ class WindNinjaModel(image_data.image_data):
         self.windninja_y = ts2['y'][:]
 
         XW, YW = np.meshgrid(self.windninja_x, self.windninja_y)
-        xwint = XW.flatten()
-        ywint = YW.flatten()
-        self.wn_mx = xwint
-        self.wn_my = ywint
+        self.wn_mx = XW.flatten()
+        self.wn_my = YW.flatten()
 
         xy = np.zeros([XW.shape[0]*XW.shape[1], 2])
-        xy[:, 1] = ywint
-        xy[:, 0] = xwint
+        xy[:, 1] = self.wn_my
+        xy[:, 0] = self.wn_mx
         uv = np.zeros([self.X.shape[0]*self.X.shape[1], 2])
         uv[:, 1] = self.Y.flatten()
         uv[:, 0] = self.X.flatten()
 
         self.vtx, self.wts = utils.interp_weights(xy, uv, d=2)
+
+        self.init_interp = False
 
     def distribute(self, data_speed, data_direction):
         """Distribute the wind for the model
@@ -117,6 +160,11 @@ class WindNinjaModel(image_data.image_data):
             data_speed {DataFrame} -- wind speed data frame
             data_direction {DataFrame} -- wind direction data frame
         """
+
+        t = data_speed.index
+
+        if self.init_interp:
+            self.initialize_interp(t)
 
         wind_speed, wind_direction = self.convert_wind_ninja(t)
         self.wind_speed = wind_speed
@@ -128,34 +176,16 @@ class WindNinjaModel(image_data.image_data):
         SMRF data streamself.
 
         Args:
-            t:              datetime of timestep
+            t: datetime of timestep
 
         Returns:
             ws: wind speed numpy array
             wd: wind direction numpy array
 
         """
-        # fmt_wn = '%Y-%m-%d_%H%M'
-        fmt_wn = '%m-%d-%Y_%H%M'
-        fmt_d = '%Y%m%d'
 
         # get the ascii files that need converted
-        # file example tuol_09-20-2018_1900_200m_vel.prj
-        # find timestamp of WindNinja file
-        t_file = t.astimezone(self.wind_ninja_tz)
-
-        fp_vel = os.path.join(self.wind_ninja_dir,
-                              'data{}'.format(t.strftime(fmt_d)),
-                              'wind_ninja_data',
-                              '{}_{}_{:d}m_vel.asc'.format(self.wind_ninja_pref,
-                                                           t_file.strftime(
-                                                               fmt_wn),
-                                                           self.wind_ninja_dxy))
-
-        # make sure files exist
-        if not os.path.isfile(fp_vel):
-            raise ValueError(
-                '{} in windninja convert module does not exist!'.format(fp_vel))
+        fp_vel = self.wind_ninja_path(t, 'vel')
 
         data_vel = np.loadtxt(fp_vel, skiprows=6)
         data_vel_int = data_vel.flatten()
@@ -171,17 +201,7 @@ class WindNinjaModel(image_data.image_data):
 
         # Don't get angle if not distributing drifts
         if self.distribute_drifts:
-            fp_ang = os.path.join(self.wind_ninja_dir,
-                                  'data{}'.format(t.strftime(fmt_d)),
-                                  'wind_ninja_data',
-                                  '{}_{}_{:d}m_ang.asc'.format(self.wind_ninja_pref,
-                                                               t_file.strftime(
-                                                                   fmt_wn),
-                                                               self.wind_ninja_dxy))
-
-            if not os.path.isfile(fp_ang):
-                raise ValueError(
-                    '{} in windninja convert module does not exist!'.format(fp_ang))
+            fp_ang = self.wind_ninja_path(t, 'ang')
 
             data_ang = np.loadtxt(fp_ang, skiprows=6)
             data_ang_int = data_ang.flatten()

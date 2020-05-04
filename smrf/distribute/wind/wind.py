@@ -1,12 +1,7 @@
 
-import glob
 import logging
-import os
 
-import netCDF4 as nc
 import numpy as np
-import pandas as pd
-import pytz
 
 from smrf.distribute import image_data
 from smrf.utils import utils
@@ -16,56 +11,13 @@ from smrf.distribute.wind.wind_ninja import WindNinjaModel
 
 class Wind(image_data.image_data):
     """
-
     The :mod:`~smrf.distribute.wind.wind` class allows for variable specific
     distributions that go beyond the base class.
 
-    Estimating wind speed and direction is complex terrain can be difficult due
-    to the interaction of the local topography with the wind. The methods
-    described here follow the work developed by Winstral and Marks (2002) and
-    Winstral et al. (2009) :cite:`Winstral&Marks:2002` :cite:`Winstral&al:2009`
-    which parameterizes the terrain based on the upwind direction. The
-    underlying method calulates the maximum upwind slope (maxus) within a
-    search distance to determine if a cell is sheltered or exposed. See
-    :mod:`smrf.utils.wind.model` for a more in depth description. A maxus file
-    (library) is used to load the upwind direction and maxus values over the
-    dem. The following steps are performed when estimating the wind speed:
-
-    1. Adjust measured wind speeds at the stations and determine the wind
-        direction componenets
-    2. Distribute the flat wind speed
-    3. Distribute the wind direction components
-    4. Simulate the wind speeds based on the distribute flat wind, wind
-        direction, and maxus values
-
-    After the maxus is calculated for multiple wind directions over the entire
-    DEM, the measured wind speed and direction can be distirbuted. The first
-    step is to adjust the measured wind speeds to estimate the wind speed if
-    the site were on a flat surface. The adjustment uses the maxus value at the
-    station location and an enhancement factor for the site based on the
-    sheltering of that site to wind. A special consideration is performed when
-    the station is on a peak, as artificially high wind speeds can be
-    calcualted.  Therefore, if the station is on a peak, the minimum maxus
-    value is choosen for all wind directions. The wind direction is also broken
-    up into the u,v componenets.
-
-    Next the flat wind speed, u wind direction component, and v wind direction
-    compoenent are distributed using the underlying distribution methods. With
-    the distributed flat wind speed and wind direction, the simulated wind
-    speeds can be estimated. The distributed wind direction is binned into the
-    upwind directions in the maxus library. This determines which maxus value
-    to use for each pixel in the DEM. Each cell's maxus value is further
-    enhanced for vegetation, with larger, more dense vegetation increasing the
-    maxus value (more sheltering) and bare ground not enhancing the maxus value
-    (exposed). With the adjusted maxus values, wind speed is estimated using
-    the relationships in Winstral and Marks (2002) and Winstral et al. (2009)
-    :cite:`Winstral&Marks:2002` :cite:`Winstral&al:2009` based on the
-    distributed flat wind speed and each cell's maxus value.
-
-    When gridded data is provided, the methods outlined above are not performed
-    due to the unknown complexity of parameterizing the gridded dataset for
-    using the maxus methods. Therefore, the wind speed and direction are
-    distributed using the underlying distribution methods.
+    Three distribution methods are available for the Wind class:
+    1. Winstral and Marks 2002 method for maximum upwind slope (maxus)
+    2. Import WindNinja simulations
+    3. Standared interpolation
 
     Args:
         self.config: The [wind] section of the configuration file
@@ -169,18 +121,8 @@ class Wind(image_data.image_data):
     def distribute(self, data_speed, data_direction, t):
         """
         Distribute given a Panda's dataframe for a single time step. Calls
-        :mod:`smrf.distribute.image_data.image_data._distribute`.
-
-        Follows the following steps for station measurements:
-
-        1. Adjust measured wind speeds at the stations and determine the wind
-            direction componenets
-        2. Distribute the flat wind speed
-        3. Distribute the wind direction components
-        4. Simulate the wind speeds based on the distribute flat wind, wind
-            direction, and maxus values
-
-        Gridded interpolation distributes the given wind speed and direction.
+        :mod:`smrf.distribute.image_data.image_data._distribute` for
+        the `wind_model` chosen.
 
         Args:
             data_speed: Pandas dataframe for single time step from wind_speed
