@@ -79,6 +79,11 @@ class topo():
         # read in the images
         f = Dataset(self.topoConfig['filename'], 'r')
 
+        # netCDF>1.4.0 returns as masked arrays even if no missing values
+        # are present. This will ensure that if the array has no missing
+        # values, a normal numpy array is returned
+        f.set_always_mask(False)
+
         if 'projection' not in f.variables.keys():
             raise IOError("Topo input files must have projection information")
 
