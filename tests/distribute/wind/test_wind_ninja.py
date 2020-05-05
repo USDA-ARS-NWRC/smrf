@@ -1,14 +1,14 @@
-from datetime import timedelta
 import os
+from datetime import timedelta
+
+import netCDF4 as nc
 import numpy as np
 import pytz
-import netCDF4 as nc
 
-from smrf.distribute.wind.wind_ninja import WindNinjaModel
-from smrf.data.mysql_data import date_range
 from smrf.data import loadTopo
+from smrf.data.mysql_data import date_range
+from smrf.distribute.wind.wind_ninja import WindNinjaModel
 from smrf.utils import utils
-
 from tests.smrf_test_case import SMRFTestCaseLakes
 
 

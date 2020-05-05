@@ -12,8 +12,9 @@ from smrf.framework.model_framework import run_smrf
 
 class SMRFTestCase(unittest.TestCase):
     """
-    The base test case for SMRF that will load in the configuration file and store as
-    the base config. Also will remove the output directory upon tear down.
+    The base test case for SMRF that will load in the configuration file
+    and store as the base config. Also will remove the output
+    directory upon tear down.
     """
     dist_variables = [
         'air_temp',
@@ -33,7 +34,7 @@ class SMRFTestCase(unittest.TestCase):
             return True
 
         except Exception as e:
-            # print(e)
+            print(e)
             return False
 
     def assertGoldEqual(self, gold, not_gold, error_msg):
@@ -116,19 +117,21 @@ class SMRFTestCase(unittest.TestCase):
         # read in the base configuration
         cls.base_config = get_user_config(config_file, modules='smrf')
 
-    def tearDown(self):
+    @classmethod
+    def tearDownClass(cls):
         """
         Clean up the output directory
         """
-        folder = os.path.join(self.base_config.cfg['output']['out_location'])
+        folder = os.path.join(cls.base_config.cfg['output']['out_location'])
         if os.path.exists(folder):
             shutil.rmtree(folder)
 
 
 class SMRFTestCaseLakes(SMRFTestCase):
     """
-    The base test case for SMRF that will load in the configuration file and store as
-    the base config. Also will remove the output directory upon tear down.
+    The base test case for SMRF that will load in the configuration file
+    and store as the base config. Also will remove the output directory
+    upon tear down.
     """
 
     @classmethod
@@ -138,8 +141,6 @@ class SMRFTestCaseLakes(SMRFTestCase):
         """
 
         cls.test_dir = os.path.join('tests', 'Lakes')
-
-        # check whether or not this is being ran as a single test or part of the suite
         cls.config_file = os.path.join(cls.test_dir, 'config.ini')
 
         # read in the base configuration
@@ -160,19 +161,3 @@ class SMRFTestCaseLakes(SMRFTestCase):
         folder = os.path.join(cls.base_config.cfg['output']['out_location'])
         if os.path.exists(folder):
             shutil.rmtree(folder)
-
-
-#    def tearDown(self):
-#        """
-#        Clean up the output directory
-#        """
-#
-#        folder = os.path.join(self.test_dir, 'output')
-#        for the_file in os.listdir(folder):
-#            file_path = os.path.join(folder, the_file)
-#            try:
-#                if os.path.isfile(file_path):
-#                    os.unlink(file_path)
-#                elif os.path.isdir(file_path): shutil.rmtree(file_path)
-#            except Exception as e:
-#                print(e)

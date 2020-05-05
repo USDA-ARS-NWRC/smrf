@@ -10,42 +10,13 @@ Tests for an entire smrf run. The SMRF integration run!
 
 import shutil
 import unittest
-from os.path import abspath, isdir, join
 from copy import copy
+from os.path import abspath, isdir, join
 
-import numpy as np
-from netCDF4 import Dataset
 from inicheck.tools import cast_all_variables
 
 from smrf.framework.model_framework import run_smrf
 from tests.smrf_test_case import SMRFTestCase
-
-
-def compare_image(v_name, gold_dir, test_dir):
-    """
-    Compares two netcdfs images to and determines if they are the same.
-
-    Args:
-        v_name: Name with in the file contains
-        gold_dir: Directory containing gold standard results
-        test_dir: Directory containing test results to be compared
-
-    Returns:
-        Boolean: Whether the two images were the same
-    """
-
-    image1 = join(gold_dir, v_name + '.nc')
-    image2 = join(test_dir, v_name + '.nc')
-    d1 = Dataset(image1, 'r')
-    gold = d1.variables[v_name][:]
-    d1.close()
-
-    d2 = Dataset(image2, 'r')
-    rough = d2.variables[v_name][:]
-    d2.close()
-
-    result = np.abs(gold - rough)
-    return not np.any(result > 0)
 
 
 class TestThreadedRME(SMRFTestCase):
@@ -68,17 +39,85 @@ class TestThreadedRME(SMRFTestCase):
 
         run_smrf(cls.config_file)
 
-    def test_variables(self):
-        """
-        Compare that the entire output datasets to confirm they are the same as
-        the gold file provided.
-        """
-        variables = ['air_temp', 'precip_temp', 'net_solar',
-                     'percent_snow', 'precip', 'thermal', 'wind_speed',
-                     'wind_direction', 'snow_density', 'vapor_pressure']
+    def test_air_temp(self):
+        """Test RME threaded air_temp"""
 
-        for v in variables:
-            self.assertTrue(compare_image(v, self.gold, self.output))
+        self.compare_netcdf_files(
+            join(self.gold, 'air_temp.nc'),
+            join(self.output, 'air_temp.nc')
+        )
+
+    def test_precip_temp(self):
+        """Test RME threaded precip_temp"""
+
+        self.compare_netcdf_files(
+            join(self.gold, 'precip_temp.nc'),
+            join(self.output, 'precip_temp.nc')
+        )
+
+    def test_net_solar(self):
+        """Test RME threaded net_solar"""
+
+        self.compare_netcdf_files(
+            join(self.gold, 'net_solar.nc'),
+            join(self.output, 'net_solar.nc')
+        )
+
+    def test_percent_snow(self):
+        """Test RME threaded percent_snow"""
+
+        self.compare_netcdf_files(
+            join(self.gold, 'percent_snow.nc'),
+            join(self.output, 'percent_snow.nc')
+        )
+
+    def test_precip(self):
+        """Test RME threaded precip"""
+
+        self.compare_netcdf_files(
+            join(self.gold, 'precip.nc'),
+            join(self.output, 'precip.nc')
+        )
+
+    def test_thermal(self):
+        """Test RME threaded thermal"""
+
+        self.compare_netcdf_files(
+            join(self.gold, 'thermal.nc'),
+            join(self.output, 'thermal.nc')
+        )
+
+    def test_wind_speed(self):
+        """Test RME threaded wind_speed"""
+
+        self.compare_netcdf_files(
+            join(self.gold, 'wind_speed.nc'),
+            join(self.output, 'wind_speed.nc')
+        )
+
+    def test_wind_direction(self):
+        """Test RME threaded wind_direction"""
+
+        self.compare_netcdf_files(
+            join(self.gold, 'wind_direction.nc'),
+            join(self.output, 'wind_direction.nc')
+        )
+
+    def test_snow_density(self):
+        """Test RME threaded snow_density"""
+
+        self.compare_netcdf_files(
+            join(self.gold, 'snow_density.nc'),
+            join(self.output, 'snow_density.nc')
+        )
+
+    def test_vapor_pressure(self):
+        """Test RME threaded vapor_pressure"""
+
+        self.compare_netcdf_files(
+            join(self.gold, 'vapor_pressure.nc'),
+            join(self.output, 'vapor_pressure.nc')
+        )
 
 
 class TestRME(SMRFTestCase):
@@ -107,17 +146,85 @@ class TestRME(SMRFTestCase):
 
         run_smrf(config)
 
-    def test_variables(self):
-        """
-        Compare that the entire output datasets to confirm they are the same as
-        the gold file provided.
-        """
-        variables = ['air_temp', 'precip_temp', 'net_solar',
-                     'percent_snow', 'precip', 'thermal', 'wind_speed',
-                     'wind_direction', 'snow_density', 'vapor_pressure']
+    def test_air_temp(self):
+        """Test RME air_temp"""
 
-        for v in variables:
-            self.assertTrue(compare_image(v, self.gold, self.output))
+        self.compare_netcdf_files(
+            join(self.gold, 'air_temp.nc'),
+            join(self.output, 'air_temp.nc')
+        )
+
+    def test_precip_temp(self):
+        """Test RME precip_temp"""
+
+        self.compare_netcdf_files(
+            join(self.gold, 'precip_temp.nc'),
+            join(self.output, 'precip_temp.nc')
+        )
+
+    def test_net_solar(self):
+        """Test RME net_solar"""
+
+        self.compare_netcdf_files(
+            join(self.gold, 'net_solar.nc'),
+            join(self.output, 'net_solar.nc')
+        )
+
+    def test_percent_snow(self):
+        """Test RME percent_snow"""
+
+        self.compare_netcdf_files(
+            join(self.gold, 'percent_snow.nc'),
+            join(self.output, 'percent_snow.nc')
+        )
+
+    def test_precip(self):
+        """Test RME precip"""
+
+        self.compare_netcdf_files(
+            join(self.gold, 'precip.nc'),
+            join(self.output, 'precip.nc')
+        )
+
+    def test_thermal(self):
+        """Test RME thermal"""
+
+        self.compare_netcdf_files(
+            join(self.gold, 'thermal.nc'),
+            join(self.output, 'thermal.nc')
+        )
+
+    def test_wind_speed(self):
+        """Test RME wind_speed"""
+
+        self.compare_netcdf_files(
+            join(self.gold, 'wind_speed.nc'),
+            join(self.output, 'wind_speed.nc')
+        )
+
+    def test_wind_direction(self):
+        """Test RME wind_direction"""
+
+        self.compare_netcdf_files(
+            join(self.gold, 'wind_direction.nc'),
+            join(self.output, 'wind_direction.nc')
+        )
+
+    def test_snow_density(self):
+        """Test RME snow_density"""
+
+        self.compare_netcdf_files(
+            join(self.gold, 'snow_density.nc'),
+            join(self.output, 'snow_density.nc')
+        )
+
+    def test_vapor_pressure(self):
+        """Test RME vapor_pressure"""
+
+        self.compare_netcdf_files(
+            join(self.gold, 'vapor_pressure.nc'),
+            join(self.output, 'vapor_pressure.nc')
+        )
 
 
 if __name__ == '__main__':
