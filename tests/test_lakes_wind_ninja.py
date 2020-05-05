@@ -1,13 +1,6 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-"""
-test_full_smrf
-----------------------------------
-
-Tests for an entire smrf run. The SMRF integration run!
-"""
-
 import os
 
 from smrf.framework.model_framework import run_smrf
@@ -29,10 +22,6 @@ class TestLakes(SMRFTestCaseLakes):
 
     def tearDown(self):
         pass
-
-    # variables = ['air_temp', 'precip_temp', 'net_solar',
-    #              'percent_snow', 'precip', 'thermal', 'wind_speed',
-    #              'wind_direction', 'snow_density', 'vapor_pressure']
 
     def test_air_temp(self):
         """Test Lakes air_temp"""

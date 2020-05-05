@@ -205,7 +205,6 @@ class WindNinjaModel(image_data.image_data):
 
         # get the ascii files that need converted
         fp_vel = self.wind_ninja_path(t, 'vel')
-
         data_vel = np.loadtxt(fp_vel, skiprows=6)
         data_vel_int = data_vel.flatten()
 
@@ -223,17 +222,23 @@ class WindNinjaModel(image_data.image_data):
         # log law scale
         g_vel = g_vel * self.ln_wind_scale
 
-        # wind direction from angle
+        # wind direction from angle, split into u,v components then interpolate
         fp_ang = self.wind_ninja_path(t, 'ang')
-
         data_ang = np.loadtxt(fp_ang, skiprows=6)
-        data_ang_int = data_ang.flatten()
 
-        g_ang = utils.grid_interpolate(
-            data_ang_int, self.vtx,
-            self.wts, self.X.shape)
+        u = np.sin(data_ang * np.pi / 180)
+        v = np.cos(data_ang * np.pi / 180)
 
-        g_ang = self.fill_data(g_ang)
+        ui = utils.grid_interpolate(
+            u.flatten(), self.vtx, self.wts, self.X.shape)
+        vi = utils.grid_interpolate(
+            v.flatten(), self.vtx, self.wts, self.X.shape)
+
+        uf = self.fill_data(ui)
+        vf = self.fill_data(vi)
+
+        g_ang = np.arctan2(uf, vf) * 180 / np.pi
+        g_ang[g_ang < 0] = g_ang[g_ang < 0] + 360
 
         return g_vel, g_ang
 
