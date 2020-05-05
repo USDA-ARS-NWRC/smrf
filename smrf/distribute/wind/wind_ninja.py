@@ -1,8 +1,8 @@
 import logging
 import os
 
-import pytz
 import numpy as np
+import pytz
 from scipy import interpolate
 
 from smrf.distribute import image_data

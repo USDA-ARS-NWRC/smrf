@@ -114,3 +114,6 @@ examples/simple_hill/* *.csv
 
 # notebooks
 .ipynb_checkpoints
+
+# grib2 .idx files
+*.grib2.*.idx

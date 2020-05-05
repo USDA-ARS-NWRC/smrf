@@ -4,9 +4,9 @@ import logging
 import numpy as np
 
 from smrf.distribute import image_data
-from smrf.utils import utils
-from smrf.distribute.wind.winstral import WinstralWindModel
 from smrf.distribute.wind.wind_ninja import WindNinjaModel
+from smrf.distribute.wind.winstral import WinstralWindModel
+from smrf.utils import utils
 
 
 class Wind(image_data.image_data):

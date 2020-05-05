@@ -2,7 +2,6 @@
 import logging
 import os
 import subprocess as sp
-from multiprocessing import Process
 
 import numpy as np
 from netCDF4 import Dataset
@@ -68,7 +67,8 @@ class topo():
         else:
             self.stoporad_in_file = None
 
-    # IPW Support has been deprecated since 0.8.0, but it now has been fully removed.
+    # IPW Support has been deprecated since 0.8.0, but it now
+    # has been fully removed.
 
     def readNetCDF(self):
         """
@@ -87,7 +87,8 @@ class topo():
         # to double or int
         for v_smrf in self.images:
 
-            # check to see if the user defined any variables e.g. veg_height = veg_length
+            # check to see if the user defined any variables
+            # e.g. veg_height = veg_length
             if v_smrf in self.topoConfig.keys():
                 v_file = self.topoConfig[v_smrf]
             else:
@@ -120,10 +121,11 @@ class topo():
         self.zone_number = int(f.variables['projection'].utm_zone_number)
 
         # Calculate the lat long
-        self.basin_lat, self.basin_long = to_latlon(self.cx,
-                                                    self.cy,
-                                                    self.zone_number,
-                                                    northern=self.northern_hemisphere)
+        self.basin_lat, self.basin_long = to_latlon(
+            self.cx,
+            self.cy,
+            self.zone_number,
+            northern=self.northern_hemisphere)
 
         self._logger.info('Domain center in UTM Zone {:d} = {:0.1f}m, {:0.1f}m'
                           ''.format(self.zone_number, self.cx, self.cy))
