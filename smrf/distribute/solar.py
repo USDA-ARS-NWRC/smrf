@@ -134,72 +134,73 @@ class solar(image_data.image_data):
     variable = 'solar'
 
     # these are variables that can be output
-    output_variables = {'clear_ir_beam': {
-                                  'units': 'watt/m2',
-                                  'standard_name': 'clear_sky_infrared_beam',
-                                  'long_name': 'Clear sky infrared beam solar radiation'
-                                  },
-                        'clear_ir_diffuse': {
-                                  'units': 'watt/m2',
-                                  'standard_name': 'clear_sky_infrared_diffuse',
-                                  'long_name': 'Clear sky infrared diffuse solar radiation'
-                                  },
-                        'clear_vis_beam': {
-                                  'units': 'watt/m2',
-                                  'standard_name': 'clear_sky_visible_beam',
-                                  'long_name': 'Clear sky visible beam solar radiation'
-                                  },
-                        'clear_vis_diffuse': {
-                                  'units': 'watt/m2',
-                                  'standard_name': 'clear_sky_visible_diffuse',
-                                  'long_name': 'Clear sky visible diffuse solar radiation'
-                                  },
-                        'cloud_ir_beam': {
-                                  'units': 'watt/m2',
-                                  'standard_name': 'cloud_infrared_beam',
-                                  'long_name': 'Cloud corrected infrared beam solar radiation'
-                                  },
-                        'cloud_ir_diffuse': {
-                                  'units': 'watt/m2',
-                                  'standard_name': 'cloud_infrared_diffuse',
-                                  'long_name': 'Cloud corrected infrared diffuse solar radiation'
-                                  },
-                        'cloud_vis_beam': {
-                                  'units': 'watt/m2',
-                                  'standard_name': 'cloud_visible_beam',
-                                  'long_name': 'Cloud corrected visible beam solar radiation'
-                                  },
-                        'cloud_vis_diffuse': {
-                                  'units': 'watt/m2',
-                                  'standard_name': 'cloud_visible_diffuse',
-                                  'long_name': 'Cloud corrected visible diffuse solar radiation'
-                                  },
-                        'net_solar': {
-                                  'units': 'watt/m2',
-                                  'standard_name': 'net_solar_radiation',
-                                  'long_name': 'Net solar radiation'
-                                  },
-                        'veg_ir_beam': {
-                                  'units': 'watt/m2',
-                                  'standard_name': 'vegetation_infrared_beam',
-                                  'long_name': 'Vegetation corrected infrared beam solar radiation'
-                                  },
-                        'veg_ir_diffuse': {
-                                  'units': 'watt/m2',
-                                  'standard_name': 'vegetation_infrared_diffuse',
-                                  'long_name': 'Vegetation corrected infrared diffuse solar radiation'
-                                  },
-                        'veg_vis_beam': {
-                                  'units': 'watt/m2',
-                                  'standard_name': 'vegetation_visible_beam',
-                                  'long_name': 'Vegetation corrected visible beam solar radiation'
-                                  },
-                        'veg_vis_diffuse': {
-                                  'units': 'watt/m2',
-                                  'standard_name': 'vegetation_visible_diffuse',
-                                  'long_name': 'Vegetation corrected visible diffuse solar radiation'
-                                  }
-                        }
+    output_variables = {
+        'clear_ir_beam': {
+            'units': 'watt/m2',
+            'standard_name': 'clear_sky_infrared_beam',
+            'long_name': 'Clear sky infrared beam solar radiation'
+        },
+        'clear_ir_diffuse': {
+            'units': 'watt/m2',
+            'standard_name': 'clear_sky_infrared_diffuse',
+            'long_name': 'Clear sky infrared diffuse solar radiation'
+        },
+        'clear_vis_beam': {
+            'units': 'watt/m2',
+            'standard_name': 'clear_sky_visible_beam',
+            'long_name': 'Clear sky visible beam solar radiation'
+        },
+        'clear_vis_diffuse': {
+            'units': 'watt/m2',
+            'standard_name': 'clear_sky_visible_diffuse',
+            'long_name': 'Clear sky visible diffuse solar radiation'
+        },
+        'cloud_ir_beam': {
+            'units': 'watt/m2',
+            'standard_name': 'cloud_infrared_beam',
+            'long_name': 'Cloud corrected infrared beam solar radiation'
+        },
+        'cloud_ir_diffuse': {
+            'units': 'watt/m2',
+            'standard_name': 'cloud_infrared_diffuse',
+            'long_name': 'Cloud corrected infrared diffuse solar radiation'
+        },
+        'cloud_vis_beam': {
+            'units': 'watt/m2',
+            'standard_name': 'cloud_visible_beam',
+            'long_name': 'Cloud corrected visible beam solar radiation'
+        },
+        'cloud_vis_diffuse': {
+            'units': 'watt/m2',
+            'standard_name': 'cloud_visible_diffuse',
+            'long_name': 'Cloud corrected visible diffuse solar radiation'
+        },
+        'net_solar': {
+            'units': 'watt/m2',
+            'standard_name': 'net_solar_radiation',
+            'long_name': 'Net solar radiation'
+        },
+        'veg_ir_beam': {
+            'units': 'watt/m2',
+            'standard_name': 'vegetation_infrared_beam',
+            'long_name': 'Vegetation corrected infrared beam solar radiation'
+        },
+        'veg_ir_diffuse': {
+            'units': 'watt/m2',
+            'standard_name': 'vegetation_infrared_diffuse',
+            'long_name': 'Vegetation corrected infrared diffuse solar radiation'
+        },
+        'veg_vis_beam': {
+            'units': 'watt/m2',
+            'standard_name': 'vegetation_visible_beam',
+            'long_name': 'Vegetation corrected visible beam solar radiation'
+        },
+        'veg_vis_diffuse': {
+            'units': 'watt/m2',
+            'standard_name': 'vegetation_visible_diffuse',
+            'long_name': 'Vegetation corrected visible diffuse solar radiation'
+        }
+    }
 
     # These are variables that are operate at the end only and do not need to
     # be written during main distribute loop
@@ -411,7 +412,6 @@ class solar(image_data.image_data):
                     self.cloud_ir_beam = self.ir_beam.copy()
                     self.cloud_ir_diffuse = self.ir_diffuse.copy()
 
-
                 # correct for vegetation effects
                 illum_ang = queue['illum_ang'].get(t)
                 if self.config['correct_veg'] == True:
@@ -546,24 +546,24 @@ class solar(image_data.image_data):
         # calculate for visible
         # correct beam
         self.vis_beam = radiation.veg_beam(self.vis_beam,
-                                               self.veg_height,
-                                               illum_ang,
-                                               self.veg_k)
+                                           self.veg_height,
+                                           illum_ang,
+                                           self.veg_k)
 
         # correct diffuse
         self.vis_diffuse = radiation.veg_diffuse(self.vis_diffuse,
-                                                     self.veg_tau)
+                                                 self.veg_tau)
 
         # calculate for ir #
         # correct beam
         self.ir_beam = radiation.veg_beam(self.ir_beam,
-                                              self.veg_height,
-                                              illum_ang,
-                                              self.veg_k)
+                                          self.veg_height,
+                                          illum_ang,
+                                          self.veg_k)
 
         # correct diffuse
         self.ir_diffuse = radiation.veg_diffuse(self.ir_diffuse,
-                                                    self.veg_tau)
+                                                self.veg_tau)
 
     def calc_net(self, albedo_vis, albedo_ir):
         """
@@ -627,7 +627,7 @@ class solar(image_data.image_data):
                self.stoporad_in,
                self.ir_file)
 
-        #self._logger.debug(ir_cmd)
+        # self._logger.debug(ir_cmd)
 
         irp = sp.Popen(ir_cmd,
                        shell=True,

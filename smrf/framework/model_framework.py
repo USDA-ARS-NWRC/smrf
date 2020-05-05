@@ -555,7 +555,7 @@ class SMRF():
             illum_ang = None
             if cosz > 0:
                 illum_ang = radiation.shade(
-                    self.topo.slope,
+                    self.topo.sin_slope,
                     self.topo.aspect,
                     azimuth,
                     cosz)
@@ -729,7 +729,7 @@ class SMRF():
         t.append(Thread(target=radiation.shade_thread,
                         name='illum_angle',
                         args=(q, self.date_time,
-                              self.topo.slope, self.topo.aspect)))
+                              self.topo.sin_slope, self.topo.aspect)))
 
         # 1. Air temperature
         t.append(Thread(target=self.distribute['air_temp'].distribute_thread,

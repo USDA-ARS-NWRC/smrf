@@ -11,6 +11,7 @@ from utm import to_latlon
 
 from smrf.utils import gradient
 
+
 class topo():
     """
     Class for topo images and processing those images. Images are:
@@ -109,9 +110,8 @@ class topo():
         self.y = f.variables['y'][:]
         [self.X, self.Y] = np.meshgrid(self.x, self.y)
 
-
         # Calculate the center of the basin
-        self.cx, self.cy  = self.get_center(f, mask_name='mask')
+        self.cx, self.cy = self.get_center(f, mask_name='mask')
 
         # Is the modeling domain in the northern hemisphere
         self.northern_hemisphere = self.topoConfig['northern_hemisphere']
@@ -121,9 +121,9 @@ class topo():
 
         # Calculate the lat long
         self.basin_lat, self.basin_long = to_latlon(self.cx,
-                                            self.cy,
-                                            self.zone_number,
-                                            northern=self.northern_hemisphere)
+                                                    self.cy,
+                                                    self.zone_number,
+                                                    northern=self.northern_hemisphere)
 
         self._logger.info('Domain center in UTM Zone {:d} = {:0.1f}m, {:0.1f}m'
                           ''.format(self.zone_number, self.cx, self.cy))
@@ -252,7 +252,8 @@ class topo():
 
         # calculate the gradient and aspect
         g, a = getattr(gradient, func)(self.dem, dx, dy, aspect_rad=True)
-        self.slope = g
+        self.slope_radians = g
+        self.sin_slope = np.sin(g)  # IPW stores slope as sin(Slope)
         self.aspect = a
 
         # convert to ipw images for stoporad, the spatialnc package
@@ -263,7 +264,7 @@ class topo():
             os.path.join(self.tempDir, 'slope.ipw')
         ))
         i = ipw.IPW()
-        i.new_band(g)
+        i.new_band(self.sin_slope)
         i.add_geo_hdr([self.x[0], self.y[0]],
                       [np.mean(np.diff(self.x)), np.mean(np.diff(self.y))],
                       'm', 'UTM')
