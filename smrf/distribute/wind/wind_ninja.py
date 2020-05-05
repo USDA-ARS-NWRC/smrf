@@ -35,12 +35,12 @@ class WindNinjaModel(image_data.image_data):
     WN_DATE_FORMAT = '%m-%d-%Y_%H%M'
     DATE_FORMAT = '%Y%m%d'
 
-    def __init__(self, smrf_config, distribute_drifts):
+    def __init__(self, smrf_config):
         """Initialize the WinstralWindModel
 
         Arguments:
             smrf_config {UserConfig} -- entire smrf config
-            distribute_drifts {bool} -- distribute drifts if true
+            distribute_drifts {bool} -- not used
 
         Raises:
             IOError: if maxus file does not match topo size
@@ -53,7 +53,6 @@ class WindNinjaModel(image_data.image_data):
 
         self.smrf_config = smrf_config
         self.getConfig(smrf_config['wind'])
-        self.distribute_drifts = distribute_drifts
 
         # wind ninja parameters
         self.wind_ninja_dir = self.config['wind_ninja_dir']

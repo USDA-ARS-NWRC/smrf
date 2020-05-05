@@ -54,7 +54,7 @@ class WinstralWindModel(image_data.image_data):
 
     variable = 'wind'
 
-    def __init__(self, smrf_config, distribute_drifts):
+    def __init__(self, smrf_config):
         """Initialize the WinstralWindModel
 
         Arguments:
@@ -71,7 +71,7 @@ class WinstralWindModel(image_data.image_data):
 
         self.smrf_config = smrf_config
         self.getConfig(smrf_config['wind'])
-        self.distribute_drifts = distribute_drifts
+        # self.distribute_drifts = distribute_drifts
 
         self._logger.debug('Creating the WinstralWindModel')
 
@@ -141,11 +141,11 @@ class WinstralWindModel(image_data.image_data):
                     self.metadata.loc[m, 'enhancement'] = \
                         float(enhancement)
 
-        if not self.distribute_drifts:
-            # we have to pass these to precip, so make them none
-            # if we won't use them
-            self.dir_round_cell = None
-            self.cellmaxus = None
+        # if not self.distribute_drifts:
+        # we have to pass these to precip, so make them none
+        # if we won't use them, or they will be overwritten later
+        # self.dir_round_cell = None
+        # self.cellmaxus = None
 
     def distribute(self, data_speed, data_direction):
         """Distribute the wind for the model

@@ -1,10 +1,13 @@
 from datetime import timedelta
+import os
 import numpy as np
 import pytz
+import netCDF4 as nc
 
-from smrf.distribute import wind
+from smrf.distribute.wind.wind_ninja import WindNinjaModel
 from smrf.data.mysql_data import date_range
 from smrf.data import loadTopo
+from smrf.utils import utils
 
 from tests.smrf_test_case import SMRFTestCaseLakes
 
@@ -30,15 +33,34 @@ class TestWindNinja(SMRFTestCaseLakes):
         tzinfo = pytz.timezone(config['time']['time_zone'])
         date_time = [di.replace(tzinfo=tzinfo) for di in d]
 
-        wn = wind.Wind(config)
-        wn.wind_model.initialize(topo, None)
-        wn.wind_model.initialize_interp(date_time[0])
+        wn = WindNinjaModel(config)
+        wn.initialize(topo, None)
+        wn.initialize_interp(date_time[0])
+        g_vel, g_ang = wn.convert_wind_ninja(date_time[0])
 
         # The x values are ascending
-        self.assertTrue(np.all(np.diff(wn.wind_model.windninja_x) > 0))
+        self.assertTrue(np.all(np.diff(wn.windninja_x) > 0))
 
         # The y values are descnding
-        self.assertTrue(np.all(np.diff(wn.wind_model.windninja_y) < 0))
+        self.assertTrue(np.all(np.diff(wn.windninja_y) < 0))
 
-        # run wind ninja but not comparing to anything
-        g_vel, g_ang = wn.wind_model.convert_wind_ninja(date_time[0])
+        # compare against gold
+        g_vel = utils.set_min_max(
+            g_vel, wn.config['min'], wn.config['max'])
+
+        # check against gold
+        # The two are not exactly the same as there is some float
+        # precision error with netcdf
+        n = nc.Dataset(os.path.join(self.gold, 'wind_speed.nc'))
+        np.testing.assert_allclose(
+            n.variables['wind_speed'][0, :],
+            g_vel
+        )
+        n.close()
+
+        n = nc.Dataset(os.path.join(self.gold, 'wind_direction.nc'))
+        np.testing.assert_allclose(
+            n.variables['wind_direction'][0, :],
+            g_ang
+        )
+        n.close()

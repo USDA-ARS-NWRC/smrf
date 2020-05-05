@@ -36,6 +36,29 @@ class SMRFTestCase(unittest.TestCase):
             # print(e)
             return False
 
+    def assertGoldEqual(self, gold, not_gold, error_msg):
+        """Compare two arrays
+
+        Arguments:
+            gold {array} -- gold array
+            not_gold {array} -- not gold array
+            error_msg {str} -- error message to display
+        """
+
+        if os.getenv('NOT_ON_GOLD_HOST') is None:
+            np.testing.assert_array_equal(
+                not_gold,
+                gold,
+                err_msg=error_msg
+            )
+        else:
+            np.testing.assert_almost_equal(
+                not_gold,
+                gold,
+                decimal=3,
+                err_msg=error_msg
+            )
+
     def compare_netcdf_files(self, gold_file, test_file):
         """
         Compare two netcdf files to ensure that they are identical. The
@@ -65,19 +88,11 @@ class SMRFTestCase(unittest.TestCase):
             if gold.variables[var_name].datatype != np.dtype('S1'):
                 error_msg = "Variable: {0} did not match gold standard".\
                     format(var_name)
-                if os.getenv('NOT_ON_GOLD_HOST') is None:
-                    np.testing.assert_array_equal(
-                        test.variables[var_name][:],
-                        gold.variables[var_name][:],
-                        err_msg=error_msg
-                    )
-                else:
-                    np.testing.assert_almost_equal(
-                        test.variables[var_name][:],
-                        gold.variables[var_name][:],
-                        decimal=3,
-                        err_msg=error_msg
-                    )
+                self.assertGoldEqual(
+                    gold.variables[var_name][:],
+                    test.variables[var_name][:],
+                    error_msg
+                )
 
         gold.close()
         test.close()

@@ -76,9 +76,9 @@ class Wind(image_data.image_data):
         self.smrf_config = config
         self.getConfig(config['wind'])
 
-        distribute_drifts = False
-        if self.smrf_config["precip"]["precip_rescaling_model"] == "winstral":
-            distribute_drifts = True
+        # distribute_drifts = False
+        # if self.smrf_config["precip"]["precip_rescaling_model"] == "winstral":
+        #     distribute_drifts = True
 
         if self.config['wind_model'] == 'interp':
             # Straight interpolation of the wind
@@ -88,12 +88,10 @@ class Wind(image_data.image_data):
             self.wind_model.dir_round_cell = None
 
         elif self.config['wind_model'] == 'wind_ninja':
-            self.wind_model = WindNinjaModel(
-                self.smrf_config, distribute_drifts)
+            self.wind_model = WindNinjaModel(self.smrf_config)
 
         elif self.config['wind_model'] == 'winstral':
-            self.wind_model = WinstralWindModel(
-                self.smrf_config, distribute_drifts)
+            self.wind_model = WinstralWindModel(self.smrf_config)
 
         self._logger.debug('Created distribute.wind')
 
