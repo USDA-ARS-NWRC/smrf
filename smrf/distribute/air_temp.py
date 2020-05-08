@@ -38,11 +38,11 @@ class ta(image_data.image_data):
 
     # these are variables that can be output
     output_variables = {'air_temp': {
-                                     'units': 'degree_Celsius',
-                                     'standard_name': 'air_temperature',
-                                     'long_name': 'Air temperature'
-                                     }
-                        }
+        'units': 'degree_Celsius',
+        'standard_name': 'air_temperature',
+        'long_name': 'Air temperature'
+    }
+    }
 
     # these are variables that are operate at the end only and do not need to
     # be written during main distribute loop
@@ -65,7 +65,7 @@ class ta(image_data.image_data):
         :mod:`smrf.distribute.image_data.image_data._initialize`.
 
         Args:
-            topo: :mod:`smrf.data.loadTopo.topo` instance contain topographic
+            topo: :mod:`smrf.data.loadTopo.Topo` instance contain topographic
                 data and infomation
             metadata: metadata Pandas dataframe containing the station metadata
                 from :mod:`smrf.data.loadData` or :mod:`smrf.data.loadGrid`

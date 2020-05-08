@@ -6,15 +6,10 @@ import numpy as np
 import pandas as pd
 import pytz
 import utm
+from weather_forecast_retrieval import hrrr
 
 from smrf.envphys import phys
 from smrf.envphys.radiation import get_hrrr_cloud
-
-try:
-    from weather_forecast_retrieval import hrrr
-except:
-    pass
-
 
 
 class grid():
@@ -55,7 +50,6 @@ class grid():
         # The data that will be output
         self.variables = ['air_temp', 'vapor_pressure', 'precip', 'wind_speed',
                           'wind_direction', 'cloud_factor', 'thermal']
-
 
         # get the buffer gridded data domain extents in lat long
         self.dlat, self.dlon = self.model_domain_grid()
@@ -124,7 +118,7 @@ class grid():
 
         self._logger.info('Reading data from from HRRR directory: {}'.format(
             self.dataConfig['hrrr_directory']
-            ))
+        ))
 
         # forecast hours for each run hour
         if not self.forecast_flag:
@@ -158,7 +152,9 @@ class grid():
 
         # calculate vapor pressure
         self._logger.debug('Loading vapor_pressure')
-        vp = phys.rh2vp(data['air_temp'].values, data['relative_humidity'].values)
+        vp = phys.rh2vp(
+            data['air_temp'].values,
+            data['relative_humidity'].values)
         self.vapor_pressure = pd.DataFrame(vp, index=idx, columns=cols)
 
         # calculate the wind speed and wind direction
@@ -182,8 +178,9 @@ class grid():
         self._logger.debug('Loading solar')
         solar = pd.DataFrame(data['short_wave'], index=idx, columns=cols)
         self._logger.debug('Calculating cloud factor')
-        self.cloud_factor = get_hrrr_cloud(solar, self.metadata, self._logger,
-                                           self.topo.basin_lat, self.topo.basin_long)
+        self.cloud_factor = get_hrrr_cloud(
+            solar, self.metadata, self._logger,
+            self.topo.basin_lat, self.topo.basin_long)
 
     def load_from_netcdf(self):
         """
@@ -197,8 +194,8 @@ class grid():
         """
 
         self._logger.info('Reading data coming from netcdf: {}'.format(
-                            self.dataConfig['netcdf_file'])
-                          )
+            self.dataConfig['netcdf_file'])
+        )
 
         f = nc.Dataset(self.dataConfig['netcdf_file'], 'r')
 
@@ -207,7 +204,7 @@ class grid():
         mlon = f.variables['lon'][:]
         mhgt = f.variables['elev'][:]
 
-        if mlat.ndim != 2 & mlon.ndim !=2:
+        if mlat.ndim != 2 & mlon.ndim != 2:
             [mlon, mlat] = np.meshgrid(mlon, mlat)
 
         # get the values that are in the modeling domain
@@ -242,7 +239,8 @@ class grid():
 
         # GET THE TIMES
         t = f.variables['time']
-        time = nc.num2date(t[:].astype(int), t.getncattr('units'), t.getncattr('calendar'))
+        time = nc.num2date(t[:].astype(int), t.getncattr(
+            'units'), t.getncattr('calendar'))
         # Drop milliseconds and prepare to use as pandas DataFrame index
         time = pd.DatetimeIndex(
             [str(tm.replace(microsecond=0)) for tm in time], tz=self.time_zone
@@ -296,7 +294,7 @@ class grid():
 
         self._logger.info('Reading data coming from WRF output: {}'.format(
             self.dataConfig['wrf_file']
-            ))
+        ))
         f = nc.Dataset(self.dataConfig['wrf_file'])
 
         # get the values that are in the modeling domain
@@ -366,7 +364,8 @@ class grid():
 
         self._logger.debug('Calculating vapor_pressure')
         satvp = phys.satvp(self.dew_point.values)
-        self.vapor_pressure = pd.DataFrame(satvp, index=time, columns=primary_id)
+        self.vapor_pressure = pd.DataFrame(
+            satvp, index=time, columns=primary_id)
 
         self._logger.debug('Loading thermal')
         self.thermal = pd.DataFrame(index=time, columns=primary_id)
@@ -419,7 +418,6 @@ class grid():
             d = getattr(self, v)
             setattr(self, v, d.tz_convert(tz=self.time_zone))
 
-
     def get_latlon(self, utm_x, utm_y):
         '''
         Convert UTM coords to Latitude and longitude
@@ -434,8 +432,9 @@ class grid():
         '''
 
         lat, lon = utm.to_latlon(utm_x, utm_y, self.topo.zone_number,
-                                        northern=self.topo.northern_hemisphere)
+                                 northern=self.topo.northern_hemisphere)
         return lat, lon
+
 
 def apply_utm(s, force_zone_number):
     """

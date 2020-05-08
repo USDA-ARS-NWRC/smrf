@@ -150,43 +150,43 @@ class th(image_data.image_data):
             and ``long_name`` for creating the NetCDF output file.
         variable: 'thermal'
         dem: numpy array for the DEM, from
-            :py:attr:`smrf.data.loadTopo.topo.dem`
+            :py:attr:`smrf.data.loadTopo.Topo.dem`
         veg_type: numpy array for the veg type, from
-            :py:attr:`smrf.data.loadTopo.topo.veg_type`
+            :py:attr:`smrf.data.loadTopo.Topo.veg_type`
         veg_height: numpy array for the veg height, from
-            :py:attr:`smrf.data.loadTopo.topo.veg_height`
+            :py:attr:`smrf.data.loadTopo.Topo.veg_height`
         veg_k: numpy array for the veg K, from
-            :py:attr:`smrf.data.loadTopo.topo.veg_k`
+            :py:attr:`smrf.data.loadTopo.Topo.veg_k`
         veg_tau: numpy array for the veg transmissivity, from
-            :py:attr:`smrf.data.loadTopo.topo.veg_tau`
+            :py:attr:`smrf.data.loadTopo.Topo.veg_tau`
         sky_view: numpy array for the sky view factor, from
-            :py:attr:`smrf.data.loadTopo.topo.sky_view`
+            :py:attr:`smrf.data.loadTopo.Topo.sky_view`
     """
 
     variable = 'thermal'
 
     # these are variables that can be output
     output_variables = {'thermal': {
-                                  'units': 'watt/m2',
-                                  'standard_name': 'thermal_radiation',
-                                  'long_name': 'Thermal (longwave) radiation'
-                                  },
-                        'thermal_clear': {
-                                      'units': 'watt/m2',
-                                      'standard_name': 'thermal_radiation non-correct',
-                                      'long_name': 'Thermal (longwave) radiation non-corrected'
-                                      },
-                        'thermal_cloud': {
-                                      'units': 'watt/m2',
-                                      'standard_name': 'thermal_radiation cloud corrected',
-                                      'long_name': 'Thermal (longwave) radiation cloud corrected'
-                                      },
-                        'thermal_veg': {
-                                      'units': 'watt/m2',
-                                      'standard_name': 'thermal_radiation veg corrected',
-                                      'long_name': 'Thermal (longwave) radiation veg corrected'
-                                      }
-                        }
+        'units': 'watt/m2',
+        'standard_name': 'thermal_radiation',
+        'long_name': 'Thermal (longwave) radiation'
+    },
+        'thermal_clear': {
+        'units': 'watt/m2',
+        'standard_name': 'thermal_radiation non-correct',
+        'long_name': 'Thermal (longwave) radiation non-corrected'
+    },
+        'thermal_cloud': {
+        'units': 'watt/m2',
+        'standard_name': 'thermal_radiation cloud corrected',
+        'long_name': 'Thermal (longwave) radiation cloud corrected'
+    },
+        'thermal_veg': {
+        'units': 'watt/m2',
+        'standard_name': 'thermal_radiation veg corrected',
+        'long_name': 'Thermal (longwave) radiation veg corrected'
+    }
+    }
     # these are variables that are operate at the end only and do not need to
     # be written during main distribute loop
     post_process_variables = {}
@@ -216,7 +216,7 @@ class th(image_data.image_data):
         """
         Initialize the distribution, calls
         :mod:`smrf.distribute.image_data.image_data._initialize` for gridded
-        distirbution. Sets the following from :mod:`smrf.data.loadTopo.topo`
+        distirbution. Sets the following from :mod:`smrf.data.loadTopo.Topo`
 
         * :py:attr:`veg_height`
         * :py:attr:`veg_tau`
@@ -225,7 +225,7 @@ class th(image_data.image_data):
         * :py:attr:`dem`
 
         Args:
-            topo: :mod:`smrf.data.loadTopo.topo` instance contain topographic
+            topo: :mod:`smrf.data.loadTopo.Topo` instance contain topographic
                 data and infomation
             data: data Pandas dataframe containing the station data,
                 from :mod:`smrf.data.loadData` or :mod:`smrf.data.loadGrid`
@@ -327,7 +327,7 @@ class th(image_data.image_data):
             # make output variable
             self.thermal_veg = cth.copy()
 
-        self.thermal = utils.set_min_max(cth,self.min,self.max)
+        self.thermal = utils.set_min_max(cth, self.min, self.max)
 
     def distribute_thread(self, queue, date):
         """
@@ -414,7 +414,6 @@ class th(image_data.image_data):
             air_temp = queue['air_temp'].get(t)
 
             self.distribute_thermal(data.loc[t], air_temp)
-
 
             if self.correct_veg:
                 queue['thermal_veg'].put([t, self.thermal_veg])

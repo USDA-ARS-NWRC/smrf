@@ -282,7 +282,7 @@ class TestGradientD8(TestGradient):
     #     # IPW topo calc
     #     # First converts DEM to ipw 16-bit image
     #     # Gradient output is 8-bit image
-    #     topo = loadTopo.topo(topo_config, calcInput=True,
+    #     topo = loadTopo.Topo(topo_config, calcInput=True,
     #                          tempDir='tests/RME/output')
 
     #     # IPW slope is sin(S)

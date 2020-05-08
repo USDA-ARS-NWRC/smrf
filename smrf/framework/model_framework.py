@@ -87,7 +87,7 @@ class SMRF():
                         'clear_ir_beam', 'clear_ir_diffuse',
                         'albedo_vis', 'albedo_ir', 'net_solar',
                         'cloud_factor', 'thermal',
-                        'output', 'veg_ir_beam','veg_ir_diffuse',
+                        'output', 'veg_ir_beam', 'veg_ir_diffuse',
                         'veg_vis_beam', 'veg_vis_diffuse',
                         'cloud_ir_beam', 'cloud_ir_diffuse', 'cloud_vis_beam',
                         'cloud_vis_diffuse', 'thermal_clear', 'wind_direction']
@@ -114,7 +114,7 @@ class SMRF():
             raise Exception('Config passed to SMRF is neither file name nor '
                             ' UserConfig instance')
         # start logging
-        if external_logger == None:
+        if external_logger is None:
 
             if 'log_level' in ucfg.cfg['system']:
                 loglevel = ucfg.cfg['system']['log_level'].upper()
@@ -127,18 +127,18 @@ class SMRF():
 
             # setup the logging
             logfile = None
-            if ucfg.cfg['system']['log_file']!= None:
+            if ucfg.cfg['system']['log_file'] is not None:
                 logfile = ucfg.cfg['system']['log_file']
                 if not os.path.isabs(logfile):
                     logfile = abspath(join(
-                                            dirname(configFile),
-                                            ucfg.cfg['system']['log_file']))
+                        dirname(configFile),
+                        ucfg.cfg['system']['log_file']))
 
                 if not os.path.isdir(dirname(logfile)):
                     os.makedirs(dirname(logfile))
 
                 if not os.path.isfile(logfile):
-                    with open(logfile,'w+') as f:
+                    with open(logfile, 'w+') as f:
                         f.close()
 
             fmt = '%(levelname)s:%(name)s:%(message)s'
@@ -165,7 +165,7 @@ class SMRF():
         out = ucfg.cfg['output']['out_location']
 
         # Make the tmp and output directories if they do not exist
-        makeable_dirs = [out, join(out,'tmp')]
+        makeable_dirs = [out, join(out, 'tmp')]
         for path in makeable_dirs:
             if not os.path.isdir(path):
                 try:
@@ -191,14 +191,14 @@ class SMRF():
                                " status report above.")
             sys.exit()
 
-        # Write the config file to the output dir no matter where the project is
-        full_config_out = abspath(join(out,'config.ini'))
+        # Write the config file to the output dir
+        full_config_out = abspath(join(out, 'config.ini'))
 
         self._logger.info("Writing config file with full options.")
         generate_config(self.ucfg, full_config_out)
 
         # Process the system variables
-        for k,v in self.config['system'].items():
+        for k, v in self.config['system'].items():
             setattr(self, k, v)
 
         os.environ['WORKDIR'] = self.temp_dir
@@ -219,7 +219,7 @@ class SMRF():
         self.forecast_flag = False
         if 'gridded' in self.config:
             self.gridded = True
-            if self.config['gridded']['data_type'] in ['hrrr_netcdf','hrrr_grib']:
+            if self.config['gridded']['data_type'] in ['hrrr_netcdf', 'hrrr_grib']:
                 self.forecast_flag = self.config['gridded']['hrrr_forecast_flag']
 
             # hours from start of day
@@ -228,7 +228,7 @@ class SMRF():
 
         now = datetime.now().astimezone(self.time_zone)
         if ((self.start_date > now and not self.gridded) or
-           (self.end_date > now and not self.gridded)):
+                (self.end_date > now and not self.gridded)):
             raise ValueError("A date set in the future can only be used with"
                              " WRF generated data!")
 
@@ -288,7 +288,7 @@ class SMRF():
                 if os.path.isfile(self.distribute['solar'].ir_file):
                     os.remove(self.distribute['solar'].ir_file)
 
-        if hasattr(self,'temp_dir'):
+        if hasattr(self, 'temp_dir'):
             if os.path.isdir(self.temp_dir):
                 shutil.rmtree(self.temp_dir)
 
@@ -297,11 +297,11 @@ class SMRF():
     def loadTopo(self, calcInput=True):
         """
         Load the information from the configFile in the ['topo'] section. See
-        :func:`smrf.data.loadTopo.topo` for full description.
+        :func:`smrf.data.loadTopo.Topo` for full description.
         """
 
         # load the topo
-        self.topo = data.loadTopo.topo(self.config['topo'],
+        self.topo = data.loadTopo.Topo(self.config['topo'],
                                        calcInput,
                                        tempDir=self.temp_dir)
 
@@ -326,52 +326,44 @@ class SMRF():
         """
 
         # 1. Air temperature
-        self.distribute['air_temp'] = \
-            distribute.air_temp.ta(self.config['air_temp'])
+        self.distribute['air_temp'] = distribute.air_temp.ta(
+            self.config['air_temp'])
 
         # 2. Vapor pressure
-        self.distribute['vapor_pressure'] = \
-            distribute.vapor_pressure.vp(self.config['vapor_pressure'],
-                                         self.config['precip']['precip_temp_method'])
+        self.distribute['vapor_pressure'] = distribute.vapor_pressure.vp(
+            self.config['vapor_pressure'],
+            self.config['precip']['precip_temp_method'])
 
         # 3. Wind
-        distribute_drifts = False
-        if self.config["precip"]["precip_rescaling_model"] == "winstral":
-            distribute_drifts = True
-
-        self.distribute['wind'] = \
-            distribute.wind.wind(self.config['wind'],
-                                 distribute_drifts,
-                                 self.config,
-                                 tempDir=self.temp_dir)
+        self.distribute['wind'] = distribute.wind.Wind(self.config)
 
         # 4. Precipitation
-        self.distribute['precip'] = \
-            distribute.precipitation.ppt(self.config['precip'],
-                                         self.start_date,
-                                         self.config['time']['time_step'])
+        self.distribute['precip'] = distribute.precipitation.ppt(
+            self.config['precip'],
+            self.start_date,
+            self.config['time']['time_step'])
 
         # 5. Albedo
-        self.distribute['albedo'] = \
-            distribute.albedo.albedo(self.config['albedo'])
+        self.distribute['albedo'] = distribute.albedo.albedo(
+            self.config['albedo'])
 
         # 6. cloud_factor
-        self.distribute['cloud_factor'] = \
-            distribute.cloud_factor.cf(self.config['cloud_factor'])
+        self.distribute['cloud_factor'] = distribute.cloud_factor.cf(
+            self.config['cloud_factor'])
 
-        #7. Solar radiation
-        self.distribute['solar'] = \
-            distribute.solar.solar(self.config,
-                                   self.topo.stoporad_in_file,
-                                   self.temp_dir)
+        # 7. Solar radiation
+        self.distribute['solar'] = distribute.solar.solar(
+            self.config,
+            self.topo.stoporad_in_file,
+            self.temp_dir)
 
         # 8. thermal radiation
-        self.distribute['thermal'] = \
-            distribute.thermal.th(self.config['thermal'])
+        self.distribute['thermal'] = distribute.thermal.th(
+            self.config['thermal'])
 
         # 9. soil temperature
-        self.distribute['soil_temp'] = \
-            distribute.soil_temp.ts(self.config['soil_temp'])
+        self.distribute['soil_temp'] = distribute.soil_temp.ts(
+            self.config['soil_temp'])
 
     def loadData(self):
         """
@@ -393,30 +385,33 @@ class SMRF():
 
         flag = True
         if 'csv' in self.config:
-            self.data = data.loadData.wxdata(self.config['csv'],
-                                     self.start_date,
-                                     self.end_date,
-                                     time_zone=self.time_zone,
-                                     dataType='csv')
+            self.data = data.loadData.wxdata(
+                self.config['csv'],
+                self.start_date,
+                self.end_date,
+                time_zone=self.time_zone,
+                dataType='csv')
 
         elif 'mysql' in self.config:
-            self.data = data.loadData.wxdata(self.config['mysql'],
-                                     self.start_date,
-                                     self.end_date,
-                                     time_zone=self.time_zone,
-                                     dataType='mysql')
+            self.data = data.loadData.wxdata(
+                self.config['mysql'],
+                self.start_date,
+                self.end_date,
+                time_zone=self.time_zone,
+                dataType='mysql')
 
         elif 'gridded' in self.config:
             flag = False
-            self.data = data.loadGrid.grid(self.config['gridded'],
-                                   self.topo,
-                                   self.start_date,
-                                   self.end_date,
-                                   time_zone=self.time_zone,
-                                   dataType=self.config['gridded']['data_type'],
-                                   tempDir=self.temp_dir,
-                                   forecast_flag=self.forecast_flag,
-                                   day_hour=self.day_hour)
+            self.data = data.loadGrid.grid(
+                self.config['gridded'],
+                self.topo,
+                self.start_date,
+                self.end_date,
+                time_zone=self.time_zone,
+                dataType=self.config['gridded']['data_type'],
+                tempDir=self.temp_dir,
+                forecast_flag=self.forecast_flag,
+                day_hour=self.day_hour)
 
             # set the stations in the distribute
             try:
@@ -426,35 +421,40 @@ class SMRF():
                             self.data.metadata.index.tolist())
 
             except Exception as e:
-                self._logger.warning("Distribution not initialized, grid stations"
-                                  "could not be set.")
+                self._logger.warning("Distribution not initialized, grid"
+                                     " stations could not be set.")
                 self._logger.exception(e)
 
         else:
             raise KeyError('Could not determine where station data is located')
 
-        # determine the locations of the stations on the grid while maintaining reverse compatibility
-        #New DB uses utm_x utm_y instead of X,Y
+        # determine the locations of the stations on the grid while
+        # maintaining reverse compatibility
+        # New DB uses utm_x utm_y instead of X,Y
         try:
-            self.data.metadata['xi'] = \
-                self.data.metadata.apply(lambda row: find_pixel_location(row,
-                                                                     self.topo.x,
-                                                                     'utm_x'), axis=1)
-            self.data.metadata['yi'] = \
-                self.data.metadata.apply(lambda row: find_pixel_location(row,
-                                                                     self.topo.y,
-                                                                     'utm_y'), axis=1)
-        #Old DB has X and Y
+            self.data.metadata['xi'] = self.data.metadata.apply(
+                lambda row: find_pixel_location(
+                    row,
+                    self.topo.x,
+                    'utm_x'), axis=1)
+            self.data.metadata['yi'] = self.data.metadata.apply(
+                lambda row: find_pixel_location(
+                    row,
+                    self.topo.y,
+                    'utm_y'), axis=1)
+        # Old DB has X and Y
         except:
 
-            self.data.metadata['xi'] = \
-                self.data.metadata.apply(lambda row: find_pixel_location(row,
-                                                                     self.topo.x,
-                                                                     'X'), axis=1)
-            self.data.metadata['yi'] = \
-                self.data.metadata.apply(lambda row: find_pixel_location(row,
-                                                                     self.topo.y,
-                                                                     'Y'), axis=1)
+            self.data.metadata['xi'] = self.data.metadata.apply(
+                lambda row: find_pixel_location(
+                    row,
+                    self.topo.x,
+                    'X'), axis=1)
+            self.data.metadata['yi'] = self.data.metadata.apply(
+                lambda row: find_pixel_location(
+                    row,
+                    self.topo.y,
+                    'Y'), axis=1)
 
         # Pre-filter the data to only the desired stations
         if flag:
@@ -464,7 +464,7 @@ class SMRF():
                     d = getattr(self.data, key)
 
                     # Check to find the matching stations
-                    if self.distribute[key].stations != None:
+                    if self.distribute[key].stations is not None:
 
                         match = d.columns.isin(self.distribute[key].stations)
                         sta_match = d.columns[match]
@@ -473,21 +473,25 @@ class SMRF():
                         self.distribute[key].stations = sta_match.tolist()
                         setattr(self.data, key, d[sta_match])
                     else:
-                       self._logger.warning("Distribution not initialized,"
-                                            " data not filtered to desired"
-                                            " stations in variable {}"
-                                            "".format(key))
+                        self._logger.warning("Distribution not initialized,"
+                                             " data not filtered to desired"
+                                             " stations in variable {}"
+                                             "".format(key))
 
             # Check all sections for stations that are colocated
             for key in self.distribute.keys():
                 if key in self.data.variables:
-                    if self.distribute[key].stations != None:
-                        # Confirm out stations all have a unique position for each section
-                        colocated = check_station_colocation(metadata=self.data.metadata.loc[self.distribute[key].stations])
+                    if self.distribute[key].stations is not None:
+                        # Confirm out stations all have a unique position
+                        colocated = check_station_colocation(
+                            metadata=self.data.metadata.loc[self.distribute[key].stations])
 
                         # Stations are co-located, throw error
-                        if colocated != None:
-                            self._logger.error("Stations in the {0} section are colocated.\n{1}".format(key,','.join(colocated[0])))
+                        if colocated is not None:
+                            self._logger.error(
+                                "Stations in the {0} section "
+                                "are colocated.\n{1}".format(
+                                    key, ','.join(colocated[0])))
                             sys.exit()
 
         # clip the timeseries to the start and end date
@@ -498,7 +502,7 @@ class SMRF():
                 setattr(self.data, key, d)
 
         # Does the user want to create a CSV copy of the station data used.
-        if self.config["output"]['input_backup'] == True:
+        if self.config["output"]['input_backup']:
             self._logger.info('Backing up input data...')
             backup_input(self.data, self.ucfg)
 
@@ -519,7 +523,7 @@ class SMRF():
     def distributeData_single(self):
         """
         Distribute the measurement point data for all variables in serial. Each
-        variable is initialized first using the :func:`smrf.data.loadTopo.topo`
+        variable is initialized first using the :func:`smrf.data.loadTopo.Topo`
         instance and the metadata loaded from
         :func:`~smrf.framework.model_framework.SMRF.loadData`.
         The function distributes over each time step, all the variables below.
@@ -552,70 +556,80 @@ class SMRF():
 
             self._logger.info('Distributing time step %s' % t)
             # 0.1 sun angle for time step
-            cosz, azimuth, rad_vec = sunang.sunang(t.astimezone(pytz.utc),
-                                            self.topo.basin_lat,
-                                            self.topo.basin_long)
+            cosz, azimuth, rad_vec = sunang.sunang(
+                t.astimezone(pytz.utc),
+                self.topo.basin_lat,
+                self.topo.basin_long)
 
             # 0.2 illumination angle
             illum_ang = None
             if cosz > 0:
-                illum_ang = radiation.shade(self.topo.slope,
-                                            self.topo.aspect,
-                                            azimuth,
-                                            cosz)
+                illum_ang = radiation.shade(
+                    self.topo.sin_slope,
+                    self.topo.aspect,
+                    azimuth,
+                    cosz)
 
             # 1. Air temperature
             self.distribute['air_temp'].distribute(self.data.air_temp.loc[t])
 
             # 2. Vapor pressure
-            self.distribute['vapor_pressure'].distribute(self.data.vapor_pressure.loc[t],
-                                                        self.distribute['air_temp'].air_temp)
+            self.distribute['vapor_pressure'].distribute(
+                self.data.vapor_pressure.loc[t],
+                self.distribute['air_temp'].air_temp)
 
             # 3. Wind_speed and wind_direction
-            self.distribute['wind'].distribute(self.data.wind_speed.loc[t],
-                                               self.data.wind_direction.loc[t],
-                                               t)
+            self.distribute['wind'].distribute(
+                self.data.wind_speed.loc[t],
+                self.data.wind_direction.loc[t],
+                t)
             # 4. Precipitation
-            self.distribute['precip'].distribute(self.data.precip.loc[t],
-                                                self.distribute['vapor_pressure'].dew_point,
-                                                self.distribute['vapor_pressure'].precip_temp,
-                                                self.distribute['air_temp'].air_temp,
-                                                t,
-                                                self.data.wind_speed.loc[t],
-                                                self.data.air_temp.loc[t],
-                                                self.distribute['wind'].wind_direction,
-                                                self.distribute['wind'].dir_round_cell,
-                                                self.distribute['wind'].wind_speed,
-                                                self.distribute['wind'].cellmaxus)
+            self.distribute['precip'].distribute(
+                self.data.precip.loc[t],
+                self.distribute['vapor_pressure'].dew_point,
+                self.distribute['vapor_pressure'].precip_temp,
+                self.distribute['air_temp'].air_temp,
+                t,
+                self.data.wind_speed.loc[t],
+                self.data.air_temp.loc[t],
+                self.distribute['wind'].wind_direction,
+                self.distribute['wind'].wind_model.dir_round_cell,
+                self.distribute['wind'].wind_speed,
+                self.distribute['wind'].wind_model.cellmaxus)
 
             # 5. Albedo
-            self.distribute['albedo'].distribute(t,
-                                                 illum_ang,
-                                                 self.distribute['precip'].storm_days)
+            self.distribute['albedo'].distribute(
+                t,
+                illum_ang,
+                self.distribute['precip'].storm_days)
             # 6. cloud_factor
-            self.distribute['cloud_factor'].distribute(self.data.cloud_factor.loc[t])
+            self.distribute['cloud_factor'].distribute(
+                self.data.cloud_factor.loc[t])
 
             # 7. Solar
-            self.distribute['solar'].distribute(t,
-                                                self.distribute["cloud_factor"].cloud_factor,
-                                                illum_ang,
-                                                cosz,
-                                                azimuth,
-                                                self.distribute['precip'].last_storm_day_basin,
-                                                self.distribute['albedo'].albedo_vis,
-                                                self.distribute['albedo'].albedo_ir)
+            self.distribute['solar'].distribute(
+                t,
+                self.distribute["cloud_factor"].cloud_factor,
+                illum_ang,
+                cosz,
+                azimuth,
+                self.distribute['precip'].last_storm_day_basin,
+                self.distribute['albedo'].albedo_vis,
+                self.distribute['albedo'].albedo_ir)
 
             # 7. thermal radiation
             if self.distribute['thermal'].gridded and \
-               self.config['gridded']['data_type'] in ['wrf','netcdf']:
-                self.distribute['thermal'].distribute_thermal(self.data.thermal.loc[t],
-                                                              self.distribute['air_temp'].air_temp)
+               self.config['gridded']['data_type'] in ['wrf', 'netcdf']:
+                self.distribute['thermal'].distribute_thermal(
+                    self.data.thermal.loc[t],
+                    self.distribute['air_temp'].air_temp)
             else:
-                self.distribute['thermal'].distribute(t,
-                                                      self.distribute['air_temp'].air_temp,
-                                                      self.distribute['vapor_pressure'].vapor_pressure,
-                                                      self.distribute['vapor_pressure'].dew_point,
-                                                      self.distribute['cloud_factor'].cloud_factor)
+                self.distribute['thermal'].distribute(
+                    t,
+                    self.distribute['air_temp'].air_temp,
+                    self.distribute['vapor_pressure'].vapor_pressure,
+                    self.distribute['vapor_pressure'].dew_point,
+                    self.distribute['cloud_factor'].cloud_factor)
 
             # 8. Soil temperature
             self.distribute['soil_temp'].distribute()
@@ -633,7 +647,7 @@ class SMRF():
         """
         Distribute the measurement point data for all variables using threading
         and queues. Each variable is initialized first using the
-        :func:`smrf.data.loadTopo.topo` instance and the metadata loaded from
+        :func:`smrf.data.loadTopo.Topo` instance and the metadata loaded from
         :func:`~smrf.framework.model_framework.SMRF.loadData`. A
         :func:`DateQueue <smrf.utils.queue.DateQueue_Threading>` is initialized
         for :attr:`all threading
@@ -646,7 +660,7 @@ class SMRF():
         :func:`DateQueue <smrf.utils.queue.DateQueue_Threading>`.
         """
         # Create threads for distribution
-        t,q = self.create_distributed_threads()
+        t, q = self.create_distributed_threads()
 
         # output thread
         t.append(queue.QueueOutput(q, self.date_time,
@@ -704,7 +718,8 @@ class SMRF():
         if self.distribute['thermal'].correct_veg:
             self.thread_variables += ['thermal_veg']
 
-        self._logger.info("Staging {} threaded variables...".format(len(self.thread_variables)))
+        self._logger.info("Staging {} threaded variables...".format(
+            len(self.thread_variables)))
         for v in self.thread_variables:
             q[v] = queue.DateQueue_Threading(self.queue_max_values,
                                              self.time_out,
@@ -714,81 +729,95 @@ class SMRF():
         # Distribute the data
 
         # 0.1 sun angle for time step
-        t.append(Thread(target=sunang.sunang_thread,
-                        name='sun_angle',
-                        args=(q, self.date_time,
-                              self.topo.basin_lat,
-                              self.topo.basin_long)))
+        t.append(Thread(
+            target=sunang.sunang_thread,
+            name='sun_angle',
+            args=(q, self.date_time,
+                  self.topo.basin_lat,
+                  self.topo.basin_long)))
 
         # 0.2 illumination angle
-        t.append(Thread(target=radiation.shade_thread,
-                        name='illum_angle',
-                        args=(q, self.date_time,
-                              self.topo.slope, self.topo.aspect)))
+        t.append(Thread(
+            target=radiation.shade_thread,
+            name='illum_angle',
+            args=(q, self.date_time,
+                  self.topo.sin_slope, self.topo.aspect)))
 
         # 1. Air temperature
-        t.append(Thread(target=self.distribute['air_temp'].distribute_thread,
-                        name='air_temp',
-                        args=(q, self.data.air_temp)))
+        t.append(Thread(
+            target=self.distribute['air_temp'].distribute_thread,
+            name='air_temp',
+            args=(q, self.data.air_temp)))
 
         # 2. Vapor pressure
-        t.append(Thread(target=self.distribute['vapor_pressure'].distribute_thread,
-                        name='vapor_pressure',
-                        args=(q, self.data.vapor_pressure)))
+        t.append(Thread(
+            target=self.distribute['vapor_pressure'].distribute_thread,
+            name='vapor_pressure',
+            args=(q, self.data.vapor_pressure)))
 
         # 3. Wind_speed and wind_direction
-        t.append(Thread(target=self.distribute['wind'].distribute_thread,
-                        name='wind',
-                        args=(q, self.data.wind_speed,
-                              self.data.wind_direction)))
+        t.append(Thread(
+            target=self.distribute['wind'].distribute_thread,
+            name='wind',
+            args=(q, self.data.wind_speed,
+                  self.data.wind_direction)))
 
         # 4. Precipitation
-        t.append(Thread(target=self.distribute['precip'].distribute_thread,
-                        name='precipitation',
-                        args=(q, self.data, self.date_time,
-                                self.topo.mask)))
+        t.append(Thread(
+            target=self.distribute['precip'].distribute_thread,
+            name='precipitation',
+            args=(q, self.data, self.date_time,
+                  self.topo.mask)))
 
         # 5. Albedo
-        t.append(Thread(target=self.distribute['albedo'].distribute_thread,
-                        name='albedo',
-                        args=(q, self.date_time)))
+        t.append(Thread(
+            target=self.distribute['albedo'].distribute_thread,
+            name='albedo',
+            args=(q, self.date_time)))
 
         # 6.Cloud Factor
-        t.append(Thread(target=self.distribute['cloud_factor'].distribute_thread,
-                        name='cloud_factor',
-                        args=(q, self.data.cloud_factor)))
+        t.append(Thread(
+            target=self.distribute['cloud_factor'].distribute_thread,
+            name='cloud_factor',
+            args=(q, self.data.cloud_factor)))
 
         # 7.1 Clear sky visible
-        t.append(Thread(target=self.distribute['solar'].distribute_thread_clear,
-                        name='clear_vis',
-                        args=(q, self.data.cloud_factor, 'clear_vis')))
+        t.append(Thread(
+            target=self.distribute['solar'].distribute_thread_clear,
+            name='clear_vis',
+            args=(q, self.data.cloud_factor, 'clear_vis')))
 
         # 7.2 Clear sky ir
-        t.append(Thread(target=self.distribute['solar'].distribute_thread_clear,
-                        name='clear_ir',
-                        args=(q, self.data.cloud_factor, 'clear_ir')))
+        t.append(Thread(
+            target=self.distribute['solar'].distribute_thread_clear,
+            name='clear_ir',
+            args=(q, self.data.cloud_factor, 'clear_ir')))
 
         # 7.3 Net radiation
-        t.append(Thread(target=self.distribute['solar'].distribute_thread,
-                        name='solar',
-                        args=(q, self.data.cloud_factor)))
+        t.append(Thread(
+            target=self.distribute['solar'].distribute_thread,
+            name='solar',
+            args=(q, self.data.cloud_factor)))
 
         # 7. thermal radiation
         if self.distribute['thermal'].gridded:
-            t.append(Thread(target=self.distribute['thermal'].distribute_thermal_thread,
-                            name='thermal',
-                            args=(q, self.data.thermal)))
+            t.append(Thread(
+                target=self.distribute['thermal'].distribute_thermal_thread,
+                name='thermal',
+                args=(q, self.data.thermal)))
         else:
-            t.append(Thread(target=self.distribute['thermal'].distribute_thread,
-                            name='thermal',
-                            args=(q, self.date_time)))
+            t.append(Thread(
+                target=self.distribute['thermal'].distribute_thread,
+                name='thermal',
+                args=(q, self.date_time)))
 
-        return t,q
+        return t, q
 
     def initializeOutput(self):
         """
         Initialize the output files based on the configFile section ['output'].
-        Currently only :func:`NetCDF files <smrf.output.output_netcdf>` is supported.
+        Currently only :func:`NetCDF files <smrf.output.output_netcdf>` is
+        supported.
         """
         out = self.config['output']['out_location']
 
@@ -816,22 +845,26 @@ class SMRF():
                             else:
                                 fname = join(out, v)
 
-                            d = {'variable': v,
-                                 'module': m,
-                                 'out_location':fname,
-                                 'info': self.distribute[m].output_variables[v]}
+                            d = {
+                                'variable': v,
+                                'module': m,
+                                'out_location': fname,
+                                'info': self.distribute[m].output_variables[v]
+                            }
                             variable_list[v] = d
 
             # determine what type of file to output
             if self.config['output']['file_type'].lower() == 'netcdf':
-                self.out_func = output.output_netcdf(variable_list, self.topo,
-                                                     self.config['time'],
-                                                     self.config['output'])
+                self.out_func = output.output_netcdf(
+                    variable_list, self.topo,
+                    self.config['time'],
+                    self.config['output'])
 
             elif self.config['output']['file_type'].lower() == 'hru':
-                self.out_func = output.output_hru(variable_list, self.topo,
-                                                  self.date_time,
-                                                  self.config['output'])
+                self.out_func = output.output_hru(
+                    variable_list, self.topo,
+                    self.date_time,
+                    self.config['output'])
 
             else:
                 raise Exception('Could not determine type of file for output')
@@ -850,7 +883,8 @@ class SMRF():
         Output the forcing data or model outputs for the current_time_step.
 
         Args:
-            current_time_step (date_time): the current time step datetime object
+            current_time_step (date_time): the current time step datetime 
+                                            object
 
             module -
             var_name -
@@ -865,7 +899,7 @@ class SMRF():
 
             # User is attempting to output single variable
             if module is not None and out_var is not None:
-                # add only one variable to the output list and preceed as normal
+                # add only one variable to the output list and preceed
                 var_vals = [self.out_func.variable_list[out_var]]
 
             # Incomplete request
@@ -986,15 +1020,15 @@ def can_i_run_smrf(config):
 
 
 def find_pixel_location(row, vec, a):
-        """
-        Find the index of the stations X/Y location in the model domain
+    """
+    Find the index of the stations X/Y location in the model domain
 
-        Args:
-            row (pandas.DataFrame): metadata rows
-            vec (nparray): Array of X or Y locations in domain
-            a (str): Column in DataFrame to pull data from (i.e. 'X')
+    Args:
+        row (pandas.DataFrame): metadata rows
+        vec (nparray): Array of X or Y locations in domain
+        a (str): Column in DataFrame to pull data from (i.e. 'X')
 
-        Returns:
-            Pixel value in vec where row[a] is located
-        """
-        return np.argmin(np.abs(vec - row[a]))
+    Returns:
+        Pixel value in vec where row[a] is located
+    """
+    return np.argmin(np.abs(vec - row[a]))

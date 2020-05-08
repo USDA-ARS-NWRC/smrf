@@ -2,7 +2,6 @@
 import logging
 import os
 import subprocess as sp
-from multiprocessing import Process
 
 import numpy as np
 from netCDF4 import Dataset
@@ -11,7 +10,8 @@ from utm import to_latlon
 
 from smrf.utils import gradient
 
-class topo():
+
+class Topo():
     """
     Class for topo images and processing those images. Images are:
     - DEM
@@ -47,7 +47,7 @@ class topo():
 
     """
 
-    images = ['dem', 'mask', 'veg_type', 'veg_height', 'veg_k', 'veg_tau']
+    IMAGES = ['dem', 'mask', 'veg_type', 'veg_height', 'veg_k', 'veg_tau']
 
     def __init__(self, topoConfig, calcInput=True, tempDir=None):
         self.topoConfig = topoConfig
@@ -67,7 +67,8 @@ class topo():
         else:
             self.stoporad_in_file = None
 
-    # IPW Support has been deprecated since 0.8.0, but it now has been fully removed.
+    # IPW Support has been deprecated since 0.8.0, but it now
+    # has been fully removed.
 
     def readNetCDF(self):
         """
@@ -78,15 +79,21 @@ class topo():
         # read in the images
         f = Dataset(self.topoConfig['filename'], 'r')
 
+        # netCDF>1.4.0 returns as masked arrays even if no missing values
+        # are present. This will ensure that if the array has no missing
+        # values, a normal numpy array is returned
+        f.set_always_mask(False)
+
         if 'projection' not in f.variables.keys():
             raise IOError("Topo input files must have projection information")
 
         # read in the images
         # netCDF files are stored typically as 32-bit float, so convert
         # to double or int
-        for v_smrf in self.images:
+        for v_smrf in self.IMAGES:
 
-            # check to see if the user defined any variables e.g. veg_height = veg_length
+            # check to see if the user defined any variables
+            # e.g. veg_height = veg_length
             if v_smrf in self.topoConfig.keys():
                 v_file = self.topoConfig[v_smrf]
             else:
@@ -109,9 +116,8 @@ class topo():
         self.y = f.variables['y'][:]
         [self.X, self.Y] = np.meshgrid(self.x, self.y)
 
-
         # Calculate the center of the basin
-        self.cx, self.cy  = self.get_center(f, mask_name='mask')
+        self.cx, self.cy = self.get_center(f, mask_name='mask')
 
         # Is the modeling domain in the northern hemisphere
         self.northern_hemisphere = self.topoConfig['northern_hemisphere']
@@ -120,10 +126,11 @@ class topo():
         self.zone_number = int(f.variables['projection'].utm_zone_number)
 
         # Calculate the lat long
-        self.basin_lat, self.basin_long = to_latlon(self.cx,
-                                            self.cy,
-                                            self.zone_number,
-                                            northern=self.northern_hemisphere)
+        self.basin_lat, self.basin_long = to_latlon(
+            self.cx,
+            self.cy,
+            self.zone_number,
+            northern=self.northern_hemisphere)
 
         self._logger.info('Domain center in UTM Zone {:d} = {:0.1f}m, {:0.1f}m'
                           ''.format(self.zone_number, self.cx, self.cy))
@@ -252,7 +259,8 @@ class topo():
 
         # calculate the gradient and aspect
         g, a = getattr(gradient, func)(self.dem, dx, dy, aspect_rad=True)
-        self.slope = g
+        self.slope_radians = g
+        self.sin_slope = np.sin(g)  # IPW stores slope as sin(Slope)
         self.aspect = a
 
         # convert to ipw images for stoporad, the spatialnc package
@@ -263,7 +271,7 @@ class topo():
             os.path.join(self.tempDir, 'slope.ipw')
         ))
         i = ipw.IPW()
-        i.new_band(g)
+        i.new_band(self.sin_slope)
         i.add_geo_hdr([self.x[0], self.y[0]],
                       [np.mean(np.diff(self.x)), np.mean(np.diff(self.y))],
                       'm', 'UTM')

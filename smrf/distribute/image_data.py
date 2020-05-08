@@ -84,7 +84,7 @@ class image_data():
 
         # determine the stations that will be used, alphabetical order
         if "stations" in config.keys():
-            if config["stations"] != None:
+            if config["stations"] is not None:
                 stations = config['stations'].sort()
 
         self.stations = stations
@@ -95,7 +95,7 @@ class image_data():
         :py:attr:`config`.
 
         Args:
-            topo: :mod:`smrf.data.loadTopo.topo` instance contain topographic
+            topo: :mod:`smrf.data.loadTopo.Topo` instance contain topographic
                 data and infomation
             metadata: metadata Pandas dataframe containing the station metadata
                 from :mod:`smrf.data.loadData` or :mod:`smrf.data.loadGrid`
@@ -111,11 +111,11 @@ class image_data():
         """
 
         self.min = self.config['min']
-        if self.min == None:
+        if self.min is None:
             self.min = -np.inf
 
         self.max = self.config['max']
-        if self.max == None:
+        if self.max is None:
             self.max = np.inf
 
         # pull out the metadata subset
@@ -125,7 +125,7 @@ class image_data():
             self.stations = metadata.index.values
         self.metadata = metadata
 
-        #Old DB used X and Y, New DB uses utm_x, utm_y
+        # Old DB used X and Y, New DB uses utm_x, utm_y
         try:
             self.mx = metadata.utm_x.values
             self.my = metadata.utm_y.values
@@ -138,34 +138,39 @@ class image_data():
         if "distribution" in self.config.keys():
             if self.config['distribution'] == 'idw':
                 # inverse distance weighting
-                self.idw = idw.IDW(self.mx, self.my, topo.X, topo.Y, mz=self.mz,
-                                   GridZ=topo.dem, power=self.config['idw_power'])
+                self.idw = idw.IDW(
+                    self.mx, self.my, topo.X, topo.Y, mz=self.mz,
+                    GridZ=topo.dem, power=self.config['idw_power'])
 
             elif self.config['distribution'] == 'dk':
                 # detrended kriging
-                self.dk = dk.DK(self.mx, self.my, self.mz, topo.X, topo.Y,
-                                                                   topo.dem,
-                                                                   self.config)
+                self.dk = dk.DK(
+                    self.mx, self.my, self.mz, topo.X, topo.Y,
+                    topo.dem,
+                    self.config)
 
             elif self.config['distribution'] == 'grid':
                 # linear interpolation between points
-                self.grid = grid.GRID(self.config, self.mx, self.my, topo.X,
-                                                                topo.Y,
-                                                                mz=self.mz,
-                                                                GridZ=topo.dem,
-                                                                mask=topo.mask,
-                                                                metadata=metadata)
+                self.grid = grid.GRID(
+                    self.config, self.mx, self.my, topo.X,
+                    topo.Y,
+                    mz=self.mz,
+                    GridZ=topo.dem,
+                    mask=topo.mask,
+                    metadata=metadata)
 
             elif self.config['distribution'] == 'kriging':
                 # generic kriging
-                self.kriging = kriging.KRIGE(self.mx, self.my, self.mz, topo.X,
-                                                                        topo.Y,
-                                                                        topo.dem,
-                                                                        self.config)
+                self.kriging = kriging.KRIGE(
+                    self.mx, self.my, self.mz, topo.X,
+                    topo.Y,
+                    topo.dem,
+                    self.config)
 
             else:
-                raise Exception("Could not determine the distribution method for "
-                                "{}".format(self.variable))
+                raise Exception(
+                    "Could not determine the distribution method for "
+                    "{}".format(self.variable))
 
     def _distribute(self, data, other_attribute=None, zeros=None):
         """
@@ -192,9 +197,10 @@ class image_data():
 
         if self.config['distribution'] == 'idw':
             if self.config['detrend']:
-                v = self.idw.detrendedIDW(data.values,
-                                          self.config['detrend_slope'],
-                                          zeros=zeros)
+                v = self.idw.detrendedIDW(
+                    data.values,
+                    self.config['detrend_slope'],
+                    zeros=zeros)
             else:
                 v = self.idw.calculateIDW(data.values)
 
@@ -203,12 +209,14 @@ class image_data():
 
         elif self.config['distribution'] == 'grid':
             if self.config['detrend']:
-                v = self.grid.detrendedInterpolation(data,
-                                                     self.config['detrend_slope'],
-                                                     self.config['grid_method'])
+                v = self.grid.detrendedInterpolation(
+                    data,
+                    self.config['detrend_slope'],
+                    self.config['grid_method'])
             else:
-                v = self.grid.calculateInterpolation(data.values,
-                                                     self.config['grid_method'])
+                v = self.grid.calculateInterpolation(
+                    data.values,
+                    self.config['grid_method'])
 
         elif self.config['distribution'] == 'kriging':
             v, ss = self.kriging.calculate(data.values)

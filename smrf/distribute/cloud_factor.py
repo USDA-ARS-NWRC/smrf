@@ -32,11 +32,11 @@ class cf(image_data.image_data):
 
     # these are variables that can be output
     output_variables = {'cloud_factor': {
-                                     'units': 'None',
-                                     'standard_name': 'cloud_factor',
-                                     'long_name': 'cloud factor'
-                                     }
-                        }
+        'units': 'None',
+        'standard_name': 'cloud_factor',
+        'long_name': 'cloud factor'
+    }
+    }
 
     # these are variables that are operate at the end only and do not need to
     # be written during main distribute loop
@@ -58,7 +58,7 @@ class cf(image_data.image_data):
         :mod:`smrf.distribute.image_data.image_data._initialize`.
 
         Args:
-            topo: :mod:`smrf.data.loadTopo.topo` instance contain topographic
+            topo: :mod:`smrf.data.loadTopo.Topo` instance contain topographic
                 data and infomation
             metadata: metadata Pandas dataframe containing the station metadata
                 from :mod:`smrf.data.loadData` or :mod:`smrf.data.loadGrid`
@@ -82,7 +82,7 @@ class cf(image_data.image_data):
 
         self._distribute(data)
         self.cloud_factor = utils.set_min_max(self.cloud_factor, self.min,
-                                                                 self.max)
+                                              self.max)
 
     def distribute_thread(self, queue, data):
         """

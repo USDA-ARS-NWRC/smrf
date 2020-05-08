@@ -7,7 +7,7 @@ from subprocess import check_output
 
 import numpy
 from Cython.Distutils import build_ext
-from setuptools import Extension, setup
+from setuptools import Extension, setup, find_packages
 
 if sys.argv[-1] != 'test':
 
@@ -117,19 +117,7 @@ setup(
     author="Scott Havens",
     author_email='scott.havens@ars.usda.gov',
     url='https://github.com/USDA-ARS-NWRC/smrf',
-    packages=[
-        'smrf',
-        'smrf.data',
-        'smrf.distribute',
-        'smrf.envphys',
-        'smrf.envphys.core',
-        'smrf.framework',
-        'smrf.output',
-        'smrf.spatial',
-        'smrf.utils',
-        'smrf.utils.wind',
-        'smrf.spatial.dk'
-    ],
+    packages=find_packages(include=['smrf', 'smrf.*']),
     include_package_data=True,
     package_data={
         'smrf': [
