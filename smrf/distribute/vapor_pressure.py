@@ -46,21 +46,21 @@ class vp(image_data.image_data):
 
     # these are variables that can be output
     output_variables = {'vapor_pressure': {
-                                  'units': 'pascal',
-                                  'standard_name': 'vapor_pressure',
-                                  'long_name': 'Vapor pressure'
-                                  },
-                        'dew_point': {
-                                  'units': 'degree_Celcius',
-                                  'standard_name': 'dew_point_temperature',
-                                  'long_name': 'Dew point temperature'
-                                  },
-                         'precip_temp': {
-                                   'units': 'degree_Celcius',
-                                   'standard_name': 'precip_temperature',
-                                   'long_name': 'Precip temperature'
-                                   }
-                        }
+        'units': 'pascal',
+        'standard_name': 'vapor_pressure',
+        'long_name': 'Vapor pressure'
+    },
+        'dew_point': {
+        'units': 'degree_Celcius',
+        'standard_name': 'dew_point_temperature',
+        'long_name': 'Dew point temperature'
+    },
+        'precip_temp': {
+        'units': 'degree_Celcius',
+        'standard_name': 'precip_temperature',
+        'long_name': 'Precip temperature'
+    }
+    }
 
     # these are variables that are operate at the end only and do not need to
     # be written during main distribute loop
@@ -87,7 +87,7 @@ class vp(image_data.image_data):
         the following class attributes to zeros:
 
         Args:
-            topo: :mod:`smrf.data.loadTopo.topo` instance contain topographic
+            topo: :mod:`smrf.data.loadTopo.Topo` instance contain topographic
                 data and infomation
             data: data Pandas dataframe containing the station data,
                 from :mod:`smrf.data.loadData` or :mod:`smrf.data.loadGrid`

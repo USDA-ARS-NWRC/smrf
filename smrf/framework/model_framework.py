@@ -297,11 +297,11 @@ class SMRF():
     def loadTopo(self, calcInput=True):
         """
         Load the information from the configFile in the ['topo'] section. See
-        :func:`smrf.data.loadTopo.topo` for full description.
+        :func:`smrf.data.loadTopo.Topo` for full description.
         """
 
         # load the topo
-        self.topo = data.loadTopo.topo(self.config['topo'],
+        self.topo = data.loadTopo.Topo(self.config['topo'],
                                        calcInput,
                                        tempDir=self.temp_dir)
 
@@ -523,7 +523,7 @@ class SMRF():
     def distributeData_single(self):
         """
         Distribute the measurement point data for all variables in serial. Each
-        variable is initialized first using the :func:`smrf.data.loadTopo.topo`
+        variable is initialized first using the :func:`smrf.data.loadTopo.Topo`
         instance and the metadata loaded from
         :func:`~smrf.framework.model_framework.SMRF.loadData`.
         The function distributes over each time step, all the variables below.
@@ -647,7 +647,7 @@ class SMRF():
         """
         Distribute the measurement point data for all variables using threading
         and queues. Each variable is initialized first using the
-        :func:`smrf.data.loadTopo.topo` instance and the metadata loaded from
+        :func:`smrf.data.loadTopo.Topo` instance and the metadata loaded from
         :func:`~smrf.framework.model_framework.SMRF.loadData`. A
         :func:`DateQueue <smrf.utils.queue.DateQueue_Threading>` is initialized
         for :attr:`all threading

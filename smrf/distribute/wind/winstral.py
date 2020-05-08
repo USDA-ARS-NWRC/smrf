@@ -52,7 +52,7 @@ class WinstralWindModel(image_data.image_data):
     distributed flat wind speed and each cell's maxus value.
     """
 
-    variable = 'wind'
+    VARIABLE = 'wind'
 
     def __init__(self, smrf_config):
         """Initialize the WinstralWindModel
@@ -65,7 +65,7 @@ class WinstralWindModel(image_data.image_data):
             IOError: if maxus file does not match topo size
         """
 
-        image_data.image_data.__init__(self, self.variable)
+        image_data.image_data.__init__(self, self.VARIABLE)
 
         self._logger = logging.getLogger(__name__)
 

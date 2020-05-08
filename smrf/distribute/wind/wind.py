@@ -17,17 +17,17 @@ class Wind(image_data.image_data):
     Three distribution methods are available for the Wind class:
     1. Winstral and Marks 2002 method for maximum upwind slope (maxus)
     2. Import WindNinja simulations
-    3. Standared interpolation
+    3. Standard interpolation
 
     Args:
-        self.config: The [wind] section of the configuration file
+        self.config: The full SMRF configuration file
 
     Attributes:
-        config: configuration from [vapor_pressure] section
+        config: configuration from [wind] section
         wind_speed: numpy matrix of the wind speed
         wind_direction: numpy matrix of the wind direction
         veg_type: numpy array for the veg type, from
-            :py:attr:`smrf.data.loadTopo.topo.veg_type`
+            :py:attr:`smrf.data.loadTopo.Topo.veg_type`
         _maxus_file: the location of the maxus NetCDF file
         maxus: the loaded library values from :py:attr:`_maxus_file`
         maxus_direction: the directions associated with the :py:attr:`maxus`
@@ -42,7 +42,7 @@ class Wind(image_data.image_data):
 
     """
 
-    variable = 'wind'
+    VARIABLE = 'wind'
 
     # these are variables that can be output
     output_variables = {
@@ -69,16 +69,12 @@ class Wind(image_data.image_data):
     def __init__(self, config):
 
         # extend the base class
-        image_data.image_data.__init__(self, self.variable)
+        image_data.image_data.__init__(self, self.VARIABLE)
         self._logger = logging.getLogger(__name__)
 
         # check and assign the configuration
         self.smrf_config = config
         self.getConfig(config['wind'])
-
-        # distribute_drifts = False
-        # if self.smrf_config["precip"]["precip_rescaling_model"] == "winstral":
-        #     distribute_drifts = True
 
         if self.config['wind_model'] == 'interp':
             # Straight interpolation of the wind
@@ -102,7 +98,7 @@ class Wind(image_data.image_data):
         the enhancement factors for the stations and vegetation.
 
         Args:
-            topo: :mod:`smrf.data.loadTopo.topo` instance contain topographic
+            topo: :mod:`smrf.data.loadTopo.Topo` instance contain topographic
                 data and infomation
             data: data Pandas dataframe containing the station data,
                 from :mod:`smrf.data.loadData` or :mod:`smrf.data.loadGrid`
@@ -114,8 +110,6 @@ class Wind(image_data.image_data):
         self.wind_model._initialize(topo, data.metadata)
 
         if self.config['wind_model'] != 'interp':
-            #     self.wind_model._initialize(topo, data.metadata)
-            # else:
             self.wind_model.initialize(topo, data)
 
     def distribute(self, data_speed, data_direction, t):
@@ -140,8 +134,8 @@ class Wind(image_data.image_data):
             self._distribute(data_speed, other_attribute='wind_speed')
 
             # wind direction components at the station
-            self.u_direction = np.sin(data_direction * np.pi/180)    # u
-            self.v_direction = np.cos(data_direction * np.pi/180)    # v
+            self.u_direction = np.sin(data_direction * np.pi/180)
+            self.v_direction = np.cos(data_direction * np.pi/180)
 
             # distribute u_direction and v_direction
             self._distribute(self.u_direction,

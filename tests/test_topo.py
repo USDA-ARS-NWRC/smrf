@@ -13,16 +13,15 @@ class TestLoadTopo(unittest.TestCase):
         self.test_dir = abspath(join(base, '../', 'tests'))
         topo_config = {
             'filename': join(self.test_dir, 'RME/topo/topo.nc'),
-            'northern_hemisphere':True,
+            'northern_hemisphere': True,
         }
-
 
         self.ds = nc.Dataset(topo_config['filename'])
 
-        self.topo = loadTopo.topo(
+        self.topo = loadTopo.Topo(
             topo_config,
             calcInput=False,
-            tempDir= join(self.test_dir, 'RME/output')
+            tempDir=join(self.test_dir, 'RME/output')
         )
 
     @classmethod
@@ -33,7 +32,7 @@ class TestLoadTopo(unittest.TestCase):
         '''
         Test the basin center calculation using the basin mask
         '''
-        cx, cy  = self.topo.get_center(self.ds, mask_name='mask')
+        cx, cy = self.topo.get_center(self.ds, mask_name='mask')
         np.testing.assert_almost_equal(cx, 520033.7187500, 7)
         np.testing.assert_almost_equal(cy, 4768035.0, 7)
 
@@ -41,7 +40,7 @@ class TestLoadTopo(unittest.TestCase):
         '''
         Test the basin center calculation for the entire basin domain
         '''
-        cx, cy  = self.topo.get_center(self.ds, mask_name=None)
+        cx, cy = self.topo.get_center(self.ds, mask_name=None)
         np.testing.assert_almost_equal(cx, 520050.0, 7)
         np.testing.assert_almost_equal(cy, 4768055.0, 7)
 
@@ -52,15 +51,17 @@ class TestLoadTopo(unittest.TestCase):
         # Original RME
         # basin_lon:                     -116.7547
         # basin_lat:                     43.067
-        np.testing.assert_almost_equal(self.topo.basin_lat, 43.06475372378507, 7)
-        np.testing.assert_almost_equal(self.topo.basin_long, -116.75395420397061, 7)
+        np.testing.assert_almost_equal(
+            self.topo.basin_lat, 43.06475372378507, 7)
+        np.testing.assert_almost_equal(
+            self.topo.basin_long, -116.75395420397061, 7)
 
     def test_projection_attributes(self):
         '''
         Confirm that this class has important projection attributes
         '''
         # Attribute directly used in load Grid as attributess from topo class
-        important = ['basin_lat','basin_long', 'zone_number',
+        important = ['basin_lat', 'basin_long', 'zone_number',
                      'northern_hemisphere']
 
         for at in important:

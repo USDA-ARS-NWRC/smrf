@@ -78,7 +78,7 @@ class solar(image_data.image_data):
         config: full configuration dictionary contain at least the sections
                 albedo, and solar
         stoporad_in: file path to the stoporad_in file created from
-            :mod:`smrf.data.loadTopo.topo`
+            :mod:`smrf.data.loadTopo.Topo`
         tempDir: location of temp/working directory (default=None, which is the
             'WORKDIR' environment variable)
 
@@ -88,7 +88,7 @@ class solar(image_data.image_data):
         config: configuration from [albedo] section
 
         stoporad_in: file path to the stoporad_in file created from
-            :mod:`smrf.data.loadTopo.topo`
+            :mod:`smrf.data.loadTopo.Topo`
         clear_ir_beam: numpy array modeled clear sky infrared beam radiation
         clear_ir_diffuse: numpy array modeled clear sky infrared diffuse
             radiation
@@ -109,19 +109,19 @@ class solar(image_data.image_data):
             and ``long_name`` for creating the NetCDF output file.
         stations: stations to be used in alphabetical order
         stoporad_in: file path to the stoporad_in file created from
-            :mod:`smrf.data.loadTopo.topo`
+            :mod:`smrf.data.loadTopo.Topo`
         tempDir: temporary directory for ``stoporad``, will default to the
             ``WORKDIR`` environment variable
         variable: solar
         veg_height: numpy array of vegetation heights from
-            :mod:`smrf.data.loadTopo.topo`
+            :mod:`smrf.data.loadTopo.Topo`
         veg_ir_beam: numpy array vegetation adjusted infrared beam radiation
         veg_ir_diffuse: numpy array vegetation adjusted infrared diffuse
             radiation
         veg_k: numpy array of vegetation extinction coefficient from
-            :mod:`smrf.data.loadTopo.topo`
+            :mod:`smrf.data.loadTopo.Topo`
         veg_tau: numpy array of vegetation optical transmissivity from
-            :mod:`smrf.data.loadTopo.topo`
+            :mod:`smrf.data.loadTopo.Topo`
         veg_vis_beam: numpy array vegetation adjusted visible beam radiation
         veg_vis_diffuse: numpy array vegetation adjusted visible diffuse
             radiation
@@ -237,7 +237,7 @@ class solar(image_data.image_data):
         * :py:attr:`veg_k`
 
         Args:
-            topo: :mod:`smrf.data.loadTopo.topo` instance contain topographic
+            topo: :mod:`smrf.data.loadTopo.Topo` instance contain topographic
                 data and infomation
             data: data Pandas dataframe containing the station data,
                 from :mod:`smrf.data.loadData` or :mod:`smrf.data.loadGrid`

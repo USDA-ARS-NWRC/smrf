@@ -34,11 +34,11 @@ class ts(image_data.image_data):
 
     # these are variables that can be output
     output_variables = {'soil_temp': {
-                                  'units': 'degree_Celcius',
-                                  'standard_name': 'soil_temperature',
-                                  'long_name': 'Soil temperature'
-                                  }
-                        }
+        'units': 'degree_Celcius',
+        'standard_name': 'soil_temperature',
+        'long_name': 'Soil temperature'
+    }
+    }
 
     # these are variables that are operate at the end only and do not need to
     # be written during main distribute loop
@@ -60,7 +60,7 @@ class ts(image_data.image_data):
         value based on the configuration file.
 
         Args:
-            topo: :mod:`smrf.data.loadTopo.topo` instance contain topographic
+            topo: :mod:`smrf.data.loadTopo.Topo` instance contain topographic
                 data and infomation
             metadata: data Pandas dataframe containing the station data,
                 from :mod:`smrf.data.loadData` or :mod:`smrf.data.loadGrid`

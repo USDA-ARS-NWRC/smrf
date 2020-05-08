@@ -43,16 +43,16 @@ class albedo(image_data.image_data):
 
     # these are variables that can be output
     output_variables = {'albedo_vis': {
-                                       'units': 'None',
-                                       'standard_name': 'visible_albedo',
-                                       'long_name': 'Visible wavelength albedo'
-                                       },
-                        'albedo_ir': {
-                                       'units': 'None',
-                                       'standard_name': 'infrared_albedo',
-                                       'long_name': 'Infrared wavelength albedo'
-                                       }
-                        }
+        'units': 'None',
+        'standard_name': 'visible_albedo',
+        'long_name': 'Visible wavelength albedo'
+    },
+        'albedo_ir': {
+        'units': 'None',
+        'standard_name': 'infrared_albedo',
+        'long_name': 'Infrared wavelength albedo'
+    }
+    }
     # these are variables that are operate at the end only and do not need to
     # be written during main distribute loop
     post_process_variables = {}
@@ -69,12 +69,13 @@ class albedo(image_data.image_data):
         image_data.image_data.__init__(self, self.variable)
         self._logger = logging.getLogger(__name__)
 
-        #Get the veg values for the decay methods. Date method uses self.veg
-        #Hardy2000 uses self.litter
-        for d in ['veg','litter']:
+        # Get the veg values for the decay methods. Date method uses self.veg
+        # Hardy2000 uses self.litter
+        for d in ['veg', 'litter']:
             v = {}
 
-            matching = [s for s in albedoConfig.keys() if "{0}_".format(d) in s]
+            matching = [s for s in albedoConfig.keys()
+                        if "{0}_".format(d) in s]
             for m in matching:
                 ms = m.split('_')
                 v[ms[-1]] = albedoConfig[m]
@@ -93,7 +94,7 @@ class albedo(image_data.image_data):
         Initialize the distribution, calls image_data.image_data._initialize()
 
         Args:
-            topo: smrf.data.loadTopo.topo instance contain topo data/info
+            topo: smrf.data.loadTopo.Topo instance contain topo data/info
             data: data dataframe containing the station data
 
         """
@@ -131,12 +132,12 @@ class albedo(image_data.image_data):
             # Perform litter decay
             if self.config['decay_method'] == 'date_method':
                 alb_v_d, alb_ir_d = radiation.decay_alb_power(self.veg,
-                                        self.veg_type,
-                                        self.config['date_method_start_decay'],
-                                        self.config['date_method_end_decay'],
-                                        current_time_step,
-                                        self.config['date_method_decay_power'],
-                                        alb_v, alb_ir)
+                                                              self.veg_type,
+                                                              self.config['date_method_start_decay'],
+                                                              self.config['date_method_end_decay'],
+                                                              current_time_step,
+                                                              self.config['date_method_decay_power'],
+                                                              alb_v, alb_ir)
                 alb_v = alb_v_d
                 alb_ir = alb_ir_d
 

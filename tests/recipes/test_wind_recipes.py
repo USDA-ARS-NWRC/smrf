@@ -1,7 +1,8 @@
 from copy import deepcopy
 
 from tests.recipes.base_recipe import BaseRecipes
-from tests.smrf_test_case import SMRFTestCaseLakes, SMRFTestCase
+from tests.smrf_test_case import SMRFTestCase
+from tests.smrf_test_case_lakes import SMRFTestCaseLakes
 
 
 class TestWindNinjaRecipes(SMRFTestCaseLakes, BaseRecipes):
@@ -12,12 +13,8 @@ class TestWindNinjaRecipes(SMRFTestCaseLakes, BaseRecipes):
         """Test the wind ninja recipe
         """
 
-        # no changes to the base config which is a
-        # wind ninja run in the Lakes
-        config = deepcopy(self.base_config)
-
         # get the master config list
-        master_config = self.master_config(config)
+        master_config = self.master_config(self.base_config)
 
         # make changes
         master_config['wind'] = [
@@ -32,7 +29,7 @@ class TestWindNinjaRecipes(SMRFTestCaseLakes, BaseRecipes):
             'max'
         ]
 
-        self.check_config_section(config, master_config, 'wind')
+        self.check_config_section(self.base_config, master_config, 'wind')
 
 
 class TestWinstralWindRecipes(SMRFTestCase, BaseRecipes):
@@ -42,10 +39,9 @@ class TestWinstralWindRecipes(SMRFTestCase, BaseRecipes):
     def test_winstral_wind_recipe(self):
         """Test the winstral wind recipe
         """
-        config = deepcopy(self.base_config)
 
         # get the master config list
-        master_config = self.master_config(config)
+        master_config = self.master_config(self.base_config)
 
         # make changes
         master_config['wind'] = [
@@ -69,7 +65,7 @@ class TestWinstralWindRecipes(SMRFTestCase, BaseRecipes):
             'veg_3061'
         ]
 
-        self.check_config_section(config, master_config, 'wind')
+        self.check_config_section(self.base_config, master_config, 'wind')
 
 
 class TestInterpWindRecipes(SMRFTestCase, BaseRecipes):

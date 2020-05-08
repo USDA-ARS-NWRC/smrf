@@ -9,7 +9,7 @@ from smrf.data import loadTopo
 from smrf.data.mysql_data import date_range
 from smrf.distribute.wind.wind_ninja import WindNinjaModel
 from smrf.utils import utils
-from tests.smrf_test_case import SMRFTestCaseLakes
+from tests.smrf_test_case_lakes import SMRFTestCaseLakes
 
 
 class TestWindNinja(SMRFTestCaseLakes):
@@ -21,10 +21,10 @@ class TestWindNinja(SMRFTestCaseLakes):
         config = self.base_config.cfg
 
         # Load the topo
-        topo = loadTopo.topo(config['topo'], calcInput=False,
+        topo = loadTopo.Topo(config['topo'], calcInput=False,
                              tempDir='tests/Lakes/output')
 
-        # Get the timesetps correctly in the time zone
+        # Get the time steps correctly in the time zone
         d = date_range(
             config['time']['start_date'],
             config['time']['end_date'],

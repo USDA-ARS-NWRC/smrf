@@ -11,7 +11,7 @@ from utm import to_latlon
 from smrf.utils import gradient
 
 
-class topo():
+class Topo():
     """
     Class for topo images and processing those images. Images are:
     - DEM
@@ -47,7 +47,7 @@ class topo():
 
     """
 
-    images = ['dem', 'mask', 'veg_type', 'veg_height', 'veg_k', 'veg_tau']
+    IMAGES = ['dem', 'mask', 'veg_type', 'veg_height', 'veg_k', 'veg_tau']
 
     def __init__(self, topoConfig, calcInput=True, tempDir=None):
         self.topoConfig = topoConfig
@@ -90,7 +90,7 @@ class topo():
         # read in the images
         # netCDF files are stored typically as 32-bit float, so convert
         # to double or int
-        for v_smrf in self.images:
+        for v_smrf in self.IMAGES:
 
             # check to see if the user defined any variables
             # e.g. veg_height = veg_length

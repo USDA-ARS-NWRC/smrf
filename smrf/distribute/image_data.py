@@ -95,7 +95,7 @@ class image_data():
         :py:attr:`config`.
 
         Args:
-            topo: :mod:`smrf.data.loadTopo.topo` instance contain topographic
+            topo: :mod:`smrf.data.loadTopo.Topo` instance contain topographic
                 data and infomation
             metadata: metadata Pandas dataframe containing the station metadata
                 from :mod:`smrf.data.loadData` or :mod:`smrf.data.loadGrid`

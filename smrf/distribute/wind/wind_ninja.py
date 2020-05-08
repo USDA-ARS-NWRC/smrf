@@ -31,7 +31,7 @@ class WindNinjaModel(image_data.image_data):
     files and interpolates to the model domain.
     """
 
-    variable = 'wind'
+    VARIABLE = 'wind'
     WN_DATE_FORMAT = '%m-%d-%Y_%H%M'
     DATE_FORMAT = '%Y%m%d'
 
@@ -39,14 +39,14 @@ class WindNinjaModel(image_data.image_data):
         """Initialize the WinstralWindModel
 
         Arguments:
-            smrf_config {UserConfig} -- entire smrf config
+            smrf_config {UserConfig.Dictionary} -- entire smrf config
             distribute_drifts {bool} -- not used
 
         Raises:
             IOError: if maxus file does not match topo size
         """
 
-        image_data.image_data.__init__(self, self.variable)
+        image_data.image_data.__init__(self, self.VARIABLE)
 
         self._logger = logging.getLogger(__name__)
         self._logger.debug('Creating the WindNinjaModel')
