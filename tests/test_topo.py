@@ -1,18 +1,22 @@
-import smrf
-from os.path import join, dirname, abspath
-import numpy as np
+import os
 import unittest
-from smrf.data import loadTopo
+
 import netCDF4 as nc
+import numpy as np
+
+import smrf
+from smrf.data import loadTopo
 
 
 class TestLoadTopo(unittest.TestCase):
     @classmethod
     def setUp(self):
-        base = dirname(smrf.__file__)
-        self.test_dir = abspath(join(base, '../', 'tests'))
+        base = os.path.dirname(smrf.__file__)
+        self.test_dir = os.path.abspath(os.path.join(base, '../', 'tests'))
+        tempDir = os.path.join(self.test_dir, 'RME/output')
+        os.mkdir(tempDir)
         topo_config = {
-            'filename': join(self.test_dir, 'RME/topo/topo.nc'),
+            'filename': os.path.join(self.test_dir, 'RME/topo/topo.nc'),
             'northern_hemisphere': True,
             'gradient_method': 'gradient_d8'
         }
@@ -21,7 +25,7 @@ class TestLoadTopo(unittest.TestCase):
 
         self.topo = loadTopo.Topo(
             topo_config,
-            tempDir=join(self.test_dir, 'RME/output')
+            tempDir=tempDir
         )
 
     @classmethod

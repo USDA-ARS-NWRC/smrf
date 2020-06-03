@@ -5,9 +5,9 @@ import subprocess as sp
 
 import numpy as np
 from netCDF4 import Dataset
+from spatialnc import ipw
 from topocalc import gradient
 from topocalc.viewf import viewf
-from spatialnc import ipw
 from utm import to_latlon
 
 
