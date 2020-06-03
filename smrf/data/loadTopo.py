@@ -5,10 +5,9 @@ import subprocess as sp
 
 import numpy as np
 from netCDF4 import Dataset
+from topocalc import gradient
 from spatialnc import ipw
 from utm import to_latlon
-
-from smrf.utils import gradient
 
 
 class Topo():
@@ -151,8 +150,8 @@ class Topo():
         Args:
             ds: netCDF4.Dataset object containing at least x,y, optionally
                     a mask variable name
-            mask_name: variable name in the dataset that is a mask where 1 is in
-                      the mask
+            mask_name: variable name in the dataset that is a mask where 1 is
+                    in the mask
         Returns:
             tuple: x,y of the data center in the datas native coordinates
         '''
@@ -197,7 +196,6 @@ class Topo():
         ))
         self._logger.debug('gradient file - %s' % gfile)
 
-        # self._gradient(self.topoConfig['dem'], gfile)
         self.gradient(gfile)
 
         # calculate the view factor
@@ -236,14 +234,6 @@ class Topo():
 
         os.remove(self.topoConfig['dem'])
         self.topoConfig.pop('dem', None)
-
-    def _gradient(self, demFile, gradientFile):
-        # calculate the gradient
-        cmd = 'gradient %s > %s' % (demFile, gradientFile)
-        proc = sp.Popen(cmd, shell=True, env=os.environ.copy()).wait()
-
-        if proc != 0:
-            raise OSError('gradient failed')
 
     def gradient(self, gfile):
         """
