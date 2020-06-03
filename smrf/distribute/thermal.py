@@ -110,8 +110,8 @@ class th(image_data.image_data):
 
     The results from Flerchinger et al (2009) :cite:`Flerchinger&al:2009`
     showed that the Kimball1982 cloud correction with Dilley1998 clear sky
-    algorthim had the lowest RMSD. The Crawford1999 worked best when combined with
-    Angstrom1918, Dilley1998, or Prata1996.
+    algorthim had the lowest RMSD. The Crawford1999 worked best when combined
+    with Angstrom1918, Dilley1998, or Prata1996.
 
     .. figure:: _static/thermal_cloud_comparision.png
        :scale: 50%
@@ -159,8 +159,8 @@ class th(image_data.image_data):
             :py:attr:`smrf.data.loadTopo.Topo.veg_k`
         veg_tau: numpy array for the veg transmissivity, from
             :py:attr:`smrf.data.loadTopo.Topo.veg_tau`
-        sky_view: numpy array for the sky view factor, from
-            :py:attr:`smrf.data.loadTopo.Topo.sky_view`
+        sky_view_factor: numpy array for the sky view factor, from
+            :py:attr:`smrf.data.loadTopo.Topo.sky_view_factor`
     """
 
     variable = 'thermal'
@@ -221,7 +221,7 @@ class th(image_data.image_data):
         * :py:attr:`veg_height`
         * :py:attr:`veg_tau`
         * :py:attr:`veg_k`
-        * :py:attr:`sky_view`
+        * :py:attr:`sky_view_factor`
         * :py:attr:`dem`
 
         Args:
@@ -239,9 +239,9 @@ class th(image_data.image_data):
         self.veg_height = topo.veg_height
         self.veg_tau = topo.veg_tau
         self.veg_k = topo.veg_k
-        self.sky_view = topo.sky_view
+        self.sky_view_factor = topo.sky_view_factor
         if not self.correct_terrain:
-            self.sky_view = None
+            self.sky_view_factor = None
         self.dem = topo.dem
 
     def distribute(self, date_time, air_temp, vapor_pressure=None,
@@ -270,8 +270,12 @@ class th(image_data.image_data):
         # calculate clear sky thermal
         if self.clear_sky_method == 'marks1979':
             cth = np.zeros_like(air_temp, dtype=np.float64)
-            envphys_c.ctopotherm(air_temp, dew_point, self.dem, self.sky_view,
-                                 cth, self.config['marks1979_nthreads'])
+            envphys_c.ctopotherm(
+                air_temp, dew_point,
+                self.dem,
+                self.sky_view_factor,
+                cth,
+                self.config['marks1979_nthreads'])
 
         elif self.clear_sky_method == 'dilley1998':
             cth = thermal_radiation.Dilly1998(air_temp, vapor_pressure/1000)
@@ -283,9 +287,9 @@ class th(image_data.image_data):
             cth = thermal_radiation.Angstrom1918(air_temp, vapor_pressure/1000)
 
         # terrain factor correction
-        if (self.sky_view is not None) and (self.clear_sky_method != 'marks1979'):
+        if (self.sky_view_factor is not None) and (self.clear_sky_method != 'marks1979'):
             # apply (emiss * skvfac) + (1.0 - skvfac) to the longwave
-            cth = cth * self.sky_view + (1.0 - self.sky_view) * \
+            cth = cth * self.sky_view_factor + (1.0 - self.sky_view_factor) * \
                 thermal_radiation.STEF_BOLTZ * air_temp**4
 
         # make output variable
