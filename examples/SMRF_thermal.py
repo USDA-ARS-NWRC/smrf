@@ -23,7 +23,7 @@ def main():
 
     try:
         start = datetime.now()
-        
+
         configFile = '../test_data/testConfig.ini'
         if len(sys.argv) > 1:
             configFile = sys.argv[1]
@@ -31,17 +31,21 @@ def main():
         # initialize
         with smrf.framework.SMRF(configFile) as s:
             # load topo data
-            s.loadTopo(calcInput=True)
+            s.loadTopo()
 
             # Create the distribution class
-            s.distribute['air_temp'] = smrf.distribute.air_temp.ta(s.config['air_temp'])
-            s.distribute['vapor_pressure'] = smrf.distribute.vapor_pressure.vp(s.config['vapor_pressure'])
-            s.distribute['albedo'] = smrf.distribute.albedo.albedo(s.config['albedo'])
+            s.distribute['air_temp'] = smrf.distribute.air_temp.ta(
+                s.config['air_temp'])
+            s.distribute['vapor_pressure'] = smrf.distribute.vapor_pressure.vp(
+                s.config['vapor_pressure'])
+            s.distribute['albedo'] = smrf.distribute.albedo.albedo(
+                s.config['albedo'])
             s.distribute['solar'] = smrf.distribute.solar.solar(s.config['solar'],
                                                                 s.distribute['albedo'].config,
                                                                 s.topo.stoporad_in_file,
                                                                 s.config['system']['temp_dir'])
-            s.distribute['thermal'] = smrf.distribute.thermal.th(s.config['thermal'])
+            s.distribute['thermal'] = smrf.distribute.thermal.th(
+                s.config['thermal'])
 
             # load weather data  and station metadata
             s.loadData()
@@ -53,10 +57,11 @@ def main():
             s.initializeOutput()
 
             # 7. Distribute the data
-            for output_count,t in enumerate(s.date_time):
+            for output_count, t in enumerate(s.date_time):
 
                 s.distribute['air_temp'].distribute(s.data.air_temp.ix[t])
-                s.distribute['solar']._distribute(s.data.cloud_factor.ix[t], other_attribute='cloud_factor')
+                s.distribute['solar']._distribute(
+                    s.data.cloud_factor.ix[t], other_attribute='cloud_factor')
                 s.distribute['vapor_pressure'].distribute(s.data.vapor_pressure.ix[t],
                                                           s.distribute['air_temp'].air_temp)
                 s.distribute['thermal'].distribute(t, s.distribute['air_temp'].air_temp,

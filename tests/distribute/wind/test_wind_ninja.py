@@ -21,7 +21,7 @@ class TestWindNinja(SMRFTestCaseLakes):
         config = self.base_config.cfg
 
         # Load the topo
-        topo = loadTopo.Topo(config['topo'], calcInput=False,
+        topo = loadTopo.Topo(config['topo'],
                              tempDir='tests/Lakes/output')
 
         # Get the time steps correctly in the time zone

@@ -75,10 +75,10 @@ class TestRadiation(SMRFTestCase):
         topo_config = {
             'filename': os.path.join(self.test_dir, 'RME/topo/topo.nc'),
             'northern_hemisphere': True,
+            'gradient_method': 'gradient_d8'
         }
         topo = loadTopo.Topo(
             topo_config,
-            calcInput=False,
             tempDir=os.path.join(self.test_dir, 'RME/output')
         )
 

@@ -294,16 +294,16 @@ class SMRF():
 
         self._logger.info('SMRF closed --> %s' % datetime.now())
 
-    def loadTopo(self, calcInput=True):
+    def loadTopo(self):
         """
         Load the information from the configFile in the ['topo'] section. See
         :func:`smrf.data.loadTopo.Topo` for full description.
         """
 
         # load the topo
-        self.topo = data.loadTopo.Topo(self.config['topo'],
-                                       calcInput,
-                                       tempDir=self.temp_dir)
+        self.topo = data.loadTopo.Topo(
+            self.config['topo'],
+            tempDir=self.temp_dir)
 
     def initializeDistribution(self):
         """

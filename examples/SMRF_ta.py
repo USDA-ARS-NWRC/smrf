@@ -16,26 +16,25 @@ def main():
     try:
         start = datetime.now()
 
-
         configFile = '../test_data/testConfig.ini'
         if len(sys.argv) > 1:
             configFile = sys.argv[1]
 
         with smrf.framework.SMRF(configFile) as s:
-            #===============================================================================
+            # ===============================================================================
             # Model setup and initialize
-            #===============================================================================
+            # ===============================================================================
 
             #
             # These are steps that will load the necessary data and initialize the framework
             # Once loaded, this shouldn't need to be re-ran except if something major changes
 
             # load topo data
-            s.loadTopo(calcInput=False)
+            s.loadTopo()
 
             # Create the distribution class
-            s.distribute['air_temp'] = smrf.distribute.air_temp.ta(s.config['air_temp'])
-
+            s.distribute['air_temp'] = smrf.distribute.air_temp.ta(
+                s.config['air_temp'])
 
             # load weather data  and station metadata
             s.loadData()
@@ -48,7 +47,7 @@ def main():
             s.initializeOutput()
 
             # 7. Distribute the data
-            for output_count,t in enumerate(s.date_time):
+            for output_count, t in enumerate(s.date_time):
 
                 s.distribute['air_temp'].distribute(s.data.air_temp.ix[t])
 
@@ -60,6 +59,7 @@ def main():
 
     except Exception as e:
         s._logger.error(e)
+
 
 if __name__ == '__main__':
     main()

@@ -14,13 +14,13 @@ class TestLoadTopo(unittest.TestCase):
         topo_config = {
             'filename': join(self.test_dir, 'RME/topo/topo.nc'),
             'northern_hemisphere': True,
+            'gradient_method': 'gradient_d8'
         }
 
         self.ds = nc.Dataset(topo_config['filename'])
 
         self.topo = loadTopo.Topo(
             topo_config,
-            calcInput=False,
             tempDir=join(self.test_dir, 'RME/output')
         )
 

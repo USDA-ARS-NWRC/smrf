@@ -49,7 +49,7 @@ class Topo():
 
     IMAGES = ['dem', 'mask', 'veg_type', 'veg_height', 'veg_k', 'veg_tau']
 
-    def __init__(self, topoConfig, calcInput=True, tempDir=None):
+    def __init__(self, topoConfig, tempDir=None):
         self.topoConfig = topoConfig
 
         if (tempDir is None) | (tempDir == 'WORKDIR'):
@@ -66,13 +66,7 @@ class Topo():
         self.viewf()
 
         # create the stoporad.in file
-        if calcInput:
-            self.stoporadInput()
-        else:
-            self.stoporad_in_file = None
-
-    # IPW Support has been deprecated since 0.8.0, but it now
-    # has been fully removed.
+        self.stoporadInput()
 
     def readNetCDF(self):
         """
@@ -288,7 +282,7 @@ class Topo():
         self.stoporad_in_file = stoporad_file
 
         # clean up the WORKDIR
-        os.remove(dem_file)
+        # os.remove(dem_file) # This may be able to be removed after shade is implemented
         os.remove(svf_file)
         os.remove(slope_file)
         os.remove(slope_file2)
