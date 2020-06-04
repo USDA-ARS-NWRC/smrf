@@ -1,6 +1,3 @@
-import unittest
-from copy import deepcopy
-
 import numpy as np
 import pandas as pd
 import utm

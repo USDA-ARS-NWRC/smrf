@@ -66,24 +66,7 @@ class Topo():
             raise IOError("Topo input files must have projection information")
 
         # read in the images
-        # netCDF files are stored typically as 32-bit float, so convert
-        # to double or int
-        for v_smrf in self.IMAGES:
-
-            # check to see if the user defined any variables
-            # e.g. veg_height = veg_length
-            if v_smrf in self.topoConfig.keys():
-                v_file = self.topoConfig[v_smrf]
-            else:
-                v_file = v_smrf
-
-            if v_file in f.variables.keys():
-                if v_smrf == 'veg_type':
-                    result = f.variables[v_file][:].astype(int)
-                else:
-                    result = f.variables[v_file][:].astype(np.float64)
-
-            setattr(self, v_smrf, result)
+        self.readImages(f)
 
         # get some general information about the model domain from the dem
         self.nx = f.dimensions['x'].size
@@ -119,6 +102,32 @@ class Topo():
                           '{:0.5f}'.format(self.basin_lat, self.basin_long))
 
         f.close()
+
+    def readImages(self, f):
+        """Read images from the netcdf and set as attributes in the Topo class
+
+        Args:
+            f: netcdf dataset object
+        """
+
+        # netCDF files are stored typically as 32-bit float, so convert
+        # to double or int
+        for v_smrf in self.IMAGES:
+
+            # check to see if the user defined any variables
+            # e.g. veg_height = veg_length
+            if v_smrf in self.topoConfig.keys():
+                v_file = self.topoConfig[v_smrf]
+            else:
+                v_file = v_smrf
+
+            if v_file in f.variables.keys():
+                if v_smrf == 'veg_type':
+                    result = f.variables[v_file][:].astype(int)
+                else:
+                    result = f.variables[v_file][:].astype(np.float64)
+
+            setattr(self, v_smrf, result)
 
     def get_center(self, ds, mask_name=None):
         '''
