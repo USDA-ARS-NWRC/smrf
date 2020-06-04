@@ -25,26 +25,6 @@ class Topo():
     topo will guess the location of the WORKDIR env variable
     and should work for unix systems.
 
-    Attributes:
-        topoConfig: configuration for topo
-        tempDir: location of temporary working directory
-        dem: numpy array for the DEM
-        mask: numpy array for the mask
-        veg_type: numpy array for the veg type
-        veg_height: numpy array for the veg height
-        veg_k: numpy array for the veg K
-        veg_tau: numpy array for the veg transmissivity
-        sky_view:
-        ny: number of columns in DEM
-        nx: number of rows in DEM
-        u,v: location of upper left corner
-        du, dv: step size of grid
-        unit: geo header units of grid
-        coord_sys_ID: coordinate syste,
-        x,y: position vectors
-        X,Y: position grid
-        stoporad_in: numpy array for the sky view factor
-
     """
 
     IMAGES = ['dem', 'mask', 'veg_type', 'veg_height', 'veg_k', 'veg_tau']
@@ -282,7 +262,8 @@ class Topo():
         self.stoporad_in_file = stoporad_file
 
         # clean up the WORKDIR
-        # os.remove(dem_file) # This may be able to be removed after shade is implemented
+        # This may be able to be removed after shade is implemented
+        # os.remove(dem_file)
         os.remove(svf_file)
         os.remove(slope_file)
         os.remove(slope_file2)

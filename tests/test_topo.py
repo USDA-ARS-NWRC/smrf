@@ -14,7 +14,10 @@ class TestLoadTopo(unittest.TestCase):
         base = os.path.dirname(smrf.__file__)
         self.test_dir = os.path.abspath(os.path.join(base, '../', 'tests'))
         tempDir = os.path.join(self.test_dir, 'RME/output')
-        os.mkdir(tempDir)
+
+        if not os.path.exists(tempDir):
+            os.mkdir(tempDir)
+
         topo_config = {
             'filename': os.path.join(self.test_dir, 'RME/topo/topo.nc'),
             'northern_hemisphere': True,
