@@ -38,7 +38,7 @@ def main():
                 s.config['air_temp'])
             s.distribute['vapor_pressure'] = smrf.distribute.vapor_pressure.vp(
                 s.config['vapor_pressure'])
-            s.distribute['albedo'] = smrf.distribute.albedo.albedo(
+            s.distribute['albedo'] = smrf.distribute.albedo.Albedo(
                 s.config['albedo'])
             s.distribute['solar'] = smrf.distribute.solar.solar(s.config['solar'],
                                                                 s.distribute['albedo'].config,

@@ -280,9 +280,9 @@ class solar(image_data.image_data):
             min_storm_day: decimal day of last storm for the entire basin, from
                 :mod:`smrf.distribute.precip.ppt.last_storm_day_basin`
             albedo_vis: numpy array for visible albedo, from
-                :mod:`smrf.distribute.albedo.albedo.albedo_vis`
+                :mod:`smrf.distribute.albedo.Albedo.albedo_vis`
             albedo_ir: numpy array for infrared albedo, from
-                :mod:`smrf.distribute.albedo.albedo.albedo_ir`
+                :mod:`smrf.distribute.albedo.Albedo.albedo_ir`
 
         """
 
@@ -574,9 +574,9 @@ class solar(image_data.image_data):
 
         Args:
             albedo_vis: numpy array for visible albedo, from
-                :mod:`smrf.distribute.albedo.albedo.albedo_vis`
+                :mod:`smrf.distribute.albedo.Albedo.albedo_vis`
             albedo_ir: numpy array for infrared albedo, from
-                :mod:`smrf.distribute.albedo.albedo.albedo_ir`
+                :mod:`smrf.distribute.albedo.Albedo.albedo_ir`
         """
 
         self._logger.debug('Calculating net radiation')

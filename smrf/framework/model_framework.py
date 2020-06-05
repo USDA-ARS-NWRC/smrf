@@ -320,7 +320,7 @@ class SMRF():
             * :func:`Vapor pressure <smrf.distribute.vapor_pressure.vp>`
             * :func:`Wind speed and direction <smrf.distribute.wind.wind>`
             * :func:`Precipitation <smrf.distribute.precipitation.ppt>`
-            * :func:`Albedo <smrf.distribute.albedo.albedo>`
+            * :func:`Albedo <smrf.distribute.albedo.Albedo>`
             * :func:`Solar radiation <smrf.distribute.solar.solar>`
             * :func:`Thermal radiation <smrf.distribute.thermal.th>`
             * :func:`Soil Temperature <smrf.distribute.soil_temp.ts>`
@@ -345,7 +345,7 @@ class SMRF():
             self.config['time']['time_step'])
 
         # 5. Albedo
-        self.distribute['albedo'] = distribute.albedo.albedo(
+        self.distribute['albedo'] = distribute.albedo.Albedo(
             self.config['albedo'])
 
         # 6. cloud_factor

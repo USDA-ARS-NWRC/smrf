@@ -1,18 +1,15 @@
-import datetime
 import logging
 
 import numpy as np
-import pandas as pd
-import pytz
 
 from smrf.distribute import image_data
-from smrf.envphys import radiation
+from smrf.envphys import albedo
 from smrf.utils import utils
 
 
-class albedo(image_data.image_data):
+class Albedo(image_data.image_data):
     """
-    The :mod:`~smrf.distribute.albedo.albedo` class allows for variable
+    The :mod:`~smrf.distribute.albedo.Albedo` class allows for variable
     specific distributions that go beyond the base class.
 
     The visible (280-700nm) and infrared (700-2800nm) albedo follows the
@@ -34,7 +31,7 @@ class albedo(image_data.image_data):
         max: maximum value of albedo is 1
         stations: stations to be used in alphabetical order
         output_variables: Dictionary of the variables held within class
-            :mod:`!smrf.distribute.albedo.albedo` that specifies the ``units``
+            :mod:`!smrf.distribute.albedo.Albedo` that specifies the ``units``
             and ``long_name`` for creating the NetCDF output file.
         variable: 'albedo'
     """
@@ -102,7 +99,7 @@ class albedo(image_data.image_data):
         self._logger.debug('Initializing distribute.albedo')
         self.veg_type = topo.veg_type
 
-        if self.config["decay_method"] == None:
+        if self.config["decay_method"] is None:
             self._logger.warning("No decay method is set!")
 
     def distribute(self, current_time_step, cosz, storm_day):
@@ -124,29 +121,34 @@ class albedo(image_data.image_data):
         # only need to calculate albedo if the sun is up
         if cosz is not None:
 
-            alb_v, alb_ir = radiation.albedo(storm_day, cosz,
-                                             self.config['grain_size'],
-                                             self.config['max_grain'],
-                                             self.config['dirt'])
+            alb_v, alb_ir = albedo.albedo(
+                storm_day, cosz,
+                self.config['grain_size'],
+                self.config['max_grain'],
+                self.config['dirt'])
 
             # Perform litter decay
             if self.config['decay_method'] == 'date_method':
-                alb_v_d, alb_ir_d = radiation.decay_alb_power(self.veg,
-                                                              self.veg_type,
-                                                              self.config['date_method_start_decay'],
-                                                              self.config['date_method_end_decay'],
-                                                              current_time_step,
-                                                              self.config['date_method_decay_power'],
-                                                              alb_v, alb_ir)
+                alb_v_d, alb_ir_d = albedo.decay_alb_power(
+                    self.veg,
+                    self.veg_type,
+                    self.config['date_method_start_decay'],
+                    self.config['date_method_end_decay'],
+                    current_time_step,
+                    self.config['date_method_decay_power'],
+                    alb_v, alb_ir)
+
                 alb_v = alb_v_d
                 alb_ir = alb_ir_d
 
             elif self.config['decay_method'] == 'hardy2000':
-                alb_v_d, alb_ir_d = radiation.decay_alb_hardy(self.litter,
-                                                              self.veg_type,
-                                                              storm_day,
-                                                              alb_v,
-                                                              alb_ir)
+                alb_v_d, alb_ir_d = albedo.decay_alb_hardy(
+                    self.litter,
+                    self.veg_type,
+                    storm_day,
+                    alb_v,
+                    alb_ir)
+
                 alb_v = alb_v_d
                 alb_ir = alb_ir_d
 

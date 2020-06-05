@@ -44,7 +44,7 @@ def main():
             s.config['vapor_pressure'])
         s.distribute['thermal'] = smrf.distribute.thermal.th(
             s.config['thermal'])
-        s.distribute['albedo'] = smrf.distribute.albedo.albedo(
+        s.distribute['albedo'] = smrf.distribute.albedo.Albedo(
             s.config['albedo'])
         s.distribute['solar'] = smrf.distribute.solar.solar(s.config['solar'],
                                                             s.distribute['albedo'].config,

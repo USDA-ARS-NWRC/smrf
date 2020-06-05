@@ -42,7 +42,7 @@ def main():
                 s.config['vapor_pressure'])
             s.distribute['precip'] = smrf.distribute.precipitation.ppt(
                 s.config['precip'], s.config['time']['time_step'])
-            s.distribute['albedo'] = smrf.distribute.albedo.albedo(
+            s.distribute['albedo'] = smrf.distribute.albedo.Albedo(
                 s.config['albedo'])
             s.distribute['solar'] = smrf.distribute.solar.solar(s.config['solar'],
                                                                 s.distribute['albedo'].config,
