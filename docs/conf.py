@@ -18,16 +18,19 @@
 
 import os
 import sys
+from datetime import datetime
+
 # -- Have to do a mock install of some modules that RTD doesn't have --------
 from unittest.mock import Mock
 
 from inicheck.tools import config_documentation
 
+import smrf
 from smrf.utils.utils import get_config_doc_section_hdr
 
-config_documentation('./auto_config.rst',
-					 modules='smrf',
-					 section_link_dict=get_config_doc_section_hdr())
+config_documentation('./user_guide/auto_config.rst',
+                     modules='smrf',
+                     section_link_dict=get_config_doc_section_hdr())
 
 if os.environ.get('READTHEDOCS') == 'True':
     sys.path.insert(0, os.path.abspath('.'))
@@ -39,11 +42,12 @@ else:
 #     @classmethod
 #     def __getattr__(cls, name):
 #             return Mock()
-MOCK_MODULES = ['netCDF4', 'matplotlib', 'matplotlib.pyplot', 'pandas','pykrige']
+MOCK_MODULES = ['netCDF4', 'matplotlib',
+                'matplotlib.pyplot', 'pandas', 'pykrige']
 
 sys.modules.update((mod_name, Mock()) for mod_name in MOCK_MODULES)
 
-os.environ['IPW'] = '.' # set a temporary IPW environment variable
+os.environ['IPW'] = '.'  # set a temporary IPW environment variable
 
 # -- General configuration ------------------------------------------------
 
@@ -61,7 +65,8 @@ extensions = [
     'sphinx.ext.viewcode',
     'sphinx.ext.napoleon',
     'sphinx.ext.imgmath',
-    'sphinxcontrib.bibtex'
+    'sphinxcontrib.bibtex',
+    'sphinx.ext.intersphinx'
 ]
 
 # Add any paths that contain templates here, relative to this directory.
@@ -81,15 +86,15 @@ source_suffix = '.rst'
 master_doc = 'index'
 
 # General information about the project.
-project = u'SMRF'
-copyright = u'2018, Scott Havens, USDA Agricultural Research Service'
-author = u'Scott Havens'
+project = 'SMRF'
+copyright = f"2008-{datetime.now().year} USDA Agricultural Research Service"
+author = 'Scott Havens'
 # The version info for the project you're documenting, acts as replacement for
 # |version| and |release|, also used in various other places throughout the
 # built documents.
 #
 # The short X.Y version.
-version = u'0.9.1'
+version = str(smrf.__version__)
 
 # The full version, including alpha/beta/rc tags.
 # release = u'0.9.1'
@@ -170,7 +175,7 @@ napoleon_use_keyword = True
 # The theme to use for HTML and HTML Help pages.  See the documentation for
 # a list of builtin themes.
 #
-html_theme = 'sphinx_rtd_theme'
+html_theme = 'pydata_sphinx_theme'
 
 # Theme options are theme-specific and customize the look and feel of a theme
 # further.  For a list of options available for each theme, see the
@@ -226,7 +231,8 @@ html_static_path = ['_static']
 
 # Custom sidebar templates, maps document names to template names.
 #
-html_sidebars = { '**': ['globaltoc.html', 'relations.html', 'sourcelink.html', 'searchbox.html'] }
+html_sidebars = {'**': ['globaltoc.html',
+                        'relations.html', 'sourcelink.html', 'searchbox.html']}
 
 # Additional templates that should be rendered to pages, maps page names to
 # template names.
@@ -290,21 +296,21 @@ htmlhelp_basename = 'SMRFdoc'
 # -- Options for LaTeX output ---------------------------------------------
 
 latex_elements = {
-     # The paper size ('letterpaper' or 'a4paper').
-     #
-     # 'papersize': 'letterpaper',
+    # The paper size ('letterpaper' or 'a4paper').
+    #
+    # 'papersize': 'letterpaper',
 
-     # The font size ('10pt', '11pt' or '12pt').
-     #
-     # 'pointsize': '10pt',
+    # The font size ('10pt', '11pt' or '12pt').
+    #
+    # 'pointsize': '10pt',
 
-     # Additional stuff for the LaTeX preamble.
-     #
-     # 'preamble': '',
+    # Additional stuff for the LaTeX preamble.
+    #
+    # 'preamble': '',
 
-     # Latex figure (float) alignment
-     #
-     # 'figure_align': 'htbp',
+    # Latex figure (float) alignment
+    #
+    # 'figure_align': 'htbp',
 }
 
 # Grouping the document tree into LaTeX files. List of tuples

@@ -74,18 +74,15 @@ Weather Reserach and Forecasting (`WRF <http://www.wrf-model.org/>`_) at a 1 and
 grid point will be used as if it were a weather stations, with it's own X, Y, and elevation.  Therefore,
 the coarse resolution model terrain can be taken into account when downscaling to a higher resolution DEM.
 
-.. figure:: _static/WRF_example.png
-   :scale: 75%
+.. figure:: ../_static/WRF_example.png
    :alt: Using WRF as a gridded dataset for SMRF.
 
    Using WRF as a gridded dataset for SMRF.
 
-See Havens et al. (in prep) for more details and further discussion on using WRF for forcing iSnobal.
+See Havens et al. (2017) for more details and further discussion on using WRF for forcing iSnobal.
 
 Data Format
 -----------
-
-
 
 CSV Files
 `````````
@@ -172,8 +169,8 @@ but need help setting up the database and tables to work with SMRF. We can provi
 that will help create the database.
 
 
-Gridded Dataset
-```````````````
+WRF
+```
 
 Gridded datasets can come in many forms and the :mod:`smrf.data.loadGrid` module is meant to import
 gridded datasets.  Currently, SMRF can ingest WRF output in the standard wrf_out NetCDF files. SMRF
@@ -213,3 +210,7 @@ UGRD
 
 VGRD
    Wind vector, v component
+
+
+High Resolution Rapid Refresh (HRRR)
+````````````````````````````````````

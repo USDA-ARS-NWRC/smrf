@@ -27,7 +27,6 @@ from smrf import __core_config__, __version__
 from .gitinfo import __gitPath__, __gitVersion__
 
 
-
 class CheckStation(CheckType):
     """
     Custom check for ensuring our stations are always capitalized
@@ -335,7 +334,7 @@ def get_config_doc_section_hdr():
     hdr_dict = {}
 
     dist_modules = ['air_temp', 'vapor_pressure', 'precip', 'wind', 'albedo',
-                    'thermal', 'solar', 'soil_temp']
+                    'thermal', 'solar', 'cloud_factor', 'soil_temp']
 
     for d in dist_modules:
         if d == 'precip':
@@ -347,7 +346,7 @@ def get_config_doc_section_hdr():
         intro = ("The {0} section controls all the available parameters that"
                  " effect the distribution of the {0} module, espcially  the"
                  " associated models. For more detailed information please see"
-                 " :mod:`smrf.distribute.{0}`").format(sec)
+                 " :mod:`smrf.distribute.{0}`\n").format(sec)
 
         hdr_dict[d] = intro
 

@@ -66,7 +66,7 @@ coverage:
 docs:
 	rm -f docs/smrf.rst
 	rm -f docs/modules.rst
-	sphinx-apidoc -o docs/ smrf
+	sphinx-apidoc -o docs/api smrf
 	$(MAKE) -C docs clean
 	$(MAKE) -C docs html
 	$(BROWSER) docs/_build/html/index.html
