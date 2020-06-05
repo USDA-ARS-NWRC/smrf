@@ -11,4 +11,4 @@ utm==0.4.0
 git+https://github.com/USDA-ARS-NWRC/PyKrige.git@master
 spatialnc>=0.2.12
 weather-forecast-retrieval>=0.6.0
-topocalc
+topocalc>=0.3.0
