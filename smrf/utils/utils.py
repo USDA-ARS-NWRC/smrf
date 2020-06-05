@@ -24,8 +24,7 @@ from scipy.interpolate.interpnd import (CloughTocher2DInterpolator,
 
 from smrf import __core_config__, __version__
 
-from .gitinfo import __gitPath__, __gitVersion__
-
+from .gitinfo import __gitVersion__
 
 
 class CheckStation(CheckType):
@@ -41,7 +40,8 @@ class CheckStation(CheckType):
         Attempt to convert all the values to upper case.
 
         Args:
-            value: A single string in a a config entry representing a station name
+            value: A single string in a a config entry representing a
+                station name
         Returns:
             value: A single station name all upper case
         """
@@ -84,8 +84,8 @@ def handle_run_script_options(config_option):
         configs = find_configs(config_option)
 
         if len(configs) > 1:
-            print("\nError: Multiple config files detected in {0} please ensure"
-                  " only one is in the folder.\n".format(config_option))
+            print("\nError: Multiple config files detected in {0} please"
+                  " ensure only one is in the folder.\n".format(config_option))
             sys.exit()
 
         else:
@@ -137,9 +137,9 @@ def set_min_max(data, min_val, max_val):
     Returns:
         data: numpy array of data trimmed at min_val and max_val
     """
-    if max_val == None:
+    if max_val is None:
         max_val = np.inf
-    if min_val == None:
+    if min_val is None:
         min_val = -np.inf
 
     ind = np.isnan(data)
@@ -195,8 +195,8 @@ def is_leap_year(year):
 
 def backup_input(data, config_obj):
     """
-    Backs up input data files so a user can rerun a run with the exact data used
-    for a run.
+    Backs up input data files so a user can rerun a run with the exact data
+    used for a run.
 
     Args:
         data: Pandas dataframe containing the station data
@@ -210,7 +210,6 @@ def backup_input(data, config_obj):
                               'input_backup')
     if not os.path.isdir(backup_dir):
         os.mkdir(backup_dir)
-    csv_names = {}
 
     # Check config file for csv section and remove alternate data form config
     if 'csv' not in backup_config_obj.cfg.keys():
@@ -225,8 +224,8 @@ def backup_input(data, config_obj):
             del backup_config_obj.cfg['stations']['client']
 
     # Output station data to CSV
-    csv_var = ['metadata', 'air_temp', 'vapor_pressure', 'precip', 'wind_speed',
-               'wind_direction', 'cloud_factor']
+    csv_var = ['metadata', 'air_temp', 'vapor_pressure', 'precip',
+               'wind_speed', 'wind_direction', 'cloud_factor']
 
     for k in csv_var:
         fname = os.path.join(backup_dir, k + '.csv')
@@ -237,14 +236,15 @@ def backup_input(data, config_obj):
         backup_config_obj.cfg['csv'][k] = fname
 
     # Copy topo files over to backup
-    ignore = ['northern_hemisphere', 'gradient_method']
+    ignore = ['northern_hemisphere',
+              'gradient_method', 'sky_view_factor_angles']
     for s in backup_config_obj.cfg['topo'].keys():
         src = backup_config_obj.cfg['topo'][s]
         # make not a list if lenth is 1
         if isinstance(src, list):
             src = mk_lst(src, unlst=True)
         # Avoid attempring to copy files that don't exist
-        if s not in ignore and src != None:
+        if s not in ignore and src is not None:
             dst = os.path.join(backup_dir, os.path.basename(src))
             backup_config_obj.cfg["topo"][s] = dst
             copyfile(src, dst)
@@ -284,7 +284,8 @@ def getConfigHeader():
 
     cfg_str = ("Config File for SMRF {0}\n"
                "For more SMRF related help see:\n"
-               "{1}").format(getgitinfo(), 'http://smrf.readthedocs.io/en/latest/')
+               "{1}").format(
+                   getgitinfo(), 'http://smrf.readthedocs.io/en/latest/')
     return cfg_str
 
 
@@ -301,7 +302,7 @@ def check_station_colocation(metadata_csv=None, metadata=None):
     Returns:
         repeat_sta: list of station primary_id that are colocated
     """
-    if metadata_csv != None:
+    if metadata_csv is not None:
         metadata = pd.read_csv(metadata_csv)
         metadata.set_index('primary_id', inplace=True)
 
@@ -404,8 +405,9 @@ def interp_weights(xy, uv, d=2):
     This routine follows the methods of scipy.interpolate.griddata as outlined
     here:
     https://stackoverflow.com/questions/20915502/speedup-scipy-griddata-for-multiple-interpolations-between-two-irregular-grids
-    This function finds the vertices and weights which is the most computationally
-    expensive part of the routine. The interpolateion can then be done quickly.
+    This function finds the vertices and weights which is the most
+    computationally expensive part of the routine. The interpolateion can
+    then be done quickly.
 
     Args:
         xy: n by 2 array of flattened meshgrid x and y coords of WindNinja grid

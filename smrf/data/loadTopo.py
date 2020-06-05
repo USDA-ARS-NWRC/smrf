@@ -183,8 +183,12 @@ class Topo():
         """Calculate the sky view factor
         """
 
-        svf, tcf = viewf(self.dem, self.dx, nangles=72,
-                         sin_slope=self.sin_slope, aspect=self.aspect)
+        svf, tcf = viewf(
+            self.dem,
+            self.dx,
+            nangles=self.topoConfig['sky_view_factor_angles'],
+            sin_slope=self.sin_slope,
+            aspect=self.aspect)
 
         self.sky_view_factor = svf
         self.terrain_config_factor = tcf
