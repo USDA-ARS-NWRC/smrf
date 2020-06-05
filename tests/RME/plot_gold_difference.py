@@ -33,7 +33,7 @@ def main():
         gold_files=gold_files,
         file_type='netcdf',
         old_branch='upstream/master',
-        new_branch='origin/156_topocalc')
+        new_branch='156_topocalc')
 
     results = gc.compare()
 
