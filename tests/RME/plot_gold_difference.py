@@ -37,7 +37,7 @@ def main():
 
     results = gc.compare()
 
-    gc.plot_results(results, plot_original_data=True, include_hist=True)
+    gc.plot_results(results, plot_original_data=False, include_hist=True)
 
 
 if __name__ == '__main__':
