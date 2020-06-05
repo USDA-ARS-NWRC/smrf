@@ -31,7 +31,7 @@ def main():
             # Once loaded, this shouldn't need to be re-ran except if something major changes
 
             # load topo data
-            s.loadTopo(=False)
+            s.loadTopo()
 
             # Create the distribution class
             s.distribute['air_temp'] = smrf.distribute.air_temp.ta(
