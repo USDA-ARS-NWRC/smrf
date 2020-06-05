@@ -5,21 +5,26 @@ Installation
 SMRF relies on the Image Processing Workbench (IPW) so it must be installed first.
 IPW currently has not been tested to run natively on Windows and must use
 Docker. Check the `Windows`_ section for how to run. Please go through and
-install the dependencies for your system prior to install install IPW and SMRF.
+install the dependencies for your system prior to installing IPW and SMRF.
+
+.. note::
+    SMRF is only maintained for Python 3 and using Python 2 may not work.
+
+.. note::
+    SMRF uses the OpenMP specification v4.X and will not work with GCC >= 9.0.
 
 
 Ubuntu
 ------
 
-SMRF is actively developed on Ubuntu 16.04 LTS and has been tested on 14.04 and 18.04 as
-well. SMRF needs gcc greater than 4.8 and Python compiled with gcc. Install the
-dependencies by updating, install build-essentials and installing python-dev:
+SMRF is actively developed on Ubuntu and requires gcc greater than 4.8 and less than 9.0.
+Install the dependencies by updating, install build-essentials and installing python3-dev:
 
   .. code:: bash
 
     sudo apt-get update
     sudo apt-get install build-essential
-    sudo apt-get install python-dev
+    sudo apt-get install python3-dev
 
 
 Mac OSX
@@ -37,7 +42,7 @@ Install the system dependencies using MacPorts or homebrew:
     .. code:: bash
 
        port install gcc5
-       port install python35
+       port install python3
 
   b.  Homebrew install system dependencies
 
@@ -45,11 +50,11 @@ Install the system dependencies using MacPorts or homebrew:
 
        brew tap homebrew/versions
        brew install gcc5
-       brew install python
+       brew install python3
 
 .. note::
    Ensure that the correct gcc and Python are activated, use ``gcc --version``
-   and ``python --version``. If they are not set, use Homebrew or MacPorts
+   and ``python3 --version``. If they are not set, use Homebrew or MacPorts
    activate features.
 
 Windows
@@ -58,7 +63,7 @@ Windows
 Since IPW has not been tested to run in Window, Docker will have to be used
 to run SMRF.  The docker image for SMRF can be found on docker hub
 `here <https://hub.docker.com/r/usdaarsnwrc/smrf/>`_. The docker image is
-already setup to run smrf so the following steps do not apply for running out
+already setup to run SMRF so the following steps do not apply for running out
 of a docker.
 
 
@@ -96,11 +101,8 @@ following will install smrf. It is preferable to use a Python
 
   .. code:: bash
 
-    virtualenv -p python3.5 smrfenv
-    source smrfenv/bin/activate
-
-**Tip:** The developers recommend using an alias to quickly turn on
-and off your virtual environment.
+    python3 -m virtualenv .venv
+    source .venv/bin/activate
 
 
 2. Clone SMRF source code from the ARS-NWRC github.
@@ -115,15 +117,14 @@ and off your virtual environment.
   .. code:: bash
 
     cd smrf
-    pip install -r requirements.txt
-    python setup.py install
+    python3 -m pip install -r requirements_dev.txt
+    python3 setup.py install
 
 4. (Optional) Generate a local copy of the documentation.
 
   .. code:: bash
 
-    cd docs
-    make html
+    make docs
 
   To view the documentation use the preferred browser to open up the files.
   This can be done from the browser by opening the index.rst file directly or
@@ -133,20 +134,11 @@ and off your virtual environment.
 
     google-chrome _build/html/index.html
 
-5. Test the installation by running a small example. First to run any of the
-   examples the maxus.nc for distributing wind. This only needs to be done once
-   at the beginning of a new project.
+5. Test the installation by running the test suite.
 
    .. code:: bash
 
-      gen_maxus --out_maxus test_data/topo/maxus.nc test_data/topo/dem.ipw
+      python3 -m unittest -v
 
-  Once the maxus file is in place run the small example over the Boise River
-  Basin.
-
-  .. code:: bash
-
-    run_smrf test_data/testConfig.ini
-
-If everything ran without the SMRF install is totall complete. See examples for
+If all tests passed, SMRF is installed. See examples for
 specific types of runs. Happy SMRF-ing!

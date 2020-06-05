@@ -8,23 +8,33 @@
 [![Build Status](https://travis-ci.org/USDA-ARS-NWRC/smrf.svg?branch=develop)](https://travis-ci.org/USDA-ARS-NWRC/smrf)
 [![Coverage Status](https://coveralls.io/repos/github/USDA-ARS-NWRC/smrf/badge.svg?branch=HEAD)](https://coveralls.io/github/USDA-ARS-NWRC/smrf?branch=HEAD)
 
-Spatial Modeling for Resources Framework (SMRF) was developed by Dr. Scott
-Havens at the USDA Agricultural Research Service (ARS) in Boise, ID. SMRF was
-designed to increase the flexibility of taking measured weather data and
-distributing the point measurements across a watershed. SMRF was developed to be
-used as an operational or research framework, where ease of use, efficiency,
-and ability to run in near real time are high priorities.
+Spatial Modeling for Resources Framework (SMRF) was developed by Dr. Scott Havens at the USDA Agricultural Research Service (ARS) in Boise, ID. SMRF was designed to increase the flexibility of taking measured weather data and distributing the point measurements across a watershed. SMRF was developed to be used as an operational or research framework, where ease of use, efficiency, and ability to run in near real time are high priorities.
 
-## Usage
-Read the full documentation for [SMRF](https://smrf.readthedocs.io) including
-up to date installation instructions.
+Read the full documentation for [SMRF](https://smrf.readthedocs.io) including up to date installation instructions.
+
+## Installation
+
+To install SMRF locally on Linux of MacOSX, first clone the repository and build into a virtual environment. This requires `gcc <= 9.0`. The general steps are as follows and will test the SMRF installation by running the tests.
+
+Clone from the repository
+
+```bash
+git clone https://github.com/USDA-ARS-NWRC/smrf.git
+```
+
+And install the requirements, SMRF and run the tests.
+
+```bash
+python3 -m pip install -r requirements_dev.txt
+python3 setup.py install
+python3 -m unittest -v
+```
+
+For Windows, the install method is using [Docker](#Docker).
 
 
-## Quick Start
 
-### Native install
-
-### Docker
+## Docker
 
 To mount a data volume, so that you can share data between the local file
 system and the docker, the `-v` option must be used. For a more in depth
@@ -46,16 +56,3 @@ For MacOSX:
 
 For Windows:
 `docker run -v /c/Users/<path>:/data -it usdaarsnwrc/smrf [/bin/bash]`
-
-
-#### Running the test
-
-```
-docker run -it usdaarsnwrc/smrf /bin/bash
-cd /code/smrf
-gen_maxus --out_maxus test_data/topo/maxus.nc test_data/topo/dem.ipw
-run_smrf.py test_data/testConfig.ini
-```
-
-The output netCDF files will be placed in the `/code/smrf/test_data/output`
-location.
