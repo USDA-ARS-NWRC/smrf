@@ -1,0 +1,99 @@
+#!/usr/bin/env python3
+
+#
+# Script to plot difference in gold files between current branch and master
+# Must be ran from the project root directory
+#
+
+import os
+import argparse
+
+from goldmeister.compare import GoldGitBranchCompare
+
+files = [
+    'air_temp',
+    'net_solar',
+    'percent_snow',
+    'precip_temp',
+    'precip',
+    'snow_density',
+    'thermal',
+    'vapor_pressure',
+    'wind_direction',
+    'wind_speed'
+]
+
+
+def argument_parser():
+    parser = argparse.ArgumentParser(
+        description="Plot the differences in the gold files "
+        "for two different branches. This is meant to document "
+        "changes in the gold files"
+    )
+
+    parser.add_argument(
+        '--basin', '-b',
+        metavar='BASIN',
+        type=str,
+        default='RME',
+        choices=['RME', 'Lakes'],
+        help='Test basin name (RME or Lakes)'
+    )
+
+    parser.add_argument(
+        '--gold_dir', '-g',
+        metavar='GOLD_DIR',
+        type=str,
+        default='gold',
+        choices=['gold', 'gold_hrrr'],
+        help='Gold directory (gold or gold_hrrr)'
+    )
+
+    parser.add_argument(
+        '--old_branch', '-o',
+        metavar='OLD_BRANCH',
+        type=str,
+        help='Old branch to compare against'
+    )
+
+    parser.add_argument(
+        '--new_branch', '-n',
+        metavar='NEW_BRANCH',
+        type=str,
+        help='New branch to compare against'
+    )
+
+    return parser
+
+
+def main(args):
+
+    repo_path = os.getcwd()
+
+    gold_files = []
+    for gf in files:
+        gold_files.append(
+            os.path.join(
+                repo_path,
+                'tests',
+                args.basin,
+                args.gold_dir,
+                f"{gf}.nc"
+            )
+        )
+
+    gc = GoldGitBranchCompare(
+        repo_path=repo_path,
+        gold_files=gold_files,
+        file_type='netcdf',
+        old_branch=args.old_branch,
+        new_branch=args.new_branch)
+
+    results = gc.compare()
+
+    gc.plot_results(results, plot_original_data=False, include_hist=True)
+
+
+if __name__ == '__main__':
+    script_arguments = argument_parser().parse_args()
+    main(script_arguments)

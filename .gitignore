@@ -117,3 +117,5 @@ examples/simple_hill/* *.csv
 
 # grib2 .idx files
 *.grib2.*.idx
+
+output/
