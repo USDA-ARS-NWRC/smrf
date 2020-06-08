@@ -10,6 +10,24 @@ Three wind distribution methods are available for the Wind class:
 The type of wind model can be specfied in the ``[wind]`` section of the configuration file. The
 options are ``winstral``, ``wind_ninja``, and ``interp``.
 
+Wind Measurement Height
+```````````````````````
+
+This paragraph aims to be a cautionary note. Wind is an important driver for the turbulent fluxes
+in a snow or hydrological model. However, atmospheric models and wind measurements can be taken at
+a multitude of different heights. For example, with WindNinja, HRRR outputs at 10 meters above the ground
+surface. WindNinja can then scale that to a different height (default is 5 meters in ``katana``). Therefore,
+the wind speed that SMRF interpolates will be at 5 meters and that should match the measurement height
+of wind in the snow or hydrology model.
+
+The same is true with wind speed measurements as not all sensors are placed at the same height. Take care
+to review the weather station metadata and convert the wind speed to fixed height above the ground before
+using SMRF.
+
+.. note::
+    Check the wind measurement and output heights for consistency.
+
+
 WindNinja
 `````````
 
