@@ -15,6 +15,7 @@ class Wind(image_data.image_data):
     distributions that go beyond the base class.
 
     Three distribution methods are available for the Wind class:
+
     1. Winstral and Marks 2002 method for maximum upwind slope (maxus)
     2. Import WindNinja simulations
     3. Standard interpolation
