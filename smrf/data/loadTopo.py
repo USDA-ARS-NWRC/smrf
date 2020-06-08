@@ -65,7 +65,6 @@ class Topo():
         if 'projection' not in f.variables.keys():
             raise IOError("Topo input files must have projection information")
 
-        # read in the images
         self.readImages(f)
 
         # get some general information about the model domain from the dem
@@ -222,26 +221,26 @@ class Topo():
 
         # DEM ipw image
         dem_file = os.path.join(self.tempDir, 'dem.ipw')
-        i = ipw.IPW()
-        i.new_band(self.dem)
-        i = self.add_geo_hdr(i)
-        i.write(dem_file, 16)
+        ipw_image = ipw.IPW()
+        ipw_image.new_band(self.dem)
+        ipw_image = self.add_geo_hdr(ipw_image)
+        ipw_image.write(dem_file, 16)
 
         # slope
         slope_file = os.path.join(self.tempDir, 'slope.ipw')
 
-        i = ipw.IPW()
-        i.new_band(self.sin_slope)
-        i = self.add_geo_hdr(i)
-        i.write(slope_file, 8)
+        ipw_image = ipw.IPW()
+        ipw_image.new_band(self.sin_slope)
+        ipw_image = self.add_geo_hdr(ipw_image)
+        ipw_image.write(slope_file, 8)
 
         # aspect
         aspect_file = os.path.join(self.tempDir, 'aspect.ipw')
-        i = ipw.IPW()
-        i.new_band(self.aspect)
-        i = self.add_geo_hdr(i)
-        i.bands[0].units = 'radians'
-        i.write(aspect_file, 8)
+        ipw_image = ipw.IPW()
+        ipw_image.new_band(self.aspect)
+        ipw_image = self.add_geo_hdr(ipw_image)
+        ipw_image.bands[0].units = 'radians'
+        ipw_image.write(aspect_file, 8)
 
         # modify the LQ headers
         # will only use the max/min floats for the LQ hearder, however
@@ -255,12 +254,12 @@ class Topo():
 
         # calculate the view factor
         svf_file = os.path.join(self.tempDir, 'sky_view.ipw')
-        i = ipw.IPW()
-        i.new_band(self.sky_view_factor)
-        i.new_band(self.terrain_config_factor)
-        i = self.add_geo_hdr(i)
-        i.bands[0].units = 'radians'
-        i.write(svf_file, 8)
+        ipw_image = ipw.IPW()
+        ipw_image.new_band(self.sky_view_factor)
+        ipw_image.new_band(self.terrain_config_factor)
+        ipw_image = self.add_geo_hdr(ipw_image)
+        ipw_image.bands[0].units = 'radians'
+        ipw_image.write(svf_file, 8)
 
         # combine into a value
         stoporad_file = os.path.join(self.tempDir, 'stoporad_in.ipw')

@@ -119,8 +119,7 @@ class SMRFTestCase(unittest.TestCase):
 
         # create the output dir
         folder = os.path.join(cls.base_config.cfg['output']['out_location'])
-        if not os.path.exists(folder):
-            os.mkdir(folder)
+        os.makedirs(folder, exist_ok=True)
 
     @classmethod
     def tearDownClass(cls):

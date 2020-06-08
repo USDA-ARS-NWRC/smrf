@@ -33,8 +33,7 @@ class SMRFTestCaseLakes(SMRFTestCase):
             shutil.rmtree(cls.output)
 
         # create the output dir
-        if not os.path.exists(cls.output):
-            os.mkdir(cls.output)
+        os.makedirs(cls.output, exist_ok=True)
 
     @classmethod
     def tearDownClass(cls):
