@@ -10,8 +10,6 @@ Everything you could ever want to know about SMRF.
    smrf.distribute
    smrf.envphys
    smrf.framework
-   smrf.ipw
-   smrf.model
    smrf.output
    smrf.spatial
    smrf.utils

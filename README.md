@@ -10,7 +10,7 @@
 
 Spatial Modeling for Resources Framework (SMRF) was developed by Dr. Scott Havens at the USDA Agricultural Research Service (ARS) in Boise, ID. SMRF was designed to increase the flexibility of taking measured weather data and distributing the point measurements across a watershed. SMRF was developed to be used as an operational or research framework, where ease of use, efficiency, and ability to run in near real time are high priorities.
 
-Read the full documentation for [SMRF](https://smrf.readthedocs.io) including up to date installation instructions.
+Read the [full documentation for SMRF](https://smrf.readthedocs.io) including up to date installation instructions.
 
 ## Installation
 
@@ -32,7 +32,27 @@ python3 -m unittest -v
 
 For Windows, the install method is using [Docker](#Docker).
 
+## Topo setup
 
+## Input data
+
+Input meterological data for SMRF requires the following variables:
+
+- Air temperature
+- Vapor pressure
+- Precipitation
+- Wind speed and direction
+- Cloud factor (percentage between 0 and 1 of incoming solar obstructed by clouds)
+
+The data can be supplied through the following formats:
+
+- CSV files
+- [MySQL database](https://github.com/USDA-ARS-NWRC/weather_database)
+- Weather Research and Forecasting (WRF) outputs
+- High Resolution Rapid Refresh (HRRR)
+- Generic netCDF
+
+## Running SMRF
 
 ## Docker
 

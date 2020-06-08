@@ -25,7 +25,7 @@ Air temperature [Celcius]
 
 Vapor pressure [Pascals]
    Derived from the air temperature and measured relative humidity. Can be calculated
-   using the IPW utility ``sat2vp``.
+   using the IPW utility ``sat2vp`` or the SMRF function ``rh2vp``.
 
 Precipitation [mm]
    Instantaneous precipitation with no negative values. If using a weighing precipitation
@@ -43,12 +43,13 @@ Cloud factor [None]
     The percentage between 0 and 1 of the incoming solar radiation that is obstructed by clouds.
     0 equates to no light and 1 equates to no clouds.  The cloud factor is derived from the
     measured solar radiation and the modeled clear sky solar raditation.  The modeled clear sky
-    solar radiation can be calculated using the IPW utility ``twostream``.
+    solar radiation can be calculated using the IPW utility ``twostream`` or the SMRF
+    function ``model_solar``.
 
 
 
-Types of Input Data
--------------------
+Input Data Types
+----------------
 
 All types of input data to SMRF are assumed to be point measurements.  Therefore, each measurement
 location must have a X, Y, and elevation associated with it.
@@ -81,8 +82,8 @@ the coarse resolution model terrain can be taken into account when downscaling t
 
 See Havens et al. (2017) for more details and further discussion on using WRF for forcing iSnobal.
 
-Data Format
------------
+Data Formats
+------------
 
 CSV Files
 `````````
@@ -122,7 +123,7 @@ ID_2        586856   4827316  998
 ID_N        641751   4846381  2310
 ==========  ======   =======  =========
 
-Example data files can be found for WY 2009 for the Boise River Basin in ``test_data/stationData``.
+Example data files can be found in the ``tests`` directory for RME.
 
 
 MySQL Database
@@ -164,13 +165,12 @@ ID_3        TUOL     CDEC
 ID_N        BRB      Mesowest
 ==========  ======   ======
 
-Please contact Scott Havens (scott.havens@ars.usda.gov) if you'd like to use a MySQL database
-but need help setting up the database and tables to work with SMRF. We can provide scripts
-that will help create the database.
+Visit the `Weather Database GitHub page <https://github.com/USDA-ARS-NWRC/weather_database>`_ if you'd
+like to use a MySQL database.
 
 
-WRF
-```
+Weather Research and Forecasting (WRF)
+``````````````````````````````````````
 
 Gridded datasets can come in many forms and the :mod:`smrf.data.loadGrid` module is meant to import
 gridded datasets.  Currently, SMRF can ingest WRF output in the standard wrf_out NetCDF files. SMRF
@@ -203,7 +203,7 @@ RAINNC
    Accumulated precipitation
 
 CLDFRA
-   Cloud fraction for all atmoshperic layers, the average will be used at the SMRF cloud factor
+   Cloud fraction for all atmospheric layers, the average will be used at the SMRF cloud factor
 
 UGRD
    Wind vector, u component
@@ -214,3 +214,33 @@ VGRD
 
 High Resolution Rapid Refresh (HRRR)
 ````````````````````````````````````
+
+The `High Resolution Rapid Refersh (HRRR) <https://rapidrefresh.noaa.gov/hrrr/>`_ is a real time 3-km,
+hourly atmospheric model with forecasts ran by NOAA. The data is focused on recent water years (>WY2017).
+Loading the HRRR data into SMRF is performed by `weather_forecast_retrieval <https://github.com/USDA-ARS-NWRC/weather_forecast_retrieval>`_
+based on a rigid directory structure used by the NOMADS archive. Because HHHR has a minimum of an 18 hour
+forecast every hour, if a data file is not found or is incomplete, ``weather_forecast_retrieval`` will search
+the previous forecasts for a good image for that specific time.
+
+The variables used from HRRR are:
+
+* Air temperature at 2 meters
+* Relative humidity at 2 meters
+* Wind u/v components at 10 meters
+* Total precipitation for that hour
+* Short wave radiation at the surface to calculated cloud factor
+* Elevation of the terrain
+
+
+Generic netCDF files
+````````````````````
+
+SMRF also has the ability to load generic netCDF files that may come from a variety of sources. At a minimum,
+the netCDF file requires at a minimum the following fields:
+
+* ``lat`` for the grid cell latitude
+* ``lon`` for the grid cell longitude
+* ``elev`` for the grid cell elevation
+* ``time`` CF compliant time
+
+Each variable name is specified in the configuration file and maps from the file variable to the SMRF variable.

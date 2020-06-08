@@ -9,7 +9,7 @@ Detrending Measurement Data
 Most meterological variables used in SMRF have an underlying elevational gradient.  Therefore,
 all of the distribution methods can estimate the gradient from the measurement data and apply
 the elevational gradient to the DEM during distribution. Here, the theory of how the elevational
-gradient is calculated, removed from the data, and reapplied after distirbution is explained. All
+gradient is calculated, removed from the data, and reapplied after distribution is explained. All
 the distribution methods follow this pattern and detrending can be ignored by setting ``detrend: False``
 in the configuration.
 
@@ -18,7 +18,7 @@ in the configuration.
    The elevational trend for meterological stations is calculated using all available stations
    in the modeling domain. A line is fit to the measurement data with the slope as the elevational
    gradient (:numref:`Fig. %sa <air_temp_trend>`, :numref:`Fig. %sa <precip_trend>`, and :numref:`Fig. %sa <grid_trend>`). The slope
-   can be constrained as positive, negative, or no contraint.
+   can be constrained as positive, negative, or no constraint.
 
    Gridded datasets have significantly more information than point measurements. Therefore, the
    approach is slightly different for calculating the elevational trend line.  To limit the number of
@@ -39,13 +39,13 @@ in the configuration.
 
    The distributed residuals are added to the elevational trend line evaluated at each of the DEM
    grid points (:numref:`Fig. %sc <air_temp_trend>`, :numref:`Fig. %sc <precip_trend>`, and :numref:`Fig. %sc <grid_trend>`). This
-   produces a distributed value that has the underlying elevational trend in the measurment data but
+   produces a distributed value that has the underlying elevational trend in the measurement data but
    also takes into account local changes in that value.
 
 .. note ::
 
    Constraints can be placed on the elevational trend to be either positive, negative, or no constraint.
-   However, if a constraint is applied and the measurement data does not fit the constratint (for example
+   However, if a constraint is applied and the measurement data does not fit the constraint (for example
    negavite trend for air temp but there is a positive trend during an inversion or night time), then
    the slope of the trend line will be set to zero. This will distribute the data based on the underlying
    method and not apply any trends.
@@ -62,8 +62,7 @@ Inverse Distance Weighting
 
 .. _air_temp_trend:
 
-.. figure:: _static/air_temp_trend.png
-   :scale: 75%
+.. figure:: ../_static/air_temp_trend.png
    :alt: Inverse distance weighting air temperature example.
 
    Distribution of air temperature using inverse distance weighting. a) Air temperature as a function
@@ -95,8 +94,7 @@ Detrended Kriging
 
 .. _precip_trend:
 
-.. figure:: _static/precip_trend.png
-   :scale: 75%
+.. figure:: ../_static/precip_trend.png
    :alt: Detrended kriging precipitation example.
 
    Distribution of precipitation using detrended kriging. a) Precipitation as a function
@@ -133,17 +131,26 @@ measurement locations change. The kriging weights are futher constrained to only
 proximity to the estimation point.
 
 
+Ordinary Kriging
+----------------
+
+Detrended kriging above is a specific application of ordinary kriging for distributing meterological data. A more generic
+kriging approach is to use `PyKrige <https://pykrige.readthedocs.io/en/latest/>`_ that supports 2D ordinary and universal kriging.
+See PyKrige documentation for more information and the :doc:`configuration file reference <core_config>` for specific
+application within SMRF.
+
+
+
 Gridded Interpolation
 ---------------------
 
 
 .. _grid_trend:
 
-.. figure:: _static/grid_air_temp.png
-   :scale: 75%
+.. figure:: ../_static/grid_air_temp.png
    :alt: Gridded interpolation air temperature example.
 
-   Distribution of air temperature using gridded interploation. a) Air temperature as a function
+   Distribution of air temperature using gridded interpolation. a) Air temperature as a function
    of elevation. b) Linear interpolation of the residuals. c) Retrending the residuals to the
    DEM elevation.
 
@@ -156,8 +163,6 @@ or detrended kriging are not performed to save memory and computational time. Th
 * nearest neighbor
 * cubic 1-D
 * cubic 2-D
-
-
 
 
 .. _here: http://docs.scipy.org/doc/scipy/reference/generated/scipy.interpolate.griddata.html
