@@ -154,6 +154,10 @@ setup(
         'scripts/gen_maxus'
     ],
     extras_require={
-        'docs': ['sphinxcontrib-bibtex', 'sphinxcontrib-websupport']
+        'docs': [
+            'sphinxcontrib-bibtex',
+            'sphinxcontrib-websupport',
+            'pydata-sphinx-theme'
+        ]
     }
 )
