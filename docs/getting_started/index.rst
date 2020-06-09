@@ -31,10 +31,10 @@ For Windows, the install method is using Docker.
 
 .. toctree::
     :maxdepth: 2
-    :hidden:
 
     install
-    overview
-    intro_tutorials/index
-    comparison/index
-    tutorials
+    create_topo
+    create_config
+    run_smrf
+    docker
+    CONTRIBUTING

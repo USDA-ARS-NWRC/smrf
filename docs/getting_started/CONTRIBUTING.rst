@@ -112,9 +112,8 @@ Ready to contribute? Here's how to set up `smrf` for local development.
 
     $ flake8 smrf
     $ python setup.py test
-    $ tox
 
-   To get flake8 and tox, just pip install them into your virtualenv.
+   To get flake8, just pip install them into your virtualenv.
 
 6. Commit your changes and push your branch to GitHub::
 
@@ -133,8 +132,8 @@ Before you submit a pull request, check that it meets these guidelines:
 2. If the pull request adds functionality, the docs should be updated. Put
    your new functionality into a function with a docstring, and add the
    feature to the list in README.rst.
-3. The pull request should work for Python 2.6, 2.7, 3.3, 3.4 and 3.5, and for PyPy. Check
-   https://travis-ci.org/scotthavens/smrf/pull_requests
+3. The pull request should work for Python 3.4+, and for PyPy. Check
+   https://travis-ci.com/USDA-ARA-NWRC/smrf/pull_requests
    and make sure that the tests pass for all supported Python versions.
 
 Tips
@@ -142,7 +141,7 @@ Tips
 
 To run a subset of tests::
 
-    $ python -m unittest discover -v
+    $ python3 -m unittest discover -v
 
 To check the coverage of the tests::
 

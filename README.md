@@ -12,6 +12,13 @@ Spatial Modeling for Resources Framework (SMRF) was developed by Dr. Scott Haven
 
 Read the [full documentation for SMRF](https://smrf.readthedocs.io) including up to date installation instructions.
 
+- [Spatial Modeling for Resources Framework](#spatial-modeling-for-resources-framework)
+  - [Installation](#installation)
+  - [Topo setup](#topo-setup)
+  - [Input data](#input-data)
+  - [Running SMRF](#running-smrf)
+  - [Docker](#docker)
+
 ## Installation
 
 To install SMRF locally on Linux of MacOSX, first clone the repository and build into a virtual environment. This requires `gcc <= 9.0`. The general steps are as follows and will test the SMRF installation by running the tests.
@@ -34,6 +41,19 @@ For Windows, the install method is using [Docker](#Docker).
 
 ## Topo setup
 
+The topo provides SMRF with the following static layers:
+
+1. Digital elevation model
+2. Vegetation type
+3. Vegetation height
+4. Vegetation extinction coefficient
+5. Vegetation optical transmissivity
+6. Basin mask (optional)
+
+All these layers are stored in a netCDF file, typically referred to the `topo.nc` file.
+
+While the `topo.nc` file can be generated manually, a great option is to use [basin_setup](https://github.com/USDA-ARS-NWRC/basin_setup) which creates a topo file that is compatible with SMRF and AWSM.
+
 ## Input data
 
 Input meterological data for SMRF requires the following variables:
@@ -54,25 +74,28 @@ The data can be supplied through the following formats:
 
 ## Running SMRF
 
+There are two ways to run SMRF, first is through the `run_smrf` command or through the SMRF API. If SMRF is being used as input to a snow or hydrology model, we recommend to use `run_smrf` as it will generate all the input required. See the full documentation for more details.
+
+```bash
+run_smrf <config_file>
+```
+
 ## Docker
 
-To mount a data volume, so that you can share data between the local file
-system and the docker, the `-v` option must be used. For a more in depth
-discussion and tutorial, read
-https://docs.docker.com/engine/userguide/containers/dockervolumes/. The
-container has a shared data volume at `/data` where the container can access
-the local file system.
+SMRF is also built into a docker image to make it easy to install on any operating system. The docker images are built automatically from the Github repository and include the latest code base or stable release images.
 
-When the image is ran, it will go into the Python terminal within the image.
-Within this terminal, SMRF can be imported. The command `/bin/bash` can be
-appended to the end of docker run to enter into the docker terminal for full
-control. It will start in the `/data` location with SMRF code in `/code/smrf`.
+The SMRF docker image has a folder meant to mount data inside the docker image at `/data`.
 
-For Linux
-`docker run -v <path>:/data -it usdaarsnwrc/smrf [/bin/bash]`
+```bash
+docker run -v <path to data>:/data usdaarsnwrc/smrf run_smrf <path to config>
+```
 
-For MacOSX:
-`docker run -v /Users/<path>:/data -it usdaarsnwrc/smrf [/bin/bash]`
+The `<path to data>` should be the path to where the configuration file, data and topo are on the host machine. This will also be the location to where the SMRF output will go.
 
-For Windows:
-`docker run -v /c/Users/<path>:/data -it usdaarsnwrc/smrf [/bin/bash]`
+**NOTE:** The paths in the configuration file must be adjusted for being inside the docker image. For example, in the command above the path to the config will be inside the docker image. This would be `/data/config.ini` and not the path on the host machine.
+
+In a way that ARS uses this, we keep the config, topo and data on one location as the files are fairly small. The output then is put in another location as it file size can be much larger. To facilitate this, mount the input and output data separately and modify the configuration paths.
+
+```bash
+docker run -v <input>:/data/input -v <output>:/data/output usdaarsnwrc/smrf run_smrf <path to config>
+```
