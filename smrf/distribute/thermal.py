@@ -50,7 +50,6 @@ class th(image_data.image_data):
         et al (2001) :cite:`Niemela&al:2001`
 
     .. figure:: _static/thermal_comparison.png
-       :scale: 50%
        :alt: Comparing the 4 thermal methods.
 
        The 4 different methods for estimating clear sky thermal radiation for a
@@ -114,7 +113,6 @@ class th(image_data.image_data):
     Angstrom1918, Dilley1998, or Prata1996.
 
     .. figure:: _static/thermal_cloud_comparision.png
-       :scale: 50%
        :alt: Comparing the 4 thermal cloud correction methods.
 
        The 4 different methods for correcting clear sky thermal radiation for

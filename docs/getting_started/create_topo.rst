@@ -46,3 +46,25 @@ at 30 meters. The vegetation is important in the following locations within SMRF
 Vegetation type is configured in SMRF as ``veg_<type>``. For example, to add sheltering for vegetation type 3011, the configuration
 option ``veg_3011`` will be set to the value needed, say ``10.0``. SMRF will apply the value ``10.0`` to any cells with vegetation
 type 3011.
+
+Maxus file
+----------
+
+If running SMRF with the Winstral wind model, a maxus (maximum upwind slope) file must be generated. The file
+is a calculation of the :doc:`maximum upwind slope <../user_guide/wind_models>` for
+many possible wind directions. To generate the maxus file, use the ``gen_maxus`` script.
+
+.. code:: console
+
+    gen_maxus --out_maxus=maxus.nc --sv_global 300 --sv_local=60 topo.nc
+
+This will generate a ``maxus.nc`` which are the raw calulations for each direction. ``gen_maxus`` will also
+generate a ``maxus_100window.nc`` that averages the maxus values over a window, this averaged file is what
+typically is used for SMRF.
+
+If using the Winstral precipitation rescaling method, the ``tbreak.nc`` is also required. Using the same command
+as above, adding the ``--make_tbreak`` will make this file.
+
+.. code:: console
+
+    gen_maxus --out_maxus=maxus.nc --sv_global 300 --sv_local=60 --make_tbreak --out_tbreak=tbreak.nc topo.nc

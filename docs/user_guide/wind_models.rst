@@ -135,4 +135,4 @@ the relationships in Winstral and Marks (2002) and Winstral et al. (2009) :cite:
 Standard interpolation
 ``````````````````````
 
-Standard interpolation using SMRF's :doc:`distribution methods <dist_methods>`_.
+Standard interpolation using SMRF's :doc:`distribution methods <dist_methods>`.
