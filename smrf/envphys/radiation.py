@@ -1,8 +1,3 @@
-"""
-Created on Apr 17, 2015
-@author: scott
-"""
-
 import datetime
 import logging
 import math
@@ -75,10 +70,8 @@ def albedo(telapsed, cosz, gsize, maxgsz, dirt=2):
         telapsed - time since last snow storm (decimal days)
         cosz - cosine local solar illumination angle matrix
         gsize - gsize is effective grain radius of snow after last storm (mu m)
-        maxgsz - maxgsz is maximum grain radius expected from grain growth
-                  (mu m)
-        dirt - dirt is effective contamination for adjustment to visible
-               albedo (usually between 1.5-3.0)
+        maxgsz - maxgsz is maximum grain radius expected from grain growth (mu m)
+        dirt - dirt is effective contamination for adjustment to visible albedo (usually between 1.5-3.0)
 
     Returns:
         tuple:
@@ -87,11 +80,6 @@ def albedo(telapsed, cosz, gsize, maxgsz, dirt=2):
         - **alb_v** (*numpy.array*) - albedo for visible specturm
 
         - **alb_ir** (*numpy.array*) -  albedo for ir spectrum
-
-    Created April 17, 2015
-    Modified July 23, 2015 - take image of cosz and calculate albedo for
-        one time step
-    Scott Havens
 
     """
 
@@ -1159,7 +1147,6 @@ def get_hrrr_cloud(df_solar, df_meta, logger, lat, lon):
     # Clean up the dataframe to be between 0 and 1
     df_cf[df_cf > 1.0] = 1.0
     df_cf[df_cf < 0.0] = 0.0
-
 
     # # create cloud factor dataframe
     # df_cf = df_solar.copy()

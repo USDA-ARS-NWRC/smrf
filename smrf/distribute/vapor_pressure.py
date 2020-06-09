@@ -13,7 +13,7 @@ class vp(image_data.image_data):
     The :mod:`~smrf.distribute.vapor_pressure.vp` class allows for variable
     specific distributions that go beyond the base class
 
-    Vapor pressure is provided as an argument and is calcualted from coincident
+    Vapor pressure is provided as an argument and is calculated from coincident
     air temperature and relative humidity measurements using utilities such as
     IPW's ``rh2vp``. The vapor pressure is distributed instead of the relative
     humidity as it is an absolute measurement of the vapor within the
@@ -35,31 +35,28 @@ class vp(image_data.image_data):
         min: minimum value of vapor pressure is 10 Pa
         max: maximum value of vapor pressure is 7500 Pa
         stations: stations to be used in alphabetical order
-        output_variables: Dictionary of the variables held within class
-            :mod:`!smrf.distribute.vapor_pressure.vp` that specifies the
-            ``units`` and ``long_name`` for creating the NetCDF output file.
-        variable: 'vapor_pressure'
 
     """
 
     variable = 'vapor_pressure'
 
     # these are variables that can be output
-    output_variables = {'vapor_pressure': {
-        'units': 'pascal',
-        'standard_name': 'vapor_pressure',
-        'long_name': 'Vapor pressure'
-    },
+    output_variables = {
+        'vapor_pressure': {
+            'units': 'pascal',
+            'standard_name': 'vapor_pressure',
+            'long_name': 'Vapor pressure'
+        },
         'dew_point': {
-        'units': 'degree_Celcius',
-        'standard_name': 'dew_point_temperature',
-        'long_name': 'Dew point temperature'
-    },
+            'units': 'degree_Celcius',
+            'standard_name': 'dew_point_temperature',
+            'long_name': 'Dew point temperature'
+        },
         'precip_temp': {
-        'units': 'degree_Celcius',
-        'standard_name': 'precip_temperature',
-        'long_name': 'Precip temperature'
-    }
+            'units': 'degree_Celcius',
+            'standard_name': 'precip_temperature',
+            'long_name': 'Precip temperature'
+        }
     }
 
     # these are variables that are operate at the end only and do not need to

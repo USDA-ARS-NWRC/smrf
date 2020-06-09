@@ -23,21 +23,18 @@ class ts(image_data.image_data):
         config: configuration from [soil] section
         soil_temp: numpy array of the soil temperature
         stations: stations to be used in alphabetical order
-        output_variables: Dictionary of the variables held within class
-            :mod:`!smrf.distribute.soil_temp.ts` that specifies the ``units``
-            and ``long_name`` for creating the NetCDF output file.
-        variable: 'soil_temp'
 
     """
 
     variable = 'soil_temp'
 
     # these are variables that can be output
-    output_variables = {'soil_temp': {
-        'units': 'degree_Celcius',
-        'standard_name': 'soil_temperature',
-        'long_name': 'Soil temperature'
-    }
+    output_variables = {
+        'soil_temp': {
+            'units': 'degree_Celcius',
+            'standard_name': 'soil_temperature',
+            'long_name': 'Soil temperature'
+        }
     }
 
     # these are variables that are operate at the end only and do not need to

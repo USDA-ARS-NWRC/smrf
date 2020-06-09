@@ -1,4 +1,3 @@
-
 import logging
 
 import numpy as np
@@ -49,7 +48,7 @@ class th(image_data.image_data):
         References: Angstrom (1918) :cite:`Angstrom:1918` as cityed by Niemela
         et al (2001) :cite:`Niemela&al:2001`
 
-    .. figure:: _static/thermal_comparison.png
+    .. figure:: ../_static/thermal_comparison.png
        :alt: Comparing the 4 thermal methods.
 
        The 4 different methods for estimating clear sky thermal radiation for a
@@ -112,7 +111,7 @@ class th(image_data.image_data):
     algorthim had the lowest RMSD. The Crawford1999 worked best when combined with
     Angstrom1918, Dilley1998, or Prata1996.
 
-    .. figure:: _static/thermal_cloud_comparision.png
+    .. figure:: ../_static/thermal_cloud_comparision.png
        :alt: Comparing the 4 thermal cloud correction methods.
 
        The 4 different methods for correcting clear sky thermal radiation for
@@ -143,10 +142,6 @@ class th(image_data.image_data):
         min: minimum value of thermal is -600 W/m^2
         max: maximum value of thermal is 600 W/m^2
         stations: stations to be used in alphabetical order
-        output_variables: Dictionary of the variables held within class
-            :mod:`!smrf.distribute.thermal.ta` that specifies the ``units``
-            and ``long_name`` for creating the NetCDF output file.
-        variable: 'thermal'
         dem: numpy array for the DEM, from
             :py:attr:`smrf.data.loadTopo.Topo.dem`
         veg_type: numpy array for the veg type, from
@@ -164,26 +159,27 @@ class th(image_data.image_data):
     variable = 'thermal'
 
     # these are variables that can be output
-    output_variables = {'thermal': {
-        'units': 'watt/m2',
-        'standard_name': 'thermal_radiation',
-        'long_name': 'Thermal (longwave) radiation'
-    },
+    output_variables = {
+        'thermal': {
+            'units': 'watt/m2',
+            'standard_name': 'thermal_radiation',
+            'long_name': 'Thermal (longwave) radiation'
+        },
         'thermal_clear': {
-        'units': 'watt/m2',
-        'standard_name': 'thermal_radiation non-correct',
-        'long_name': 'Thermal (longwave) radiation non-corrected'
-    },
+            'units': 'watt/m2',
+            'standard_name': 'thermal_radiation non-correct',
+            'long_name': 'Thermal (longwave) radiation non-corrected'
+        },
         'thermal_cloud': {
-        'units': 'watt/m2',
-        'standard_name': 'thermal_radiation cloud corrected',
-        'long_name': 'Thermal (longwave) radiation cloud corrected'
-    },
+            'units': 'watt/m2',
+            'standard_name': 'thermal_radiation cloud corrected',
+            'long_name': 'Thermal (longwave) radiation cloud corrected'
+        },
         'thermal_veg': {
-        'units': 'watt/m2',
-        'standard_name': 'thermal_radiation veg corrected',
-        'long_name': 'Thermal (longwave) radiation veg corrected'
-    }
+            'units': 'watt/m2',
+            'standard_name': 'thermal_radiation veg corrected',
+            'long_name': 'Thermal (longwave) radiation veg corrected'
+        }
     }
     # these are variables that are operate at the end only and do not need to
     # be written during main distribute loop

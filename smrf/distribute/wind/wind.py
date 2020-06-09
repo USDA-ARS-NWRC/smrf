@@ -36,10 +36,6 @@ class Wind(image_data.image_data):
         min: minimum value of wind is 0.447
         max: maximum value of wind is 35
         stations: stations to be used in alphabetical order
-        output_variables: Dictionary of the variables held within class
-            :mod:`!smrf.distribute.wind.wind` that specifies the ``units`` and
-            ``long_name`` for creating the NetCDF output file.
-        variable: 'wind'
 
     """
 

@@ -115,9 +115,7 @@ def nan_helper(y):
     Returns:
         tuple:
             **nans** - logical indices of NaNs
-            **index** -  a function, with signature
-                         indices=index(logical_indices) to convert logical
-                         indices of NaNs to 'equivalent' indices
+            **index** - a function
 
     """
 

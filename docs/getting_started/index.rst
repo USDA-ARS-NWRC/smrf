@@ -38,3 +38,4 @@ For Windows, the install method is using Docker.
     run_smrf
     docker
     CONTRIBUTING
+    HISTORY

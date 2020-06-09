@@ -1,5 +1,3 @@
-
-# import numpy as np
 import logging
 
 from smrf.distribute import image_data
@@ -8,11 +6,15 @@ from smrf.utils import utils
 
 class cf(image_data.image_data):
     """
-    The :mod:`~smrf.distribute.cloud_factor.cf` class allows for variable specific
-    distributions that go beyond the base class.
+    The :mod:`~smrf.distribute.cloud_factor.cf` class allows for variable
+    specific distributions that go beyond the base class. Cloud factor is
+    a relatively simple variable to distribute as it does not rely on any
+    other variables.
 
-    cloud factor is a relatively simple variable to distribute as it does
-    not rely on any other variables.
+    Cloud factor is calculated as the ratio between measured incoming
+    solar radiation and modeled clear sky radiation. A value of 0 means
+    no incoming solar radiation (or very cloudy) and a value of 1 means
+    sunny.
 
     Args:
         config: The [cloud_factor] section of the configuration file
@@ -21,21 +23,18 @@ class cf(image_data.image_data):
         config: configuration from [cloud_factor] section
         cloud_factor: numpy array of the cloud factor
         stations: stations to be used in alphabetical order
-        output_variables: Dictionary of the variables held within class
-            :mod:`!smrf.distribute.cloud_factor.cf` that specifies the ``units``
-            and ``long_name`` for creating the NetCDF output file.
-        variable: 'cloud_factor'
 
     """
 
     variable = 'cloud_factor'
 
     # these are variables that can be output
-    output_variables = {'cloud_factor': {
-        'units': 'None',
-        'standard_name': 'cloud_factor',
-        'long_name': 'cloud factor'
-    }
+    output_variables = {
+        'cloud_factor': {
+            'units': 'None',
+            'standard_name': 'cloud_factor',
+            'long_name': 'cloud factor'
+        }
     }
 
     # these are variables that are operate at the end only and do not need to
@@ -54,7 +53,7 @@ class cf(image_data.image_data):
 
     def initialize(self, topo, data):
         """
-        Initialize the distribution, soley calls
+        Initialize the distribution, solely calls
         :mod:`smrf.distribute.image_data.image_data._initialize`.
 
         Args:
@@ -88,8 +87,8 @@ class cf(image_data.image_data):
         """
         Distribute the data using threading and queue. All data is provided
         and ``distribute_thread`` will go through each time step and call
-        :mod:`smrf.distribute.cloud_factor.cf.distribute` then puts the distributed
-        data into ``queue['cloud_factor']``.
+        :mod:`smrf.distribute.cloud_factor.cf.distribute` then puts the
+        distributed data into ``queue['cloud_factor']``.
 
         Args:
             queue: queue dictionary for all variables

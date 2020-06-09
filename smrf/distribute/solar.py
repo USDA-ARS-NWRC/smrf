@@ -1,4 +1,3 @@
-
 import logging
 import os
 import subprocess as sp
@@ -83,12 +82,8 @@ class solar(image_data.image_data):
             'WORKDIR' environment variable)
 
     Attributes:
-        config: configuration from solar section
         albedoConfig: configuration from [albedo] section
         config: configuration from [albedo] section
-
-        stoporad_in: file path to the stoporad_in file created from
-            :mod:`smrf.data.loadTopo.Topo`
         clear_ir_beam: numpy array modeled clear sky infrared beam radiation
         clear_ir_diffuse: numpy array modeled clear sky infrared diffuse
             radiation
@@ -104,15 +99,11 @@ class solar(image_data.image_data):
             radiation
         metadata: metadata for the station data
         net_solar: numpy array for the calculated net solar radiation
-        output_variables: Dictionary of the variables held within class
-            :mod:`!smrf.distribute.solar.solar` that specifies the ``units``
-            and ``long_name`` for creating the NetCDF output file.
         stations: stations to be used in alphabetical order
         stoporad_in: file path to the stoporad_in file created from
             :mod:`smrf.data.loadTopo.Topo`
         tempDir: temporary directory for ``stoporad``, will default to the
             ``WORKDIR`` environment variable
-        variable: solar
         veg_height: numpy array of vegetation heights from
             :mod:`smrf.data.loadTopo.Topo`
         veg_ir_beam: numpy array vegetation adjusted infrared beam radiation
