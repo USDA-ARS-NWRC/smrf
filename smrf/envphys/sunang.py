@@ -23,20 +23,20 @@ def sunang(date_time, latitude, longitude, truncate=True):
         date_time: python datetime object
         latitude: value or np.ndarray (in degrees)
         longitude: value or np.ndarray (in degrees)
-        truncate: True will replicate the IPW output precision, not applied
-            if position is an array
+        truncate: True will replicate the IPW output precision, not applied if position is an array
 
     Returns
         cosz - cosine of the zenith angle, same shape as input position
         azimuth - solar azimuth, same shape as input position
         rad_vec - Earth-Sun radius vector
+
     """
 
     # Calculate the ephemeris parameters
     declination, omega, rad_vec = ephemeris(date_time)
 
     # calculate the sun angle
-    rad_latitude = latitude * M_PI /180
+    rad_latitude = latitude * M_PI / 180
     rad_longitude = longitude * M_PI / 180
     mu, azimuth = sunpath(rad_latitude, rad_longitude, declination, omega)
 
@@ -97,36 +97,43 @@ def sunpath(latitude, longitude, declination, omega):
             raise ValueError("latitude array not between -90 and +90 degrees")
 
         if np.any(np.abs(longitude) > M_PI):
-            raise ValueError("longitude array not between -180 and +180 degrees")
+            raise ValueError(
+                "longitude array not between -180 and +180 degrees")
 
     else:
         if np.abs(latitude) > M_PI_2:
-            raise ValueError("latitude ({} deg) not between -90 and +90 degrees".format(latitude*180/M_PI))
+            raise ValueError(
+                "latitude ({} deg) not between -90 and +90 degrees".format(latitude*180/M_PI))
 
         if np.abs(longitude) > M_PI:
-            raise ValueError("longitude ({} deg) not between -180 and +180 degrees".format(longitude*180/M_PI))
+            raise ValueError(
+                "longitude ({} deg) not between -180 and +180 degrees".format(longitude*180/M_PI))
 
     if np.abs(declination) > M_PI*MAX_DECLINATION/180:
-        raise ValueError("declination ({} deg) > maximum declination ({} deg)".format(declination*180/M_PI, MAX_DECLINATION))
+        raise ValueError("declination ({} deg) > maximum declination ({} deg)".format(
+            declination*180/M_PI, MAX_DECLINATION))
 
     if np.abs(omega) > M_PI:
-        raise ValueError("longitude of sun ({} deg) not between -180 and +180 degrees".format(omega*180/M_PI))
+        raise ValueError(
+            "longitude of sun ({} deg) not between -180 and +180 degrees".format(omega*180/M_PI))
 
     cosz, az = rotate(np.sin(declination), omega, np.sin(latitude), longitude)
 
     return cosz, az
 
+
 def dsign(a, b):
     """
     modified from /usr/src/lib/libF77/d_sign.c
     """
-    
+
     x = a if a >= 0 else -a
     y = x if b >= 0 else -x
     return y
 
 # original ibm 360/44 fortran ivf - vislab - wilson - 29jul79
 # translated, modified and reduced by dozier - ucsb - 11/81
+
 
 def ephemeris(dt):
     """
@@ -146,8 +153,9 @@ def ephemeris(dt):
         declin: solar declination angle, in radians
         omega: sun longitude, in radians
         r: Earth-Sun radius vector
+
     """
-        
+
     one = 1.0
     degrd = atan(one) / 45.0
 
@@ -159,7 +167,8 @@ def ephemeris(dt):
     # The int() is required for compatability with IPW as the divide by 100 keeps
     # the value as an integer where python converts to a float...
     p51 = gmts / 10.0 / 24.0
-    p22 = int(((dt.year - 1900) * JULIAN_CENTURY - 25) / 100) + yearday(dt.year, dt.month, dt.day) - 0.5
+    p22 = int(((dt.year - 1900) * JULIAN_CENTURY - 25) / 100) + \
+        yearday(dt.year, dt.month, dt.day) - 0.5
     p23 = (p51 / DEGS_IN_CIRCLE + p22) / JULIAN_CENTURY
     p22 = p23 * JULIAN_CENTURY
 
@@ -177,7 +186,7 @@ def ephemeris(dt):
     p14 = -3.e-6
     p25 = p11 + fmod(p12 * p22, DEGS_IN_CIRCLE) + p23 * p23 * (p13 + p14 * p23)
     p25 = fmod(p25, DEGS_IN_CIRCLE)
- 
+
     # eccentricity - p26
     p11 = 0.01675104
     p12 = -4.18e-5
@@ -195,12 +204,13 @@ def ephemeris(dt):
     p13 = p12 / degrd
 
     # true anomaly - p27`
-    p27 = 2.0 * atan(sqrt((1.0 + p26) / (1.0 - p26)) * tan(p13 / 2.0 * degrd)) / degrd
+    p27 = 2.0 * atan(sqrt((1.0 + p26) / (1.0 - p26))
+                     * tan(p13 / 2.0 * degrd)) / degrd
     if dsign(1.0, p27) != dsign(1.0, sin(p13 * degrd)):
         p27 += 1.8e2
     if p27 < 0.0:
         p27 += DEGS_IN_CIRCLE
- 
+
     # radius vector - r
     r = 1.0 - p26 * cos(p13 * degrd)
 
@@ -213,7 +223,7 @@ def ephemeris(dt):
     p13 = -1.64e-6
     p14 = 5.03e-7
     p43 = p11 + p23 * (p12 + p23 * (p13 + p14 * p23))
- 
+
     #  mean ascension - p45
     p11 = 279.6909832
     p12 = 0.98564734
@@ -228,7 +238,8 @@ def ephemeris(dt):
     p13 = 198.8491083
     p14 = 0.00919167
     p15 = 1.4388e-5
-    p28 = p11 + fmod(p12 * p23, DEGS_IN_CIRCLE) + p23 * (p13 + p23 * (p14 + p15 * p23))
+    p28 = p11 + fmod(p12 * p23, DEGS_IN_CIRCLE) + p23 * \
+        (p13 + p23 * (p14 + p15 * p23))
     p28 = fmod(p28, DEGS_IN_CIRCLE)
 
     # mean elongation of moon - p30
@@ -312,6 +323,7 @@ def ephemeris(dt):
 
     return declin, omega, r
 
+
 def rotate(mu, azm, mu_r, lam_r):
     """
     Calculates new spherical coordinates if system rotated about
@@ -333,43 +345,47 @@ def rotate(mu, azm, mu_r, lam_r):
 
     # Check input values: mu = cos(theta) mu_r = cos(theta-sub-r)
     if mu < -1.0 or mu > 1.0:
-        raise ValueError("rotate: mu = cos(theta) = {} is not between -1 and +1".format(mu))
+        raise ValueError(
+            "rotate: mu = cos(theta) = {} is not between -1 and +1".format(mu))
 
     if isinstance(mu_r, np.ndarray):
         if np.any(mu_r < -1.0) or np.any(mu_r > 1.0):
             raise ValueError("rotate, mu_r array is not between -1 and +1")
     else:
         if mu_r < -1.0 or mu_r > 1.0:
-            raise ValueError("rotate: mu_rotate = cos(theta-sub-r) = {} is not between -1 and +1".format(mu_r))
+            raise ValueError(
+                "rotate: mu_rotate = cos(theta-sub-r) = {} is not between -1 and +1".format(mu_r))
 
     if np.abs(azm) > (2 * np.pi):
-        raise ValueError("rotate: azimuth ({} deg) is not between -360 and 360".format(180 * (azm * 360) / np.pi))
+        raise ValueError(
+            "rotate: azimuth ({} deg) is not between -360 and 360".format(180 * (azm * 360) / np.pi))
 
     if isinstance(lam_r, np.ndarray):
         if np.any(np.abs(lam_r) > (2 * np.pi)):
             raise ValueError("rotate, lam_r array is not between -360 and 360")
     else:
         if np.abs(lam_r) > (2 * np.pi):
-            raise ValueError("rotate: lam_r ({} deg) = axis rotation, is not between -360 and 360".format(180 * lam_r / np.pi))
+            raise ValueError(
+                "rotate: lam_r ({} deg) = axis rotation, is not between -360 and 360".format(180 * lam_r / np.pi))
 
     # difference between azimuth and rotation angle of x-axis
     omega = lam_r - azm
 
-    #sine of angle theta (cosine is an argument)
-    #sine of angle theta-sub-r (cosine is an argument)
+    # sine of angle theta (cosine is an argument)
+    # sine of angle theta-sub-r (cosine is an argument)
     sinTheta = np.sqrt((1. - mu) * (1. + mu))
     sinThr = np.sqrt((1. - mu_r) * (1. + mu_r))
-        
-    #cosine of difference between azimuth and aziumth of rotation
+
+    # cosine of difference between azimuth and aziumth of rotation
     cosOmega = np.cos(omega)
 
-    #Output:
-    #azimuth and cosine of angle in rotated axis system.
-    #(bug if trig routines trigger error)
+    # Output:
+    # azimuth and cosine of angle in rotated axis system.
+    # (bug if trig routines trigger error)
     aPrime = -np.arctan2(sinTheta * np.sin(omega),
-                mu_r * sinTheta * cosOmega - mu * sinThr)
+                         mu_r * sinTheta * cosOmega - mu * sinThr)
     muPrime = sinTheta * sinThr * cosOmega + mu * mu_r
-    
+
     return muPrime, aPrime
 
 
@@ -385,7 +401,7 @@ def yearday(year, month, day):
 
     Returns:
         yday: day of year
-        
+
     """
 
     assert(year >= 0)
@@ -409,7 +425,7 @@ def numdays(year, month):
     Args:
         year
         month
-    
+
     Returns:
         ndays: number of days in month
     """

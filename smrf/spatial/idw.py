@@ -1,11 +1,3 @@
-'''
-2015-11-30 Scott Havens
-updated 2015-12-31 Scott Havens
-    - start using panda dataframes to help keep track of stations
-
-Distributed forcing data over a grid using different methods
-'''
-
 import numpy as np
 
 
@@ -21,7 +13,6 @@ class IDW:
 
     def __init__(self, mx, my, GridX, GridY, mz=None, GridZ=None,
                  power=2, zeroVal=-1):
-
         """
         Args:
             mx: x locations for the points
@@ -58,7 +49,6 @@ class IDW:
 
         # calculate the weights
         self.calculateWeights()
-
 
     def calculateDistances(self):
         '''

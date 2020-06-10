@@ -1,0 +1,2 @@
+sphinxcontrib-bibtex>=1.0
+sphinxcontrib-websupport>=1.0.1

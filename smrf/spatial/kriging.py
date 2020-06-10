@@ -1,4 +1,3 @@
-
 import numpy as np
 import pandas as pd
 from pykrige.ok import OrdinaryKriging
@@ -10,7 +9,6 @@ class KRIGE:
     '''
 
     def __init__(self, mx, my, mz, GridX, GridY, GridZ, config):
-
         """
         Args:
             mx: x locations for the points
@@ -39,17 +37,19 @@ class KRIGE:
         self.config = config
 
         # kriging parameters for pykrige
-        self.variogram_model = self.config['krig_variogram_model'] #'linear'
+        self.variogram_model = self.config['krig_variogram_model']  # 'linear'
         self.variogram_parameters = None
         self.variogram_function = None
-        self.nlags = self.config['krig_nlags']#np.min([np.round(len(mx)/2), 6])
+        # np.min([np.round(len(mx)/2), 6])
+        self.nlags = self.config['krig_nlags']
         self.weight = self.config['krig_weight']
-        self.anisotropy_scaling = self.config['krig_anisotropy_scaling'] #1.0
-        self.anisotropy_angle = self.config['krig_anisotropy_angle'] #0.0
+        self.anisotropy_scaling = self.config['krig_anisotropy_scaling']  # 1.0
+        self.anisotropy_angle = self.config['krig_anisotropy_angle']  # 0.0
         self.verbose = False
         self.enable_plotting = False
         self.enable_statistics = False
-        self.coordinates_type = self.config['krig_coordinates_type'] # not in the pypi release of PyKrige
+        # not in the pypi release of PyKrige
+        self.coordinates_type = self.config['krig_coordinates_type']
 
         # pykrige execution
         self.backend = 'vectorized'
@@ -94,28 +94,28 @@ class KRIGE:
                              enable_statistics=self.enable_statistics)
 
         v, ss1 = OK.execute('grid',
-                            self.GridX[0,:],
-                            self.GridY[:,0],
+                            self.GridX[0, :],
+                            self.GridY[:, 0],
                             backend=self.backend,
                             n_closest_points=self.n_closest_points)
-
 
         if self.config['detrend']:
             # retrend the residuals
             v = self.retrendData(v)
-
 
         return v, ss1
 
     def detrendData(self, data, flag=0, zeros=None):
         '''
         Detrend the data in val using the heights zmeas
+
         Args:
             data: is the same size at mx,my
             flag: - 1 for positive, -1 for negative, 0 for any trend imposed
 
         Returns:
             data minus the elevation trend
+
         '''
 
         # calculate the trend on any real data

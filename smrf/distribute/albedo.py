@@ -1,9 +1,6 @@
-import datetime
 import logging
 
 import numpy as np
-import pandas as pd
-import pytz
 
 from smrf.distribute import image_data
 from smrf.envphys import radiation
@@ -33,25 +30,22 @@ class albedo(image_data.image_data):
         min: minimum value of albedo is 0
         max: maximum value of albedo is 1
         stations: stations to be used in alphabetical order
-        output_variables: Dictionary of the variables held within class
-            :mod:`!smrf.distribute.albedo.albedo` that specifies the ``units``
-            and ``long_name`` for creating the NetCDF output file.
-        variable: 'albedo'
     """
 
     variable = 'albedo'
 
     # these are variables that can be output
-    output_variables = {'albedo_vis': {
-        'units': 'None',
-        'standard_name': 'visible_albedo',
-        'long_name': 'Visible wavelength albedo'
-    },
+    output_variables = {
+        'albedo_vis': {
+            'units': 'None',
+            'standard_name': 'visible_albedo',
+            'long_name': 'Visible wavelength albedo'
+        },
         'albedo_ir': {
-        'units': 'None',
-        'standard_name': 'infrared_albedo',
-        'long_name': 'Infrared wavelength albedo'
-    }
+            'units': 'None',
+            'standard_name': 'infrared_albedo',
+            'long_name': 'Infrared wavelength albedo'
+        }
     }
     # these are variables that are operate at the end only and do not need to
     # be written during main distribute loop

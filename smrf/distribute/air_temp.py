@@ -17,7 +17,7 @@ class ta(image_data.image_data):
     best when detrended. However, even with a negative trend, it is possible to
     have instances where the trend does not apply, for example a temperature
     inversion or cold air pooling.  These types of conditions will have
-    unintended concequences on variables that use the distributed air
+    unintended consequences on variables that use the distributed air
     temperature.
 
     Args:
@@ -27,21 +27,17 @@ class ta(image_data.image_data):
         config: configuration from [air_temp] section
         air_temp: numpy array of the air temperature
         stations: stations to be used in alphabetical order
-        output_variables: Dictionary of the variables held within class
-            :mod:`!smrf.distribute.air_temp.ta` that specifies the ``units``
-            and ``long_name`` for creating the NetCDF output file.
-        variable: 'air_temp'
-
     """
 
     variable = 'air_temp'
 
     # these are variables that can be output
-    output_variables = {'air_temp': {
-        'units': 'degree_Celsius',
-        'standard_name': 'air_temperature',
-        'long_name': 'Air temperature'
-    }
+    output_variables = {
+        'air_temp': {
+            'units': 'degree_Celsius',
+            'standard_name': 'air_temperature',
+            'long_name': 'Air temperature'
+        }
     }
 
     # these are variables that are operate at the end only and do not need to
@@ -61,7 +57,7 @@ class ta(image_data.image_data):
 
     def initialize(self, topo, data):
         """
-        Initialize the distribution, soley calls
+        Initialize the distribution, solely calls
         :mod:`smrf.distribute.image_data.image_data._initialize`.
 
         Args:

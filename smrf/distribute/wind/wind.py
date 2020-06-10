@@ -15,6 +15,7 @@ class Wind(image_data.image_data):
     distributions that go beyond the base class.
 
     Three distribution methods are available for the Wind class:
+
     1. Winstral and Marks 2002 method for maximum upwind slope (maxus)
     2. Import WindNinja simulations
     3. Standard interpolation
@@ -35,10 +36,6 @@ class Wind(image_data.image_data):
         min: minimum value of wind is 0.447
         max: maximum value of wind is 35
         stations: stations to be used in alphabetical order
-        output_variables: Dictionary of the variables held within class
-            :mod:`!smrf.distribute.wind.wind` that specifies the ``units`` and
-            ``long_name`` for creating the NetCDF output file.
-        variable: 'wind'
 
     """
 
