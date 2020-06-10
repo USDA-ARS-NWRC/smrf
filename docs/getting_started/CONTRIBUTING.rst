@@ -57,9 +57,8 @@ Don't forget to push your tags afterwards with::
 
   $ git push origin --tags
 
-The development team of SMRF attempted to adhere
-
-to semantic versioning. Here is the basics taken from the semantic versioning website.
+The development team of SMRF attempted to adhere to semantic versioning. Here is the basics taken from
+the semantic versioning website.
 
   * Patch version Z (x.y.Z | x > 0) MUST be incremented if only backwards compatible bug fixes are introduced.
     A bug fix is defined as an internal change that fixes incorrect behavior.
