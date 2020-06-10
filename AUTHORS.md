@@ -12,3 +12,4 @@
 * Danny Marks [@dannymarks](http://github.com/dannymarks)
 * Andrew Hedrick  [@Hedrick-ARS](http://github.com/Hedrick-ARS)
 * Joachim Meyer [@jomey](https://github.com/jomey)
+* Ernesto Trujillo [@etujil](https://github.com/etrujil)

@@ -34,6 +34,11 @@ And install the requirements, SMRF and run the tests.
 ```bash
 python3 -m pip install -r requirements_dev.txt
 python3 setup.py install
+```
+
+To optionally verify the installation, run the unit tests
+
+```bash
 python3 -m unittest -v
 ```
 

@@ -60,7 +60,7 @@ options are available for the topo section type item.
 
 .. code-block:: console
 
-  inicheck --details topo filename -m smrf
+  inicheck --details topo <filename> -m smrf
 
 The output is:
 
