@@ -12,7 +12,7 @@ run in near real time are high priorities.
 Features
 --------
 
-SMRF was developed as a modular framework to enable new modules to be easily intigrated
+SMRF was developed as a modular framework to enable new modules to be easily integrated
 and utilized.
 
 * Load data into SMRF from MySQL database, CSV files, or gridded climate models (i.e. WRF)
@@ -28,16 +28,12 @@ and utilized.
 * Computation tasks implemented in C
 
 .. toctree::
-   :maxdepth: 4
+   :maxdepth: 2
+   :titlesonly:
 
-   install
-   CONTRIBUTING
-   configuration
-   input_data
-   dist_methods
-   core_config
-   api
-   AUTHORS
+   getting_started/index
+   user_guide/index
+   api/index
    zreferences
 
 
@@ -46,4 +42,3 @@ Indices and tables
 
 * :ref:`genindex`
 * :ref:`modindex`
-* :ref:`search`

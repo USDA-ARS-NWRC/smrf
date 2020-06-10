@@ -152,5 +152,12 @@ setup(
         'scripts/run_smrf',
         'scripts/mk_project',
         'scripts/gen_maxus'
-    ]
+    ],
+    extras_require={
+        'docs': [
+            'sphinxcontrib-bibtex',
+            'sphinxcontrib-websupport',
+            'pydata-sphinx-theme'
+        ]
+    }
 )

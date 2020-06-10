@@ -9,7 +9,7 @@ except:
 webbrowser.open("file://" + pathname2url(os.path.abspath(sys.argv[1])))
 endef
 export BROWSER_PYSCRIPT
-BROWSER := python -c "$$BROWSER_PYSCRIPT"
+BROWSER := python3 -c "$$BROWSER_PYSCRIPT"
 
 help:
 	@echo "clean - remove all build, test, coverage and Python artifacts"
@@ -66,7 +66,7 @@ coverage:
 docs:
 	rm -f docs/smrf.rst
 	rm -f docs/modules.rst
-	sphinx-apidoc -o docs/ smrf
+	sphinx-apidoc -o docs/api smrf
 	$(MAKE) -C docs clean
 	$(MAKE) -C docs html
 	$(BROWSER) docs/_build/html/index.html
