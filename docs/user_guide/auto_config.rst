@@ -25,6 +25,12 @@ topo
 | 		*Type: bool*
 | 
 
+| **sky_view_factor_angles**
+| 	Number of directions to estimate the horizon. Divides 360 degrees into evenly spaced directions.
+| 		*Default: 72*
+| 		*Type: int*
+| 
+
 
 time
 ----
