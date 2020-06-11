@@ -18,6 +18,10 @@ from scipy.interpolate.interpnd import (CloughTocher2DInterpolator,
 from smrf import __core_config__, __version__
 
 from .gitinfo import __gitVersion__
+<< << << < HEAD
+
+== == == =
+>>>>>> > upstream/master
 
 
 class CheckStation(CheckType):
@@ -246,7 +250,8 @@ def backup_input(data, config_obj):
         backup_config_obj.cfg['csv'][k] = fname
 
     # Copy topo files over to backup
-    ignore = ['northern_hemisphere', 'gradient_method']
+    ignore = ['northern_hemisphere',
+              'gradient_method', 'sky_view_factor_angles']
     for s in backup_config_obj.cfg['topo'].keys():
         src = backup_config_obj.cfg['topo'][s]
         # make not a list if lenth is 1
@@ -416,8 +421,8 @@ def interp_weights(xy, uv, d=2):
     here:
     https://stackoverflow.com/questions/20915502/speedup-scipy-griddata-for-multiple-interpolations-between-two-irregular-grids
     This function finds the vertices and weights which is the most
-    computationally expensive part of the routine. The interpolateion can then
-    be done quickly.
+    computationally expensive part of the routine. The interpolateion can
+    then be done quickly.
 
     Args:
         xy: n by 2 array of flattened meshgrid x and y coords of WindNinja grid

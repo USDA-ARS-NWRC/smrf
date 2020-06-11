@@ -38,6 +38,7 @@ import pytz
 from inicheck.config import UserConfig
 from inicheck.output import generate_config, print_config_report
 from inicheck.tools import check_config, get_user_config
+from topocalc.shade import shade
 
 from smrf import data, distribute, output
 from smrf.envphys import radiation, sunang
@@ -219,8 +220,8 @@ class SMRF():
         self.forecast_flag = False
         if 'gridded' in self.config:
             self.gridded = True
-            if self.config['gridded']['data_type'] in ['hrrr_netcdf', 'hrrr_grib']:
-                self.forecast_flag = self.config['gridded']['hrrr_forecast_flag']
+            if self.config['gridded']['data_type'] in ['hrrr_netcdf', 'hrrr_grib']:  # noqa
+                self.forecast_flag = self.config['gridded']['hrrr_forecast_flag']  # noqa
 
             # hours from start of day
             self.day_hour = self.start_date - self.date_time[0]
@@ -294,16 +295,16 @@ class SMRF():
 
         self._logger.info('SMRF closed --> %s' % datetime.now())
 
-    def loadTopo(self, calcInput=True):
+    def loadTopo(self):
         """
         Load the information from the configFile in the ['topo'] section. See
         :func:`smrf.data.loadTopo.Topo` for full description.
         """
 
         # load the topo
-        self.topo = data.loadTopo.Topo(self.config['topo'],
-                                       calcInput,
-                                       tempDir=self.temp_dir)
+        self.topo = data.loadTopo.Topo(
+            self.config['topo'],
+            tempDir=self.temp_dir)
 
     def initializeDistribution(self):
         """
@@ -319,7 +320,7 @@ class SMRF():
             * :func:`Vapor pressure <smrf.distribute.vapor_pressure.vp>`
             * :func:`Wind speed and direction <smrf.distribute.wind.wind>`
             * :func:`Precipitation <smrf.distribute.precipitation.ppt>`
-            * :func:`Albedo <smrf.distribute.albedo.albedo>`
+            * :func:`Albedo <smrf.distribute.albedo.Albedo>`
             * :func:`Solar radiation <smrf.distribute.solar.solar>`
             * :func:`Thermal radiation <smrf.distribute.thermal.th>`
             * :func:`Soil Temperature <smrf.distribute.soil_temp.ts>`
@@ -344,7 +345,7 @@ class SMRF():
             self.config['time']['time_step'])
 
         # 5. Albedo
-        self.distribute['albedo'] = distribute.albedo.albedo(
+        self.distribute['albedo'] = distribute.albedo.Albedo(
             self.config['albedo'])
 
         # 6. cloud_factor
@@ -564,7 +565,7 @@ class SMRF():
             # 0.2 illumination angle
             illum_ang = None
             if cosz > 0:
-                illum_ang = radiation.shade(
+                illum_ang = shade(
                     self.topo.sin_slope,
                     self.topo.aspect,
                     azimuth,

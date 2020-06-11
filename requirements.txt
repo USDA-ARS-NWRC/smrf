@@ -9,5 +9,6 @@ pytz==2017.3
 scipy>=1.0.0
 utm==0.4.0
 pykrige>=1.5.0
-spatialnc>=0.2.12,<0.3.0
+spatialnc>=0.2.12
 weather-forecast-retrieval>=0.6.0
+topocalc>=0.3.0
