@@ -95,7 +95,8 @@ class TestLoadGrid(SMRFTestCase):
             },
             'time': {
                 'start_date': '2018-07-22 16:00',
-                'end_date': '2018-07-22 20:00'
+                'end_date': '2018-07-22 20:00',
+                'time_zone': 'utc'
             },
             'system': {
                 'threading': False,
