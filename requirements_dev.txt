@@ -10,3 +10,4 @@ sphinxcontrib-websupport>=1.0.1
 pygit2
 jupyter
 seaborn
+git+https://github.com/USDA-ARS-NWRC/goldmeister.git@master

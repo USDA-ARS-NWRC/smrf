@@ -1,13 +1,10 @@
-import unittest
-from copy import deepcopy
-
 import numpy as np
 import pandas as pd
 import utm
 import os
 
 from smrf.data import loadTopo
-from smrf.envphys import radiation, sunang
+from smrf.envphys import radiation, radiation_ipw, sunang
 from tests.smrf_test_case import SMRFTestCase
 
 
@@ -36,7 +33,7 @@ class TestRadiation(SMRFTestCase):
         ipw_azimuth = -5.413
         ipw_rad_vector = 0.98787
 
-        result = radiation.sunang_ipw(date_time, lat, lon)
+        result = radiation_ipw.sunang_ipw(date_time, lat, lon)
         self.assertTrue(result[0] == ipw_cosz)
         self.assertTrue(result[1] == ipw_azimuth)
 
@@ -75,10 +72,11 @@ class TestRadiation(SMRFTestCase):
         topo_config = {
             'filename': os.path.join(self.test_dir, 'RME/topo/topo.nc'),
             'northern_hemisphere': True,
+            'gradient_method': 'gradient_d8',
+            'sky_view_factor_angles': 72
         }
         topo = loadTopo.Topo(
             topo_config,
-            calcInput=False,
             tempDir=os.path.join(self.test_dir, 'RME/output')
         )
 
@@ -110,7 +108,7 @@ class TestRadiation(SMRFTestCase):
         date_time = date_time.tz_localize('UTC')
 
         # IPW version
-        sipw = radiation.solar_ipw(date_time, w=[0.58, 0.68])
+        sipw = radiation_ipw.solar_ipw(date_time, w=[0.58, 0.68])
         self.assertTrue(sipw == sin)
 
         # Python version
@@ -144,7 +142,7 @@ class TestRadiation(SMRFTestCase):
         for n in [0, 1]:
 
             # IPW way
-            ipw_R = radiation.twostream_ipw(
+            ipw_R = radiation_ipw.twostream_ipw(
                 cosz[n], S0[n], tau=tau[n], omega=omega[n], g=g[n], R0=R0[n])
             self.assertTrue(ipw_R[0] == reflectance[n])
             self.assertTrue(ipw_R[1] == transmittance[n])

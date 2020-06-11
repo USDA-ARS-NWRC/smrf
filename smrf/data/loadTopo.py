@@ -6,9 +6,9 @@ import subprocess as sp
 import numpy as np
 from netCDF4 import Dataset
 from spatialnc import ipw
+from topocalc import gradient
+from topocalc.viewf import viewf
 from utm import to_latlon
-
-from smrf.utils import gradient
 
 
 class Topo():
@@ -25,31 +25,11 @@ class Topo():
     topo will guess the location of the WORKDIR env variable
     and should work for unix systems.
 
-    Attributes:
-        topoConfig: configuration for topo
-        tempDir: location of temporary working directory
-        dem: numpy array for the DEM
-        mask: numpy array for the mask
-        veg_type: numpy array for the veg type
-        veg_height: numpy array for the veg height
-        veg_k: numpy array for the veg K
-        veg_tau: numpy array for the veg transmissivity
-        sky_view:
-        ny: number of columns in DEM
-        nx: number of rows in DEM
-        u,v: location of upper left corner
-        du, dv: step size of grid
-        unit: geo header units of grid
-        coord_sys_ID: coordinate syste,
-        x,y: position vectors
-        X,Y: position grid
-        stoporad_in: numpy array for the sky view factor
-
     """
 
     IMAGES = ['dem', 'mask', 'veg_type', 'veg_height', 'veg_k', 'veg_tau']
 
-    def __init__(self, topoConfig, calcInput=True, tempDir=None):
+    def __init__(self, topoConfig, tempDir=None):
         self.topoConfig = topoConfig
 
         if (tempDir is None) | (tempDir == 'WORKDIR'):
@@ -61,14 +41,12 @@ class Topo():
 
         self.readNetCDF()
 
-        # calculate the necessary images for stoporad
-        if calcInput:
-            self.stoporadInput()
-        else:
-            self.stoporad_in_file = None
+        # calculate the gradient and the sky view factor
+        self.gradient()
+        self.viewf()
 
-    # IPW Support has been deprecated since 0.8.0, but it now
-    # has been fully removed.
+        # create the stoporad.in file
+        self.stoporadInput()
 
     def readNetCDF(self):
         """
@@ -87,25 +65,7 @@ class Topo():
         if 'projection' not in f.variables.keys():
             raise IOError("Topo input files must have projection information")
 
-        # read in the images
-        # netCDF files are stored typically as 32-bit float, so convert
-        # to double or int
-        for v_smrf in self.IMAGES:
-
-            # check to see if the user defined any variables
-            # e.g. veg_height = veg_length
-            if v_smrf in self.topoConfig.keys():
-                v_file = self.topoConfig[v_smrf]
-            else:
-                v_file = v_smrf
-
-            if v_file in f.variables.keys():
-                if v_smrf == 'veg_type':
-                    result = f.variables[v_file][:].astype(int)
-                else:
-                    result = f.variables[v_file][:].astype(np.float64)
-
-            setattr(self, v_smrf, result)
+        self.readImages(f)
 
         # get some general information about the model domain from the dem
         self.nx = f.dimensions['x'].size
@@ -115,6 +75,9 @@ class Topo():
         self.x = f.variables['x'][:]
         self.y = f.variables['y'][:]
         [self.X, self.Y] = np.meshgrid(self.x, self.y)
+
+        self.dx = np.mean(np.diff(self.x))
+        self.dy = np.mean(np.diff(self.y))
 
         # Calculate the center of the basin
         self.cx, self.cy = self.get_center(f, mask_name='mask')
@@ -139,6 +102,32 @@ class Topo():
 
         f.close()
 
+    def readImages(self, f):
+        """Read images from the netcdf and set as attributes in the Topo class
+
+        Args:
+            f: netcdf dataset object
+        """
+
+        # netCDF files are stored typically as 32-bit float, so convert
+        # to double or int
+        for v_smrf in self.IMAGES:
+
+            # check to see if the user defined any variables
+            # e.g. veg_height = veg_length
+            if v_smrf in self.topoConfig.keys():
+                v_file = self.topoConfig[v_smrf]
+            else:
+                v_file = v_smrf
+
+            if v_file in f.variables.keys():
+                if v_smrf == 'veg_type':
+                    result = f.variables[v_file][:].astype(int)
+                else:
+                    result = f.variables[v_file][:].astype(np.float64)
+
+            setattr(self, v_smrf, result)
+
     def get_center(self, ds, mask_name=None):
         '''
         Function returns the basin center in the native coordinates of the
@@ -151,8 +140,8 @@ class Topo():
         Args:
             ds: netCDF4.Dataset object containing at least x,y, optionally
                     a mask variable name
-            mask_name: variable name in the dataset that is a mask where 1 is in
-                      the mask
+            mask_name: variable name in the dataset that is a mask where 1 is
+                    in the mask
         Returns:
             tuple: x,y of the data center in the datas native coordinates
         '''
@@ -172,80 +161,7 @@ class Topo():
 
         return x.mean(), y.mean()
 
-    def stoporadInput(self):
-        """
-        Calculate the necessary input file for stoporad
-        The IPW and WORKDIR environment variables must be set
-        """
-        # if self.topoConfig['type'] != 'ipw':
-        #
-        f = os.path.abspath(os.path.expanduser(os.path.join(self.tempDir,
-                                                            'dem.ipw')))
-        i = ipw.IPW()
-        i.new_band(self.dem)
-
-        i.add_geo_hdr([self.x[0], self.y[0]],
-                      [np.mean(np.diff(self.x)), np.mean(np.diff(self.y))],
-                      'm', 'UTM')
-        i.write(f, 16)
-
-        self.topoConfig['dem'] = f
-
-        # calculate the gradient
-        gfile = os.path.abspath(os.path.expanduser(
-            os.path.join(self.tempDir, 'gradient.ipw')
-        ))
-        self._logger.debug('gradient file - %s' % gfile)
-
-        # self._gradient(self.topoConfig['dem'], gfile)
-        self.gradient(gfile)
-
-        # calculate the view factor
-        svfile = os.path.abspath(os.path.expanduser(
-            os.path.join(self.tempDir, 'sky_view.ipw')
-        ))
-        self._logger.debug('sky view file - %s' % svfile)
-
-        self._viewf(self.topoConfig['dem'], svfile)
-
-        # combine into a value
-        sfile = os.path.abspath(os.path.expanduser(
-            os.path.join(self.tempDir, 'stoporad_in.ipw')
-        ))
-        self._logger.debug('stoporad in file - %s' % sfile)
-
-        cmd = 'mux %s %s %s > %s' % (self.topoConfig['dem'],
-                                     gfile,
-                                     svfile,
-                                     sfile)
-        proc = sp.Popen(cmd, shell=True).wait()
-
-        if proc != 0:
-            raise OSError('mux for stoporad_in.ipw failed')
-
-        # read in the stoporad file to store in memory
-        self.stoporad_in = ipw.IPW(sfile)
-        self.stoporad_in_file = sfile
-        # self.slope = self.stoporad_in.bands[1].data.astype(np.float64)
-        # self.aspect = self.stoporad_in.bands[2].data.astype(np.float64)
-        self.sky_view = self.stoporad_in.bands[3].data.astype(np.float64)
-
-        # clean up the WORKDIR
-        os.remove(gfile)
-        os.remove(svfile)
-
-        os.remove(self.topoConfig['dem'])
-        self.topoConfig.pop('dem', None)
-
-    def _gradient(self, demFile, gradientFile):
-        # calculate the gradient
-        cmd = 'gradient %s > %s' % (demFile, gradientFile)
-        proc = sp.Popen(cmd, shell=True, env=os.environ.copy()).wait()
-
-        if proc != 0:
-            raise OSError('gradient failed')
-
-    def gradient(self, gfile):
+    def gradient(self):
         """
         Calculate the gradient and aspect
 
@@ -254,65 +170,113 @@ class Topo():
         """
 
         func = self.topoConfig['gradient_method']
-        dx = np.mean(np.diff(self.x))
-        dy = np.mean(np.diff(self.x))
 
         # calculate the gradient and aspect
-        g, a = getattr(gradient, func)(self.dem, dx, dy, aspect_rad=True)
+        g, a = getattr(gradient, func)(
+            self.dem, self.dx, self.dy, aspect_rad=True)
         self.slope_radians = g
         self.sin_slope = np.sin(g)  # IPW stores slope as sin(Slope)
         self.aspect = a
 
-        # convert to ipw images for stoporad, the spatialnc package
+    def viewf(self):
+        """Calculate the sky view factor
+        """
+
+        svf, tcf = viewf(
+            self.dem,
+            self.dx,
+            nangles=self.topoConfig['sky_view_factor_angles'],
+            sin_slope=self.sin_slope,
+            aspect=self.aspect)
+
+        self.sky_view_factor = svf
+        self.terrain_config_factor = tcf
+
+    def add_geo_hdr(self, image):
+        """Add an IPW geoheader to the image
+
+        Arguments:
+            image {IPW} -- IPW class
+        """
+
+        image.add_geo_hdr(
+            [self.x[0], self.y[0]],
+            [self.dx, self.dx],
+            'm',
+            'UTM')
+
+        return image
+
+    def stoporadInput(self):
+        """
+        Build the stoporad.in file. This will have to write out
+
+        The stoporad.in file is a 5 band image with the following:
+            - dem
+            - slope
+            - aspect
+            - sky view factor
+            - terrain factor
+        """
+
+        # DEM ipw image
+        dem_file = os.path.join(self.tempDir, 'dem.ipw')
+        ipw_image = ipw.IPW()
+        ipw_image.new_band(self.dem)
+        ipw_image = self.add_geo_hdr(ipw_image)
+        ipw_image.write(dem_file, 16)
+
+        # slope
+        slope_file = os.path.join(self.tempDir, 'slope.ipw')
+
+        ipw_image = ipw.IPW()
+        ipw_image.new_band(self.sin_slope)
+        ipw_image = self.add_geo_hdr(ipw_image)
+        ipw_image.write(slope_file, 8)
+
+        # aspect
+        aspect_file = os.path.join(self.tempDir, 'aspect.ipw')
+        ipw_image = ipw.IPW()
+        ipw_image.new_band(self.aspect)
+        ipw_image = self.add_geo_hdr(ipw_image)
+        ipw_image.bands[0].units = 'radians'
+        ipw_image.write(aspect_file, 8)
+
+        # modify the LQ headers
         # will only use the max/min floats for the LQ hearder, however
         # the shade function checks the lq header max and will error
         # with these slopes
-        sfile = os.path.abspath(os.path.expanduser(
-            os.path.join(self.tempDir, 'slope.ipw')
-        ))
-        i = ipw.IPW()
-        i.new_band(self.sin_slope)
-        i.add_geo_hdr([self.x[0], self.y[0]],
-                      [np.mean(np.diff(self.x)), np.mean(np.diff(self.y))],
-                      'm', 'UTM')
-        i.write(sfile, 8)
-
-        # aspect
-        afile = os.path.abspath(os.path.expanduser(
-            os.path.join(self.tempDir, 'aspect.ipw')
-        ))
-        i = ipw.IPW()
-        i.new_band(a)
-        i.add_geo_hdr([self.x[0], self.y[0]],
-                      [np.mean(np.diff(self.x)), np.mean(np.diff(self.y))],
-                      'm', 'UTM')
-        i.bands[0].units = 'radians'
-        i.write(afile, 8)
-
-        # modify the LQ headers
-        sfile2 = os.path.abspath(os.path.expanduser(
-            os.path.join(self.tempDir, 'slope2.ipw')
-        ))
-        cmd = 'requant -m 0,1 {} > {}'.format(sfile, sfile2)
+        slope_file2 = os.path.join(self.tempDir, 'slope2.ipw')
+        cmd = 'requant -m 0,1 {} > {}'.format(slope_file, slope_file2)
         proc = sp.Popen(cmd, shell=True, env=os.environ.copy()).wait()
         if proc != 0:
             raise OSError('slope LQ header modification failed')
 
-        # mux together for gradient
-        cmd = 'mux {} {} > {}'.format(sfile2, afile, gfile)
-        proc = sp.Popen(cmd, shell=True, env=os.environ.copy()).wait()
+        # calculate the view factor
+        svf_file = os.path.join(self.tempDir, 'sky_view.ipw')
+        ipw_image = ipw.IPW()
+        ipw_image.new_band(self.sky_view_factor)
+        ipw_image.new_band(self.terrain_config_factor)
+        ipw_image = self.add_geo_hdr(ipw_image)
+        ipw_image.bands[0].units = 'radians'
+        ipw_image.write(svf_file, 8)
+
+        # combine into a value
+        stoporad_file = os.path.join(self.tempDir, 'stoporad_in.ipw')
+
+        cmd = f"mux {dem_file} {slope_file2} {aspect_file} " \
+            f"{svf_file} > {stoporad_file}"
+        proc = sp.Popen(cmd, shell=True).wait()
+
         if proc != 0:
-            raise OSError('gradient mux failed')
+            raise OSError('mux for stoporad_in.ipw failed')
 
-        # clean up
-        os.remove(sfile)
-        os.remove(sfile2)
-        os.remove(afile)
+        self.stoporad_in_file = stoporad_file
 
-    def _viewf(self, demFile, viewfFile):
-        # calculate the sky view file
-        cmd = 'viewf %s > %s' % (demFile, viewfFile)
-        proc = sp.Popen(cmd, shell=True, env=os.environ.copy()).wait()
-
-        if proc != 0:
-            raise OSError('viewf failed')
+        # clean up the WORKDIR
+        # This may be able to be removed after shade is implemented
+        # os.remove(dem_file)
+        os.remove(svf_file)
+        os.remove(slope_file)
+        os.remove(slope_file2)
+        os.remove(aspect_file)

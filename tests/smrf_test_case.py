@@ -117,6 +117,10 @@ class SMRFTestCase(unittest.TestCase):
         # read in the base configuration
         cls.base_config = get_user_config(config_file, modules='smrf')
 
+        # create the output dir
+        folder = os.path.join(cls.base_config.cfg['output']['out_location'])
+        os.makedirs(folder, exist_ok=True)
+
     @classmethod
     def tearDownClass(cls):
         """
