@@ -18,10 +18,6 @@ from scipy.interpolate.interpnd import (CloughTocher2DInterpolator,
 from smrf import __core_config__, __version__
 
 from .gitinfo import __gitVersion__
-<< << << < HEAD
-
-== == == =
->>>>>> > upstream/master
 
 
 class CheckStation(CheckType):
