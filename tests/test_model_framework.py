@@ -53,14 +53,20 @@ class TestModelFrameworkMST(SMRFTestCase):
     """
     Test timezone handling for MST.
     """
-    TIMEZONE = pytz.timezone('US/Mountain')
+    TIMEZONE = pytz.timezone('MST')
 
     @classmethod
     def setUpClass(cls):
         super().setUpClass()
         base_config = copy.deepcopy(cls.base_config)
-        base_config.cfg['time']['time_zone'] = str(cls.TIMEZONE)
+        base_config.cfg['time']['time_zone'] = 'MST'
         cls.smrf = SMRF(base_config)
+
+    def test_timezone_error(self):
+        base_config = copy.deepcopy(self.base_config)
+        base_config.cfg['time']['time_zone'] = 'mst'
+        with self.assertRaises(Exception):
+            SMRF(base_config)
 
     def test_start_date(self):
         self.assertEqual(

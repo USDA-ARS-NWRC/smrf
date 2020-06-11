@@ -1,10 +1,3 @@
-
-"""
-20160104 Scott Havens
-
-Collection of utility functions
-"""
-
 import copy
 import os
 import random
@@ -26,6 +19,7 @@ from smrf import __core_config__, __version__
 
 from .gitinfo import __gitVersion__
 
+
 class CheckStation(CheckType):
     """
     Custom check for ensuring our stations are always capitalized
@@ -39,13 +33,32 @@ class CheckStation(CheckType):
         Attempt to convert all the values to upper case.
 
         Args:
-            value: A single string in a a config entry representing a
-                station name
+            value: A single string in config entry representing a station name
         Returns:
             value: A single station name all upper case
         """
 
         return value.upper()
+
+
+class CheckRawString(CheckType):
+    """
+    Custom `inicheck` checker that will not change the input string
+    """
+
+    def __init__(self, **kwargs):
+        super(CheckRawString, self).__init__(**kwargs)
+
+    def type_func(self, value):
+        """
+        Do not change the passed value at all
+        Args:
+            value: A single string
+        Returns:
+            value: A single string unchanged
+        """
+
+        return value
 
 
 def find_configs(directory):
@@ -282,7 +295,8 @@ def getConfigHeader():
     cfg_str = ("Config File for SMRF {0}\n"
                "For more SMRF related help see:\n"
                "{1}").format(
-                   getgitinfo(), 'http://smrf.readthedocs.io/en/latest/')
+                   getgitinfo(),
+                   'http://smrf.readthedocs.io/en/latest/')
     return cfg_str
 
 

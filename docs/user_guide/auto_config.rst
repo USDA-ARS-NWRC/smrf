@@ -54,9 +54,9 @@ time
 | 
 
 | **time_zone**
-| 	Time zone for all times provided and how the model will be run see pytz docs for information on what is accepted
+| 	Case sensitive time zone for all times provided and how the model will be run. See pytz docs for information on what is accepted. Full list can be found en.wikipedia.org/wiki/List_of_tz_database_time_zones
 | 		*Default: UTC*
-| 		*Type: string*
+| 		*Type: rawstring*
 | 
 
 
