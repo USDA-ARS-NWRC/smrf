@@ -9,7 +9,7 @@ import utm
 from weather_forecast_retrieval import hrrr
 
 from smrf.envphys import phys
-from smrf.envphys.radiation import get_hrrr_cloud
+from smrf.envphys.radiation.cloud import get_hrrr_cloud
 
 
 class grid():

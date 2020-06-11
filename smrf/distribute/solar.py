@@ -6,7 +6,8 @@ import numpy as np
 from spatialnc import ipw
 
 from smrf.distribute import image_data
-from smrf.envphys import radiation
+from smrf.envphys.radiation import cloud
+from smrf.envphys.radiation import vegetation
 from smrf.utils import utils
 
 
@@ -507,24 +508,24 @@ class solar(image_data.image_data):
     def cloud_correct(self):
         """
         Correct the modeled clear sky radiation for cloud cover using
-        :mod:`smrf.envphys.radiation.cf_cloud`. Sets :py:attr:`cloud_vis_beam`
+        :mod:`smrf.envphys.radiation.cloud.cf_cloud`. Sets :py:attr:`cloud_vis_beam`
         and :py:attr:`cloud_vis_diffuse`.
         """
 
         self._logger.debug('Correcting clear sky radiation for clouds')
-        self.vis_beam, self.vis_diffuse = radiation.cf_cloud(self.vis_beam,
-                                                             self.vis_diffuse,
-                                                             self.cloud_factor)
+        self.vis_beam, self.vis_diffuse = cloud.cf_cloud(self.vis_beam,
+                                                         self.vis_diffuse,
+                                                         self.cloud_factor)
 
-        self.ir_beam, self.ir_diffuse = radiation.cf_cloud(self.ir_beam,
-                                                           self.ir_diffuse,
-                                                           self.cloud_factor)
+        self.ir_beam, self.ir_diffuse = cloud.cf_cloud(self.ir_beam,
+                                                       self.ir_diffuse,
+                                                       self.cloud_factor)
 
     def veg_correct(self, illum_ang):
         """
         Correct the cloud adjusted radiation for vegetation using
-        :mod:`smrf.envphys.radiation.veg_beam` and
-        :mod:`smrf.envphys.radiation.veg_diffuse`. Sets
+        :mod:`smrf.envphys.radiation.vegetation.veg_beam` and
+        :mod:`smrf.envphys.radiation.vegetation.veg_diffuse`. Sets
         :py:attr:`veg_vis_beam`, :py:attr:`veg_vis_diffuse`,
         :py:attr:`veg_ir_beam`, and :py:attr:`veg_ir_diffuse`.
 
@@ -538,25 +539,25 @@ class solar(image_data.image_data):
 
         # calculate for visible
         # correct beam
-        self.vis_beam = radiation.veg_beam(self.vis_beam,
+        self.vis_beam = vegetation.veg_beam(self.vis_beam,
+                                            self.veg_height,
+                                            illum_ang,
+                                            self.veg_k)
+
+        # correct diffuse
+        self.vis_diffuse = vegetation.veg_diffuse(self.vis_diffuse,
+                                                  self.veg_tau)
+
+        # calculate for ir #
+        # correct beam
+        self.ir_beam = vegetation.veg_beam(self.ir_beam,
                                            self.veg_height,
                                            illum_ang,
                                            self.veg_k)
 
         # correct diffuse
-        self.vis_diffuse = radiation.veg_diffuse(self.vis_diffuse,
+        self.ir_diffuse = vegetation.veg_diffuse(self.ir_diffuse,
                                                  self.veg_tau)
-
-        # calculate for ir #
-        # correct beam
-        self.ir_beam = radiation.veg_beam(self.ir_beam,
-                                          self.veg_height,
-                                          illum_ang,
-                                          self.veg_k)
-
-        # correct diffuse
-        self.ir_diffuse = radiation.veg_diffuse(self.ir_diffuse,
-                                                self.veg_tau)
 
     def calc_net(self, albedo_vis, albedo_ir):
         """

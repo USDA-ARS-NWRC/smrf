@@ -4,7 +4,8 @@ import utm
 import os
 
 from smrf.data import loadTopo
-from smrf.envphys import radiation, radiation_ipw, sunang
+from smrf.envphys.radiation import ipw, twostream, solar
+from smrf.envphys import sunang
 from tests.smrf_test_case import SMRFTestCase
 
 
@@ -33,7 +34,7 @@ class TestRadiation(SMRFTestCase):
         ipw_azimuth = -5.413
         ipw_rad_vector = 0.98787
 
-        result = radiation_ipw.sunang_ipw(date_time, lat, lon)
+        result = ipw.sunang_ipw(date_time, lat, lon)
         self.assertTrue(result[0] == ipw_cosz)
         self.assertTrue(result[1] == ipw_azimuth)
 
@@ -108,11 +109,11 @@ class TestRadiation(SMRFTestCase):
         date_time = date_time.tz_localize('UTC')
 
         # IPW version
-        sipw = radiation_ipw.solar_ipw(date_time, w=[0.58, 0.68])
+        sipw = ipw.solar_ipw(date_time, w=[0.58, 0.68])
         self.assertTrue(sipw == sin)
 
         # Python version
-        spy = radiation.solar(date_time, w=[0.58, 0.68])
+        spy = solar.solar(date_time, w=[0.58, 0.68])
         self.assertTrue(np.abs(spy - sin) <= 0.021)
 
     def test_twostream(self):
@@ -142,7 +143,7 @@ class TestRadiation(SMRFTestCase):
         for n in [0, 1]:
 
             # IPW way
-            ipw_R = radiation_ipw.twostream_ipw(
+            ipw_R = ipw.twostream_ipw(
                 cosz[n], S0[n], tau=tau[n], omega=omega[n], g=g[n], R0=R0[n])
             self.assertTrue(ipw_R[0] == reflectance[n])
             self.assertTrue(ipw_R[1] == transmittance[n])
@@ -152,7 +153,7 @@ class TestRadiation(SMRFTestCase):
             self.assertTrue(ipw_R[5] == direct_irradiance_normal_to_beam[n])
 
             # Python way
-            py_R = radiation.twostream(
+            py_R = twostream.twostream(
                 cosz[n], S0[n], tau=tau[n], omega=omega[n], g=g[n], R0=R0[n])
 
             # IPW is printed to %g format so convert
@@ -164,70 +165,3 @@ class TestRadiation(SMRFTestCase):
             self.assertTrue(py_R[3] == upwelling_irradiance[n])
             self.assertTrue(py_R[4] == total_irradiance_at_bottom[n])
             self.assertTrue(py_R[5] == direct_irradiance_normal_to_beam[n])
-
-    # def test_model_solar(self):
-    #     """ Model solar radiation at a point for a year """
-
-    #     date_time = pd.date_range(
-    #         '2015-10-01 00:00', '2016-09-30 00:00', freq='H', tz='UTC')
-
-    #     # RME basin lat/lon
-    #     lon = -116.7547
-    #     lat = 43.067
-    #     tau = 0.2
-
-    #     df = pd.DataFrame(
-    #         index=date_time,
-    #         columns=['ipw_cosz', 'ipw_az', 'ipw_sol', 'ipw_ts',
-    #                  'py_cosz', 'py_az', 'py_sol', 'py_ts']
-    #     )
-
-    #     for dt in date_time:
-    #         print(dt)
-
-    #         # IPW way
-    #         ipw_cosz, ipw_az = radiation.sunang_ipw(dt, lat, lon)
-    #         ipw_sol = radiation.solar_ipw(dt, [0.28, 2.8])
-    #         ipw_R = radiation.twostream_ipw(ipw_cosz, ipw_sol, tau=tau)
-    #         ipw_ts = ipw_R[4][0]
-
-    #         # Python way
-    #         py_cosz, py_az, py_rad_vec = sunang.sunang(dt, lat, lon)
-    #         py_sol = radiation.solar(dt, [0.28, 2.8])
-    #         py_R = radiation.twostream(py_cosz, py_sol, tau=tau)
-    #         py_ts = py_R[4]
-
-    #         df.loc[dt, :] = [ipw_cosz, ipw_az, ipw_sol, ipw_ts,
-    #                          py_cosz, py_az, py_sol, py_ts]
-
-    #     df['ts_diff'] = df['ipw_ts'] - df['py_ts']
-    #     df['zen_diff'] = (df['ipw_cosz'] - df['py_cosz']) * 180 / np.pi
-    #     df['az_diff'] = df['ipw_az'] - df['py_az']
-    #     df['solar_diff'] = df['ipw_sol'] - df['py_sol']
-
-    #     df.to_csv('radiation_comparison.csv')
-
-    #     import matplotlib.pyplot as plt
-    #     # zenith (cosz) difference
-    #     ax = df['zen_diff'].hist(bins=50)
-    #     ax.set_title('IPW zenith - Python zenith')
-    #     ax.set_xlabel('Zenith difference, degrees')
-    #     plt.show()
-
-    #     # azimuth difference
-    #     ax = df['az_diff'].hist(bins=50)
-    #     ax.set_title('IPW azimuth - Python azimuth')
-    #     ax.set_xlabel('Azimuth difference, degrees')
-    #     plt.show()
-
-    #     ax = df['solar_diff'].hist(bins=50)
-    #     ax.set_title('IPW solar - Python solar')
-    #     ax.set_xlabel(
-    #         'Difference exoatmospheric direct solar irradiance [W/m2]')
-    #     plt.show()
-
-    #     ax = df['ts_diff'].hist(bins=50)
-    #     ax.set_title('IPW twostream - Python twostream')
-    #     ax.set_xlabel(
-    #         'Difference in twostream [W/m2]')
-    #     plt.show()

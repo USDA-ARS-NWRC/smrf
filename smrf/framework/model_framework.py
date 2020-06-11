@@ -41,7 +41,8 @@ from inicheck.tools import check_config, get_user_config
 from topocalc.shade import shade
 
 from smrf import data, distribute, output
-from smrf.envphys import radiation, sunang
+from smrf.envphys import sunang
+from smrf.envphys.radiation import model
 from smrf.utils import queue
 from smrf.utils.utils import backup_input, check_station_colocation, getqotw
 
@@ -739,7 +740,7 @@ class SMRF():
 
         # 0.2 illumination angle
         t.append(Thread(
-            target=radiation.shade_thread,
+            target=model.shade_thread,
             name='illum_angle',
             args=(q, self.date_time,
                   self.topo.sin_slope, self.topo.aspect)))
