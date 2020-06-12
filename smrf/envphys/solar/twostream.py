@@ -41,7 +41,7 @@ def twostream(cosz, S0, tau=0.2, omega=0.85, g=0.3, R0=0.5):
         raise ValueError('The direct beam irradiance (S0) is less than 0')
 
     if isinstance(tau, float):
-        tau = np.array(tau)
+        tau = np.array([tau])
 
     idx = tau == 0
     tau[idx] = 1e15

@@ -157,11 +157,15 @@ class TestRadiation(SMRFTestCase):
                 cosz[n], S0[n], tau=tau[n], omega=omega[n], g=g[n], R0=R0[n])
 
             # IPW is printed to %g format so convert
-            for i, r in enumerate(py_R):
-                py_R[i] = float('{:g}'.format(r))
-            self.assertTrue(py_R[0] == reflectance[n])
-            self.assertTrue(py_R[1] == transmittance[n])
-            self.assertTrue(py_R[2] == direct_transmittance[n])
-            self.assertTrue(py_R[3] == upwelling_irradiance[n])
-            self.assertTrue(py_R[4] == total_irradiance_at_bottom[n])
-            self.assertTrue(py_R[5] == direct_irradiance_normal_to_beam[n])
+            for key, value in py_R.items():
+                py_R[key] = float('{:g}'.format(value[0]))
+            self.assertTrue(py_R['reflectance'] == reflectance[n])
+            self.assertTrue(py_R['transmittance'] == transmittance[n])
+            self.assertTrue(py_R['direct_transmittance']
+                            == direct_transmittance[n])
+            self.assertTrue(py_R['upwelling_irradiance']
+                            == upwelling_irradiance[n])
+            self.assertTrue(py_R['irradiance_at_bottom']
+                            == total_irradiance_at_bottom[n])
+            self.assertTrue(py_R['irradiance_normal_to_beam']
+                            == direct_irradiance_normal_to_beam[n])
