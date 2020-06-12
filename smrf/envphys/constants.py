@@ -17,3 +17,4 @@ SEA_LEVEL = 1.013246e5  # sea level pressure
 RGAS = 8.31432e3        # gas constant (J / kmole / deg)
 GRAVITY = 9.80665       # gravity (m/s^2)
 MOL_AIR = 28.9644       # molecular weight of air (kg / kmole)
+STD_AIRTMP = 2.88e2

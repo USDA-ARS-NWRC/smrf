@@ -25,6 +25,7 @@ def twostream(cosz, S0, tau=0.2, omega=0.85, g=0.3, R0=0.5):
             will be set to zero.
 
     Returns:
+        dictionary with the following keys
         R[0] - reflectance
         R[1] - transmittance
         R[2] - direct transmittance
@@ -39,8 +40,11 @@ def twostream(cosz, S0, tau=0.2, omega=0.85, g=0.3, R0=0.5):
     if S0 <= 0:
         raise ValueError('The direct beam irradiance (S0) is less than 0')
 
-    if tau == 0:
-        tau = 1e15
+    if isinstance(tau, float):
+        tau = np.array(tau)
+
+    idx = tau == 0
+    tau[idx] = 1e15
 
     if R0 < 0:
         R0 = 0
@@ -70,50 +74,58 @@ def twostream(cosz, S0, tau=0.2, omega=0.85, g=0.3, R0=0.5):
     gpx = xi + gam1
     opx = cosz * xi + 1
 
+    # more intermediate variables, needed only for finite case
+    omx = 1 - cosz * xi
+    gmx = gam1 - xi
+    rm = gam2 - gmx * R0
+    rp = gam2 - gpx * R0
+
+    # denominator for reflectance and transmittance
+    denrt = ep * gpx * rm - em * gmx * rp
+
+    # reflectance
+    refl = (omega * (ep * rm * (gam3 * xi + alph2) / opx
+                     - em * rp * (alph2 - gam3 * xi) / omx)
+            + 2 * et * gam2
+            * (R0 - ((alph1 * R0 - alph2) * cosz + gam4
+                     * R0 + gam3) * omega / (omx * opx)) * xi) / denrt
+
+    # transmittance
+    trans = (et * (ep * gpx * (gam2 - omega * (alph2
+                                               - gam3 * xi) / omx)
+                   - em * gmx * (gam2 - omega * (gam3 * xi + alph2) / opx))
+             + 2 * gam2 * (alph1 * cosz + gam4) * omega * xi /
+             (omx * opx)) / denrt
+
+    # direct transmittance
+    btrans = et
+
     # semi-infinite?
-    if (em == 0 and et == 0) or (ep >= 1e15):
-        refl = omega * (gam3 * xi + alph2) / (gpx * opx)
-        btrans = trans = 0
+    idx = np.argwhere(((em == 0) & (et == 0)) | (ep >= 1e15))
+    refl[idx] = omega * (gam3 * xi + alph2) / (gpx * opx)
+    btrans[idx] = 0
+    trans[idx] = 0
 
-    else:
+    assert(np.min(refl) >= 0)
+    assert(np.min(trans) >= 0)
+    assert(np.min(btrans) >= 0)
+    assert(np.all(trans >= btrans * cosz))
 
-        # more intermediate variables, needed only for finite case
-        omx = 1 - cosz * xi
-        gmx = gam1 - xi
-        rm = gam2 - gmx * R0
-        rp = gam2 - gpx * R0
+    # r = [refl,
+    #      trans,
+    #      btrans,
+    #      refl * cosz * S0,
+    #      trans * cosz * S0,
+    #      btrans * S0]
 
-        # denominator for reflectance and transmittance
-        denrt = ep * gpx * rm - em * gmx * rp
-
-        # reflectance
-        refl = (omega * (ep * rm * (gam3 * xi + alph2) / opx
-                         - em * rp * (alph2 - gam3 * xi) / omx)
-                + 2 * et * gam2
-                * (R0 - ((alph1 * R0 - alph2) * cosz + gam4
-                         * R0 + gam3) * omega / (omx * opx)) * xi) / denrt
-
-        # transmittance
-        trans = (et * (ep * gpx * (gam2 - omega * (alph2
-                                                   - gam3 * xi) / omx)
-                       - em * gmx * (gam2 - omega * (gam3 * xi + alph2) / opx))
-                 + 2 * gam2 * (alph1 * cosz + gam4) * omega * xi /
-                 (omx * opx)) / denrt
-
-        # direct transmittance
-        btrans = et
-
-        assert(refl >= 0)
-        assert(trans >= 0)
-        assert(btrans >= 0)
-        assert(trans >= btrans * cosz)
-
-    r = [refl,
-         trans,
-         btrans,
-         refl * cosz * S0,
-         trans * cosz * S0,
-         btrans * S0]
+    r = {
+        'reflectance': refl,
+        'transmittance': trans,
+        'direct_transmittance': btrans,
+        'upwelling_irradiance': refl * cosz * S0,
+        'irradiance_at_bottom': trans * cosz * S0,
+        'irradiance_normal_to_beam': btrans * S0
+    }
 
     return r
 
