@@ -85,6 +85,7 @@ class TestToporad(SMRFTestCaseLakes):
 
     def test_toporad(self):
 
+        # inputs for toporad
         cosz, azimuth, rad_vec = sunang(
             self.date_time,
             self.topo.basin_lat,
