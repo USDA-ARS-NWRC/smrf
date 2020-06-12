@@ -3,8 +3,8 @@ import logging
 from topocalc.shade import shade
 
 from smrf.envphys import sunang
-from smrf.envphys.radiation.solar import solar
-from smrf.envphys.radiation.twostream import twostream
+from smrf.envphys.solar.irradiance import direct_solar_irradiance
+from smrf.envphys.solar.twostream import twostream
 
 
 def shade_thread(queue, date, sin_slope, aspect, zenith=None):
@@ -61,7 +61,7 @@ def model_solar(dt, lat, lon, tau=0.2, tzone=0):
     cosz, az, rad_vec = sunang.sunang(dt, lat, lon)
 
     # calculate the solar irradiance
-    sol = solar(dt, [0.28, 2.8])
+    sol = direct_solar_irradiance(dt, [0.28, 2.8])
 
     # calculate the two stream model value
     R = twostream(cosz, sol, tau=tau)

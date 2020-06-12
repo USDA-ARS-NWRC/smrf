@@ -1,6 +1,6 @@
 import pandas as pd
 
-from smrf.envphys.radiation.model import model_solar
+from smrf.envphys.solar.model import model_solar
 
 
 def cf_cloud(beam, diffuse, cf):

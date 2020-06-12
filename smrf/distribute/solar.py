@@ -6,8 +6,7 @@ import numpy as np
 from spatialnc import ipw
 
 from smrf.distribute import image_data
-from smrf.envphys.radiation import cloud
-from smrf.envphys.radiation import vegetation
+from smrf.envphys.solar import cloud, vegetation
 from smrf.utils import utils
 
 
@@ -539,25 +538,25 @@ class solar(image_data.image_data):
 
         # calculate for visible
         # correct beam
-        self.vis_beam = vegetation.veg_beam(self.vis_beam,
-                                            self.veg_height,
-                                            illum_ang,
-                                            self.veg_k)
+        self.vis_beam = vegetation.solar_veg_beam(self.vis_beam,
+                                                  self.veg_height,
+                                                  illum_ang,
+                                                  self.veg_k)
 
         # correct diffuse
-        self.vis_diffuse = vegetation.veg_diffuse(self.vis_diffuse,
-                                                  self.veg_tau)
+        self.vis_diffuse = vegetation.solar_veg_diffuse(self.vis_diffuse,
+                                                        self.veg_tau)
 
         # calculate for ir #
         # correct beam
-        self.ir_beam = vegetation.veg_beam(self.ir_beam,
-                                           self.veg_height,
-                                           illum_ang,
-                                           self.veg_k)
+        self.ir_beam = vegetation.solar_veg_beam(self.ir_beam,
+                                                 self.veg_height,
+                                                 illum_ang,
+                                                 self.veg_k)
 
         # correct diffuse
-        self.ir_diffuse = vegetation.veg_diffuse(self.ir_diffuse,
-                                                 self.veg_tau)
+        self.ir_diffuse = vegetation.solar_veg_diffuse(self.ir_diffuse,
+                                                       self.veg_tau)
 
     def calc_net(self, albedo_vis, albedo_ir):
         """

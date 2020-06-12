@@ -42,7 +42,7 @@ from topocalc.shade import shade
 
 from smrf import data, distribute, output
 from smrf.envphys import sunang
-from smrf.envphys.radiation import model
+from smrf.envphys.solar import model
 from smrf.utils import queue
 from smrf.utils.utils import backup_input, check_station_colocation, getqotw
 

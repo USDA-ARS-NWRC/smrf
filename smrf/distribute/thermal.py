@@ -3,8 +3,9 @@ import logging
 import numpy as np
 
 from smrf.distribute import image_data
-from smrf.envphys import thermal_radiation
+from smrf.envphys.thermal import clear_sky, cloud, vegetation
 from smrf.envphys.core import envphys_c
+from smrf.envphys.constants import STEF_BOLTZ
 from smrf.utils import utils
 
 
@@ -272,19 +273,19 @@ class th(image_data.image_data):
                 self.config['marks1979_nthreads'])
 
         elif self.clear_sky_method == 'dilley1998':
-            cth = thermal_radiation.Dilly1998(air_temp, vapor_pressure/1000)
+            cth = clear_sky.Dilly1998(air_temp, vapor_pressure/1000)
 
         elif self.clear_sky_method == 'prata1996':
-            cth = thermal_radiation.Prata1996(air_temp, vapor_pressure/1000)
+            cth = clear_sky.Prata1996(air_temp, vapor_pressure/1000)
 
         elif self.clear_sky_method == 'angstrom1918':
-            cth = thermal_radiation.Angstrom1918(air_temp, vapor_pressure/1000)
+            cth = clear_sky.Angstrom1918(air_temp, vapor_pressure/1000)
 
         # terrain factor correction
         if (self.sky_view_factor is not None) and (self.clear_sky_method != 'marks1979'):
             # apply (emiss * skvfac) + (1.0 - skvfac) to the longwave
             cth = cth * self.sky_view_factor + (1.0 - self.sky_view_factor) * \
-                thermal_radiation.STEF_BOLTZ * air_temp**4
+                STEF_BOLTZ * air_temp**4
 
         # make output variable
         self.thermal_clear = cth.copy()
@@ -293,34 +294,34 @@ class th(image_data.image_data):
         # ratio of measured/modeled solar indicates the thermal correction
         if self.correct_cloud:
             if self.cloud_method == 'garen2005':
-                cth = thermal_radiation.Garen2005(cth,
-                                                  cloud_factor)
+                cth = cloud.Garen2005(cth,
+                                      cloud_factor)
 
             elif self.cloud_method == 'unsworth1975':
-                cth = thermal_radiation.Unsworth1975(cth,
-                                                     air_temp,
-                                                     cloud_factor)
+                cth = cloud.Unsworth1975(cth,
+                                         air_temp,
+                                         cloud_factor)
 
             elif self.cloud_method == 'kimball1982':
-                cth = thermal_radiation.Kimball1982(cth,
-                                                    air_temp,
-                                                    vapor_pressure/1000,
-                                                    cloud_factor)
+                cth = cloud.Kimball1982(cth,
+                                        air_temp,
+                                        vapor_pressure/1000,
+                                        cloud_factor)
 
             elif self.cloud_method == 'crawford1999':
-                cth = thermal_radiation.Crawford1999(cth,
-                                                     air_temp,
-                                                     cloud_factor)
+                cth = cloud.Crawford1999(cth,
+                                         air_temp,
+                                         cloud_factor)
 
             # make output variable
             self.thermal_cloud = cth.copy()
 
         # correct for vegetation
         if self.correct_veg:
-            cth = thermal_radiation.thermal_correct_canopy(cth,
-                                                           air_temp,
-                                                           self.veg_tau,
-                                                           self.veg_height)
+            cth = vegetation.thermal_correct_canopy(cth,
+                                                    air_temp,
+                                                    self.veg_tau,
+                                                    self.veg_height)
 
             # make output variable
             self.thermal_veg = cth.copy()
@@ -385,10 +386,10 @@ class th(image_data.image_data):
 
         # correct for vegetation
         if self.correct_veg:
-            self.thermal_veg = thermal_radiation.thermal_correct_canopy(self.thermal_cloud,
-                                                                        air_temp,
-                                                                        self.veg_tau,
-                                                                        self.veg_height)
+            self.thermal_veg = vegetation.thermal_correct_canopy(self.thermal_cloud,
+                                                                 air_temp,
+                                                                 self.veg_tau,
+                                                                 self.veg_height)
             self.thermal = self.thermal_veg.copy()
 
     def distribute_thermal_thread(self, queue, data):

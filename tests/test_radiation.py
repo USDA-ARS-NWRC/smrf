@@ -4,7 +4,7 @@ import utm
 import os
 
 from smrf.data import loadTopo
-from smrf.envphys.radiation import ipw, twostream, solar
+from smrf.envphys.solar import ipw, twostream, irradiance
 from smrf.envphys import sunang
 from tests.smrf_test_case import SMRFTestCase
 
@@ -98,7 +98,7 @@ class TestRadiation(SMRFTestCase):
         self.assertTrue(isinstance(azimuth, np.ndarray))
         self.assertTrue(isinstance(rad_vec, float))
 
-    def test_solar(self):
+    def test_direct_solar_irradiance(self):
         """ Test the solar function """
 
         # output from solar IPW function
@@ -113,7 +113,7 @@ class TestRadiation(SMRFTestCase):
         self.assertTrue(sipw == sin)
 
         # Python version
-        spy = solar.solar(date_time, w=[0.58, 0.68])
+        spy = irradiance.direct_solar_irradiance(date_time, w=[0.58, 0.68])
         self.assertTrue(np.abs(spy - sin) <= 0.021)
 
     def test_twostream(self):

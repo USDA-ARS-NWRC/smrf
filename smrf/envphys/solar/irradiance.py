@@ -2,7 +2,7 @@ import logging
 import warnings
 
 import numpy as np
-from scipy.integrate import quad, IntegrationWarning
+from scipy.integrate import IntegrationWarning, quad
 from scipy.interpolate import Akima1DInterpolator
 
 from smrf.envphys import sunang
@@ -10,7 +10,7 @@ from smrf.envphys import sunang
 SOLAR_CONSTANT = 1368.0  # solar constant in W/m**2
 
 
-def solar(d, w=[0.28, 2.8]):
+def direct_solar_irradiance(d, w=[0.28, 2.8]):
     """
     Solar calculates exoatmospheric direct solar irradiance.  If two arguments
     to -w are given, the integral of solar irradiance over the range will be
