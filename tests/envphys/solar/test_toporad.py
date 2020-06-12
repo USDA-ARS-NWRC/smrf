@@ -7,6 +7,7 @@ from topocalc.shade import shade
 from smrf.data import loadTopo
 from smrf.envphys.sunang import sunang
 from smrf.envphys.solar import toporad, irradiance
+from smrf.utils import utils
 from tests.smrf_test_case_lakes import SMRFTestCaseLakes
 
 
@@ -19,7 +20,11 @@ class TestToporad(SMRFTestCaseLakes):
         date_time = pd.to_datetime('2/15/1990 20:30')
         cls.date_time = date_time.tz_localize('UTC')
 
-        cls.cosz = 0.45
+        cls.tau_elevation = 100.0
+        cls.tau = 0.2,
+        cls.omega = 0.85
+        cls.scattering_factor = 0.3
+        cls.surface_albedo = 0.5
         cls.solar_irradiance = irradiance.direct_solar_irradiance(
             cls.date_time, w=[0.28, 2.8])
 
@@ -35,12 +40,29 @@ class TestToporad(SMRFTestCaseLakes):
         )
         cls.dem = cls.topo.dem
 
+        # inputs for toporad and stoporad
+        cls.cosz, cls.azimuth, rad_vec = sunang(
+            cls.date_time,
+            cls.topo.basin_lat,
+            cls.topo.basin_long)
+
+        cls.elevrad = toporad.Elevrad(
+            cls.dem,
+            cls.solar_irradiance,
+            cls.cosz)
+
+        cls.illum_ang = shade(
+            cls.topo.sin_slope,
+            cls.topo.aspect,
+            cls.azimuth,
+            cls.cosz)
+
     def test_elevrad(self):
 
         rad = toporad.Elevrad(
             self.dem,
             self.solar_irradiance,
-            self.cosz)
+            cosz=0.45)
 
         self.assertAlmostEqual(965.8825266529992, np.mean(rad.beam), places=4)
         self.assertAlmostEqual(943.726025997195, np.min(rad.beam), places=4)
@@ -55,22 +77,15 @@ class TestToporad(SMRFTestCaseLakes):
 
     def test_elevrad_options(self):
 
-        cosz = 0.5
-        tau_elevation = 80
-        tau = 0.3
-        omega = 0.55
-        scattering_factor = 0.35
-        surface_albedo = 0.3
-
         rad = toporad.Elevrad(
             self.dem,
             self.solar_irradiance,
-            cosz,
-            tau_elevation=tau_elevation,
-            tau=tau,
-            omega=omega,
-            scattering_factor=scattering_factor,
-            surface_albedo=surface_albedo)
+            cosz=0.5,
+            tau_elevation=80,
+            tau=0.3,
+            omega=0.55,
+            scattering_factor=0.35,
+            surface_albedo=0.3)
 
         self.assertAlmostEqual(866.520786181747, np.mean(rad.beam), places=4)
         self.assertAlmostEqual(839.8351806768451, np.min(rad.beam), places=4)
@@ -85,39 +100,49 @@ class TestToporad(SMRFTestCaseLakes):
 
     def test_toporad(self):
 
-        # inputs for toporad
-        cosz, azimuth, rad_vec = sunang(
-            self.date_time,
-            self.topo.basin_lat,
-            self.topo.basin_long)
-
-        erad = toporad.Elevrad(
-            self.dem,
-            self.solar_irradiance,
-            self.cosz)
-
-        illum_ang = shade(
-            self.topo.sin_slope,
-            self.topo.aspect,
-            azimuth,
-            cosz)
-
         trad_beam, trad_diffuse = toporad.toporad(
-            erad.beam,
-            erad.diffuse,
-            illum_ang,
+            self.elevrad.beam,
+            self.elevrad.diffuse,
+            self.illum_ang,
             self.topo.sky_view_factor,
             self.topo.terrain_config_factor,
-            cosz,
+            self.cosz,
             surface_albedo=0.5)
 
-        self.assertAlmostEqual(727.5828933374338, np.mean(trad_beam), places=4)
-        self.assertAlmostEqual(80.36698468013624, np.min(trad_beam), places=4)
-        self.assertAlmostEqual(1161.5784794841636, np.max(trad_beam), places=4)
+        self.assertAlmostEqual(803.7440367209555, np.mean(trad_beam), places=4)
+        self.assertAlmostEqual(92.33279332519623, np.min(trad_beam), places=4)
+        self.assertAlmostEqual(1271.850616069636, np.max(trad_beam), places=4)
 
         self.assertAlmostEqual(
-            108.48478468598306, np.mean(trad_diffuse), places=4)
+            124.71739693920429, np.mean(trad_diffuse), places=4)
         self.assertAlmostEqual(
-            72.89786165248275, np.min(trad_diffuse), places=4)
+            84.2389981611408, np.min(trad_diffuse), places=4)
         self.assertAlmostEqual(
-            195.75464273116648, np.max(trad_diffuse), places=4)
+            217.9322245307723, np.max(trad_diffuse), places=4)
+
+    def test_stoporad_ipw(self):
+
+        wy_day, wyear = utils.water_day(self.date_time)
+        tz_min_west = np.abs(self.date_time.utcoffset().total_seconds()/60)
+
+        srad = toporad.stoporad_ipw(
+            self.tau_elevation,
+            self.tau,
+            self.omega,
+            self.scattering_factor,
+            wavelength_range=[0.28, 0.7],
+            start=10.0,
+            current_day=wy_day,
+            time_zone=tz_min_west,
+            year=wyear,
+            latitude=self.topo.basin_lat,
+            longitude=self.topo.basin_long,
+            cosz=self.cosz,
+            azimuth=self.azimuth,
+            grain_size=100,
+            max_grain=700,
+            dirt=2,
+            solar_irradiance=self.solar_irradiance,
+            topo=self.topo)
+
+        srad
