@@ -28,9 +28,9 @@ class TestToporad(SMRFTestCaseLakes):
         solar_irradiance = irradiance.direct_solar_irradiance(
             date_time, w=[0.28, 2.8])
 
-        rad = toporad.elevrad(
+        rad = toporad.Elevrad(
             topo.variables['dem'][:],
             solar_irradiance,
             cosz)
 
-        rad
+        rad.beam
