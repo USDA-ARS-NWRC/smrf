@@ -16,13 +16,25 @@ def stoporad():
     pass
 
 
-def toporad():
-    """Topographically-corrected solar radiation.
-    Calculates the topographic distribution of solar radiation at a single
-    time, using input beam and diffuse radiation calculates supplied by
-    elevrad.
+def toporad(beam, diffuse, illum_angle, sky_view_factor, terrain_config_factor,
+            cosz, surface_albedo=0.0):
+    """Topographically-corrected solar radiation. Calculates the topographic
+    distribution of solar radiation at a single time, using input beam and diffuse
+    radiation calculates supplied by elevrad.
     """
-    pass
+
+    # adjust diffuse radiation accounting for sky view factor
+    drad = diffuse * sky_view_factor
+
+    # add reflection from adjacent terrain
+    drad = drad + (diffuse * (1 - sky_view_factor) +
+                   beam * cosz) * terrain_config_factor * surface_albedo
+
+    # global radiation is diffuse + incoming_beam * cosine of local
+    # illumination * angle
+    rad = drad + beam * illum_angle
+
+    return rad, drad
 
 
 class Elevrad():
