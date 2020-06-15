@@ -44,14 +44,14 @@ def stoporad_ipw(tau_elevation, tau, omega, scattering_factor,
 
     else:
         # Run horizon to get sun-below-horizon mask
-        # this is most likely not how the horizon function masks in IPW
         horizon_angles = horizon(azimuth, topo.dem, topo.dx)
-        # horizon_mask = horizon_angles < cosz
+        thresh = np.tan(np.pi / 2 - np.arccos(cosz))
+        no_sun_mask = np.tan(np.abs(horizon_angles)) > thresh
 
         # Run shade to get cosine local illumination angle
-        # mask by horizon mask
+        # mask by horizon mask using cosz=0 where the sun is not visible
         illum_ang = shade(topo.sin_slope, topo.aspect, azimuth, cosz)
-        # illum_ang[horizon_mask] = np.nan
+        illum_ang[no_sun_mask] = 0
 
         # Run ialbedo to get albedo
         if isinstance(start, float):
@@ -85,7 +85,7 @@ def stoporad_ipw(tau_elevation, tau, omega, scattering_factor,
             topo.sky_view_factor,
             topo.terrain_config_factor,
             cosz,
-            surface_albedo=R0_vis)
+            surface_albedo=alb_v)
 
     return trad_beam, trad_diff
 

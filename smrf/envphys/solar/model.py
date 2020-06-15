@@ -66,4 +66,4 @@ def model_solar(dt, lat, lon, tau=0.2, tzone=0):
     # calculate the two stream model value
     R = twostream(cosz, sol, tau=tau)
 
-    return R[4]
+    return R['irradiance_at_bottom']

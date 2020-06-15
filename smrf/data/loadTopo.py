@@ -76,8 +76,11 @@ class Topo():
         self.y = f.variables['y'][:]
         [self.X, self.Y] = np.meshgrid(self.x, self.y)
 
+        # There is not a great NetCDF convention on direction for the y-axis.
+        # So there is the possibility that the dy will be positive or negative.
+        # For the gradient calculations this needs to be absolute spacing.
         self.dx = np.mean(np.diff(self.x))
-        self.dy = np.mean(np.diff(self.y))
+        self.dy = np.abs(np.mean(np.diff(self.y)))
 
         # Calculate the center of the basin
         self.cx, self.cy = self.get_center(f, mask_name='mask')
