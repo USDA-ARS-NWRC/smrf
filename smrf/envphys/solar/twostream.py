@@ -35,7 +35,14 @@ def twostream(cosz, S0, tau=0.2, omega=0.85, g=0.3, R0=0.5):
     """
 
     if cosz <= 0:
-        return [0, 0, 0, 0, 0, 0]
+        r = {
+            'reflectance': 0,
+            'transmittance': 0,
+            'direct_transmittance': 0,
+            'upwelling_irradiance': 0,
+            'irradiance_at_bottom': 0,
+            'irradiance_normal_to_beam': 0
+        }
 
     if S0 <= 0:
         raise ValueError('The direct beam irradiance (S0) is less than 0')

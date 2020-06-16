@@ -9,28 +9,104 @@ from smrf.envphys.albedo import albedo
 from smrf.envphys.constants import SEA_LEVEL, STD_LAPSE, \
     GRAVITY, MOL_AIR, STD_AIRTMP
 
+VISIBLE_MIN = .28
+VISIBLE_MAX = .7
+IR_MIN = .7
+IR_MAX = 2.8
+
+
+def stoporad(date_time, topo, cosz, azimuth, illum_ang, albedo_surface, wavelength_range,
+             tau_elevation=100, tau=0.2, omega=0.85, scattering_factor=0.3):
+
+    if wavelength_range[0] >= VISIBLE_MIN and \
+            wavelength_range[1] <= VISIBLE_MAX:
+        wavelength_flag = 'vis'
+    elif wavelength_range[0] >= IR_MIN and wavelength_range[1] <= IR_MAX:
+        wavelength_flag = 'ir'
+    else:
+        raise ValueError(
+            'stoporad wavelength range not within visible or IR wavelengths')
+
+    # check cosz if sun is down
+    if cosz < 0:
+        return np.zeros_like(topo.dem), np.zeros_like(topo.dem)
+
+    else:
+        solar_irradiance = direct_solar_irradiance(
+            date_time, w=wavelength_range)
+
+        # Run horizon to get sun-below-horizon mask
+        horizon_angles = horizon(azimuth, topo.dem, topo.dx)
+        thresh = np.tan(np.pi / 2 - np.arccos(cosz))
+        no_sun_mask = np.tan(np.abs(horizon_angles)) > thresh
+
+        # Run shade to get cosine local illumination angle
+        # mask by horizon mask using cosz=0 where the sun is not visible
+        illum_ang = np.copy(illum_ang)
+        illum_ang[no_sun_mask] = 0
+
+        R0 = np.mean(albedo_surface)
+
+        # Run elevrad to get beam & diffuse then toporad
+        evrad = Elevrad(
+            topo.dem,
+            solar_irradiance,
+            cosz,
+            tau_elevation=tau_elevation,
+            tau=tau,
+            omega=omega,
+            scattering_factor=scattering_factor,
+            surface_albedo=R0)
+
+        trad_beam, trad_diff = toporad(
+            evrad.beam,
+            evrad.diffuse,
+            illum_ang,
+            topo.sky_view_factor,
+            topo.terrain_config_factor,
+            cosz,
+            surface_albedo=albedo_surface)
+
+    return trad_beam, trad_diff
+
 
 def stoporad_ipw(date_time, tau_elevation, tau, omega, scattering_factor,
                  wavelength_range, start, current_day, time_zone,
-                 year, latitude, longitude, cosz, azimuth,
-                 grain_size, max_grain, dirt, topo):
+                 year, cosz, azimuth, grain_size, max_grain, dirt, topo):
     """stoporad simulates topographic radiation over snow-covered terrain.
-    Uses a two-stream atmospheric radiation model.
+    Uses a two-stream atmospheric radiation model. This function mimics the
+    original IPW stoporad program and differences are bit noise resolution
+    of the 8-bit IPW images.
 
-    This is mainly for ensuring that the stoporad calculation is correct
-    when compared with IPW. There will be ways to speed this up.
+    Args:
+        date_time (datetime): date and time
+        tau_elevation (float): Elevation [m] of optical depth measurement.
+        tau (float): optical depth at tau_elevation.
+        omega (float): Single scattering albedo.
+        scattering_factor (float): Scattering asymmetry parameter.
+        wavelength_range (list): Min/max wavelengths to simulate
+        start (float): decimal day of last storm
+        current_day (float): decimal day for the current day
+        time_zone (float): minutes from UTC
+        year (float): water year
+        cosz (float): cosine of solar zenith angle
+        azimuth (float): aspect to the sun
+        grain_size (float): starting grain size for albedo
+        max_grain (float): max grain size for albedo
+        dirt (float): dirt factor for albedo
+        topo (Topo class): Topo class for dem
 
+    Raises:
+        ValueError: wavelength_range must be in the visible or ir band
+
+    Returns:
+        [tuple]: beam and diffuse radiation over snow covered area
     """
 
-    visible_min = .28
-    visible_max = .7
-    ir_min = .7
-    ir_max = 2.8
-
-    if wavelength_range[0] >= visible_min and \
-            wavelength_range[1] <= visible_max:
+    if wavelength_range[0] >= VISIBLE_MIN and \
+            wavelength_range[1] <= VISIBLE_MAX:
         wavelength_flag = 'vis'
-    elif wavelength_range[0] >= ir_min and wavelength_range[1] <= ir_max:
+    elif wavelength_range[0] >= IR_MIN and wavelength_range[1] <= IR_MAX:
         wavelength_flag = 'ir'
     else:
         raise ValueError(
@@ -130,7 +206,7 @@ def toporad(beam, diffuse, illum_angle, sky_view_factor, terrain_config_factor,
 
 class Elevrad():
     """Beam and diffuse radiation from elevation.
-    elevrad is essentially the spatial or grid v ersion of the twostream
+    elevrad is essentially the spatial or grid version of the twostream
     command.
 
     Args:
