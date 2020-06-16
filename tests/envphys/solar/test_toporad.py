@@ -126,6 +126,7 @@ class TestToporad(SMRFTestCaseLakes):
         tz_min_west = np.abs(self.date_time.utcoffset().total_seconds()/60)
 
         srad = toporad.stoporad_ipw(
+            self.date_time
             self.tau_elevation,
             self.tau,
             self.omega,
@@ -142,7 +143,6 @@ class TestToporad(SMRFTestCaseLakes):
             grain_size=100,
             max_grain=700,
             dirt=2,
-            solar_irradiance=self.solar_irradiance,
             topo=self.topo)
 
         srad

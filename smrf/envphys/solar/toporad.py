@@ -2,47 +2,48 @@ import numpy as np
 from topocalc.horizon import horizon
 from topocalc.shade import shade
 
-from smrf.envphys.solar.twostream import mwgamma, twostream
+from smrf.envphys.solar.twostream import twostream
+from smrf.envphys.solar.irradiance import direct_solar_irradiance
 from smrf.envphys.thermal.topotherm import hysat
 from smrf.envphys.albedo import albedo
 from smrf.envphys.constants import SEA_LEVEL, STD_LAPSE, \
     GRAVITY, MOL_AIR, STD_AIRTMP
 
 
-def stoporad_ipw(tau_elevation, tau, omega, scattering_factor,
+def stoporad_ipw(date_time, tau_elevation, tau, omega, scattering_factor,
                  wavelength_range, start, current_day, time_zone,
                  year, latitude, longitude, cosz, azimuth,
-                 grain_size, max_grain, dirt, solar_irradiance, topo):
+                 grain_size, max_grain, dirt, topo):
     """stoporad simulates topographic radiation over snow-covered terrain.
     Uses a two-stream atmospheric radiation model.
 
     This is mainly for ensuring that the stoporad calculation is correct
-    when compared with IPW. There will be ways to speed this up
+    when compared with IPW. There will be ways to speed this up.
 
-    vis_cmd = 'stoporad -z %i -t %s -w %s -g %s -x 0.28,0.7 -s %s'\
-            ' -d %s -f %i -y %i -A %f,%f -a %i -m %i -c %i -D %s > %s' \
-            % (self.config['clear_opt_depth'],
-               str(self.config['clear_tau']),
-               str(self.config['clear_omega']),
-               str(self.config['clear_gamma']),
-               str(min_storm_day),
-               str(wy_day),
-               tz_min_west,
-               wyear,
-               cosz,
-               azimuth,
-               self.albedoConfig['grain_size'],
-               self.albedoConfig['max_grain'],
-               self.albedoConfig['dirt'],
-               self.stoporad_in,
-               self.vis_file)
     """
+
+    visible_min = .28
+    visible_max = .7
+    ir_min = .7
+    ir_max = 2.8
+
+    if wavelength_range[0] >= visible_min and \
+            wavelength_range[1] <= visible_max:
+        wavelength_flag = 'vis'
+    elif wavelength_range[0] >= ir_min and wavelength_range[1] <= ir_max:
+        wavelength_flag = 'ir'
+    else:
+        raise ValueError(
+            'stoporad wavelength range not within visible or IR wavelengths')
 
     # check cosz if sun is down
     if cosz < 0:
-        return None
+        return np.zeros_like(topo.dem), np.zeros_like(topo.dem)
 
     else:
+        solar_irradiance = direct_solar_irradiance(
+            date_time, w=wavelength_range)
+
         # Run horizon to get sun-below-horizon mask
         horizon_angles = horizon(azimuth, topo.dem, topo.dx)
         thresh = np.tan(np.pi / 2 - np.arccos(cosz))
@@ -62,9 +63,13 @@ def stoporad_ipw(tau_elevation, tau, omega, scattering_factor,
             alb_v, alb_ir = albedo(
                 start, illum_ang, grain_size, max_grain, dirt)
 
-        # Run imgstat to get R0: mean albedo
-        R0_vis = np.mean(alb_v)
-        R0_ir = np.mean(alb_ir)
+        # mean albedo for elevrad
+        if wavelength_flag == 'vis':
+            R0 = np.mean(alb_v)
+            alb = alb_v
+        else:
+            R0 = np.mean(alb_ir)
+            alb = alb_ir
 
         # Run elevrad to get beam & diffuse (if -r option not specified)
         evrad = Elevrad(
@@ -75,7 +80,7 @@ def stoporad_ipw(tau_elevation, tau, omega, scattering_factor,
             tau=tau,
             omega=omega,
             scattering_factor=scattering_factor,
-            surface_albedo=R0_vis)
+            surface_albedo=R0)
 
         # Form input file and run toporad
         trad_beam, trad_diff = toporad(
@@ -85,7 +90,7 @@ def stoporad_ipw(tau_elevation, tau, omega, scattering_factor,
             topo.sky_view_factor,
             topo.terrain_config_factor,
             cosz,
-            surface_albedo=alb_v)
+            surface_albedo=alb)
 
     return trad_beam, trad_diff
 
