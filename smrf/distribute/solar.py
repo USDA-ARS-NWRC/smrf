@@ -377,12 +377,11 @@ class solar(image_data.image_data):
         self._logger.info(f"Distributing {self.variable}")
         for date_time in data.index:
 
-            # check if sun is up or not
             cosz = queue['cosz'].get(date_time)
             azimuth = queue['azimuth'].get(date_time)
             illum_ang = queue['illum_ang'].get(date_time)
             albedo_ir = queue['albedo_ir'].get(date_time)
-            albedo_vis = queue['albedo_ir'].get(date_time)
+            albedo_vis = queue['albedo_vis'].get(date_time)
             self.cloud_factor = queue['cloud_factor'].get(date_time)
 
             self.distribute(
@@ -397,12 +396,12 @@ class solar(image_data.image_data):
             for cstv in self.CLEAR_SKY_THREAD_VARIABLES:
                 queue[cstv].put([date_time, getattr(self, cstv)])
 
-            # Add the cloud corrected variables to the queue if requested
+            # Add the cloud corrected variables to the queue
             if self.config['correct_cloud']:
                 for vtv in self.VEG_THREAD_VARIABLES:
                     queue[vtv].put([date_time, getattr(self, vtv)])
 
-            # Add the veg correct variables to the queue if requested
+            # Add the veg correct variables to the queue
             if self.config['correct_veg']:
                 for ctv in self.CLOUD_THREAD_VARIABLES:
                     queue[ctv].put([date_time, getattr(self, ctv)])
