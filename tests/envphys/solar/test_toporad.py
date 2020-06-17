@@ -74,16 +74,16 @@ class TestToporad(SMRFTestCaseLakes):
             self.solar_irradiance,
             cosz=0.45)
 
-        self.assertAlmostEqual(965.8825266529992, np.mean(rad.beam), places=4)
-        self.assertAlmostEqual(943.726025997195, np.min(rad.beam), places=4)
-        self.assertAlmostEqual(989.6426109567752, np.max(rad.beam), places=4)
+        self.assertAlmostEqual(965.8828575567114, np.mean(rad.beam), places=4)
+        self.assertAlmostEqual(943.7263794826135, np.min(rad.beam), places=4)
+        self.assertAlmostEqual(989.6429308508227, np.max(rad.beam), places=4)
 
         self.assertAlmostEqual(
-            93.84312456169383, np.mean(rad.diffuse), places=4)
+            93.84315440085071, np.mean(rad.diffuse), places=4)
         self.assertAlmostEqual(
-            87.84985436187131, np.min(rad.diffuse), places=4)
+            87.84988698685561, np.min(rad.diffuse), places=4)
         self.assertAlmostEqual(
-            99.39601061863907, np.max(rad.diffuse), places=4)
+            99.39603484739534, np.max(rad.diffuse), places=4)
 
     def test_elevrad_options(self):
 
@@ -97,16 +97,16 @@ class TestToporad(SMRFTestCaseLakes):
             scattering_factor=0.35,
             surface_albedo=0.3)
 
-        self.assertAlmostEqual(866.520786181747, np.mean(rad.beam), places=4)
-        self.assertAlmostEqual(839.8351806768451, np.min(rad.beam), places=4)
-        self.assertAlmostEqual(895.3270566804218, np.max(rad.beam), places=4)
+        self.assertAlmostEqual(866.5210770956645, np.mean(rad.beam), places=4)
+        self.assertAlmostEqual(839.8354626316999, np.min(rad.beam), places=4)
+        self.assertAlmostEqual(895.3273572653653, np.max(rad.beam), places=4)
 
         self.assertAlmostEqual(
-            76.05066002013795, np.mean(rad.diffuse), places=4)
+            76.05068555235343, np.mean(rad.diffuse), places=4)
         self.assertAlmostEqual(
-            71.93614207728453, np.min(rad.diffuse), places=4)
+            71.93616622814766, np.min(rad.diffuse), places=4)
         self.assertAlmostEqual(
-            79.77788947641184, np.max(rad.diffuse), places=4)
+            79.77791625995671, np.max(rad.diffuse), places=4)
 
     def test_toporad(self):
 
@@ -119,16 +119,16 @@ class TestToporad(SMRFTestCaseLakes):
             self.cosz,
             surface_albedo=0.5)
 
-        self.assertAlmostEqual(706.00646512025, np.mean(trad_beam), places=4)
-        self.assertAlmostEqual(85.17261208557352, np.min(trad_beam), places=4)
-        self.assertAlmostEqual(1164.002552980898, np.max(trad_beam), places=4)
+        self.assertAlmostEqual(706.0067021452699, np.mean(trad_beam), places=4)
+        self.assertAlmostEqual(85.17264068026927, np.min(trad_beam), places=4)
+        self.assertAlmostEqual(1164.002943767303, np.max(trad_beam), places=4)
 
         self.assertAlmostEqual(
-            112.40386960667101, np.mean(trad_diffuse), places=4)
+            112.40390734361924, np.mean(trad_diffuse), places=4)
         self.assertAlmostEqual(
-            84.87506304536915, np.min(trad_diffuse), places=4)
+            84.87509154016982, np.min(trad_diffuse), places=4)
         self.assertAlmostEqual(
-            148.25525747786014, np.max(trad_diffuse), places=4)
+            148.2553072510663, np.max(trad_diffuse), places=4)
 
     def test_stoporad_ipw(self):
 
@@ -154,16 +154,16 @@ class TestToporad(SMRFTestCaseLakes):
             topo=self.topo)
 
         self.assertAlmostEqual(
-            351.25182444925485, np.mean(srad_beam), places=4)
-        self.assertAlmostEqual(50.92724524244678, np.min(srad_beam), places=4)
-        self.assertAlmostEqual(572.402983921415, np.max(srad_beam), places=4)
+            351.25153575009557, np.mean(srad_beam), places=4)
+        self.assertAlmostEqual(50.927203384577695, np.min(srad_beam), places=4)
+        self.assertAlmostEqual(572.4025134547906, np.max(srad_beam), places=4)
 
         self.assertAlmostEqual(
-            66.89108278587302, np.mean(srad_diffuse), places=4)
+            66.89102780708569, np.mean(srad_diffuse), places=4)
         self.assertAlmostEqual(
-            50.92724524244678, np.min(srad_diffuse), places=4)
+            50.927203384577695, np.min(srad_diffuse), places=4)
         self.assertAlmostEqual(
-            104.8765113187472, np.max(srad_diffuse), places=4)
+            104.87642511916467, np.max(srad_diffuse), places=4)
 
     def test_stoporad_visible(self):
 
@@ -184,16 +184,16 @@ class TestToporad(SMRFTestCaseLakes):
             scattering_factor=self.scattering_factor)
 
         self.assertAlmostEqual(
-            350.15499774108343, np.mean(srad_beam), places=4)
-        self.assertAlmostEqual(49.93072201088423, np.min(srad_beam), places=4)
-        self.assertAlmostEqual(570.8952497322141, np.max(srad_beam), places=4)
+            350.1547099434225, np.mean(srad_beam), places=4)
+        self.assertAlmostEqual(49.930680972072594, np.min(srad_beam), places=4)
+        self.assertAlmostEqual(570.8947805048191, np.max(srad_beam), places=4)
 
         self.assertAlmostEqual(
-            65.79425607770162, np.mean(srad_diffuse), places=4)
+            65.79420200041265, np.mean(srad_diffuse), places=4)
         self.assertAlmostEqual(
-            49.93072201088423, np.min(srad_diffuse), places=4)
+            49.930680972072594, np.min(srad_diffuse), places=4)
         self.assertAlmostEqual(
-            102.0245829059228, np.max(srad_diffuse), places=4)
+            102.02449905038313, np.max(srad_diffuse), places=4)
 
     def test_stoporad_ir(self):
 
@@ -214,13 +214,13 @@ class TestToporad(SMRFTestCaseLakes):
             scattering_factor=self.scattering_factor)
 
         self.assertAlmostEqual(
-            365.2325025385806, np.mean(srad_beam), places=4)
-        self.assertAlmostEqual(41.89547121619991, np.min(srad_beam), places=4)
-        self.assertAlmostEqual(602.1473403247246, np.max(srad_beam), places=4)
+            365.23243248652074, np.mean(srad_beam), places=4)
+        self.assertAlmostEqual(41.8954631805951, np.min(srad_beam), places=4)
+        self.assertAlmostEqual(602.1472248320969, np.max(srad_beam), places=4)
 
         self.assertAlmostEqual(
-            56.30766430031142, np.mean(srad_diffuse), places=4)
+            56.30765350042961, np.mean(srad_diffuse), places=4)
         self.assertAlmostEqual(
-            41.89547121619991, np.min(srad_diffuse), places=4)
+            41.8954631805951, np.min(srad_diffuse), places=4)
         self.assertAlmostEqual(
-            71.2741086202979, np.max(srad_diffuse), places=4)
+            71.27409494983297, np.max(srad_diffuse), places=4)

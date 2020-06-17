@@ -67,7 +67,8 @@ def solint(a, b):
     with warnings.catch_warnings(record=True) as messages:
         warnings.simplefilter('always', category=IntegrationWarning)
         # Take the integral between the two wavelengths
-        intgrl, ierror = quad(c, a, b, limit=120)
+        intgrl, ierror = quad(c, a, b, epsabs=1.49e-05,
+                              epsrel=1.49e-05, limit=200)
 
         log = logging.getLogger(__name__)
         for warning in messages:
