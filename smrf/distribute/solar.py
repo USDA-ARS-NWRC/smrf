@@ -77,8 +77,6 @@ class solar(image_data.image_data):
         config: full configuration dictionary contain at least the sections
                 albedo, and solar
         topo: Topo class :mod:`smrf.data.loadTopo.Topo`
-        tempDir: location of temp/working directory (default=None, which is the
-            'WORKDIR' environment variable)
 
     Attributes:
         albedoConfig: configuration from [albedo] section
@@ -99,8 +97,6 @@ class solar(image_data.image_data):
         metadata: metadata for the station data
         net_solar: numpy array for the calculated net solar radiation
         stations: stations to be used in alphabetical order
-        tempDir: temporary directory for ``stoporad``, will default to the
-            ``WORKDIR`` environment variable
         veg_height: numpy array of vegetation heights from
             :mod:`smrf.data.loadTopo.Topo`
         veg_ir_beam: numpy array vegetation adjusted infrared beam radiation
@@ -203,7 +199,7 @@ class solar(image_data.image_data):
     # be written during main distribute loop
     post_process_variables = {}
 
-    def __init__(self, config, topo, tempDir=None):
+    def __init__(self, config, topo):
 
         # extend the base class
         image_data.image_data.__init__(self, self.variable)
@@ -213,14 +209,6 @@ class solar(image_data.image_data):
         self.albedoConfig = config["albedo"]
 
         self.topo = topo
-
-        if (tempDir is None) | (tempDir == 'WORKDIR'):
-            tempDir = os.environ['WORKDIR']
-        self.tempDir = tempDir
-
-        # stoporad file names
-        self.ir_file = os.path.join(self.tempDir, 'clearsky_ir.ipw')
-        self.vis_file = os.path.join(self.tempDir, 'clearsky_vis.ipw')
 
         self._logger.debug('Created distribute.solar')
 

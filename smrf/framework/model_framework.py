@@ -278,18 +278,6 @@ class SMRF():
         Provide some logging info about when SMRF was closed
         """
 
-        # clean up the WORKDIR
-        if hasattr(self, 'topo'):
-            if self.topo.stoporad_in_file is not None:
-                if os.path.isfile(self.topo.stoporad_in_file):
-                    os.remove(self.topo.stoporad_in_file)
-        if hasattr(self, 'distribute'):
-            if 'solar' in self.distribute.keys():
-                if os.path.isfile(self.distribute['solar'].vis_file):
-                    os.remove(self.distribute['solar'].vis_file)
-                if os.path.isfile(self.distribute['solar'].ir_file):
-                    os.remove(self.distribute['solar'].ir_file)
-
         if hasattr(self, 'temp_dir'):
             if os.path.isdir(self.temp_dir):
                 shutil.rmtree(self.temp_dir)
@@ -356,8 +344,7 @@ class SMRF():
         # 7. Solar radiation
         self.distribute['solar'] = distribute.solar.solar(
             self.config,
-            self.topo,
-            self.temp_dir)
+            self.topo)
 
         # 8. thermal radiation
         self.distribute['thermal'] = distribute.thermal.th(
