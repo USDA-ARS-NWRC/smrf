@@ -171,7 +171,8 @@ class solar(image_data.image_data):
         'veg_ir_diffuse': {
             'units': 'watt/m2',
             'standard_name': 'vegetation_infrared_diffuse',
-            'long_name': 'Vegetation corrected infrared diffuse solar radiation'
+            'long_name': 'Vegetation corrected infrared diffuse solar \
+                radiation'
         },
         'veg_vis_beam': {
             'units': 'watt/m2',
@@ -193,6 +194,20 @@ class solar(image_data.image_data):
         'clear_ir_diffuse',
         'clear_vis_beam',
         'clear_vis_diffuse'
+    ]
+
+    VEG_THREAD_VARIABLES = [
+        'veg_ir_beam',
+        'veg_ir_diffuse',
+        'veg_vis_beam',
+        'veg_vis_diffuse'
+    ]
+
+    CLOUD_THREAD_VARIABLES = [
+        'cloud_ir_beam',
+        'cloud_ir_diffuse',
+        'cloud_vis_beam',
+        'cloud_vis_diffuse'
     ]
 
     # These are variables that are operate at the end only and do not need to
@@ -326,8 +341,6 @@ class solar(image_data.image_data):
             self._logger.debug('Sun is down, see you in the morning!')
 
             # clear sky
-#             z = np.zeros()
-
             self.clear_vis_beam = None
             self.clear_vis_diffuse = None
             self.clear_ir_beam = None
@@ -384,74 +397,17 @@ class solar(image_data.image_data):
             for cstv in self.CLEAR_SKY_THREAD_VARIABLES:
                 queue[cstv].put([date_time, getattr(self, cstv)])
 
-            # Add the veg correct variables to the queue if requested
-            if self.config['correct_veg']:
-                queue['veg_vis_beam'].put([date_time, self.veg_vis_beam])
-                queue['veg_vis_diffuse'].put([date_time, self.veg_vis_diffuse])
-                queue['veg_ir_beam'].put([date_time, self.veg_ir_beam])
-                queue['veg_ir_diffuse'].put([date_time, self.veg_ir_diffuse])
-
             # Add the cloud corrected variables to the queue if requested
             if self.config['correct_cloud']:
-                queue['cloud_vis_beam'].put([date_time, self.cloud_vis_beam])
-                queue['cloud_vis_diffuse'].put(
-                    [date_time, self.cloud_vis_diffuse])
-                queue['cloud_ir_beam'].put([date_time, self.cloud_ir_beam])
-                queue['cloud_ir_diffuse'].put(
-                    [date_time, self.cloud_ir_diffuse])
+                for vtv in self.VEG_THREAD_VARIABLES:
+                    queue[vtv].put([date_time, getattr(self, vtv)])
+
+            # Add the veg correct variables to the queue if requested
+            if self.config['correct_veg']:
+                for ctv in self.CLOUD_THREAD_VARIABLES:
+                    queue[ctv].put([date_time, getattr(self, ctv)])
 
             queue['net_solar'].put([date_time, self.net_solar])
-
-    # def distribute_thread_clear(self, queue, data, calc_type):
-    #     """
-    #     Distribute the data using threading and queue. All data is provided and
-    #     ``distribute_thread`` will go through each time step and model clear
-    #     sky radiation with ``stoporad``. The data queues puts the distributed
-    #     data into:
-
-    #     * :py:attr:`clear_vis_beam`
-    #     * :py:attr:`clear_vis_diffuse`
-    #     * :py:attr:`clear_ir_beam`
-    #     * :py:attr:`clear_ir_diffuse`
-
-    #     """
-    #     # the variable names
-    #     beam = '%s_beam' % calc_type
-    #     diffuse = '%s_diffuse' % calc_type
-
-    #     for date_time in data.index:
-    #         cosz = queue['cosz'].get(date_time)
-
-    #         # check if sun is up or not
-    #         if cosz > 0:
-
-    #             # get the rest of the information
-    #             azimuth = queue['azimuth'].get(date_time)
-    #             illum_ang = queue['illum_ang'].get(date_time)
-
-    #             if calc_type == 'clear_ir':
-    #                 albedo = queue['albedo_ir'].get(date_time)
-    #                 wavelength_range = self.IR_WAVELENGTHS
-
-    #             elif calc_type == 'clear_vis':
-    #                 albedo = queue['albedo_vis'].get(date_time)
-    #                 wavelength_range = self.VISIBLE_WAVELENGTHS
-
-    #             else:
-    #                 raise Exception('''Could not determine type of clear sky
-    #                                 radiation to calculate''')
-
-    #             val_beam, val_diffuse = self.calc_stoporad(
-    #                 date_time, illum_ang, cosz, azimuth,
-    #                 albedo, wavelength_range)
-
-    #         else:
-    #             val_beam = None
-    #             val_diffuse = None
-
-    #         # put into the queue
-    #         queue[beam].put([date_time, val_beam])
-    #         queue[diffuse].put([date_time, val_diffuse])
 
     def cloud_correct(self):
         """
@@ -461,13 +417,15 @@ class solar(image_data.image_data):
         """
 
         self._logger.debug('Correcting clear sky radiation for clouds')
-        self.vis_beam, self.vis_diffuse = cloud.cf_cloud(self.vis_beam,
-                                                         self.vis_diffuse,
-                                                         self.cloud_factor)
+        self.vis_beam, self.vis_diffuse = cloud.cf_cloud(
+            self.vis_beam,
+            self.vis_diffuse,
+            self.cloud_factor)
 
-        self.ir_beam, self.ir_diffuse = cloud.cf_cloud(self.ir_beam,
-                                                       self.ir_diffuse,
-                                                       self.cloud_factor)
+        self.ir_beam, self.ir_diffuse = cloud.cf_cloud(
+            self.ir_beam,
+            self.ir_diffuse,
+            self.cloud_factor)
 
     def veg_correct(self, illum_ang):
         """
@@ -487,25 +445,29 @@ class solar(image_data.image_data):
 
         # calculate for visible
         # correct beam
-        self.vis_beam = vegetation.solar_veg_beam(self.vis_beam,
-                                                  self.veg_height,
-                                                  illum_ang,
-                                                  self.veg_k)
+        self.vis_beam = vegetation.solar_veg_beam(
+            self.vis_beam,
+            self.veg_height,
+            illum_ang,
+            self.veg_k)
 
         # correct diffuse
-        self.vis_diffuse = vegetation.solar_veg_diffuse(self.vis_diffuse,
-                                                        self.veg_tau)
+        self.vis_diffuse = vegetation.solar_veg_diffuse(
+            self.vis_diffuse,
+            self.veg_tau)
 
-        # calculate for ir #
+        # calculate for ir
         # correct beam
-        self.ir_beam = vegetation.solar_veg_beam(self.ir_beam,
-                                                 self.veg_height,
-                                                 illum_ang,
-                                                 self.veg_k)
+        self.ir_beam = vegetation.solar_veg_beam(
+            self.ir_beam,
+            self.veg_height,
+            illum_ang,
+            self.veg_k)
 
         # correct diffuse
-        self.ir_diffuse = vegetation.solar_veg_diffuse(self.ir_diffuse,
-                                                       self.veg_tau)
+        self.ir_diffuse = vegetation.solar_veg_diffuse(
+            self.ir_diffuse,
+            self.veg_tau)
 
     def calc_net(self, albedo_vis, albedo_ir):
         """
@@ -535,6 +497,19 @@ class solar(image_data.image_data):
 
     def calc_stoporad(self, date_time, illum_ang, cosz, azimuth,
                       albedo_surface, wavelength_range=[0.28, 0.7]):
+        """Run stoporad for the given date_time and wavelength range
+
+        Args:
+            date_time (datetime): datetime object
+            illum_ang (np.array): numpy array of cosing of local illumination angles
+            cosz (float): cosine of the zenith angle for the basin
+            azimuth (float): azimuth to the sun for the basin
+            albedo_surface (np.array): albedo should match wavelengths specified
+            wavelength_range (list, optional): wavelengths to integrate over. Defaults to [0.28, 0.7].
+
+        Returns:
+            tuple: clear sky beam and diffuse radiation
+        """
 
         clear_beam, clear_diffuse = toporad.stoporad(
             date_time,
@@ -555,6 +530,8 @@ class solar(image_data.image_data):
                 wyear, cosz, azimuth):
         """
         Run ``stoporad`` for the infrared bands
+
+        TODO: depricated
 
         Args:
             min_storm_day: decimal day of last storm for the entire basin, from
@@ -611,6 +588,8 @@ class solar(image_data.image_data):
         """
         Run ``stoporad`` for the visible bands that calls IPW stoporad
 
+        TODO: depricated
+
         Args:
             min_storm_day: decimal day of last storm for the entire basin, from
                 :mod:`smrf.distribute.precip.ppt.last_storm_day_basin`
@@ -666,6 +645,8 @@ class solar(image_data.image_data):
     def radiation_dates(self, date_time):
         """
         Calculate some times based on the date for ``stoporad``
+
+        TODO: depricated
 
         Args:
             date_time: date time object
