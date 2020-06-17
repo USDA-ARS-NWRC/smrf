@@ -356,7 +356,7 @@ class SMRF():
         # 7. Solar radiation
         self.distribute['solar'] = distribute.solar.solar(
             self.config,
-            self.topo.stoporad_in_file,
+            self.topo,
             self.temp_dir)
 
         # 8. thermal radiation
@@ -604,6 +604,7 @@ class SMRF():
                 t,
                 illum_ang,
                 self.distribute['precip'].storm_days)
+
             # 6. cloud_factor
             self.distribute['cloud_factor'].distribute(
                 self.data.cloud_factor.loc[t])
@@ -615,7 +616,6 @@ class SMRF():
                 illum_ang,
                 cosz,
                 azimuth,
-                self.distribute['precip'].last_storm_day_basin,
                 self.distribute['albedo'].albedo_vis,
                 self.distribute['albedo'].albedo_ir)
 
@@ -783,17 +783,17 @@ class SMRF():
             name='cloud_factor',
             args=(q, self.data.cloud_factor)))
 
-        # 7.1 Clear sky visible
-        t.append(Thread(
-            target=self.distribute['solar'].distribute_thread_clear,
-            name='clear_vis',
-            args=(q, self.data.cloud_factor, 'clear_vis')))
+        # # 7.1 Clear sky visible
+        # t.append(Thread(
+        #     target=self.distribute['solar'].distribute_thread_clear,
+        #     name='clear_vis',
+        #     args=(q, self.data.cloud_factor, 'clear_vis')))
 
-        # 7.2 Clear sky ir
-        t.append(Thread(
-            target=self.distribute['solar'].distribute_thread_clear,
-            name='clear_ir',
-            args=(q, self.data.cloud_factor, 'clear_ir')))
+        # # 7.2 Clear sky ir
+        # t.append(Thread(
+        #     target=self.distribute['solar'].distribute_thread_clear,
+        #     name='clear_ir',
+        #     args=(q, self.data.cloud_factor, 'clear_ir')))
 
         # 7.3 Net radiation
         t.append(Thread(

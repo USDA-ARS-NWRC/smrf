@@ -15,8 +15,9 @@ IR_MIN = .7
 IR_MAX = 2.8
 
 
-def stoporad(date_time, topo, cosz, azimuth, illum_ang, albedo_surface, wavelength_range,
-             tau_elevation=100, tau=0.2, omega=0.85, scattering_factor=0.3):
+def stoporad(date_time, topo, cosz, azimuth, illum_ang, albedo_surface,
+             wavelength_range, tau_elevation=100, tau=0.2, omega=0.85,
+             scattering_factor=0.3):
 
     if wavelength_range[0] >= VISIBLE_MIN and \
             wavelength_range[1] <= VISIBLE_MAX:
