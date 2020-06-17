@@ -15,9 +15,7 @@ IR_MIN = .7
 IR_MAX = 2.8
 
 
-def stoporad(date_time, topo, cosz, azimuth, illum_ang, albedo_surface,
-             wavelength_range, tau_elevation=100, tau=0.2, omega=0.85,
-             scattering_factor=0.3):
+def check_wavelengths(wavelength_range):
 
     if wavelength_range[0] >= VISIBLE_MIN and \
             wavelength_range[1] <= VISIBLE_MAX:
@@ -27,6 +25,15 @@ def stoporad(date_time, topo, cosz, azimuth, illum_ang, albedo_surface,
     else:
         raise ValueError(
             'stoporad wavelength range not within visible or IR wavelengths')
+
+    return wavelength_flag
+
+
+def stoporad(date_time, topo, cosz, azimuth, illum_ang, albedo_surface,
+             wavelength_range, tau_elevation=100, tau=0.2, omega=0.85,
+             scattering_factor=0.3):
+
+    wavelength_flag = check_wavelengths(wavelength_range)  # noqa
 
     # check cosz if sun is down
     if cosz < 0:
@@ -79,6 +86,8 @@ def stoporad_ipw(date_time, tau_elevation, tau, omega, scattering_factor,
     original IPW stoporad program and differences are bit noise resolution
     of the 8-bit IPW images.
 
+    TODO: depricated, mainly for testing
+
     Args:
         date_time (datetime): date and time
         tau_elevation (float): Elevation [m] of optical depth measurement.
@@ -104,14 +113,7 @@ def stoporad_ipw(date_time, tau_elevation, tau, omega, scattering_factor,
         [tuple]: beam and diffuse radiation over snow covered area
     """
 
-    if wavelength_range[0] >= VISIBLE_MIN and \
-            wavelength_range[1] <= VISIBLE_MAX:
-        wavelength_flag = 'vis'
-    elif wavelength_range[0] >= IR_MIN and wavelength_range[1] <= IR_MAX:
-        wavelength_flag = 'ir'
-    else:
-        raise ValueError(
-            'stoporad wavelength range not within visible or IR wavelengths')
+    wavelength_flag = check_wavelengths(wavelength_range)
 
     # check cosz if sun is down
     if cosz < 0:

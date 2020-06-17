@@ -118,14 +118,7 @@ def twostream(cosz, S0, tau=0.2, omega=0.85, g=0.3, R0=0.5):
     assert(np.min(btrans) >= 0)
     assert(np.all(trans >= btrans * cosz))
 
-    # r = [refl,
-    #      trans,
-    #      btrans,
-    #      refl * cosz * S0,
-    #      trans * cosz * S0,
-    #      btrans * S0]
-
-    r = {
+    return {
         'reflectance': refl,
         'transmittance': trans,
         'direct_transmittance': btrans,
@@ -133,8 +126,6 @@ def twostream(cosz, S0, tau=0.2, omega=0.85, g=0.3, R0=0.5):
         'irradiance_at_bottom': trans * cosz * S0,
         'irradiance_normal_to_beam': btrans * S0
     }
-
-    return r
 
 
 def mwgamma(cosz, omega, g):
