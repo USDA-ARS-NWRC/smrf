@@ -76,18 +76,6 @@ def get_hrrr_cloud(df_solar, df_meta, logger, lat, lon):
     basin_sol[basin_sol < 50] = 0
     df_solar[basin_sol < 50] = 0
 
-    # This would be the proper way to do this but it's too
-    # computationally expensive
-    # cs_solar = df_solar.copy()
-    # for dt, row in cs_solar.iterrows():
-    #     dtt = pd.to_datetime(dt)
-    #     for ix,value in row.iteritems():
-    #         # get solar using twostream only if the sun is
-    # up
-    #         if value > 0:
-    #             cs_solar.loc[dt, ix] = model_solar(dtt,
-    # df_meta.loc[ix, 'latitude'], df_meta.loc[ix, 'longitude'])
-
     # This will produce NaN values when the sun is down
     df_cf = df_solar / basin_sol
 
@@ -97,54 +85,5 @@ def get_hrrr_cloud(df_solar, df_meta, logger, lat, lon):
     # Clean up the dataframe to be between 0 and 1
     df_cf[df_cf > 1.0] = 1.0
     df_cf[df_cf < 0.0] = 0.0
-
-    # # create cloud factor dataframe
-    # df_cf = df_solar.copy()
-    # #df_basin_sol = pd.DataFrame(index = dates, data = basin_sol)
-
-    # # calculate cloud factor from basin solar
-    # for cl in clms:
-    #     cf_tmp = df_cf[cl].values[:]/basin_sol
-    #     cf_tmp[np.isnan(cf_tmp)] = 0.0
-    #     cf_tmp[cf_tmp > 1.0] = 1.0
-    #     df_cf[cl] = cf_tmp
-
-    # df_cf = df_solar.divide(df_basin_sol)
-    # # clip to 1.0
-    # df_cf = df_cf.clip(upper=1.0)
-    # # fill nighttime with 0
-    # df_cf = df_cf.fillna(value=0.0)
-
-    # for idc, cl in enumerate(clms):
-    #     # get lat and lon for each hrrr pixel
-    #     lat = df_meta.loc[ cl,'latitude']
-    #     lon = df_meta.loc[ cl,'longitude']
-    #
-    #     # get solar values and make empty cf vector
-    #     sol_vals = df_solar[cl].values[:]
-    #     cf_vals = np.zeros_like(sol_vals)
-    #     cf_vals[:] = np.nan
-    #
-    #     # loop through time series for the pixel
-    #     for idt, sol in enumerate(sol_vals):
-    #         dt = pd.to_datetime(dates[idt])
-    #         # get the modeled solar
-    #         calc_sol = model_solar(dt, lat, lon)
-    #         if calc_sol == 0.0:
-    #             cf_tmp = 0.0
-    #             # diff = sol - calc_sol
-    #             # if diff > 5:
-    #             #     print(sol)
-    #         else:
-    #             cf_tmp = sol / calc_sol
-    #         if cf_tmp > 1.0:
-    #             logger.warning('CF to large: ')
-    #             logger.warning('{} for {} at {}'.format(cf_tmp, cl, idt))
-    #             cf_tmp = 1.0
-    #         # store value
-    #         cf_vals[idt] =cf_tmp
-    #
-    #     # store pixel cloud factor
-    #     df_cf[cl] = cf_vals
 
     return df_cf

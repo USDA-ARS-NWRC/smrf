@@ -7,10 +7,11 @@ from spatialnc import ipw
 
 from smrf.distribute import image_data
 from smrf.envphys.solar import cloud, vegetation, toporad
+from smrf.envphys.constants import VISIBLE_WAVELENGTHS, IR_WAVELENGTHS
 from smrf.utils import utils
 
 
-class solar(image_data.image_data):
+class Solar(image_data.image_data):
     """
     The :mod:`~smrf.distribute.solar.solar` class allows for variable specific
     distributions that go beyond the base class.
@@ -186,9 +187,6 @@ class solar(image_data.image_data):
         }
     }
 
-    VISIBLE_WAVELENGTHS = [0.28, 0.7]
-    IR_WAVELENGTHS = [0.7, 2.8]
-
     CLEAR_SKY_THREAD_VARIABLES = [
         'clear_ir_beam',
         'clear_ir_diffuse',
@@ -297,7 +295,7 @@ class solar(image_data.image_data):
             # Not all the clean but it will work for now
             val_beam, val_diffuse = self.calc_stoporad(
                 date_time, illum_ang, cosz, azimuth,
-                albedo_ir, self.IR_WAVELENGTHS)
+                albedo_ir, IR_WAVELENGTHS)
 
             setattr(self, 'clear_ir_beam', val_beam)
             setattr(self, 'clear_ir_diffuse', val_diffuse)
@@ -306,7 +304,7 @@ class solar(image_data.image_data):
 
             val_beam, val_diffuse = self.calc_stoporad(
                 date_time, illum_ang, cosz, azimuth,
-                albedo_vis, self.VISIBLE_WAVELENGTHS)
+                albedo_vis, VISIBLE_WAVELENGTHS)
 
             setattr(self, 'clear_vis_beam', val_beam)
             setattr(self, 'clear_vis_diffuse', val_diffuse)
@@ -374,7 +372,7 @@ class solar(image_data.image_data):
             queue: queue dictionary for all variables
             data: pandas dataframe for all data, indexed by date time
         """
-        self._logger.info(f"Distributing {self.variable}")
+        self._logger.info("Distributing {}".format(self.variable))
         for date_time in data.index:
 
             cosz = queue['cosz'].get(date_time)
@@ -495,7 +493,7 @@ class solar(image_data.image_data):
         self.net_solar = utils.set_min_max(self.net_solar, self.min, self.max)
 
     def calc_stoporad(self, date_time, illum_ang, cosz, azimuth,
-                      albedo_surface, wavelength_range=[0.28, 0.7]):
+                      albedo_surface, wavelength_range=VISIBLE_WAVELENGTHS):
         """Run stoporad for the given date_time and wavelength range
 
         Args:
@@ -530,7 +528,7 @@ class solar(image_data.image_data):
         """
         Run ``stoporad`` for the infrared bands
 
-        TODO: depricated
+        TODO: deprecated
 
         Args:
             min_storm_day: decimal day of last storm for the entire basin, from
@@ -587,7 +585,7 @@ class solar(image_data.image_data):
         """
         Run ``stoporad`` for the visible bands that calls IPW stoporad
 
-        TODO: depricated
+        TODO: deprecated
 
         Args:
             min_storm_day: decimal day of last storm for the entire basin, from
@@ -645,7 +643,7 @@ class solar(image_data.image_data):
         """
         Calculate some times based on the date for ``stoporad``
 
-        TODO: depricated
+        TODO: deprecated
 
         Args:
             date_time: date time object

@@ -7,12 +7,8 @@ from smrf.envphys.solar.irradiance import direct_solar_irradiance
 from smrf.envphys.thermal.topotherm import hysat
 from smrf.envphys.albedo import albedo
 from smrf.envphys.constants import SEA_LEVEL, STD_LAPSE, \
-    GRAVITY, MOL_AIR, STD_AIRTMP
-
-VISIBLE_MIN = .28
-VISIBLE_MAX = .7
-IR_MIN = .7
-IR_MAX = 2.8
+    GRAVITY, MOL_AIR, STD_AIRTMP, VISIBLE_MIN, VISIBLE_MAX, \
+    IR_MIN, IR_MAX
 
 
 def check_wavelengths(wavelength_range):
@@ -32,6 +28,24 @@ def check_wavelengths(wavelength_range):
 def stoporad(date_time, topo, cosz, azimuth, illum_ang, albedo_surface,
              wavelength_range, tau_elevation=100, tau=0.2, omega=0.85,
              scattering_factor=0.3):
+    """[summary]
+
+    Args:
+        date_time ([type]): [description]
+        topo ([type]): [description]
+        cosz ([type]): [description]
+        azimuth ([type]): [description]
+        illum_ang ([type]): [description]
+        albedo_surface ([type]): [description]
+        wavelength_range ([type]): [description]
+        tau_elevation (int, optional): [description]. Defaults to 100.
+        tau (float, optional): [description]. Defaults to 0.2.
+        omega (float, optional): [description]. Defaults to 0.85.
+        scattering_factor (float, optional): [description]. Defaults to 0.3.
+
+    Returns:
+        [type]: [description]
+    """
 
     wavelength_flag = check_wavelengths(wavelength_range)  # noqa
 
@@ -86,7 +100,7 @@ def stoporad_ipw(date_time, tau_elevation, tau, omega, scattering_factor,
     original IPW stoporad program and differences are bit noise resolution
     of the 8-bit IPW images.
 
-    TODO: depricated, mainly for testing
+    TODO: deprecated, mainly for testing
 
     Args:
         date_time (datetime): date and time

@@ -214,6 +214,8 @@ class Topo():
         """
         Build the stoporad.in file. This will have to write out
 
+        TODO: deprecated, will be removed in the future
+
         The stoporad.in file is a 5 band image with the following:
             - dem
             - slope

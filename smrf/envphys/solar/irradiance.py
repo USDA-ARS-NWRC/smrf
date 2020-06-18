@@ -6,8 +6,7 @@ from scipy.integrate import IntegrationWarning, quad
 from scipy.interpolate import Akima1DInterpolator
 
 from smrf.envphys import sunang
-
-SOLAR_CONSTANT = 1368.0  # solar constant in W/m**2
+from smrf.envphys.constants import SOLAR_CONSTANT
 
 
 def direct_solar_irradiance(d, w=[0.28, 2.8]):

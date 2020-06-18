@@ -1,4 +1,13 @@
-# define some constants
+VISIBLE_MIN = .28
+VISIBLE_MAX = .7
+IR_MIN = .7
+IR_MAX = 2.8
+# visible solar irradiance wavelengths
+VISIBLE_WAVELENGTHS = [VISIBLE_MIN, VISIBLE_MAX]
+# infrared solar irradiance wavelengths
+IR_WAVELENGTHS = [IR_MIN, IR_MAX]
+SOLAR_CONSTANT = 1368.0  # solar constant in W/m**2
+
 MAXV = 1.0              # vis albedo when gsize = 0
 MAXIR = 0.85447         # IR albedo when gsize = 0
 IRFAC = -0.02123        # IR decay factor

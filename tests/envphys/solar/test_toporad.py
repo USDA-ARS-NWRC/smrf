@@ -58,15 +58,6 @@ class TestToporad(SMRFTestCaseLakes):
             cls.azimuth,
             cls.cosz)
 
-    def setup(self):
-        super().setup()
-
-        self.assertTrue(self.tau_elevation == 100.0)
-        self.assertTrue(self.tau == 0.2)
-        self.assertTrue(self.omega == 0.85)
-        self.assertTrue(self.scattering_factor == 0.3)
-        self.assertTrue(self.surface_albedo == 0.5)
-
     def test_elevrad(self):
 
         rad = toporad.Elevrad(

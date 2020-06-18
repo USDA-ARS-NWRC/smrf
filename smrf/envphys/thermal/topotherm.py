@@ -5,16 +5,16 @@ from smrf.envphys.constants import (FREEZE, GRAVITY, MOL_AIR, SEA_LEVEL,
 from smrf.envphys.vapor_pressure import sati
 
 
-def brutsaert(ta, l, ea, z, pa):
+def brutsaert(air_temp, lapse_rate, vapor_pressure, elevation, pressure):
     """
     Calculate atmosphere emissivity from Brutsaert (1975):cite:`Brutsaert:1975`
 
     Args:
-        ta: air temp (K)
-        l: temperature lapse rate (deg/m)
+        air_temp: air temp (K)
+        lapse_rate: temperature lapse rate (deg/m)
         ea: vapor pressure (Pa)
-        z: elevation (z)
-        pa: air pressure (Pa)
+        elevation: elevation (z)
+        pressure: air pressure (Pa)
 
     Returns:
         atmosphericy emissivity
@@ -22,13 +22,14 @@ def brutsaert(ta, l, ea, z, pa):
     20151027 Scott Havens
     """
 
-    t_prime = ta - (l * z)
-    rh = ea / sati(ta)
+    t_prime = air_temp - (lapse_rate * elevation)
+    rh = vapor_pressure / sati(air_temp)
     rh[rh > 1] = 1
 
-    e_prime = (rh * sati(t_prime))/100.0
+    e_prime = (rh * sati(t_prime)) / 100.0
 
-    air_emiss = (1.24*np.power(e_prime/t_prime, 1./7.0))*pa/SEA_LEVEL
+    air_emiss = (1.24 * np.power(e_prime / t_prime, 1. / 7.0)) * \
+        pressure / SEA_LEVEL
 
     air_emiss[air_emiss > 1.0] = 1.0
 

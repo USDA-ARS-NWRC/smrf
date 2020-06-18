@@ -310,7 +310,7 @@ class SMRF():
             * :func:`Wind speed and direction <smrf.distribute.wind.wind>`
             * :func:`Precipitation <smrf.distribute.precipitation.ppt>`
             * :func:`Albedo <smrf.distribute.albedo.Albedo>`
-            * :func:`Solar radiation <smrf.distribute.solar.solar>`
+            * :func:`Solar radiation <smrf.distribute.solar.Solar>`
             * :func:`Thermal radiation <smrf.distribute.thermal.th>`
             * :func:`Soil Temperature <smrf.distribute.soil_temp.ts>`
         """
@@ -342,7 +342,7 @@ class SMRF():
             self.config['cloud_factor'])
 
         # 7. Solar radiation
-        self.distribute['solar'] = distribute.solar.solar(
+        self.distribute['solar'] = distribute.solar.Solar(
             self.config,
             self.topo)
 
@@ -770,25 +770,13 @@ class SMRF():
             name='cloud_factor',
             args=(q, self.data.cloud_factor)))
 
-        # # 7.1 Clear sky visible
-        # t.append(Thread(
-        #     target=self.distribute['solar'].distribute_thread_clear,
-        #     name='clear_vis',
-        #     args=(q, self.data.cloud_factor, 'clear_vis')))
-
-        # # 7.2 Clear sky ir
-        # t.append(Thread(
-        #     target=self.distribute['solar'].distribute_thread_clear,
-        #     name='clear_ir',
-        #     args=(q, self.data.cloud_factor, 'clear_ir')))
-
-        # 7.3 Net radiation
+        # 7 Net radiation
         t.append(Thread(
             target=self.distribute['solar'].distribute_thread,
             name='solar',
             args=(q, self.data.cloud_factor)))
 
-        # 7. thermal radiation
+        # 8. thermal radiation
         if self.distribute['thermal'].gridded:
             t.append(Thread(
                 target=self.distribute['thermal'].distribute_thermal_thread,
