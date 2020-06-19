@@ -20,7 +20,7 @@ env:
     - CIBW_TEST_REQUIRES=nose
     - CIBW_TEST_COMMAND="nosetests -vv --exe smrf"
     - CIBW_BUILD="cp3*-manylinux_x86_64 cp3*-macosx_x86_64"
-    - CIBW_SKIP="?p27* pp*"
+    - CIBW_SKIP="?p27* pp* cp35*"
     - CIBW_BUILD_VERBOSITY=3
     - CIBW_BEFORE_BUILD="pip install -r requirements.txt"
     - TWINE_USERNAME=__token__
@@ -44,16 +44,12 @@ ci-build-wheels: &ci-build-wheels
   os: linux
   dist: xenial
   language: python
-  install: python3 -m pip install cibuildwheel==1.3.0
+  install: python3 -m pip install cibuildwheel==1.4.2
   script: travis/build.sh    
 
 jobs:
   include:
     # test stage
-    - <<: *unittest
-      python: 3.5
-      env: TOXENV=py35
-
     - <<: *unittest
       python: 3.6
       env: TOXENV=py36,flake8,coverage
