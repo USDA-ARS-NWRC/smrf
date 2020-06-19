@@ -262,12 +262,12 @@ class SMRF():
             self.end_date = self.end_date.tz_localize(self.time_zone)
 
         # Get the time steps correctly in the time zone
-        self.date_time = pd.date_range(
+        self.date_time = list(pd.date_range(
             self.start_date,
             self.end_date,
             freq="{[time][time_step]}min".format(self.config),
             tz=self.time_zone
-        ).to_list()
+        ))
         self.time_steps = len(self.date_time)
 
     def __enter__(self):
