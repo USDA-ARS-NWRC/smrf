@@ -1,17 +1,11 @@
 # -*- coding: utf-8 -*-
-'''
-SMRF - Snow Modeling Resource Framework
-'''
-
-from importlib_metadata import version, PackageNotFoundError
 import os
+from pkg_resources import get_distribution, DistributionNotFound
 
 try:
-    __version__ = version(__name__)
-except PackageNotFoundError:
-    # package is not installed
-    pass
-
+    __version__ = get_distribution(__name__).version
+except DistributionNotFound:
+    __version__ = 'unknown'
 __core_config__ = os.path.abspath(
     os.path.dirname(__file__) + '/framework/CoreConfig.ini')
 __recipes__ = os.path.abspath(os.path.dirname(
