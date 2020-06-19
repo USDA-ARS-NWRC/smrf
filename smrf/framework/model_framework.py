@@ -817,7 +817,7 @@ class SMRF():
     def initializeOutput(self):
         """
         Initialize the output files based on the configFile section ['output'].
-        Currently only :func:`NetCDF files <smrf.output.output_netcdf>` is
+        Currently only :func:`NetCDF files <smrf.output.output_netcdf.OutputNetcdf>` is
         supported.
         """
         out = self.config['output']['out_location']
@@ -831,7 +831,7 @@ class SMRF():
             output_variables = self.config['output']['variables']
 
             # determine which variables belong where
-            variable_list = {}
+            variable_dict = {}
             for v in output_variables:
                 for m in self.modules:
 
@@ -852,18 +852,18 @@ class SMRF():
                                 'out_location': fname,
                                 'info': self.distribute[m].output_variables[v]
                             }
-                            variable_list[v] = d
+                            variable_dict[v] = d
 
             # determine what type of file to output
             if self.config['output']['file_type'].lower() == 'netcdf':
-                self.out_func = output.output_netcdf(
-                    variable_list, self.topo,
+                self.out_func = output.output_netcdf.OutputNetcdf(
+                    variable_dict, self.topo,
                     self.config['time'],
                     self.config['output'])
 
             elif self.config['output']['file_type'].lower() == 'hru':
-                self.out_func = output.output_hru(
-                    variable_list, self.topo,
+                self.out_func = output.output_hru.output_hru(
+                    variable_dict, self.topo,
                     self.date_time,
                     self.config['output'])
 
@@ -901,7 +901,7 @@ class SMRF():
             # User is attempting to output single variable
             if module is not None and out_var is not None:
                 # add only one variable to the output list and preceed
-                var_vals = [self.out_func.variable_list[out_var]]
+                var_vals = [self.out_func.variable_dict[out_var]]
 
             # Incomplete request
             elif module is not None or out_var is not None:
@@ -911,7 +911,7 @@ class SMRF():
 
             else:
                 # Output all the variables
-                var_vals = self.out_func.variable_list.values()
+                var_vals = self.out_func.variable_dict.values()
 
             # Get the output variables then pass to the function
             for v in var_vals:

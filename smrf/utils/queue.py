@@ -280,7 +280,7 @@ class QueueOutput(threading.Thread):
                (output_count == len(self.date_time)):
 
                 # get the output variables then pass to the function
-                for v in self.out_func.variable_list.values():
+                for v in self.out_func.variable_dict.values():
                     if v['variable'] in self.queues.keys():
                         data = self.queues[v['variable']].get(t)
 

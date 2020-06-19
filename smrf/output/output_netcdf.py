@@ -1,8 +1,3 @@
-"""
-Functions to output as a netCDF
-"""
-
-# from scipy import stats
 import logging
 import os
 from datetime import datetime
@@ -12,37 +7,36 @@ import numpy as np
 from spatialnc.proj import add_proj, add_proj_from_file
 
 from smrf import __version__
-from smrf.utils import utils
-
-# import pandas as pd
 
 
-class output_netcdf():
+class OutputNetcdf():
     """
-    Class output_netcdf() to output values to a netCDF file
+    Class OutputNetcdf() to output values to a netCDF file
     """
 
     type = 'netcdf'
     fmt = '%Y-%m-%d %H:%M:%S'
     cs = (6, 10, 10)
 
-    def __init__(self, variable_list, topo, time, outConfig):
+    def __init__(self, variable_dict, topo, time, outConfig):
         """
-        Initialize the output_netcdf() class
+        Initialize the OutputNetcdf() class
 
         Args:
-            variable_list: list of dicts, one for each variable
+            variable_dict: dict of variable information
             topo: loadTopo instance
+            time: time configuration
+            outConfig: out configuration
         """
 
         self._logger = logging.getLogger(__name__)
 
         # go through the variable list and make full file names
-        for v in variable_list:
-            variable_list[v]['file_name'] = \
-                str(variable_list[v]['out_location'] + '.nc')
+        for v in variable_dict:
+            variable_dict[v]['file_name'] = \
+                str(variable_dict[v]['out_location'] + '.nc')
 
-        self.variable_list = variable_list
+        self.variable_dict = variable_dict
 
         # process the time section
         self.run_time_step = int(time['time_step'])
@@ -61,13 +55,13 @@ class output_netcdf():
         # Retrieve projection information from topo
         map_meta = add_proj_from_file(topo.topoConfig['filename'])
 
-        for v in self.variable_list:
+        for v in self.variable_dict:
 
-            f = self.variable_list[v]
+            f = self.variable_dict[v]
 
             if os.path.isfile(f['file_name']):
                 self._logger.warning('Opening {}, data may be overwritten!'
-                                  .format(f['file_name']))
+                                     .format(f['file_name']))
 
                 # open in append mode
                 s = nc.Dataset(f['file_name'], 'a')
@@ -80,7 +74,7 @@ class output_netcdf():
             else:
                 self._logger.debug('Creating %s' % f['file_name'])
                 s = nc.Dataset(f['file_name'], 'w', format='NETCDF4',
-                                                    clobber=True)
+                               clobber=True)
 
                 # add dimensions
                 s.createDimension(dimensions[0], None)
@@ -97,33 +91,32 @@ class output_netcdf():
 
                 # # define some attributes
                 s.variables['time'].setncattr(
-                        'units',
-                        'hours since {}'.format(time['start_date']))
+                    'units',
+                    'hours since {}'.format(time['start_date']))
                 s.variables['time'].setncattr('calendar', 'standard')
                 s.variables['time'].setncattr('time_zone', time['time_zone'])
                 s.variables['time'].setncattr('long_name', 'time')
 
                 # the y variable attributes
-                s.variables['y'].setncattr('units','meters')
-                s.variables['y'].setncattr('description','UTM, north south')
-                s.variables['y'].setncattr('long_name','y coordinate')
+                s.variables['y'].setncattr('units', 'meters')
+                s.variables['y'].setncattr('description', 'UTM, north south')
+                s.variables['y'].setncattr('long_name', 'y coordinate')
 
                 # the x variable attributes
-                s.variables['x'].setncattr('units','meters')
-                s.variables['x'].setncattr('description','UTM, east west')
-                s.variables['x'].setncattr('long_name','x coordinate')
+                s.variables['x'].setncattr('units', 'meters')
+                s.variables['x'].setncattr('description', 'UTM, east west')
+                s.variables['x'].setncattr('long_name', 'x coordinate')
 
                 # the variable attributes
                 s.variables[f['variable']].setncattr(
-                        'module',
-                        f['module'])
+                    'module',
+                    f['module'])
                 s.variables[f['variable']].setncattr(
-                        'units',
-                        f['info']['units'])
+                    'units',
+                    f['info']['units'])
                 s.variables[f['variable']].setncattr(
-                        'long_name',
-                        f['info']['long_name'])
-
+                    'long_name',
+                    f['info']['long_name'])
 
                 # define some global attribute
                 s.setncattr_string('Conventions', 'CF-1.6')
@@ -131,22 +124,22 @@ class output_netcdf():
                 s.setncattr_string('title', 'Distributed {0} data from SMRF'
                                             ''.format(f['info']['long_name']))
                 s.setncattr_string('history', ('[{}] Create netCDF4 file'
-                                              '').format(now_str))
+                                               '').format(now_str))
                 s.setncattr_string('institution', ('USDA Agricultural Research'
                                                    ' Service, Northwest'
                                                    ' Watershed Research'
                                                    ' Center'))
                 s = add_proj(s, map_meta=map_meta)
 
-                s.setncattr_string('references',
-                        'Online documentation smrf.readthedocs.io;'
-                        ' https://doi.org/10.1016/j.cageo.2017.08.016')
+                s.setncattr_string(
+                    'references',
+                    'Online documentation smrf.readthedocs.io;'
+                    ' https://doi.org/10.1016/j.cageo.2017.08.016')
 
                 s.variables['y'][:] = y
                 s.variables['x'][:] = x
 
-            s.setncattr_string('source',
-                    'SMRF {}'.format(utils.getgitinfo()))
+            s.setncattr_string('SMRF_version', __version__)
             s.close()
 
     def output(self, variable, data, date_time):
@@ -162,8 +155,8 @@ class output_netcdf():
         self._logger.debug('{0} Writing variable {1} to netCDF'
                            .format(date_time, variable))
 
-#         f = self.variable_list[variable]['nc_file']
-        f = nc.Dataset(self.variable_list[variable]['file_name'],
+#         f = self.variable_dict[variable]['nc_file']
+        f = nc.Dataset(self.variable_dict[variable]['file_name'],
                        'a', 'NETCDF4')
 
         # the current time integer
@@ -181,17 +174,12 @@ class output_netcdf():
         else:
             index = len(times)
 
-#         self.date_time[variable] = np.append(self.date_time[variable], pd.to_datetime(date_time))
-
-            # insert the time
+        # insert the time and data
         f.variables['time'][index] = t
 
-        # insert the data
         if self.outConfig['mask_output']:
             f.variables[variable][index, :] = data*self.mask
         else:
             f.variables[variable][index, :] = data
 
-        # synce the data to disk to that it can be viewed immediately
-#         f.sync()
         f.close()

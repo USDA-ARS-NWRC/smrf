@@ -71,7 +71,6 @@ ext_modules += [
 
 setup(
     name='smrf',
-    version='0.9.1',
     description="Distributed snow modeling for water resources",
     author="Scott Havens",
     author_email='scott.havens@ars.usda.gov',
@@ -95,10 +94,10 @@ setup(
         'License :: OSI Approved :: CC0 1.0',
         'Natural Language :: English',
         'Programming Language :: Python :: 3',
-        'Programming Language :: Python :: 3.3',
-        'Programming Language :: Python :: 3.4',
         'Programming Language :: Python :: 3.5',
         'Programming Language :: Python :: 3.6',
+        'Programming Language :: Python :: 3.7',
+        'Programming Language :: Python :: 3.8'
     ],
     test_suite='tests',
     # tests_require=test_requirements,
