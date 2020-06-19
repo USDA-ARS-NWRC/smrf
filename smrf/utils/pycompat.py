@@ -36,10 +36,9 @@ else:  # pragma: no cover
     pyreduce = reduce
     import __builtin__ as builtins
     from ConfigParser import SafeConfigParser
+
+
 try:
-    from cyordereddict import OrderedDict
-except ImportError:  # pragma: no cover
-    try:
-        from collections import OrderedDict
-    except ImportError:
-        from ordereddict import OrderedDict
+    from collections import OrderedDict
+except ImportError:
+    from ordereddict import OrderedDict

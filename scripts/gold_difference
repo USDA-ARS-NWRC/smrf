@@ -78,7 +78,7 @@ def main(args):
                 'tests',
                 args.basin,
                 args.gold_dir,
-                f"{gf}.nc"
+                "{}.nc".format(gf)
             )
         )
 
