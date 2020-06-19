@@ -8,7 +8,6 @@ from smrf.data import loadTopo
 from smrf.envphys.sunang import sunang
 from smrf.envphys.solar import toporad, irradiance
 from smrf.envphys.albedo import albedo
-from smrf.utils import utils
 from smrf.tests.smrf_test_case_lakes import SMRFTestCaseLakes
 
 
