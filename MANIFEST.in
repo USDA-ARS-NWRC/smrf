@@ -5,6 +5,11 @@ include requirements.txt
 
 global-include *.txt *.md *.pyx *.pxd *.c *.h
 
+include smrf/framework/CoreConfig.ini
+include smrf/framework/.qotw
+include smrf/framework/recipes.ini
+include smrf/framework/changelog.in
+
 recursive-include smrf/tests *
 recursive-exclude * __pycache__
 recursive-exclude * *.py[co]
