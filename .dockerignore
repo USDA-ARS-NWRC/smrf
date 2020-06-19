@@ -2,17 +2,11 @@
 Dockerfile
 .venv/
 
-# Eclipse files
-.project
-.settings
-.pydevproject
 .DS_Store
 ._.*
-test_data/stoporad.ip
 
 *.lprof
 *.prof
-*.ipw
 
 test_data/wrfout_d02_2016-03-10.nc
 test_data/stoporad*

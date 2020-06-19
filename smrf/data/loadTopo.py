@@ -1,11 +1,9 @@
 
 import logging
 import os
-import subprocess as sp
 
 import numpy as np
 from netCDF4 import Dataset
-from spatialnc import ipw
 from topocalc import gradient
 from topocalc.viewf import viewf
 from utm import to_latlon
@@ -44,9 +42,6 @@ class Topo():
         # calculate the gradient and the sky view factor
         self.gradient()
         self.viewf()
-
-        # create the stoporad.in file
-        self.stoporadInput()
 
     def readNetCDF(self):
         """
@@ -167,9 +162,6 @@ class Topo():
     def gradient(self):
         """
         Calculate the gradient and aspect
-
-        Args:
-            gfile: IPW file to write the results to
         """
 
         func = self.topoConfig['gradient_method']
@@ -178,7 +170,9 @@ class Topo():
         g, a = getattr(gradient, func)(
             self.dem, self.dx, self.dy, aspect_rad=True)
         self.slope_radians = g
-        self.sin_slope = np.sin(g)  # IPW stores slope as sin(Slope)
+
+        # following IPW convention for slope as sin(Slope)
+        self.sin_slope = np.sin(g)
         self.aspect = a
 
     def viewf(self):
@@ -194,94 +188,3 @@ class Topo():
 
         self.sky_view_factor = svf
         self.terrain_config_factor = tcf
-
-    def add_geo_hdr(self, image):
-        """Add an IPW geoheader to the image
-
-        Arguments:
-            image {IPW} -- IPW class
-        """
-
-        image.add_geo_hdr(
-            [self.x[0], self.y[0]],
-            [self.dx, self.dx],
-            'm',
-            'UTM')
-
-        return image
-
-    def stoporadInput(self):
-        """
-        Build the stoporad.in file. This will have to write out
-
-        TODO: deprecated, will be removed in the future
-
-        The stoporad.in file is a 5 band image with the following:
-            - dem
-            - slope
-            - aspect
-            - sky view factor
-            - terrain factor
-        """
-
-        # DEM ipw image
-        dem_file = os.path.join(self.tempDir, 'dem.ipw')
-        ipw_image = ipw.IPW()
-        ipw_image.new_band(self.dem)
-        ipw_image = self.add_geo_hdr(ipw_image)
-        ipw_image.write(dem_file, 16)
-
-        # slope
-        slope_file = os.path.join(self.tempDir, 'slope.ipw')
-
-        ipw_image = ipw.IPW()
-        ipw_image.new_band(self.sin_slope)
-        ipw_image = self.add_geo_hdr(ipw_image)
-        ipw_image.write(slope_file, 8)
-
-        # aspect
-        aspect_file = os.path.join(self.tempDir, 'aspect.ipw')
-        ipw_image = ipw.IPW()
-        ipw_image.new_band(self.aspect)
-        ipw_image = self.add_geo_hdr(ipw_image)
-        ipw_image.bands[0].units = 'radians'
-        ipw_image.write(aspect_file, 8)
-
-        # modify the LQ headers
-        # will only use the max/min floats for the LQ hearder, however
-        # the shade function checks the lq header max and will error
-        # with these slopes
-        slope_file2 = os.path.join(self.tempDir, 'slope2.ipw')
-        cmd = 'requant -m 0,1 {} > {}'.format(slope_file, slope_file2)
-        proc = sp.Popen(cmd, shell=True, env=os.environ.copy()).wait()
-        if proc != 0:
-            raise OSError('slope LQ header modification failed')
-
-        # calculate the view factor
-        svf_file = os.path.join(self.tempDir, 'sky_view.ipw')
-        ipw_image = ipw.IPW()
-        ipw_image.new_band(self.sky_view_factor)
-        ipw_image.new_band(self.terrain_config_factor)
-        ipw_image = self.add_geo_hdr(ipw_image)
-        ipw_image.bands[0].units = 'radians'
-        ipw_image.write(svf_file, 8)
-
-        # combine into a value
-        stoporad_file = os.path.join(self.tempDir, 'stoporad_in.ipw')
-
-        cmd = f"mux {dem_file} {slope_file2} {aspect_file} " \
-            f"{svf_file} > {stoporad_file}"
-        proc = sp.Popen(cmd, shell=True).wait()
-
-        if proc != 0:
-            raise OSError('mux for stoporad_in.ipw failed')
-
-        self.stoporad_in_file = stoporad_file
-
-        # clean up the WORKDIR
-        # This may be able to be removed after shade is implemented
-        # os.remove(dem_file)
-        os.remove(svf_file)
-        os.remove(slope_file)
-        os.remove(slope_file2)
-        os.remove(aspect_file)

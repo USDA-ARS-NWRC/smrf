@@ -121,41 +121,6 @@ class TestToporad(SMRFTestCaseLakes):
         self.assertAlmostEqual(
             148.2553072510663, np.max(trad_diffuse), places=4)
 
-    def test_stoporad_ipw(self):
-
-        wy_day, wyear = utils.water_day(self.date_time)
-        tz_min_west = np.abs(self.date_time.utcoffset().total_seconds()/60)
-
-        srad_beam, srad_diffuse = toporad.stoporad_ipw(
-            self.date_time,
-            self.tau_elevation,
-            self.tau,
-            self.omega,
-            self.scattering_factor,
-            wavelength_range=[0.28, 0.7],
-            start=10.0,
-            current_day=wy_day,
-            time_zone=tz_min_west,
-            year=wyear,
-            cosz=self.cosz,
-            azimuth=self.azimuth,
-            grain_size=100,
-            max_grain=700,
-            dirt=2,
-            topo=self.topo)
-
-        self.assertAlmostEqual(
-            351.25153575009557, np.mean(srad_beam), places=4)
-        self.assertAlmostEqual(50.927203384577695, np.min(srad_beam), places=4)
-        self.assertAlmostEqual(572.4025134547906, np.max(srad_beam), places=4)
-
-        self.assertAlmostEqual(
-            66.89102780708569, np.mean(srad_diffuse), places=4)
-        self.assertAlmostEqual(
-            50.927203384577695, np.min(srad_diffuse), places=4)
-        self.assertAlmostEqual(
-            104.87642511916467, np.max(srad_diffuse), places=4)
-
     def test_stoporad_visible(self):
 
         alb_vis, alb_ir = albedo(

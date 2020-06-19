@@ -4,7 +4,7 @@ import utm
 import os
 
 from smrf.data import loadTopo
-from smrf.envphys.solar import ipw, twostream, irradiance
+from smrf.envphys.solar import twostream, irradiance
 from smrf.envphys import sunang
 from tests.smrf_test_case import SMRFTestCase
 
@@ -33,10 +33,6 @@ class TestRadiation(SMRFTestCase):
         ipw_cosz = 0.680436
         ipw_azimuth = -5.413
         ipw_rad_vector = 0.98787
-
-        result = ipw.sunang_ipw(date_time, lat, lon)
-        self.assertTrue(result[0] == ipw_cosz)
-        self.assertTrue(result[1] == ipw_azimuth)
 
         # try out the python version
         result = sunang.sunang(date_time, lat, lon)
@@ -108,10 +104,6 @@ class TestRadiation(SMRFTestCase):
         date_time = pd.to_datetime('6/22/1990 00:00')
         date_time = date_time.tz_localize('UTC')
 
-        # IPW version
-        sipw = ipw.solar_ipw(date_time, w=[0.58, 0.68])
-        self.assertTrue(sipw == sin)
-
         # Python version
         spy = irradiance.direct_solar_irradiance(date_time, w=[0.58, 0.68])
         self.assertTrue(np.abs(spy - sin) <= 0.021)
@@ -141,16 +133,6 @@ class TestRadiation(SMRFTestCase):
         direct_irradiance_normal_to_beam = [118.485, 0.148725, 956.044]
 
         for n in [0, 1]:
-
-            # IPW way
-            ipw_R = ipw.twostream_ipw(
-                cosz[n], S0[n], tau=tau[n], omega=omega[n], g=g[n], R0=R0[n])
-            self.assertTrue(ipw_R[0] == reflectance[n])
-            self.assertTrue(ipw_R[1] == transmittance[n])
-            self.assertTrue(ipw_R[2] == direct_transmittance[n])
-            self.assertTrue(ipw_R[3] == upwelling_irradiance[n])
-            self.assertTrue(ipw_R[4] == total_irradiance_at_bottom[n])
-            self.assertTrue(ipw_R[5] == direct_irradiance_normal_to_beam[n])
 
             # Python way
             py_R = twostream.twostream(
