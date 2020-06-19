@@ -104,7 +104,7 @@ class SMRFTestCase(unittest.TestCase):
         Runs the short simulation over reynolds mountain east
         """
         base = os.path.dirname(smrf.__file__)
-        cls.test_dir = os.path.abspath(os.path.join(base, '../', 'tests'))
+        cls.test_dir = os.path.abspath(os.path.join(base, 'tests'))
 
         config_file = 'test_base_config.ini'
         config_file = os.path.join(cls.test_dir, config_file)

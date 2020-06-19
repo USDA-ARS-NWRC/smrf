@@ -2,7 +2,7 @@ import copy
 import pytz
 
 from pandas import to_datetime
-from tests.test_configurations import SMRFTestCase
+from smrf.tests.test_configurations import SMRFTestCase
 from smrf.framework.model_framework import SMRF
 
 

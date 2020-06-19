@@ -1,8 +1,8 @@
 from copy import deepcopy
 
-from tests.recipes.base_recipe import BaseRecipes
-from tests.smrf_test_case import SMRFTestCase
-from tests.smrf_test_case_lakes import SMRFTestCaseLakes
+from smrf.tests.recipes.base_recipe import BaseRecipes
+from smrf.tests.smrf_test_case import SMRFTestCase
+from smrf.tests.smrf_test_case_lakes import SMRFTestCaseLakes
 
 
 class TestWindNinjaRecipes(SMRFTestCaseLakes, BaseRecipes):

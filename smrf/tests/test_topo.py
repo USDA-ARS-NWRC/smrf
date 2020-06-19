@@ -12,7 +12,7 @@ class TestLoadTopo(unittest.TestCase):
     @classmethod
     def setUp(self):
         base = os.path.dirname(smrf.__file__)
-        self.test_dir = os.path.abspath(os.path.join(base, '../', 'tests'))
+        self.test_dir = os.path.abspath(os.path.join(base, 'tests'))
         tempDir = os.path.join(self.test_dir, 'RME/output')
 
         if not os.path.exists(tempDir):

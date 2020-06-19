@@ -99,7 +99,7 @@ setup(
         'Programming Language :: Python :: 3.7',
         'Programming Language :: Python :: 3.8'
     ],
-    test_suite='tests',
+    test_suite='smrf.tests',
     # tests_require=test_requirements,
     cmdclass={
         'build_ext': build_ext

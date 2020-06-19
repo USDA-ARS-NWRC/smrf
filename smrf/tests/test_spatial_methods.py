@@ -2,7 +2,7 @@
 # from inicheck.tools import get_user_config, check_config, cast_all_variables
 #
 # from smrf.framework.model_framework import can_i_run_smrf
-# from tests.test_configurations import SMRFTestCase
+# from smrf.tests.test_configurations import SMRFTestCase
 
 
 # class TestSpatialMethods(SMRFTestCase):

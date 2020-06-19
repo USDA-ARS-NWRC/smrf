@@ -4,7 +4,7 @@
 import os
 
 from smrf.framework.model_framework import run_smrf
-from tests.smrf_test_case_lakes import SMRFTestCaseLakes
+from smrf.tests.smrf_test_case_lakes import SMRFTestCaseLakes
 
 
 class TestLakes(SMRFTestCaseLakes):

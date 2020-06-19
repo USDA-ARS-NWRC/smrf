@@ -6,7 +6,7 @@ import os
 from smrf.data import loadTopo
 from smrf.envphys.solar import twostream, irradiance
 from smrf.envphys import sunang
-from tests.smrf_test_case import SMRFTestCase
+from smrf.tests.smrf_test_case import SMRFTestCase
 
 
 class TestRadiation(SMRFTestCase):

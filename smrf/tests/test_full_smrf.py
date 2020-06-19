@@ -16,7 +16,7 @@ from os.path import abspath, isdir, join
 from inicheck.tools import cast_all_variables
 
 from smrf.framework.model_framework import run_smrf
-from tests.smrf_test_case import SMRFTestCase
+from smrf.tests.smrf_test_case import SMRFTestCase
 
 
 class TestThreadedRME(SMRFTestCase):

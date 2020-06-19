@@ -9,7 +9,7 @@ from smrf.data import loadTopo
 from smrf.data.mysql_data import date_range
 from smrf.distribute.wind.wind_ninja import WindNinjaModel
 from smrf.utils import utils
-from tests.smrf_test_case_lakes import SMRFTestCaseLakes
+from smrf.tests.smrf_test_case_lakes import SMRFTestCaseLakes
 
 
 class TestWindNinja(SMRFTestCaseLakes):

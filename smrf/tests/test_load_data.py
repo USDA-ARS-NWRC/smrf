@@ -14,8 +14,8 @@ from copy import deepcopy
 from inicheck.tools import cast_all_variables
 
 from smrf.framework.model_framework import can_i_run_smrf, run_smrf
-from tests.nwrc_check import NWRCCheck
-from tests.smrf_test_case import SMRFTestCase
+from smrf.tests.nwrc_check import NWRCCheck
+from smrf.tests.smrf_test_case import SMRFTestCase
 
 
 @unittest.skipUnless(
