@@ -82,9 +82,6 @@ target/
 *.py~
 *.swp
 
-# git version stuff:
-smrf/utils/gitinfo.py
-
 #Auto generate config files
 *config_full.ini
 test_data/config.ini

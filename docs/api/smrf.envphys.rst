@@ -8,14 +8,23 @@ Subpackages
    :maxdepth: 4
 
    smrf.envphys.core
+   smrf.envphys.solar
 
 Submodules
 ----------
 
-smrf.envphys.phys module
-------------------------
+smrf.envphys.albedo module
+--------------------------
 
-.. automodule:: smrf.envphys.phys
+.. automodule:: smrf.envphys.albedo
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+smrf.envphys.constants module
+-----------------------------
+
+.. automodule:: smrf.envphys.constants
    :members:
    :undoc-members:
    :show-inheritance:
@@ -24,14 +33,6 @@ smrf.envphys.precip module
 --------------------------
 
 .. automodule:: smrf.envphys.precip
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
-smrf.envphys.radiation module
------------------------------
-
-.. automodule:: smrf.envphys.radiation
    :members:
    :undoc-members:
    :show-inheritance:
@@ -60,10 +61,10 @@ smrf.envphys.sunang module
    :undoc-members:
    :show-inheritance:
 
-smrf.envphys.thermal\_radiation module
---------------------------------------
+smrf.envphys.vapor\_pressure module
+-----------------------------------
 
-.. automodule:: smrf.envphys.thermal_radiation
+.. automodule:: smrf.envphys.vapor_pressure
    :members:
    :undoc-members:
    :show-inheritance:

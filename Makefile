@@ -49,10 +49,10 @@ isort: ## using isort to sort imports
 	isort -rc -vb .
 
 lint:
-	flake8 smrf tests
+	flake8 smrf
 
 test:
-	python setup.py test
+	python3 setup.py test
 
 test-all:
 	tox
@@ -66,7 +66,7 @@ coverage:
 docs:
 	rm -f docs/smrf.rst
 	rm -f docs/modules.rst
-	sphinx-apidoc -o docs/api smrf
+	sphinx-apidoc -o docs/api smrf smrf/tests/*
 	$(MAKE) -C docs clean
 	$(MAKE) -C docs html
 	$(BROWSER) docs/_build/html/index.html
