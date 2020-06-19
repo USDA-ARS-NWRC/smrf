@@ -100,7 +100,7 @@ class TestLoadGrid(SMRFTestCase):
             },
             'system': {
                 'threading': False,
-                'log_file': './RME/output/log.txt'
+                'log_file': None
             },
             'air_temp': {
                 'grid_local': True,
