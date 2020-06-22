@@ -34,9 +34,12 @@ unittest: &unittest
   language: python
   addons:
     apt:
-      packages: libeccodes-tools
+      packages:
+        - libeccodes-tools
     homebrew:
-      packages: eccodes gcc@7
+      packages:
+        - eccodes
+        - gcc@7
   before_install:
     - python3 --version
     - gcc --version
