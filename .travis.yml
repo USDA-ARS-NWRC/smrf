@@ -30,10 +30,9 @@ env:
 unittest: &unittest
   stage: test
   os: linux
-  dist: xenial
+  dist: bionic
   language: python
   before_install:
-    - sudo apt-get update
     - sudo apt-get -y install libeccodes-tools
   install: 
     - pip install -U tox-travis coveralls
