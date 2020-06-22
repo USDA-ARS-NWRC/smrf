@@ -24,7 +24,6 @@ env:
     - CIBW_BUILD_VERBOSITY=3
     - CIBW_BEFORE_BUILD="pip install -r requirements.txt"
     - TWINE_USERNAME=__token__
-    - CC=gcc
     # Note: TWINE_PASSWORD is set to a PyPI API token in Travis settings
 
 # defining the unittest jobs
@@ -37,11 +36,11 @@ unittest: &unittest
     apt:
       packages: libeccodes-tools
     homebrew:
-      packages: eccodes gcc-7
-  # before_install:
-  #   - sudo apt-get -y install libeccodes-tools
-  install: 
+      packages: eccodes gcc@7
+  before_install:
     - python3 --version
+    - gcc --version
+  install: 
     - python3 -m pip install -U tox-travis coveralls
     - python3 -m pip install -r requirements.txt
   script: tox
@@ -71,17 +70,19 @@ jobs:
       python: 3.8
       env: TOXENV=py38
 
-    - <<: *unittest
-      os: osx
-      osx_image: xcode9.4  # Python 3.6.X running on macOS 10.13
-      language: shell
-      env: TOXENV=py36
+    # - <<: *unittest
+    #   os: osx
+    #   osx_image: xcode9.4  # Python 3.7.X running on macOS 10.13
+    #   language: shell
+    #   env: TOXENV=py36
 
     - <<: *unittest
       os: osx
       osx_image: xcode11.2  # Python 3.7.X running on macOS 10.14
       language: shell
-      env: TOXENV=py37
+      env: -
+        - TOXENV=py37
+        - CC=gcc-7
 
     # Deploy source distribution
     - stage: deploy
