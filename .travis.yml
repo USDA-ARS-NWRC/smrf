@@ -40,8 +40,9 @@ unittest: &unittest
   # before_install:
   #   - sudo apt-get -y install libeccodes-tools
   install: 
-    - pip install -U tox-travis coveralls
-    - pip install -r requirements.txt
+    - python3 --version
+    - python3 -m pip install -U tox-travis coveralls
+    - python3 -m pip install -r requirements.txt
   script: tox
 
 # build the wheels with cibuildwheel
