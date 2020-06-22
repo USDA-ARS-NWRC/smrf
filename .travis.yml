@@ -32,8 +32,13 @@ unittest: &unittest
   os: linux
   dist: bionic
   language: python
-  before_install:
-    - sudo apt-get -y install libeccodes-tools
+  addons:
+    apt:
+      packages: libeccodes-tools
+    homebrew:
+      packages: eccodes
+  # before_install:
+  #   - sudo apt-get -y install libeccodes-tools
   install: 
     - pip install -U tox-travis coveralls
     - pip install -r requirements.txt
