@@ -59,34 +59,32 @@ ci-build-wheels: &ci-build-wheels
 jobs:
   include:
     # test stage
-    # - <<: *unittest
-    #   python: 3.6
-    #   env: TOXENV=py36,flake8,coverage
+    - <<: *unittest
+      python: 3.6
+      env: TOXENV=py36,flake8,coverage
 
-    # - <<: *unittest
-    #   python: 3.7
-    #   env: TOXENV=py37
+    - <<: *unittest
+      python: 3.7
+      env: TOXENV=py37
 
-    # - <<: *unittest
-    #   python: 3.8
-    #   env: TOXENV=py38
+    - <<: *unittest
+      python: 3.8
+      env: TOXENV=py38
 
-    # - <<: *unittest
-    #   os: osx
-    #   osx_image: xcode9.4  # Python 3.7.X running on macOS 10.13
-    #   language: shell
-    #   env: TOXENV=py36
+    - <<: *unittest
+      os: osx
+      osx_image: xcode9.4  # Python 3.7.X running on macOS 10.13
+      language: shell
+      env: TOXENV=py36
 
     - <<: *unittest
       os: osx
       osx_image: xcode11.2  # Python 3.7.X running on macOS 10.14
       language: shell
-      before_install:
-        - echo $CC
-        - gcc-7 --version
       env:
         - TOXENV=py37
         - CC=gcc-7
+        - NOT_ON_GOLD_HOST=yup
 
     # Deploy source distribution
     - stage: deploy
