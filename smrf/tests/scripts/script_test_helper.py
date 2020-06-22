@@ -2,10 +2,15 @@ import os
 from importlib.machinery import SourceFileLoader
 from importlib.util import module_from_spec, spec_from_loader
 
-SMRF_SCRIPT_HOME = os.path.abspath(__file__ + '../../../../../') + '/scripts/'
-
 
 def create_script_spec(script_name):
+
+    # This path doesn't exist in docker or if it's installed as a package
+    SMRF_SCRIPT_HOME = os.path.abspath(
+        __file__ + '../../../../../') + '/scripts/'
+    if not os.path.exists(SMRF_SCRIPT_HOME):
+        SMRF_SCRIPT_HOME = '/usr/local/bin/'
+
     return spec_from_loader(
         script_name,
         SourceFileLoader(

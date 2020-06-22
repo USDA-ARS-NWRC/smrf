@@ -3,6 +3,7 @@ import shutil
 
 from inicheck.tools import get_user_config
 
+import smrf
 from smrf.tests.smrf_test_case import SMRFTestCase
 
 
@@ -19,7 +20,8 @@ class SMRFTestCaseLakes(SMRFTestCase):
         Runs the short simulation over reynolds mountain east
         """
 
-        cls.test_dir = os.path.join('smrf', 'tests', 'Lakes')
+        base = os.path.dirname(smrf.__file__)
+        cls.test_dir = os.path.join(base, 'tests', 'Lakes')
         cls.config_file = os.path.join(cls.test_dir, 'config.ini')
 
         # read in the base configuration
