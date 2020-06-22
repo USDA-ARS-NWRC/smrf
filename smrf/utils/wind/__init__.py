@@ -1,2 +1,2 @@
 # -*- coding: utf-8 -*-
-from . import model, wind_c
+from . import model, wind_c  # noqa

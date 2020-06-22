@@ -43,7 +43,7 @@ unittest: &unittest
   install: 
     - python3 --version
     - python3 -m pip install -U tox-travis coveralls
-    - python3 -m pip install -r requirements.txt
+    # - python3 -m pip install -r requirements.txt
   script: tox
 
 # build the wheels with cibuildwheel
@@ -61,7 +61,11 @@ jobs:
     # test stage
     - <<: *unittest
       python: 3.6
-      env: TOXENV=py36,flake8,coverage
+      env: TOXENV=py36,coverage
+
+    - <<: *unittest
+      python: 3.6
+      env: TOXENV=flake8
 
     - <<: *unittest
       python: 3.7
@@ -70,12 +74,6 @@ jobs:
     - <<: *unittest
       python: 3.8
       env: TOXENV=py38
-
-    - <<: *unittest
-      os: osx
-      osx_image: xcode9.4  # Python 3.7.X running on macOS 10.13
-      language: shell
-      env: TOXENV=py36
 
     - <<: *unittest
       os: osx
@@ -103,3 +101,7 @@ jobs:
       name: Build and deploy macOS wheels
       os: osx
       language: shell
+
+  allow_failures:
+    - python: 3.6
+      env: TOXENV=flake8
