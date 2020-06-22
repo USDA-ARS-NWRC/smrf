@@ -83,7 +83,7 @@ jobs:
       os: osx
       osx_image: xcode11.2  # Python 3.7.X running on macOS 10.14
       language: shell
-      env: -
+      env:
         - TOXENV=py37
         - CC=gcc-7
 
