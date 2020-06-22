@@ -40,10 +40,8 @@ unittest: &unittest
       packages:
         - eccodes
         - gcc@7
-  before_install:
-    - python3 --version
-    - gcc --version
   install: 
+    - python3 --version
     - python3 -m pip install -U tox-travis coveralls
     - python3 -m pip install -r requirements.txt
   script: tox
@@ -61,17 +59,17 @@ ci-build-wheels: &ci-build-wheels
 jobs:
   include:
     # test stage
-    - <<: *unittest
-      python: 3.6
-      env: TOXENV=py36,flake8,coverage
+    # - <<: *unittest
+    #   python: 3.6
+    #   env: TOXENV=py36,flake8,coverage
 
-    - <<: *unittest
-      python: 3.7
-      env: TOXENV=py37
+    # - <<: *unittest
+    #   python: 3.7
+    #   env: TOXENV=py37
 
-    - <<: *unittest
-      python: 3.8
-      env: TOXENV=py38
+    # - <<: *unittest
+    #   python: 3.8
+    #   env: TOXENV=py38
 
     # - <<: *unittest
     #   os: osx
@@ -83,6 +81,9 @@ jobs:
       os: osx
       osx_image: xcode11.2  # Python 3.7.X running on macOS 10.14
       language: shell
+      before_install:
+        - echo $CC
+        - gcc-7 --version
       env:
         - TOXENV=py37
         - CC=gcc-7
