@@ -3,9 +3,9 @@ import logging
 import numpy as np
 
 from smrf.distribute import image_data
-from smrf.envphys.thermal import clear_sky, cloud, vegetation
-from smrf.envphys.core import envphys_c
 from smrf.envphys.constants import STEF_BOLTZ
+from smrf.envphys.core import envphys_c
+from smrf.envphys.thermal import clear_sky, cloud, vegetation
 from smrf.utils import utils
 
 

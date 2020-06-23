@@ -1,10 +1,10 @@
 import os
+
 import netCDF4 as nc
 
+from smrf import __version__
 from smrf.framework.model_framework import SMRF
 from smrf.output.output_netcdf import OutputNetcdf
-from smrf import __version__
-
 from smrf.tests.test_configurations import SMRFTestCase
 
 

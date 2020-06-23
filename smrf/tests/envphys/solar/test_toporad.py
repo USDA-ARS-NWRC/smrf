@@ -1,13 +1,13 @@
-import numpy as np
-import pandas as pd
 import os
 
+import numpy as np
+import pandas as pd
 from topocalc.shade import shade
 
 from smrf.data import loadTopo
-from smrf.envphys.sunang import sunang
-from smrf.envphys.solar import toporad, irradiance
 from smrf.envphys.albedo import albedo
+from smrf.envphys.solar import irradiance, toporad
+from smrf.envphys.sunang import sunang
 from smrf.tests.smrf_test_case_lakes import SMRFTestCaseLakes
 
 

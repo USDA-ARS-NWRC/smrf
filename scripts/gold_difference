@@ -5,8 +5,8 @@
 # Must be ran from the project root directory
 #
 
-import os
 import argparse
+import os
 
 from goldmeister.compare import GoldGitBranchCompare
 

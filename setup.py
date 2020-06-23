@@ -5,7 +5,7 @@ import os
 
 import numpy
 from Cython.Distutils import build_ext
-from setuptools import Extension, setup, find_packages
+from setuptools import Extension, find_packages, setup
 
 
 def c_name_from_path(location, name):

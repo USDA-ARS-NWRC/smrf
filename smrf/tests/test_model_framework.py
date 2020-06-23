@@ -1,9 +1,10 @@
 import copy
-import pytz
 
+import pytz
 from pandas import to_datetime
-from smrf.tests.test_configurations import SMRFTestCase
+
 from smrf.framework.model_framework import SMRF
+from smrf.tests.test_configurations import SMRFTestCase
 
 
 class TestModelFramework(SMRFTestCase):

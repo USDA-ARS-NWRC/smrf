@@ -4,11 +4,10 @@ Create classes for running on multiple threads
 20160323 Scott Havens
 """
 
-from queue import Queue, Empty, Full
-
 import logging
 import sys
 import threading
+from queue import Empty, Full, Queue
 from time import time as _time
 
 import numpy as np

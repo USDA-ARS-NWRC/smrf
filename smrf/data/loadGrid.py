@@ -8,8 +8,8 @@ import pytz
 import utm
 from weather_forecast_retrieval import hrrr
 
-from smrf.envphys.vapor_pressure import rh2vp, satvp
 from smrf.envphys.solar.cloud import get_hrrr_cloud
+from smrf.envphys.vapor_pressure import rh2vp, satvp
 
 
 class grid():

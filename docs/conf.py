@@ -19,12 +19,11 @@
 import os
 import sys
 from datetime import datetime
-from pkg_resources import get_distribution
-
 # -- Have to do a mock install of some modules that RTD doesn't have --------
 from unittest.mock import Mock
 
 from inicheck.tools import config_documentation
+from pkg_resources import get_distribution
 
 import smrf
 from smrf.utils.utils import get_config_doc_section_hdr

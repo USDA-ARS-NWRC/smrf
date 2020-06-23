@@ -1,11 +1,12 @@
+import os
+
 import numpy as np
 import pandas as pd
 import utm
-import os
 
 from smrf.data import loadTopo
-from smrf.envphys.solar import twostream, irradiance
 from smrf.envphys import sunang
+from smrf.envphys.solar import irradiance, twostream
 from smrf.tests.smrf_test_case import SMRFTestCase
 
 

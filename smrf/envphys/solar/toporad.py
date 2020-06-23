@@ -2,13 +2,13 @@ import numpy as np
 from topocalc.horizon import horizon
 from topocalc.shade import shade
 
-from smrf.envphys.solar.twostream import twostream
-from smrf.envphys.solar.irradiance import direct_solar_irradiance
-from smrf.envphys.thermal.topotherm import hysat
 from smrf.envphys.albedo import albedo
-from smrf.envphys.constants import SEA_LEVEL, STD_LAPSE, \
-    GRAVITY, MOL_AIR, STD_AIRTMP, VISIBLE_MIN, VISIBLE_MAX, \
-    IR_MIN, IR_MAX
+from smrf.envphys.constants import (GRAVITY, IR_MAX, IR_MIN, MOL_AIR,
+                                    SEA_LEVEL, STD_AIRTMP, STD_LAPSE,
+                                    VISIBLE_MAX, VISIBLE_MIN)
+from smrf.envphys.solar.irradiance import direct_solar_irradiance
+from smrf.envphys.solar.twostream import twostream
+from smrf.envphys.thermal.topotherm import hysat
 
 
 def check_wavelengths(wavelength_range):
