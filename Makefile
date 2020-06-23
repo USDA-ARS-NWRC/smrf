@@ -57,9 +57,14 @@ test:
 test-all:
 	tox
 
-coverage:
+coverage: ## run coverage and submit
 	coverage run --source smrf setup.py test
-	coverage report -m
+	coverage report --fail-under=75
+
+coveralls: coverage ## run coveralls
+	coveralls
+
+coverage-html: coverage ## check code coverage quickly with the default Python
 	coverage html
 	$(BROWSER) htmlcov/index.html
 
