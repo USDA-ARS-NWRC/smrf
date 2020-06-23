@@ -17,12 +17,14 @@ stages:
 
 env:
   global:
+    - CIBW_MANYLINUX_X86_64_IMAGE=manylinux2014
     - CIBW_TEST_REQUIRES=nose
-    - CIBW_TEST_COMMAND="nosetests -vv --exe smrf"
+    - CIBW_TEST_COMMAND="NOT_ON_GOLD_HOST=yup nosetests -vv --exe smrf"
     - CIBW_BUILD="cp3*-manylinux_x86_64 cp3*-macosx_x86_64"
     - CIBW_SKIP="?p27* pp* cp35*"
     - CIBW_BUILD_VERBOSITY=3
     - CIBW_BEFORE_BUILD_LINUX="{package}/travis/cibuildwheel_before_build_linux.sh"
+    - CIBW_ENVIRONMENT="NOT_ON_GOLD_HOST=yup"
     - TWINE_USERNAME=__token__
     # Note: TWINE_PASSWORD is set to a PyPI API token in Travis settings
 
