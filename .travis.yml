@@ -22,7 +22,7 @@ env:
     - CIBW_BUILD="cp3*-manylinux_x86_64 cp3*-macosx_x86_64"
     - CIBW_SKIP="?p27* pp* cp35*"
     - CIBW_BUILD_VERBOSITY=3
-    - CIBW_BEFORE_BUILD="pip install -r requirements.txt"
+    - CIBW_BEFORE_BUILD_LINUX="{package}/travis/cibuildwheel_before_build_linux.sh"
     - TWINE_USERNAME=__token__
     # Note: TWINE_PASSWORD is set to a PyPI API token in Travis settings
 
@@ -53,7 +53,7 @@ ci-build-wheels: &ci-build-wheels
   dist: xenial
   language: python
   install: python3 -m pip install cibuildwheel==1.4.2
-  script: travis/build.sh    
+  script: travis/build.sh
 
 jobs:
   include:
