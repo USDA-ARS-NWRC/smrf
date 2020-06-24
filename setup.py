@@ -73,7 +73,7 @@ ext_modules += [
 ]
 
 setup(
-    name='smrf',
+    name='smrf-dev',
     description="Distributed snow modeling for water resources",
     author="Scott Havens",
     author_email='scott.havens@ars.usda.gov',

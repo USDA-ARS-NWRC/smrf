@@ -19,7 +19,7 @@ def create_script_spec(script_name):
     for sch in SMRF_SCRIPT_HOME:
         filename = os.path.join(sch, script_name)
         if os.path.exists(filename):
-            SMRF_SCRIPT_HOME = sch
+            SMRF_SCRIPT_HOME = filename
             found = True
             break
 
