@@ -15,6 +15,9 @@ def c_name_from_path(location, name):
 with open('requirements.txt') as requirements_file:
     requirements = requirements_file.read()
 
+with open('README.md') as readme_file:
+    readme = readme_file.read()
+
 # Give user option to specify his local compiler name
 if "CC" not in os.environ:
     # force the compiler to use gcc
@@ -78,8 +81,11 @@ setup(
     author="Scott Havens",
     author_email='scott.havens@ars.usda.gov',
     url='https://github.com/USDA-ARS-NWRC/smrf',
+    long_description=readme,
+    long_description_content_type="text/markdown",
     packages=find_packages(include=['smrf', 'smrf.*']),
     install_requires=requirements,
+    python_requires='>3.5',
     include_package_data=True,
     package_data={
         'smrf': [
