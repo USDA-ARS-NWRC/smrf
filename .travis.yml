@@ -13,8 +13,7 @@ services:
 stages:
   - test
   - name: deploy
-    if: tag IS present
-    # if:  type = pull_request OR branch = master OR tag IS present AND repo = USDA-ARS-NWRC/smrf
+    if:  type = pull_request OR branch = master OR tag IS present AND repo = USDA-ARS-NWRC/smrf
 
 env:
   global:
@@ -63,30 +62,30 @@ ci-build-wheels: &ci-build-wheels
 jobs:
   include:
     # test stage
-    # - <<: *unittest
-    #   python: 3.6
-    #   env: TOXENV=py36,coverage
+    - <<: *unittest
+      python: 3.6
+      env: TOXENV=py36,coverage
 
-    # - <<: *unittest
-    #   python: 3.6
-    #   env: TOXENV=flake8
+    - <<: *unittest
+      python: 3.6
+      env: TOXENV=flake8
 
-    # - <<: *unittest
-    #   python: 3.7
-    #   env: TOXENV=py37
+    - <<: *unittest
+      python: 3.7
+      env: TOXENV=py37
 
-    # - <<: *unittest
-    #   python: 3.8
-    #   env: TOXENV=py38
+    - <<: *unittest
+      python: 3.8
+      env: TOXENV=py38
 
-    # - <<: *unittest
-    #   os: osx
-    #   osx_image: xcode11.2  # Python 3.7.X running on macOS 10.14
-    #   language: shell
-    #   env:
-    #     - TOXENV=py37
-    #     - CC=gcc-7
-    #     - NOT_ON_GOLD_HOST=yup
+    - <<: *unittest
+      os: osx
+      osx_image: xcode11.2  # Python 3.7.X running on macOS 10.14
+      language: shell
+      env:
+        - TOXENV=py37
+        - CC=gcc-7
+        - NOT_ON_GOLD_HOST=yup
 
     # Deploy source distribution
     - stage: deploy
