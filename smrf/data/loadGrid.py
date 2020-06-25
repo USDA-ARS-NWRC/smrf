@@ -8,8 +8,8 @@ import pytz
 import utm
 from weather_forecast_retrieval import hrrr
 
-from smrf.envphys import phys
-from smrf.envphys.radiation import get_hrrr_cloud
+from smrf.envphys.vapor_pressure import rh2vp, satvp
+from smrf.envphys.solar.cloud import get_hrrr_cloud
 
 
 class grid():
@@ -126,7 +126,9 @@ class grid():
         else:
             fcast = range(self.n_forecast_hours + 1)
 
-        metadata, data = hrrr.HRRR(external_logger=self._logger).get_saved_data(
+        metadata, data = hrrr.HRRR(
+            external_logger=self._logger
+        ).get_saved_data(
             self.start_date,
             self.end_date,
             self.bbox,
@@ -152,7 +154,7 @@ class grid():
 
         # calculate vapor pressure
         self._logger.debug('Loading vapor_pressure')
-        vp = phys.rh2vp(
+        vp = rh2vp(
             data['air_temp'].values,
             data['relative_humidity'].values)
         self.vapor_pressure = pd.DataFrame(vp, index=idx, columns=cols)
@@ -363,9 +365,9 @@ class grid():
             self.dew_point[g] = v
 
         self._logger.debug('Calculating vapor_pressure')
-        satvp = phys.satvp(self.dew_point.values)
+        vp = satvp(self.dew_point.values)
         self.vapor_pressure = pd.DataFrame(
-            satvp, index=time, columns=primary_id)
+            vp, index=time, columns=primary_id)
 
         self._logger.debug('Loading thermal')
         self.thermal = pd.DataFrame(index=time, columns=primary_id)

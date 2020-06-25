@@ -4,10 +4,7 @@ Create classes for running on multiple threads
 20160323 Scott Havens
 """
 
-try:
-    from Queue import Queue, Empty, Full
-except:
-    from queue import Queue, Empty, Full
+from queue import Queue, Empty, Full
 
 import logging
 import sys
@@ -116,7 +113,7 @@ class DateQueue_Threading(Queue):
                     #self._logger.debug("get - {}s".format(self.remaining))
                     if self.remaining <= 0.0:
                         self._logger.error("Timeout occurred while retrieving"
-                                            " an item at {} from queue".format(index))
+                                           " an item at {} from queue".format(index))
                         timed_out = True
                         raise Empty
 
@@ -182,7 +179,7 @@ class DateQueue_Threading(Queue):
                             self._logger.error("Timeout occurred while putting"
                                                " {} in the queue."
                                                "".format(item[0]))
-                            timed_out=True
+                            timed_out = True
                             raise Full
 
                         self.not_full.wait(self.remaining)
@@ -198,6 +195,7 @@ class DateQueue_Threading(Queue):
             self.not_full.release()
             if timed_out:
                 sys.exit()
+
 
 class QueueCleaner(threading.Thread):
     """
@@ -288,7 +286,8 @@ class QueueOutput(threading.Thread):
                             data = np.zeros((self.ny, self.nx))
 
                         # output the time step
-                        self._logger.debug("threaded output for {}".format(v['variable']))
+                        self._logger.debug(
+                            "threaded output for {}".format(v['variable']))
                         self.out_func.output(v['variable'], data, t)
 
                     else:

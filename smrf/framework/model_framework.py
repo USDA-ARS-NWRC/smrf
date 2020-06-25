@@ -41,7 +41,8 @@ from inicheck.tools import check_config, get_user_config
 from topocalc.shade import shade
 
 from smrf import data, distribute, output
-from smrf.envphys import radiation, sunang
+from smrf.envphys import sunang
+from smrf.envphys.solar import model
 from smrf.utils import queue
 from smrf.utils.utils import backup_input, check_station_colocation, getqotw
 
@@ -277,18 +278,6 @@ class SMRF():
         Provide some logging info about when SMRF was closed
         """
 
-        # clean up the WORKDIR
-        if hasattr(self, 'topo'):
-            if self.topo.stoporad_in_file is not None:
-                if os.path.isfile(self.topo.stoporad_in_file):
-                    os.remove(self.topo.stoporad_in_file)
-        if hasattr(self, 'distribute'):
-            if 'solar' in self.distribute.keys():
-                if os.path.isfile(self.distribute['solar'].vis_file):
-                    os.remove(self.distribute['solar'].vis_file)
-                if os.path.isfile(self.distribute['solar'].ir_file):
-                    os.remove(self.distribute['solar'].ir_file)
-
         if hasattr(self, 'temp_dir'):
             if os.path.isdir(self.temp_dir):
                 shutil.rmtree(self.temp_dir)
@@ -321,7 +310,7 @@ class SMRF():
             * :func:`Wind speed and direction <smrf.distribute.wind.wind>`
             * :func:`Precipitation <smrf.distribute.precipitation.ppt>`
             * :func:`Albedo <smrf.distribute.albedo.Albedo>`
-            * :func:`Solar radiation <smrf.distribute.solar.solar>`
+            * :func:`Solar radiation <smrf.distribute.solar.Solar>`
             * :func:`Thermal radiation <smrf.distribute.thermal.th>`
             * :func:`Soil Temperature <smrf.distribute.soil_temp.ts>`
         """
@@ -353,10 +342,9 @@ class SMRF():
             self.config['cloud_factor'])
 
         # 7. Solar radiation
-        self.distribute['solar'] = distribute.solar.solar(
+        self.distribute['solar'] = distribute.solar.Solar(
             self.config,
-            self.topo.stoporad_in_file,
-            self.temp_dir)
+            self.topo)
 
         # 8. thermal radiation
         self.distribute['thermal'] = distribute.thermal.th(
@@ -603,6 +591,7 @@ class SMRF():
                 t,
                 illum_ang,
                 self.distribute['precip'].storm_days)
+
             # 6. cloud_factor
             self.distribute['cloud_factor'].distribute(
                 self.data.cloud_factor.loc[t])
@@ -614,7 +603,6 @@ class SMRF():
                 illum_ang,
                 cosz,
                 azimuth,
-                self.distribute['precip'].last_storm_day_basin,
                 self.distribute['albedo'].albedo_vis,
                 self.distribute['albedo'].albedo_ir)
 
@@ -739,7 +727,7 @@ class SMRF():
 
         # 0.2 illumination angle
         t.append(Thread(
-            target=radiation.shade_thread,
+            target=model.shade_thread,
             name='illum_angle',
             args=(q, self.date_time,
                   self.topo.sin_slope, self.topo.aspect)))
@@ -782,25 +770,13 @@ class SMRF():
             name='cloud_factor',
             args=(q, self.data.cloud_factor)))
 
-        # 7.1 Clear sky visible
-        t.append(Thread(
-            target=self.distribute['solar'].distribute_thread_clear,
-            name='clear_vis',
-            args=(q, self.data.cloud_factor, 'clear_vis')))
-
-        # 7.2 Clear sky ir
-        t.append(Thread(
-            target=self.distribute['solar'].distribute_thread_clear,
-            name='clear_ir',
-            args=(q, self.data.cloud_factor, 'clear_ir')))
-
-        # 7.3 Net radiation
+        # 7 Net radiation
         t.append(Thread(
             target=self.distribute['solar'].distribute_thread,
             name='solar',
             args=(q, self.data.cloud_factor)))
 
-        # 7. thermal radiation
+        # 8. thermal radiation
         if self.distribute['thermal'].gridded:
             t.append(Thread(
                 target=self.distribute['thermal'].distribute_thermal_thread,
