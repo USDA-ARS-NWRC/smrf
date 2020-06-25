@@ -1,4 +1,6 @@
 # -*- coding: utf-8 -*-
+# flake8: noqa
+
 import os
 
 from pkg_resources import DistributionNotFound, get_distribution

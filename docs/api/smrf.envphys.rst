@@ -9,6 +9,7 @@ Subpackages
 
    smrf.envphys.core
    smrf.envphys.solar
+   smrf.envphys.thermal
 
 Submodules
 ----------

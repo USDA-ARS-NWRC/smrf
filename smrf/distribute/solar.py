@@ -493,11 +493,14 @@ class Solar(image_data.image_data):
 
         Args:
             date_time (datetime): datetime object
-            illum_ang (np.array): numpy array of cosing of local illumination angles
+            illum_ang (np.array): numpy array of cosing of local illumination
+                angles
             cosz (float): cosine of the zenith angle for the basin
             azimuth (float): azimuth to the sun for the basin
-            albedo_surface (np.array): albedo should match wavelengths specified
-            wavelength_range (list, optional): wavelengths to integrate over. Defaults to [0.28, 0.7].
+            albedo_surface (np.array): albedo should match wavelengths
+                specified
+            wavelength_range (list, optional): wavelengths to integrate over.
+                Defaults to [0.28, 0.7].
 
         Returns:
             tuple: clear sky beam and diffuse radiation

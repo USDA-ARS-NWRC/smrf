@@ -5,7 +5,6 @@ Functions to output the gridded data for a HRU
 import logging
 import os
 
-import netCDF4 as nc
 import numpy as np
 import pandas as pd
 
@@ -89,8 +88,9 @@ class output_hru():
             hru_data = pd.DataFrame(index=range(len(self.date_time)),
                                     columns=cols)
 
-            yrs = np.array([[y.year, y.month, y.day, y.hour, y.minute, y.second]
-                            for y in self.date_time])
+            yrs = np.array([
+                [y.year, y.month, y.day, y.hour, y.minute, y.second]
+                for y in self.date_time])
             hru_data['year'] = yrs[:, 0]
             hru_data['month'] = yrs[:, 1]
             hru_data['day'] = yrs[:, 2]
@@ -150,7 +150,10 @@ class output_hru():
         """
 
         self._logger.debug('{} Writing variable {} to {} file'
-                           .format(date_time, variable, self.config['output_type']))
+                           .format(
+                               date_time,
+                               variable,
+                               self.config['output_type']))
 
         # loop through the HRU
         m_hru = np.zeros((self.hru_max,))
