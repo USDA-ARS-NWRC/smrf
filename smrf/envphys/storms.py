@@ -200,6 +200,7 @@ def tracking_by_station(precip, mass_thresh=0.01, steps_thresh=3):
 
     stations = list(precip)
     is_storming = False
+    time_steps_since_precip = 0
 
     for i, row in precip.iterrows():
         time = pd.Timestamp(i)

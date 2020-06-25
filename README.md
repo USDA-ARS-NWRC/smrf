@@ -14,12 +14,17 @@ Read the [full documentation for SMRF](https://smrf.readthedocs.io) including up
 
 - [Spatial Modeling for Resources Framework](#spatial-modeling-for-resources-framework)
   - [Installation](#installation)
+    - [System dependencies](#system-dependencies)
   - [Topo setup](#topo-setup)
   - [Input data](#input-data)
   - [Running SMRF](#running-smrf)
   - [Docker](#docker)
 
 ## Installation
+
+```bash
+python3 -m pip install smrf-dev
+```
 
 To install SMRF locally on Linux of MacOSX, first clone the repository and build into a virtual environment. This requires `gcc <= 9.0`. The general steps are as follows and will test the SMRF installation by running the tests.
 
@@ -43,6 +48,10 @@ python3 -m unittest -v
 ```
 
 For Windows, the install method is using [Docker](#Docker).
+
+### System dependencies
+
+If using SMRF with gridded weather data from GRIB files, you will need the system dependancy for `eccodes` which is a GRIB file reader.
 
 ## Topo setup
 
