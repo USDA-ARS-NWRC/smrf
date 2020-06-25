@@ -13,4 +13,3 @@ spatialnc>=0.2.12
 weather-forecast-retrieval>=0.6.12
 topocalc>=0.3.1
 setuptools_scm<4.2
-importlib-metadata
