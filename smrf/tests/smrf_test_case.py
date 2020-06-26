@@ -1,6 +1,7 @@
 import os
 import shutil
 import unittest
+import logging
 
 import netCDF4 as nc
 import numpy as np
@@ -129,3 +130,7 @@ class SMRFTestCase(unittest.TestCase):
         folder = os.path.join(cls.base_config.cfg['output']['out_location'])
         if os.path.exists(folder):
             shutil.rmtree(folder)
+
+        logging.shutdown()
+        for handler in logging.root.handlers[:]:
+            logging.root.removeHandler(handler)

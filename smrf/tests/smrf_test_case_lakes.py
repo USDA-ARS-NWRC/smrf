@@ -1,5 +1,6 @@
 import os
 import shutil
+import logging
 
 from inicheck.tools import get_user_config
 
@@ -45,3 +46,7 @@ class SMRFTestCaseLakes(SMRFTestCase):
         folder = os.path.join(cls.base_config.cfg['output']['out_location'])
         if os.path.exists(folder):
             shutil.rmtree(folder)
+
+        logging.shutdown()
+        for handler in logging.root.handlers[:]:
+            logging.root.removeHandler(handler)

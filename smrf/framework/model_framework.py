@@ -40,7 +40,7 @@ from inicheck.tools import check_config, get_user_config
 from topocalc.shade import shade
 
 from smrf import data, distribute
-from smrf.output import output_netcdf
+from smrf.output import output_netcdf, output_hru
 from smrf.framework import art
 from smrf.envphys import sunang
 from smrf.envphys.solar import model
@@ -104,14 +104,14 @@ class SMRF():
             if not os.path.isfile(config):
                 raise Exception('Configuration file does not exist --> {}'
                                 .format(config))
-            configFile = config
+            self.configFile = config
 
             # Read in the original users config
             ucfg = get_user_config(config, modules='smrf')
 
         elif isinstance(config, UserConfig):
             ucfg = config
-            configFile = config.filename
+            self.configFile = config.filename
 
         else:
             raise Exception('Config passed to SMRF is neither file name nor '
