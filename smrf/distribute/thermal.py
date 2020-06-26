@@ -32,13 +32,14 @@ class th(image_data.image_data):
 
     Dilley1998
         .. math::
-            L_{clear} = 59.38 + 113.7 * \\left( \\frac{T_a}{273.16} \\right)^6 + 96.96 \\sqrt{w/25}
+            L_{clear} = 59.38 + 113.7 * \\left( \\frac{T_a}{273.16} \\right)^6
+            + 96.96 \\sqrt{w/25}
 
         References: Dilley and O'Brian (1998) :cite:`Dilley&OBrian:1998`
 
     Prata1996
         .. math::
-            \epsilon_{clear} = 1 - (1 + w) * exp(-1.2 + 3w)^{1/2}
+            \\epsilon_{clear} = 1 - (1 + w) * exp(-1.2 + 3w)^{1/2}
 
         References: Prata (1996) :cite:`Prata:1996`
 
@@ -46,7 +47,7 @@ class th(image_data.image_data):
         .. math::
             \\epsilon_{clear} = 0.83 - 0.18 * 10^{-0.067 e_a}
 
-        References: Angstrom (1918) :cite:`Angstrom:1918` as cityed by Niemela
+        References: Angstrom (1918) :cite:`Angstrom:1918` as cited by Niemela
         et al (2001) :cite:`Niemela&al:2001`
 
     .. figure:: ../_static/thermal_comparison.png
@@ -64,7 +65,7 @@ class th(image_data.image_data):
     then additional long wave radiation is added to account for the cloud
     cover. Selecting one of the options below will change the equations used.
     The methods were chosen based on the study by Flerchinger et al (2009)
-    :cite:`Flerchinger&al:2009`, where :math:`c=1-cloud\_factor`.
+    :cite:`Flerchinger&al:2009`, where :math:`c=1-cloud\\_factor`.
 
     Garen2005
         Cloud correction is based on the relationship in Garen and Marks (2005)
@@ -72,24 +73,25 @@ class th(image_data.image_data):
         wave radiation using measurement stations in the Boise River Basin.
 
         .. math::
-            L_{cloud} = L_{clear} * (1.485 - 0.488 * cloud\_factor)
+            L_{cloud} = L_{clear} * (1.485 - 0.488 * cloud\\_factor)
 
     Unsworth1975
         .. math::
 
-            L_d &= L_{clear} + \\tau_8 c f_8 \sigma T^{4}_{c}
+            L_d &= L_{clear} + \\tau_8 c f_8 \\sigma T^{4}_{c}
 
-            \\tau_8 &= 1 - \epsilon_{8z} (1.4 - 0.4 \epsilon_{8z})
+            \\tau_8 &= 1 - \\epsilon_{8z} (1.4 - 0.4 \\epsilon_{8z})
 
-            \epsilon_{8z} &= 0.24 + 2.98 \\times 10^{-6} e^2_o exp(3000/T_o)
+            \\epsilon_{8z} &= 0.24 + 2.98 \\times 10^{-6} e^2_o exp(3000/T_o)
 
-            f_8 &= -0.6732 + 0.6240 \\times 10^{-2} T_c - 0.9140 \\times 10^{-5} T^2_c
+            f_8 &= -0.6732 + 0.6240 \\times 10^{-2} T_c - 0.9140
+            \\times 10^{-5} T^2_c
 
         References: Unsworth and Monteith (1975) :cite:`Unsworth&Monteith:1975`
 
     Kimball1982
         .. math::
-            L_d &= L_{clear} + \\tau_8 c \sigma T^4_c
+            L_d &= L_{clear} + \\tau_8 c \\sigma T^4_c
 
 
         where the original Kimball et al. (1982) :cite:`Kimball&al:1982` was
@@ -101,11 +103,12 @@ class th(image_data.image_data):
 
     Crawford1999
         .. math::
-            \epsilon_a = (1 - cloud\_factor) + cloud\_factor * \epsilon_{clear}
+            \\epsilon_a = (1 - cloud\\_factor) + cloud\\_factor *
+            \\epsilon_{clear}
 
         References: Crawford and Duchon (1999) :cite:`Crawford&Duchon:1999`
-        where :math:`cloud\_factor` is the ratio of measured solar radiation to
-        the clear sky irradiance.
+        where :math:`cloud\\_factor` is the ratio of measured solar radiation
+        to the clear sky irradiance.
 
     The results from Flerchinger et al (2009) :cite:`Flerchinger&al:2009`
     showed that the Kimball1982 cloud correction with Dilley1998 clear sky
@@ -127,12 +130,13 @@ class th(image_data.image_data):
     radiation is adjusted by
 
     .. math::
-        L_{canopy} = \\tau_d * L_{cloud} + (1 - \\tau_d) \epsilon \sigma T_a^4
+        L_{canopy} = \\tau_d * L_{cloud} + (1 - \\tau_d) \\epsilon
+        \\sigma T_a^4
 
     where :math:`\\tau_d` is the optical transmissivity, :math:`L_{cloud}` is
-    the cloud corrected thermal radiation, :math:`\epsilon` is the emissivity
-    of the canopy (0.96), :math:`\sigma` is the Stephan-Boltzmann constant, and
-    :math:`T_a` is the distributed air temperature.
+    the cloud corrected thermal radiation, :math:`\\epsilon` is the emissivity
+    of the canopy (0.96), :math:`\\sigma` is the Stephan-Boltzmann constant,
+    and :math:`T_a` is the distributed air temperature.
 
     Args:
         thermalConfig: The [thermal] section of the configuration file
@@ -282,7 +286,8 @@ class th(image_data.image_data):
             cth = clear_sky.Angstrom1918(air_temp, vapor_pressure/1000)
 
         # terrain factor correction
-        if (self.sky_view_factor is not None) and (self.clear_sky_method != 'marks1979'):
+        if (self.sky_view_factor is not None) and \
+                (self.clear_sky_method != 'marks1979'):
             # apply (emiss * skvfac) + (1.0 - skvfac) to the longwave
             cth = cth * self.sky_view_factor + (1.0 - self.sky_view_factor) * \
                 STEF_BOLTZ * air_temp**4
@@ -377,8 +382,8 @@ class th(image_data.image_data):
 
         self._logger.debug('%s Distributing thermal' % data.name)
 
-        # assign the input thermal radiation to clear thermal, this may not be the case
-        # but will be the assumption for now
+        # assign the input thermal radiation to clear thermal, this may not be
+        # the case but will be the assumption for now
         self._distribute(data, other_attribute='thermal_clear')
 
         self.thermal_cloud = self.thermal_clear.copy()
@@ -386,10 +391,11 @@ class th(image_data.image_data):
 
         # correct for vegetation
         if self.correct_veg:
-            self.thermal_veg = vegetation.thermal_correct_canopy(self.thermal_cloud,
-                                                                 air_temp,
-                                                                 self.veg_tau,
-                                                                 self.veg_height)
+            self.thermal_veg = vegetation.thermal_correct_canopy(
+                self.thermal_cloud,
+                air_temp,
+                self.veg_tau,
+                self.veg_height)
             self.thermal = self.thermal_veg.copy()
 
     def distribute_thermal_thread(self, queue, data):

@@ -1,8 +1,6 @@
 import numpy as np
 from topocalc.horizon import horizon
-from topocalc.shade import shade
 
-from smrf.envphys.albedo import albedo
 from smrf.envphys.constants import (GRAVITY, IR_MAX, IR_MIN, MOL_AIR,
                                     SEA_LEVEL, STD_AIRTMP, STD_LAPSE,
                                     VISIBLE_MAX, VISIBLE_MIN)
@@ -105,7 +103,8 @@ def toporad(beam, diffuse, illum_angle, sky_view_factor, terrain_config_factor,
         sky_view_factor (np.array): sky view factor
         terrain_config_factor (np.array): terrain configuraiton factor
         cosz (float): cosine of the zenith
-        surface_albedo (float/np.array, optional): surface albedo. Defaults to 0.0.
+        surface_albedo (float/np.array, optional): surface albedo.
+            Defaults to 0.0.
 
     Returns:
         tuple: beam and diffuse radiation corrected for terrain
@@ -134,10 +133,12 @@ class Elevrad():
         elevation (np.array): DEM elevations in meters
         solar_irradiance (float): from direct_solar_irradiance
         cosz (float): cosine of zenith angle
-        tau_elevation (float, optional): Elevation [m] of optical depth measurement. Defaults to 100.
+        tau_elevation (float, optional): Elevation [m] of optical depth
+                                        measurement. Defaults to 100.
         tau (float, optional): optical depth at tau_elevation. Defaults to 0.2.
         omega (float, optional): Single scattering albedo. Defaults to 0.85.
-        scattering_factor (float, optional): Scattering asymmetry parameter. Defaults to 0.3.
+        scattering_factor (float, optional): Scattering asymmetry parameter.
+                                            Defaults to 0.3.
         surface_albedo (float, optional): Mean surface albedo. Defaults to 0.5.
     """
 
@@ -148,7 +149,8 @@ class Elevrad():
             elevation (np.array): DEM elevation in meters
             solar_irradiance (float): from direct_solar_irradiance
             cosz (float): cosine of zenith angle
-            kwargs: tau_elevation, tau, omega, scattering_factor, surface_albedo
+            kwargs: tau_elevation, tau, omega, scattering_factor,
+                    surface_albedo
 
         Returns:
             radiation: dict with beam and diffuse radiation

@@ -93,7 +93,8 @@ class TestGenMaxusArguments(unittest.TestCase):
         args = self.argument_parser.parse_args(['dem'])
         self.assertEqual(False, args.make_tbreak)
 
-        args = self.argument_parser.parse_args(['dem', '--make_tbreak', 'true'])
+        args = self.argument_parser.parse_args(
+            ['dem', '--make_tbreak', 'true'])
         self.assertEqual(True, args.make_tbreak)
 
         args = self.argument_parser.parse_args(['dem', '-tb', '1'])

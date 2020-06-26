@@ -115,7 +115,8 @@ def decay_alb_power(veg, veg_type, start_decay, end_decay,
     before start_date. Fore times between start and end of decay,
 
     .. math::
-      \\alpha = \\alpha - (dec_{max}^{\\frac{1.0}{pwr}} \\times \\frac{t-start}{end-start})^{pwr}
+      \\alpha = \\alpha - (dec_{max}^{\\frac{1.0}{pwr}} \\times
+      \\frac{t-start}{end-start})^{pwr}
 
     Where :math:`\\alpha` is albedo, :math:`dec_{max}` is the maximum decay
     for albedo, :math:`pwr` is the decay power, :math:`t`, :math:`start`,

@@ -129,7 +129,7 @@ class image_data():
         try:
             self.mx = metadata.utm_x.values
             self.my = metadata.utm_y.values
-        except:
+        except Exception:
             self.mx = metadata.X.values
             self.my = metadata.Y.values
 

@@ -35,7 +35,7 @@ def twostream(cosz, S0, tau=0.2, omega=0.85, g=0.3, R0=0.5):
     """
 
     if cosz <= 0:
-        r = {
+        return {
             'reflectance': 0,
             'transmittance': 0,
             'direct_transmittance': 0,

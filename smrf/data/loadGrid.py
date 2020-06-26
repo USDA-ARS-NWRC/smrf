@@ -259,7 +259,7 @@ class grid():
                 try:
                     fv = f.variables[v_file].getncattr('_FillValue')
                     df.replace(fv, np.nan, inplace=True)
-                except:
+                except Exception:
                     pass
 
                 # Set variable and subset by start and end time

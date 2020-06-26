@@ -41,6 +41,7 @@ from inicheck.tools import check_config, get_user_config
 from topocalc.shade import shade
 
 from smrf import data, distribute, output
+from smrf.framework import art
 from smrf.envphys import sunang
 from smrf.envphys.solar import model
 from smrf.utils import queue
@@ -412,7 +413,7 @@ class SMRF():
                     self.topo.y,
                     'utm_y'), axis=1)
         # Old DB has X and Y
-        except:
+        except Exception:
 
             self.data.metadata['xi'] = self.data.metadata.apply(
                 lambda row: find_pixel_location(
@@ -453,7 +454,7 @@ class SMRF():
                     if self.distribute[key].stations is not None:
                         # Confirm out stations all have a unique position
                         colocated = check_station_colocation(
-                            metadata=self.data.metadata.loc[self.distribute[key].stations])
+                            metadata=self.data.metadata.loc[self.distribute[key].stations])  # noqa
 
                         # Stations are co-located, throw error
                         if colocated is not None:
@@ -773,8 +774,8 @@ class SMRF():
     def initializeOutput(self):
         """
         Initialize the output files based on the configFile section ['output'].
-        Currently only :func:`NetCDF files <smrf.output.output_netcdf.OutputNetcdf>` is
-        supported.
+        Currently only :func:`NetCDF files
+        <smrf.output.output_netcdf.OutputNetcdf>` are supported.
         """
         out = self.config['output']['out_location']
 
@@ -840,11 +841,11 @@ class SMRF():
         Output the forcing data or model outputs for the current_time_step.
 
         Args:
-            current_time_step (date_time): the current time step datetime 
+            current_time_step (date_time): the current time step datetime
                                             object
 
-            module -
-            var_name -
+            module (str): module name
+            out_var (str) - output a single variable
 
         """
         output_count = self.date_time.index(current_time_step)
@@ -895,37 +896,10 @@ class SMRF():
         """
 
         if option == 1:
-            title = ["  .----------------.  .----------------.  .----------------.  .----------------.",
-                     " | .--------------. || .--------------. || .--------------. || .--------------. |",
-                     " | |    _______   | || | ____    ____ | || |  _______     | || |  _________   | |",
-                     " | |   /  ___  |  | || ||_   \  /   _|| || | |_   __ \    | || | |_   ___  |  | |",
-                     " | |  |  (__ \_|  | || |  |   \/   |  | || |   | |__) |   | || |   | |_  \_|  | |",
-                     " | |   '.___`-.   | || |  | |\  /| |  | || |   |  __ /    | || |   |  _|      | |",
-                     " | |  |`\____) |  | || | _| |_\/_| |_ | || |  _| |  \ \_  | || |  _| |_       | |",
-                     " | |  |_______.'  | || ||_____||_____|| || | |____| |___| | || | |_____|      | |",
-                     " | |              | || |              | || |              | || |              | |",
-                     " | '--------------' || '--------------' || '--------------' || '--------------' |",
-                     "  '----------------'  '----------------'  '----------------'  '----------------' ",
-                     " "]
+            title = art.title1
 
         elif option == 2:
-            title = ["    SSSSSSSSSSSSSSS  MMMMMMMM               MMMMMMMM RRRRRRRRRRRRRRRRR    FFFFFFFFFFFFFFFFFFFFFF",
-                     "  SS:::::::::::::::S M:::::::M             M:::::::M R::::::::::::::::R   F::::::::::::::::::::F",
-                     " S:::::SSSSSS::::::S M::::::::M           M::::::::M R::::::RRRRRR:::::R  F::::::::::::::::::::F",
-                     " S:::::S     SSSSSSS M:::::::::M         M:::::::::M RR:::::R     R:::::R FF::::::FFFFFFFFF::::F",
-                     " S:::::S             M::::::::::M       M::::::::::M   R::::R     R:::::R   F:::::F       FFFFFF",
-                     " S:::::S             M:::::::::::M     M:::::::::::M   R::::R     R:::::R   F:::::F",
-                     "  S::::SSSS          M:::::::M::::M   M::::M:::::::M   R::::RRRRRR:::::R    F::::::FFFFFFFFFF",
-                     "   SS::::::SSSSS     M::::::M M::::M M::::M M::::::M   R:::::::::::::RR     F:::::::::::::::F",
-                     "     SSS::::::::SS   M::::::M  M::::M::::M  M::::::M   R::::RRRRRR:::::R    F:::::::::::::::F",
-                     "        SSSSSS::::S  M::::::M   M:::::::M   M::::::M   R::::R     R:::::R   F::::::FFFFFFFFFF",
-                     "             S:::::S M::::::M    M:::::M    M::::::M   R::::R     R:::::R   F:::::F",
-                     "             S:::::S M::::::M     MMMMM     M::::::M   R::::R     R:::::R   F:::::F",
-                     " SSSSSSS     S:::::S M::::::M               M::::::M RR:::::R     R:::::R FF:::::::FF",
-                     " S::::::SSSSSS:::::S M::::::M               M::::::M R::::::R     R:::::R F::::::::FF",
-                     " S:::::::::::::::SS  M::::::M               M::::::M R::::::R     R:::::R F::::::::FF",
-                     "  SSSSSSSSSSSSSSS    MMMMMMMM               MMMMMMMM RRRRRRRR     RRRRRRR FFFFFFFFFFF",
-                     " "]
+            title = art.title2
 
         return title
 
