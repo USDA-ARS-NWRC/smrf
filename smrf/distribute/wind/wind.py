@@ -63,6 +63,14 @@ class Wind(image_data.image_data):
     # be written during main distribute loop
     post_process_variables = {}
 
+    BASE_THREAD_VARIABLES = [
+        'wind_speed',
+        'wind_direction',
+        'flatwind',
+        'cellmaxus',
+        'dir_round_cell'
+    ]
+
     def __init__(self, config):
 
         # extend the base class
@@ -106,8 +114,11 @@ class Wind(image_data.image_data):
 
         self.wind_model._initialize(topo, data.metadata)
 
+        self.thread_variables = self.BASE_THREAD_VARIABLES
+
         if self.config['wind_model'] != 'interp':
             self.wind_model.initialize(topo, data)
+            self.thread_variables += self.wind_model.THREAD_VARIABLES
 
     def distribute(self, data_speed, data_direction, t):
         """

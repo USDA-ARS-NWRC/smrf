@@ -40,6 +40,10 @@ class ta(image_data.image_data):
         }
     }
 
+    BASE_THREAD_VARIABLES = [
+        'air_temp'
+    ]
+
     # these are variables that are operate at the end only and do not need to
     # be written during main distribute loop
     post_process_variables = {}
@@ -70,6 +74,7 @@ class ta(image_data.image_data):
 
         self._logger.debug('Initializing distribute.air_temp')
         self._initialize(topo, data.metadata)
+        self.thread_variables = self.BASE_THREAD_VARIABLES
 
     def distribute(self, data):
         """

@@ -41,6 +41,8 @@ class ts(image_data.image_data):
     # be written during main distribute loop
     post_process_variables = {}
 
+    BASE_THREAD_VARIABLES = []
+
     def __init__(self, soilConfig, tempDir=None):
 
         # extend the base class
@@ -67,6 +69,7 @@ class ts(image_data.image_data):
         self._logger.debug('Initializing distribute.soil_temp')
 #         self._initialize(topo, metadata)
         self.soil_temp = float(self.config['temp']) * np.ones(topo.dem.shape)
+        self.thread_variables = self.BASE_THREAD_VARIABLES
 
     def distribute(self):
         """

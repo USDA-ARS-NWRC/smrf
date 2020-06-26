@@ -102,6 +102,15 @@ class ppt(image_data.image_data):
     # be written during main distribute loop
     post_process_variables = {}
 
+    BASE_THREAD_VARIABLES = [
+        'precip',
+        'percent_snow',
+        'snow_density',
+        'storm_days',
+        'storm_total',
+        'last_storm_day_basin'
+    ]
+
     def __init__(self, pptConfig, start_date, time_step=60):
 
         # extend the base class
@@ -124,6 +133,8 @@ class ppt(image_data.image_data):
         self.storm_total = np.zeros((topo.ny, topo.nx))
         self.last_storm_day = np.zeros((topo.ny, topo.nx))
         self.dem = topo.dem
+
+        self.thread_variables = self.BASE_THREAD_VARIABLES
 
         # Assign storm_days array if given
         if self.config["storm_days_restart"] != None:
@@ -165,6 +176,7 @@ class ppt(image_data.image_data):
             '''Using {0} for the new accumulated snow density model:  '''.format(self.nasde_model))
 
         if self.nasde_model == 'marks2017':
+            self.thread_variables += ['storm_id']
 
             self.storm_total = np.zeros((topo.ny, topo.nx))
 

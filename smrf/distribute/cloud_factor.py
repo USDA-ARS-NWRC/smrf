@@ -41,6 +41,10 @@ class cf(image_data.image_data):
     # be written during main distribute loop
     post_process_variables = {}
 
+    BASE_THREAD_VARIABLES = [
+        'cloud_factor'
+    ]
+
     def __init__(self, config):
 
         # extend the base class
@@ -66,6 +70,7 @@ class cf(image_data.image_data):
 
         self._logger.debug('Initializing distribute.cloud_factor')
         self._initialize(topo, data.metadata)
+        self.thread_variables = self.BASE_THREAD_VARIABLES
 
     def distribute(self, data):
         """
