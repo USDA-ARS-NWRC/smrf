@@ -17,7 +17,6 @@ class ts(image_data.image_data):
 
     Args:
         soilConfig: The [soil] section of the configuration file
-        tempDir: location of temp/working directory (default=None)
 
     Attributes:
         config: configuration from [soil] section
@@ -41,7 +40,7 @@ class ts(image_data.image_data):
     # be written during main distribute loop
     post_process_variables = {}
 
-    def __init__(self, soilConfig, tempDir=None):
+    def __init__(self, soilConfig):
 
         # extend the base class
         image_data.image_data.__init__(self, self.variable)

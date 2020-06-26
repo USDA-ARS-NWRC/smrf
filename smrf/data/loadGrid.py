@@ -1,5 +1,4 @@
 import logging
-import os
 
 import netCDF4 as nc
 import numpy as np
@@ -27,13 +26,9 @@ class grid():
     """
 
     def __init__(self, dataConfig, topo, start_date, end_date,
-                 time_zone='UTC', dataType='wrf', tempDir=None,
+                 time_zone='UTC', dataType='wrf',
                  forecast_flag=False, day_hour=0, n_forecast_hours=18):
 
-        if (tempDir is None) | (tempDir == 'WORKDIR'):
-            tempDir = os.environ['WORKDIR']
-
-        self.tempDir = tempDir
         self.dataConfig = dataConfig
         self.dataType = dataType
         self.start_date = start_date

@@ -166,19 +166,9 @@ class SMRF():
 
         out = ucfg.cfg['output']['out_location']
 
-        # Make the tmp and output directories if they do not exist
-        makeable_dirs = [out, join(out, 'tmp')]
-        for path in makeable_dirs:
-            if not os.path.isdir(path):
-                try:
-                    self._logger.info("Directory does not exist, Creating:\n{}"
-                                      "".format(path))
-                    os.makedirs(path)
+        # Make the output directory if it do not exist
+        os.makedirs(out, exist_ok=True)
 
-                except OSError as e:
-                    raise e
-
-        self.temp_dir = path
 
         # Check the user config file for errors and report issues if any
         self._logger.info("Checking config file for issues...")
@@ -202,8 +192,6 @@ class SMRF():
         # Process the system variables
         for k, v in self.config['system'].items():
             setattr(self, k, v)
-
-        os.environ['WORKDIR'] = self.temp_dir
 
         self._setup_date_and_time()
 
@@ -278,10 +266,6 @@ class SMRF():
         Provide some logging info about when SMRF was closed
         """
 
-        if hasattr(self, 'temp_dir'):
-            if os.path.isdir(self.temp_dir):
-                shutil.rmtree(self.temp_dir)
-
         self._logger.info('SMRF closed --> %s' % datetime.now())
 
     def loadTopo(self):
@@ -290,10 +274,7 @@ class SMRF():
         :func:`smrf.data.loadTopo.Topo` for full description.
         """
 
-        # load the topo
-        self.topo = data.loadTopo.Topo(
-            self.config['topo'],
-            tempDir=self.temp_dir)
+        self.topo = data.loadTopo.Topo(self.config['topo'])
 
     def initializeDistribution(self):
         """
@@ -398,7 +379,6 @@ class SMRF():
                 self.end_date,
                 time_zone=self.time_zone,
                 dataType=self.config['gridded']['data_type'],
-                tempDir=self.temp_dir,
                 forecast_flag=self.forecast_flag,
                 day_hour=self.day_hour)
 

@@ -73,10 +73,7 @@ class TestRadiation(SMRFTestCase):
             'gradient_method': 'gradient_d8',
             'sky_view_factor_angles': 72
         }
-        topo = loadTopo.Topo(
-            topo_config,
-            tempDir=os.path.join(self.test_dir, 'RME/output')
-        )
+        topo = loadTopo.Topo(topo_config)
 
         # convert from UTM to lat/long
         lat, lon = utm.to_latlon(topo.X[0, 0], topo.Y[0, 0], 11, 'N')

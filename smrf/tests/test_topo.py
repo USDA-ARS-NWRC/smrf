@@ -13,10 +13,6 @@ class TestLoadTopo(unittest.TestCase):
     def setUp(self):
         base = os.path.dirname(smrf.__file__)
         self.test_dir = os.path.abspath(os.path.join(base, 'tests'))
-        tempDir = os.path.join(self.test_dir, 'RME/output')
-
-        if not os.path.exists(tempDir):
-            os.mkdir(tempDir)
 
         topo_config = {
             'filename': os.path.join(self.test_dir, 'RME/topo/topo.nc'),
@@ -27,10 +23,7 @@ class TestLoadTopo(unittest.TestCase):
 
         self.ds = nc.Dataset(topo_config['filename'])
 
-        self.topo = loadTopo.Topo(
-            topo_config,
-            tempDir=tempDir
-        )
+        self.topo = loadTopo.Topo(topo_config)
 
     @classmethod
     def tearDown(self):

@@ -20,19 +20,13 @@ class Topo():
     - veg tau
 
     Inputs to topo are the topo section of the config file
-    topo will guess the location of the WORKDIR env variable
-    and should work for unix systems.
-
+    
     """
 
     IMAGES = ['dem', 'mask', 'veg_type', 'veg_height', 'veg_k', 'veg_tau']
 
-    def __init__(self, topoConfig, tempDir=None):
+    def __init__(self, topoConfig):
         self.topoConfig = topoConfig
-
-        if (tempDir is None) | (tempDir == 'WORKDIR'):
-            tempDir = os.environ['WORKDIR']
-        self.tempDir = tempDir
 
         self._logger = logging.getLogger(__name__)
         self._logger.info('Reading [TOPO] and making stoporad input')

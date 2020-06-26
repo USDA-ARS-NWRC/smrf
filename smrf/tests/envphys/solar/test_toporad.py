@@ -34,10 +34,7 @@ class TestToporad(SMRFTestCaseLakes):
             'gradient_method': 'gradient_d8',
             'sky_view_factor_angles': 72
         }
-        cls.topo = loadTopo.Topo(
-            topo_config,
-            tempDir=os.path.join(cls.test_dir, 'output')
-        )
+        cls.topo = loadTopo.Topo(topo_config)
         cls.dem = cls.topo.dem
 
         # inputs for toporad and stoporad
