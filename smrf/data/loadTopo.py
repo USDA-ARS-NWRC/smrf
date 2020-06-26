@@ -1,6 +1,5 @@
 
 import logging
-import os
 
 import numpy as np
 from netCDF4 import Dataset
@@ -20,7 +19,7 @@ class Topo():
     - veg tau
 
     Inputs to topo are the topo section of the config file
-    
+
     """
 
     IMAGES = ['dem', 'mask', 'veg_type', 'veg_height', 'veg_k', 'veg_tau']

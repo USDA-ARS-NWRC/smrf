@@ -25,7 +25,6 @@ Example:
 
 import logging
 import os
-import shutil
 import sys
 from datetime import datetime
 from os.path import abspath, dirname, join
@@ -40,7 +39,8 @@ from inicheck.output import generate_config, print_config_report
 from inicheck.tools import check_config, get_user_config
 from topocalc.shade import shade
 
-from smrf import data, distribute, output
+from smrf import data, distribute
+from smrf.output import output_netcdf
 from smrf.framework import art
 from smrf.envphys import sunang
 from smrf.envphys.solar import model
@@ -132,23 +132,19 @@ class SMRF():
             logfile = None
             if ucfg.cfg['system']['log_file'] is not None:
                 logfile = ucfg.cfg['system']['log_file']
-                if not os.path.isabs(logfile):
-                    logfile = abspath(join(
-                        dirname(configFile),
-                        ucfg.cfg['system']['log_file']))
-
-                if not os.path.isdir(dirname(logfile)):
-                    os.makedirs(dirname(logfile))
-
-                if not os.path.isfile(logfile):
-                    with open(logfile, 'w+') as f:
-                        f.close()
+                os.makedirs(dirname(logfile), exist_ok=True)
 
             fmt = '%(levelname)s:%(name)s:%(message)s'
             if logfile is not None:
+                # From the python3 docs on basicConfig
+                # "This function does nothing if the root logger already has
+                # handlers configured"
+                for handler in logging.root.handlers[:]:
+                    logging.root.removeHandler(handler)
+
                 logging.basicConfig(filename=logfile,
                                     level=numeric_level,
-                                    filemode='w+',
+                                    filemode='a',
                                     format=fmt)
             else:
                 logging.basicConfig(level=numeric_level)
@@ -161,15 +157,11 @@ class SMRF():
             self._logger = external_logger
 
         # add the title
-        title = self.title(2)
-        for line in title:
-            self._logger.info(line)
-
-        out = ucfg.cfg['output']['out_location']
+        self.title(2)
 
         # Make the output directory if it do not exist
+        out = ucfg.cfg['output']['out_location']
         os.makedirs(out, exist_ok=True)
-
 
         # Check the user config file for errors and report issues if any
         self._logger.info("Checking config file for issues...")
@@ -268,6 +260,7 @@ class SMRF():
         """
 
         self._logger.info('SMRF closed --> %s' % datetime.now())
+        logging.shutdown()
 
     def loadTopo(self):
         """
@@ -813,13 +806,13 @@ class SMRF():
 
             # determine what type of file to output
             if self.config['output']['file_type'].lower() == 'netcdf':
-                self.out_func = output.output_netcdf.OutputNetcdf(
+                self.out_func = output_netcdf.OutputNetcdf(
                     variable_dict, self.topo,
                     self.config['time'],
                     self.config['output'])
 
             elif self.config['output']['file_type'].lower() == 'hru':
-                self.out_func = output.output_hru.output_hru(
+                self.out_func = output_hru.output_hru(
                     variable_dict, self.topo,
                     self.date_time,
                     self.config['output'])
@@ -901,7 +894,8 @@ class SMRF():
         elif option == 2:
             title = art.title2
 
-        return title
+        for line in title:
+            self._logger.info(line)
 
 
 def run_smrf(config):
