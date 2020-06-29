@@ -1,4 +1,4 @@
-#!/bin/bash
+#/usr/bin/env bash
 # Build the source distribution tarball
 # Only upload if a tagged commit
 
