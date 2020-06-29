@@ -1,7 +1,7 @@
 import numpy as np
 
-from smrf.envphys.constants import (FREEZE, GRAVITY, MOL_AIR, SEA_LEVEL,
-                                    STD_LAPSE, STD_LAPSE_M, STEF_BOLTZ, RGAS)
+from smrf.envphys.constants import (FREEZE, GRAVITY, MOL_AIR, RGAS, SEA_LEVEL,
+                                    STD_LAPSE, STD_LAPSE_M, STEF_BOLTZ)
 from smrf.envphys.vapor_pressure import sati
 
 

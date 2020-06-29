@@ -1,13 +1,19 @@
-include AUTHORS.rst
-include CONTRIBUTING.rst
-include HISTORY.rst
+include AUTHORS.md
 include LICENSE
-include README.rst
-include smrf/framework/CoreConfig.ini
-include smrf/framework/recipes.ini
+include README.md
+include requirements.txt
 
-recursive-include tests *
+global-include *.txt *.md *.pyx *.pxd *.c *.h
+
+include smrf/framework/CoreConfig.ini
+include smrf/framework/.qotw
+include smrf/framework/recipes.ini
+include smrf/framework/changelog.in
+
+recursive-include smrf/tests *
 recursive-exclude * __pycache__
 recursive-exclude * *.py[co]
 
-recursive-include docs *.rst conf.py Makefile make.bat
+recursive-exclude * *.grib2.*.idx
+
+recursive-include docs *.rst conf.py Makefile make.bat *.jpg *.png *.gif

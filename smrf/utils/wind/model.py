@@ -8,7 +8,7 @@ from datetime import datetime
 import netCDF4 as nc
 import numpy as np
 
-from . import wind_c
+from smrf.utils.wind import wind_c
 
 
 class wind_model():
@@ -94,7 +94,7 @@ class wind_model():
         self.type = 'maxus'
         ex_att = {}
         ex_att['dmax'] = dmax
-        #initialize output
+        # initialize output
         self.output_init(self.type, out_file, ex_att=ex_att)
 
         # run model over range in wind directions
@@ -121,7 +121,8 @@ class wind_model():
         """
 
         if (sepdist % self.dx != 0) | (dmax % self.dx != 0):
-            raise ValueError('sepdist and dmax must divide evenly into the DEM')
+            raise ValueError(
+                'sepdist and dmax must divide evenly into the DEM')
 
         self.dmax = dmax
         self.sepdist = sepdist
@@ -141,7 +142,6 @@ class wind_model():
         ex_att['sepdist'] = sepdist
         # initialize output
         self.output_init(self.type, out_file, ex_att=ex_att)
-
 
         # run model over range in wind directions
         for i, angle in enumerate(swa):
@@ -300,22 +300,6 @@ class wind_model():
 
         # determine the relative heights along the path
         h = self.dem[p[:, 0], p[:, 1]]  # - (self.inst_hgt + self.dem[index])
-
-#         # determine the distrance along the path
-#         xpath = self.x[p[:,1]]
-#         ypath = self.y[p[:,0]]
-#
-#         xstart = self.x[start_point[1]]
-#         ystart = self.y[start_point[0]]
-#
-#         dpath = np.sqrt(np.power(xpath - xstart, 2) + np.power(ypath - ystart, 2))
-#
-#         # calculate the slope to each cell
-#         rise = h - (h[0] + self.inst_hgt)
-#
-#         slope = rise/dpath
-#
-#         np.max(np.abs(slope[1:]))
 
         # find the horizon for each pixel along the path
         hord = self.hord(self.x[p[:, 1]], self.y[p[:, 0]], h)

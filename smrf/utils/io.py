@@ -3,26 +3,10 @@
 Input/Output functions
 Adapted from the UW-Hydro tonic project
 """
-from __future__ import print_function
 
-import os
-import sys
 from collections import Sequence
-from datetime import date
 
-import pandas as pd
-import pytz
-
-from smrf import __core_config__, __version__
-
-from .pycompat import OrderedDict, SafeConfigParser, basestring, unicode_type
-
-# hack for install with either version 2 or version 3 python
-if sys.version_info[0] >= 3:
-    from smrf.utils import utils
-else:
-    import utils
-
+from .pycompat import basestring, unicode_type
 
 
 def isbool(x):

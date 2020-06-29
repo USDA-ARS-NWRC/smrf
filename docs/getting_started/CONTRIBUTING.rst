@@ -47,15 +47,8 @@ articles, and such.
 
 Versioning
 ----------
-SMRF uses bumpversion to version control. More about bumpversion can be found at
-https://pypi.python.org/pypi/bumpversion. This can easily be used with the
-command::
-
-  $ bumpbversion patch --tag
-
-Don't forget to push your tags afterwards with::
-
-  $ git push origin --tags
+SMRF uses setuptools_scm to version control. Nothing major needs to be done with setuptools_scm as the
+version for SMRF will be derived from the git tags and will add the node on dev versions with the date.
 
 The development team of SMRF attempted to adhere to semantic versioning. Here is the basics taken from
 the semantic versioning website.
@@ -68,6 +61,8 @@ the semantic versioning website.
     It MAY include patch level changes. Patch version MUST be reset to 0 when minor version is incremented
   * Major version X (X.y.z | X > 0) MUST be incremented if any backwards incompatible changes are introduced to the public API.
     It MAY include minor and patch level changes. Patch and minor version MUST be reset to 0 when major version is incremented.
+  * Alpha and beta versions will follow `PEP-0440 <https://www.python.org/dev/peps/pep-0440/>` where X.Y.aN or X.Y.bN will
+    denote an alpha or beta release of the version X.Y
 
 For more info on versions see http://semver.org
 

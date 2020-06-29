@@ -1,15 +1,106 @@
-# Config file for automatic testing at travis-ci.org
-
-sudo: required
-
-language: python
+# test stage will test all branches against:
+#   - linux python 3.5, 3.6, 3.7, 3.8
+#   - osx python 3.7
+#
+# deploy stage builds and test the wheels when jobs is
+#   - pull request
+#   - master branch
+#   - tagged commit, only this will be uploaded to pypi
 
 services:
   - docker
 
-before_install:
-  - docker build --build-arg REQUIREMENTS=_dev -t usdaarsnwrc/smrf .
+stages:
+  - test
+  - name: deploy
+    if:  type = pull_request OR branch = master OR tag IS present AND repo = USDA-ARS-NWRC/smrf
 
-script:
-  docker run -it usdaarsnwrc/smrf test
+env:
+  global:
+    - CIBW_MANYLINUX_X86_64_IMAGE=manylinux2014
+    - CIBW_TEST_REQUIRES=nose
+    - CIBW_TEST_COMMAND="NOT_ON_GOLD_HOST=yup nosetests -vv --exe smrf"
+    - CIBW_BUILD="cp3*-manylinux_x86_64 cp3*-macosx_x86_64"
+    - CIBW_SKIP="?p27* pp* cp35*"
+    - CIBW_BUILD_VERBOSITY=1
+    - CIBW_BEFORE_BUILD_LINUX="{package}/travis/cibuildwheel_before_build_linux.sh"
+    - CIBW_BEFORE_BUILD_MACOS="{package}/travis/cibuildwheel_before_build_macos.sh"
+    - CIBW_ENVIRONMENT="NOT_ON_GOLD_HOST=yup"
+    - CIBW_ENVIRONMENT_MACOS="NOT_ON_GOLD_HOST=yup CC=gcc-7"
+    - TWINE_USERNAME=__token__
+    # Note: TWINE_PASSWORD is set to a PyPI API token in Travis settings
 
+# defining the unittest jobs
+unittest: &unittest
+  stage: test
+  os: linux
+  dist: bionic
+  language: python
+  addons:
+    apt:
+      packages:
+        - libeccodes-tools
+    homebrew:
+      packages:
+        - eccodes
+        - gcc@7
+  install: 
+    - python3 --version
+    - python3 -m pip install tox-travis cython
+  script: tox
+
+# build the wheels with cibuildwheel
+ci-build-wheels: &ci-build-wheels
+  stage: deploy
+  services: docker
+  os: linux
+  dist: xenial
+  language: python
+  install: python3 -m pip install cibuildwheel==1.4.2
+  script: travis/build.sh
+
+jobs:
+  include:
+    # test stage
+    - <<: *unittest
+      python: 3.6
+      env: TOXENV=py36,coverage
+
+    - <<: *unittest
+      python: 3.6
+      env: TOXENV=flake8
+
+    - <<: *unittest
+      python: 3.7
+      env: TOXENV=py37
+
+    - <<: *unittest
+      python: 3.8
+      env: TOXENV=py38
+
+    - <<: *unittest
+      os: osx
+      osx_image: xcode11.2  # Python 3.7.X running on macOS 10.14
+      language: shell
+      env:
+        - TOXENV=py37
+        - CC=gcc-7
+        - NOT_ON_GOLD_HOST=yup
+
+    # Deploy source distribution
+    - stage: deploy
+      name: Deploy source distribution
+      language: python
+      python: 3.6
+      install: skip
+      script: travis/build-sdist.sh
+          
+    # Deploy on linux
+    - <<: *ci-build-wheels
+      name: Build and deploy Linux wheels
+
+    # Deploy on osx
+    - <<: *ci-build-wheels
+      name: Build and deploy macOS wheels
+      os: osx
+      language: shell

@@ -2,56 +2,21 @@
 # -*- coding: utf-8 -*-
 
 import os
-import sys
-from subprocess import check_output
 
 import numpy
 from Cython.Distutils import build_ext
-from setuptools import Extension, setup, find_packages
-
-if sys.argv[-1] != 'test':
-
-    # Grab and write the gitVersion from 'git describe'.
-    gitVersion = ''
-    gitPath = ''
-
-    # get git describe if in git repository
-    print('Fetching most recent git tags')
-    if os.path.exists('./.git'):
-        try:
-            # if we are in a git repo, fetch most recent tags
-            check_output(["git fetch --tags"], shell=True)
-        except Exception as e:
-            print('Unable to fetch most recent tags')
-
-        try:
-            ls_proc = check_output(["git describe --tags"], shell=True,
-                                   universal_newlines=True)
-            gitVersion = ls_proc
-            print('Checking most recent version')
-        except Exception as e:
-            print('Unable to get git tag and hash')
-    # if not in git repo
-    else:
-        print('Not in git repository')
-        gitVersion = ''
-
-    # get current working directory to define git path
-    gitPath = os.getcwd()
-
-    # git untracked file to store version and path
-    fname = os.path.abspath(os.path.expanduser('./smrf/utils/gitinfo.py'))
-
-    with open(fname, 'w') as f:
-        nchars = len(gitVersion) - 1
-        f.write("__gitPath__='{0}'\n".format(gitPath))
-        f.write("__gitVersion__='{0}'\n".format(gitVersion[:nchars]))
-        f.close()
+from setuptools import Extension, find_packages, setup
 
 
 def c_name_from_path(location, name):
     return os.path.join(location, name).replace('/', '.')
 
+
+with open('requirements.txt') as requirements_file:
+    requirements = requirements_file.read()
+
+with open('README.md') as readme_file:
+    readme = readme_file.read()
 
 # Give user option to specify his local compiler name
 if "CC" not in os.environ:
@@ -111,13 +76,16 @@ ext_modules += [
 ]
 
 setup(
-    name='smrf',
-    version='0.9.1',
+    name='smrf-dev',
     description="Distributed snow modeling for water resources",
     author="Scott Havens",
     author_email='scott.havens@ars.usda.gov',
     url='https://github.com/USDA-ARS-NWRC/smrf',
+    long_description=readme,
+    long_description_content_type="text/markdown",
     packages=find_packages(include=['smrf', 'smrf.*']),
+    install_requires=requirements,
+    python_requires='>3.5',
     include_package_data=True,
     package_data={
         'smrf': [
@@ -133,15 +101,14 @@ setup(
     classifiers=[
         'Development Status :: 2 - Pre-Alpha',
         'Intended Audience :: Developers',
-        'License :: OSI Approved :: CC0 1.0',
         'Natural Language :: English',
+        'License :: CC0 1.0 Universal (CC0 1.0) Public Domain Dedication',
         'Programming Language :: Python :: 3',
-        'Programming Language :: Python :: 3.3',
-        'Programming Language :: Python :: 3.4',
-        'Programming Language :: Python :: 3.5',
         'Programming Language :: Python :: 3.6',
+        'Programming Language :: Python :: 3.7',
+        'Programming Language :: Python :: 3.8'
     ],
-    test_suite='tests',
+    test_suite='smrf.tests',
     # tests_require=test_requirements,
     cmdclass={
         'build_ext': build_ext
@@ -150,7 +117,6 @@ setup(
     scripts=[
         'scripts/update_configs',
         'scripts/run_smrf',
-        'scripts/mk_project',
         'scripts/gen_maxus'
     ],
     extras_require={
@@ -159,5 +125,11 @@ setup(
             'sphinxcontrib-websupport',
             'pydata-sphinx-theme'
         ]
-    }
+    },
+    use_scm_version={
+        'local_scheme': 'node-and-date',
+    },
+    setup_requires=[
+        'setuptools_scm'
+    ],
 )

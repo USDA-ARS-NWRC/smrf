@@ -40,8 +40,8 @@ class wxdata():
                       'stations',
                       'client']
 
-    def __init__(self, dataConfig, start_date, end_date, time_zone='UTC',
-                                                         dataType=None):
+    def __init__(self, dataConfig, start_date, end_date,
+                 time_zone='UTC', dataType=None):
 
         if dataType is None:
             raise Exception('''loadData.data() must have a specified dataType
@@ -81,7 +81,7 @@ class wxdata():
 
         sta = self.stations
 
-        if sta != None:
+        if sta is not None:
             msta = ", ".join(sta)
             self._logger.debug('Using only stations {0}'.format(msta))
 
@@ -94,14 +94,14 @@ class wxdata():
                 self._logger.debug('Reading %s...' % self.dataConfig[i])
                 if i == 'metadata':
                     dp_final = pd.read_csv(self.dataConfig[i],
-                                     index_col='primary_id')
-                    #Ensure all stations are all caps.
+                                           index_col='primary_id')
+                    # Ensure all stations are all caps.
                     dp_final.index = [s.upper() for s in dp_final.index]
 
                 elif self.dataConfig[i]:
                     dp_full = pd.read_csv(self.dataConfig[i],
-                                     index_col='date_time',
-                                     parse_dates=[0])
+                                          index_col='date_time',
+                                          parse_dates=[0])
                     dp_full = dp_full.tz_localize(self.time_zone)
                     dp_full.columns = [s.upper() for s in dp_full.columns]
 
@@ -188,6 +188,7 @@ class wxdata():
 
         # go through and extract the data
         for v in variables:
-            # MySQL Data is TZ aware. So convert just in case non utc is passed.
+            # MySQL Data is TZ aware. So convert just in case non utc
+            # is passed.
             dfv = dp[self.dataConfig[v]]
             setattr(self, v, dfv)

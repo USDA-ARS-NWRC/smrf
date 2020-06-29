@@ -1,5 +1,4 @@
 import logging
-import os
 
 import netCDF4 as nc
 import numpy as np
@@ -8,8 +7,8 @@ import pytz
 import utm
 from weather_forecast_retrieval import hrrr
 
-from smrf.envphys.vapor_pressure import rh2vp, satvp
 from smrf.envphys.solar.cloud import get_hrrr_cloud
+from smrf.envphys.vapor_pressure import rh2vp, satvp
 
 
 class grid():
@@ -27,13 +26,9 @@ class grid():
     """
 
     def __init__(self, dataConfig, topo, start_date, end_date,
-                 time_zone='UTC', dataType='wrf', tempDir=None,
+                 time_zone='UTC', dataType='wrf',
                  forecast_flag=False, day_hour=0, n_forecast_hours=18):
 
-        if (tempDir is None) | (tempDir == 'WORKDIR'):
-            tempDir = os.environ['WORKDIR']
-
-        self.tempDir = tempDir
         self.dataConfig = dataConfig
         self.dataType = dataType
         self.start_date = start_date
@@ -264,7 +259,7 @@ class grid():
                 try:
                     fv = f.variables[v_file].getncattr('_FillValue')
                     df.replace(fv, np.nan, inplace=True)
-                except:
+                except Exception:
                     pass
 
                 # Set variable and subset by start and end time

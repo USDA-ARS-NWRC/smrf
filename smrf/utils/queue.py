@@ -4,11 +4,10 @@ Create classes for running on multiple threads
 20160323 Scott Havens
 """
 
-from queue import Queue, Empty, Full
-
 import logging
 import sys
 import threading
+from queue import Empty, Full, Queue
 from time import time as _time
 
 import numpy as np
@@ -82,8 +81,8 @@ class DateQueue_Threading(Queue):
 
         Args:
             index: datetime object representing the date/time being processed
-            block: boolean determining whether to wait for a variable to become available
-            timeout: Number of seconds to wait before dropping error, none equates to forever.
+            block: whether to wait for a variable to become available
+            timeout: Seconds to wait before dropping error, none is forever.
         """
         timed_out = False
         # see if timeout was passed
@@ -93,7 +92,6 @@ class DateQueue_Threading(Queue):
         self.not_empty.acquire()
 
         try:
-            #self._logger.debug("Retrieving {}".format(index))
             if not block:
                 if not self._qsize():
                     raise Empty
@@ -110,10 +108,10 @@ class DateQueue_Threading(Queue):
                 while index not in self.queue.keys():
                     self.remaining = endtime - _time()
                     # Time out has occurred
-                    #self._logger.debug("get - {}s".format(self.remaining))
                     if self.remaining <= 0.0:
-                        self._logger.error("Timeout occurred while retrieving"
-                                           " an item at {} from queue".format(index))
+                        self._logger.error(
+                            "Timeout occurred while retrieving"
+                            " an item at {} from queue".format(index))
                         timed_out = True
                         raise Empty
 
@@ -153,11 +151,11 @@ class DateQueue_Threading(Queue):
         self.not_full.acquire()
 
         try:
-            #self._logger.debug("Put {} in queue".format(item[0]))
             # Is there anything in the Queue
             if self.maxsize > 0:
 
-                # Working with a thread set to block other threads until complete
+                # Working with a thread set to block other threads
+                # until complete
                 if not block:
                     if self._qsize() == self.maxsize:
                         raise Full
@@ -173,7 +171,6 @@ class DateQueue_Threading(Queue):
 
                     while self._qsize() == self.maxsize:
                         self.remaining = endtime - _time()
-                        #self._logger.debug("put - {}s".format(self.remaining))
 
                         if self.remaining <= 0.0:
                             self._logger.error("Timeout occurred while putting"
@@ -228,13 +225,11 @@ class QueueCleaner(threading.Thread):
             # first do a get on all the data, this will ensure that
             # there is data there to be had
             for v in self.queues.keys():
-                #self._logger.debug('Clean checking %s -- %s' % (t, v))
                 self.queues[v].get(t)
 
             # now that we know there is data in all of the queues
             # that have the same time, clean up those times
             for v in self.queues.keys():
-                #self._logger.debug('Clean cleaning %s -- %s' % (t, v))
                 self.queues[v].clean(t)
 
             self._logger.debug('%s Cleaned from queues' % t)
@@ -278,7 +273,7 @@ class QueueOutput(threading.Thread):
                (output_count == len(self.date_time)):
 
                 # get the output variables then pass to the function
-                for v in self.out_func.variable_list.values():
+                for v in self.out_func.variable_dict.values():
                     if v['variable'] in self.queues.keys():
                         data = self.queues[v['variable']].get(t)
 
@@ -291,8 +286,9 @@ class QueueOutput(threading.Thread):
                         self.out_func.output(v['variable'], data, t)
 
                     else:
-                        self._logger.warning('{0} Output variable {1} not in queue'
-                                             .format(t, v['variable']))
+                        self._logger.warning(
+                            '{0} Output variable {1} not in queue'
+                            .format(t, v['variable']))
 
                 # put the value into the output queue so clean knows it's done
                 self.queues['output'].put([t, True])

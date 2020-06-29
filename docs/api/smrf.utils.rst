@@ -12,22 +12,6 @@ Subpackages
 Submodules
 ----------
 
-smrf.utils.gitinfo module
--------------------------
-
-.. automodule:: smrf.utils.gitinfo
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
-smrf.utils.gradient module
---------------------------
-
-.. automodule:: smrf.utils.gradient
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
 smrf.utils.io module
 --------------------
 

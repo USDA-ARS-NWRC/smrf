@@ -49,24 +49,29 @@ isort: ## using isort to sort imports
 	isort -rc -vb .
 
 lint:
-	flake8 smrf tests
+	flake8 smrf
 
 test:
-	python setup.py test
+	python3 setup.py test
 
 test-all:
 	tox
 
-coverage:
+coverage: ## run coverage and submit
 	coverage run --source smrf setup.py test
-	coverage report -m
+	coverage report --fail-under=75
+
+coveralls: coverage ## run coveralls
+	coveralls
+
+coverage-html: coverage ## check code coverage quickly with the default Python
 	coverage html
 	$(BROWSER) htmlcov/index.html
 
 docs:
 	rm -f docs/smrf.rst
 	rm -f docs/modules.rst
-	sphinx-apidoc -o docs/api smrf
+	sphinx-apidoc -o docs/api smrf smrf/tests/*
 	$(MAKE) -C docs clean
 	$(MAKE) -C docs html
 	$(BROWSER) docs/_build/html/index.html

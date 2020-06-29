@@ -11,7 +11,7 @@ def Garen2005(th, cloud_factor):
     wave radiation using measurement stations in the Boise River Basin.
 
     .. math::
-        L_{cloud} = L_{clear} * (1.485 - 0.488 * cloud\_factor)
+        L_{cloud} = L_{clear} * (1.485 - 0.488 * cloud\\_factor)
 
     Args:
         th: clear sky thermal radiation [W/m2]
@@ -33,9 +33,9 @@ def Unsworth1975(th, ta, cloud_factor):
     :cite:`Unsworth&Monteith:1975`
 
     .. math::
-            \epsilon_a = (1 - 0.84) \epsilon_{clear} + 0.84c
+            \\epsilon_a = (1 - 0.84) \\epsilon_{clear} + 0.84c
 
-    where :math:`c = 1 - cloud\_factor`
+    where :math:`c = 1 - cloud\\_factor`
 
     Args:
         th: clear sky thermal radiation [W/m2]
@@ -67,13 +67,14 @@ def Kimball1982(th, ta, ea, cloud_factor):
 
     .. math::
 
-        L_d &= L_{clear} + \\tau_8 c f_8 \sigma T^{4}_{c}
+        L_d &= L_{clear} + \\tau_8 c f_8 \\sigma T^{4}_{c}
 
-        \\tau_8 &= 1 - \epsilon_{8z} (1.4 - 0.4 \epsilon_{8z})
+        \\tau_8 &= 1 - \\epsilon_{8z} (1.4 - 0.4 \\epsilon_{8z})
 
-        \epsilon_{8z} &= 0.24 + 2.98 \\times 10^{-6} e^2_o exp(3000/T_o)
+        \\epsilon_{8z} &= 0.24 + 2.98 \\times 10^{-6} e^2_o exp(3000/T_o)
 
-        f_8 &= -0.6732 + 0.6240 \\times 10^{-2} T_c - 0.9140 \\times 10^{-5} T^2_c
+        f_8 &= -0.6732 + 0.6240 \\times 10^{-2} T_c - 0.9140
+        \\times 10^{-5} T^2_c
 
     where the original Kimball et al. (1982) :cite:`Kimball&al:1982` was for
     multiple cloud layers, which was simplified to one layer. :math:`T_c` is
@@ -109,10 +110,11 @@ def Crawford1999(th, ta, cloud_factor):
     :cite:`Crawford&Duchon:1999`
 
     .. math::
-            \epsilon_a = (1 - cloud\_factor) + cloud\_factor * \epsilon_{clear}
+            \\epsilon_a = (1 - cloud\\_factor) +
+            cloud\\_factor * \\epsilon_{clear}
 
-    where :math:`cloud\_factor` is the ratio of measured solar radiation to the
-    clear sky irradiance.
+    where :math:`cloud\\_factor` is the ratio of measured solar radiation
+    to the clear sky irradiance.
 
     Args:
         th: clear sky thermal radiation [W/m2]

@@ -1,3 +1,3 @@
 # -*- coding: utf-8 -*-
-from . import grid, idw
-from .dk import dk
+from . import grid, idw  # noqa
+from .dk import dk  # noqa

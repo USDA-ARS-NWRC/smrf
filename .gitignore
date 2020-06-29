@@ -1,7 +1,3 @@
-# Eclipse files
-.project
-.settings
-.pydevproject
 .DS_Store
 ._.*
 
@@ -16,7 +12,6 @@
 
 # Examples files
 examples/*/*/maxus*.nc
-*/*/output/*
 */*/log.*
 
 # Byte-compiled / optimized / DLL files
@@ -44,6 +39,7 @@ var/
 *.egg-info/
 .installed.cfg
 *.egg
+wheelhouse/
 
 # PyInstaller
 #  Usually these files are written by a python script from a template
@@ -83,9 +79,6 @@ target/
 *.py~
 *.swp
 
-# git version stuff:
-smrf/utils/gitinfo.py
-
 #Auto generate config files
 *config_full.ini
 test_data/config.ini
@@ -98,18 +91,7 @@ docs/auto_config.rst
 docs/modules.rst
 docs/smrf.rst
 
-#Ignore results in test_data
-test_data/output/*
-test_data/tmp/*
-tests/RME/output/*
-tests/RME/**/*.idx
 
-#ignore maxus.
-test_data/topo/maxus_100window.nc
-test_data/topo/maxus.nc
-examples/* *.nc
-examples/reynolds_mountain_east/output/*
-examples/simple_hill/* *.csv
 */tmp/*
 
 # notebooks
@@ -117,5 +99,3 @@ examples/simple_hill/* *.csv
 
 # grib2 .idx files
 *.grib2.*.idx
-
-output/

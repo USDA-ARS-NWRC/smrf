@@ -5,21 +5,20 @@ import os
 from datetime import datetime
 
 import netCDF4 as nc
-from spatialnc.ipw import IPW
 
 from smrf.utils.wind.model import wind_model
 
 
 def argument_parser():
     parser = argparse.ArgumentParser(
-        description="Takes in Netcdf or IPW dem image and maxus file from "
+        description="Takes in Netcdf dem image and maxus file from "
                     "Adam Winstrals wind model. "
                     "The maxus file is required for SMRF simulations"
     )
     parser.add_argument(
         'dem',
         type=str,
-        help='Netcdf or IPW file containing the dem'
+        help='Netcdf file containing the dem'
     )
     parser.add_argument(
         '--out_maxus', '-O',
@@ -135,17 +134,10 @@ def main(args):
                     args.var_name
                 )
             )
-    elif ext == 'ipw':
-        # read in the DEM
-        dem = IPW(dem_file)
-        # dem_data = np.round(dem.bands[0].data)
-        dem_data = dem.bands[0].data
-        x = dem.bands[0].x
-        y = dem.bands[0].y
 
     else:
         raise IOError(
-            "Image must be a netcdf file (.nc) or an ipw image (.ipw)"
+            "Image must be a netcdf file (.nc)"
         )
 
     # ------------------------------------------------------------------------------

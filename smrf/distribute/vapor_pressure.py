@@ -15,14 +15,14 @@ class vp(image_data.image_data):
 
     Vapor pressure is provided as an argument and is calculated from coincident
     air temperature and relative humidity measurements using utilities such as
-    IPW's ``rh2vp``. The vapor pressure is distributed instead of the relative
-    humidity as it is an absolute measurement of the vapor within the
-    atmosphere and will follow elevational trends (typically negative).  Were
-    as relative humidity is a relative measurement which varies in complex ways
-    over the topography.  From the distributed vapor pressure, the dew point is
-    calculated for use by other distribution methods. The dew point temperature
-    is further corrected to ensure that it does not exceed the distributed air
-    temperature.
+    :mod:`smrf.envphys.vapor_pressure.rh2vp`. The vapor pressure is distributed
+    instead of the relative humidity as it is an absolute measurement of the
+    vapor within the atmosphere and will follow elevational trends (typically
+    negative).  Were as relative humidity is a relative measurement which
+    varies in complex ways over the topography.  From the distributed vapor
+    pressure, the dew point is calculated for use by other distribution
+    methods. The dew point temperature is further corrected to ensure that it
+    does not exceed the distributed air temperature.
 
     Args:
         vpConfig: The [vapor_pressure] section of the configuration file

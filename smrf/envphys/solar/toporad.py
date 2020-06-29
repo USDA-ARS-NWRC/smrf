@@ -1,14 +1,12 @@
 import numpy as np
 from topocalc.horizon import horizon
-from topocalc.shade import shade
 
-from smrf.envphys.solar.twostream import twostream
+from smrf.envphys.constants import (GRAVITY, IR_MAX, IR_MIN, MOL_AIR,
+                                    SEA_LEVEL, STD_AIRTMP, STD_LAPSE,
+                                    VISIBLE_MAX, VISIBLE_MIN)
 from smrf.envphys.solar.irradiance import direct_solar_irradiance
+from smrf.envphys.solar.twostream import twostream
 from smrf.envphys.thermal.topotherm import hysat
-from smrf.envphys.albedo import albedo
-from smrf.envphys.constants import SEA_LEVEL, STD_LAPSE, \
-    GRAVITY, MOL_AIR, STD_AIRTMP, VISIBLE_MIN, VISIBLE_MAX, \
-    IR_MIN, IR_MAX
 
 
 def check_wavelengths(wavelength_range):
@@ -92,102 +90,6 @@ def stoporad(date_time, topo, cosz, azimuth, illum_ang, albedo_surface,
     return trad_beam, trad_diff
 
 
-def stoporad_ipw(date_time, tau_elevation, tau, omega, scattering_factor,
-                 wavelength_range, start, current_day, time_zone,
-                 year, cosz, azimuth, grain_size, max_grain, dirt, topo):
-    """stoporad simulates topographic radiation over snow-covered terrain.
-    Uses a two-stream atmospheric radiation model. This function mimics the
-    original IPW stoporad program and differences are bit noise resolution
-    of the 8-bit IPW images.
-
-    TODO: deprecated, mainly for testing
-
-    Args:
-        date_time (datetime): date and time
-        tau_elevation (float): Elevation [m] of optical depth measurement.
-        tau (float): optical depth at tau_elevation.
-        omega (float): Single scattering albedo.
-        scattering_factor (float): Scattering asymmetry parameter.
-        wavelength_range (list): Min/max wavelengths to simulate
-        start (float): decimal day of last storm
-        current_day (float): decimal day for the current day
-        time_zone (float): minutes from UTC
-        year (float): water year
-        cosz (float): cosine of solar zenith angle
-        azimuth (float): aspect to the sun
-        grain_size (float): starting grain size for albedo
-        max_grain (float): max grain size for albedo
-        dirt (float): dirt factor for albedo
-        topo (Topo class): Topo class for dem
-
-    Raises:
-        ValueError: wavelength_range must be in the visible or ir band
-
-    Returns:
-        [tuple]: beam and diffuse radiation over snow covered area
-    """
-
-    wavelength_flag = check_wavelengths(wavelength_range)
-
-    # check cosz if sun is down
-    if cosz < 0:
-        return np.zeros_like(topo.dem), np.zeros_like(topo.dem)
-
-    else:
-        solar_irradiance = direct_solar_irradiance(
-            date_time, w=wavelength_range)
-
-        # Run horizon to get sun-below-horizon mask
-        horizon_angles = horizon(azimuth, topo.dem, topo.dx)
-        thresh = np.tan(np.pi / 2 - np.arccos(cosz))
-        no_sun_mask = np.tan(np.abs(horizon_angles)) > thresh
-
-        # Run shade to get cosine local illumination angle
-        # mask by horizon mask using cosz=0 where the sun is not visible
-        illum_ang = shade(topo.sin_slope, topo.aspect, azimuth, cosz)
-        illum_ang[no_sun_mask] = 0
-
-        # Run ialbedo to get albedo
-        if isinstance(start, float):
-            alb_v, alb_ir = albedo(
-                start * np.ones_like(topo.dem), illum_ang, grain_size,
-                max_grain, dirt)
-        else:
-            alb_v, alb_ir = albedo(
-                start, illum_ang, grain_size, max_grain, dirt)
-
-        # mean albedo for elevrad
-        if wavelength_flag == 'vis':
-            R0 = np.mean(alb_v)
-            alb = alb_v
-        else:
-            R0 = np.mean(alb_ir)
-            alb = alb_ir
-
-        # Run elevrad to get beam & diffuse (if -r option not specified)
-        evrad = Elevrad(
-            topo.dem,
-            solar_irradiance,
-            cosz,
-            tau_elevation=tau_elevation,
-            tau=tau,
-            omega=omega,
-            scattering_factor=scattering_factor,
-            surface_albedo=R0)
-
-        # Form input file and run toporad
-        trad_beam, trad_diff = toporad(
-            evrad.beam,
-            evrad.diffuse,
-            illum_ang,
-            topo.sky_view_factor,
-            topo.terrain_config_factor,
-            cosz,
-            surface_albedo=alb)
-
-    return trad_beam, trad_diff
-
-
 def toporad(beam, diffuse, illum_angle, sky_view_factor, terrain_config_factor,
             cosz, surface_albedo=0.0):
     """Topographically-corrected solar radiation. Calculates the topographic
@@ -201,7 +103,8 @@ def toporad(beam, diffuse, illum_angle, sky_view_factor, terrain_config_factor,
         sky_view_factor (np.array): sky view factor
         terrain_config_factor (np.array): terrain configuraiton factor
         cosz (float): cosine of the zenith
-        surface_albedo (float/np.array, optional): surface albedo. Defaults to 0.0.
+        surface_albedo (float/np.array, optional): surface albedo.
+            Defaults to 0.0.
 
     Returns:
         tuple: beam and diffuse radiation corrected for terrain
@@ -230,10 +133,12 @@ class Elevrad():
         elevation (np.array): DEM elevations in meters
         solar_irradiance (float): from direct_solar_irradiance
         cosz (float): cosine of zenith angle
-        tau_elevation (float, optional): Elevation [m] of optical depth measurement. Defaults to 100.
+        tau_elevation (float, optional): Elevation [m] of optical depth
+                                        measurement. Defaults to 100.
         tau (float, optional): optical depth at tau_elevation. Defaults to 0.2.
         omega (float, optional): Single scattering albedo. Defaults to 0.85.
-        scattering_factor (float, optional): Scattering asymmetry parameter. Defaults to 0.3.
+        scattering_factor (float, optional): Scattering asymmetry parameter.
+                                            Defaults to 0.3.
         surface_albedo (float, optional): Mean surface albedo. Defaults to 0.5.
     """
 
@@ -244,7 +149,8 @@ class Elevrad():
             elevation (np.array): DEM elevation in meters
             solar_irradiance (float): from direct_solar_irradiance
             cosz (float): cosine of zenith angle
-            kwargs: tau_elevation, tau, omega, scattering_factor, surface_albedo
+            kwargs: tau_elevation, tau, omega, scattering_factor,
+                    surface_albedo
 
         Returns:
             radiation: dict with beam and diffuse radiation
