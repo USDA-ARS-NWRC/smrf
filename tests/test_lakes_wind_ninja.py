@@ -27,7 +27,6 @@ class TestLakes(SMRFTestCaseLakes):
         pass
 
     def test_air_temp(self):
-        """Test Lakes air_temp"""
 
         self.compare_netcdf_files(
             os.path.join(self.gold, 'air_temp.nc'),
@@ -35,7 +34,6 @@ class TestLakes(SMRFTestCaseLakes):
         )
 
     def test_precip_temp(self):
-        """Test Lakes precip_temp"""
 
         self.compare_netcdf_files(
             os.path.join(self.gold, 'precip_temp.nc'),
@@ -43,7 +41,6 @@ class TestLakes(SMRFTestCaseLakes):
         )
 
     def test_net_solar(self):
-        """Test Lakes net_solar"""
 
         self.compare_netcdf_files(
             os.path.join(self.gold, 'net_solar.nc'),
@@ -51,7 +48,6 @@ class TestLakes(SMRFTestCaseLakes):
         )
 
     def test_percent_snow(self):
-        """Test Lakes percent_snow"""
 
         self.compare_netcdf_files(
             os.path.join(self.gold, 'percent_snow.nc'),
@@ -59,7 +55,6 @@ class TestLakes(SMRFTestCaseLakes):
         )
 
     def test_precip(self):
-        """Test Lakes precip"""
 
         self.compare_netcdf_files(
             os.path.join(self.gold, 'precip.nc'),
@@ -67,7 +62,6 @@ class TestLakes(SMRFTestCaseLakes):
         )
 
     def test_thermal(self):
-        """Test Lakes thermal"""
 
         self.compare_netcdf_files(
             os.path.join(self.gold, 'thermal.nc'),
@@ -75,7 +69,6 @@ class TestLakes(SMRFTestCaseLakes):
         )
 
     def test_wind_speed(self):
-        """Test Lakes wind_speed"""
 
         self.compare_netcdf_files(
             os.path.join(self.gold, 'wind_speed.nc'),
@@ -83,7 +76,6 @@ class TestLakes(SMRFTestCaseLakes):
         )
 
     def test_wind_direction(self):
-        """Test Lakes wind_direction"""
 
         self.compare_netcdf_files(
             os.path.join(self.gold, 'wind_direction.nc'),
@@ -91,7 +83,6 @@ class TestLakes(SMRFTestCaseLakes):
         )
 
     def test_snow_density(self):
-        """Test Lakes snow_density"""
 
         self.compare_netcdf_files(
             os.path.join(self.gold, 'snow_density.nc'),
@@ -99,7 +90,6 @@ class TestLakes(SMRFTestCaseLakes):
         )
 
     def test_vapor_pressure(self):
-        """Test Lakes vapor_pressure"""
 
         self.compare_netcdf_files(
             os.path.join(self.gold, 'vapor_pressure.nc'),
@@ -128,7 +118,6 @@ class TestLakesThreaded(SMRFTestCaseLakes):
         pass
 
     def test_air_temp(self):
-        """Test Lakes air_temp"""
 
         self.compare_netcdf_files(
             os.path.join(self.gold, 'air_temp.nc'),
@@ -136,7 +125,6 @@ class TestLakesThreaded(SMRFTestCaseLakes):
         )
 
     def test_precip_temp(self):
-        """Test Lakes precip_temp"""
 
         self.compare_netcdf_files(
             os.path.join(self.gold, 'precip_temp.nc'),
@@ -144,7 +132,6 @@ class TestLakesThreaded(SMRFTestCaseLakes):
         )
 
     def test_net_solar(self):
-        """Test Lakes net_solar"""
 
         self.compare_netcdf_files(
             os.path.join(self.gold, 'net_solar.nc'),
@@ -152,7 +139,6 @@ class TestLakesThreaded(SMRFTestCaseLakes):
         )
 
     def test_percent_snow(self):
-        """Test Lakes percent_snow"""
 
         self.compare_netcdf_files(
             os.path.join(self.gold, 'percent_snow.nc'),
@@ -160,7 +146,6 @@ class TestLakesThreaded(SMRFTestCaseLakes):
         )
 
     def test_precip(self):
-        """Test Lakes precip"""
 
         self.compare_netcdf_files(
             os.path.join(self.gold, 'precip.nc'),
@@ -168,7 +153,6 @@ class TestLakesThreaded(SMRFTestCaseLakes):
         )
 
     def test_thermal(self):
-        """Test Lakes thermal"""
 
         self.compare_netcdf_files(
             os.path.join(self.gold, 'thermal.nc'),
@@ -176,7 +160,6 @@ class TestLakesThreaded(SMRFTestCaseLakes):
         )
 
     def test_wind_speed(self):
-        """Test Lakes wind_speed"""
 
         self.compare_netcdf_files(
             os.path.join(self.gold, 'wind_speed.nc'),
@@ -184,7 +167,6 @@ class TestLakesThreaded(SMRFTestCaseLakes):
         )
 
     def test_wind_direction(self):
-        """Test Lakes wind_direction"""
 
         self.compare_netcdf_files(
             os.path.join(self.gold, 'wind_direction.nc'),
@@ -192,7 +174,6 @@ class TestLakesThreaded(SMRFTestCaseLakes):
         )
 
     def test_snow_density(self):
-        """Test Lakes snow_density"""
 
         self.compare_netcdf_files(
             os.path.join(self.gold, 'snow_density.nc'),
@@ -200,7 +181,6 @@ class TestLakesThreaded(SMRFTestCaseLakes):
         )
 
     def test_vapor_pressure(self):
-        """Test Lakes vapor_pressure"""
 
         self.compare_netcdf_files(
             os.path.join(self.gold, 'vapor_pressure.nc'),
