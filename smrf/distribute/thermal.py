@@ -194,7 +194,6 @@ class th(image_data.image_data):
 
         # extend the base class
         image_data.image_data.__init__(self, self.variable)
-        self._logger = logging.getLogger(__name__)
         self.getConfig(thermalConfig)
 
         self.min = thermalConfig['min']

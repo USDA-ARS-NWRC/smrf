@@ -61,7 +61,6 @@ class Albedo(image_data.image_data):
 
         # extend the base class
         image_data.image_data.__init__(self, self.variable)
-        self._logger = logging.getLogger(__name__)
 
         # Get the veg values for the decay methods. Date method uses self.veg
         # Hardy2000 uses self.litter

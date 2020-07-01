@@ -106,7 +106,6 @@ class ppt(image_data.image_data):
 
         # extend the base class
         image_data.image_data.__init__(self, self.variable)
-        self._logger = logging.getLogger(__name__)
 
         # check and assign the configuration
         self.getConfig(pptConfig)
