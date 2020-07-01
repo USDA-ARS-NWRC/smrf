@@ -1,5 +1,3 @@
-import logging
-
 from smrf.distribute import image_data
 from smrf.envphys.constants import IR_WAVELENGTHS, VISIBLE_WAVELENGTHS
 from smrf.envphys.solar import cloud, toporad, vegetation

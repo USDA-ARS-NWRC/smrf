@@ -1,5 +1,3 @@
-import logging
-
 import numpy as np
 
 from smrf.distribute import image_data
