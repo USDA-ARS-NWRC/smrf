@@ -64,14 +64,24 @@ class SMRFLogger():
                     'class': 'logging.StreamHandler',
                     'stream': 'ext://sys.stdout',  # Default is stderr
                 },
+                'log_file': {
+                    'level': self.log_level,
+                    'formatter': 'standard',
+                    'class': 'logging.FileHandler',
+                    'filename': self.log_file,
+                    'mode': 'a'
+                }
             },
             'loggers': {
                 '': {  # root logger
-                    'handlers': ['default'],
+                    'handlers': ['log_file'],
                     'level': self.log_level,
                     'propagate': False
                 }
             }
         }
+
+        # if self.log_file is not None:
+        #     log_config['handlers']['log_file']['filename'] = self.log_file
 
         logging.config.dictConfig(log_config)
