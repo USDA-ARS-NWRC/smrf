@@ -27,10 +27,9 @@ import logging
 import os
 import sys
 from datetime import datetime
-from os.path import abspath, dirname, join
+from os.path import abspath, join
 from threading import Thread
 
-import coloredlogs
 import numpy as np
 import pandas as pd
 import pytz
@@ -40,10 +39,10 @@ from inicheck.tools import check_config, get_user_config
 from topocalc.shade import shade
 
 from smrf import data, distribute
-from smrf.output import output_netcdf, output_hru
-from smrf.framework import art
 from smrf.envphys import sunang
 from smrf.envphys.solar import model
+from smrf.framework import art, logger
+from smrf.output import output_hru, output_netcdf
 from smrf.utils import queue
 from smrf.utils.utils import backup_input, check_station_colocation, getqotw
 
@@ -118,40 +117,7 @@ class SMRF():
                             ' UserConfig instance')
         # start logging
         if external_logger is None:
-
-            if 'log_level' in ucfg.cfg['system']:
-                loglevel = ucfg.cfg['system']['log_level'].upper()
-            else:
-                loglevel = 'INFO'
-
-            numeric_level = getattr(logging, loglevel, None)
-            if not isinstance(numeric_level, int):
-                raise ValueError('Invalid log level: %s' % loglevel)
-
-            # setup the logging
-            logfile = None
-            if ucfg.cfg['system']['log_file'] is not None:
-                logfile = ucfg.cfg['system']['log_file']
-                os.makedirs(dirname(logfile), exist_ok=True)
-
-            fmt = '%(levelname)s:%(name)s:%(message)s'
-            if logfile is not None:
-                # From the python3 docs on basicConfig
-                # "This function does nothing if the root logger already has
-                # handlers configured"
-                for handler in logging.root.handlers[:]:
-                    logging.root.removeHandler(handler)
-
-                logging.basicConfig(filename=logfile,
-                                    level=numeric_level,
-                                    filemode='a',
-                                    format=fmt)
-            else:
-                logging.basicConfig(level=numeric_level)
-                coloredlogs.install(level=numeric_level, fmt=fmt)
-
-            self._loglevel = numeric_level
-
+            self.smrf_logger = logger.SMRFLogger(ucfg.cfg['system'])
             self._logger = logging.getLogger(__name__)
         else:
             self._logger = external_logger

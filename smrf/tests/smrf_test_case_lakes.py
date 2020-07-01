@@ -1,6 +1,6 @@
+import logging
 import os
 import shutil
-import logging
 
 from inicheck.tools import get_user_config
 

@@ -50,7 +50,7 @@ class image_data():
 
         self.gridded = False
 
-        self._base_logger = logging.getLogger(__name__)
+        self._logger = logging.getLogger(self.__class__.__module__)
 
     def getConfig(self, cfg):
         """

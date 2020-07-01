@@ -1,5 +1,3 @@
-import logging
-
 from smrf.distribute import image_data
 from smrf.envphys.constants import IR_WAVELENGTHS, VISIBLE_WAVELENGTHS
 from smrf.envphys.solar import cloud, toporad, vegetation
@@ -211,7 +209,6 @@ class Solar(image_data.image_data):
 
         # extend the base class
         image_data.image_data.__init__(self, self.variable)
-        self._logger = logging.getLogger(__name__)
 
         self.config = config["solar"]
         self.albedoConfig = config["albedo"]

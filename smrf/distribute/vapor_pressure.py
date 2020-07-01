@@ -1,6 +1,4 @@
 
-import logging
-
 import numpy as np
 
 from smrf.distribute import image_data
@@ -67,7 +65,6 @@ class vp(image_data.image_data):
 
         # extend the base class
         image_data.image_data.__init__(self, self.variable)
-        self._logger = logging.getLogger(__name__)
 
         # check and assign the configuration
         self.getConfig(vpConfig)
