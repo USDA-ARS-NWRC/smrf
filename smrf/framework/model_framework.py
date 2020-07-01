@@ -41,7 +41,7 @@ from topocalc.shade import shade
 
 from smrf import data, distribute
 from smrf.output import output_netcdf, output_hru
-from smrf.framework import art
+from smrf.framework import art, logger
 from smrf.envphys import sunang
 from smrf.envphys.solar import model
 from smrf.utils import queue
@@ -118,39 +118,40 @@ class SMRF():
                             ' UserConfig instance')
         # start logging
         if external_logger is None:
+            self.smrf_logger = logger.SMRFLogger(ucfg.cfg['system'])
 
-            if 'log_level' in ucfg.cfg['system']:
-                loglevel = ucfg.cfg['system']['log_level'].upper()
-            else:
-                loglevel = 'INFO'
+            # if 'log_level' in ucfg.cfg['system']:
+            #     loglevel = ucfg.cfg['system']['log_level'].upper()
+            # else:
+            #     loglevel = 'INFO'
 
-            numeric_level = getattr(logging, loglevel, None)
-            if not isinstance(numeric_level, int):
-                raise ValueError('Invalid log level: %s' % loglevel)
+            # numeric_level = getattr(logging, loglevel, None)
+            # if not isinstance(numeric_level, int):
+            #     raise ValueError('Invalid log level: %s' % loglevel)
 
-            # setup the logging
-            logfile = None
-            if ucfg.cfg['system']['log_file'] is not None:
-                logfile = ucfg.cfg['system']['log_file']
-                os.makedirs(dirname(logfile), exist_ok=True)
+            # # setup the logging
+            # logfile = None
+            # if ucfg.cfg['system']['log_file'] is not None:
+            #     logfile = ucfg.cfg['system']['log_file']
+            #     os.makedirs(dirname(logfile), exist_ok=True)
 
-            fmt = '%(levelname)s:%(name)s:%(message)s'
-            if logfile is not None:
-                # From the python3 docs on basicConfig
-                # "This function does nothing if the root logger already has
-                # handlers configured"
-                for handler in logging.root.handlers[:]:
-                    logging.root.removeHandler(handler)
+            # fmt = '%(levelname)s:%(name)s:%(message)s'
+            # if logfile is not None:
+            #     # From the python3 docs on basicConfig
+            #     # "This function does nothing if the root logger already has
+            #     # handlers configured"
+            #     for handler in logging.root.handlers[:]:
+            #         logging.root.removeHandler(handler)
 
-                logging.basicConfig(filename=logfile,
-                                    level=numeric_level,
-                                    filemode='a',
-                                    format=fmt)
-            else:
-                logging.basicConfig(level=numeric_level)
-                coloredlogs.install(level=numeric_level, fmt=fmt)
+            #     logging.basicConfig(filename=logfile,
+            #                         level=numeric_level,
+            #                         filemode='a',
+            #                         format=fmt)
+            # else:
+            #     logging.basicConfig(level=numeric_level)
+            #     coloredlogs.install(level=numeric_level, fmt=fmt)
 
-            self._loglevel = numeric_level
+            # self._loglevel = numeric_level
 
             self._logger = logging.getLogger(__name__)
         else:

@@ -4,8 +4,10 @@ import logging
 
 from smrf.distribute import image_data
 from smrf.utils import utils
+from smrf.framework.logger import add_logger
 
 
+@add_logger()
 class ta(image_data.image_data):
     """
     The :mod:`~smrf.distribute.air_temp.ta` class allows for variable specific
@@ -52,7 +54,7 @@ class ta(image_data.image_data):
 
         # check and assign the configuration
         self.getConfig(taConfig)
-
+        self._logger.debug('Test debug')
         self._logger.debug('Created distribute.air_temp')
 
     def initialize(self, topo, data):
