@@ -40,7 +40,6 @@ class ta(image_data.image_data):
     # be written during main distribute loop
     post_process_variables = {}
 
-    # @add_logger()
     def __init__(self, taConfig):
 
         # extend the base class
