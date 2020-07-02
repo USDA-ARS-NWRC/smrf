@@ -201,6 +201,11 @@ class Solar(image_data.image_data):
         'cloud_vis_diffuse'
     ]
 
+    BASE_THREAD_VARIABLES = CLEAR_SKY_THREAD_VARIABLES + \
+        CLOUD_THREAD_VARIABLES + \
+        VEG_THREAD_VARIABLES + \
+        ['net_solar']
+
     # These are variables that are operate at the end only and do not need to
     # be written during main distribute loop
     post_process_variables = {}
@@ -243,9 +248,9 @@ class Solar(image_data.image_data):
         self.veg_tau = topo.veg_tau
         self.veg_k = topo.veg_k
 
-        self.thread_variables = self.CLEAR_SKY_THREAD_VARIABLES + \
-            self.CLOUD_THREAD_VARIABLES + self.VEG_THREAD_VARIABLES + \
-            ['net_solar']
+        # self.thread_variables = self.CLEAR_SKY_THREAD_VARIABLES + \
+        #     self.CLOUD_THREAD_VARIABLES + self.VEG_THREAD_VARIABLES + \
+        #     ['net_solar']
 
     def distribute(self, date_time, cloud_factor, illum_ang, cosz, azimuth,
                    albedo_vis, albedo_ir):

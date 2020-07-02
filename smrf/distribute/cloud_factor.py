@@ -67,7 +67,6 @@ class cf(image_data.image_data):
 
         self._logger.debug('Initializing distribute.cloud_factor')
         self._initialize(topo, data.metadata)
-        self.thread_variables = self.BASE_THREAD_VARIABLES[:]
 
     def distribute(self, data):
         """

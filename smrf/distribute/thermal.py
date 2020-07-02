@@ -234,8 +234,8 @@ class th(image_data.image_data):
         """
 
         self._logger.debug('Initializing distribute.thermal')
-        if self.gridded:
-            self._initialize(topo, data.metadata)
+        # if self.gridded:
+        self._initialize(topo, data.metadata)
 
         self.veg_height = topo.veg_height
         self.veg_tau = topo.veg_tau
@@ -245,7 +245,6 @@ class th(image_data.image_data):
             self.sky_view_factor = None
         self.dem = topo.dem
 
-        self.thread_variables = self.BASE_THREAD_VARIABLES[:]
         if self.correct_cloud:
             self.thread_variables.append('thermal_cloud')
 

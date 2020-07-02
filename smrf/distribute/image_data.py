@@ -1,4 +1,5 @@
 import logging
+from copy import deepcopy
 
 import numpy as np
 
@@ -171,6 +172,8 @@ class image_data():
                 raise Exception(
                     "Could not determine the distribution method for "
                     "{}".format(self.variable))
+
+        self.thread_variables = deepcopy(self.BASE_THREAD_VARIABLES)
 
     def _distribute(self, data, other_attribute=None, zeros=None):
         """
