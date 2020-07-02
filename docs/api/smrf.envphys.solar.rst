@@ -12,14 +12,6 @@ smrf.envphys.solar.cloud module
    :undoc-members:
    :show-inheritance:
 
-smrf.envphys.solar.ipw module
------------------------------
-
-.. automodule:: smrf.envphys.solar.ipw
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
 smrf.envphys.solar.irradiance module
 ------------------------------------
 

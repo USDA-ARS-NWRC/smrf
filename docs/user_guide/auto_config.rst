@@ -12,7 +12,7 @@ topo
 | 
 
 | **gradient_method**
-| 	Method to use for calculating the slope and aspect. gradient_d8 uses 3 by 3 finite difference window and gradient_d4 uses a two cell finite difference for x and y which mimics the IPW gradient function
+| 	Method to use for calculating the slope and aspect. gradient_d8 uses 3 by 3 finite difference window and gradient_d4 uses a two cell finite difference for x and y
 | 		*Default: gradient_d8*
 | 		*Type: string*
 | 		*Options:*

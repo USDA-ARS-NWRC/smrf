@@ -50,7 +50,7 @@ class image_data():
 
         self.gridded = False
 
-        self._base_logger = logging.getLogger(__name__)
+        self._logger = logging.getLogger(self.__class__.__module__)
 
     def getConfig(self, cfg):
         """
@@ -129,7 +129,7 @@ class image_data():
         try:
             self.mx = metadata.utm_x.values
             self.my = metadata.utm_y.values
-        except:
+        except Exception:
             self.mx = metadata.X.values
             self.my = metadata.Y.values
 

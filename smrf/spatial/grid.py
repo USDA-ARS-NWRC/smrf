@@ -19,8 +19,9 @@ class GRID:
     - Standard IDW
     - Detrended IDW
     '''
-    def __init__(self, config, mx, my, GridX, GridY, mz=None, GridZ=None, mask=None, metadata=None):
 
+    def __init__(self, config, mx, my, GridX, GridY,
+                 mz=None, GridZ=None, mask=None, metadata=None):
         """
         Args:
             config: configuration for grid interpolation
@@ -54,9 +55,10 @@ class GRID:
             k = config['grid_local_n']
             dist_df = pd.DataFrame(index=metadata.index, columns=range(k))
             dist_df.index.name = 'cell_id'
-            for i,row in metadata.iterrows():
+            for i, row in metadata.iterrows():
 
-                d = np.sqrt((metadata.latitude - row.latitude)**2 + (metadata.longitude - row.longitude)**2)
+                d = np.sqrt((metadata.latitude - row.latitude) **
+                            2 + (metadata.longitude - row.longitude)**2)
                 dist_df.loc[row.name] = d.sort_values()[:k].index
 
             self.dist_df = dist_df
@@ -67,13 +69,12 @@ class GRID:
             df.drop('level_1', axis=1, inplace=True)
 
             # get the elevations
-            df['elevation'] = metadata.loc[df['cell_local'], 'elevation'].values
+            df['elevation'] = metadata.loc[df.cell_local, 'elevation'].values
 
             # now we have cell_id, cell_local and elevation for the whole grid
             self.full_df = df
 
             self.tri = None
-
 
         # mask
         self.mask = np.zeros_like(self.mx, dtype=bool)
@@ -103,7 +104,6 @@ class GRID:
 
         # get the trend, ensure it's positive
 
-
         if self.config['grid_local']:
             rtrend = self.detrendedInterpolationLocal(data, flag, grid_method)
 
@@ -122,12 +122,11 @@ class GRID:
         """
 
         # take the new full_df and fill a data column
-        # Adapted from:
-        # https://stackoverflow.com/questions/51140302/using-polyfit-on-pandas-dataframe-and-then-adding-the-results-to-new-columns
         df = self.full_df.copy()
         df['data'] = data[df['cell_local']].values
         df = df.set_index('cell_id')
-        df['fit'] = df.groupby('cell_id').apply(lambda x: np.polyfit(x.elevation, x.data, 1))
+        df['fit'] = df.groupby('cell_id').apply(
+            lambda x: np.polyfit(x.elevation, x.data, 1))
 
         # drop all the duplicates
         df.reset_index(inplace=True)
@@ -144,26 +143,38 @@ class GRID:
 
         # get triangulation
         if self.tri is None:
-            xy = _ndim_coords_from_arrays((self.metadata.utm_x, self.metadata.utm_y))
+            xy = _ndim_coords_from_arrays(
+                (self.metadata.utm_x, self.metadata.utm_y))
             self.tri = qhull.Delaunay(xy)
 
         # interpolate the slope/intercept
-        grid_slope = grid_interpolate_deconstructed(self.tri, df.slope.values[:], (self.GridX, self.GridY), method=grid_method)
+        grid_slope = grid_interpolate_deconstructed(
+            self.tri,
+            df.slope.values[:],
+            (self.GridX, self.GridY),
+            method=grid_method)
 
-        grid_intercept = grid_interpolate_deconstructed(self.tri, df.intercept.values[:], (self.GridX, self.GridY), method=grid_method)
+        grid_intercept = grid_interpolate_deconstructed(
+            self.tri,
+            df.intercept.values[:],
+            (self.GridX, self.GridY),
+            method=grid_method)
 
         # remove the elevation trend from the HRRR precip
         el_trend = df.elevation * df.slope + df.intercept
         dtrend = df.data - el_trend
 
         # interpolate the residuals over the DEM
-        idtrend = grid_interpolate_deconstructed(self.tri, dtrend, (self.GridX, self.GridY), method=grid_method)
+        idtrend = grid_interpolate_deconstructed(
+            self.tri,
+            dtrend,
+            (self.GridX, self.GridY),
+            method=grid_method)
 
         # reinterpolate
         rtrend = idtrend + grid_slope * self.GridZ + grid_intercept
 
         return rtrend
-
 
     def detrendedInterpolationMask(self, data, flag=0, grid_method='linear'):
         """

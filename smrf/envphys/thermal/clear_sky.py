@@ -47,7 +47,8 @@ def Dilly1998(ta, ea):
     (1998) :cite:`Dilley&OBrian:1998` using the equation:
 
     .. math::
-        L_{clear} = 59.38 + 113.7 * \\left( \\frac{T_a}{273.16} \\right)^6 + 96.96 \\sqrt{w/25}
+        L_{clear} = 59.38 + 113.7 * \\left( \\frac{T_a}{273.16}
+        \\right)^6 + 96.96 \\sqrt{w/25}
 
     Where :math:`T_a` is the air temperature and :math:`w` is the amount of
     precipitable water. The preipitable water is estimated as
@@ -77,7 +78,7 @@ def Prata1996(ta, ea):
     :cite:`Prata:1996` using the equation:
 
     .. math::
-        \epsilon_{clear} = 1 - (1 + w) * exp(-1.2 + 3w)^{1/2}
+        \\epsilon_{clear} = 1 - (1 + w) * exp(-1.2 + 3w)^{1/2}
 
     Where :math:`w` is the amount of precipitable water. The preipitable
     water is estimated as :math:`4650 e_o/T_o` from Prata (1996)

@@ -25,13 +25,11 @@ Example:
 
 import logging
 import os
-import shutil
 import sys
 from datetime import datetime
-from os.path import abspath, dirname, join
+from os.path import abspath, join
 from threading import Thread
 
-import coloredlogs
 import numpy as np
 import pandas as pd
 import pytz
@@ -40,9 +38,11 @@ from inicheck.output import generate_config, print_config_report
 from inicheck.tools import check_config, get_user_config
 from topocalc.shade import shade
 
-from smrf import data, distribute, output
+from smrf import data, distribute
 from smrf.envphys import sunang
 from smrf.envphys.solar import model
+from smrf.framework import art, logger
+from smrf.output import output_hru, output_netcdf
 from smrf.utils import queue
 from smrf.utils.utils import backup_input, check_station_colocation, getqotw
 
@@ -91,82 +91,31 @@ class SMRF():
             if not os.path.isfile(config):
                 raise Exception('Configuration file does not exist --> {}'
                                 .format(config))
-            configFile = config
+            self.configFile = config
 
             # Read in the original users config
             ucfg = get_user_config(config, modules='smrf')
 
         elif isinstance(config, UserConfig):
             ucfg = config
-            configFile = config.filename
+            self.configFile = config.filename
 
         else:
             raise Exception('Config passed to SMRF is neither file name nor '
                             ' UserConfig instance')
         # start logging
         if external_logger is None:
-
-            if 'log_level' in ucfg.cfg['system']:
-                loglevel = ucfg.cfg['system']['log_level'].upper()
-            else:
-                loglevel = 'INFO'
-
-            numeric_level = getattr(logging, loglevel, None)
-            if not isinstance(numeric_level, int):
-                raise ValueError('Invalid log level: %s' % loglevel)
-
-            # setup the logging
-            logfile = None
-            if ucfg.cfg['system']['log_file'] is not None:
-                logfile = ucfg.cfg['system']['log_file']
-                if not os.path.isabs(logfile):
-                    logfile = abspath(join(
-                        dirname(configFile),
-                        ucfg.cfg['system']['log_file']))
-
-                if not os.path.isdir(dirname(logfile)):
-                    os.makedirs(dirname(logfile))
-
-                if not os.path.isfile(logfile):
-                    with open(logfile, 'w+') as f:
-                        f.close()
-
-            fmt = '%(levelname)s:%(name)s:%(message)s'
-            if logfile is not None:
-                logging.basicConfig(filename=logfile,
-                                    level=numeric_level,
-                                    filemode='w+',
-                                    format=fmt)
-            else:
-                logging.basicConfig(level=numeric_level)
-                coloredlogs.install(level=numeric_level, fmt=fmt)
-
-            self._loglevel = numeric_level
-
+            self.smrf_logger = logger.SMRFLogger(ucfg.cfg['system'])
             self._logger = logging.getLogger(__name__)
         else:
             self._logger = external_logger
 
         # add the title
-        title = self.title(2)
-        for line in title:
-            self._logger.info(line)
+        self.title(2)
 
+        # Make the output directory if it do not exist
         out = ucfg.cfg['output']['out_location']
-
-        # Make the tmp and output directories if they do not exist
-        makeable_dirs = [out, join(out, 'tmp')]
-        for path in makeable_dirs:
-            if not os.path.isdir(path):
-                try:
-                    self._logger.info("Directory does not exist, Creating:\n{}"
-                                      "".format(path))
-                    os.makedirs(path)
-
-                except OSError as e:
-                    raise e
-
-        self.temp_dir = path
+        os.makedirs(out, exist_ok=True)
 
         # Check the user config file for errors and report issues if any
         self._logger.info("Checking config file for issues...")
@@ -190,8 +139,6 @@ class SMRF():
         # Process the system variables
         for k, v in self.config['system'].items():
             setattr(self, k, v)
-
-        os.environ['WORKDIR'] = self.temp_dir
 
         self._setup_date_and_time()
 
@@ -250,12 +197,12 @@ class SMRF():
             self.end_date = self.end_date.tz_localize(self.time_zone)
 
         # Get the time steps correctly in the time zone
-        self.date_time = pd.date_range(
+        self.date_time = list(pd.date_range(
             self.start_date,
             self.end_date,
             freq="{[time][time_step]}min".format(self.config),
             tz=self.time_zone
-        ).to_list()
+        ))
         self.time_steps = len(self.date_time)
 
     def __enter__(self):
@@ -266,11 +213,8 @@ class SMRF():
         Provide some logging info about when SMRF was closed
         """
 
-        if hasattr(self, 'temp_dir'):
-            if os.path.isdir(self.temp_dir):
-                shutil.rmtree(self.temp_dir)
-
         self._logger.info('SMRF closed --> %s' % datetime.now())
+        logging.shutdown()
 
     def loadTopo(self):
         """
@@ -278,10 +222,7 @@ class SMRF():
         :func:`smrf.data.loadTopo.Topo` for full description.
         """
 
-        # load the topo
-        self.topo = data.loadTopo.Topo(
-            self.config['topo'],
-            tempDir=self.temp_dir)
+        self.topo = data.loadTopo.Topo(self.config['topo'])
 
     def initializeDistribution(self):
         """
@@ -386,7 +327,6 @@ class SMRF():
                 self.end_date,
                 time_zone=self.time_zone,
                 dataType=self.config['gridded']['data_type'],
-                tempDir=self.temp_dir,
                 forecast_flag=self.forecast_flag,
                 day_hour=self.day_hour)
 
@@ -420,7 +360,7 @@ class SMRF():
                     self.topo.y,
                     'utm_y'), axis=1)
         # Old DB has X and Y
-        except:
+        except Exception:
 
             self.data.metadata['xi'] = self.data.metadata.apply(
                 lambda row: find_pixel_location(
@@ -461,7 +401,7 @@ class SMRF():
                     if self.distribute[key].stations is not None:
                         # Confirm out stations all have a unique position
                         colocated = check_station_colocation(
-                            metadata=self.data.metadata.loc[self.distribute[key].stations])
+                            metadata=self.data.metadata.loc[self.distribute[key].stations])  # noqa
 
                         # Stations are co-located, throw error
                         if colocated is not None:
@@ -769,8 +709,8 @@ class SMRF():
     def initializeOutput(self):
         """
         Initialize the output files based on the configFile section ['output'].
-        Currently only :func:`NetCDF files <smrf.output.output_netcdf>` is
-        supported.
+        Currently only :func:`NetCDF files
+        <smrf.output.output_netcdf.OutputNetcdf>` are supported.
         """
         out = self.config['output']['out_location']
 
@@ -783,7 +723,7 @@ class SMRF():
             output_variables = self.config['output']['variables']
 
             # determine which variables belong where
-            variable_list = {}
+            variable_dict = {}
             for v in output_variables:
                 for m in self.modules:
 
@@ -804,18 +744,18 @@ class SMRF():
                                 'out_location': fname,
                                 'info': self.distribute[m].output_variables[v]
                             }
-                            variable_list[v] = d
+                            variable_dict[v] = d
 
             # determine what type of file to output
             if self.config['output']['file_type'].lower() == 'netcdf':
-                self.out_func = output.output_netcdf(
-                    variable_list, self.topo,
+                self.out_func = output_netcdf.OutputNetcdf(
+                    variable_dict, self.topo,
                     self.config['time'],
                     self.config['output'])
 
             elif self.config['output']['file_type'].lower() == 'hru':
-                self.out_func = output.output_hru(
-                    variable_list, self.topo,
+                self.out_func = output_hru.output_hru(
+                    variable_dict, self.topo,
                     self.date_time,
                     self.config['output'])
 
@@ -836,11 +776,11 @@ class SMRF():
         Output the forcing data or model outputs for the current_time_step.
 
         Args:
-            current_time_step (date_time): the current time step datetime 
+            current_time_step (date_time): the current time step datetime
                                             object
 
-            module -
-            var_name -
+            module (str): module name
+            out_var (str) - output a single variable
 
         """
         output_count = self.date_time.index(current_time_step)
@@ -853,7 +793,7 @@ class SMRF():
             # User is attempting to output single variable
             if module is not None and out_var is not None:
                 # add only one variable to the output list and preceed
-                var_vals = [self.out_func.variable_list[out_var]]
+                var_vals = [self.out_func.variable_dict[out_var]]
 
             # Incomplete request
             elif module is not None or out_var is not None:
@@ -863,7 +803,7 @@ class SMRF():
 
             else:
                 # Output all the variables
-                var_vals = self.out_func.variable_list.values()
+                var_vals = self.out_func.variable_dict.values()
 
             # Get the output variables then pass to the function
             for v in var_vals:
@@ -891,39 +831,13 @@ class SMRF():
         """
 
         if option == 1:
-            title = ["  .----------------.  .----------------.  .----------------.  .----------------.",
-                     " | .--------------. || .--------------. || .--------------. || .--------------. |",
-                     " | |    _______   | || | ____    ____ | || |  _______     | || |  _________   | |",
-                     " | |   /  ___  |  | || ||_   \  /   _|| || | |_   __ \    | || | |_   ___  |  | |",
-                     " | |  |  (__ \_|  | || |  |   \/   |  | || |   | |__) |   | || |   | |_  \_|  | |",
-                     " | |   '.___`-.   | || |  | |\  /| |  | || |   |  __ /    | || |   |  _|      | |",
-                     " | |  |`\____) |  | || | _| |_\/_| |_ | || |  _| |  \ \_  | || |  _| |_       | |",
-                     " | |  |_______.'  | || ||_____||_____|| || | |____| |___| | || | |_____|      | |",
-                     " | |              | || |              | || |              | || |              | |",
-                     " | '--------------' || '--------------' || '--------------' || '--------------' |",
-                     "  '----------------'  '----------------'  '----------------'  '----------------' ",
-                     " "]
+            title = art.title1
 
         elif option == 2:
-            title = ["    SSSSSSSSSSSSSSS  MMMMMMMM               MMMMMMMM RRRRRRRRRRRRRRRRR    FFFFFFFFFFFFFFFFFFFFFF",
-                     "  SS:::::::::::::::S M:::::::M             M:::::::M R::::::::::::::::R   F::::::::::::::::::::F",
-                     " S:::::SSSSSS::::::S M::::::::M           M::::::::M R::::::RRRRRR:::::R  F::::::::::::::::::::F",
-                     " S:::::S     SSSSSSS M:::::::::M         M:::::::::M RR:::::R     R:::::R FF::::::FFFFFFFFF::::F",
-                     " S:::::S             M::::::::::M       M::::::::::M   R::::R     R:::::R   F:::::F       FFFFFF",
-                     " S:::::S             M:::::::::::M     M:::::::::::M   R::::R     R:::::R   F:::::F",
-                     "  S::::SSSS          M:::::::M::::M   M::::M:::::::M   R::::RRRRRR:::::R    F::::::FFFFFFFFFF",
-                     "   SS::::::SSSSS     M::::::M M::::M M::::M M::::::M   R:::::::::::::RR     F:::::::::::::::F",
-                     "     SSS::::::::SS   M::::::M  M::::M::::M  M::::::M   R::::RRRRRR:::::R    F:::::::::::::::F",
-                     "        SSSSSS::::S  M::::::M   M:::::::M   M::::::M   R::::R     R:::::R   F::::::FFFFFFFFFF",
-                     "             S:::::S M::::::M    M:::::M    M::::::M   R::::R     R:::::R   F:::::F",
-                     "             S:::::S M::::::M     MMMMM     M::::::M   R::::R     R:::::R   F:::::F",
-                     " SSSSSSS     S:::::S M::::::M               M::::::M RR:::::R     R:::::R FF:::::::FF",
-                     " S::::::SSSSSS:::::S M::::::M               M::::::M R::::::R     R:::::R F::::::::FF",
-                     " S:::::::::::::::SS  M::::::M               M::::::M R::::::R     R:::::R F::::::::FF",
-                     "  SSSSSSSSSSSSSSS    MMMMMMMM               MMMMMMMM RRRRRRRR     RRRRRRR FFFFFFFFFFF",
-                     " "]
+            title = art.title2
 
-        return title
+        for line in title:
+            self._logger.info(line)
 
 
 def run_smrf(config):

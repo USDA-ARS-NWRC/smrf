@@ -1,59 +1,46 @@
-# SMRF is built on the IPW
-FROM usdaarsnwrc/ipw:latest
+# Multi-stage SMRF docker build
+FROM python:3.6-slim-buster as builder
 
-MAINTAINER Scott Havens <scott.havens@ars.usda.gov>
-
-ARG REQUIREMENTS=''
-
-####################################################
-# System requirements
-####################################################
-
-RUN apt-get update -y \
-    && apt-get install -y --no-install-recommends libblas-dev \
+RUN mkdir /install \
+    && mkdir /build \
+    && apt-get update -y \
+    && apt-get install -y --no-install-recommends \
+    gcc \
     git \
-    liblapack-dev \
-    libatlas-base-dev \
-    libffi-dev \
     libssl-dev \
-    gfortran \
     libyaml-dev \
-    libfreetype6-dev \
-    libpng-dev \
     libhdf5-serial-dev \
-    python3-dev \
-    python3-pip \
-    python3-tk \
     curl \
-    libeccodes-dev \
     libeccodes-tools \
     && rm -rf /var/lib/apt/lists/* \
-    && apt autoremove -y curl
+    && apt-get autoremove -y curl
 
-####################################################
-# SMRF
-####################################################
+COPY . /build
+WORKDIR /build
 
-COPY . / /code/smrf/
-
-RUN mkdir /data \
-    && cd /code/smrf \
-    && python3 -m pip install --no-cache-dir --upgrade pip \
+RUN python3 -m pip install --no-cache-dir --upgrade pip \
     && python3 -m pip install --no-cache-dir setuptools wheel \
-    && python3 -m pip install --no-cache-dir -r /code/smrf/requirements${REQUIREMENTS}.txt \
+    && python3 -m pip install --no-cache-dir --user -r requirements.txt \
+    && python3 setup.py bdist_wheel \
     && python3 setup.py build_ext --inplace \
-    && python3 setup.py install \
-    # && rm -r /root/.cache/pip \
-    && apt-get autoremove -y gcc
+    && python3 setup.py install --user
 
-####################################################
+##############################################
+# main image
+##############################################
+FROM python:3.6-slim-buster
+
+COPY --from=builder /root/.local /usr/local
+
+RUN apt-get update -y \
+    && apt-get install -y --no-install-recommends libeccodes-tools \
+    && python3 -m pip install --no-cache-dir nose \
+    && nosetests -vv --exe smrf \
+    && python3 -m pip uninstall -y nose \
+    && rm -rf /var/lib/apt/lists/*
+
 # Create a shared data volume
-####################################################
-
 VOLUME /data
 WORKDIR /data
 
-COPY ./docker-entrypoint.sh /
-RUN chmod +x /docker-entrypoint.sh
-ENTRYPOINT ["/docker-entrypoint.sh"]
 CMD ["/bin/bash"]

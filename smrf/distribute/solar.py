@@ -1,13 +1,6 @@
-import logging
-import os
-import subprocess as sp
-
-import numpy as np
-from spatialnc import ipw
-
 from smrf.distribute import image_data
-from smrf.envphys.solar import cloud, vegetation, toporad
-from smrf.envphys.constants import VISIBLE_WAVELENGTHS, IR_WAVELENGTHS
+from smrf.envphys.constants import IR_WAVELENGTHS, VISIBLE_WAVELENGTHS
+from smrf.envphys.solar import cloud, toporad, vegetation
 from smrf.utils import utils
 
 
@@ -216,7 +209,6 @@ class Solar(image_data.image_data):
 
         # extend the base class
         image_data.image_data.__init__(self, self.variable)
-        self._logger = logging.getLogger(__name__)
 
         self.config = config["solar"]
         self.albedoConfig = config["albedo"]
@@ -501,11 +493,14 @@ class Solar(image_data.image_data):
 
         Args:
             date_time (datetime): datetime object
-            illum_ang (np.array): numpy array of cosing of local illumination angles
+            illum_ang (np.array): numpy array of cosing of local illumination
+                angles
             cosz (float): cosine of the zenith angle for the basin
             azimuth (float): azimuth to the sun for the basin
-            albedo_surface (np.array): albedo should match wavelengths specified
-            wavelength_range (list, optional): wavelengths to integrate over. Defaults to [0.28, 0.7].
+            albedo_surface (np.array): albedo should match wavelengths
+                specified
+            wavelength_range (list, optional): wavelengths to integrate over.
+                Defaults to [0.28, 0.7].
 
         Returns:
             tuple: clear sky beam and diffuse radiation
@@ -525,144 +520,3 @@ class Solar(image_data.image_data):
             scattering_factor=self.config['clear_gamma'])
 
         return clear_beam, clear_diffuse
-
-    def calc_ir(self, min_storm_day, wy_day, tz_min_west,
-                wyear, cosz, azimuth):
-        """
-        Run ``stoporad`` for the infrared bands
-
-        TODO: deprecated
-
-        Args:
-            min_storm_day: decimal day of last storm for the entire basin, from
-                :mod:`smrf.distribute.precip.ppt.last_storm_day_basin`
-            wy_day: day of water year, from
-                :mod:`~smrf.distirbute.solar.solar.radiation_dates`
-            tz_min_west: time zone in minutes west from UTC, from
-                :mod:`~smrf.distirbute.solar.solar.radiation_dates`
-            wyear: water year, from
-                :mod:`~smrf.distirbute.solar.solar.radiation_dates`
-            cosz: cosine of the zenith angle for the basin, from
-                :mod:`smrf.envphys.radiation.sunang`
-            azimuth: azimuth to the sun for the basin, from
-                :mod:`smrf.envphys.radiation.sunang`
-        """
-        self._logger.debug('Calculating clear sky radiation, ir')
-
-        ir_cmd = 'stoporad -z %i -t %s -w %s -g %s -x 0.7,2.8 -s %s'\
-            ' -d %s -f %i -y %i -A %f,%f -a %i -m %i -c %i -D %s > %s' \
-            % (self.config['clear_opt_depth'],
-               str(self.config['clear_tau']),
-               str(self.config['clear_omega']),
-               str(self.config['clear_gamma']),
-               str(min_storm_day),
-               str(wy_day),
-               tz_min_west, wyear,
-               cosz, azimuth,
-               self.albedoConfig['grain_size'],
-               self.albedoConfig['max_grain'],
-               self.albedoConfig['dirt'],
-               self.topo.stoporad_in_file,
-               self.ir_file)
-
-        # self._logger.debug(ir_cmd)
-
-        irp = sp.Popen(ir_cmd,
-                       shell=True,
-                       env={"PATH": os.environ['PATH'],
-                            "WORKDIR": os.environ['WORKDIR']})
-
-        stdoutdata, stderrdata = irp.communicate()
-
-        if irp.returncode != 0:
-            raise Exception('Clear sky for IR failed')
-
-        ir = ipw.IPW(self.ir_file)
-        clear_ir_beam = ir.bands[0].data
-        clear_ir_diffuse = ir.bands[1].data
-
-        return clear_ir_beam, clear_ir_diffuse
-
-    def calc_vis_ipw(self, min_storm_day, wy_day, tz_min_west,
-                     wyear, cosz, azimuth):
-        """
-        Run ``stoporad`` for the visible bands that calls IPW stoporad
-
-        TODO: deprecated
-
-        Args:
-            min_storm_day: decimal day of last storm for the entire basin, from
-                :mod:`smrf.distribute.precip.ppt.last_storm_day_basin`
-            wy_day: day of water year, from
-                :mod:`~smrf.distirbute.solar.solar.radiation_dates`
-            tz_min_west: time zone in minutes west from UTC, from
-                :mod:`~smrf.distirbute.solar.solar.radiation_dates`
-            wyear: water year, from
-                :mod:`~smrf.distirbute.solar.solar.radiation_dates`
-            cosz: cosine of the zenith angle for the basin, from
-                :mod:`smrf.envphys.radiation.sunang`
-            azimuth: azimuth to the sun for the basin, from
-                :mod:`smrf.envphys.radiation.sunang`
-        """
-        self._logger.debug('Calculating clear sky radiation, visible')
-
-        vis_cmd = 'stoporad -z %i -t %s -w %s -g %s -x 0.28,0.7 -s %s'\
-            ' -d %s -f %i -y %i -A %f,%f -a %i -m %i -c %i -D %s > %s' \
-            % (self.config['clear_opt_depth'],
-               str(self.config['clear_tau']),
-               str(self.config['clear_omega']),
-               str(self.config['clear_gamma']),
-               str(min_storm_day),
-               str(wy_day),
-               tz_min_west,
-               wyear,
-               cosz,
-               azimuth,
-               self.albedoConfig['grain_size'],
-               self.albedoConfig['max_grain'],
-               self.albedoConfig['dirt'],
-               self.topo.stoporad_in_file,
-               self.vis_file)
-#         self._logger.debug(vis_cmd)
-
-        visp = sp.Popen(vis_cmd,
-                        shell=True,
-                        env={"PATH": os.environ['PATH'],
-                             "WORKDIR": os.environ['WORKDIR']})
-
-        stdoutdata, stderrdata = visp.communicate()
-
-        if visp.returncode != 0:
-            raise Exception('Clear sky for visible failed')
-
-        # load clear sky files back in
-        vis = ipw.IPW(self.vis_file)
-        clear_vis_beam = vis.bands[0].data
-        clear_vis_diffuse = vis.bands[1].data
-
-        return clear_vis_beam, clear_vis_diffuse
-
-    def radiation_dates(self, date_time):
-        """
-        Calculate some times based on the date for ``stoporad``
-
-        TODO: deprecated
-
-        Args:
-            date_time: date time object
-
-        Returns:
-            (tuple): tuple containing:
-
-                * **wy_day** - day of water year from October 1
-                * **wyear** - water year
-                * **tz_min_west** - minutes west of UTC for timezone
-        """
-
-        # get the current day of water year
-        wy_day, wyear = utils.water_day(date_time)
-
-        # determine the minutes west of timezone
-        tz_min_west = np.abs(date_time.utcoffset().total_seconds()/60)
-
-        return wy_day, wyear, tz_min_west

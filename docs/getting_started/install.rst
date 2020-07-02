@@ -67,27 +67,6 @@ already setup to run SMRF so the following steps do not apply for running out
 of a docker.
 
 
-Installing IPW
---------------
-
-Clone IPW  using the command below and follow the instructions in the Install
-text file. If you would prefer to read the file in your browser `click here`_.
-
-.. _click here: https://github.com/USDA-ARS-NWRC/ipw/blob/master/Install
-
-.. code:: bash
-
-    git clone https://github.com/USDA-ARS-NWRC/ipw.git
-
-Double check that the following environment variables are set and readable by Python
-
-   * $IPW, and $IPW/bin environment variable is set.
-   * WORKDIR, the location where temporary files are created and modified which
-     is not default on Linux. Use ~/tmp for example.
-   * PATH, is set and readable by Python (mainly if running inside an IDE
-     environment).
-
-
 Installing SMRF
 ---------------
 

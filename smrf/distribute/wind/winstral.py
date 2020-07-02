@@ -20,10 +20,12 @@ class WinstralWindModel(image_data.image_data):
     (library) is used to load the upwind direction and maxus values over the
     dem. The following steps are performed when estimating the wind speed:
 
-    1. Adjust measured wind speeds at the stations and determine the wind direction componenets
+    1. Adjust measured wind speeds at the stations and determine the wind
+       direction componenets
     2. Distribute the flat wind speed
     3. Distribute the wind direction components
-    4. Simulate the wind speeds based on the distribute flat wind, wind direction, and maxus values
+    4. Simulate the wind speeds based on the distribute flat wind, wind
+       direction, and maxus values
 
     After the maxus is calculated for multiple wind directions over the entire
     DEM, the measured wind speed and direction can be distirbuted. The first

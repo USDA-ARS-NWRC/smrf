@@ -7,13 +7,12 @@ of development and users will require the specific table setup
 """
 
 import logging
-from datetime import datetime, timedelta
+from datetime import timedelta
 
 import mysql.connector
 import numpy as np
 import pandas as pd
 import scipy.stats as stats
-import utm
 
 
 class database:
@@ -71,7 +70,7 @@ class database:
         else:
             qry = """SELECT {0}.* FROM {0} INNER JOIN {1} ON
                     {0}.id={1}.metadata_id WHERE {1}.client='{2}'""".format(
-                    table, station_table, client)
+                table, station_table, client)
 
         self._logger.debug(qry)
 
@@ -105,7 +104,7 @@ class database:
         qry = """SELECT date_time,station_id,{0} FROM {1}
              WHERE date_time BETWEEN '{2}' AND '{3}' AND
              station_id IN ('{4}') ORDER BY date_time ASC""".format(
-                variables, table, start_date, end_date, sta)
+            variables, table, start_date, end_date, sta)
 
         self._logger.debug(qry)
 

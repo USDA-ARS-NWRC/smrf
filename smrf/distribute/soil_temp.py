@@ -1,6 +1,3 @@
-
-import logging
-
 import numpy as np
 
 from smrf.distribute import image_data
@@ -17,7 +14,6 @@ class ts(image_data.image_data):
 
     Args:
         soilConfig: The [soil] section of the configuration file
-        tempDir: location of temp/working directory (default=None)
 
     Attributes:
         config: configuration from [soil] section
@@ -43,11 +39,10 @@ class ts(image_data.image_data):
 
     BASE_THREAD_VARIABLES = []
 
-    def __init__(self, soilConfig, tempDir=None):
+    def __init__(self, soilConfig):
 
         # extend the base class
         image_data.image_data.__init__(self, self.variable)
-        self._logger = logging.getLogger(__name__)
 
         self.config = soilConfig
 

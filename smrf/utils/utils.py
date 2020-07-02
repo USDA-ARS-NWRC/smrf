@@ -15,9 +15,7 @@ from inicheck.utilities import mk_lst
 from scipy.interpolate.interpnd import (CloughTocher2DInterpolator,
                                         LinearNDInterpolator)
 
-from smrf import __core_config__, __version__
-
-from .gitinfo import __gitVersion__
+from smrf import __core_config__
 
 
 class CheckStation(CheckType):
@@ -265,39 +263,6 @@ def backup_input(data, config_obj):
     # Output inifile
     generate_config(backup_config_obj, os.path.join(
         backup_dir, 'backup_config.ini'))
-
-
-def getgitinfo():
-    """
-    gitignored file that contains specific SMRF version and path
-
-    Returns:
-        str: git version from 'git describe'
-    """
-    # return git describe if in git tracked SMRF
-    if len(__gitVersion__) > 1:
-        return __gitVersion__
-
-    # return overarching version if not in git tracked SMRF
-    else:
-        version = 'v'+__version__
-        return version
-
-
-def getConfigHeader():
-    """
-    Generates string for inicheck to add to config files
-
-    Returns:
-        cfg_str: string for cfg headers
-    """
-
-    cfg_str = ("Config File for SMRF {0}\n"
-               "For more SMRF related help see:\n"
-               "{1}").format(
-                   getgitinfo(),
-                   'http://smrf.readthedocs.io/en/latest/')
-    return cfg_str
 
 
 def check_station_colocation(metadata_csv=None, metadata=None):

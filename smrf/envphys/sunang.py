@@ -23,7 +23,8 @@ def sunang(date_time, latitude, longitude, truncate=True):
         date_time: python datetime object
         latitude: value or np.ndarray (in degrees)
         longitude: value or np.ndarray (in degrees)
-        truncate: True will replicate the IPW output precision, not applied if position is an array
+        truncate: True will replicate the IPW output precision, not
+                applied if position is an array
 
     Returns
         cosz - cosine of the zenith angle, same shape as input position
@@ -56,7 +57,8 @@ def sunang_thread(queue, date, lat, lon):
 
     Args:
         queue: queue with cosz, azimuth
-        date: loop through dates to accesss queue, must be same as rest of queues
+        date: loop through dates to accesss queue, must be same as
+                rest of queues
 
     """
 
@@ -103,19 +105,23 @@ def sunpath(latitude, longitude, declination, omega):
     else:
         if np.abs(latitude) > M_PI_2:
             raise ValueError(
-                "latitude ({} deg) not between -90 and +90 degrees".format(latitude*180/M_PI))
+                "latitude ({} deg) not between -90 and +90 degrees".format(
+                    latitude*180/M_PI))
 
         if np.abs(longitude) > M_PI:
             raise ValueError(
-                "longitude ({} deg) not between -180 and +180 degrees".format(longitude*180/M_PI))
+                "longitude ({} deg) not between -180 and +180 degrees".format(
+                    longitude*180/M_PI))
 
     if np.abs(declination) > M_PI*MAX_DECLINATION/180:
-        raise ValueError("declination ({} deg) > maximum declination ({} deg)".format(
-            declination*180/M_PI, MAX_DECLINATION))
+        raise ValueError(
+            "declination ({} deg) > maximum declination ({} deg)".format(
+                declination*180/M_PI, MAX_DECLINATION))
 
     if np.abs(omega) > M_PI:
         raise ValueError(
-            "longitude of sun ({} deg) not between -180 and +180 degrees".format(omega*180/M_PI))
+            """longitude of sun ({} deg) not between -180 and """
+            """+180 degrees""".format(omega*180/M_PI))
 
     cosz, az = rotate(np.sin(declination), omega, np.sin(latitude), longitude)
 
@@ -164,8 +170,8 @@ def ephemeris(dt):
 
     # p51 = gmts/3600/24*360
 
-    # The int() is required for compatability with IPW as the divide by 100 keeps
-    # the value as an integer where python converts to a float...
+    # The int() is required for compatability with IPW as the divide by
+    # 100 keeps the value as an integer where python converts to a float...
     p51 = gmts / 10.0 / 24.0
     p22 = int(((dt.year - 1900) * JULIAN_CENTURY - 25) / 100) + \
         yearday(dt.year, dt.month, dt.day) - 0.5
@@ -331,9 +337,9 @@ def rotate(mu, azm, mu_r, lam_r):
     radians.
 
     Args:
-        mu: cosine of angle theta from z-axis in old coordinate 
+        mu: cosine of angle theta from z-axis in old coordinate
             system, sin(declination)
-        azm: azimuth (+ccw from x-axis) in old coordinate system, 
+        azm: azimuth (+ccw from x-axis) in old coordinate system,
             hour angle of sun (long. where sun is vertical)
         mu_r: cosine of angle theta_r of rotation of z-axis, sin(latitude)
         lam_r: azimuth (+ccw) of rotation of x-axis, longitude
@@ -354,11 +360,12 @@ def rotate(mu, azm, mu_r, lam_r):
     else:
         if mu_r < -1.0 or mu_r > 1.0:
             raise ValueError(
-                "rotate: mu_rotate = cos(theta-sub-r) = {} is not between -1 and +1".format(mu_r))
+                "rotate: mu_r ({}) is not between -1 and +1".format(mu_r))
 
     if np.abs(azm) > (2 * np.pi):
         raise ValueError(
-            "rotate: azimuth ({} deg) is not between -360 and 360".format(180 * (azm * 360) / np.pi))
+            "rotate: azimuth ({} deg) is not between -360 and 360".format(
+                180 * (azm * 360) / np.pi))
 
     if isinstance(lam_r, np.ndarray):
         if np.any(np.abs(lam_r) > (2 * np.pi)):
@@ -366,7 +373,8 @@ def rotate(mu, azm, mu_r, lam_r):
     else:
         if np.abs(lam_r) > (2 * np.pi):
             raise ValueError(
-                "rotate: lam_r ({} deg) = axis rotation, is not between -360 and 360".format(180 * lam_r / np.pi))
+                "rotate: lam_r ({} deg) is not between -360 and 360".format(
+                    180 * lam_r / np.pi))
 
     # difference between azimuth and rotation angle of x-axis
     omega = lam_r - azm
