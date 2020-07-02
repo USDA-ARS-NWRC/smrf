@@ -101,7 +101,7 @@ class Albedo(image_data.image_data):
         if self.config["decay_method"] is None:
             self._logger.warning("No decay method is set!")
 
-        self.thread_variables = self.BASE_THREAD_VARIABLES
+        self.thread_variables = self.BASE_THREAD_VARIABLES[:]
 
     def distribute(self, current_time_step, cosz, storm_day):
         """

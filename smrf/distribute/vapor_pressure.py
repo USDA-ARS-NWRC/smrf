@@ -100,7 +100,7 @@ class vp(image_data.image_data):
         # get dem to pass to wet_bulb
         self.dem = topo.dem
 
-        self.thread_variables = self.BASE_THREAD_VARIABLES
+        self.thread_variables = self.BASE_THREAD_VARIABLES[:]
 
     def distribute(self, data, ta):
         """

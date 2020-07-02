@@ -106,7 +106,7 @@ class TestLakesThreaded(SMRFTestCaseLakes):
         config = deepcopy(cls.base_config)
         config.raw_cfg['system'].update({
             'threading': True,
-            'time_out': 1
+            'time_out': 2
         })
 
         config.apply_recipes()

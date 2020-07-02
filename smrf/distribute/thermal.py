@@ -245,7 +245,7 @@ class th(image_data.image_data):
             self.sky_view_factor = None
         self.dem = topo.dem
 
-        self.thread_variables = self.BASE_THREAD_VARIABLES
+        self.thread_variables = self.BASE_THREAD_VARIABLES[:]
         if self.correct_cloud:
             self.thread_variables.append('thermal_cloud')
 

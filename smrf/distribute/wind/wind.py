@@ -114,7 +114,7 @@ class Wind(image_data.image_data):
 
         self.wind_model._initialize(topo, data.metadata)
 
-        self.thread_variables = self.BASE_THREAD_VARIABLES
+        self.thread_variables = self.BASE_THREAD_VARIABLES[:]
 
         if self.config['wind_model'] != 'interp':
             self.wind_model.initialize(topo, data)
