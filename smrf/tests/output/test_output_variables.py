@@ -1,6 +1,6 @@
+import os
 from copy import copy
 from glob import glob
-import os
 
 from inicheck.tools import cast_all_variables
 
