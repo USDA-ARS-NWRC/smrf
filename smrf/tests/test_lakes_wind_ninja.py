@@ -106,6 +106,7 @@ class TestLakesThreaded(SMRFTestCaseLakes):
         config = deepcopy(cls.base_config)
         config.raw_cfg['system'].update({
             'threading': True,
+            'max_queue': 1,
             'time_out': 2
         })
 
