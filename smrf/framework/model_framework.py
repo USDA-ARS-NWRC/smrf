@@ -202,6 +202,11 @@ class SMRF():
         ))
         self.time_steps = len(self.date_time)
 
+    @property
+    def thermal_netcdf(self):
+        return self.distribute['thermal'].gridded and \
+            self.config['gridded']['data_type'] in ['wrf', 'netcdf']
+
     def __enter__(self):
         return self
 
@@ -532,8 +537,7 @@ class SMRF():
                 self.distribute['albedo'].albedo_ir)
 
             # 7. thermal radiation
-            if self.distribute['thermal'].gridded and \
-               self.config['gridded']['data_type'] in ['wrf', 'netcdf']:
+            if self.thermal_netcdf:
                 self.distribute['thermal'].distribute_thermal(
                     self.data.thermal.loc[t],
                     self.distribute['air_temp'].air_temp)
@@ -692,8 +696,7 @@ class SMRF():
             args=(q, self.data.cloud_factor)))
 
         # 8. thermal radiation
-        if self.distribute['thermal'].gridded and \
-                self.config['gridded']['data_type'] in ['wrf', 'netcdf']:
+        if self.thermal_netcdf:
             t.append(Thread(
                 target=self.distribute['thermal'].distribute_thermal_thread,
                 name='thermal',
