@@ -1,3 +1,5 @@
+from copy import deepcopy
+
 import numpy as np
 
 from smrf.distribute import image_data
