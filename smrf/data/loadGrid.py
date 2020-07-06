@@ -433,19 +433,4 @@ class grid():
         return lat, lon
 
 
-def apply_utm(s, force_zone_number):
-    """
-    Calculate the utm from lat/lon for a series
 
-    Args:
-        s: pandas series with fields latitude and longitude
-        force_zone_number: default None, zone number to force to
-
-    Returns:
-        s: pandas series with fields 'X' and 'Y' filled
-    """
-    p = utm.from_latlon(s.latitude, s.longitude,
-                        force_zone_number=force_zone_number)
-    s['X'] = p[0]
-    s['Y'] = p[1]
-    return s

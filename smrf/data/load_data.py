@@ -1,9 +1,11 @@
 import logging
 
 import pandas as pd
+import numpy as np
+import utm
 
 from smrf.data import mysql_data
-from smrf.data import LoadCSV
+from smrf.data import LoadCSV, LoadWRF
 
 
 class LoadData():
@@ -23,12 +25,27 @@ class LoadData():
 
     """
 
-    variables = ['air_temp',
-                 'vapor_pressure',
-                 'precip',
-                 'wind_speed',
-                 'wind_direction',
-                 'cloud_factor']
+    VARIABLES = [
+        'air_temp',
+        'vapor_pressure',
+        'precip',
+        'wind_speed',
+        'wind_direction',
+        'cloud_factor',
+        'thermal',
+        'metadata'
+    ]
+
+    # Data variables and which module they belong to
+    MODULE_VARIABLES = {
+        'air_temp': 'air_temp',
+        'vapor_pressure': 'vapor_pressure',
+        'precip': 'precip',
+        'wind_speed': 'wind',
+        'wind_direction': 'wind',
+        'cloud_factor': 'cloud_factor',
+        'thermal': 'thermal'
+    }
 
     db_config_vars = ['user',
                       'password',
@@ -42,22 +59,32 @@ class LoadData():
                       'client']
 
     DATA_FUNCTIONS = {
-        'csv': LoadCSV
+        'csv': LoadCSV,
+        'wrf': LoadWRF
     }
 
-    def __init__(self, smrf_config, start_date, end_date):
+    # degree offset for a buffer around the model domain in degrees
+    OFFSET = 0.1
+
+    def __init__(self, smrf_config, start_date, end_date, topo):
 
         self.smrf_config = smrf_config
         self.start_date = start_date
         self.end_date = end_date
         self.time_zone = start_date.tzinfo
+        self.topo = topo
 
         self._logger = logging.getLogger(__name__)
+
+        # get the buffer gridded data domain extents in lat long
+        self.model_domain_grid()
 
         data_inputs = {
             'start_date': self.start_date,
             'end_date': self.end_date,
-            'time_zone': self.time_zone
+            'time_zone': self.time_zone,
+            'topo': self.topo,
+            'bbox': self.bbox
         }
 
         if 'csv' in self.smrf_config:
@@ -71,70 +98,97 @@ class LoadData():
 
         # load the data
         load_func = self.DATA_FUNCTIONS[self.data_type](**data_inputs)
-        data = load_func.load()
+        load_func.load()
 
-        for key, df in data.items():
-            setattr(self, key, df)
+        for variable in self.VARIABLES:
+            d = getattr(load_func, variable, None)
+            if variable == 'metadata':
+                setattr(self, variable, d)
+            elif d is not None:
+                setattr(self, variable, d.tz_convert(tz=self.time_zone))
 
-    def load_from_csv(self):
+        self.metadata_pixel_location()
+
+        if self.data_type == 'csv':
+            load_func.check_colocation()
+
+    def metadata_pixel_location(self):
+        """Set the pixel location in the topo for each station
         """
-        Load the data from a csv file
-        Fields that are operated on
-        - metadata -> dictionary, one for each station,
-        must have at least the following:
-        primary_id, X, Y, elevation
-        - csv data files -> dictionary, one for each time step,
-        must have at least the following columns:
-        date_time, column names matching metadata.primary_id
+
+        self.metadata['xi'] = self.metadata.apply(
+            lambda row: self.find_pixel_location(
+                row,
+                self.topo.x,
+                'utm_x'), axis=1)
+        self.metadata['yi'] = self.metadata.apply(
+            lambda row: self.find_pixel_location(
+                row,
+                self.topo.y,
+                'utm_y'), axis=1)
+
+    def model_domain_grid(self):
+        '''
+        Retrieve the bounding box for the gridded data by adding a buffer to
+        the extents of the topo domain.
+
+        Returns:
+            tuple: (dlat, dlon) Domain latitude and longitude extents
+        '''
+        dlat = np.zeros((2,))
+        dlon = np.zeros_like(dlat)
+
+        # Convert the UTM extents to lat long extents
+        ur = self.get_latlon(np.max(self.topo.x), np.max(self.topo.y))
+        ll = self.get_latlon(np.min(self.topo.x), np.min(self.topo.y))
+
+        # Put into numpy arrays for convenience later
+        dlat[0], dlon[0] = ll
+        dlat[1], dlon[1] = ur
+
+        # add a buffer
+        dlat[0] -= self.OFFSET
+        dlat[1] += self.OFFSET
+        dlon[0] -= self.OFFSET
+        dlon[1] += self.OFFSET
+
+        self.dlat = dlat
+        self.dlon = dlon
+
+        # This is placed long, lat on purpose as thats the HRRR class expects
+        self.bbox = np.array([self.dlon[0], self.dlat[0],
+                              self.dlon[1], self.dlat[1]])
+
+    def get_latlon(self, utm_x, utm_y):
+        '''
+        Convert UTM coords to Latitude and longitude
+
+        Args:
+            utm_x: UTM easting in meters in the same zone/letter as the topo
+            utm_y: UTM Northing in meters in the same zone/letter as the topo
+
+        Returns:
+            tuple: (lat,lon) latitude and longitude conversion from the UTM
+                coordinates
+        '''
+
+        lat, lon = utm.to_latlon(utm_x, utm_y, self.topo.zone_number,
+                                 northern=self.topo.northern_hemisphere)
+        return lat, lon
+
+    def find_pixel_location(self, row, vec, a):
         """
+        Find the index of the stations X/Y location in the model domain
 
-        self._logger.info('Reading data coming from CSV files')
+        Args:
+            row (pandas.DataFrame): metadata rows
+            vec (nparray): Array of X or Y locations in domain
+            a (str): Column in DataFrame to pull data from (i.e. 'X')
 
-        sta = self.stations
-
-        if sta is not None:
-            msta = ", ".join(sta)
-            self._logger.debug('Using only stations {0}'.format(msta))
-
-        # load the data
-        v = list(self.variables)
-        v.append('metadata')
-        for i in v:
-            if i in self.dataConfig:
-
-                self._logger.debug('Reading %s...' % self.dataConfig[i])
-                if i == 'metadata':
-                    dp_final = pd.read_csv(self.dataConfig[i],
-                                           index_col='primary_id')
-                    # Ensure all stations are all caps.
-                    dp_final.index = [s.upper() for s in dp_final.index]
-
-                elif self.dataConfig[i]:
-                    dp_full = pd.read_csv(self.dataConfig[i],
-                                          index_col='date_time',
-                                          parse_dates=[0])
-                    dp_full = dp_full.tz_localize(self.time_zone)
-                    dp_full.columns = [s.upper() for s in dp_full.columns]
-
-                    if sta is not None:
-
-                        data_sta = dp_full.columns.str.upper()
-
-                        # Grab IDs from user list thats also in Data
-                        self.stations = [s for s in data_sta if s in sta]
-                        dp = dp_full[dp_full.columns[(data_sta).isin(sta)]]
-
-                    else:
-                        dp = dp_full
-
-                    # Only get the desired dates
-                    dp_final = dp[self.start_date:self.end_date]
-
-                    if dp_final.empty:
-                        raise Exception("No CSV data found for {0}"
-                                        "".format(i))
-
-                setattr(self, i, dp_final)
+        Returns:
+            Pixel value in vec where row[a] is located
+        """
+        return np.argmin(np.abs(vec - row[a]))
 
     def load_from_mysql(self):
         """

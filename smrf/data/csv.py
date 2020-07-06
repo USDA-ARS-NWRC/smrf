@@ -1,7 +1,8 @@
 import logging
-import os
 
 import pandas as pd
+
+from smrf.utils.utils import check_station_colocation
 
 
 class LoadCSV():
@@ -33,7 +34,7 @@ class LoadCSV():
 
         variable_list = list(self.config.keys())
         variable_list.remove('stations')
-        df_dict = {}
+
         for variable in variable_list:
             filename = self.config[variable]
 
@@ -53,16 +54,8 @@ class LoadCSV():
                 df = df.tz_localize(self.time_zone)
                 df.columns = [s.upper() for s in df.columns]
 
-                # if sta is not None:
-
-                #     data_sta = dp_full.columns.str.upper()
-
-                #     # Grab IDs from user list thats also in Data
-                #     self.stations = [s for s in data_sta if s in sta]
-                #     dp = dp_full[dp_full.columns[(data_sta).isin(sta)]]
-
-                # else:
-                #     dp = dp_full
+                if self.stations is not None:
+                    df = df[df.columns[(df.columns).isin(self.stations)]]
 
                 # Only get the desired dates
                 df = df[self.start_date:self.end_date]
@@ -71,6 +64,11 @@ class LoadCSV():
                     raise Exception("No CSV data found for {0}"
                                     "".format(variable))
 
-            df_dict[variable] = df
+            setattr(self, variable, df)
 
-        return df_dict
+    def check_colocation(self):
+        # Check all sections for stations that are colocated
+        colocated = check_station_colocation(metadata=self.metadata)
+        if colocated is not None:
+            self._logger.error(
+                "Stations are colocated: {}".format(','.join(colocated[0])))

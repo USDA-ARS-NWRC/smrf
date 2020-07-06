@@ -38,7 +38,8 @@ from inicheck.output import generate_config, print_config_report
 from inicheck.tools import check_config, get_user_config
 from topocalc.shade import shade
 
-from smrf import data, distribute
+from smrf import distribute
+from smrf.data import LoadData, loadTopo
 from smrf.envphys import sunang
 from smrf.envphys.solar import model
 from smrf.framework import art, logger
@@ -234,7 +235,7 @@ class SMRF():
         :func:`smrf.data.loadTopo.Topo` for full description.
         """
 
-        self.topo = data.loadTopo.Topo(self.config['topo'])
+        self.topo = loadTopo.Topo(self.config['topo'])
 
     def initializeDistribution(self):
         """
@@ -313,112 +314,98 @@ class SMRF():
 
         # get the start date and end date requested
 
-        flag = True
-        if 'csv' in self.config:
-            self.data = data.LoadData(
-                self.config,
-                self.start_date,
-                self.end_date)
+        # flag = True
+        # if 'csv' in self.config:
+        self.data = LoadData(
+            self.config,
+            self.start_date,
+            self.end_date,
+            self.topo)
 
-        elif 'gridded' in self.config:
-            flag = False
-            self.data = data.loadGrid.grid(
-                self.config['gridded'],
-                self.topo,
-                self.start_date,
-                self.end_date,
-                time_zone=self.time_zone,
-                dataType=self.config['gridded']['data_type'],
-                forecast_flag=self.forecast_flag,
-                day_hour=self.day_hour)
+        # elif 'gridded' in self.config:
+        #     flag = False
+        #     self.data = data.loadGrid.grid(
+        #         self.config['gridded'],
+        #         self.topo,
+        #         self.start_date,
+        #         self.end_date,
+        #         time_zone=self.time_zone,
+        #         dataType=self.config['gridded']['data_type'],
+        #         forecast_flag=self.forecast_flag,
+        #         day_hour=self.day_hour)
 
-            # set the stations in the distribute
-            try:
-                for key in self.distribute.keys():
-                    setattr(self.distribute[key],
-                            'stations',
-                            self.data.metadata.index.tolist())
+        # # set the stations in the distribute
+        # try:
+        #     for key in self.distribute.keys():
+        #         setattr(self.distribute[key],
+        #                 'stations',
+        #                 self.data.metadata.index.tolist())
 
-            except Exception as e:
-                self._logger.warning("Distribution not initialized, grid"
-                                     " stations could not be set.")
-                self._logger.exception(e)
-
-        else:
-            raise KeyError('Could not determine where station data is located')
+        # except Exception as e:
+        #     self._logger.warning("Distribution not initialized, grid"
+        #                          " stations could not be set.")
+        #     self._logger.exception(e)
 
         # determine the locations of the stations on the grid while
         # maintaining reverse compatibility
         # New DB uses utm_x utm_y instead of X,Y
-        try:
-            self.data.metadata['xi'] = self.data.metadata.apply(
-                lambda row: find_pixel_location(
-                    row,
-                    self.topo.x,
-                    'utm_x'), axis=1)
-            self.data.metadata['yi'] = self.data.metadata.apply(
-                lambda row: find_pixel_location(
-                    row,
-                    self.topo.y,
-                    'utm_y'), axis=1)
-        # Old DB has X and Y
-        except Exception:
+        # try:
 
-            self.data.metadata['xi'] = self.data.metadata.apply(
-                lambda row: find_pixel_location(
-                    row,
-                    self.topo.x,
-                    'X'), axis=1)
-            self.data.metadata['yi'] = self.data.metadata.apply(
-                lambda row: find_pixel_location(
-                    row,
-                    self.topo.y,
-                    'Y'), axis=1)
+        # # Old DB has X and Y
+        # except Exception:
 
-        # Pre-filter the data to only the desired stations
-        if flag:
-            for key in self.distribute.keys():
-                if key in self.data.variables:
-                    # Pull out the loaded data
-                    d = getattr(self.data, key)
+        #     self.data.metadata['xi'] = self.data.metadata.apply(
+        #         lambda row: find_pixel_location(
+        #             row,
+        #             self.topo.x,
+        #             'X'), axis=1)
+        #     self.data.metadata['yi'] = self.data.metadata.apply(
+        #         lambda row: find_pixel_location(
+        #             row,
+        #             self.topo.y,
+        #             'Y'), axis=1)
 
-                    # Check to find the matching stations
-                    if self.distribute[key].stations is not None:
+        # Pre-filter the data to the desired stations in
+        # each [variable] section
+        # if flag:
+        self._logger.debug(
+            'Filter data to those specified in each variable section')
+        for variable, module in self.data.MODULE_VARIABLES.items():
+            # if key in self.data.variables:
+            # Check to find the matching stations
+            data = getattr(self.data, variable, pd.DataFrame())
+            if self.distribute[module].stations is not None:
 
-                        match = d.columns.isin(self.distribute[key].stations)
-                        sta_match = d.columns[match]
+                match = data.columns.isin(self.distribute[module].stations)
+                sta_match = data.columns[match]
 
-                        # Update the dataframe and the distribute stations
-                        self.distribute[key].stations = sta_match.tolist()
-                        setattr(self.data, key, d[sta_match])
-                    else:
-                        self._logger.warning("Distribution not initialized,"
-                                             " data not filtered to desired"
-                                             " stations in variable {}"
-                                             "".format(key))
+                # Update the dataframe and the distribute stations
+                self.distribute[module].stations = sta_match.tolist()
+                setattr(self.data, variable, data[sta_match])
 
-            # Check all sections for stations that are colocated
-            for key in self.distribute.keys():
-                if key in self.data.variables:
-                    if self.distribute[key].stations is not None:
-                        # Confirm out stations all have a unique position
-                        colocated = check_station_colocation(
-                            metadata=self.data.metadata.loc[self.distribute[key].stations])  # noqa
+            else:
+                self.distribute[module].stations = data.columns.tolist()
 
-                        # Stations are co-located, throw error
-                        if colocated is not None:
-                            self._logger.error(
-                                "Stations in the {0} section "
-                                "are colocated.\n{1}".format(
-                                    key, ','.join(colocated[0])))
-                            sys.exit()
+        # for key in self.distribute.keys():
+        #     if key in self.data.variables:
+        #         if self.distribute[key].stations is not None:
+        #             # Confirm out stations all have a unique position
+        #             colocated = check_station_colocation(
+        #                 metadata=self.data.metadata.loc[self.distribute[key].stations])  # noqa
+
+        #             # Stations are co-located, throw error
+        #             if colocated is not None:
+        #                 self._logger.error(
+        #                     "Stations in the {0} section "
+        #                     "are colocated.\n{1}".format(
+        #                         key, ','.join(colocated[0])))
+        #                 sys.exit()
 
         # clip the timeseries to the start and end date
-        for key in self.data.variables:
-            if hasattr(self.data, key):
-                d = getattr(self.data, key)
-                d = d[self.start_date:self.end_date]
-                setattr(self.data, key, d)
+        for variable in self.data.VARIABLES[:-1]:
+            d = getattr(self.data, variable, None)
+            if d is not None:
+                setattr(self.data, variable, d[self.start_date:self.end_date])
 
         # Does the user want to create a CSV copy of the station data used.
         if self.config["output"]['input_backup']:
@@ -898,18 +885,3 @@ def can_i_run_smrf(config):
     except Exception as e:
         raise e
         return False
-
-
-def find_pixel_location(row, vec, a):
-    """
-    Find the index of the stations X/Y location in the model domain
-
-    Args:
-        row (pandas.DataFrame): metadata rows
-        vec (nparray): Array of X or Y locations in domain
-        a (str): Column in DataFrame to pull data from (i.e. 'X')
-
-    Returns:
-        Pixel value in vec where row[a] is located
-    """
-    return np.argmin(np.abs(vec - row[a]))
