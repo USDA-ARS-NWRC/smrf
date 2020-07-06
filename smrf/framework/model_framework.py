@@ -45,7 +45,7 @@ from smrf.envphys.solar import model
 from smrf.framework import art, logger
 from smrf.output import output_hru, output_netcdf
 from smrf.utils import queue
-from smrf.utils.utils import backup_input, check_station_colocation, getqotw
+from smrf.utils.utils import backup_input, getqotw
 
 
 class SMRF():
@@ -308,66 +308,18 @@ class SMRF():
         the data to the desired stations if CSV files are used.
         """
 
-        # get the start date and end date requested
-
-        # flag = True
-        # if 'csv' in self.config:
         self.data = LoadData(
             self.config,
             self.start_date,
             self.end_date,
             self.topo)
 
-        # elif 'gridded' in self.config:
-        #     flag = False
-        #     self.data = data.loadGrid.grid(
-        #         self.config['gridded'],
-        #         self.topo,
-        #         self.start_date,
-        #         self.end_date,
-        #         time_zone=self.time_zone,
-        #         dataType=self.config['gridded']['data_type'],
-        #         forecast_flag=self.forecast_flag,
-        #         day_hour=self.day_hour)
-
-        # # set the stations in the distribute
-        # try:
-        #     for key in self.distribute.keys():
-        #         setattr(self.distribute[key],
-        #                 'stations',
-        #                 self.data.metadata.index.tolist())
-
-        # except Exception as e:
-        #     self._logger.warning("Distribution not initialized, grid"
-        #                          " stations could not be set.")
-        #     self._logger.exception(e)
-
-        # determine the locations of the stations on the grid while
-        # maintaining reverse compatibility
-        # New DB uses utm_x utm_y instead of X,Y
-        # try:
-
-        # # Old DB has X and Y
-        # except Exception:
-
-        #     self.data.metadata['xi'] = self.data.metadata.apply(
-        #         lambda row: find_pixel_location(
-        #             row,
-        #             self.topo.x,
-        #             'X'), axis=1)
-        #     self.data.metadata['yi'] = self.data.metadata.apply(
-        #         lambda row: find_pixel_location(
-        #             row,
-        #             self.topo.y,
-        #             'Y'), axis=1)
-
         # Pre-filter the data to the desired stations in
         # each [variable] section
-        # if flag:
         self._logger.debug(
             'Filter data to those specified in each variable section')
         for variable, module in self.data.MODULE_VARIABLES.items():
-            # if key in self.data.variables:
+
             # Check to find the matching stations
             data = getattr(self.data, variable, pd.DataFrame())
             if self.distribute[module].stations is not None:
@@ -381,27 +333,6 @@ class SMRF():
 
             else:
                 self.distribute[module].stations = data.columns.tolist()
-
-        # for key in self.distribute.keys():
-        #     if key in self.data.variables:
-        #         if self.distribute[key].stations is not None:
-        #             # Confirm out stations all have a unique position
-        #             colocated = check_station_colocation(
-        #                 metadata=self.data.metadata.loc[self.distribute[key].stations])  # noqa
-
-        #             # Stations are co-located, throw error
-        #             if colocated is not None:
-        #                 self._logger.error(
-        #                     "Stations in the {0} section "
-        #                     "are colocated.\n{1}".format(
-        #                         key, ','.join(colocated[0])))
-        #                 sys.exit()
-
-        # # clip the timeseries to the start and end date
-        # for variable in self.data.VARIABLES[:-1]:
-        #     d = getattr(self.data, variable, None)
-        #     if d is not None:
-        #         setattr(self.data, variable, d[self.start_date:self.end_date])
 
         # Does the user want to create a CSV copy of the station data used.
         if self.config["output"]['input_backup']:

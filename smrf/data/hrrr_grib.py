@@ -40,12 +40,6 @@ class LoadGribHRRR():
             self.config['hrrr_directory']
         ))
 
-        # forecast hours for each run hour
-        # if not self.forecast_flag:
-        #     fcast = [0]
-        # else:
-        #     fcast = range(self.n_forecast_hours + 1)
-
         metadata, data = HRRR(
             external_logger=self._logger
         ).get_saved_data(
@@ -53,10 +47,7 @@ class LoadGribHRRR():
             self.end_date,
             self.bbox,
             output_dir=self.config['hrrr_directory'],
-            force_zone_number=self.topo.zone_number,
-            # forecast=fcast,
-            # forecast_flag=self.forecast_flag,
-            # day_hour=self.day_hour)
+            force_zone_number=self.topo.zone_number
         )
 
         # the data may be returned as type=object, convert to numeric
