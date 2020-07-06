@@ -66,13 +66,6 @@ class TestLoadHRRR(SMRFTestCase):
         config.apply_recipes()
         config = cast_all_variables(config, config.mcfg)
 
-        # # ensure that the recipes are used
-        # cls.assertTrue(
-        #     cls,
-        #     'station_adjust_for_undercatch' not in config.cfg['precip'].keys())
-        # cls.assertTrue(cls, config.cfg['thermal']['correct_cloud'])
-        # cls.assertTrue(cls, config.cfg['thermal']['correct_veg'])
-
         cls.config = config
 
     def compare_hrrr_gold(self, out_dir):

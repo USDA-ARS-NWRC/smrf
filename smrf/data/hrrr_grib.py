@@ -15,10 +15,12 @@ class LoadGribHRRR():
         for keys in kwargs.keys():
             setattr(self, keys, kwargs[keys])
 
+        self._logger = logging.getLogger(__name__)
+
         if self.config['hrrr_load_method'] == 'timestep':
             self.timestep_dates()
 
-        self._logger = logging.getLogger(__name__)
+        self.hrrr = HRRR(external_logger=self._logger)
 
     def timestep_dates(self):
         self.end_date = self.start_date + pd.to_timedelta(20, 'minutes')
@@ -46,15 +48,29 @@ class LoadGribHRRR():
             self.config['hrrr_directory']
         ))
 
-        metadata, data = HRRR(
-            external_logger=self._logger
-        ).get_saved_data(
+        metadata, data = self.hrrr.get_saved_data(
             self.start_date,
             self.end_date,
             self.bbox,
             output_dir=self.config['hrrr_directory'],
             force_zone_number=self.topo.zone_number
         )
+
+        self.parse_data(metadata, data)
+
+    def load_timestep(self, date_time):
+        """Load a single time step for HRRR
+
+        Args:
+            date_time (datetime): date time to load
+        """
+
+        self.start_date = date_time
+        self.timestep_dates()
+
+        self.load()
+
+    def parse_data(self, metadata, data):
 
         # the data may be returned as type=object, convert to numeric
         # correct for the timezone

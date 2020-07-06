@@ -393,11 +393,8 @@ class SMRF():
             self._logger.info('Distributing time step %s' % t)
 
             if self.hrrr_data_timestep:
-                self.data = LoadData(
-                    self.config,
-                    t,
-                    self.end_date,
-                    self.topo)
+                self.data.load_class.load_timestep(t)
+                self.data.set_variables()
 
             # 0.1 sun angle for time step
             cosz, azimuth, rad_vec = sunang.sunang(

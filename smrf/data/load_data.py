@@ -97,21 +97,27 @@ class LoadData():
             data_inputs['config'] = self.smrf_config['gridded']
 
         # load the data
-        load_func = self.DATA_FUNCTIONS[self.data_type](**data_inputs)
-        load_func.load()
+        self.load_class = self.DATA_FUNCTIONS[self.data_type](**data_inputs)
+        self.load_class.load()
+
+        self.set_variables()
+
+        self.metadata_pixel_location()
+
+        if self.data_type == 'csv':
+            self.load_class.check_colocation()
+
+    def set_variables(self):
+        """Set the instance attributes for each variable
+        """
 
         for variable in self.VARIABLES:
-            d = getattr(load_func, variable, None)
+            d = getattr(self.load_class, variable, None)
             if variable == 'metadata':
                 setattr(self, variable, d)
             elif d is not None:
                 d = d.tz_convert(tz=self.time_zone)
                 setattr(self, variable, d[self.start_date:self.end_date])
-
-        self.metadata_pixel_location()
-
-        if self.data_type == 'csv':
-            load_func.check_colocation()
 
     def metadata_pixel_location(self):
         """Set the pixel location in the topo for each station
