@@ -8,6 +8,10 @@ from smrf.utils.utils import apply_utm
 from smrf.envphys.vapor_pressure import satvp
 
 
+def metadata_name_from_index(index):
+    return 'grid_y{:d}_x{:d}'.format(index[0], index[1])
+
+
 class LoadWRF():
 
     WRF_VARIABLES = [
@@ -66,7 +70,7 @@ class LoadWRF():
         # GET THE METADATA
         # create some fake station names based on the index
         a = np.argwhere(ind)
-        primary_id = ['grid_y%i_x%i' % (i[0], i[1]) for i in a]
+        primary_id = [metadata_name_from_index(i) for i in a]
         self._logger.debug('{} grid cells within model domain'.format(len(a)))
 
         # create a metadata dataframe to store all the grid info
@@ -107,14 +111,14 @@ class LoadWRF():
         self._logger.debug('Loading air_temp')
         self.air_temp = pd.DataFrame(index=time, columns=primary_id)
         for i in a:
-            g = 'grid_y%i_x%i' % (i[0], i[1])
+            g = metadata_name_from_index(i)
             v = f.variables['T2'][time_ind, i[0], i[1]] - 273.15
             self.air_temp[g] = v
 
         self._logger.debug('Loading dew_point and calculating vapor_pressure')
         self.dew_point = pd.DataFrame(index=time, columns=primary_id)
         for i in a:
-            g = 'grid_y%i_x%i' % (i[0], i[1])
+            g = metadata_name_from_index(i)
             v = f.variables['DWPT'][time_ind, i[0], i[1]]
             self.dew_point[g] = v
 
@@ -126,7 +130,7 @@ class LoadWRF():
         self._logger.debug('Loading thermal')
         self.thermal = pd.DataFrame(index=time, columns=primary_id)
         for i in a:
-            g = 'grid_y%i_x%i' % (i[0], i[1])
+            g = metadata_name_from_index(i)
             v = f.variables['GLW'][time_ind, i[0], i[1]]
             self.thermal[g] = v
 
@@ -134,7 +138,7 @@ class LoadWRF():
         self.cloud_factor = pd.DataFrame(index=time, columns=primary_id)
         cf = 1 - np.mean(f.variables['CLDFRA'][time_ind, :], axis=1)
         for i in a:
-            g = 'grid_y%i_x%i' % (i[0], i[1])
+            g = metadata_name_from_index(i)
             v = cf[:, i[0], i[1]]
             self.cloud_factor[g] = v
 
@@ -157,7 +161,7 @@ class LoadWRF():
         d[ind] = d[ind] + 360
 
         for i in a:
-            g = 'grid_y%i_x%i' % (i[0], i[1])
+            g = metadata_name_from_index(i)
 
             self.wind_speed[g] = s[:, i[0], i[1]]
             self.wind_direction[g] = d[:, i[0], i[1]]
@@ -166,7 +170,7 @@ class LoadWRF():
         self.precip = pd.DataFrame(index=time, columns=primary_id)
         precip = np.diff(f.variables['RAINNC'][time_ind, :], axis=0)
         for i in a:
-            g = 'grid_y%i_x%i' % (i[0], i[1])
+            g = metadata_name_from_index(i)
             self.precip[g] = np.concatenate(([0], precip[:, i[0], i[1]]))
 
         # # correct for the timezone and get only the desired dates

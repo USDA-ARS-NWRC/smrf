@@ -1,11 +1,10 @@
 import logging
 
-import pandas as pd
 import numpy as np
 import utm
 
 from smrf.data import mysql_data
-from smrf.data import LoadCSV, LoadWRF
+from smrf.data import LoadCSV, LoadWRF, LoadNetcdf
 
 
 class LoadData():
@@ -60,7 +59,8 @@ class LoadData():
 
     DATA_FUNCTIONS = {
         'csv': LoadCSV,
-        'wrf': LoadWRF
+        'wrf': LoadWRF,
+        'netcdf': LoadNetcdf
     }
 
     # degree offset for a buffer around the model domain in degrees
@@ -105,7 +105,8 @@ class LoadData():
             if variable == 'metadata':
                 setattr(self, variable, d)
             elif d is not None:
-                setattr(self, variable, d.tz_convert(tz=self.time_zone))
+                d = d.tz_convert(tz=self.time_zone)
+                setattr(self, variable, d[self.start_date:self.end_date])
 
         self.metadata_pixel_location()
 

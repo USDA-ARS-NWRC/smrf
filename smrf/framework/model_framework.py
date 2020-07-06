@@ -401,11 +401,11 @@ class SMRF():
         #                         key, ','.join(colocated[0])))
         #                 sys.exit()
 
-        # clip the timeseries to the start and end date
-        for variable in self.data.VARIABLES[:-1]:
-            d = getattr(self.data, variable, None)
-            if d is not None:
-                setattr(self.data, variable, d[self.start_date:self.end_date])
+        # # clip the timeseries to the start and end date
+        # for variable in self.data.VARIABLES[:-1]:
+        #     d = getattr(self.data, variable, None)
+        #     if d is not None:
+        #         setattr(self.data, variable, d[self.start_date:self.end_date])
 
         # Does the user want to create a CSV copy of the station data used.
         if self.config["output"]['input_backup']:
