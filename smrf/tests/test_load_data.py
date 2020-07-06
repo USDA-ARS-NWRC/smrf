@@ -18,87 +18,87 @@ from smrf.tests.nwrc_check import NWRCCheck
 from smrf.tests.smrf_test_case import SMRFTestCase
 
 
-@unittest.skipUnless(
-    NWRCCheck.in_network(),
-    "Skipping because we are not on the NWRC network"
-)
-class TestLoadMySQLData(SMRFTestCase):
+# @unittest.skipUnless(
+#     NWRCCheck.in_network(),
+#     "Skipping because we are not on the NWRC network"
+# )
+# class TestLoadMySQLData(SMRFTestCase):
 
-    def test_mysql_data_w_stations(self):
-        """
-        Use a simple user tester on the weather database to ensure loading is
-        performed correctly. This will not work outside of NWRC until we
-        convert so SQLalchemy.
-        """
-        # test a successful run specifying stations
-        config = deepcopy(self.base_config)
-        options = deepcopy(NWRCCheck.MYSQL_OPTIONS)
-        config.raw_cfg['mysql'] = options
+#     def test_mysql_data_w_stations(self):
+#         """
+#         Use a simple user tester on the weather database to ensure loading is
+#         performed correctly. This will not work outside of NWRC until we
+#         convert so SQLalchemy.
+#         """
+#         # test a successful run specifying stations
+#         config = deepcopy(self.base_config)
+#         options = deepcopy(NWRCCheck.MYSQL_OPTIONS)
+#         config.raw_cfg['mysql'] = options
 
-        config.raw_cfg['mysql']['stations'] = ['RMESP', 'RME_176']
-        del config.raw_cfg['csv']
+#         config.raw_cfg['mysql']['stations'] = ['RMESP', 'RME_176']
+#         del config.raw_cfg['csv']
 
-        config.apply_recipes()
-        config = cast_all_variables(config, config.mcfg)
+#         config.apply_recipes()
+#         config = cast_all_variables(config, config.mcfg)
 
-        result = self.can_i_run_smrf(config)
+#         result = self.can_i_run_smrf(config)
 
-        self.assertTrue(result)
+#         self.assertTrue(result)
 
-    def test_mysql_data_w_client(self):
-        """
-        Run SMRF with MYSQL data from client, also can only be run from inside
-        NWRC.
-        """
-        # test a successful run specifying client
-        config = deepcopy(self.base_config)
-        options = deepcopy(NWRCCheck.MYSQL_OPTIONS)
-        config.raw_cfg['mysql'] = options
+#     def test_mysql_data_w_client(self):
+#         """
+#         Run SMRF with MYSQL data from client, also can only be run from inside
+#         NWRC.
+#         """
+#         # test a successful run specifying client
+#         config = deepcopy(self.base_config)
+#         options = deepcopy(NWRCCheck.MYSQL_OPTIONS)
+#         config.raw_cfg['mysql'] = options
 
-        config.raw_cfg['mysql']['client'] = 'RME_test'
-        del config.raw_cfg['csv']
+#         config.raw_cfg['mysql']['client'] = 'RME_test'
+#         del config.raw_cfg['csv']
 
-        config.apply_recipes()
-        config = cast_all_variables(config, config.mcfg)
+#         config.apply_recipes()
+#         config = cast_all_variables(config, config.mcfg)
 
-        result = can_i_run_smrf(config)
-        assert result
+#         result = can_i_run_smrf(config)
+#         assert result
 
-    def test_mysql_metadata_error(self):
-        """ test no metadata found """
+#     def test_mysql_metadata_error(self):
+#         """ test no metadata found """
 
-        config = deepcopy(self.base_config)
-        options = deepcopy(NWRCCheck.MYSQL_OPTIONS)
-        config.raw_cfg['mysql'] = options
+#         config = deepcopy(self.base_config)
+#         options = deepcopy(NWRCCheck.MYSQL_OPTIONS)
+#         config.raw_cfg['mysql'] = options
 
-        config.raw_cfg['mysql']['stations'] = ['NOT_STID', 'NOPE']
-        del config.raw_cfg['csv']
+#         config.raw_cfg['mysql']['stations'] = ['NOT_STID', 'NOPE']
+#         del config.raw_cfg['csv']
 
-        config.apply_recipes()
-        config = cast_all_variables(config, config.mcfg)
+#         config.apply_recipes()
+#         config = cast_all_variables(config, config.mcfg)
 
-        with self.assertRaises(Exception):
-            run_smrf(config)
+#         with self.assertRaises(Exception):
+#             run_smrf(config)
 
-    def test_mysql_data_error(self):
-        """ test no data found """
+#     def test_mysql_data_error(self):
+#         """ test no data found """
 
-        config = deepcopy(self.base_config)
-        options = deepcopy(NWRCCheck.MYSQL_OPTIONS)
+#         config = deepcopy(self.base_config)
+#         options = deepcopy(NWRCCheck.MYSQL_OPTIONS)
 
-        config.raw_cfg['mysql'] = options
-        config.raw_cfg['mysql']['stations'] = ['RMESP', 'RME_176']
-        del config.raw_cfg['csv']
+#         config.raw_cfg['mysql'] = options
+#         config.raw_cfg['mysql']['stations'] = ['RMESP', 'RME_176']
+#         del config.raw_cfg['csv']
 
-        # wrong time
-        config.raw_cfg['time']['start_date'] = '1900-01-01 00:00'
-        config.raw_cfg['time']['end_date'] = '1900-02-01 00:00'
+#         # wrong time
+#         config.raw_cfg['time']['start_date'] = '1900-01-01 00:00'
+#         config.raw_cfg['time']['end_date'] = '1900-02-01 00:00'
 
-        config.apply_recipes()
-        config = cast_all_variables(config, config.mcfg)
+#         config.apply_recipes()
+#         config = cast_all_variables(config, config.mcfg)
 
-        with self.assertRaises(Exception):
-            run_smrf(config)
+#         with self.assertRaises(Exception):
+#             run_smrf(config)
 
 
 class TestLoadCSVData(SMRFTestCase):

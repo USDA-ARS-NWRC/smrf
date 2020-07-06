@@ -4,7 +4,7 @@ import numpy as np
 import utm
 
 from smrf.data import mysql_data
-from smrf.data import LoadCSV, LoadWRF, LoadNetcdf
+from smrf.data import LoadCSV, LoadWRF, LoadNetcdf, LoadGribHRRR
 
 
 class LoadData():
@@ -60,7 +60,8 @@ class LoadData():
     DATA_FUNCTIONS = {
         'csv': LoadCSV,
         'wrf': LoadWRF,
-        'netcdf': LoadNetcdf
+        'netcdf': LoadNetcdf,
+        'hrrr_grib': LoadGribHRRR
     }
 
     # degree offset for a buffer around the model domain in degrees
@@ -191,70 +192,70 @@ class LoadData():
         """
         return np.argmin(np.abs(vec - row[a]))
 
-    def load_from_mysql(self):
-        """
-        Load the data from a mysql database
-        """
+    # def load_from_mysql(self):
+    #     """
+    #     Load the data from a mysql database
+    #     """
 
-        self._logger.info('Reading data from MySQL database')
+    #     self._logger.info('Reading data from MySQL database')
 
-        # open the database connection
-        data = mysql_data.database(self.dataConfig['user'],
-                                   self.dataConfig['password'],
-                                   self.dataConfig['host'],
-                                   self.dataConfig['database'],
-                                   self.dataConfig['port'])
+    #     # open the database connection
+    #     data = mysql_data.database(self.dataConfig['user'],
+    #                                self.dataConfig['password'],
+    #                                self.dataConfig['host'],
+    #                                self.dataConfig['database'],
+    #                                self.dataConfig['port'])
 
-        # ---------------------------------------------------
-        # determine if it's stations or client
-        sta = self.stations
+    #     # ---------------------------------------------------
+    #     # determine if it's stations or client
+    #     sta = self.stations
 
-        c = None
-        stable = None
-        if 'client' in self.dataConfig.keys():
-            c = self.dataConfig['client']
-            stable = self.dataConfig['station_table']
+    #     c = None
+    #     stable = None
+    #     if 'client' in self.dataConfig.keys():
+    #         c = self.dataConfig['client']
+    #         stable = self.dataConfig['station_table']
 
-        # Determine what table for the metadata
-        mtable = self.dataConfig['metadata']
+    #     # Determine what table for the metadata
+    #     mtable = self.dataConfig['metadata']
 
-        # Raise an error if neither stations or client provided
-        if (sta is None) & (c is None):
-            raise Exception('Error in configuration file for [mysql],'
-                            ' must specify either "stations" or "client"')
+    #     # Raise an error if neither stations or client provided
+    #     if (sta is None) & (c is None):
+    #         raise Exception('Error in configuration file for [mysql],'
+    #                         ' must specify either "stations" or "client"')
 
-        self._logger.debug('Loading metadata from table %s' % mtable)
+    #     self._logger.debug('Loading metadata from table %s' % mtable)
 
-        # ---------------------------------------------------
-        # load the metadata
-        self.metadata = data.metadata(mtable, station_ids=sta,
-                                      client=c, station_table=stable)
+    #     # ---------------------------------------------------
+    #     # load the metadata
+    #     self.metadata = data.metadata(mtable, station_ids=sta,
+    #                                   client=c, station_table=stable)
 
-        self._logger.debug('%i stations loaded' % self.metadata.shape[0])
+    #     self._logger.debug('%i stations loaded' % self.metadata.shape[0])
 
-        # ---------------------------------------------------
-        # get a list of the stations
-        station_ids = self.metadata.index.tolist()
+    #     # ---------------------------------------------------
+    #     # get a list of the stations
+    #     station_ids = self.metadata.index.tolist()
 
-        # get the correct column names if specified, along with variable names
-        db_var_names = [val for key, val in self.dataConfig.items()
-                        if key not in self.db_config_vars]
-        variables = [x for x in self.dataConfig.keys()
-                     if x not in self.db_config_vars]
+    #     # get the correct column names if specified, along with variable names
+    #     db_var_names = [val for key, val in self.dataConfig.items()
+    #                     if key not in self.db_config_vars]
+    #     variables = [x for x in self.dataConfig.keys()
+    #                  if x not in self.db_config_vars]
 
-        # get the data
-        # dp is a dictionary of dataframes
-        dp = data.get_data(
-            self.dataConfig['data_table'],
-            station_ids,
-            self.start_date,
-            self.end_date, db_var_names,
-            time_zone=self.time_zone
-        )
+    #     # get the data
+    #     # dp is a dictionary of dataframes
+    #     dp = data.get_data(
+    #         self.dataConfig['data_table'],
+    #         station_ids,
+    #         self.start_date,
+    #         self.end_date, db_var_names,
+    #         time_zone=self.time_zone
+    #     )
 
-        # go through and extract the data
-        for v in variables:
-            # MySQL Data is TZ aware. So convert just in case non utc
-            # is passed.
-            dfv = dp[self.dataConfig[v]]
-            setattr(self, v, dfv)
+    #     # go through and extract the data
+    #     for v in variables:
+    #         # MySQL Data is TZ aware. So convert just in case non utc
+    #         # is passed.
+    #         dfv = dp[self.dataConfig[v]]
+    #         setattr(self, v, dfv)

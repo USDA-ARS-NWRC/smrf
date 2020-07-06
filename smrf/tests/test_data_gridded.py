@@ -44,7 +44,8 @@ class TestLoadGrid(SMRFTestCase):
                 'wrf_file': './RME/gridded/WRF_test.nc',
             },
             'system': {
-                'threading': 'False'
+                'threading': 'False',
+                'log_file': './RME/output/log.txt'
             },
             'precip': {
                 'station_adjust_for_undercatch': 'False'

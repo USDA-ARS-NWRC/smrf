@@ -172,10 +172,6 @@ class SMRF():
             if self.config['gridded']['data_type'] in ['hrrr_netcdf', 'hrrr_grib']:  # noqa
                 self.forecast_flag = self.config['gridded']['hrrr_forecast_flag']  # noqa
 
-            # hours from start of day
-            self.day_hour = self.start_date - self.date_time[0]
-            self.day_hour = int(self.day_hour / np.timedelta64(1, 'h'))
-
         now = datetime.now().astimezone(self.time_zone)
         if ((self.start_date > now and not self.gridded) or
                 (self.end_date > now and not self.gridded)):
