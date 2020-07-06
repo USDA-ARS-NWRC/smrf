@@ -15,7 +15,13 @@ class LoadGribHRRR():
         for keys in kwargs.keys():
             setattr(self, keys, kwargs[keys])
 
+        if self.config['hrrr_load_method'] == 'timestep':
+            self.timestep_dates()
+
         self._logger = logging.getLogger(__name__)
+
+    def timestep_dates(self):
+        self.end_date = self.start_date + pd.to_timedelta(20, 'minutes')
 
     def load(self):
         """

@@ -167,10 +167,14 @@ class SMRF():
         # if a gridded dataset will be used
         self.gridded = False
         self.forecast_flag = False
+        self.hrrr_data_timestep = False
         if 'gridded' in self.config:
             self.gridded = True
-            if self.config['gridded']['data_type'] in ['hrrr_netcdf', 'hrrr_grib']:  # noqa
-                self.forecast_flag = self.config['gridded']['hrrr_forecast_flag']  # noqa
+            if self.config['gridded']['data_type'] in ['hrrr_grib']:
+                self.forecast_flag = \
+                    self.config['gridded']['hrrr_forecast_flag']
+                self.hrrr_data_timestep = \
+                    self.config['gridded']['hrrr_load_method'] == 'timestep'
 
         now = datetime.now().astimezone(self.time_zone)
         if ((self.start_date > now and not self.gridded) or
@@ -386,8 +390,15 @@ class SMRF():
             # wait here for the model to catch up if needed
 
             startTime = datetime.now()
-
             self._logger.info('Distributing time step %s' % t)
+
+            if self.hrrr_data_timestep:
+                self.data = LoadData(
+                    self.config,
+                    t,
+                    self.end_date,
+                    self.topo)
+
             # 0.1 sun angle for time step
             cosz, azimuth, rad_vec = sunang.sunang(
                 t.astimezone(pytz.utc),
