@@ -3,9 +3,10 @@ import logging
 import pandas as pd
 
 from smrf.data import mysql_data
+from smrf.data import LoadCSV
 
 
-class wxdata():
+class LoadData():
     """
     Class for loading and storing the data, either from
     - CSV file
@@ -40,30 +41,40 @@ class wxdata():
                       'stations',
                       'client']
 
-    def __init__(self, dataConfig, start_date, end_date,
-                 time_zone='UTC', dataType=None):
+    DATA_FUNCTIONS = {
+        'csv': LoadCSV
+    }
 
-        if dataType is None:
-            raise Exception('''loadData.data() must have a specified dataType
-                            of "csv" or "mysql"''')
+    def __init__(self, smrf_config, start_date, end_date):
 
-        self.dataConfig = dataConfig
-        self.dataType = dataType
+        self.smrf_config = smrf_config
         self.start_date = start_date
         self.end_date = end_date
-        self.time_zone = time_zone
+        self.time_zone = start_date.tzinfo
 
         self._logger = logging.getLogger(__name__)
-        self.stations = self.dataConfig['stations']
+
+        data_inputs = {
+            'start_date': self.start_date,
+            'end_date': self.end_date,
+            'time_zone': self.time_zone
+        }
+
+        if 'csv' in self.smrf_config:
+            self.data_type = 'csv'
+            data_inputs['stations'] = self.smrf_config['csv']['stations']
+            data_inputs['config'] = self.smrf_config['csv']
+
+        elif 'gridded' in self.smrf_config:
+            self.data_type = self.smrf_config['gridded']['data_type']
+            data_inputs['config'] = self.smrf_config['gridded']
 
         # load the data
-        if dataType == 'csv':
-            self.load_from_csv()
+        load_func = self.DATA_FUNCTIONS[self.data_type](**data_inputs)
+        data = load_func.load()
 
-        elif dataType == 'mysql':
-            self.load_from_mysql()
-        else:
-            raise Exception('Could not resolve dataType')
+        for key, df in data.items():
+            setattr(self, key, df)
 
     def load_from_csv(self):
         """

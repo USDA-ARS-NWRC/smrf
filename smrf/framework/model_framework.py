@@ -315,20 +315,10 @@ class SMRF():
 
         flag = True
         if 'csv' in self.config:
-            self.data = data.loadData.wxdata(
-                self.config['csv'],
+            self.data = data.LoadData(
+                self.config,
                 self.start_date,
-                self.end_date,
-                time_zone=self.time_zone,
-                dataType='csv')
-
-        elif 'mysql' in self.config:
-            self.data = data.loadData.wxdata(
-                self.config['mysql'],
-                self.start_date,
-                self.end_date,
-                time_zone=self.time_zone,
-                dataType='mysql')
+                self.end_date)
 
         elif 'gridded' in self.config:
             flag = False
