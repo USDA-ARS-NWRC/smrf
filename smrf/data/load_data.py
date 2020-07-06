@@ -3,7 +3,6 @@ import logging
 import numpy as np
 import utm
 
-from smrf.data import mysql_data
 from smrf.data import LoadCSV, LoadWRF, LoadNetcdf, LoadGribHRRR
 
 

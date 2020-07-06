@@ -4,7 +4,6 @@ import pandas as pd
 import numpy as np
 from weather_forecast_retrieval.hrrr import HRRR
 
-from smrf.utils.utils import apply_utm
 from smrf.envphys.vapor_pressure import rh2vp
 from smrf.envphys.solar.cloud import get_hrrr_cloud
 

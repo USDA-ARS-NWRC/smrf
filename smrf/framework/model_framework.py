@@ -39,7 +39,7 @@ from inicheck.tools import check_config, get_user_config
 from topocalc.shade import shade
 
 from smrf import distribute
-from smrf.data import LoadData, loadTopo
+from smrf.data import LoadData, Topo
 from smrf.envphys import sunang
 from smrf.envphys.solar import model
 from smrf.framework import art, logger
@@ -231,7 +231,7 @@ class SMRF():
         :func:`smrf.data.loadTopo.Topo` for full description.
         """
 
-        self.topo = loadTopo.Topo(self.config['topo'])
+        self.topo = Topo(self.config['topo'])
 
     def initializeDistribution(self):
         """
