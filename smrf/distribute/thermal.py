@@ -234,7 +234,7 @@ class th(image_data.image_data):
         """
 
         self._logger.debug('Initializing distribute.thermal')
-        # if self.gridded:
+
         self._initialize(topo, data.metadata)
 
         self.veg_height = topo.veg_height
