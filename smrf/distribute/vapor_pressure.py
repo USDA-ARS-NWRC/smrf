@@ -74,7 +74,7 @@ class vp(image_data.image_data):
 
         self._logger.debug('Created distribute.vapor_pressure')
 
-    def initialize(self, topo, data):
+    def initialize(self, topo, data, date_time=None):
         """
         Initialize the distribution, calls
         :mod:`smrf.distribute.image_data.image_data._initialize`. Preallocates
@@ -89,6 +89,7 @@ class vp(image_data.image_data):
         """
 
         self._logger.debug('Initializing distribute.vapor_pressure')
+        self.date_time = date_time
         self._initialize(topo, data.metadata)
 
         # get dem to pass to wet_bulb
@@ -156,28 +157,29 @@ class vp(image_data.image_data):
         else:
             self.precip_temp = dpt
 
-    def distribute_thread(self, queue, data):
+    def distribute_thread(self, smrf_queue, data_queue):
         """
-        Distribute the data using threading and queue. All data is provided and
+        Distribute the data using threading. All data is provided and
         ``distribute_thread`` will go through each time step and call
         :mod:`smrf.distribute.vapor_pressure.vp.distribute` then puts the
-        distributed data into the queue for:
+        distributed data into the smrf_queue for:
 
         * :py:attr:`vapor_pressure`
         * :py:attr:`dew_point`
 
         Args:
-            queue: queue dictionary for all variables
+            smrf_queue: smrf_queue dictionary for all variables
             data: pandas dataframe for all data, indexed by date time
         """
         self._logger.info("Distributing {}".format(self.variable))
 
-        for t in data.index:
+        for date_time in self.date_time:
 
-            ta = queue['air_temp'].get(t)
+            vp_data = data_queue['vapor_pressure'].get(date_time)
+            ta = smrf_queue['air_temp'].get(date_time)
 
-            self.distribute(data.loc[t], ta)
+            self.distribute(vp_data, ta)
 
-            queue[self.variable].put([t, self.vapor_pressure])
-            queue['precip_temp'].put([t, self.precip_temp])
-            queue['dew_point'].put([t, self.dew_point])
+            smrf_queue[self.variable].put([date_time, self.vapor_pressure])
+            smrf_queue['precip_temp'].put([date_time, self.precip_temp])
+            smrf_queue['dew_point'].put([date_time, self.dew_point])

@@ -88,7 +88,7 @@ class Wind(image_data.image_data):
 
         self._logger.debug('Created distribute.wind')
 
-    def initialize(self, topo, data):
+    def initialize(self, topo, data, date_time=None):
         """
         Initialize the distribution, calls
         :mod:`smrf.distribute.image_data.image_data._initialize`. Checks for
@@ -103,7 +103,7 @@ class Wind(image_data.image_data):
         """
 
         self._logger.debug('Initializing distribute.wind')
-
+        self.date_time = date_time
         self.wind_model._initialize(topo, data.metadata)
 
         if self.config['wind_model'] != 'interp':
@@ -157,25 +157,33 @@ class Wind(image_data.image_data):
                                             self.wind_model.min,
                                             self.wind_model.max)
 
-    def distribute_thread(self, queue, data_speed, data_direction):
+    def distribute_thread(self, smrf_queue, data_queue):
         """
-        Distribute the data using threading and queue. All data is provided and
+        Distribute the data using threading. All data is provided and
         ``distribute_thread`` will go through each time step and call
         :mod:`smrf.distribute.wind.wind.distribute` then puts the distributed
-        data into the queue for :py:attr:`wind_speed`.
+        data into the smrf_queue for :py:attr:`wind_speed`.
 
         Args:
-            queue: queue dictionary for all variables
+            smrf_queue: smrf_queue dictionary for all variables
             data: pandas dataframe for all data, indexed by date time
         """
         self._logger.info("Distributing {}".format(self.variable))
 
-        for t in data_speed.index:
+        for date_time in self.date_time:
 
-            self.distribute(data_speed.loc[t], data_direction.loc[t], t)
+            ws_data = data_queue['wind_speed'].get(date_time)
+            wd_data = data_queue['wind_direction'].get(date_time)
 
-            queue['wind_speed'].put([t, self.wind_model.wind_speed])
-            queue['wind_direction'].put([t, self.wind_model.wind_direction])
-            queue['flatwind'].put([t, self.wind_model.flatwind])
-            queue['cellmaxus'].put([t, self.wind_model.cellmaxus])
-            queue['dir_round_cell'].put([t, self.wind_model.dir_round_cell])
+            self.distribute(ws_data, wd_data, date_time)
+
+            smrf_queue['wind_speed'].put(
+                [date_time, self.wind_model.wind_speed])
+            smrf_queue['wind_direction'].put(
+                [date_time, self.wind_model.wind_direction])
+            smrf_queue['flatwind'].put(
+                [date_time, self.wind_model.flatwind])
+            smrf_queue['cellmaxus'].put(
+                [date_time, self.wind_model.cellmaxus])
+            smrf_queue['dir_round_cell'].put(
+                [date_time, self.wind_model.dir_round_cell])

@@ -110,10 +110,11 @@ class ppt(image_data.image_data):
         self.time_step = float(time_step)
         self.start_date = start_date
 
-    def initialize(self, topo, data):
+    def initialize(self, topo, data, date_time=None):
 
         self._logger.debug('Initializing distribute.precip')
 
+        self.date_time = date_time
         self._initialize(topo, data.metadata)
         self.percent_snow = np.zeros((topo.ny, topo.nx))
         self.snow_density = np.zeros((topo.ny, topo.nx))
@@ -460,7 +461,7 @@ class ppt(image_data.image_data):
         else:
             self.last_storm_day_basin = np.max(self.last_storm_day)
 
-    def distribute_thread(self, queue, data, date, mask=None):
+    def distribute_thread(self, smrf_queue, data_queue, mask=None):
         """
         Distribute the data using threading and queue. All data is provided and
         ``distribute_thread`` will go through each time step and call
@@ -479,31 +480,36 @@ class ppt(image_data.image_data):
         """
         self._logger.info("Distributing {}".format(self.variable))
 
-        for t in data.precip.index:
+        for date_time in self.date_time:
 
-            dpt = queue['dew_point'].get(t)
-            precip_temp = queue['precip_temp'].get(t)
-            ta = queue['air_temp'].get(t)
+            ppt_data = data_queue['precip'].get(date_time)
+            ta_data = data_queue['air_temp'].get(date_time)
+            ws_data = data_queue['wind_speed'].get(date_time)
+
+            dpt = smrf_queue['dew_point'].get(date_time)
+            precip_temp = smrf_queue['precip_temp'].get(date_time)
+            ta = smrf_queue['air_temp'].get(date_time)
 
             # variables for wind redistribution
-            az = queue['wind_direction'].get(t)
-            flatwind = queue['flatwind'].get(t)
-            dir_round_cell = queue['dir_round_cell'].get(t)
-            cell_maxus = queue['cellmaxus'].get(t)
+            az = smrf_queue['wind_direction'].get(date_time)
+            flatwind = smrf_queue['flatwind'].get(date_time)
+            dir_round_cell = smrf_queue['dir_round_cell'].get(date_time)
+            cell_maxus = smrf_queue['cellmaxus'].get(date_time)
 
-            self.distribute(data.precip.loc[t], dpt, precip_temp, ta, t,
-                            data.wind_speed.loc[t], data.air_temp.loc[t],
+            self.distribute(ppt_data, dpt, precip_temp, ta, date_time,
+                            ws_data, ta_data,
                             az, dir_round_cell, flatwind, cell_maxus,
                             mask=mask)
 
-            queue[self.variable].put([t, self.precip])
-            queue['percent_snow'].put([t, self.percent_snow])
-            queue['snow_density'].put([t, self.snow_density])
-            queue['last_storm_day_basin'].put([t, self.last_storm_day_basin])
-            queue['storm_days'].put([t, self.storm_days])
-            queue['storm_total'].put([t, self.storm_total])
+            smrf_queue[self.variable].put([date_time, self.precip])
+            smrf_queue['percent_snow'].put([date_time, self.percent_snow])
+            smrf_queue['snow_density'].put([date_time, self.snow_density])
+            smrf_queue['last_storm_day_basin'].put(
+                [date_time, self.last_storm_day_basin])
+            smrf_queue['storm_days'].put([date_time, self.storm_days])
+            smrf_queue['storm_total'].put([date_time, self.storm_total])
             if self.nasde_model == "marks2017":
-                queue['storm_id'].put([t, self.storm_id])
+                smrf_queue['storm_id'].put([date_time, self.storm_id])
 
     def post_processor(self, main_obj, threaded=False):
 

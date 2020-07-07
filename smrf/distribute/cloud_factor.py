@@ -48,7 +48,7 @@ class cf(image_data.image_data):
         self.getConfig(config)
         self._logger.debug('Created distribute.cloud_factor')
 
-    def initialize(self, topo, data):
+    def initialize(self, topo, data, date_time=None):
         """
         Initialize the distribution, solely calls
         :mod:`smrf.distribute.image_data.image_data._initialize`.
@@ -62,6 +62,7 @@ class cf(image_data.image_data):
         """
 
         self._logger.debug('Initializing distribute.cloud_factor')
+        self.date_time = date_time
         self._initialize(topo, data.metadata)
 
     def distribute(self, data):
@@ -80,7 +81,7 @@ class cf(image_data.image_data):
         self.cloud_factor = utils.set_min_max(self.cloud_factor, self.min,
                                               self.max)
 
-    def distribute_thread(self, queue, data):
+    def distribute_thread(self, smrf_queue, data_queue):
         """
         Distribute the data using threading and queue. All data is provided
         and ``distribute_thread`` will go through each time step and call
@@ -94,7 +95,8 @@ class cf(image_data.image_data):
         """
         self._logger.info("Distributing {}".format(self.variable))
 
-        for t in data.index:
+        for date_time in self.date_time:
 
-            self.distribute(data.loc[t])
-            queue[self.variable].put([t, self.cloud_factor])
+            data = data_queue[self.variable].get(date_time)
+            self.distribute(data)
+            smrf_queue[self.variable].put([date_time, self.cloud_factor])

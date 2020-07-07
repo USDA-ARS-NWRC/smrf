@@ -208,7 +208,7 @@ class th(image_data.image_data):
 
         self._logger.debug('Created distribute.thermal')
 
-    def initialize(self, topo, data):
+    def initialize(self, topo, data, date_time=None):
         """
         Initialize the distribution, calls
         :mod:`smrf.distribute.image_data.image_data._initialize` for gridded
@@ -229,6 +229,7 @@ class th(image_data.image_data):
         """
 
         self._logger.debug('Initializing distribute.thermal')
+        self.date_time = date_time
         if self.gridded:
             self._initialize(topo, data.metadata)
 
@@ -330,37 +331,39 @@ class th(image_data.image_data):
 
         self.thermal = utils.set_min_max(cth, self.min, self.max)
 
-    def distribute_thread(self, queue, date):
+    def distribute_thread(self, smrf_queue):
         """
-        Distribute the data using threading and queue. All data is provided and
+        Distribute the data using threading and smrf_queue. All data is provided and
         ``distribute_thread`` will go through each time step and call
         :mod:`smrf.distribute.thermal.th.distribute` then puts the distributed
-        data into the queue for :py:attr:`thermal`.
+        data into the smrf_queue for :py:attr:`thermal`.
 
         Args:
-            queue: queue dictionary for all variables
+            smrf_queue: smrf_queue dictionary for all variables
             data: pandas dataframe for all data, indexed by date time
 
         """
 
-        for t in date:
+        for date_time in self.date_time:
 
-            air_temp = queue['air_temp'].get(t)
-            dew_point = queue['dew_point'].get(t)
-            vapor_pressure = queue['vapor_pressure'].get(t)
-            cloud_factor = queue['cloud_factor'].get(t)
+            air_temp = smrf_queue['air_temp'].get(date_time)
+            dew_point = smrf_queue['dew_point'].get(date_time)
+            vapor_pressure = smrf_queue['vapor_pressure'].get(date_time)
+            cloud_factor = smrf_queue['cloud_factor'].get(date_time)
 
-            self.distribute(t, air_temp, vapor_pressure,
+            self.distribute(date_time, air_temp, vapor_pressure,
                             dew_point, cloud_factor)
 
             if self.correct_veg:
-                queue['thermal_veg'].put([t, self.thermal_veg])
+                smrf_queue['thermal_veg'].put(
+                    [date_time, self.thermal_veg])
             if self.correct_cloud:
-                queue['thermal_cloud'].put([t, self.thermal_cloud])
+                smrf_queue['thermal_cloud'].put(
+                    [date_time, self.thermal_cloud])
 
-            queue['thermal_clear'].put([t, self.thermal_clear])
+            smrf_queue['thermal_clear'].put([date_time, self.thermal_clear])
 
-            queue['thermal'].put([t, self.thermal])
+            smrf_queue['thermal'].put([date_time, self.thermal])
 
     def distribute_thermal(self, data, air_temp):
         """
@@ -395,33 +398,35 @@ class th(image_data.image_data):
                 self.veg_height)
             self.thermal = self.thermal_veg.copy()
 
-    def distribute_thermal_thread(self, queue, data):
+    def distribute_thermal_thread(self, smrf_queue, data_queue):
         """
-        Distribute the data using threading and queue. All data is provided and
+        Distribute the data using threading and smrf_queue. All data is provided and
         ``distribute_thread`` will go through each time step and call
         :mod:`smrf.distribute.thermal.th.distribute_thermal` then puts the
-        distributed data into the queue for :py:attr:`thermal`. Used when
+        distributed data into the smrf_queue for :py:attr:`thermal`. Used when
         thermal is given (i.e. gridded datasets from WRF).
 
         Args:
-            queue: queue dictionary for all variables
+            smrf_queue: smrf_queue dictionary for all variables
             data: pandas dataframe for all data, indexed by date time
 
         """
 
         self._logger.info("Distributing {}".format(self.variable))
 
-        for t in data.index:
+        for date_time in self.date_time:
 
-            air_temp = queue['air_temp'].get(t)
+            thermal_data = data_queue['thermal'].get(date_time)
+            air_temp = smrf_queue['air_temp'].get(date_time)
 
-            self.distribute_thermal(data.loc[t], air_temp)
+            self.distribute_thermal(thermal_data, air_temp)
 
             if self.correct_veg:
-                queue['thermal_veg'].put([t, self.thermal_veg])
+                smrf_queue['thermal_veg'].put([date_time, self.thermal_veg])
             if self.correct_cloud:
-                queue['thermal_cloud'].put([t, self.thermal_cloud])
+                smrf_queue['thermal_cloud'].put(
+                    [date_time, self.thermal_cloud])
 
-            queue['thermal_clear'].put([t, self.thermal_clear])
+            smrf_queue['thermal_clear'].put([date_time, self.thermal_clear])
 
-            queue['thermal'].put([t, self.thermal])
+            smrf_queue['thermal'].put([date_time, self.thermal])

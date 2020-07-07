@@ -217,7 +217,7 @@ class Solar(image_data.image_data):
 
         self._logger.debug('Created distribute.solar')
 
-    def initialize(self, topo, data):
+    def initialize(self, topo, data, date_time=None):
         """
         Initialize the distribution, soley calls
         :mod:`smrf.distribute.image_data.image_data._initialize`. Sets the
@@ -236,6 +236,7 @@ class Solar(image_data.image_data):
         """
 
         self._logger.debug('Initializing distribute.solar')
+        self.date_time = date_time
         # Solar has no stations. Relies on Cloud factor
         self.stations = None
         self._initialize(topo, data.metadata)
@@ -351,28 +352,28 @@ class Solar(image_data.image_data):
             # net
             self.net_solar = None
 
-    def distribute_thread(self, queue, data):
+    def distribute_thread(self, smrf_queue):
         """
-        Distribute the data using threading and queue. All data is provided and
+        Distribute the data using threading. All data is provided and
         ``distribute_thread`` will go through each time step following the
         methods outlined in :mod:`smrf.distribute.solar.solar.distribute`. The
-        data queues puts the distributed data into:
+        data smrf_queues puts the distributed data into:
 
         * :py:attr:`net_solar`
 
         Args:
-            queue: queue dictionary for all variables
+            smrf_queue: smrf_queue dictionary for all variables
             data: pandas dataframe for all data, indexed by date time
         """
         self._logger.info("Distributing {}".format(self.variable))
-        for date_time in data.index:
+        for date_time in self.date_time:
 
-            cosz = queue['cosz'].get(date_time)
-            azimuth = queue['azimuth'].get(date_time)
-            illum_ang = queue['illum_ang'].get(date_time)
-            albedo_ir = queue['albedo_ir'].get(date_time)
-            albedo_vis = queue['albedo_vis'].get(date_time)
-            self.cloud_factor = queue['cloud_factor'].get(date_time)
+            cosz = smrf_queue['cosz'].get(date_time)
+            azimuth = smrf_queue['azimuth'].get(date_time)
+            illum_ang = smrf_queue['illum_ang'].get(date_time)
+            albedo_ir = smrf_queue['albedo_ir'].get(date_time)
+            albedo_vis = smrf_queue['albedo_vis'].get(date_time)
+            self.cloud_factor = smrf_queue['cloud_factor'].get(date_time)
 
             self.distribute(
                 date_time,
@@ -384,19 +385,19 @@ class Solar(image_data.image_data):
                 albedo_ir)
 
             for cstv in self.CLEAR_SKY_THREAD_VARIABLES:
-                queue[cstv].put([date_time, getattr(self, cstv)])
+                smrf_queue[cstv].put([date_time, getattr(self, cstv)])
 
-            # Add the cloud corrected variables to the queue
+            # Add the cloud corrected variables to the smrf_queue
             if self.config['correct_cloud']:
                 for vtv in self.VEG_THREAD_VARIABLES:
-                    queue[vtv].put([date_time, getattr(self, vtv)])
+                    smrf_queue[vtv].put([date_time, getattr(self, vtv)])
 
-            # Add the veg correct variables to the queue
+            # Add the veg correct variables to the smrf_queue
             if self.config['correct_veg']:
                 for ctv in self.CLOUD_THREAD_VARIABLES:
-                    queue[ctv].put([date_time, getattr(self, ctv)])
+                    smrf_queue[ctv].put([date_time, getattr(self, ctv)])
 
-            queue['net_solar'].put([date_time, self.net_solar])
+            smrf_queue['net_solar'].put([date_time, self.net_solar])
 
     def cloud_correct(self):
         """
