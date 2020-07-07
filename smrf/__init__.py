@@ -9,6 +9,7 @@ try:
     __version__ = get_distribution(__name__).version
 except DistributionNotFound:
     __version__ = 'unknown'
+
 __core_config__ = os.path.abspath(
     os.path.dirname(__file__) + '/framework/CoreConfig.ini')
 __recipes__ = os.path.abspath(os.path.dirname(
@@ -36,7 +37,7 @@ __config_titles__ = {
     "system": "System variables and Logging"
 }
 
-# from . import data, distribute, envphys, framework, output, spatial, utils  # isort:skip
+from . import data, distribute, envphys, framework, output, spatial, utils  # isort:skip
 
 __config_header__ = "Config File for SMRF {0}\n" \
                     "For more SMRF related help see:\n" \
