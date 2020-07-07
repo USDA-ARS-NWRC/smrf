@@ -10,6 +10,15 @@ from smrf.envphys.solar.cloud import get_hrrr_cloud
 
 class LoadGribHRRR():
 
+    VARIABLES = [
+        'air_temp',
+        'vapor_pressure',
+        'precip',
+        'wind_speed',
+        'wind_direction',
+        'cloud_factor'
+    ]
+
     def __init__(self, *args, **kwargs):
 
         for keys in kwargs.keys():
@@ -67,8 +76,18 @@ class LoadGribHRRR():
 
         self.start_date = date_time
         self.timestep_dates()
-
         self.load()
+
+    def load_timestep_thread(self, date_times, data_queue):
+
+        for date_time in date_times[1:]:
+            self.load_timestep(date_time)
+
+            for variable in self.VARIABLES:
+                data_queue[variable].put(
+                    [date_time, getattr(self, variable).iloc[0]])
+
+        self._logger.debug('Finished loading data')
 
     def parse_data(self, metadata, data):
 

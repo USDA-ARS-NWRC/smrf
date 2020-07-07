@@ -505,25 +505,29 @@ class SMRF():
         self.create_data_queue()
 
         # Create threads for distribution
-        t, smrf_queue = self.create_distributed_threads()
+        self.create_distributed_threads()
 
         # output thread
-        t.append(queue.QueueOutput(smrf_queue, self.date_time,
-                                   self.out_func,
-                                   self.config['output']['frequency'],
-                                   self.topo.nx,
-                                   self.topo.ny))
+        self.threads.append(
+            queue.QueueOutput(
+                self.smrf_queue,
+                self.date_time,
+                self.out_func,
+                self.config['output']['frequency'],
+                self.topo.nx,
+                self.topo.ny))
 
         # the cleaner
-        t.append(queue.QueueCleaner(self.date_time, smrf_queue))
+        self.threads.append(queue.QueueCleaner(
+            self.date_time, self.smrf_queue))
 
         # start all the threads
-        for i in range(len(t)):
-            t[i].start()
+        for i in range(len(self.threads)):
+            self.threads[i].start()
 
         # Wait for the end
-        for i in range(len(t)):
-            t[i].join()
+        for i in range(len(self.threads)):
+            self.threads[i].join()
 
         self._logger.debug('DONE!!!!')
 
@@ -534,6 +538,7 @@ class SMRF():
         self.data_queue = {}
         for variable in self.data.VARIABLES[:-1]:
             dq = queue.DateQueue_Threading(
+                timeout=self.time_out,
                 name="data_{}".format(variable))
 
             # load the data into the queue, all methods should have
@@ -544,6 +549,14 @@ class SMRF():
                 dq.put([date_time, row])
 
             self.data_queue[variable] = dq
+
+        # create a thread to load the data
+        if self.hrrr_data_timestep:
+            data_thread = Thread(
+                target=self.data.load_class.load_timestep_thread,
+                name='data',
+                args=(self.date_time, self.data_queue))
+            data_thread.start()
 
     def create_distributed_threads(self):
         """
@@ -564,8 +577,8 @@ class SMRF():
 
         # -------------------------------------
         # Create Queues for all the variables
-        smrf_queue = {}
-        t = []
+        self.smrf_queue = {}
+        self.threads = []
 
         # Add threaded variables on the fly
         self.thread_variables += ['storm_total']
@@ -584,83 +597,83 @@ class SMRF():
         self._logger.info("Staging {} threaded variables...".format(
             len(self.thread_variables)))
         for v in self.thread_variables:
-            smrf_queue[v] = queue.DateQueue_Threading(self.queue_max_values,
-                                                      self.time_out,
-                                                      name=v)
+            self.smrf_queue[v] = queue.DateQueue_Threading(
+                self.queue_max_values,
+                self.time_out,
+                name=v)
 
         # -------------------------------------
         # Distribute the data
 
         # 0.1 sun angle for time step
-        t.append(Thread(
+        self.threads.append(Thread(
             target=sunang.sunang_thread,
             name='sun_angle',
-            args=(smrf_queue, self.date_time,
+            args=(self.smrf_queue, self.date_time,
                   self.topo.basin_lat,
                   self.topo.basin_long)))
 
         # 0.2 illumination angle
-        t.append(Thread(
+        self.threads.append(Thread(
             target=model.shade_thread,
             name='illum_angle',
-            args=(smrf_queue, self.date_time,
+            args=(self.smrf_queue, self.date_time,
                   self.topo.sin_slope, self.topo.aspect)))
 
         # 1. Air temperature
-        t.append(Thread(
+        self.threads.append(Thread(
             target=self.distribute['air_temp'].distribute_thread,
             name='air_temp',
-            args=(smrf_queue, self.data_queue)))
+            args=(self.smrf_queue, self.data_queue)))
 
         # 2. Vapor pressure
-        t.append(Thread(
+        self.threads.append(Thread(
             target=self.distribute['vapor_pressure'].distribute_thread,
             name='vapor_pressure',
-            args=(smrf_queue, self.data_queue)))
+            args=(self.smrf_queue, self.data_queue)))
 
         # 3. Wind_speed and wind_direction
-        t.append(Thread(
+        self.threads.append(Thread(
             target=self.distribute['wind'].distribute_thread,
             name='wind',
-            args=(smrf_queue, self.data_queue)))
+            args=(self.smrf_queue, self.data_queue)))
 
         # 4. Precipitation
-        t.append(Thread(
+        self.threads.append(Thread(
             target=self.distribute['precip'].distribute_thread,
             name='precipitation',
-            args=(smrf_queue, self.data_queue, self.topo.mask)))
+            args=(self.smrf_queue, self.data_queue, self.topo.mask)))
 
         # 5. Albedo
-        t.append(Thread(
+        self.threads.append(Thread(
             target=self.distribute['albedo'].distribute_thread,
             name='albedo',
-            args=(smrf_queue, )))
+            args=(self.smrf_queue, )))
 
         # 6.Cloud Factor
-        t.append(Thread(
+        self.threads.append(Thread(
             target=self.distribute['cloud_factor'].distribute_thread,
             name='cloud_factor',
-            args=(smrf_queue, self.data_queue)))
+            args=(self.smrf_queue, self.data_queue)))
 
         # 7 Net radiation
-        t.append(Thread(
+        self.threads.append(Thread(
             target=self.distribute['solar'].distribute_thread,
             name='solar',
-            args=(smrf_queue, )))
+            args=(self.smrf_queue, )))
 
         # 8. thermal radiation
-        if self.distribute['thermal'].gridded:
-            t.append(Thread(
+        if self.distribute['thermal'].gridded and \
+                self.config['gridded']['data_type'] in ['wrf', 'netcdf']:
+            self.threads.append(Thread(
                 target=self.distribute['thermal'].distribute_thermal_thread,
                 name='thermal',
-                args=(smrf_queue, self.data_queue)))
+                args=(self.smrf_queue, self.data_queue)))
         else:
-            t.append(Thread(
+            self.threads.append(Thread(
                 target=self.distribute['thermal'].distribute_thread,
                 name='thermal',
-                args=(smrf_queue, )))
-
-        return t, smrf_queue
+                args=(self.smrf_queue, )))
 
     def initializeOutput(self):
         """
