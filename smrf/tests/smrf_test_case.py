@@ -122,10 +122,6 @@ class SMRFTestCase(unittest.TestCase):
         folder = os.path.join(cls.base_config.cfg['output']['out_location'])
         os.makedirs(folder, exist_ok=True)
 
-        # clear the logger
-        for handler in logging.root.handlers:
-            logging.root.removeHandler(handler)
-
     @classmethod
     def tearDownClass(cls):
         """
@@ -134,3 +130,8 @@ class SMRFTestCase(unittest.TestCase):
         folder = os.path.join(cls.base_config.cfg['output']['out_location'])
         if os.path.exists(folder):
             shutil.rmtree(folder)
+
+    def setup(self):
+        # clear the logger
+        for handler in logging.root.handlers:
+            logging.root.removeHandler(handler)

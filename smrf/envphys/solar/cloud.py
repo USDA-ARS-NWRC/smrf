@@ -45,7 +45,7 @@ def cf_cloud(beam, diffuse, cf):
     return c_grad, c_drad
 
 
-def get_hrrr_cloud(df_solar, df_meta, logger, lat, lon):
+def get_hrrr_cloud(df_solar, df_meta, lat, lon):
     """
     Take the combined solar from HRRR and use the two stream calculation
     at the specific HRRR pixels to find the cloud_factor.
@@ -53,7 +53,6 @@ def get_hrrr_cloud(df_solar, df_meta, logger, lat, lon):
     Args:
         df_solar - solar dataframe from hrrr
         df_meta - meta_data from hrrr
-        logger - smrf logger
         lat - basin lat
         lon - basin lon
 

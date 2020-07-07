@@ -114,7 +114,7 @@ class TestLoadHRRR(SMRFTestCase):
         config = deepcopy(self.config)
         config.raw_cfg['gridded']['hrrr_load_method'] = 'timestep'
         config.raw_cfg['system']['threading'] = True
-        config.raw_cfg['system']['timeout'] = 2
+        config.raw_cfg['system']['queue_max_values'] = 1
         config.apply_recipes()
         config = cast_all_variables(config, config.mcfg)
 

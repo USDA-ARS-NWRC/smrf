@@ -281,8 +281,8 @@ class QueueOutput(threading.Thread):
                             data = np.zeros((self.ny, self.nx))
 
                         # output the time step
-                        self._logger.debug(
-                            "threaded output for {}".format(v['variable']))
+                        # self._logger.debug(
+                        #     "threaded output for {}".format(v['variable']))
                         self.out_func.output(v['variable'], data, t)
 
                     else:
