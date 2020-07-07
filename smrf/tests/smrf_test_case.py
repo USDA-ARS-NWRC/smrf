@@ -1,6 +1,7 @@
 import os
 import shutil
 import unittest
+import logging
 
 import netCDF4 as nc
 import numpy as np
@@ -120,6 +121,10 @@ class SMRFTestCase(unittest.TestCase):
         # create the output dir
         folder = os.path.join(cls.base_config.cfg['output']['out_location'])
         os.makedirs(folder, exist_ok=True)
+
+        # clear the logger
+        for handler in logging.root.handlers:
+            logging.root.removeHandler(handler)
 
     @classmethod
     def tearDownClass(cls):

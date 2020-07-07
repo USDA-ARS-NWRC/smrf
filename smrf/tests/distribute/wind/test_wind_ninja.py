@@ -5,7 +5,7 @@ import netCDF4 as nc
 import numpy as np
 import pytz
 
-from smrf.data import loadTopo
+from smrf.data import Topo
 from smrf.data.mysql_data import date_range
 from smrf.distribute.wind.wind_ninja import WindNinjaModel
 from smrf.tests.smrf_test_case_lakes import SMRFTestCaseLakes
@@ -21,7 +21,7 @@ class TestWindNinja(SMRFTestCaseLakes):
         config = self.base_config.cfg
 
         # Load the topo
-        topo = loadTopo.Topo(config['topo'])
+        topo = Topo(config['topo'])
 
         # Get the time steps correctly in the time zone
         d = date_range(

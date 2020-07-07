@@ -4,7 +4,7 @@ import numpy as np
 import pandas as pd
 from topocalc.shade import shade
 
-from smrf.data import loadTopo
+from smrf.data import Topo
 from smrf.envphys.albedo import albedo
 from smrf.envphys.solar import irradiance, toporad
 from smrf.envphys.sunang import sunang
@@ -34,7 +34,7 @@ class TestToporad(SMRFTestCaseLakes):
             'gradient_method': 'gradient_d8',
             'sky_view_factor_angles': 72
         }
-        cls.topo = loadTopo.Topo(topo_config)
+        cls.topo = Topo(topo_config)
         cls.dem = cls.topo.dem
 
         # inputs for toporad and stoporad

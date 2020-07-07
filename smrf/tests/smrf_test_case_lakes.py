@@ -1,4 +1,5 @@
 import os
+import logging
 import shutil
 
 from inicheck.tools import get_user_config
@@ -36,6 +37,10 @@ class SMRFTestCaseLakes(SMRFTestCase):
 
         # create the output dir
         os.makedirs(cls.output, exist_ok=True)
+
+        # clear the logger
+        for handler in logging.root.handlers:
+            logging.root.removeHandler(handler)
 
     @classmethod
     def tearDownClass(cls):

@@ -4,7 +4,7 @@ import numpy as np
 import pandas as pd
 import utm
 
-from smrf.data import loadTopo
+from smrf.data import Topo
 from smrf.envphys import sunang
 from smrf.envphys.solar import irradiance, twostream
 from smrf.tests.smrf_test_case import SMRFTestCase
@@ -73,7 +73,7 @@ class TestRadiation(SMRFTestCase):
             'gradient_method': 'gradient_d8',
             'sky_view_factor_angles': 72
         }
-        topo = loadTopo.Topo(topo_config)
+        topo = Topo(topo_config)
 
         # convert from UTM to lat/long
         lat, lon = utm.to_latlon(topo.X[0, 0], topo.Y[0, 0], 11, 'N')
