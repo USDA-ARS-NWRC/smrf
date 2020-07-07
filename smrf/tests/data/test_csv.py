@@ -13,10 +13,9 @@ from copy import deepcopy
 
 from inicheck.tools import cast_all_variables
 
-from smrf.framework.model_framework import can_i_run_smrf, run_smrf
-from smrf.tests.nwrc_check import NWRCCheck
+from smrf.framework.model_framework import run_smrf
+# from smrf.tests.nwrc_check import NWRCCheck
 from smrf.tests.smrf_test_case import SMRFTestCase
-
 
 # @unittest.skipUnless(
 #     NWRCCheck.in_network(),
@@ -47,7 +46,8 @@ from smrf.tests.smrf_test_case import SMRFTestCase
 
 #     def test_mysql_data_w_client(self):
 #         """
-#         Run SMRF with MYSQL data from client, also can only be run from inside
+#         Run SMRF with MYSQL data from client, also can only be run from
+#  inside
 #         NWRC.
 #         """
 #         # test a successful run specifying client

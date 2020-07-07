@@ -3,7 +3,7 @@ import logging
 import numpy as np
 import utm
 
-from smrf.data import LoadCSV, LoadWRF, LoadNetcdf, LoadGribHRRR
+from smrf.data import LoadCSV, LoadGribHRRR, LoadNetcdf, LoadWRF
 
 
 class LoadData():
@@ -242,7 +242,8 @@ class LoadData():
     #     # get a list of the stations
     #     station_ids = self.metadata.index.tolist()
 
-    #     # get the correct column names if specified, along with variable names
+    #     # get the correct column names if specified, along with
+    # variable names
     #     db_var_names = [val for key, val in self.dataConfig.items()
     #                     if key not in self.db_config_vars]
     #     variables = [x for x in self.dataConfig.keys()

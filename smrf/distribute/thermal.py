@@ -343,7 +343,7 @@ class th(image_data.image_data):
 
     def distribute_thread(self, smrf_queue):
         """
-        Distribute the data using threading and smrf_queue. All data is provided and
+        Distribute the data using threading. All data is provided and
         ``distribute_thread`` will go through each time step and call
         :mod:`smrf.distribute.thermal.th.distribute` then puts the distributed
         data into the smrf_queue for :py:attr:`thermal`.
@@ -410,7 +410,7 @@ class th(image_data.image_data):
 
     def distribute_thermal_thread(self, smrf_queue, data_queue):
         """
-        Distribute the data using threading and smrf_queue. All data is provided and
+        Distribute the data using threading. All data is provided and
         ``distribute_thread`` will go through each time step and call
         :mod:`smrf.distribute.thermal.th.distribute_thermal` then puts the
         distributed data into the smrf_queue for :py:attr:`thermal`. Used when

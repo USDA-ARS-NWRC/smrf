@@ -5,11 +5,11 @@ import sys
 from datetime import datetime
 from shutil import copyfile
 
-import utm
 import numpy as np
 import pandas as pd
 import pytz
 import scipy.spatial.qhull as qhull
+import utm
 from inicheck.checkers import CheckType
 from inicheck.output import generate_config
 from inicheck.utilities import mk_lst

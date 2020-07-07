@@ -1,11 +1,11 @@
 import logging
 
-import pandas as pd
-import numpy as np
 import netCDF4 as nc
+import numpy as np
+import pandas as pd
 
-from smrf.utils.utils import apply_utm
 from smrf.data import metadata_name_from_index
+from smrf.utils.utils import apply_utm
 
 
 class LoadNetcdf():
@@ -99,7 +99,8 @@ class LoadNetcdf():
         for variable in self.variables:
             v_file = self.config[variable]
             self._logger.debug(
-                'Loading variable {} from netcdf field {}'.format(variable, v_file))
+                'Loading variable {} from netcdf field {}'.format(
+                    variable, v_file))
 
             df = pd.DataFrame(index=time, columns=primary_id)
             for i in a:

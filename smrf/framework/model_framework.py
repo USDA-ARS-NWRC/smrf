@@ -642,7 +642,7 @@ class SMRF():
 
         # 8. thermal radiation
         if self.thermal_netcdf:
-            t.append(Thread(
+            self.threads.append(Thread(
                 target=self.distribute['thermal'].distribute_thermal_thread,
                 name='thermal',
                 args=(self.smrf_queue, self.data_queue)))

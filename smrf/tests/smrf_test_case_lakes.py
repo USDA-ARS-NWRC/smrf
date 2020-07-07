@@ -1,5 +1,5 @@
-import os
 import logging
+import os
 import shutil
 
 from inicheck.tools import get_user_config

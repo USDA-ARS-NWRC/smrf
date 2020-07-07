@@ -1,7 +1,7 @@
+import logging
 import os
 import shutil
 import unittest
-import logging
 
 import netCDF4 as nc
 import numpy as np

@@ -1,11 +1,12 @@
 import logging
 
-import pandas as pd
-import numpy as np
 import netCDF4 as nc
+import numpy as np
+import pandas as pd
 import pytz
-from smrf.utils.utils import apply_utm
+
 from smrf.envphys.vapor_pressure import satvp
+from smrf.utils.utils import apply_utm
 
 
 def metadata_name_from_index(index):
