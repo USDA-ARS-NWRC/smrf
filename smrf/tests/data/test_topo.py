@@ -5,7 +5,7 @@ import netCDF4 as nc
 import numpy as np
 
 import smrf
-from smrf.data import loadTopo
+from smrf.data import Topo
 
 
 class TestLoadTopo(unittest.TestCase):
@@ -23,7 +23,7 @@ class TestLoadTopo(unittest.TestCase):
 
         self.ds = nc.Dataset(topo_config['filename'])
 
-        self.topo = loadTopo.Topo(topo_config)
+        self.topo = Topo(topo_config)
 
     @classmethod
     def tearDown(self):

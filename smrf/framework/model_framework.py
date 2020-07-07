@@ -526,7 +526,7 @@ class SMRF():
 
         self.data_queue = {}
         for variable in self.data.VARIABLES[:-1]:
-            dq = queue.DateQueue_Threading(
+            dq = queue.DateQueueThreading(
                 timeout=self.time_out,
                 name="data_{}".format(variable))
 
@@ -565,18 +565,19 @@ class SMRF():
         self.thread_variables = ['cosz', 'azimuth', 'illum_ang', 'output']
 
         for v in self.distribute:
-            self.distribute[v].initialize(self.topo, self.data)
+            self.distribute[v].initialize(self.topo, self.data, self.date_time)
             self.thread_variables += self.distribute[v].thread_variables
 
         # -------------------------------------
         # Create Queues for all the variables
-        self.smrf_queues = {}
+        self.smrf_queue = {}
         self._logger.info("Staging {} threaded variables...".format(
             len(self.thread_variables)))
         for v in self.thread_variables:
-            self.smrf_queues[v] = queue.DateQueueThreading(self.queue_max_values,
-                                                           self.time_out,
-                                                           name=v)
+            self.smrf_queue[v] = queue.DateQueueThreading(
+                self.queue_max_values,
+                self.time_out,
+                name=v)
 
         # -------------------------------------
         # Distribute the data
