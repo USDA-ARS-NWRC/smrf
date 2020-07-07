@@ -188,6 +188,11 @@ class th(image_data.image_data):
     # be written during main distribute loop
     post_process_variables = {}
 
+    BASE_THREAD_VARIABLES = [
+        'thermal',
+        'thermal_clear'
+    ]
+
     def __init__(self, thermalConfig):
 
         # extend the base class
@@ -230,8 +235,7 @@ class th(image_data.image_data):
 
         self._logger.debug('Initializing distribute.thermal')
         self.date_time = date_time
-        if self.gridded:
-            self._initialize(topo, data.metadata)
+        self._initialize(topo, data.metadata)
 
         self.veg_height = topo.veg_height
         self.veg_tau = topo.veg_tau
@@ -240,6 +244,12 @@ class th(image_data.image_data):
         if not self.correct_terrain:
             self.sky_view_factor = None
         self.dem = topo.dem
+
+        if self.correct_cloud:
+            self.thread_variables.append('thermal_cloud')
+
+        if self.correct_veg:
+            self.thread_variables.append('thermal_veg')
 
     def distribute(self, date_time, air_temp, vapor_pressure=None,
                    dew_point=None, cloud_factor=None):

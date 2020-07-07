@@ -54,6 +54,8 @@ class WinstralWindModel(image_data.image_data):
 
     VARIABLE = 'wind'
 
+    BASE_THREAD_VARIABLES = []
+
     def __init__(self, smrf_config):
         """Initialize the WinstralWindModel
 

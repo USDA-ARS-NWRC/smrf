@@ -34,6 +34,7 @@ class WindNinjaModel(image_data.image_data):
     VARIABLE = 'wind'
     WN_DATE_FORMAT = '%m-%d-%Y_%H%M'
     DATE_FORMAT = '%Y%m%d'
+    BASE_THREAD_VARIABLES = []
 
     def __init__(self, smrf_config):
         """Initialize the WinstralWindModel

@@ -80,21 +80,6 @@ class SMRF():
                'vapor_pressure',
                'wind']
 
-    # These are the variables that will be queued
-    thread_variables = ['cosz', 'azimuth', 'illum_ang',
-                        'air_temp', 'dew_point', 'vapor_pressure',
-                        'wind_speed', 'precip', 'percent_snow',
-                        'snow_density', 'last_storm_day_basin',
-                        'storm_days', 'precip_temp',
-                        'clear_vis_beam', 'clear_vis_diffuse',
-                        'clear_ir_beam', 'clear_ir_diffuse',
-                        'albedo_vis', 'albedo_ir', 'net_solar',
-                        'cloud_factor', 'thermal',
-                        'output', 'veg_ir_beam', 'veg_ir_diffuse',
-                        'veg_vis_beam', 'veg_vis_diffuse',
-                        'cloud_ir_beam', 'cloud_ir_diffuse', 'cloud_vis_beam',
-                        'cloud_vis_diffuse', 'thermal_clear', 'wind_direction']
-
     def __init__(self, config, external_logger=None):
         """
         Initialize the model, read config file, start and end date, and logging
@@ -217,6 +202,11 @@ class SMRF():
             tz=self.time_zone
         ))
         self.time_steps = len(self.date_time)
+
+    @property
+    def thermal_netcdf(self):
+        return self.distribute['thermal'].gridded and \
+            self.config['gridded']['data_type'] in ['wrf', 'netcdf']
 
     def __enter__(self):
         return self
@@ -459,8 +449,7 @@ class SMRF():
                 self.distribute['albedo'].albedo_ir)
 
             # 7. thermal radiation
-            if self.distribute['thermal'].gridded and \
-               self.config['gridded']['data_type'] in ['wrf', 'netcdf']:
+            if self.thermal_netcdf:
                 self.distribute['thermal'].distribute_thermal(
                     self.data.thermal.loc[t],
                     self.distribute['air_temp'].air_temp)
@@ -569,41 +558,29 @@ class SMRF():
         """
 
         # -------------------------------------
-        # Initialize the distibutions
+        # Initialize the distibutions and get thread variables
         self._logger.info("Initializing distributed variables...")
 
+        # These are the variables that will be queued
+        self.thread_variables = ['cosz', 'azimuth', 'illum_ang', 'output']
+
         for v in self.distribute:
-            self.distribute[v].initialize(self.topo, self.data, self.date_time)
+            self.distribute[v].initialize(self.topo, self.data)
+            self.thread_variables += self.distribute[v].thread_variables
 
         # -------------------------------------
         # Create Queues for all the variables
-        self.smrf_queue = {}
-        self.threads = []
-
-        # Add threaded variables on the fly
-        self.thread_variables += ['storm_total']
-        self.thread_variables += ['flatwind']
-        self.thread_variables += ['cellmaxus', 'dir_round_cell']
-
-        if self.distribute['precip'].nasde_model == 'marks2017':
-            self.thread_variables += ['storm_id']
-
-        if self.distribute['thermal'].correct_cloud:
-            self.thread_variables += ['thermal_cloud']
-
-        if self.distribute['thermal'].correct_veg:
-            self.thread_variables += ['thermal_veg']
-
+        self.smrf_queues = {}
         self._logger.info("Staging {} threaded variables...".format(
             len(self.thread_variables)))
         for v in self.thread_variables:
-            self.smrf_queue[v] = queue.DateQueue_Threading(
-                self.queue_max_values,
-                self.time_out,
-                name=v)
+            self.smrf_queues[v] = queue.DateQueueThreading(self.queue_max_values,
+                                                           self.time_out,
+                                                           name=v)
 
         # -------------------------------------
         # Distribute the data
+        self.threads = []
 
         # 0.1 sun angle for time step
         self.threads.append(Thread(
@@ -663,9 +640,8 @@ class SMRF():
             args=(self.smrf_queue, )))
 
         # 8. thermal radiation
-        if self.distribute['thermal'].gridded and \
-                self.config['gridded']['data_type'] in ['wrf', 'netcdf']:
-            self.threads.append(Thread(
+        if self.thermal_netcdf:
+            t.append(Thread(
                 target=self.distribute['thermal'].distribute_thermal_thread,
                 name='thermal',
                 args=(self.smrf_queue, self.data_queue)))
