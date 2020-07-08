@@ -163,6 +163,10 @@ class LoadGribHRRR():
         if self.cf_memory is None:
             self.cf_memory = self.cloud_factor
 
+            # if initial cloud factor is at night, default to clear sky
+            if self.cf_memory.isnull().values.any():
+                self.cf_memory[:] = 1
+
         else:
             self.cf_memory = pd.concat(
                 [self.cf_memory.tail(1), self.cloud_factor])
