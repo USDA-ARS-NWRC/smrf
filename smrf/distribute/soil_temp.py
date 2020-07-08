@@ -1,5 +1,3 @@
-from copy import deepcopy
-
 import numpy as np
 
 from smrf.distribute import image_data
@@ -39,8 +37,6 @@ class ts(image_data.image_data):
     # be written during main distribute loop
     post_process_variables = {}
 
-    BASE_THREAD_VARIABLES = []
-
     def __init__(self, soilConfig):
 
         # extend the base class
@@ -65,7 +61,7 @@ class ts(image_data.image_data):
 
         self._logger.debug('Initializing distribute.soil_temp')
 #         self._initialize(topo, metadata)
-        self.thread_variables = deepcopy(self.BASE_THREAD_VARIABLES)
+        self.thread_variables = self.base_thread_variables
         self.soil_temp = float(self.config['temp']) * np.ones(topo.dem.shape)
 
     def distribute(self):

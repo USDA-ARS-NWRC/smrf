@@ -113,8 +113,7 @@ class Wind(image_data.image_data):
         self._logger.debug('Initializing distribute.wind')
 
         self.wind_model._initialize(topo, data.metadata)
-        self.thread_variables = self.BASE_THREAD_VARIABLES + \
-            self.wind_model.thread_variables
+        self.thread_variables = self.base_thread_variables
 
         if self.config['wind_model'] != 'interp':
             self.wind_model.initialize(topo, data)
