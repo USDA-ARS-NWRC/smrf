@@ -63,13 +63,13 @@ class Wind(image_data.image_data):
     # be written during main distribute loop
     post_process_variables = {}
 
-    BASE_THREAD_VARIABLES = [
+    BASE_THREAD_VARIABLES = frozenset([
         'wind_speed',
         'wind_direction',
         'flatwind',
         'cellmaxus',
         'dir_round_cell'
-    ]
+    ])
 
     def __init__(self, config):
 
@@ -113,8 +113,6 @@ class Wind(image_data.image_data):
         self._logger.debug('Initializing distribute.wind')
         self.date_time = date_time
         self.wind_model._initialize(topo, data.metadata)
-        self.thread_variables = self.BASE_THREAD_VARIABLES + \
-            self.wind_model.thread_variables
 
         if self.config['wind_model'] != 'interp':
             self.wind_model.initialize(topo, data)

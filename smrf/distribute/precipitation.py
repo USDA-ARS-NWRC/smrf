@@ -100,14 +100,14 @@ class ppt(image_data.image_data):
     # be written during main distribute loop
     post_process_variables = {}
 
-    BASE_THREAD_VARIABLES = [
+    BASE_THREAD_VARIABLES = frozenset([
         'precip',
         'percent_snow',
         'snow_density',
         'storm_days',
         'storm_total',
         'last_storm_day_basin'
-    ]
+    ])
 
     def __init__(self, pptConfig, start_date, time_step=60):
 
