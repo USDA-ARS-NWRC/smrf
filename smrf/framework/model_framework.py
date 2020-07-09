@@ -547,7 +547,7 @@ class SMRF():
                 args=(self.date_time, self.data_queue))
             data_thread.start()
 
-    def create_distributed_threads(self):
+    def create_distributed_threads(self, other_queue=None):
         """
         Creates the threads for a distributed run in smrf.
         Designed for smrf runs in memory
@@ -563,6 +563,9 @@ class SMRF():
 
         # These are the variables that will be queued
         self.thread_variables = ['cosz', 'azimuth', 'illum_ang', 'output']
+
+        if other_queue is not None:
+            self.thread_variables += other_queue
 
         for v in self.distribute:
             self.distribute[v].initialize(self.topo, self.data, self.date_time)
