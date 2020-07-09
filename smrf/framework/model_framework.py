@@ -579,8 +579,8 @@ class SMRF():
         # Create Queues for all the variables
         self.smrf_queue = {}
         self._logger.info("Staging {} threaded variables...".format(
-            len(self.thread_variables)))
-        for v in self.thread_variables:
+            len(thread_queue_variables)))
+        for v in thread_queue_variables:
             self.smrf_queue[v] = queue.DateQueueThreading(
                 self.queue_max_values,
                 self.time_out,
