@@ -1,4 +1,4 @@
-
+from copy import deepcopy
 import logging
 
 import numpy as np
@@ -113,7 +113,7 @@ class Wind(image_data.image_data):
         self._logger.debug('Initializing distribute.wind')
 
         self.wind_model._initialize(topo, data.metadata)
-        self.thread_variables = self.base_thread_variables
+        self.thread_variables = deepcopy(self.base_thread_variables)
 
         if self.config['wind_model'] != 'interp':
             self.wind_model.initialize(topo, data)

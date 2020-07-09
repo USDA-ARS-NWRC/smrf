@@ -179,7 +179,7 @@ class image_data():
                     "Could not determine the distribution method for "
                     "{}".format(self.variable))
 
-        self.thread_variables = self.base_thread_variables
+        self.thread_variables = deepcopy(self.base_thread_variables)
 
     def _distribute(self, data, other_attribute=None, zeros=None):
         """
