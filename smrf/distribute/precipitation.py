@@ -100,6 +100,15 @@ class ppt(image_data.image_data):
     # be written during main distribute loop
     post_process_variables = {}
 
+    BASE_THREAD_VARIABLES = frozenset([
+        'precip',
+        'percent_snow',
+        'snow_density',
+        'storm_days',
+        'storm_total',
+        'last_storm_day_basin'
+    ])
+
     def __init__(self, pptConfig, start_date, time_step=60):
 
         # extend the base class
@@ -164,6 +173,7 @@ class ppt(image_data.image_data):
             """ model:  """.format(self.nasde_model))
 
         if self.nasde_model == 'marks2017':
+            self.thread_variables.append('storm_id')
 
             self.storm_total = np.zeros((topo.ny, topo.nx))
 

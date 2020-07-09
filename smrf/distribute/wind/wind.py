@@ -63,6 +63,14 @@ class Wind(image_data.image_data):
     # be written during main distribute loop
     post_process_variables = {}
 
+    BASE_THREAD_VARIABLES = frozenset([
+        'wind_speed',
+        'wind_direction',
+        'flatwind',
+        'cellmaxus',
+        'dir_round_cell'
+    ])
+
     def __init__(self, config):
 
         # extend the base class

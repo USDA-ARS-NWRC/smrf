@@ -43,6 +43,8 @@ class image_data():
 
     """
 
+    BASE_THREAD_VARIABLES = frozenset()
+
     def __init__(self, variable):
 
         self.variable = variable
@@ -51,6 +53,14 @@ class image_data():
         self.gridded = False
 
         self._logger = logging.getLogger(self.__class__.__module__)
+        self._thread_variables = None
+
+    @property
+    def thread_variables(self):
+        if self._thread_variables is None:
+            self._thread_variables = list(self.BASE_THREAD_VARIABLES)
+
+        return self._thread_variables
 
     def getConfig(self, cfg):
         """

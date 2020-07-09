@@ -61,6 +61,12 @@ class vp(image_data.image_data):
     # be written during main distribute loop
     post_process_variables = {}
 
+    BASE_THREAD_VARIABLES = frozenset([
+        'vapor_pressure',
+        'dew_point',
+        'precip_temp'
+    ])
+
     def __init__(self, vpConfig, precip_temp_method):
 
         # extend the base class

@@ -39,6 +39,10 @@ class cf(image_data.image_data):
     # be written during main distribute loop
     post_process_variables = {}
 
+    BASE_THREAD_VARIABLES = frozenset([
+        'cloud_factor'
+    ])
+
     def __init__(self, config):
 
         # extend the base class

@@ -13,9 +13,9 @@ from time import time as _time
 import numpy as np
 
 
-class DateQueue_Threading(Queue):
+class DateQueueThreading(Queue):
     """
-    DateQueue extends Queue.Queue module
+    DateQueue extends queue.Queue module
     Stores the items in a dictionary with date_time keys
     When values are retrieved, it will not remove them and will
     require cleaning at the end to not have to many values

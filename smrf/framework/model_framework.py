@@ -79,20 +79,9 @@ class SMRF():
                'vapor_pressure',
                'wind']
 
-    # These are the variables that will be queued
-    thread_variables = ['cosz', 'azimuth', 'illum_ang',
-                        'air_temp', 'dew_point', 'vapor_pressure',
-                        'wind_speed', 'precip', 'percent_snow',
-                        'snow_density', 'last_storm_day_basin',
-                        'storm_days', 'precip_temp',
-                        'clear_vis_beam', 'clear_vis_diffuse',
-                        'clear_ir_beam', 'clear_ir_diffuse',
-                        'albedo_vis', 'albedo_ir', 'net_solar',
-                        'cloud_factor', 'thermal',
-                        'output', 'veg_ir_beam', 'veg_ir_diffuse',
-                        'veg_vis_beam', 'veg_vis_diffuse',
-                        'cloud_ir_beam', 'cloud_ir_diffuse', 'cloud_vis_beam',
-                        'cloud_vis_diffuse', 'thermal_clear', 'wind_direction']
+    BASE_THREAD_VARIABLES = frozenset([
+        'cosz', 'azimuth', 'illum_ang', 'output'
+    ])
 
     def __init__(self, config, external_logger=None):
         """
@@ -216,6 +205,11 @@ class SMRF():
             tz=self.time_zone
         ))
         self.time_steps = len(self.date_time)
+
+    @property
+    def thermal_netcdf(self):
+        return self.distribute['thermal'].gridded and \
+            self.config['gridded']['data_type'] in ['wrf', 'netcdf']
 
     def __enter__(self):
         return self
@@ -547,8 +541,7 @@ class SMRF():
                 self.distribute['albedo'].albedo_ir)
 
             # 7. thermal radiation
-            if self.distribute['thermal'].gridded and \
-               self.config['gridded']['data_type'] in ['wrf', 'netcdf']:
+            if self.thermal_netcdf:
                 self.distribute['thermal'].distribute_thermal(
                     self.data.thermal.loc[t],
                     self.distribute['air_temp'].air_temp)
@@ -588,6 +581,7 @@ class SMRF():
         distributed values into the
         :func:`DateQueue <smrf.utils.queue.DateQueue_Threading>`.
         """
+
         # Create threads for distribution
         t, q = self.create_distributed_threads()
 
@@ -622,40 +616,29 @@ class SMRF():
         """
 
         # -------------------------------------
-        # Initialize the distibutions
+        # Initialize the distibutions and get thread variables
         self._logger.info("Initializing distributed variables...")
+
+        # These are the variables that will be queued
+        thread_queue_variables = list(self.BASE_THREAD_VARIABLES)
 
         for v in self.distribute:
             self.distribute[v].initialize(self.topo, self.data)
+            thread_queue_variables += self.distribute[v].thread_variables
 
         # -------------------------------------
         # Create Queues for all the variables
         q = {}
-        t = []
-
-        # Add threaded variables on the fly
-        self.thread_variables += ['storm_total']
-        self.thread_variables += ['flatwind']
-        self.thread_variables += ['cellmaxus', 'dir_round_cell']
-
-        if self.distribute['precip'].nasde_model == 'marks2017':
-            self.thread_variables += ['storm_id']
-
-        if self.distribute['thermal'].correct_cloud:
-            self.thread_variables += ['thermal_cloud']
-
-        if self.distribute['thermal'].correct_veg:
-            self.thread_variables += ['thermal_veg']
-
         self._logger.info("Staging {} threaded variables...".format(
-            len(self.thread_variables)))
-        for v in self.thread_variables:
-            q[v] = queue.DateQueue_Threading(self.queue_max_values,
-                                             self.time_out,
-                                             name=v)
+            len(thread_queue_variables)))
+        for v in thread_queue_variables:
+            q[v] = queue.DateQueueThreading(self.queue_max_values,
+                                            self.time_out,
+                                            name=v)
 
         # -------------------------------------
         # Distribute the data
+        t = []
 
         # 0.1 sun angle for time step
         t.append(Thread(
@@ -717,7 +700,7 @@ class SMRF():
             args=(q, self.data.cloud_factor)))
 
         # 8. thermal radiation
-        if self.distribute['thermal'].gridded:
+        if self.thermal_netcdf:
             t.append(Thread(
                 target=self.distribute['thermal'].distribute_thermal_thread,
                 name='thermal',

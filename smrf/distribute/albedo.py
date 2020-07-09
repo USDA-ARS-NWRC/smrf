@@ -49,6 +49,11 @@ class Albedo(image_data.image_data):
     # be written during main distribute loop
     post_process_variables = {}
 
+    BASE_THREAD_VARIABLES = frozenset([
+        'albedo_vis',
+        'albedo_ir'
+    ])
+
     def __init__(self, albedoConfig):
         """
         Initialize albedo()
@@ -74,9 +79,7 @@ class Albedo(image_data.image_data):
             # Create self.litter,self.veg
             setattr(self, d, v)
 
-        self.config = albedoConfig
-        self.min = self.config['min']
-        self.max = self.config['max']
+        self.getConfig(albedoConfig)
 
         self._logger.debug('Created distribute.albedo')
 
@@ -92,6 +95,7 @@ class Albedo(image_data.image_data):
 
         self._logger.debug('Initializing distribute.albedo')
         self.veg_type = topo.veg_type
+        self._initialize(topo, data.metadata)
 
         if self.config["decay_method"] is None:
             self._logger.warning("No decay method is set!")
