@@ -79,6 +79,10 @@ class SMRF():
                'vapor_pressure',
                'wind']
 
+    BASE_THREAD_VARIABLES = {
+        'cosz', 'azimuth', 'illum_ang', 'output'
+    }
+
     def __init__(self, config, external_logger=None):
         """
         Initialize the model, read config file, start and end date, and logging
@@ -616,18 +620,18 @@ class SMRF():
         self._logger.info("Initializing distributed variables...")
 
         # These are the variables that will be queued
-        self.thread_variables = ['cosz', 'azimuth', 'illum_ang', 'output']
+        thread_queue_variables = list(self.BASE_THREAD_VARIABLES)
 
         for v in self.distribute:
             self.distribute[v].initialize(self.topo, self.data)
-            self.thread_variables += self.distribute[v].thread_variables
+            thread_queue_variables += self.distribute[v].thread_variables
 
         # -------------------------------------
         # Create Queues for all the variables
         q = {}
         self._logger.info("Staging {} threaded variables...".format(
-            len(self.thread_variables)))
-        for v in self.thread_variables:
+            len(thread_queue_variables)))
+        for v in thread_queue_variables:
             q[v] = queue.DateQueueThreading(self.queue_max_values,
                                             self.time_out,
                                             name=v)
