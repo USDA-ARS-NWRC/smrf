@@ -188,10 +188,10 @@ class th(image_data.image_data):
     # be written during main distribute loop
     post_process_variables = {}
 
-    BASE_THREAD_VARIABLES = {
+    BASE_THREAD_VARIABLES = frozenset([
         'thermal',
         'thermal_clear'
-    }
+    ])
 
     def __init__(self, thermalConfig):
 

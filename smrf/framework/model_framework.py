@@ -79,9 +79,9 @@ class SMRF():
                'vapor_pressure',
                'wind']
 
-    BASE_THREAD_VARIABLES = {
+    BASE_THREAD_VARIABLES = frozenset([
         'cosz', 'azimuth', 'illum_ang', 'output'
-    }
+    ])
 
     def __init__(self, config, external_logger=None):
         """

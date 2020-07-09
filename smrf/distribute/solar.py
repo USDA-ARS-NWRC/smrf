@@ -201,7 +201,7 @@ class Solar(image_data.image_data):
         'cloud_vis_diffuse'
     ]
 
-    BASE_THREAD_VARIABLES = set(
+    BASE_THREAD_VARIABLES = frozenset(
         CLEAR_SKY_THREAD_VARIABLES +
         CLOUD_THREAD_VARIABLES +
         VEG_THREAD_VARIABLES +

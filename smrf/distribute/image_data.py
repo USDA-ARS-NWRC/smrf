@@ -43,7 +43,7 @@ class image_data():
 
     """
 
-    BASE_THREAD_VARIABLES = set()
+    BASE_THREAD_VARIABLES = frozenset()
 
     def __init__(self, variable):
 
