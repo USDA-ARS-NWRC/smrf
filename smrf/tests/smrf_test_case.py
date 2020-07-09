@@ -67,13 +67,16 @@ class SMRFTestCase(unittest.TestCase):
         the values are exact
         """
 
-        # open the gold and compare
         gold = nc.Dataset(gold_file)
         test = nc.Dataset(test_file)
 
-        # compare the time first
-        self.assertEqual(len(gold.variables['time']), len(
-            test.variables['time']))
+        np.testing.assert_equal(
+            gold.variables['time'][:],
+            test.variables['time'][:],
+            err_msg="Time steps did not match: \nGOLD {0} \n TEST {1}".format(
+                gold.variables['time'], test.variables['time']
+            )
+        )
 
         # go through all variables and compare everything including
         # the attributes and data
