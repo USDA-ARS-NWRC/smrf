@@ -201,10 +201,12 @@ class Solar(image_data.image_data):
         'cloud_vis_diffuse'
     ]
 
-    BASE_THREAD_VARIABLES = CLEAR_SKY_THREAD_VARIABLES + \
-        CLOUD_THREAD_VARIABLES + \
-        VEG_THREAD_VARIABLES + \
+    BASE_THREAD_VARIABLES = set(
+        CLEAR_SKY_THREAD_VARIABLES +
+        CLOUD_THREAD_VARIABLES +
+        VEG_THREAD_VARIABLES +
         ['net_solar']
+    )
 
     # These are variables that are operate at the end only and do not need to
     # be written during main distribute loop

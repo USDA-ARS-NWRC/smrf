@@ -61,7 +61,6 @@ class ts(image_data.image_data):
 
         self._logger.debug('Initializing distribute.soil_temp')
 #         self._initialize(topo, metadata)
-        self.thread_variables = self.base_thread_variables
         self.soil_temp = float(self.config['temp']) * np.ones(topo.dem.shape)
 
     def distribute(self):

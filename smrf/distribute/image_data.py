@@ -44,7 +44,7 @@ class image_data():
 
     """
 
-    BASE_THREAD_VARIABLES = []
+    BASE_THREAD_VARIABLES = set()
 
     def __init__(self, variable):
 
@@ -54,10 +54,14 @@ class image_data():
         self.gridded = False
 
         self._logger = logging.getLogger(self.__class__.__module__)
+        self._thread_variables = None
 
     @property
-    def base_thread_variables(self):
-        return deepcopy(self.BASE_THREAD_VARIABLES)
+    def thread_variables(self):
+        if self._thread_variables is None:
+            self._thread_variables = list(self.BASE_THREAD_VARIABLES)
+
+        return self._thread_variables
 
     def getConfig(self, cfg):
         """
@@ -178,8 +182,6 @@ class image_data():
                 raise Exception(
                     "Could not determine the distribution method for "
                     "{}".format(self.variable))
-
-        self.thread_variables = self.base_thread_variables
 
     def _distribute(self, data, other_attribute=None, zeros=None):
         """
