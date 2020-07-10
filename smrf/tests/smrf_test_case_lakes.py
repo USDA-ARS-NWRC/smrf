@@ -16,7 +16,6 @@ class SMRFTestCaseLakes(SMRFTestCase):
         super().setUpClass()
 
         cls.gold = cls.test_dir.joinpath('gold_hrrr')
-        cls.output = os.path.join(cls.test_dir, 'output')
 
     def assert_list(self, list1, list2):
         """Couldn't get the assert_list to work"""

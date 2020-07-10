@@ -27,68 +27,67 @@ class TestThreadedRME(SMRFTestCase):
         super().setUpClass()
 
         cls.gold = abspath(join(cls.test_dir, 'RME', 'gold'))
-        cls.output = join(cls.test_dir, 'RME', 'output')
 
         run_smrf(cls.config_file)
 
     def test_air_temp(self):
         self.compare_netcdf_files(
             join(self.gold, 'air_temp.nc'),
-            join(self.output, 'air_temp.nc')
+            join(self.output_dir, 'air_temp.nc')
         )
 
     def test_precip_temp(self):
         self.compare_netcdf_files(
             join(self.gold, 'precip_temp.nc'),
-            join(self.output, 'precip_temp.nc')
+            join(self.output_dir, 'precip_temp.nc')
         )
 
     def test_net_solar(self):
         self.compare_netcdf_files(
             join(self.gold, 'net_solar.nc'),
-            join(self.output, 'net_solar.nc')
+            join(self.output_dir, 'net_solar.nc')
         )
 
     def test_percent_snow(self):
         self.compare_netcdf_files(
             join(self.gold, 'percent_snow.nc'),
-            join(self.output, 'percent_snow.nc')
+            join(self.output_dir, 'percent_snow.nc')
         )
 
     def test_precip(self):
         self.compare_netcdf_files(
             join(self.gold, 'precip.nc'),
-            join(self.output, 'precip.nc')
+            join(self.output_dir, 'precip.nc')
         )
 
     def test_thermal(self):
         self.compare_netcdf_files(
             join(self.gold, 'thermal.nc'),
-            join(self.output, 'thermal.nc')
+            join(self.output_dir, 'thermal.nc')
         )
 
     def test_wind_speed(self):
         self.compare_netcdf_files(
             join(self.gold, 'wind_speed.nc'),
-            join(self.output, 'wind_speed.nc')
+            join(self.output_dir, 'wind_speed.nc')
         )
 
     def test_wind_direction(self):
         self.compare_netcdf_files(
             join(self.gold, 'wind_direction.nc'),
-            join(self.output, 'wind_direction.nc')
+            join(self.output_dir, 'wind_direction.nc')
         )
 
     def test_snow_density(self):
         self.compare_netcdf_files(
             join(self.gold, 'snow_density.nc'),
-            join(self.output, 'snow_density.nc')
+            join(self.output_dir, 'snow_density.nc')
         )
 
     def test_vapor_pressure(self):
         self.compare_netcdf_files(
             join(self.gold, 'vapor_pressure.nc'),
-            join(self.output, 'vapor_pressure.nc')
+            join(self.output_dir, 'vapor_pressure.nc')
         )
 
 
@@ -102,7 +101,6 @@ class TestRME(SMRFTestCase):
         super().setUpClass()
 
         cls.gold = abspath(join(cls.test_dir, 'RME', 'gold'))
-        cls.output = join(cls.test_dir, 'RME', 'output')
 
         config = cls.base_config_copy()
         config.raw_cfg['system']['threading'] = False
@@ -115,61 +113,61 @@ class TestRME(SMRFTestCase):
     def test_air_temp(self):
         self.compare_netcdf_files(
             join(self.gold, 'air_temp.nc'),
-            join(self.output, 'air_temp.nc')
+            join(self.output_dir, 'air_temp.nc')
         )
 
     def test_precip_temp(self):
         self.compare_netcdf_files(
             join(self.gold, 'precip_temp.nc'),
-            join(self.output, 'precip_temp.nc')
+            join(self.output_dir, 'precip_temp.nc')
         )
 
     def test_net_solar(self):
         self.compare_netcdf_files(
             join(self.gold, 'net_solar.nc'),
-            join(self.output, 'net_solar.nc')
+            join(self.output_dir, 'net_solar.nc')
         )
 
     def test_percent_snow(self):
         self.compare_netcdf_files(
             join(self.gold, 'percent_snow.nc'),
-            join(self.output, 'percent_snow.nc')
+            join(self.output_dir, 'percent_snow.nc')
         )
 
     def test_precip(self):
         self.compare_netcdf_files(
             join(self.gold, 'precip.nc'),
-            join(self.output, 'precip.nc')
+            join(self.output_dir, 'precip.nc')
         )
 
     def test_thermal(self):
         self.compare_netcdf_files(
             join(self.gold, 'thermal.nc'),
-            join(self.output, 'thermal.nc')
+            join(self.output_dir, 'thermal.nc')
         )
 
     def test_wind_speed(self):
         self.compare_netcdf_files(
             join(self.gold, 'wind_speed.nc'),
-            join(self.output, 'wind_speed.nc')
+            join(self.output_dir, 'wind_speed.nc')
         )
 
     def test_wind_direction(self):
         self.compare_netcdf_files(
             join(self.gold, 'wind_direction.nc'),
-            join(self.output, 'wind_direction.nc')
+            join(self.output_dir, 'wind_direction.nc')
         )
 
     def test_snow_density(self):
         self.compare_netcdf_files(
             join(self.gold, 'snow_density.nc'),
-            join(self.output, 'snow_density.nc')
+            join(self.output_dir, 'snow_density.nc')
         )
 
     def test_vapor_pressure(self):
         self.compare_netcdf_files(
             join(self.gold, 'vapor_pressure.nc'),
-            join(self.output, 'vapor_pressure.nc')
+            join(self.output_dir, 'vapor_pressure.nc')
         )
 
 

@@ -60,7 +60,7 @@ class SMRFTestCase(unittest.TestCase):
     @classmethod
     def tearDownClass(cls):
         cls.remove_output_dir()
-        delattr(cls, '_output_dir')
+        delattr(cls, 'output_dir')
 
     @classmethod
     def create_output_dir(cls):
@@ -71,13 +71,13 @@ class SMRFTestCase(unittest.TestCase):
             shutil.rmtree(folder)
 
         os.makedirs(folder)
-        cls._output_dir = folder
+        cls.output_dir = folder
 
     @classmethod
     def remove_output_dir(cls):
-        if hasattr(cls, '_output_dir') and \
-                os.path.exists(cls._output_dir):
-            shutil.rmtree(cls._output_dir)
+        if hasattr(cls, 'output_dir') and \
+                os.path.exists(cls.output_dir):
+            shutil.rmtree(cls.output_dir)
 
     @staticmethod
     def can_i_run_smrf(config):
