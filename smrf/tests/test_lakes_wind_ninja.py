@@ -1,8 +1,6 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-import os
-
 from inicheck.tools import cast_all_variables
 
 from smrf.framework.model_framework import run_smrf
@@ -24,64 +22,34 @@ class TestLakes(SMRFTestCaseLakes):
         self.assert_thread_variables()
 
     def test_air_temp(self):
-        self.compare_netcdf_files(
-            os.path.join(self.gold, 'air_temp.nc'),
-            os.path.join(self.output_dir, 'air_temp.nc')
-        )
+        self.compare_netcdf_files('air_temp.nc')
 
     def test_precip_temp(self):
-        self.compare_netcdf_files(
-            os.path.join(self.gold, 'precip_temp.nc'),
-            os.path.join(self.output_dir, 'precip_temp.nc')
-        )
+        self.compare_netcdf_files('precip_temp.nc')
 
     def test_net_solar(self):
-        self.compare_netcdf_files(
-            os.path.join(self.gold, 'net_solar.nc'),
-            os.path.join(self.output_dir, 'net_solar.nc')
-        )
+        self.compare_netcdf_files('net_solar.nc')
 
     def test_percent_snow(self):
-        self.compare_netcdf_files(
-            os.path.join(self.gold, 'percent_snow.nc'),
-            os.path.join(self.output_dir, 'percent_snow.nc')
-        )
+        self.compare_netcdf_files('percent_snow.nc')
 
     def test_precip(self):
-        self.compare_netcdf_files(
-            os.path.join(self.gold, 'precip.nc'),
-            os.path.join(self.output_dir, 'precip.nc')
-        )
+        self.compare_netcdf_files('precip.nc')
 
     def test_thermal(self):
-        self.compare_netcdf_files(
-            os.path.join(self.gold, 'thermal.nc'),
-            os.path.join(self.output_dir, 'thermal.nc')
-        )
+        self.compare_netcdf_files('thermal.nc')
 
     def test_wind_speed(self):
-        self.compare_netcdf_files(
-            os.path.join(self.gold, 'wind_speed.nc'),
-            os.path.join(self.output_dir, 'wind_speed.nc')
-        )
+        self.compare_netcdf_files('wind_speed.nc')
 
     def test_wind_direction(self):
-        self.compare_netcdf_files(
-            os.path.join(self.gold, 'wind_direction.nc'),
-            os.path.join(self.output_dir, 'wind_direction.nc')
-        )
+        self.compare_netcdf_files('wind_direction.nc')
 
     def test_snow_density(self):
-        self.compare_netcdf_files(
-            os.path.join(self.gold, 'snow_density.nc'),
-            os.path.join(self.output_dir, 'snow_density.nc')
-        )
+        self.compare_netcdf_files('snow_density.nc')
 
     def test_vapor_pressure(self):
-        self.compare_netcdf_files(
-            os.path.join(self.gold, 'vapor_pressure.nc'),
-            os.path.join(self.output_dir, 'vapor_pressure.nc')
-        )
+        self.compare_netcdf_files('vapor_pressure.nc')
 
 
 class TestLakesThreaded(SMRFTestCaseLakes):
@@ -112,61 +80,31 @@ class TestLakesThreaded(SMRFTestCaseLakes):
         self.assert_thread_variables()
 
     def test_air_temp(self):
-        self.compare_netcdf_files(
-            os.path.join(self.gold, 'air_temp.nc'),
-            os.path.join(self.output_dir, 'air_temp.nc')
-        )
+        self.compare_netcdf_files('air_temp.nc')
 
     def test_precip_temp(self):
-        self.compare_netcdf_files(
-            os.path.join(self.gold, 'precip_temp.nc'),
-            os.path.join(self.output_dir, 'precip_temp.nc')
-        )
+        self.compare_netcdf_files('precip_temp.nc')
 
     def test_net_solar(self):
-        self.compare_netcdf_files(
-            os.path.join(self.gold, 'net_solar.nc'),
-            os.path.join(self.output_dir, 'net_solar.nc')
-        )
+        self.compare_netcdf_files('net_solar.nc')
 
     def test_percent_snow(self):
-        self.compare_netcdf_files(
-            os.path.join(self.gold, 'percent_snow.nc'),
-            os.path.join(self.output_dir, 'percent_snow.nc')
-        )
+        self.compare_netcdf_files('percent_snow.nc')
 
     def test_precip(self):
-        self.compare_netcdf_files(
-            os.path.join(self.gold, 'precip.nc'),
-            os.path.join(self.output_dir, 'precip.nc')
-        )
+        self.compare_netcdf_files('precip.nc')
 
     def test_thermal(self):
-        self.compare_netcdf_files(
-            os.path.join(self.gold, 'thermal.nc'),
-            os.path.join(self.output_dir, 'thermal.nc')
-        )
+        self.compare_netcdf_files('thermal.nc')
 
     def test_wind_speed(self):
-        self.compare_netcdf_files(
-            os.path.join(self.gold, 'wind_speed.nc'),
-            os.path.join(self.output_dir, 'wind_speed.nc')
-        )
+        self.compare_netcdf_files('wind_speed.nc')
 
     def test_wind_direction(self):
-        self.compare_netcdf_files(
-            os.path.join(self.gold, 'wind_direction.nc'),
-            os.path.join(self.output_dir, 'wind_direction.nc')
-        )
+        self.compare_netcdf_files('wind_direction.nc')
 
     def test_snow_density(self):
-        self.compare_netcdf_files(
-            os.path.join(self.gold, 'snow_density.nc'),
-            os.path.join(self.output_dir, 'snow_density.nc')
-        )
+        self.compare_netcdf_files('snow_density.nc')
 
     def test_vapor_pressure(self):
-        self.compare_netcdf_files(
-            os.path.join(self.gold, 'vapor_pressure.nc'),
-            os.path.join(self.output_dir, 'vapor_pressure.nc')
-        )
+        self.compare_netcdf_files('vapor_pressure.nc')

@@ -1,4 +1,3 @@
-import os
 from datetime import timedelta
 
 import netCDF4 as nc
@@ -50,14 +49,14 @@ class TestWindNinja(SMRFTestCaseLakes):
         # check against gold
         # The two are not exactly the same as there is some float
         # precision error with netcdf
-        n = nc.Dataset(os.path.join(self.gold, 'wind_speed.nc'))
+        n = nc.Dataset(self.gold_dir.joinpath('wind_speed.nc'))
         np.testing.assert_allclose(
             n.variables['wind_speed'][0, :],
             g_vel
         )
         n.close()
 
-        n = nc.Dataset(os.path.join(self.gold, 'wind_direction.nc'))
+        n = nc.Dataset(self.gold_dir.joinpath('wind_direction.nc'))
         np.testing.assert_allclose(
             n.variables['wind_direction'][0, :],
             g_ang

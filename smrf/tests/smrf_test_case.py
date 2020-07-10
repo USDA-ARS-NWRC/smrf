@@ -72,7 +72,7 @@ class SMRFTestCase(unittest.TestCase):
             shutil.rmtree(folder)
 
         os.makedirs(folder)
-        cls.output_dir = folder
+        cls.output_dir = Path(folder)
 
     @classmethod
     def remove_output_dir(cls):
@@ -120,27 +120,24 @@ class SMRFTestCase(unittest.TestCase):
     def setUp(self):
         self._dist_variables = None
 
-    def compare_hrrr_gold(self, gold_path):
+    def compare_hrrr_gold(self):
         """
         Compare the model results with the gold standard
         """
-        file_names = gold_path.glob('*.nc')
+        [
+            self.compare_netcdf_files(file_name.name)
+            for file_name in self.gold_dir.glob('*.nc')
+        ]
 
-        for file_name in file_names:
-            nc_name = file_name.name
-            gold_file = os.path.join(gold_path, nc_name)
-
-            self.compare_netcdf_files(gold_file, file_name)
-
-    def compare_netcdf_files(self, gold_file, test_file):
+    def compare_netcdf_files(self, output_file):
         """
         Compare two netcdf files to ensure that they are identical. The
         tests will compare the attributes of each variable and ensure that
         the values are exact
         """
 
-        gold = nc.Dataset(gold_file)
-        test = nc.Dataset(test_file)
+        gold = nc.Dataset(self.gold_dir.joinpath(output_file))
+        test = nc.Dataset(self.output_dir.joinpath(output_file))
 
         np.testing.assert_equal(
             gold.variables['time'][:],

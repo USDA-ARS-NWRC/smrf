@@ -118,7 +118,8 @@ class TestLoadGrid(SMRFTestCase):
 
         run_smrf(config)
 
-        self.compare_hrrr_gold(self.basin_dir.joinpath('gold_hrrr'))
+        self.gold_dir = self.basin_dir.joinpath('gold_hrrr')
+        self.compare_hrrr_gold()
 
     def test_grid_netcdf(self):
         """ Generic NetCDF loading """
