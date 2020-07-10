@@ -2,7 +2,7 @@ import os
 import shutil
 import unittest
 from copy import deepcopy
-from pathlib import PurePath
+from pathlib import Path
 
 import netCDF4 as nc
 import numpy as np
@@ -31,7 +31,7 @@ class SMRFTestCase(unittest.TestCase):
 
     BASE_INI_FILE_NAME = 'config.ini'
 
-    test_dir = PurePath(smrf.__file__).parent.joinpath('tests')
+    test_dir = Path(smrf.__file__).parent.joinpath('tests')
     basin_dir = test_dir.joinpath('basins', 'RME')
     config_file = os.path.join(basin_dir, BASE_INI_FILE_NAME)
 
@@ -119,6 +119,18 @@ class SMRFTestCase(unittest.TestCase):
 
     def setUp(self):
         self._dist_variables = None
+
+    def compare_hrrr_gold(self, gold_path):
+        """
+        Compare the model results with the gold standard
+        """
+        file_names = gold_path.glob('*.nc')
+
+        for file_name in file_names:
+            nc_name = file_name.name
+            gold_file = os.path.join(gold_path, nc_name)
+
+            self.compare_netcdf_files(gold_file, file_name)
 
     def compare_netcdf_files(self, gold_file, test_file):
         """

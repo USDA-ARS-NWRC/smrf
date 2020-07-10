@@ -1,6 +1,3 @@
-import os
-from glob import glob
-
 from inicheck.tools import cast_all_variables
 
 from smrf.framework.model_framework import run_smrf
@@ -8,27 +5,6 @@ from smrf.tests.smrf_test_case import SMRFTestCase
 
 
 class TestLoadGrid(SMRFTestCase):
-
-    def compare_hrrr_gold(self):
-        """
-        Compare the model results with the gold standard
-
-        Args:
-            out_dir: the output directory for the model run
-        """
-
-        s = os.path.join(self.output_dir, '*.nc')
-        file_names = glob(os.path.realpath(s))
-
-        # path to the gold standard
-        gold_path = os.path.realpath(os.path.join(self.basin_dir, 'gold_hrrr'))
-
-        for file_name in file_names:
-            nc_name = file_name.split('/')[-1]
-            gold_file = os.path.join(gold_path, nc_name)
-
-            self.compare_netcdf_files(gold_file, file_name)
-
     def test_grid_wrf(self):
         """ WRF NetCDF loading """
 
@@ -142,7 +118,7 @@ class TestLoadGrid(SMRFTestCase):
 
         run_smrf(config)
 
-        self.compare_hrrr_gold()
+        self.compare_hrrr_gold(self.basin_dir.joinpath('gold_hrrr'))
 
     def test_grid_netcdf(self):
         """ Generic NetCDF loading """
