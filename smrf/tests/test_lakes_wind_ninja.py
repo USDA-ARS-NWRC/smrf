@@ -12,7 +12,7 @@ from smrf.tests.smrf_test_case_lakes import SMRFTestCaseLakes
 class TestLakes(SMRFTestCaseLakes):
     """
     Integration test for SMRF without threading.
-    Runs the short simulation over reynolds mountain east.
+    Runs the short simulation over Lakes.
     """
     @classmethod
     def setUpClass(cls):
@@ -87,7 +87,7 @@ class TestLakes(SMRFTestCaseLakes):
 class TestLakesThreaded(SMRFTestCaseLakes):
     """
     Integration test for SMRF.
-    Runs the short simulation over reynolds mountain east.
+    Runs the short simulation over Lakes.
     """
     @classmethod
     def setUpClass(cls):
