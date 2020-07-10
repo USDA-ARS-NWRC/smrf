@@ -16,14 +16,20 @@ class SMRFTestCase(unittest.TestCase):
     and store as the base config. Also will remove the output
     directory upon tear down.
     """
-    dist_variables = [
+    DIST_VARIABLES = frozenset([
         'air_temp',
         'cloud_factor',
         'precip',
         'thermal',
         'vapor_pressure',
         'wind',
-    ]
+    ])
+
+    @property
+    def dist_variables(self):
+        if self._dist_variables is None:
+            self._dist_variables = list(self.DIST_VARIABLES)
+        return self._dist_variables
 
     def can_i_run_smrf(self, config):
         """
@@ -100,6 +106,9 @@ class SMRFTestCase(unittest.TestCase):
 
         gold.close()
         test.close()
+
+    def setUp(self):
+        self._dist_variables = None
 
     @classmethod
     def setUpClass(cls):
