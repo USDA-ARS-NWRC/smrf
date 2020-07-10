@@ -4,18 +4,17 @@ import unittest
 import netCDF4 as nc
 import numpy as np
 
-import smrf
 from smrf.data import loadTopo
+from smrf.tests.smrf_test_case import SMRFTestCase
 
 
 class TestLoadTopo(unittest.TestCase):
     @classmethod
     def setUp(self):
-        base = os.path.dirname(smrf.__file__)
-        self.test_dir = os.path.abspath(os.path.join(base, 'tests'))
-
         topo_config = {
-            'filename': os.path.join(self.test_dir, 'RME/topo/topo.nc'),
+            'filename': os.path.join(
+                SMRFTestCase.test_dir, 'RME/topo/topo.nc'
+            ),
             'northern_hemisphere': True,
             'gradient_method': 'gradient_d8',
             'sky_view_factor_angles': 72

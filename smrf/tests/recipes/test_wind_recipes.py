@@ -1,5 +1,3 @@
-from copy import deepcopy
-
 from smrf.tests.recipes.base_recipe import BaseRecipes
 from smrf.tests.smrf_test_case import SMRFTestCase
 from smrf.tests.smrf_test_case_lakes import SMRFTestCaseLakes
@@ -75,7 +73,7 @@ class TestInterpWindRecipes(SMRFTestCase, BaseRecipes):
     def test_interp_wind_recipe(self):
         """Test the intper wind recipe
         """
-        config = deepcopy(self.base_config)
+        config = self.base_config_copy()
 
         adj_config = {
             'wind': {

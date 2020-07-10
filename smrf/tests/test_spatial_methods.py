@@ -12,7 +12,7 @@
 #         Test the config for different spatial methods
 #         """
 #
-#         config = deepcopy(self.base_config)
+#         config = self.base_config_copy()
 #
 #
 #         config.raw_cfg['air_temp']['distribution'] = 'dk'
@@ -37,7 +37,7 @@
 #         Test the config for the grid
 #         """
 #
-#         config = deepcopy(self.base_config)
+#         config = self.base_config_copy()
 #
 #
 #         config.raw_cfg['air_temp']['distribution'] = 'grid'

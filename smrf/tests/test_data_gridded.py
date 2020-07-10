@@ -1,5 +1,4 @@
 import os
-from copy import deepcopy
 from glob import glob
 
 from inicheck.tools import cast_all_variables
@@ -35,7 +34,7 @@ class TestLoadGrid(SMRFTestCase):
     def test_grid_wrf(self):
         """ WRF NetCDF loading """
 
-        config = deepcopy(self.base_config)
+        config = self.base_config_copy()
         del config.raw_cfg['csv']
 
         adj_config = {
@@ -85,7 +84,7 @@ class TestLoadGrid(SMRFTestCase):
     def test_grid_hrrr_local(self):
         """ HRRR grib2 loading with local elevation gradient """
 
-        config = deepcopy(self.base_config)
+        config = self.base_config_copy()
         del config.raw_cfg['csv']
 
         adj_config = {
@@ -150,7 +149,7 @@ class TestLoadGrid(SMRFTestCase):
     def test_grid_netcdf(self):
         """ Generic NetCDF loading """
 
-        config = deepcopy(self.base_config)
+        config = self.base_config_copy()
         del config.raw_cfg['csv']
 
         generic_grid = {
