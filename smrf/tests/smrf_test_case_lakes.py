@@ -8,14 +8,14 @@ class SMRFTestCaseLakes(SMRFTestCase):
     Runs the short simulation over reynolds mountain east
     """
 
-    test_dir = SMRFTestCase.test_dir.joinpath('Lakes')
-    config_file = os.path.join(test_dir, 'config.ini')
+    basin_dir = SMRFTestCase.test_dir.joinpath('basins', 'Lakes')
+    config_file = os.path.join(basin_dir, 'config.ini')
 
     @classmethod
     def setUpClass(cls):
         super().setUpClass()
 
-        cls.gold = cls.test_dir.joinpath('gold_hrrr')
+        cls.gold = cls.basin_dir.joinpath('gold_hrrr')
 
     def assert_list(self, list1, list2):
         """Couldn't get the assert_list to work"""

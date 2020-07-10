@@ -26,7 +26,7 @@ class TestThreadedRME(SMRFTestCase):
     def setUpClass(cls):
         super().setUpClass()
 
-        cls.gold = abspath(join(cls.test_dir, 'RME', 'gold'))
+        cls.gold = abspath(join(cls.basin_dir, 'gold'))
 
         run_smrf(cls.config_file)
 
@@ -100,7 +100,7 @@ class TestRME(SMRFTestCase):
     def setUpClass(cls):
         super().setUpClass()
 
-        cls.gold = abspath(join(cls.test_dir, 'RME', 'gold'))
+        cls.gold = abspath(join(cls.basin_dir, 'gold'))
 
         config = cls.base_config_copy()
         config.raw_cfg['system']['threading'] = False

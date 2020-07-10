@@ -29,10 +29,11 @@ class SMRFTestCase(unittest.TestCase):
         'wind',
     ])
 
-    BASE_INI_FILE_NAME = 'RME/config.ini'
+    BASE_INI_FILE_NAME = 'config.ini'
 
     test_dir = PurePath(smrf.__file__).parent.joinpath('tests')
-    config_file = os.path.join(test_dir, BASE_INI_FILE_NAME)
+    basin_dir = test_dir.joinpath('basins', 'RME')
+    config_file = os.path.join(basin_dir, BASE_INI_FILE_NAME)
 
     @property
     def dist_variables(self):

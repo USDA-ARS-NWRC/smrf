@@ -9,7 +9,7 @@ from smrf.tests.smrf_test_case import SMRFTestCase
 
 class TestLoadGrid(SMRFTestCase):
 
-    def compare_hrrr_gold(self, out_dir):
+    def compare_hrrr_gold(self):
         """
         Compare the model results with the gold standard
 
@@ -17,13 +17,11 @@ class TestLoadGrid(SMRFTestCase):
             out_dir: the output directory for the model run
         """
 
-        output_dir = os.path.abspath(os.path.join(self.test_dir, out_dir))
-        s = os.path.join(output_dir, '*.nc')
+        s = os.path.join(self.output_dir, '*.nc')
         file_names = glob(os.path.realpath(s))
 
         # path to the gold standard
-        gold_path = os.path.realpath(
-            os.path.join(self.test_dir, 'RME', 'gold_hrrr'))
+        gold_path = os.path.realpath(os.path.join(self.basin_dir, 'gold_hrrr'))
 
         for file_name in file_names:
             nc_name = file_name.split('/')[-1]
@@ -144,7 +142,7 @@ class TestLoadGrid(SMRFTestCase):
 
         run_smrf(config)
 
-        self.compare_hrrr_gold(config.raw_cfg['output']['out_location'][0])
+        self.compare_hrrr_gold()
 
     def test_grid_netcdf(self):
         """ Generic NetCDF loading """

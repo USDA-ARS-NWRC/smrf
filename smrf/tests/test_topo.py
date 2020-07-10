@@ -1,4 +1,3 @@
-import os
 import unittest
 
 import netCDF4 as nc
@@ -12,9 +11,7 @@ class TestLoadTopo(unittest.TestCase):
     @classmethod
     def setUp(self):
         topo_config = {
-            'filename': os.path.join(
-                SMRFTestCase.test_dir, 'RME/topo/topo.nc'
-            ),
+            'filename': SMRFTestCase.basin_dir.joinpath('topo', 'topo.nc'),
             'northern_hemisphere': True,
             'gradient_method': 'gradient_d8',
             'sky_view_factor_angles': 72
