@@ -40,11 +40,11 @@ class TestLoadGrid(SMRFTestCase):
         adj_config = {
             'gridded': {
                 'data_type': 'wrf',
-                'wrf_file': './RME/gridded/WRF_test.nc',
+                'wrf_file': './gridded/WRF_test.nc',
             },
             'system': {
                 'threading': 'False',
-                'log_file': './RME/output/log.txt'
+                'log_file': './output/log.txt'
             },
             'precip': {
                 'station_adjust_for_undercatch': 'False'
@@ -90,7 +90,7 @@ class TestLoadGrid(SMRFTestCase):
         adj_config = {
             'gridded': {
                 'data_type': 'hrrr_grib',
-                'hrrr_directory': './RME/gridded/hrrr_test/',
+                'hrrr_directory': './gridded/hrrr_test/',
             },
             'time': {
                 'start_date': '2018-07-22 16:00',
@@ -99,7 +99,7 @@ class TestLoadGrid(SMRFTestCase):
             },
             'system': {
                 'threading': False,
-                'log_file': './RME/output/test.log'
+                'log_file': './output/test.log'
             },
             'air_temp': {
                 'grid_local': True,
@@ -154,7 +154,7 @@ class TestLoadGrid(SMRFTestCase):
 
         generic_grid = {
             'data_type': 'netcdf',
-            'netcdf_file': './RME/gridded/netcdf_test.nc',
+            'netcdf_file': './gridded/netcdf_test.nc',
             'air_temp': 'air_temp',
             'vapor_pressure': 'vapor_pressure',
             'precip': 'precip',

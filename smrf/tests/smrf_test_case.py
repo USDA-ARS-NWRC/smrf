@@ -29,7 +29,7 @@ class SMRFTestCase(unittest.TestCase):
         'wind',
     ])
 
-    BASE_INI_FILE_NAME = 'test_base_config.ini'
+    BASE_INI_FILE_NAME = 'RME/config.ini'
 
     test_dir = PurePath(smrf.__file__).parent.joinpath('tests')
     config_file = os.path.join(test_dir, BASE_INI_FILE_NAME)
