@@ -43,7 +43,7 @@ class SMRFTestCase(unittest.TestCase):
 
     @property
     def base_config(self):
-        return deepcopy(self._base_config)
+        return self.base_config_copy()
 
     @classmethod
     def base_config_copy(cls):
