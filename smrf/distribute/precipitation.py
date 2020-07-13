@@ -173,7 +173,7 @@ class ppt(image_data.image_data):
             """ model:  """.format(self.nasde_model))
 
         if self.nasde_model == 'marks2017':
-            self.thread_variables.append('storm_id')
+            self.add_thread_variables('storm_id')
 
             self.storm_total = np.zeros((topo.ny, topo.nx))
 

@@ -74,7 +74,7 @@ class image_data():
         """
 
         if isinstance(variables, str):
-            variables = list(variables)
+            variables = list((variables, ))
 
         self.thread_variables = self.thread_variables + variables
 

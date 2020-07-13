@@ -628,12 +628,8 @@ class SMRF():
         # Initialize the distibutions and get thread variables
         self._logger.info("Initializing distributed variables...")
 
-        # These are the variables that will be queued
-        # self.thread_queue_variables = list(self.BASE_THREAD_VARIABLES)
-
         for v in self.distribute:
             self.distribute[v].initialize(self.topo, self.data)
-            # self.thread_queue_variables += self.distribute[v].thread_variables
 
         self.set_queue_variables()
 
@@ -887,6 +883,8 @@ def run_smrf(config):
         s.post_process()
 
         s._logger.info(datetime.now() - start)
+
+    return s
 
 
 def can_i_run_smrf(config):

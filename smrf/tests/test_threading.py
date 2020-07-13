@@ -1,4 +1,3 @@
-import os
 from copy import deepcopy
 
 from inicheck.tools import cast_all_variables

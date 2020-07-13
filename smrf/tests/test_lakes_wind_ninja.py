@@ -21,7 +21,10 @@ class TestLakes(SMRFTestCaseLakes):
         """
         super().setUpClass()
 
-        run_smrf(cls.config_file)
+        cls.smrf = run_smrf(cls.config_file)
+
+    def setUp(self):
+        self.assert_thread_variables()
 
     def tearDown(self):
         pass
@@ -113,10 +116,13 @@ class TestLakesThreaded(SMRFTestCaseLakes):
         config.apply_recipes()
         config = cast_all_variables(config, config.mcfg)
 
-        run_smrf(config)
+        cls.smrf = run_smrf(config)
 
     def tearDown(self):
         pass
+
+    def setUp(self):
+        self.assert_thread_variables()
 
     def test_air_temp(self):
 

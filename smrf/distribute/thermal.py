@@ -246,10 +246,10 @@ class th(image_data.image_data):
         self.dem = topo.dem
 
         if self.correct_cloud:
-            self.thread_variables.append('thermal_cloud')
+            self.add_thread_variables('thermal_cloud')
 
         if self.correct_veg:
-            self.thread_variables.append('thermal_veg')
+            self.add_thread_variables('thermal_veg')
 
     def distribute(self, date_time, air_temp, vapor_pressure=None,
                    dew_point=None, cloud_factor=None):
