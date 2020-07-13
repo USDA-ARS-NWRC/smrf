@@ -113,10 +113,6 @@ class WinstralWindModel(image_data.image_data):
 
         self.veg = v
 
-    @property
-    def thread_variables(self):
-        return list(self.BASE_THREAD_VARIABLES)
-
     def initialize(self, topo, data):
         """Initialize the model with data
 
