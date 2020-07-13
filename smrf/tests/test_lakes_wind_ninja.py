@@ -110,7 +110,7 @@ class TestLakesThreaded(SMRFTestCaseLakes):
         config.raw_cfg['system'].update({
             'threading': True,
             'max_queue': 1,
-            'time_out': 2
+            'time_out': 5
         })
 
         config.apply_recipes()

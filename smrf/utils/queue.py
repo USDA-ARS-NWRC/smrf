@@ -282,7 +282,8 @@ class QueueOutput(threading.Thread):
 
                         # output the time step
                         self._logger.debug(
-                            "threaded output for {}".format(v['variable']))
+                            "{} threaded output for {}".format(
+                                t, v['variable']))
                         self.out_func.output(v['variable'], data, t)
 
                     else:
