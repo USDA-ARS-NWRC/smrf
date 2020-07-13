@@ -506,6 +506,7 @@ class SMRF():
                 self.data.wind_speed.loc[t],
                 self.data.wind_direction.loc[t],
                 t)
+
             # 4. Precipitation
             self.distribute['precip'].distribute(
                 self.data.precip.loc[t],

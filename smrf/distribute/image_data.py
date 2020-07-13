@@ -62,6 +62,18 @@ class image_data():
 
         return self._thread_variables
 
+    def add_thread_variables(self, variables):
+        """Add a list or single variable to the thread variables
+
+        Args:
+            variables (list or str): List or string of variables to add
+        """
+
+        if isinstance(variables, str):
+            variables = list(variables)
+
+        self._thread_variables = self.thread_variables + variables
+
     def getConfig(self, cfg):
         """
         Check the configuration that was set by the user for the variable
