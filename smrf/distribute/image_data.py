@@ -1,4 +1,5 @@
 import logging
+from copy import deepcopy
 
 import numpy as np
 
@@ -44,6 +45,7 @@ class image_data():
     """
 
     BASE_THREAD_VARIABLES = frozenset()
+    OUTPUT_VARIABLES = {}
 
     def __init__(self, variable):
 
@@ -77,6 +79,14 @@ class image_data():
             variables = list((variables, ))
 
         self.thread_variables = self.thread_variables + variables
+
+    @property
+    def output_variables(self):
+        ov = {}
+        for key, value in self.OUTPUT_VARIABLES.items():
+            value['module'] = self.__class__.__module__.split('.')[-1]
+            ov[key] = value
+        return ov
 
     def getConfig(self, cfg):
         """

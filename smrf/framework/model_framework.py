@@ -263,7 +263,7 @@ class SMRF():
         self.distribute['wind'] = distribute.wind.Wind(self.config)
 
         # 4. Precipitation
-        self.distribute['precip'] = distribute.precipitation.ppt(
+        self.distribute['precipitation'] = distribute.precipitation.ppt(
             self.config['precip'],
             self.start_date,
             self.config['time']['time_step'])
@@ -508,7 +508,7 @@ class SMRF():
                 t)
 
             # 4. Precipitation
-            self.distribute['precip'].distribute(
+            self.distribute['precipitation'].distribute(
                 self.data.precip.loc[t],
                 self.distribute['vapor_pressure'].dew_point,
                 self.distribute['vapor_pressure'].precip_temp,
@@ -525,7 +525,7 @@ class SMRF():
             self.distribute['albedo'].distribute(
                 t,
                 illum_ang,
-                self.distribute['precip'].storm_days)
+                self.distribute['precipitation'].storm_days)
 
             # 6. cloud_factor
             self.distribute['cloud_factor'].distribute(
@@ -688,7 +688,7 @@ class SMRF():
 
         # 4. Precipitation
         self.threads.append(Thread(
-            target=self.distribute['precip'].distribute_thread,
+            target=self.distribute['precipitation'].distribute_thread,
             name='precipitation',
             args=(self.smrf_queue, self.data, self.date_time,
                   self.topo.mask)))
@@ -729,64 +729,67 @@ class SMRF():
         Currently only :func:`NetCDF files
         <smrf.output.output_netcdf.OutputNetcdf>` are supported.
         """
-        out = self.config['output']['out_location']
+        out_location = self.config['output']['out_location']
 
-        if self.config['output']['frequency'] is not None:
+        # determine the variables to be output
+        s_var_list = ", ".join(self.config['output']['variables'])
+        self._logger.info('{} variables will be output'.format(s_var_list))
 
-            # determine the variables to be output
-            s_var_list = ", ".join(self.config['output']['variables'])
-            self._logger.info('{} variables will be output'.format(s_var_list))
+        output_variables = self.config['output']['variables']
 
-            output_variables = self.config['output']['variables']
+        # Collect the potential output variables
+        possible_output_variables = {}
+        for variable, module in self.distribute.items():
+            possible_output_variables.update(module.output_variables)
 
-            # determine which variables belong where
-            variable_dict = {}
-            for v in output_variables:
-                for m in self.modules:
+        # determine which variables belong where
+        variable_dict = {}
+        for output_variable in output_variables:
 
-                    if m in self.distribute.keys():
+            if output_variable in possible_output_variables.keys():
+                fname = join(out_location, output_variable)
+                module = possible_output_variables[output_variable]['module']
 
-                        if v in self.distribute[m].output_variables.keys():
+                # TODO this is a hack to not have to redo the gold files
+                if module == 'precipitation':
+                    nc_module = 'precip'
+                else:
+                    nc_module = module
 
-                            # if there is a key in the config files output sec,
-                            # then change the output file name
-                            if v in self.config['output'].keys():
-                                fname = join(out, self.config['output'][v])
-                            else:
-                                fname = join(out, v)
-
-                            d = {
-                                'variable': v,
-                                'module': m,
-                                'out_location': fname,
-                                'info': self.distribute[m].output_variables[v]
-                            }
-                            variable_dict[v] = d
-
-            # determine what type of file to output
-            if self.config['output']['file_type'].lower() == 'netcdf':
-                self.out_func = output_netcdf.OutputNetcdf(
-                    variable_dict, self.topo,
-                    self.config['time'],
-                    self.config['output'])
-
-            elif self.config['output']['file_type'].lower() == 'hru':
-                self.out_func = output_hru.output_hru(
-                    variable_dict, self.topo,
-                    self.date_time,
-                    self.config['output'])
+                variable_dict[output_variable] = {
+                    'variable': output_variable,
+                    'module': nc_module,
+                    'out_location': fname,
+                    'info': self.distribute[module].output_variables[output_variable]  # noqa
+                }
 
             else:
-                raise Exception('Could not determine type of file for output')
+                self._logger.error(
+                    '{} not an output variable'.format(output_variable))
 
-            # is there a function to apply?
-            self.out_func.func = None
-            if 'func' in self.config['output']:
-                self.out_func.func = self.config['output']['func']
+        self._logger.debug('{} of {} variables will be output'.format(
+            len(output_variables), len(possible_output_variables)))
+
+        # determine what type of file to output
+        if self.config['output']['file_type'].lower() == 'netcdf':
+            self.out_func = output_netcdf.OutputNetcdf(
+                variable_dict, self.topo,
+                self.config['time'],
+                self.config['output'])
+
+        elif self.config['output']['file_type'].lower() == 'hru':
+            self.out_func = output_hru.output_hru(
+                variable_dict, self.topo,
+                self.date_time,
+                self.config['output'])
 
         else:
-            self._logger.info('No variables will be output')
-            self.output_variables = None
+            raise Exception('Could not determine type of file for output')
+
+        # is there a function to apply?
+        self.out_func.func = None
+        if 'func' in self.config['output']:
+            self.out_func.func = self.config['output']['func']
 
     def output(self, current_time_step,  module=None, out_var=None):
         """
@@ -825,7 +828,8 @@ class SMRF():
             # Get the output variables then pass to the function
             for v in var_vals:
                 # get the data desired
-                data = getattr(self.distribute[v['module']], v['variable'])
+                data = getattr(
+                    self.distribute[v['info']['module']], v['variable'])
 
                 if data is None:
                     data = np.zeros((self.topo.ny, self.topo.nx))

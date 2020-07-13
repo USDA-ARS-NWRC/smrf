@@ -69,7 +69,7 @@ class SMRFTestCaseLakes(SMRFTestCase):
         )
 
         self.assert_list(
-            self.smrf.distribute['precip'].thread_variables,
+            self.smrf.distribute['precipitation'].thread_variables,
             [
                 'precip',
                 'percent_snow',

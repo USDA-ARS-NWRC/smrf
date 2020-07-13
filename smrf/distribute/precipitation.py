@@ -63,7 +63,7 @@ class ppt(image_data.image_data):
     variable = 'precip'
 
     # these are variables that can be output
-    output_variables = {
+    OUTPUT_VARIABLES = {
         'precip': {
             'units': 'mm',
             'standard_name': 'precipitation_mass',

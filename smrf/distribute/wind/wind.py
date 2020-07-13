@@ -42,7 +42,7 @@ class Wind(image_data.image_data):
     VARIABLE = 'wind'
 
     # these are variables that can be output
-    output_variables = {
+    OUTPUT_VARIABLES = {
         'flatwind': {
             'units': 'm/s',
             'standard_name': 'flatwind_wind_speed',
