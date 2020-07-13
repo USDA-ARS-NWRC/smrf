@@ -258,7 +258,7 @@ class ppt(image_data.image_data):
             time:           pass in the time were are currently on
             wind:           station wind speed at time step
             temp:           station air temperature at time step
-            wind_direction:             numpy array for simulated wind direction
+            wind_direction: numpy array for simulated wind direction
             dir_round_cell: numpy array for wind direction in discreet
                             increments for referencing maxus at a specific
                             direction
@@ -529,7 +529,7 @@ class ppt(image_data.image_data):
             queue['last_storm_day_basin'].put([t, self.last_storm_day_basin])
             queue['storm_days'].put([t, self.storm_days])
             queue['storm_total'].put([t, self.storm_total])
-            
+
             if self.nasde_model == "marks2017":
                 queue['storm_id'].put([t, self.storm_id])
 
