@@ -110,3 +110,6 @@ class SMRFTestCaseLakes(SMRFTestCase):
             self.smrf.distribute['soil_temp'].thread_variables,
             []
         )
+
+        if hasattr(self, 'threads'):
+            self.assertTrue(len(self.smrf.threads == 12))
