@@ -62,6 +62,10 @@ class image_data():
 
         return self._thread_variables
 
+    @thread_variables.setter
+    def thread_variables(self, value):
+        self._thread_variables = value
+
     def add_thread_variables(self, variables):
         """Add a list or single variable to the thread variables
 
@@ -72,7 +76,7 @@ class image_data():
         if isinstance(variables, str):
             variables = list(variables)
 
-        self._thread_variables = self.thread_variables + variables
+        self.thread_variables = self.thread_variables + variables
 
     def getConfig(self, cfg):
         """

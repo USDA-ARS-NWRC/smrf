@@ -12,7 +12,7 @@ from datetime import timedelta
 import mysql.connector
 import numpy as np
 import pandas as pd
-import scipy.stats as stats
+from scipy import stats as stats
 
 
 class database:

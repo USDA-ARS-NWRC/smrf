@@ -46,7 +46,7 @@ clean-test:
 	rm -fr htmlcov/
 	
 isort: ## using isort to sort imports
-	isort -rc -vb .
+	isort -rc -v .
 
 lint:
 	flake8 smrf

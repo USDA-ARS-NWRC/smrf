@@ -124,8 +124,7 @@ class Wind(image_data.image_data):
         self.wind_model._initialize(topo, data.metadata)
 
         if self.check_wind_model_type('winstral'):
-            self.add_thread_variables(
-                list(self.wind_model.BASE_THREAD_VARIABLES))
+            self.add_thread_variables(self.wind_model.thread_variables)
 
         if not self.check_wind_model_type('interp'):
             self.wind_model.initialize(topo, data)
