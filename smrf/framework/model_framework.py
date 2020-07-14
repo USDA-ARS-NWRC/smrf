@@ -575,7 +575,7 @@ class SMRF():
         self._logger.info("Initializing distributed variables...")
 
         for v in self.distribute:
-            self.distribute[v].initialize(self.topo, self.data)
+            self.distribute[v].initialize(self.topo, self.data, self.date_time)
 
         self.set_queue_variables()
 
@@ -629,7 +629,7 @@ class SMRF():
 
         # 4. Precipitation
         self.threads.append(Thread(
-            target=self.distribute['precip'].distribute_thread,
+            target=self.distribute['precipitation'].distribute_thread,
             name='precipitation',
             args=(self.smrf_queue, self.data_queue, self.topo.mask)))
 

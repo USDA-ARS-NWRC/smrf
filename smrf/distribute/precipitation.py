@@ -503,10 +503,10 @@ class ppt(image_data.image_data):
 
             # variables for wind redistribution
             if self.config['precip_rescaling_model'] == 'winstral':
-                wind_direction = smrf_queue['wind_direction'].get(t)
-                flatwind = smrf_queue['flatwind'].get(t)
-                dir_round_cell = smrf_queue['dir_round_cell'].get(t)
-                cell_maxus = smrf_queue['cellmaxus'].get(t)
+                wind_direction = smrf_queue['wind_direction'].get(date_time)
+                flatwind = smrf_queue['flatwind'].get(date_time)
+                dir_round_cell = smrf_queue['dir_round_cell'].get(date_time)
+                cell_maxus = smrf_queue['cellmaxus'].get(date_time)
 
             else:
                 wind_direction = None
@@ -515,29 +515,29 @@ class ppt(image_data.image_data):
                 cell_maxus = None
 
             self.distribute(
-                data.precip.loc[t],
+                ppt_data,
                 dpt,
                 precip_temp,
                 ta,
-                t,
-                data.wind_speed.loc[t],
-                data.air_temp.loc[t],
+                date_time,
+                ws_data,
+                ta_data,
                 wind_direction,
                 dir_round_cell,
                 flatwind,
                 cell_maxus,
                 mask=mask)
 
-            smrf_queue[self.variable].put([t, self.precip])
-            smrf_queue['percent_snow'].put([t, self.percent_snow])
-            smrf_queue['snow_density'].put([t, self.snow_density])
+            smrf_queue[self.variable].put([date_time, self.precip])
+            smrf_queue['percent_snow'].put([date_time, self.percent_snow])
+            smrf_queue['snow_density'].put([date_time, self.snow_density])
             smrf_queue['last_storm_day_basin'].put(
-                [t, self.last_storm_day_basin])
-            smrf_queue['storm_days'].put([t, self.storm_days])
-            smrf_queue['storm_total'].put([t, self.storm_total])
+                [date_time, self.last_storm_day_basin])
+            smrf_queue['storm_days'].put([date_time, self.storm_days])
+            smrf_queue['storm_total'].put([date_time, self.storm_total])
 
             if self.nasde_model == "marks2017":
-                smrf_smrf_queue['storm_id'].put([date_time, self.storm_id])
+                smrf_queue['storm_id'].put([date_time, self.storm_id])
 
     def post_processor(self, main_obj, threaded=False):
 

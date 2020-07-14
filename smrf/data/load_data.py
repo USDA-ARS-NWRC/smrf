@@ -38,7 +38,7 @@ class LoadData():
     MODULE_VARIABLES = {
         'air_temp': 'air_temp',
         'vapor_pressure': 'vapor_pressure',
-        'precip': 'precip',
+        'precip': 'precipitation',
         'wind_speed': 'wind',
         'wind_direction': 'wind',
         'cloud_factor': 'cloud_factor',
