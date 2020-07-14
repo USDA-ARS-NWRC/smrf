@@ -36,6 +36,7 @@ unittest: &unittest
   os: linux
   dist: bionic
   language: python
+  cache: pip
   addons:
     apt:
       packages:
