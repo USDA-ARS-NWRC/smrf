@@ -29,7 +29,7 @@ class TestToporad(SMRFTestCaseLakes):
             cls.date_time, w=[0.28, 2.8])
 
         topo_config = {
-            'filename': os.path.join(cls.test_dir, 'topo/topo.nc'),
+            'filename': os.path.join(cls.basin_dir, 'topo/topo.nc'),
             'northern_hemisphere': True,
             'gradient_method': 'gradient_d8',
             'sky_view_factor_angles': 72

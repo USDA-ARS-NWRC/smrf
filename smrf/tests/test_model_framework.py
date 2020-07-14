@@ -1,10 +1,8 @@
-import copy
-
 import pytz
 from pandas import to_datetime
 
 from smrf.framework.model_framework import SMRF
-from smrf.tests.test_configurations import SMRFTestCase
+from smrf.tests.smrf_test_case import SMRFTestCase
 
 
 class TestModelFramework(SMRFTestCase):
@@ -59,12 +57,12 @@ class TestModelFrameworkMST(SMRFTestCase):
     @classmethod
     def setUpClass(cls):
         super().setUpClass()
-        base_config = copy.deepcopy(cls.base_config)
+        base_config = cls.base_config_copy()
         base_config.cfg['time']['time_zone'] = 'MST'
         cls.smrf = SMRF(base_config)
 
     def test_timezone_error(self):
-        base_config = copy.deepcopy(self.base_config)
+        base_config = self.base_config
         base_config.cfg['time']['time_zone'] = 'mst'
         with self.assertRaises(Exception):
             SMRF(base_config)

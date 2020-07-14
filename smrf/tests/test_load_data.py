@@ -14,8 +14,8 @@ from copy import deepcopy
 from inicheck.tools import cast_all_variables
 
 from smrf.framework.model_framework import can_i_run_smrf, run_smrf, SMRF
-from smrf.tests.nwrc_check import NWRCCheck
 from smrf.tests.smrf_test_case import SMRFTestCase
+from smrf.tests.utils.nwrc_check import NWRCCheck
 
 
 @unittest.skipUnless(
@@ -31,7 +31,7 @@ class TestLoadMySQLData(SMRFTestCase):
         convert so SQLalchemy.
         """
         # test a successful run specifying stations
-        config = deepcopy(self.base_config)
+        config = self.base_config_copy()
         options = deepcopy(NWRCCheck.MYSQL_OPTIONS)
         config.raw_cfg['mysql'] = options
 
@@ -51,7 +51,7 @@ class TestLoadMySQLData(SMRFTestCase):
         NWRC.
         """
         # test a successful run specifying client
-        config = deepcopy(self.base_config)
+        config = self.base_config_copy()
         options = deepcopy(NWRCCheck.MYSQL_OPTIONS)
         config.raw_cfg['mysql'] = options
 
@@ -67,7 +67,7 @@ class TestLoadMySQLData(SMRFTestCase):
     def test_mysql_metadata_error(self):
         """ test no metadata found """
 
-        config = deepcopy(self.base_config)
+        config = self.base_config_copy()
         options = deepcopy(NWRCCheck.MYSQL_OPTIONS)
         config.raw_cfg['mysql'] = options
 
@@ -83,7 +83,7 @@ class TestLoadMySQLData(SMRFTestCase):
     def test_mysql_data_error(self):
         """ test no data found """
 
-        config = deepcopy(self.base_config)
+        config = self.base_config_copy()
         options = deepcopy(NWRCCheck.MYSQL_OPTIONS)
 
         config.raw_cfg['mysql'] = options
@@ -107,7 +107,7 @@ class TestLoadCSVData(SMRFTestCase):
         """
         Test the start date not in the data
         """
-        config = deepcopy(self.base_config)
+        config = self.base_config_copy()
 
         # Use dates not in the dataset, expecting an error
         config.raw_cfg['time']['start_date'] = '1900-01-01 00:00'
@@ -126,7 +126,7 @@ class TestLoadCSVData(SMRFTestCase):
         """
 
         # test the end date
-        config = deepcopy(self.base_config)
+        config = self.base_config_copy()
         config.raw_cfg['csv']['stations'] = ['RMESP', 'RME_176']
 
         # apply the new recipies

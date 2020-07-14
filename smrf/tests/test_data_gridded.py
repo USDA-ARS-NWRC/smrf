@@ -1,7 +1,3 @@
-import os
-from copy import deepcopy
-from glob import glob
-
 from inicheck.tools import cast_all_variables
 
 from smrf.framework.model_framework import run_smrf
@@ -9,43 +5,20 @@ from smrf.tests.smrf_test_case import SMRFTestCase
 
 
 class TestLoadGrid(SMRFTestCase):
-
-    def compare_hrrr_gold(self, out_dir):
-        """
-        Compare the model results with the gold standard
-
-        Args:
-            out_dir: the output directory for the model run
-        """
-
-        output_dir = os.path.abspath(os.path.join(self.test_dir, out_dir))
-        s = os.path.join(output_dir, '*.nc')
-        file_names = glob(os.path.realpath(s))
-
-        # path to the gold standard
-        gold_path = os.path.realpath(
-            os.path.join(self.test_dir, 'RME', 'gold_hrrr'))
-
-        for file_name in file_names:
-            nc_name = file_name.split('/')[-1]
-            gold_file = os.path.join(gold_path, nc_name)
-
-            self.compare_netcdf_files(gold_file, file_name)
-
     def test_grid_wrf(self):
         """ WRF NetCDF loading """
 
-        config = deepcopy(self.base_config)
+        config = self.base_config_copy()
         del config.raw_cfg['csv']
 
         adj_config = {
             'gridded': {
                 'data_type': 'wrf',
-                'wrf_file': './RME/gridded/WRF_test.nc',
+                'wrf_file': './gridded/WRF_test.nc',
             },
             'system': {
                 'threading': 'False',
-                'log_file': './RME/output/log.txt'
+                'log_file': './output/log.txt'
             },
             'precip': {
                 'station_adjust_for_undercatch': 'False'
@@ -85,13 +58,13 @@ class TestLoadGrid(SMRFTestCase):
     def test_grid_hrrr_local(self):
         """ HRRR grib2 loading with local elevation gradient """
 
-        config = deepcopy(self.base_config)
+        config = self.base_config_copy()
         del config.raw_cfg['csv']
 
         adj_config = {
             'gridded': {
                 'data_type': 'hrrr_grib',
-                'hrrr_directory': './RME/gridded/hrrr_test/',
+                'hrrr_directory': './gridded/hrrr_test/',
             },
             'time': {
                 'start_date': '2018-07-22 16:00',
@@ -100,7 +73,7 @@ class TestLoadGrid(SMRFTestCase):
             },
             'system': {
                 'threading': False,
-                'log_file': './RME/output/test.log'
+                'log_file': './output/test.log'
             },
             'air_temp': {
                 'grid_local': True,
@@ -145,17 +118,18 @@ class TestLoadGrid(SMRFTestCase):
 
         run_smrf(config)
 
-        self.compare_hrrr_gold(config.raw_cfg['output']['out_location'][0])
+        self.gold_dir = self.basin_dir.joinpath('gold_hrrr')
+        self.compare_hrrr_gold()
 
     def test_grid_netcdf(self):
         """ Generic NetCDF loading """
 
-        config = deepcopy(self.base_config)
+        config = self.base_config_copy()
         del config.raw_cfg['csv']
 
         generic_grid = {
             'data_type': 'netcdf',
-            'netcdf_file': './RME/gridded/netcdf_test.nc',
+            'netcdf_file': './gridded/netcdf_test.nc',
             'air_temp': 'air_temp',
             'vapor_pressure': 'vapor_pressure',
             'precip': 'precip',

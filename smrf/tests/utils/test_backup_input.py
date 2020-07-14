@@ -2,7 +2,7 @@ import os
 
 from smrf import __version__
 from smrf.framework.model_framework import SMRF
-from smrf.tests.test_configurations import SMRFTestCase
+from smrf.tests.smrf_test_case import SMRFTestCase
 from smrf.utils.utils import backup_input
 
 
