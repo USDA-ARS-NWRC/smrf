@@ -1,8 +1,6 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-from inicheck.tools import cast_all_variables
-
 from smrf.framework.model_framework import run_smrf
 from smrf.tests.smrf_test_case_lakes import SMRFTestCaseLakes
 
@@ -61,17 +59,7 @@ class TestLakesThreaded(SMRFTestCaseLakes):
     def setUpClass(cls):
         super().setUpClass()
 
-        config = cls.base_config_copy()
-        config.raw_cfg['system'].update({
-            'threading': True,
-            'max_queue': 1,
-            'time_out': 5
-        })
-
-        config.apply_recipes()
-        config = cast_all_variables(config, config.mcfg)
-
-        cls.smrf = run_smrf(config)
+        cls.smrf = run_smrf(cls.thread_config())
 
     def tearDown(self):
         pass

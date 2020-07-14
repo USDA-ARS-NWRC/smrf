@@ -6,7 +6,7 @@ from pathlib import Path
 
 import netCDF4 as nc
 import numpy as np
-from inicheck.tools import get_user_config
+from inicheck.tools import get_user_config, cast_all_variables
 
 import smrf
 from smrf.framework.model_framework import run_smrf
@@ -28,6 +28,12 @@ class SMRFTestCase(unittest.TestCase):
         'vapor_pressure',
         'wind',
     ])
+
+    THREAD_CONFIG = {
+        'threading': True,
+        'max_queue': 1,
+        'time_out': 5
+    }
 
     BASE_INI_FILE_NAME = 'config.ini'
 
@@ -79,6 +85,16 @@ class SMRFTestCase(unittest.TestCase):
         if hasattr(cls, 'output_dir') and \
                 os.path.exists(cls.output_dir):
             shutil.rmtree(cls.output_dir)
+
+    @classmethod
+    def thread_config(cls):
+        config = cls.base_config_copy()
+        config.raw_cfg['system'].update(cls.THREAD_CONFIG)
+
+        config.apply_recipes()
+        config = cast_all_variables(config, config.mcfg)
+
+        return config
 
     @staticmethod
     def can_i_run_smrf(config):

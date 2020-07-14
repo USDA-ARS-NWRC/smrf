@@ -1,15 +1,13 @@
-from copy import deepcopy
-
-from inicheck.tools import cast_all_variables
-
 from smrf.framework.model_framework import SMRF, run_smrf
 from smrf.tests.smrf_test_case_lakes import SMRFTestCaseLakes
 
 
 class TestThreading(SMRFTestCaseLakes):
+    THREAD_VARIABLE_COUNT = 36
 
-    def get_variables(self, config):
-        s = SMRF(self.base_config)
+    @staticmethod
+    def get_variables(config):
+        s = SMRF(config)
         s.loadTopo()
         s.initializeDistribution()
         s.loadData()
@@ -22,9 +20,8 @@ class TestThreading(SMRFTestCaseLakes):
         return s.thread_queue_variables
 
     def test_thread_variables(self):
-
         variables = self.get_variables(self.base_config)
-        self.assertEqual(len(variables), 36)
+        self.assertEqual(len(variables), self.THREAD_VARIABLE_COUNT)
 
     def test_multi_thread_variables(self):
         # Try to mimic the testing errors where the Lakes will
@@ -32,16 +29,8 @@ class TestThreading(SMRFTestCaseLakes):
 
         run_smrf(self.base_config)
 
-        config = deepcopy(self.base_config)
-        config.raw_cfg['system'].update({
-            'threading': True,
-            'max_queue': 1,
-            'time_out': 2
-        })
-
-        config.apply_recipes()
-        config = cast_all_variables(config, config.mcfg)
+        config = self.thread_config()
 
         thread_variables = self.get_variables(config)
 
-        self.assertEqual(len(thread_variables), 36)
+        self.assertEqual(len(thread_variables), self.THREAD_VARIABLE_COUNT)
