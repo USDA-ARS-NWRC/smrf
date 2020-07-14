@@ -63,7 +63,7 @@ class ppt(image_data.image_data):
     variable = 'precip'
 
     # these are variables that can be output
-    output_variables = {
+    OUTPUT_VARIABLES = {
         'precip': {
             'units': 'mm',
             'standard_name': 'precipitation_mass',
@@ -173,7 +173,7 @@ class ppt(image_data.image_data):
             """ model:  """.format(self.nasde_model))
 
         if self.nasde_model == 'marks2017':
-            self.thread_variables.append('storm_id')
+            self.add_thread_variables('storm_id')
 
             self.storm_total = np.zeros((topo.ny, topo.nx))
 
@@ -233,8 +233,9 @@ class ppt(image_data.image_data):
 
         self.mask = topo.mask
 
-    def distribute(self, data, dpt, precip_temp, ta, time, wind, temp, az,
-                   dir_round_cell, wind_speed, cell_maxus, mask=None):
+    def distribute(self, data, dpt, precip_temp, ta, time, wind, temp,
+                   wind_direction=None, dir_round_cell=None, wind_speed=None,
+                   cell_maxus=None, mask=None):
         """
         Distribute given a Panda's dataframe for a single time step. Calls
         :mod:`smrf.distribute.image_data.image_data._distribute`.
@@ -257,7 +258,7 @@ class ppt(image_data.image_data):
             time:           pass in the time were are currently on
             wind:           station wind speed at time step
             temp:           station air temperature at time step
-            az:             numpy array for simulated wind direction
+            wind_direction: numpy array for simulated wind direction
             dir_round_cell: numpy array for wind direction in discreet
                             increments for referencing maxus at a specific
                             direction
@@ -316,7 +317,7 @@ class ppt(image_data.image_data):
                 self.precip = precip.dist_precip_wind(
                     self.precip,
                     dpt,
-                    az,
+                    wind_direction,
                     dir_round_cell,
                     wind_speed,
                     cell_maxus,
@@ -496,15 +497,31 @@ class ppt(image_data.image_data):
             ta = queue['air_temp'].get(t)
 
             # variables for wind redistribution
-            az = queue['wind_direction'].get(t)
-            flatwind = queue['flatwind'].get(t)
-            dir_round_cell = queue['dir_round_cell'].get(t)
-            cell_maxus = queue['cellmaxus'].get(t)
+            if self.config['precip_rescaling_model'] == 'winstral':
+                wind_direction = queue['wind_direction'].get(t)
+                flatwind = queue['flatwind'].get(t)
+                dir_round_cell = queue['dir_round_cell'].get(t)
+                cell_maxus = queue['cellmaxus'].get(t)
 
-            self.distribute(data.precip.loc[t], dpt, precip_temp, ta, t,
-                            data.wind_speed.loc[t], data.air_temp.loc[t],
-                            az, dir_round_cell, flatwind, cell_maxus,
-                            mask=mask)
+            else:
+                wind_direction = None
+                flatwind = None
+                dir_round_cell = None
+                cell_maxus = None
+
+            self.distribute(
+                data.precip.loc[t],
+                dpt,
+                precip_temp,
+                ta,
+                t,
+                data.wind_speed.loc[t],
+                data.air_temp.loc[t],
+                wind_direction,
+                dir_round_cell,
+                flatwind,
+                cell_maxus,
+                mask=mask)
 
             queue[self.variable].put([t, self.precip])
             queue['percent_snow'].put([t, self.percent_snow])
@@ -512,6 +529,7 @@ class ppt(image_data.image_data):
             queue['last_storm_day_basin'].put([t, self.last_storm_day_basin])
             queue['storm_days'].put([t, self.storm_days])
             queue['storm_total'].put([t, self.storm_total])
+
             if self.nasde_model == "marks2017":
                 queue['storm_id'].put([t, self.storm_id])
 

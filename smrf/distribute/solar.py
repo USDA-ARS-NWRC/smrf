@@ -111,7 +111,7 @@ class Solar(image_data.image_data):
     variable = 'solar'
 
     # these are variables that can be output
-    output_variables = {
+    OUTPUT_VARIABLES = {
         'clear_ir_beam': {
             'units': 'watt/m2',
             'standard_name': 'clear_sky_infrared_beam',

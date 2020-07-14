@@ -25,7 +25,7 @@ class ts(image_data.image_data):
     variable = 'soil_temp'
 
     # these are variables that can be output
-    output_variables = {
+    OUTPUT_VARIABLES = {
         'soil_temp': {
             'units': 'degree_Celcius',
             'standard_name': 'soil_temperature',

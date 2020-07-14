@@ -13,7 +13,7 @@ from copy import deepcopy
 
 from inicheck.tools import cast_all_variables
 
-from smrf.framework.model_framework import can_i_run_smrf, run_smrf
+from smrf.framework.model_framework import can_i_run_smrf, run_smrf, SMRF
 from smrf.tests.nwrc_check import NWRCCheck
 from smrf.tests.smrf_test_case import SMRFTestCase
 
@@ -133,7 +133,7 @@ class TestLoadCSVData(SMRFTestCase):
         config.apply_recipes()
         config = cast_all_variables(config, config.mcfg)
 
-        self.assertIsNone(run_smrf(config))
+        self.assertIsInstance(run_smrf(config), SMRF)
 
 
 if __name__ == '__main__':

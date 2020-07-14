@@ -54,6 +54,12 @@ class WinstralWindModel(image_data.image_data):
 
     VARIABLE = 'wind'
 
+    BASE_THREAD_VARIABLES = frozenset([
+        'flatwind',
+        'cellmaxus',
+        'dir_round_cell'
+    ])
+
     def __init__(self, smrf_config):
         """Initialize the WinstralWindModel
 

@@ -36,6 +36,7 @@ unittest: &unittest
   os: linux
   dist: bionic
   language: python
+  cache: pip
   addons:
     apt:
       packages:
@@ -64,7 +65,11 @@ jobs:
     # test stage
     - <<: *unittest
       python: 3.6
-      env: TOXENV=py36,coverage
+      env: TOXENV=py36
+
+    - <<: *unittest
+      python: 3.6
+      env: TOXENV=coverage
 
     - <<: *unittest
       python: 3.6
@@ -104,3 +109,7 @@ jobs:
       name: Build and deploy macOS wheels
       os: osx
       language: shell
+
+  allow_failures:
+    - python: 3.6
+      env: TOXENV=coverage

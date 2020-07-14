@@ -28,7 +28,7 @@ class ta(image_data.image_data):
     variable = 'air_temp'
 
     # these are variables that can be output
-    output_variables = {
+    OUTPUT_VARIABLES = {
         'air_temp': {
             'units': 'degree_Celsius',
             'standard_name': 'air_temperature',
