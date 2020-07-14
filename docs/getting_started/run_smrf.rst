@@ -30,7 +30,7 @@ below is the function :mod:`run_smrf <smrf.framework.model_framework.run_smrf>`.
         s.loadTopo()
 
         # initialize the distribution
-        s.initializeDistribution()
+        s.create_distribution()
 
         # initialize the outputs if desired
         s.initializeOutput()

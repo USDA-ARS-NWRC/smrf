@@ -11,7 +11,7 @@ class TestThreading(SMRFTestCaseLakes):
     def get_variables(self, config):
         s = SMRF(self.base_config)
         s.loadTopo()
-        s.initializeDistribution()
+        s.create_distribution()
         s.loadData()
 
         for v in s.distribute:

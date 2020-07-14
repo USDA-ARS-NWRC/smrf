@@ -16,7 +16,7 @@ Example:
     >>> import smrf
     >>> s = smrf.framework.SMRF(configFile) # initialize SMRF
     >>> s.loadTopo() # load topo data
-    >>> s.initializeDistribution() # initialize the distribution
+    >>> s.create_distribution() # initialize the distribution
     >>> s.initializeOutput() # initialize the outputs if desired
     >>> s.loadData() # load weather data  and station metadata
     >>> s.distributeData() # distribute
@@ -66,7 +66,7 @@ class SMRF():
         config: Configuration file read in as dictionary
         distribute: Dictionary the contains all the desired variables to
             distribute and is initialized in
-            :func:`~smrf.framework.model_framework.initializeDistribution`
+            :func:`~smrf.framework.model_framework.create_distribution`
     """
 
     # These are the modules that the user can modify and use different methods
@@ -231,11 +231,11 @@ class SMRF():
 
         self.topo = Topo(self.config['topo'])
 
-    def initializeDistribution(self):
+    def create_distribution(self):
         """
         This initializes the distirbution classes based on the configFile
         sections for each variable.
-        :func:`~smrf.framework.model_framework.SMRF.initializeDistribution`
+        :func:`~smrf.framework.model_framework.SMRF.create_distribution`
         will initialize the variables within the :func:`smrf.distribute`
         package and insert into a dictionary 'distribute' with variable names
         as the keys.
@@ -351,6 +351,17 @@ class SMRF():
         else:
             self.distributeData_single()
 
+    def initialize_distribution(self, date_time=None):
+        """Call the initialize method for each distribute module
+
+        Args:
+            date_time (list, optional): initialize with the datetime list or not.
+                Defaults to None.
+        """
+
+        for v in self.distribute:
+            self.distribute[v].initialize(self.topo, self.data, date_time)
+
     def distributeData_single(self):
         """
         Distribute the measurement point data for all variables in serial. Each
@@ -373,10 +384,7 @@ class SMRF():
             11. Output time step if needed
         """
 
-        # -------------------------------------
-        # Initialize the distibution
-        for v in self.distribute:
-            self.distribute[v].initialize(self.topo, self.data)
+        self.initialize_distribution()
 
         # -------------------------------------
         # Distribute the data
@@ -571,12 +579,10 @@ class SMRF():
         """
 
         # -------------------------------------
-        # Initialize the distibutions and get thread variables
+        # Initialize the distributions and get thread variables
         self._logger.info("Initializing distributed variables...")
 
-        for v in self.distribute:
-            self.distribute[v].initialize(self.topo, self.data, self.date_time)
-
+        self.initialize_distribution(self.date_time)
         self.set_queue_variables()
 
         # -------------------------------------
@@ -786,7 +792,7 @@ def run_smrf(config):
         s.loadTopo()
 
         # initialize the distribution
-        s.initializeDistribution()
+        s.create_distribution()
 
         # initialize the outputs if desired
         s.initializeOutput()

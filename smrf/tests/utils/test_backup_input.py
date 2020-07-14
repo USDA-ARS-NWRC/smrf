@@ -13,7 +13,7 @@ class TestBackupInput(SMRFTestCase):
         super().setUpClass()
         cls.smrf = SMRF(cls.config_file)
         cls.smrf.loadTopo()
-        cls.smrf.initializeDistribution()
+        cls.smrf.create_distribution()
         cls.smrf.loadData()
 
     def test_backup_version(self):
