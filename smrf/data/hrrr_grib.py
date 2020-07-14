@@ -8,7 +8,7 @@ from smrf.envphys.solar.cloud import get_hrrr_cloud
 from smrf.envphys.vapor_pressure import rh2vp
 
 
-class LoadGribHRRR():
+class InputGribHRRR():
 
     VARIABLES = [
         'air_temp',

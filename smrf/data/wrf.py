@@ -13,7 +13,7 @@ def metadata_name_from_index(index):
     return 'grid_y{:d}_x{:d}'.format(index[0], index[1])
 
 
-class LoadWRF():
+class InputWRF():
 
     WRF_VARIABLES = [
         'GLW',

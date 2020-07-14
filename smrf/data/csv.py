@@ -5,7 +5,7 @@ import pandas as pd
 from smrf.utils.utils import check_station_colocation
 
 
-class LoadCSV():
+class InputCSV():
 
     def __init__(self, *args, **kwargs):
 

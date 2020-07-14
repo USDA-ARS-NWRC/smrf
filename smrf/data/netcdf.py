@@ -8,7 +8,7 @@ from smrf.data import metadata_name_from_index
 from smrf.utils.utils import apply_utm
 
 
-class LoadNetcdf():
+class InputNetcdf():
 
     VARIABLES = [
         'air_temp',

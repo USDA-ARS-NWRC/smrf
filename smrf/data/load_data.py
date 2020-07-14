@@ -3,10 +3,10 @@ import logging
 import numpy as np
 import utm
 
-from smrf.data import LoadCSV, LoadGribHRRR, LoadNetcdf, LoadWRF
+from smrf.data import InputCSV, InputGribHRRR, InputNetcdf, InputWRF
 
 
-class LoadData():
+class InputData():
     """
     Class for loading and storing the data, either from
     - CSV file
@@ -57,10 +57,10 @@ class LoadData():
                       'client']
 
     DATA_FUNCTIONS = {
-        'csv': LoadCSV,
-        'wrf': LoadWRF,
-        'netcdf': LoadNetcdf,
-        'hrrr_grib': LoadGribHRRR
+        'csv': InputCSV,
+        'wrf': InputWRF,
+        'netcdf': InputNetcdf,
+        'hrrr_grib': InputGribHRRR
     }
 
     # degree offset for a buffer around the model domain in degrees
