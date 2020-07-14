@@ -16,9 +16,6 @@ class TestLakes(SMRFTestCaseLakes):
 
         cls.smrf = run_smrf(cls.config_file)
 
-    def setUp(self):
-        self.assert_thread_variables()
-
     def test_air_temp(self):
         self.compare_netcdf_files('air_temp.nc')
 
@@ -63,9 +60,6 @@ class TestLakesThreaded(SMRFTestCaseLakes):
 
     def tearDown(self):
         pass
-
-    def setUp(self):
-        self.assert_thread_variables()
 
     def test_air_temp(self):
         self.compare_netcdf_files('air_temp.nc')

@@ -1,36 +1,75 @@
-from smrf.framework.model_framework import SMRF, run_smrf
+from smrf.framework.model_framework import SMRF
 from smrf.tests.smrf_test_case_lakes import SMRFTestCaseLakes
 
 
 class TestThreading(SMRFTestCaseLakes):
-    THREAD_VARIABLE_COUNT = 36
-
-    @staticmethod
-    def get_variables(config):
-        s = SMRF(config)
-        s.loadTopo()
-        s.initializeDistribution()
-        s.loadData()
-
-        for v in s.distribute:
-            s.distribute[v].initialize(s.topo, s.data)
-
-        s.set_queue_variables()
-
-        return s.thread_queue_variables
-
-    def test_thread_variables(self):
-        variables = self.get_variables(self.base_config)
-        self.assertEqual(len(variables), self.THREAD_VARIABLE_COUNT)
-
+    """
+    Test for all defined BASE_THREAD_VARIABLES, not accounting for config
+    dependent additions.
+    """
     def test_multi_thread_variables(self):
-        # Try to mimic the testing errors where the Lakes will
-        # fail in threading after running the non threaded
-
-        run_smrf(self.base_config)
-
         config = self.thread_config()
+        smrf = SMRF(config)
+        smrf.loadTopo()
+        smrf.initializeDistribution()
 
-        thread_variables = self.get_variables(config)
+        self.assertCountEqual(
+            smrf.distribute['air_temp'].thread_variables,
+            ['air_temp']
+        )
 
-        self.assertEqual(len(thread_variables), self.THREAD_VARIABLE_COUNT)
+        self.assertCountEqual(
+            smrf.distribute['vapor_pressure'].thread_variables,
+            ['vapor_pressure', 'dew_point', 'precip_temp']
+        )
+
+        self.assertCountEqual(
+            smrf.distribute['wind'].thread_variables,
+            ['wind_speed', 'wind_direction']
+        )
+
+        self.assertCountEqual(
+            smrf.distribute['precipitation'].thread_variables,
+            [
+                'precip',
+                'percent_snow',
+                'snow_density',
+                'storm_days',
+                'storm_total',
+                'last_storm_day_basin'
+            ]
+        )
+
+        self.assertCountEqual(
+            smrf.distribute['albedo'].thread_variables,
+            ['albedo_vis', 'albedo_ir']
+        )
+
+        self.assertCountEqual(
+            smrf.distribute['cloud_factor'].thread_variables,
+            ['cloud_factor']
+        )
+
+        self.assertCountEqual(
+            smrf.distribute['solar'].thread_variables,
+            [
+                'cloud_ir_beam', 'net_solar', 'cloud_vis_beam',
+                'clear_ir_diffuse', 'veg_vis_diffuse', 'clear_ir_beam',
+                'cloud_ir_diffuse', 'clear_vis_diffuse', 'veg_ir_diffuse',
+                'veg_vis_beam', 'clear_vis_beam', 'veg_ir_beam',
+                'cloud_vis_diffuse'
+            ]
+        )
+
+        self.assertCountEqual(
+            smrf.distribute['thermal'].thread_variables,
+            ['thermal', 'thermal_clear']
+        )
+
+        self.assertCountEqual(
+            smrf.distribute['soil_temp'].thread_variables,
+            []
+        )
+
+        if hasattr(self, 'threads'):
+            self.assertTrue(len(smrf.threads == 12))
