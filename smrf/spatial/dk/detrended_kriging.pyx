@@ -8,10 +8,10 @@ Compiling dk's kriging function
 
 import cython
 import numpy as np
-cimport numpy as np
 
+cimport numpy as np
+from cpython cimport Py_INCREF, PyObject
 from libc.stdlib cimport free
-from cpython cimport PyObject, Py_INCREF
 
 # Numpy must be initialized. When using numpy from C or Cython you must
 # _always_ do that, or you will have segfaults

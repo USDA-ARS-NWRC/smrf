@@ -42,7 +42,7 @@ class Wind(image_data.image_data):
     VARIABLE = 'wind'
 
     # these are variables that can be output
-    output_variables = {
+    OUTPUT_VARIABLES = {
         'flatwind': {
             'units': 'm/s',
             'standard_name': 'flatwind_wind_speed',
@@ -65,10 +65,7 @@ class Wind(image_data.image_data):
 
     BASE_THREAD_VARIABLES = frozenset([
         'wind_speed',
-        'wind_direction',
-        'flatwind',
-        'cellmaxus',
-        'dir_round_cell'
+        'wind_direction'
     ])
 
     def __init__(self, config):
@@ -81,20 +78,32 @@ class Wind(image_data.image_data):
         self.smrf_config = config
         self.getConfig(config['wind'])
 
-        if self.config['wind_model'] == 'interp':
+        if self.check_wind_model_type('interp'):
             # Straight interpolation of the wind
             self.wind_model = self
             self.wind_model.flatwind = None
             self.wind_model.cellmaxus = None
             self.wind_model.dir_round_cell = None
 
-        elif self.config['wind_model'] == 'wind_ninja':
+        elif self.check_wind_model_type('wind_ninja'):
             self.wind_model = WindNinjaModel(self.smrf_config)
 
-        elif self.config['wind_model'] == 'winstral':
+        elif self.check_wind_model_type('winstral'):
             self.wind_model = WinstralWindModel(self.smrf_config)
 
         self._logger.debug('Created distribute.wind')
+
+    def check_wind_model_type(self, wind_model):
+        """Check if the wind model is of a given type
+
+        Args:
+            wind_model (str): name of the wind model
+
+        Returns:
+            bool: True/False if the wind_model matches the config
+        """
+
+        return self.config['wind_model'] == wind_model
 
     def initialize(self, topo, data, date_time=None):
         """
@@ -114,7 +123,10 @@ class Wind(image_data.image_data):
         self.date_time = date_time
         self.wind_model._initialize(topo, data.metadata)
 
-        if self.config['wind_model'] != 'interp':
+        if self.check_wind_model_type('winstral'):
+            self.add_thread_variables(self.wind_model.thread_variables)
+
+        if not self.check_wind_model_type('interp'):
             self.wind_model.initialize(topo, data)
 
     def distribute(self, data_speed, data_direction, t):
@@ -134,7 +146,7 @@ class Wind(image_data.image_data):
         self._logger.debug('{} Distributing wind_direction and wind_speed'
                            .format(data_speed.name))
 
-        if self.config['wind_model'] == 'interp':
+        if self.check_wind_model_type('interp'):
 
             self._distribute(data_speed, other_attribute='wind_speed')
 
@@ -189,9 +201,11 @@ class Wind(image_data.image_data):
                 [date_time, self.wind_model.wind_speed])
             smrf_queue['wind_direction'].put(
                 [date_time, self.wind_model.wind_direction])
-            smrf_queue['flatwind'].put(
-                [date_time, self.wind_model.flatwind])
-            smrf_queue['cellmaxus'].put(
-                [date_time, self.wind_model.cellmaxus])
-            smrf_queue['dir_round_cell'].put(
-                [date_time, self.wind_model.dir_round_cell])
+
+            if self.check_wind_model_type('winstral'):
+                smrf_queue['flatwind'].put(
+                    [date_time, self.wind_model.flatwind])
+                smrf_queue['cellmaxus'].put(
+                    [date_time, self.wind_model.cellmaxus])
+                smrf_queue['dir_round_cell'].put(
+                    [date_time, self.wind_model.dir_round_cell])

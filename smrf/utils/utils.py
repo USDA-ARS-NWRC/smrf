@@ -8,13 +8,14 @@ from shutil import copyfile
 import numpy as np
 import pandas as pd
 import pytz
-import scipy.spatial.qhull as qhull
+
 import utm
 from inicheck.checkers import CheckType
 from inicheck.output import generate_config
 from inicheck.utilities import mk_lst
 from scipy.interpolate.interpnd import (CloughTocher2DInterpolator,
                                         LinearNDInterpolator)
+from scipy.spatial import qhull as qhull
 
 from smrf import __core_config__
 

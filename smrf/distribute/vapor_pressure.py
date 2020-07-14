@@ -39,7 +39,7 @@ class vp(image_data.image_data):
     variable = 'vapor_pressure'
 
     # these are variables that can be output
-    output_variables = {
+    OUTPUT_VARIABLES = {
         'vapor_pressure': {
             'units': 'pascal',
             'standard_name': 'vapor_pressure',

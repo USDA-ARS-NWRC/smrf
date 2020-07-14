@@ -173,9 +173,9 @@ class DateQueueThreading(Queue):
                         self.remaining = endtime - _time()
 
                         if self.remaining <= 0.0:
-                            self._logger.error("Timeout occurred while putting"
-                                               " {} in the queue."
-                                               "".format(item[0]))
+                            self._logger.error(
+                                "Timeout occurred while putting"
+                                " {} in the queue.".format(item[0]))
                             timed_out = True
                             raise Full
 
@@ -281,8 +281,9 @@ class QueueOutput(threading.Thread):
                             data = np.zeros((self.ny, self.nx))
 
                         # output the time step
-                        # self._logger.debug(
-                        #     "threaded output for {}".format(v['variable']))
+                        self._logger.debug(
+                            "{} threaded output for {}".format(
+                                t, v['variable']))
                         self.out_func.output(v['variable'], data, t)
 
                     else:

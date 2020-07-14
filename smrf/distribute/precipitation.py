@@ -63,7 +63,7 @@ class ppt(image_data.image_data):
     variable = 'precip'
 
     # these are variables that can be output
-    output_variables = {
+    OUTPUT_VARIABLES = {
         'precip': {
             'units': 'mm',
             'standard_name': 'precipitation_mass',
@@ -174,7 +174,7 @@ class ppt(image_data.image_data):
             """ model:  """.format(self.nasde_model))
 
         if self.nasde_model == 'marks2017':
-            self.thread_variables.append('storm_id')
+            self.add_thread_variables('storm_id')
 
             self.storm_total = np.zeros((topo.ny, topo.nx))
 
@@ -234,8 +234,9 @@ class ppt(image_data.image_data):
 
         self.mask = topo.mask
 
-    def distribute(self, data, dpt, precip_temp, ta, time, wind, temp, az,
-                   dir_round_cell, wind_speed, cell_maxus, mask=None):
+    def distribute(self, data, dpt, precip_temp, ta, time, wind, temp,
+                   wind_direction=None, dir_round_cell=None, wind_speed=None,
+                   cell_maxus=None, mask=None):
         """
         Distribute given a Panda's dataframe for a single time step. Calls
         :mod:`smrf.distribute.image_data.image_data._distribute`.
@@ -258,7 +259,7 @@ class ppt(image_data.image_data):
             time:           pass in the time were are currently on
             wind:           station wind speed at time step
             temp:           station air temperature at time step
-            az:             numpy array for simulated wind direction
+            wind_direction: numpy array for simulated wind direction
             dir_round_cell: numpy array for wind direction in discreet
                             increments for referencing maxus at a specific
                             direction
@@ -317,7 +318,7 @@ class ppt(image_data.image_data):
                 self.precip = precip.dist_precip_wind(
                     self.precip,
                     dpt,
-                    az,
+                    wind_direction,
                     dir_round_cell,
                     wind_speed,
                     cell_maxus,
@@ -501,25 +502,42 @@ class ppt(image_data.image_data):
             ta = smrf_queue['air_temp'].get(date_time)
 
             # variables for wind redistribution
-            az = smrf_queue['wind_direction'].get(date_time)
-            flatwind = smrf_queue['flatwind'].get(date_time)
-            dir_round_cell = smrf_queue['dir_round_cell'].get(date_time)
-            cell_maxus = smrf_queue['cellmaxus'].get(date_time)
+            if self.config['precip_rescaling_model'] == 'winstral':
+                wind_direction = smrf_queue['wind_direction'].get(t)
+                flatwind = smrf_queue['flatwind'].get(t)
+                dir_round_cell = smrf_queue['dir_round_cell'].get(t)
+                cell_maxus = smrf_queue['cellmaxus'].get(t)
 
-            self.distribute(ppt_data, dpt, precip_temp, ta, date_time,
-                            ws_data, ta_data,
-                            az, dir_round_cell, flatwind, cell_maxus,
-                            mask=mask)
+            else:
+                wind_direction = None
+                flatwind = None
+                dir_round_cell = None
+                cell_maxus = None
 
-            smrf_queue[self.variable].put([date_time, self.precip])
-            smrf_queue['percent_snow'].put([date_time, self.percent_snow])
-            smrf_queue['snow_density'].put([date_time, self.snow_density])
+            self.distribute(
+                data.precip.loc[t],
+                dpt,
+                precip_temp,
+                ta,
+                t,
+                data.wind_speed.loc[t],
+                data.air_temp.loc[t],
+                wind_direction,
+                dir_round_cell,
+                flatwind,
+                cell_maxus,
+                mask=mask)
+
+            smrf_queue[self.variable].put([t, self.precip])
+            smrf_queue['percent_snow'].put([t, self.percent_snow])
+            smrf_queue['snow_density'].put([t, self.snow_density])
             smrf_queue['last_storm_day_basin'].put(
-                [date_time, self.last_storm_day_basin])
-            smrf_queue['storm_days'].put([date_time, self.storm_days])
-            smrf_queue['storm_total'].put([date_time, self.storm_total])
+                [t, self.last_storm_day_basin])
+            smrf_queue['storm_days'].put([t, self.storm_days])
+            smrf_queue['storm_total'].put([t, self.storm_total])
+
             if self.nasde_model == "marks2017":
-                smrf_queue['storm_id'].put([date_time, self.storm_id])
+                smrf_smrf_queue['storm_id'].put([date_time, self.storm_id])
 
     def post_processor(self, main_obj, threaded=False):
 

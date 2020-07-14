@@ -27,7 +27,7 @@ class cf(image_data.image_data):
     variable = 'cloud_factor'
 
     # these are variables that can be output
-    output_variables = {
+    OUTPUT_VARIABLES = {
         'cloud_factor': {
             'units': 'None',
             'standard_name': 'cloud_factor',

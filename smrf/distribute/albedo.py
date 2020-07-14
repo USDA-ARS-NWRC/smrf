@@ -33,7 +33,7 @@ class Albedo(image_data.image_data):
     variable = 'albedo'
 
     # these are variables that can be output
-    output_variables = {
+    OUTPUT_VARIABLES = {
         'albedo_vis': {
             'units': 'None',
             'standard_name': 'visible_albedo',
