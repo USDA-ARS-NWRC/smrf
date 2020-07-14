@@ -67,48 +67,6 @@ def time_since_storm(precipitation, perc_snow, time_step=1/24, mass=1.0,
     return stormDays, stormPrecip
 
 
-def time_since_storm_basin(precipitation, storm, stormid, storming, time,
-                           time_step=1/24, stormDays=None):
-    """
-    Calculate the decimal days since the last storm given a precip time series,
-    days since last storm in basin, and if it is currently storming
-
-     - Will assign uniform decimal days since last storm to every pixel
-
-    Args:
-        precipitation: Precipitation values
-        storm: current or most recent storm
-        time_step: step in days of the model run
-        last_storm_day_basin: time since last storm for the basin
-        stormid: ID of current storm
-        storming: if it is currently storming
-        time: current time
-        stormDays: unifrom days since last storm on pixel basis
-
-    Returns:
-        stormDays: unifrom days since last storm on pixel basis
-
-    Created May 9, 2017
-    @author: Scott Havens modified by Micah Sandusky
-    """
-
-    # either preallocate or use the input
-    if stormDays is None:
-        stormDays = np.zeros(precipitation.shape)
-
-    # if before first storm, just add timestep
-    if not storming and time <= storm['start'] and stormid == 0:
-        stormDays += time_step
-    # if during a storm than reset to zero
-    elif time <= storm['end']:
-        stormDays = np.zeros(precipitation.shape)
-    # else assign uniform to days from last storm for the basin
-    else:
-        stormDays += time_step
-
-    return stormDays
-
-
 def time_since_storm_pixel(precipitation, dpt, perc_snow, storming,
                            time_step=1/24, stormDays=None, mass=1.0,
                            ps_thresh=0.5):

@@ -52,8 +52,6 @@ class ppt(image_data.image_data):
         storm_days: numpy array of the days since last storm
         storm_total: numpy array of the precipitation mass for the storm
         last_storm_day: numpy array of the day of the last storm (decimal day)
-        last_storm_day_basin: maximum value of last_storm day within the mask
-            if specified
         min: minimum value of precipitation is 0
         max: maximum value of precipitation is infinite
         stations: stations to be used in alphabetical order
@@ -105,8 +103,7 @@ class ppt(image_data.image_data):
         'percent_snow',
         'snow_density',
         'storm_days',
-        'storm_total',
-        'last_storm_day_basin'
+        'storm_total'
     ])
 
     def __init__(self, pptConfig, start_date, time_step=60):
@@ -232,11 +229,10 @@ class ppt(image_data.image_data):
                         v[ms[1]] = float(self.config[m])
             self.veg = v
 
-        self.mask = topo.mask
 
     def distribute(self, data, dpt, precip_temp, ta, time, wind, temp,
                    wind_direction=None, dir_round_cell=None, wind_speed=None,
-                   cell_maxus=None, mask=None):
+                   cell_maxus=None):
         """
         Distribute given a Panda's dataframe for a single time step. Calls
         :mod:`smrf.distribute.image_data.image_data._distribute`.
@@ -265,8 +261,6 @@ class ppt(image_data.image_data):
                             direction
             wind_speed:     numpy array of wind speed
             cell_maxus:     numpy array for maxus at correct wind directions
-            mask:           basin mask to apply to the storm days for
-                            calculating the last storm day for the basin
         """
 
         self._logger.debug('%s Distributing all precip' % data.name)
@@ -291,8 +285,7 @@ class ppt(image_data.image_data):
                     self.corrected_precip.loc[time],
                     precip_temp,
                     ta,
-                    time,
-                    mask=mask)
+                    time)
 
             else:
                 # Adjust the precip for undercatchment
@@ -307,9 +300,9 @@ class ppt(image_data.image_data):
                         self.metadata)
 
                     self.distribute_for_susong1999(
-                        data, precip_temp, time, mask=mask)
+                        data, precip_temp, time)
         else:
-            self.distribute_for_susong1999(data, precip_temp, time, mask=mask)
+            self.distribute_for_susong1999(data, precip_temp, time)
 
         # redistribute due to wind to account for driftin
         if self.config['precip_rescaling_model'] == 'winstral':
@@ -328,7 +321,7 @@ class ppt(image_data.image_data):
                     self.veg,
                     self.config)
 
-    def distribute_for_marks2017(self, data, precip_temp, ta, time, mask=None):
+    def distribute_for_marks2017(self, data, precip_temp, ta, time):
         """
         Specialized distribute function for working with the new accumulated
         snow density model Marks2017 requires storm total and a corrected
@@ -409,13 +402,7 @@ class ppt(image_data.image_data):
         self.last_storm_day = utils.water_day(data.name)[0] - \
             self.storm_days - 0.001
 
-        # get the time since most recent storm
-        if mask is not None:
-            self.last_storm_day_basin = np.max(mask * self.last_storm_day)
-        else:
-            self.last_storm_day_basin = np.max(self.last_storm_day)
-
-    def distribute_for_susong1999(self, data, ppt_temp, time, mask=None):
+    def distribute_for_susong1999(self, data, ppt_temp, time):
         """Susong 1999 estimates percent snow and snow density based on
         Susong et al, (1999) :cite:`Susong&al:1999`.
 
@@ -423,7 +410,6 @@ class ppt(image_data.image_data):
             data (pd.DataFrame): Precipitation mass data
             ppt_temp (pd.DataFrame): Precipitation temperature data
             time : Unused
-            mask (np.array, optional): Mask the output. Defaults to None.
         """
 
         if data.sum() > 0:
@@ -466,13 +452,7 @@ class ppt(image_data.image_data):
         self.last_storm_day = utils.water_day(data.name)[0] - \
             self.storm_days - 0.001
 
-        # get the time since most recent storm
-        if mask is not None:
-            self.last_storm_day_basin = np.max(mask * self.last_storm_day)
-        else:
-            self.last_storm_day_basin = np.max(self.last_storm_day)
-
-    def distribute_thread(self, smrf_queue, data_queue, mask=None):
+    def distribute_thread(self, smrf_queue, data_queue):
         """
         Distribute the data using threading and queue. All data is provided and
         ``distribute_thread`` will go through each time step and call
@@ -483,7 +463,6 @@ class ppt(image_data.image_data):
 
         * :py:attr:`snow_density`
         * :py:attr:`storm_days`
-        * :py:attr:`last_storm_day_basin`
 
         Args:
             queue: queue dictionary for all variables
@@ -525,14 +504,11 @@ class ppt(image_data.image_data):
                 wind_direction,
                 dir_round_cell,
                 flatwind,
-                cell_maxus,
-                mask=mask)
+                cell_maxus)
 
             smrf_queue[self.variable].put([date_time, self.precip])
             smrf_queue['percent_snow'].put([date_time, self.percent_snow])
             smrf_queue['snow_density'].put([date_time, self.snow_density])
-            smrf_queue['last_storm_day_basin'].put(
-                [date_time, self.last_storm_day_basin])
             smrf_queue['storm_days'].put([date_time, self.storm_days])
             smrf_queue['storm_total'].put([date_time, self.storm_total])
 

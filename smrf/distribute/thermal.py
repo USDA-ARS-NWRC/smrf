@@ -341,7 +341,7 @@ class th(image_data.image_data):
 
         self.thermal = utils.set_min_max(cth, self.min, self.max)
 
-    def distribute_thread(self, smrf_queue):
+    def distribute_thread(self, smrf_queue, data_queue=None):
         """
         Distribute the data using threading. All data is provided and
         ``distribute_thread`` will go through each time step and call

@@ -158,7 +158,7 @@ class Albedo(image_data.image_data):
             self.albedo_vis = np.zeros(storm_day.shape)
             self.albedo_ir = np.zeros(storm_day.shape)
 
-    def distribute_thread(self, smrf_queue):
+    def distribute_thread(self, smrf_queue, data_queue=None):
         """
         Distribute the data using threading and queue
 

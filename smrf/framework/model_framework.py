@@ -634,60 +634,6 @@ class SMRF():
                     args=(self.smrf_queue, self.data_queue))
             )
 
-        # 1. Air temperature
-        # self.threads.append(Thread(
-        #     target=self.distribute['air_temp'].distribute_thread,
-        #     name='air_temp',
-        #     args=(self.smrf_queue, self.data_queue)))
-
-        # # 2. Vapor pressure
-        # self.threads.append(Thread(
-        #     target=self.distribute['vapor_pressure'].distribute_thread,
-        #     name='vapor_pressure',
-        #     args=(self.smrf_queue, self.data_queue)))
-
-        # # 3. Wind_speed and wind_direction
-        # self.threads.append(Thread(
-        #     target=self.distribute['wind'].distribute_thread,
-        #     name='wind',
-        #     args=(self.smrf_queue, self.data_queue)))
-
-        # # 4. Precipitation
-        # self.threads.append(Thread(
-        #     target=self.distribute['precipitation'].distribute_thread,
-        #     name='precipitation',
-        #     args=(self.smrf_queue, self.data_queue, self.topo.mask)))
-
-        # # 5. Albedo
-        # self.threads.append(Thread(
-        #     target=self.distribute['albedo'].distribute_thread,
-        #     name='albedo',
-        #     args=(self.smrf_queue, )))
-
-        # # 6.Cloud Factor
-        # self.threads.append(Thread(
-        #     target=self.distribute['cloud_factor'].distribute_thread,
-        #     name='cloud_factor',
-        #     args=(self.smrf_queue, self.data_queue)))
-
-        # # 7 Net radiation
-        # self.threads.append(Thread(
-        #     target=self.distribute['solar'].distribute_thread,
-        #     name='solar',
-        #     args=(self.smrf_queue, )))
-
-        # # 8. thermal radiation
-        # if self.thermal_netcdf:
-        #     self.threads.append(Thread(
-        #         target=self.distribute['thermal'].distribute_thermal_thread,
-        #         name='thermal',
-        #         args=(self.smrf_queue, self.data_queue)))
-        # else:
-        #     self.threads.append(Thread(
-        #         target=self.distribute['thermal'].distribute_thread,
-        #         name='thermal',
-        #         args=(self.smrf_queue, )))
-
     def initializeOutput(self):
         """
         Initialize the output files based on the configFile section ['output'].

@@ -24,7 +24,7 @@ class TestThreading(SMRFTestCaseLakes):
     def test_thread_variables(self):
 
         variables = self.get_variables(self.base_config)
-        self.assertEqual(len(variables), 36)
+        self.assertEqual(len(variables), 35)
 
     def test_multi_thread_variables(self):
         # Try to mimic the testing errors where the Lakes will
@@ -44,4 +44,4 @@ class TestThreading(SMRFTestCaseLakes):
 
         thread_variables = self.get_variables(config)
 
-        self.assertEqual(len(thread_variables), 36)
+        self.assertEqual(len(thread_variables), 35)

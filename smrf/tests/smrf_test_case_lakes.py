@@ -80,8 +80,7 @@ class SMRFTestCaseLakes(SMRFTestCase):
                 'percent_snow',
                 'snow_density',
                 'storm_days',
-                'storm_total',
-                'last_storm_day_basin'
+                'storm_total'
             ]
         )
 
