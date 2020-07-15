@@ -45,7 +45,7 @@ from smrf.envphys.solar import model
 from smrf.framework import art, logger
 from smrf.output import output_hru, output_netcdf
 from smrf.utils import queue
-from smrf.utils.utils import backup_input, getqotw, date_range
+from smrf.utils.utils import backup_input, date_range, getqotw
 
 
 class SMRF():

@@ -1,5 +1,3 @@
-from datetime import timedelta
-
 import netCDF4 as nc
 import numpy as np
 import pytz

@@ -24,7 +24,8 @@ class InputNetcdf():
         'cloud_factor'
     ]
 
-    def __init__(self, start_date, end_date, bbox=None, topo=None, config=None):
+    def __init__(self, start_date, end_date, bbox=None,
+                 topo=None, config=None):
 
         self.start_date = start_date
         self.end_date = end_date
