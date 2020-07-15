@@ -42,10 +42,10 @@ class InputData():
     }
 
     DATA_FUNCTIONS = {
-        'csv': InputCSV,
-        'wrf': InputWRF,
-        'netcdf': InputNetcdf,
-        'hrrr_grib': InputGribHRRR
+        InputCSV.DATA_TYPE: InputCSV,
+        InputWRF.DATA_TYPE: InputWRF,
+        InputNetcdf.DATA_TYPE: InputNetcdf,
+        InputGribHRRR.DATA_TYPE: InputGribHRRR
     }
 
     # degree offset for a buffer around the model domain in degrees
