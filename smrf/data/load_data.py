@@ -65,7 +65,7 @@ class InputData():
         self.model_domain_grid()
 
         if 'csv' in self.smrf_config:
-            self.data_type = 'csv'
+            self.data_type = InputCSV.DATA_TYPE
             data_inputs = {
                 'stations': self.smrf_config['csv']['stations'],
                 'config': self.smrf_config['csv']
