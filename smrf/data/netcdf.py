@@ -13,6 +13,8 @@ def metadata_name_from_index(index):
 
 class InputNetcdf():
 
+    DATA_TYPE = 'netcdf'
+
     VARIABLES = [
         'air_temp',
         'vapor_pressure',
@@ -22,10 +24,20 @@ class InputNetcdf():
         'cloud_factor'
     ]
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, start_date, end_date, bbox=None, topo=None, config=None):
 
-        for keys in kwargs.keys():
-            setattr(self, keys, kwargs[keys])
+        self.start_date = start_date
+        self.end_date = end_date
+        self.topo = topo
+        self.bbox = bbox
+        self.config = config
+        self.time_zone = start_date.tzinfo
+
+        if topo is None:
+            raise Exception('Must supply topo to InputWRF')
+
+        if bbox is None:
+            raise Exception('Must supply bbox to InputWRF')
 
         self.variables = list(self.config.keys())
         self.variables.remove('data_type')

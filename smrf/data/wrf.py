@@ -12,6 +12,8 @@ from smrf.utils.utils import apply_utm
 
 class InputWRF():
 
+    DATA_TYPE = 'wrf'
+
     BASE_VARIABLES = {
         'air_temp': 'T2',
         'dew_point': 'DWPT',
@@ -27,10 +29,20 @@ class InputWRF():
         'precip': 'RAINNC'
     }
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, start_date, end_date, bbox=None, topo=None, config=None):
 
-        for keys in kwargs.keys():
-            setattr(self, keys, kwargs[keys])
+        self.start_date = start_date
+        self.end_date = end_date
+        self.topo = topo
+        self.bbox = bbox
+        self.config = config
+        self.time_zone = start_date.tzinfo
+
+        if topo is None:
+            raise Exception('Must supply topo to InputWRF')
+
+        if bbox is None:
+            raise Exception('Must supply bbox to InputWRF')
 
         self._logger = logging.getLogger(__name__)
 
@@ -164,14 +176,12 @@ class InputWRF():
         self._logger.debug('Loading wind_speed and wind_direction')
         self.wind_speed = pd.DataFrame(index=time, columns=self.primary_id)
         self.wind_direction = pd.DataFrame(index=time, columns=self.primary_id)
-        min_speed = 0.47
 
         u10 = self.file.variables['UGRD'][time_ind, :]
         v10 = self.file.variables['VGRD'][time_ind, :]
 
         # calculate the wind speed
         s = np.sqrt(u10**2 + v10**2)
-        s[s < min_speed] = min_speed
 
         # calculate the wind direction
         d = np.degrees(np.arctan2(v10, u10))

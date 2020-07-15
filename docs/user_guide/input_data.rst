@@ -129,7 +129,7 @@ Example data files can be found in the ``tests`` directory for RME.
 MySQL Database
 ``````````````
 
-The MySQL database has been depricated as of SMRF v0.11.0. If that feature is needed,
+The MySQL database has been deprecated as of SMRF v0.11.0. If that feature is needed,
 we recommend using v0.9.X or export the tables to csv format.
 
 

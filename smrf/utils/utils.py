@@ -467,16 +467,15 @@ def apply_utm(s, force_zone_number):
     return s
 
 
-def date_range(start_date, end_date, increment):
+def date_range(start_date, end_date, increment, timezone):
     """
     Calculate a list between start and end date with
     an increment
     """
-    result = []
-    nxt = start_date
 
-    while nxt <= end_date:
-        result.append(nxt)
-        nxt += increment
-
-    return np.array(result)
+    return list(pd.date_range(
+        start_date,
+        end_date,
+        freq="{}min".format(increment),
+        tz=timezone
+    ))

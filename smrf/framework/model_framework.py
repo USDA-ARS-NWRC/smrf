@@ -45,7 +45,7 @@ from smrf.envphys.solar import model
 from smrf.framework import art, logger
 from smrf.output import output_hru, output_netcdf
 from smrf.utils import queue
-from smrf.utils.utils import backup_input, getqotw
+from smrf.utils.utils import backup_input, getqotw, date_range
 
 
 class SMRF():
@@ -199,12 +199,12 @@ class SMRF():
             self.end_date = self.end_date.tz_localize(self.time_zone)
 
         # Get the time steps correctly in the time zone
-        self.date_time = list(pd.date_range(
+        self.date_time = date_range(
             self.start_date,
             self.end_date,
-            freq="{[time][time_step]}min".format(self.config),
-            tz=self.time_zone
-        ))
+            self.config['time']['time_step'],
+            self.time_zone
+        )
         self.time_steps = len(self.date_time)
 
     def __enter__(self):

@@ -7,10 +7,15 @@ from smrf.utils.utils import check_station_colocation
 
 class InputCSV():
 
-    def __init__(self, *args, **kwargs):
+    DATA_TYPE = 'csv'
 
-        for keys in kwargs.keys():
-            setattr(self, keys, kwargs[keys])
+    def __init__(self, start_date, end_date, stations=None, config=None):
+
+        self.start_date = start_date
+        self.end_date = end_date
+        self.stations = stations
+        self.config = config
+        self.time_zone = start_date.tzinfo
 
         self._logger = logging.getLogger(__name__)
 

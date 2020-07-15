@@ -14,8 +14,6 @@ from smrf.utils.utils import date_range
 class TestWindNinja(SMRFTestCaseLakes):
 
     def test_wind_ninja(self):
-        """Test the wind ninja functions
-        """
 
         config = self.base_config.cfg
 
@@ -23,13 +21,12 @@ class TestWindNinja(SMRFTestCaseLakes):
         topo = Topo(config['topo'])
 
         # Get the time steps correctly in the time zone
-        d = date_range(
+        tzinfo = pytz.timezone(config['time']['time_zone'])
+        date_time = date_range(
             config['time']['start_date'],
             config['time']['end_date'],
-            timedelta(minutes=int(config['time']['time_step'])))
-
-        tzinfo = pytz.timezone(config['time']['time_zone'])
-        date_time = [di.replace(tzinfo=tzinfo) for di in d]
+            config['time']['time_step'],
+            tzinfo)
 
         wn = WindNinjaModel(config)
         wn.initialize(topo, None)

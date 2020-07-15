@@ -64,32 +64,33 @@ class InputData():
         # get the buffer gridded data domain extents in lat long
         self.model_domain_grid()
 
-        data_inputs = {
-            'start_date': self.start_date,
-            'end_date': self.end_date,
-            'time_zone': self.time_zone,
-            'topo': self.topo,
-            'bbox': self.bbox
-        }
-
         if 'csv' in self.smrf_config:
             self.data_type = 'csv'
-            data_inputs['stations'] = self.smrf_config['csv']['stations']
-            data_inputs['config'] = self.smrf_config['csv']
+            data_inputs = {
+                'stations': self.smrf_config['csv']['stations'],
+                'config': self.smrf_config['csv']
+            }
 
         elif 'gridded' in self.smrf_config:
             self.data_type = self.smrf_config['gridded']['data_type']
-            data_inputs['config'] = self.smrf_config['gridded']
+            data_inputs = {
+                'bbox': self.bbox,
+                'config': self.smrf_config['gridded'],
+                'topo': self.topo
+            }
 
         # load the data
-        self.load_class = self.DATA_FUNCTIONS[self.data_type](**data_inputs)
+        self.load_class = self.DATA_FUNCTIONS[self.data_type](
+            self.start_date,
+            self.end_date,
+            **data_inputs)
         self.load_class.load()
 
         self.set_variables()
 
         self.metadata_pixel_location()
 
-        if self.data_type == 'csv':
+        if self.data_type == InputCSV.DATA_TYPE:
             self.load_class.check_colocation()
 
     def set_variables(self):

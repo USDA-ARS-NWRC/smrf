@@ -10,6 +10,8 @@ from smrf.envphys.vapor_pressure import rh2vp
 
 class InputGribHRRR():
 
+    DATA_TYPE = 'hrrr_grib'
+
     VARIABLES = [
         'air_temp',
         'vapor_pressure',
@@ -19,21 +21,32 @@ class InputGribHRRR():
         'cloud_factor'
     ]
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, start_date, end_date, bbox=None, topo=None, config=None):
 
-        for keys in kwargs.keys():
-            setattr(self, keys, kwargs[keys])
+        self.start_date = start_date
+        self.end_date = end_date
+        self.topo = topo
+        self.bbox = bbox
+        self.config = config
+        self.time_zone = start_date.tzinfo
+
+        if topo is None:
+            raise Exception('Must supply topo to InputWRF')
+
+        if bbox is None:
+            raise Exception('Must supply bbox to InputWRF')
 
         self._logger = logging.getLogger(__name__)
 
         if self.config['hrrr_load_method'] == 'timestep':
+            self._timedelta_steps = pd.to_timedelta(20, 'minutes')
             self.timestep_dates()
             self.cf_memory = None
 
         self.hrrr = HRRR(external_logger=self._logger)
 
     def timestep_dates(self):
-        self.end_date = self.start_date + pd.to_timedelta(20, 'minutes')
+        self.end_date = self.start_date + self._timedelta_steps
 
     def load(self):
         """
@@ -121,7 +134,7 @@ class InputGribHRRR():
         self.air_temp = data['air_temp']
 
         # calculate vapor pressure
-        self._logger.debug('Loading vapor_pressure')
+        self._logger.debug('Calculating vapor_pressure')
         vp = rh2vp(
             data['air_temp'].values,
             data['relative_humidity'].values)
@@ -129,10 +142,8 @@ class InputGribHRRR():
 
         # calculate the wind speed and wind direction
         self._logger.debug('Loading wind_speed and wind_direction')
-        min_speed = 0.47
 
         s = np.sqrt(data['wind_u']**2 + data['wind_v']**2)
-        s[s < min_speed] = min_speed
 
         d = np.degrees(np.arctan2(data['wind_v'], data['wind_u']))
         ind = d < 0
