@@ -14,13 +14,13 @@ class TestLoadHRRR(SMRFTestCase):
     def setUpClass(cls):
         super().setUpClass()
 
-        config = deepcopy(cls.base_config)
+        config = cls.base_config_copy()
         del config.raw_cfg['csv']
 
         adj_config = {
             'gridded': {
                 'data_type': 'hrrr_grib',
-                'hrrr_directory': './RME/gridded/hrrr_test/',
+                'hrrr_directory': './gridded/hrrr_test/',
             },
             'time': {
                 'start_date': '2018-07-22 16:00',
@@ -29,7 +29,7 @@ class TestLoadHRRR(SMRFTestCase):
             },
             'system': {
                 'threading': False,
-                'log_file': './RME/output/test.log'
+                'log_file': './output/test.log'
             },
             'air_temp': {
                 'grid_local': True,
@@ -59,7 +59,7 @@ class TestLoadHRRR(SMRFTestCase):
         config.raw_cfg.update(adj_config)
 
         # set the distribution to grid, thermal defaults will be fine
-        for v in cls.dist_variables:
+        for v in cls.DIST_VARIABLES:
             config.raw_cfg[v]['distribution'] = 'grid'
             config.raw_cfg[v]['grid_mask'] = 'False'
 
@@ -67,35 +67,12 @@ class TestLoadHRRR(SMRFTestCase):
         config = cast_all_variables(config, config.mcfg)
 
         cls.config = config
-
-    def compare_hrrr_gold(self, out_dir):
-        """
-        Compare the model results with the gold standard
-
-        Args:
-            out_dir: the output directory for the model run
-        """
-
-        output_dir = os.path.abspath(os.path.join(self.test_dir, out_dir))
-        s = os.path.join(output_dir, '*.nc')
-        file_names = glob(os.path.realpath(s))
-
-        # path to the gold standard
-        gold_path = os.path.realpath(
-            os.path.join(self.test_dir, 'RME', 'gold_hrrr'))
-
-        for file_name in file_names:
-            nc_name = file_name.split('/')[-1]
-            gold_file = os.path.join(gold_path, nc_name)
-
-            self.compare_netcdf_files(gold_file, file_name)
+        cls.gold_dir = cls.basin_dir.joinpath('gold_hrrr')
 
     def test_grid_hrrr_local(self):
 
         run_smrf(self.config)
-
-        self.compare_hrrr_gold(
-            self.config.raw_cfg['output']['out_location'][0])
+        self.compare_hrrr_gold()
 
     def test_load_timestep(self):
 
@@ -106,8 +83,7 @@ class TestLoadHRRR(SMRFTestCase):
 
         run_smrf(config)
 
-        self.compare_hrrr_gold(
-            self.config.raw_cfg['output']['out_location'][0])
+        self.compare_hrrr_gold()
 
     def test_load_timestep_threaded(self):
 
@@ -120,5 +96,4 @@ class TestLoadHRRR(SMRFTestCase):
 
         run_smrf(config)
 
-        self.compare_hrrr_gold(
-            self.config.raw_cfg['output']['out_location'][0])
+        self.compare_hrrr_gold()

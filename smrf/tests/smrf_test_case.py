@@ -137,6 +137,13 @@ class SMRFTestCase(unittest.TestCase):
     def setUp(self):
         self._dist_variables = None
 
+        # clear the logger
+        for handler in logging.root.handlers:
+            logging.root.removeHandler(handler)
+
+    def tearDown(self):
+        logging.shutdown()
+
     def compare_hrrr_gold(self):
         """
         Compare the model results with the gold standard

@@ -15,7 +15,7 @@ class TestLoadNetcdf(SMRFTestCase):
 
         generic_grid = {
             'data_type': 'netcdf',
-            'netcdf_file': './RME/gridded/netcdf_test.nc',
+            'netcdf_file': './gridded/netcdf_test.nc',
             'air_temp': 'air_temp',
             'vapor_pressure': 'vapor_pressure',
             'precip': 'precip',

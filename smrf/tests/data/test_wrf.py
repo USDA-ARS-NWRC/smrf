@@ -17,11 +17,11 @@ class TestLoadGrid(SMRFTestCase):
         adj_config = {
             'gridded': {
                 'data_type': 'wrf',
-                'wrf_file': './RME/gridded/WRF_test.nc',
+                'wrf_file': './gridded/WRF_test.nc',
             },
             'system': {
                 'threading': 'False',
-                'log_file': './RME/output/log.txt'
+                'log_file': './output/log.txt'
             },
             'precip': {
                 'station_adjust_for_undercatch': 'False'
