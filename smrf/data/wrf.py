@@ -5,12 +5,9 @@ import numpy as np
 import pandas as pd
 import pytz
 
+from smrf.data.netcdf import metadata_name_from_index
 from smrf.envphys.vapor_pressure import satvp
 from smrf.utils.utils import apply_utm
-
-
-def metadata_name_from_index(index):
-    return 'grid_y{:d}_x{:d}'.format(index[0], index[1])
 
 
 class InputWRF():

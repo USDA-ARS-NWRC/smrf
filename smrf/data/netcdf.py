@@ -4,8 +4,11 @@ import netCDF4 as nc
 import numpy as np
 import pandas as pd
 
-from smrf.data import metadata_name_from_index
 from smrf.utils.utils import apply_utm
+
+
+def metadata_name_from_index(index):
+    return 'grid_y{:d}_x{:d}'.format(index[0], index[1])
 
 
 class InputNetcdf():

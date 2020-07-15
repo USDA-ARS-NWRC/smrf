@@ -36,7 +36,7 @@ __config_titles__ = {
     "system": "System variables and Logging"
 }
 
-from . import data, distribute, envphys, framework, output, spatial, utils  # isort:skip
+from . import utils, data, distribute, envphys, framework, output, spatial  # isort:skip
 
 __config_header__ = "Config File for SMRF {0}\n" \
                     "For more SMRF related help see:\n" \
