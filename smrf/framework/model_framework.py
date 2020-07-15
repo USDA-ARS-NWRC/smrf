@@ -207,11 +207,6 @@ class SMRF():
         ))
         self.time_steps = len(self.date_time)
 
-    @property
-    def thermal_netcdf(self):
-        return self.distribute['thermal'].gridded and \
-            self.config['gridded']['data_type'] in ['wrf', 'netcdf']
-
     def __enter__(self):
         return self
 
@@ -355,8 +350,8 @@ class SMRF():
         """Call the initialize method for each distribute module
 
         Args:
-            date_time (list, optional): initialize with the datetime list or not.
-                Defaults to None.
+            date_time (list, optional): initialize with the datetime list
+                or not. Defaults to None.
         """
 
         for v in self.distribute:
@@ -461,23 +456,18 @@ class SMRF():
                 self.distribute['albedo'].albedo_vis,
                 self.distribute['albedo'].albedo_ir)
 
-            # 7. thermal radiation
-            if self.thermal_netcdf:
-                self.distribute['thermal'].distribute_thermal(
-                    self.data.thermal.loc[t],
-                    self.distribute['air_temp'].air_temp)
-            else:
-                self.distribute['thermal'].distribute(
-                    t,
-                    self.distribute['air_temp'].air_temp,
-                    self.distribute['vapor_pressure'].vapor_pressure,
-                    self.distribute['vapor_pressure'].dew_point,
-                    self.distribute['cloud_factor'].cloud_factor)
+            # 8. thermal radiation
+            self.distribute['thermal'].distribute(
+                t,
+                self.distribute['air_temp'].air_temp,
+                self.distribute['vapor_pressure'].vapor_pressure,
+                self.distribute['vapor_pressure'].dew_point,
+                self.distribute['cloud_factor'].cloud_factor)
 
-            # 8. Soil temperature
+            # 9. Soil temperature
             self.distribute['soil_temp'].distribute()
 
-            # 9. output at the frequency and the last time step
+            # 10. output at the frequency and the last time step
             self.output(t)
 
             telapsed = datetime.now() - startTime
@@ -622,15 +612,9 @@ class SMRF():
             'precipitation': self.distribute['precipitation'].distribute_thread,  # noqa
             'albedo': self.distribute['albedo'].distribute_thread,
             'cloud_factor': self.distribute['cloud_factor'].distribute_thread,
-            'solar': self.distribute['solar'].distribute_thread
+            'solar': self.distribute['solar'].distribute_thread,
+            'thermal': self.distribute['thermal'].distribute_thread
         }
-
-        if self.thermal_netcdf:
-            thread_dict['thermal'] = \
-                self.distribute['thermal'].distribute_thermal_thread
-        else:
-            thread_dict['thermal'] = \
-                self.distribute['thermal'].distribute_thread
 
         for name, target in thread_dict.items():
             self.threads.append(

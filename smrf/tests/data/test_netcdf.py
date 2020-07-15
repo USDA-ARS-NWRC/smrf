@@ -21,7 +21,6 @@ class TestLoadNetcdf(SMRFTestCase):
             'precip': 'precip',
             'wind_speed': 'wind_speed',
             'wind_direction': 'wind_direction',
-            'thermal': 'thermal',
             'cloud_factor': 'cloud_factor'
         }
         config.raw_cfg['gridded'] = generic_grid

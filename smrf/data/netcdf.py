@@ -16,7 +16,6 @@ class InputNetcdf():
         'precip',
         'wind_speed',
         'wind_direction',
-        'thermal',
         'cloud_factor'
     ]
 
@@ -96,7 +95,7 @@ class InputNetcdf():
         )
 
         # GET THE DATA, ONE AT A TIME
-        for variable in self.variables:
+        for variable in self.VARIABLES:
             v_file = self.config[variable]
             self._logger.debug(
                 'Loading variable {} from netcdf field {}'.format(

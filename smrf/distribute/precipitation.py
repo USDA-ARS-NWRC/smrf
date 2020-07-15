@@ -229,7 +229,6 @@ class ppt(image_data.image_data):
                         v[ms[1]] = float(self.config[m])
             self.veg = v
 
-
     def distribute(self, data, dpt, precip_temp, ta, time, wind, temp,
                    wind_direction=None, dir_round_cell=None, wind_speed=None,
                    cell_maxus=None):
