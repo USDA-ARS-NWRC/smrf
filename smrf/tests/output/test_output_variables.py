@@ -5,13 +5,13 @@ from glob import glob
 from inicheck.tools import cast_all_variables
 
 from smrf.framework.model_framework import run_smrf
-from smrf.tests.test_configurations import SMRFTestCase
+from smrf.tests.smrf_test_case import SMRFTestCase
 
 
 class TestOutputThreadedVariables(SMRFTestCase):
 
     def tearDown(self):
-        super().tearDownClass()
+        self.remove_output_dir()
 
     def change_variables(self, new_variables):
         config = copy(self.base_config)
@@ -60,9 +60,9 @@ class TestOutputVariables(TestOutputThreadedVariables):
         """
         super().setUpClass()
 
-        config = copy(cls.base_config)
+        config = cls.base_config_copy()
         config.raw_cfg['system']['threading'] = False
 
         config.apply_recipes()
         config = cast_all_variables(config, config.mcfg)
-        cls.base_config = config
+        cls._base_config = config
