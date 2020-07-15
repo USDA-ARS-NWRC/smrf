@@ -226,8 +226,6 @@ def backup_input(data, config_obj):
         backup_config_obj.cfg['csv'] = {}
         # With a new section added, we need to remove the other data sections
         # backup_config_obj.apply_recipes()
-    if 'mysql' in backup_config_obj.cfg.keys():
-        del backup_config_obj.cfg['mysql']
 
     if 'stations' in backup_config_obj.cfg.keys():
         if 'client' in backup_config_obj.cfg['stations']:
@@ -468,3 +466,17 @@ def apply_utm(s, force_zone_number):
     s['utm_x'] = p[0]
     s['utm_y'] = p[1]
     return s
+
+def date_range(start_date, end_date, increment):
+    """
+    Calculate a list between start and end date with
+    an increment
+    """
+    result = []
+    nxt = start_date
+
+    while nxt <= end_date:
+        result.append(nxt)
+        nxt += increment
+
+    return np.array(result)

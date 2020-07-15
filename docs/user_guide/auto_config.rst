@@ -112,115 +112,15 @@ csv
 | 
 
 
-mysql
------
-
-| **air_temp**
-| 	name of the table column containing station air temperature
-| 		*Default: air_temp*
-| 		*Type: string*
-| 
-
-| **cloud_factor**
-| 	name of the table column containing station cloud factor
-| 		*Default: cloud_factor*
-| 		*Type: string*
-| 
-
-| **data_table**
-| 	name of the database table containing station data
-| 		*Default: tbl_level2*
-| 		*Type: string*
-| 
-
-| **database**
-| 	name of the database containing station data
-| 		*Default: weather_db*
-| 		*Type: string*
-| 
-
-| **host**
-| 	IP address to server.
-| 		*Default: None*
-| 		*Type: string*
-| 
-
-| **metadata**
-| 	name of the database table containing station metadata
-| 		*Default: tbl_metadata*
-| 		*Type: string*
-| 
-
-| **password**
-| 	password used for database login.
-| 		*Default: None*
-| 		*Type: password*
-| 
-
-| **port**
-| 	Port for MySQL database.
-| 		*Default: 3606*
-| 		*Type: int*
-| 
-
-| **precip**
-| 	name of the table column containing station precipitation
-| 		*Default: precip_accum*
-| 		*Type: string*
-| 
-
-| **solar**
-| 	name of the table column containing station solar radiation
-| 		*Default: solar_radiation*
-| 		*Type: string*
-| 
-
-| **station_table**
-| 	name of the database table containing client and source
-| 		*Default: tbl_stations*
-| 		*Type: string*
-| 
-
-| **stations**
-| 	List of station IDs to use for distributing any of the variables
-| 		*Default: None*
-| 		*Type: station*
-| 
-
-| **user**
-| 	username for database login.
-| 		*Default: None*
-| 		*Type: string*
-| 
-
-| **vapor_pressure**
-| 	name of the table column containing station vapor pressure
-| 		*Default: vapor_pressure*
-| 		*Type: string*
-| 
-
-| **wind_direction**
-| 	name of the table column containing station wind direction
-| 		*Default: wind_direction*
-| 		*Type: string*
-| 
-
-| **wind_speed**
-| 	name of the table column containing station wind speed
-| 		*Default: wind_speed*
-| 		*Type: string*
-| 
-
-
 gridded
 -------
 
 | **data_type**
 | 	Type of gridded input data
-| 		*Default: hrrr_netcdf*
+| 		*Default: hrrr_grib*
 | 		*Type: string*
 | 		*Options:*
- *wrf hrrr_grib netcdf hrrr_netcdf*
+ *wrf hrrr_grib netcdf*
 | 
 
 | **hrrr_directory**
@@ -233,6 +133,14 @@ gridded
 | 	True if the HRRR data is a forecast
 | 		*Default: False*
 | 		*Type: bool*
+| 
+
+| **hrrr_load_method**
+| 	Method to load the HRRR data either load all data first or for each timestep
+| 		*Default: first*
+| 		*Type: string*
+| 		*Options:*
+ *first timestep*
 | 
 
 | **netcdf_file**

@@ -10,14 +10,10 @@ class InputData():
     """
     Class for loading and storing the data, either from
     - CSV file
-    - MySQL database
-    - Add other sources here
+    - HRRR grib files
+    - WRF
+    - Generic gridded NetCDF
 
-    Inputs to data() are:
-    - dataConfig, either the [csv] or [mysql] section
-    - start_date, datetime object
-    - end_date, datetime object
-    - dataType, either 'csv' or 'mysql'
 
     The data will be loaded into a Pandas dataframe
 
@@ -44,17 +40,6 @@ class InputData():
         'cloud_factor': 'cloud_factor',
         'thermal': 'thermal'
     }
-
-    db_config_vars = ['user',
-                      'password',
-                      'host',
-                      'database',
-                      'port',
-                      'metadata',
-                      'data_table',
-                      'station_table',
-                      'stations',
-                      'client']
 
     DATA_FUNCTIONS = {
         'csv': InputCSV,
@@ -196,72 +181,3 @@ class InputData():
             Pixel value in vec where row[a] is located
         """
         return np.argmin(np.abs(vec - row[a]))
-
-    # def load_from_mysql(self):
-    #     """
-    #     Load the data from a mysql database
-    #     """
-
-    #     self._logger.info('Reading data from MySQL database')
-
-    #     # open the database connection
-    #     data = mysql_data.database(self.dataConfig['user'],
-    #                                self.dataConfig['password'],
-    #                                self.dataConfig['host'],
-    #                                self.dataConfig['database'],
-    #                                self.dataConfig['port'])
-
-    #     # ---------------------------------------------------
-    #     # determine if it's stations or client
-    #     sta = self.stations
-
-    #     c = None
-    #     stable = None
-    #     if 'client' in self.dataConfig.keys():
-    #         c = self.dataConfig['client']
-    #         stable = self.dataConfig['station_table']
-
-    #     # Determine what table for the metadata
-    #     mtable = self.dataConfig['metadata']
-
-    #     # Raise an error if neither stations or client provided
-    #     if (sta is None) & (c is None):
-    #         raise Exception('Error in configuration file for [mysql],'
-    #                         ' must specify either "stations" or "client"')
-
-    #     self._logger.debug('Loading metadata from table %s' % mtable)
-
-    #     # ---------------------------------------------------
-    #     # load the metadata
-    #     self.metadata = data.metadata(mtable, station_ids=sta,
-    #                                   client=c, station_table=stable)
-
-    #     self._logger.debug('%i stations loaded' % self.metadata.shape[0])
-
-    #     # ---------------------------------------------------
-    #     # get a list of the stations
-    #     station_ids = self.metadata.index.tolist()
-
-    #     # get the correct column names if specified, along with
-    # variable names
-    #     db_var_names = [val for key, val in self.dataConfig.items()
-    #                     if key not in self.db_config_vars]
-    #     variables = [x for x in self.dataConfig.keys()
-    #                  if x not in self.db_config_vars]
-
-    #     # get the data
-    #     # dp is a dictionary of dataframes
-    #     dp = data.get_data(
-    #         self.dataConfig['data_table'],
-    #         station_ids,
-    #         self.start_date,
-    #         self.end_date, db_var_names,
-    #         time_zone=self.time_zone
-    #     )
-
-    #     # go through and extract the data
-    #     for v in variables:
-    #         # MySQL Data is TZ aware. So convert just in case non utc
-    #         # is passed.
-    #         dfv = dp[self.dataConfig[v]]
-    #         setattr(self, v, dfv)

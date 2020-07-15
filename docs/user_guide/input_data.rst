@@ -129,44 +129,8 @@ Example data files can be found in the ``tests`` directory for RME.
 MySQL Database
 ``````````````
 
-The MySQL database is more flexible than CSV files but requires more effort to setup. However,
-SMRF will only import the data and stations that were requested without loading in additional
-data that isn't required. See :mod:`smrf.data.mysql_data` for more information.
-
-The data table contains all the measurement data with a single row representing a measurement
-time for a station.  The date column (i.e. ``date_time``) must be a ``DATETIME`` data type with
-a unique constraint on the ``date_time`` column and ``primary_id`` column.
-
-================  ==========  ====  ====  === =====
-date_time         primary_id  var1  var2  ... varN
-================  ==========  ====  ====  === =====
-10/01/2008 00:00  ID_1        5.2   13.2  ... -1.3
-10/01/2008 00:00  ID_2        1.1   0     ... -10.3
-10/01/2008 01:00  ID_1        6.3   NAN   ... -2.5
-10/01/2008 01:00  ID_2        0.3   7.1   ...  9.4
-================  ==========  ====  ====  === =====
-
-The metadata table is the same format as the CSV files, with a primary_id, X, Y, and elevation
-column. A benefit to using MySQL is that we can use a ``client`` as a way to group multiple
-stations to be used for a given model run.  For example, we can have a client named BRB, which
-will have all the station ID's for the stations that would be used to run SMRF.  Then we can
-specify the client in the configuration file instead of listing out all the station ID's.  To use
-this feature, a table must be created to hold this information. Then the station  ID's matching
-the client will only be imported.  The following is how the table should be setup. Source is used
-to track where the data is coming from.
-
-==========  ======   ======
-station_id  client   source
-==========  ======   ======
-ID_1        BRB      Mesowest
-ID_2        BRB      Mesowest
-ID_3        TUOL     CDEC
-...         ...      ...
-ID_N        BRB      Mesowest
-==========  ======   ======
-
-Visit the `Weather Database GitHub page <https://github.com/USDA-ARS-NWRC/weather_database>`_ if you'd
-like to use a MySQL database.
+The MySQL database has been depricated as of SMRF v0.11.0. If that feature is needed,
+we recommend using v0.9.X or export the tables to csv format.
 
 
 Weather Research and Forecasting (WRF)

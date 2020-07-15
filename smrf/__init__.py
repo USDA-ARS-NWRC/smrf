@@ -22,7 +22,6 @@ __config_titles__ = {
     "time": "Dates to run model",
     "stations": "Stations to use",
     "csv": "CSV section configurations",
-    "mysql": "MySQL database",
     "gridded": "Gridded datasets configurations",
     "air_temp": "Air temperature distribution",
     "vapor_pressure": "Vapor pressure distribution",
