@@ -5,10 +5,10 @@ import numpy as np
 import pytz
 
 from smrf.data import Topo
-from smrf.utils.utils import date_range
 from smrf.distribute.wind.wind_ninja import WindNinjaModel
 from smrf.tests.smrf_test_case_lakes import SMRFTestCaseLakes
 from smrf.utils import utils
+from smrf.utils.utils import date_range
 
 
 class TestWindNinja(SMRFTestCaseLakes):

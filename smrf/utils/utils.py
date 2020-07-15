@@ -8,7 +8,6 @@ from shutil import copyfile
 import numpy as np
 import pandas as pd
 import pytz
-
 import utm
 from inicheck.checkers import CheckType
 from inicheck.output import generate_config
@@ -466,6 +465,7 @@ def apply_utm(s, force_zone_number):
     s['utm_x'] = p[0]
     s['utm_y'] = p[1]
     return s
+
 
 def date_range(start_date, end_date, increment):
     """

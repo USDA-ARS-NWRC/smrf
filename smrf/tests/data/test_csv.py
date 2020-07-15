@@ -1,7 +1,7 @@
 
 from inicheck.tools import cast_all_variables
 
-from smrf.framework.model_framework import run_smrf, SMRF
+from smrf.framework.model_framework import SMRF, run_smrf
 from smrf.tests.smrf_test_case import SMRFTestCase
 
 

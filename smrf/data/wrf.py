@@ -83,7 +83,8 @@ class InputWRF():
         self.primary_id = [metadata_name_from_index(
             i) for i in self.station_index]
         self._logger.debug(
-            '{} grid cells within model domain'.format(len(self.station_index)))
+            '{} grid cells within model domain'.format(
+                len(self.station_index)))
 
         # create a metadata dataframe to store all the grid info
         metadata = pd.DataFrame(index=self.primary_id,

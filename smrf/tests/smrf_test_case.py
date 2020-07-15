@@ -7,7 +7,7 @@ from pathlib import Path
 
 import netCDF4 as nc
 import numpy as np
-from inicheck.tools import get_user_config, cast_all_variables
+from inicheck.tools import cast_all_variables, get_user_config
 
 import smrf
 from smrf.framework.model_framework import run_smrf
