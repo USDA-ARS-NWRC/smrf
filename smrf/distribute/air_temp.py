@@ -53,7 +53,7 @@ class ta(image_data.image_data):
         self.getConfig(taConfig)
         self._logger.debug('Created distribute.air_temp')
 
-    def initialize(self, topo, data):
+    def initialize(self, topo, data, date_time=None):
         """
         Initialize the distribution, solely calls
         :mod:`smrf.distribute.image_data.image_data._initialize`.
@@ -67,6 +67,7 @@ class ta(image_data.image_data):
         """
 
         self._logger.debug('Initializing distribute.air_temp')
+        self.date_time = date_time
         self._initialize(topo, data.metadata)
 
     def distribute(self, data):
@@ -84,7 +85,7 @@ class ta(image_data.image_data):
         self._distribute(data)
         self.air_temp = utils.set_min_max(self.air_temp, self.min, self.max)
 
-    def distribute_thread(self, queue, data):
+    def distribute_thread(self, smrf_queue, data_queue):
         """
         Distribute the data using threading and queue. All data is provided
         and ``distribute_thread`` will go through each time step and call
@@ -98,8 +99,8 @@ class ta(image_data.image_data):
         """
         self._logger.info("Distributing {}".format(self.variable))
 
-        for t in data.index:
+        for date_time in self.date_time:
 
-            self.distribute(data.loc[t])
-
-            queue[self.variable].put([t, self.air_temp])
+            data = data_queue[self.variable].get(date_time)
+            self.distribute(data)
+            smrf_queue[self.variable].put([date_time, self.air_temp])

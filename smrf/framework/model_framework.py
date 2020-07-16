@@ -16,7 +16,7 @@ Example:
     >>> import smrf
     >>> s = smrf.framework.SMRF(configFile) # initialize SMRF
     >>> s.loadTopo() # load topo data
-    >>> s.initializeDistribution() # initialize the distribution
+    >>> s.create_distribution() # initialize the distribution
     >>> s.initializeOutput() # initialize the outputs if desired
     >>> s.loadData() # load weather data  and station metadata
     >>> s.distributeData() # distribute
@@ -38,13 +38,14 @@ from inicheck.output import generate_config, print_config_report
 from inicheck.tools import check_config, get_user_config
 from topocalc.shade import shade
 
-from smrf import data, distribute
+from smrf import distribute
+from smrf.data import InputData, Topo
 from smrf.envphys import sunang
 from smrf.envphys.solar import model
 from smrf.framework import art, logger
 from smrf.output import output_hru, output_netcdf
 from smrf.utils import queue
-from smrf.utils.utils import backup_input, check_station_colocation, getqotw
+from smrf.utils.utils import backup_input, date_range, getqotw
 
 
 class SMRF():
@@ -65,7 +66,7 @@ class SMRF():
         config: Configuration file read in as dictionary
         distribute: Dictionary the contains all the desired variables to
             distribute and is initialized in
-            :func:`~smrf.framework.model_framework.initializeDistribution`
+            :func:`~smrf.framework.model_framework.create_distribution`
     """
 
     # These are the modules that the user can modify and use different methods
@@ -155,14 +156,14 @@ class SMRF():
         # if a gridded dataset will be used
         self.gridded = False
         self.forecast_flag = False
+        self.hrrr_data_timestep = False
         if 'gridded' in self.config:
             self.gridded = True
-            if self.config['gridded']['data_type'] in ['hrrr_netcdf', 'hrrr_grib']:  # noqa
-                self.forecast_flag = self.config['gridded']['hrrr_forecast_flag']  # noqa
-
-            # hours from start of day
-            self.day_hour = self.start_date - self.date_time[0]
-            self.day_hour = int(self.day_hour / np.timedelta64(1, 'h'))
+            if self.config['gridded']['data_type'] in ['hrrr_grib']:
+                self.forecast_flag = \
+                    self.config['gridded']['hrrr_forecast_flag']
+                self.hrrr_data_timestep = \
+                    self.config['gridded']['hrrr_load_method'] == 'timestep'
 
         now = datetime.now().astimezone(self.time_zone)
         if ((self.start_date > now and not self.gridded) or
@@ -198,18 +199,13 @@ class SMRF():
             self.end_date = self.end_date.tz_localize(self.time_zone)
 
         # Get the time steps correctly in the time zone
-        self.date_time = list(pd.date_range(
+        self.date_time = date_range(
             self.start_date,
             self.end_date,
-            freq="{[time][time_step]}min".format(self.config),
-            tz=self.time_zone
-        ))
+            self.config['time']['time_step'],
+            self.time_zone
+        )
         self.time_steps = len(self.date_time)
-
-    @property
-    def thermal_netcdf(self):
-        return self.distribute['thermal'].gridded and \
-            self.config['gridded']['data_type'] in ['wrf', 'netcdf']
 
     def __enter__(self):
         return self
@@ -228,13 +224,13 @@ class SMRF():
         :func:`smrf.data.loadTopo.Topo` for full description.
         """
 
-        self.topo = data.loadTopo.Topo(self.config['topo'])
+        self.topo = Topo(self.config['topo'])
 
-    def initializeDistribution(self):
+    def create_distribution(self):
         """
         This initializes the distirbution classes based on the configFile
         sections for each variable.
-        :func:`~smrf.framework.model_framework.SMRF.initializeDistribution`
+        :func:`~smrf.framework.model_framework.SMRF.create_distribution`
         will initialize the variables within the :func:`smrf.distribute`
         package and insert into a dictionary 'distribute' with variable names
         as the keys.
@@ -305,124 +301,31 @@ class SMRF():
         the data to the desired stations if CSV files are used.
         """
 
-        # get the start date and end date requested
+        self.data = InputData(
+            self.config,
+            self.start_date,
+            self.end_date,
+            self.topo)
 
-        flag = True
-        if 'csv' in self.config:
-            self.data = data.loadData.wxdata(
-                self.config['csv'],
-                self.start_date,
-                self.end_date,
-                time_zone=self.time_zone,
-                dataType='csv')
+        # Pre-filter the data to the desired stations in
+        # each [variable] section
+        self._logger.debug(
+            'Filter data to those specified in each variable section')
+        for variable, module in self.data.MODULE_VARIABLES.items():
 
-        elif 'mysql' in self.config:
-            self.data = data.loadData.wxdata(
-                self.config['mysql'],
-                self.start_date,
-                self.end_date,
-                time_zone=self.time_zone,
-                dataType='mysql')
+            # Check to find the matching stations
+            data = getattr(self.data, variable, pd.DataFrame())
+            if self.distribute[module].stations is not None:
 
-        elif 'gridded' in self.config:
-            flag = False
-            self.data = data.loadGrid.grid(
-                self.config['gridded'],
-                self.topo,
-                self.start_date,
-                self.end_date,
-                time_zone=self.time_zone,
-                dataType=self.config['gridded']['data_type'],
-                forecast_flag=self.forecast_flag,
-                day_hour=self.day_hour)
+                match = data.columns.isin(self.distribute[module].stations)
+                sta_match = data.columns[match]
 
-            # set the stations in the distribute
-            try:
-                for key in self.distribute.keys():
-                    setattr(self.distribute[key],
-                            'stations',
-                            self.data.metadata.index.tolist())
+                # Update the dataframe and the distribute stations
+                self.distribute[module].stations = sta_match.tolist()
+                setattr(self.data, variable, data[sta_match])
 
-            except Exception as e:
-                self._logger.warning("Distribution not initialized, grid"
-                                     " stations could not be set.")
-                self._logger.exception(e)
-
-        else:
-            raise KeyError('Could not determine where station data is located')
-
-        # determine the locations of the stations on the grid while
-        # maintaining reverse compatibility
-        # New DB uses utm_x utm_y instead of X,Y
-        try:
-            self.data.metadata['xi'] = self.data.metadata.apply(
-                lambda row: find_pixel_location(
-                    row,
-                    self.topo.x,
-                    'utm_x'), axis=1)
-            self.data.metadata['yi'] = self.data.metadata.apply(
-                lambda row: find_pixel_location(
-                    row,
-                    self.topo.y,
-                    'utm_y'), axis=1)
-        # Old DB has X and Y
-        except Exception:
-
-            self.data.metadata['xi'] = self.data.metadata.apply(
-                lambda row: find_pixel_location(
-                    row,
-                    self.topo.x,
-                    'X'), axis=1)
-            self.data.metadata['yi'] = self.data.metadata.apply(
-                lambda row: find_pixel_location(
-                    row,
-                    self.topo.y,
-                    'Y'), axis=1)
-
-        # Pre-filter the data to only the desired stations
-        if flag:
-            for key in self.distribute.keys():
-                if key in self.data.variables:
-                    # Pull out the loaded data
-                    d = getattr(self.data, key)
-
-                    # Check to find the matching stations
-                    if self.distribute[key].stations is not None:
-
-                        match = d.columns.isin(self.distribute[key].stations)
-                        sta_match = d.columns[match]
-
-                        # Update the dataframe and the distribute stations
-                        self.distribute[key].stations = sta_match.tolist()
-                        setattr(self.data, key, d[sta_match])
-                    else:
-                        self._logger.warning("Distribution not initialized,"
-                                             " data not filtered to desired"
-                                             " stations in variable {}"
-                                             "".format(key))
-
-            # Check all sections for stations that are colocated
-            for key in self.distribute.keys():
-                if key in self.data.variables:
-                    if self.distribute[key].stations is not None:
-                        # Confirm out stations all have a unique position
-                        colocated = check_station_colocation(
-                            metadata=self.data.metadata.loc[self.distribute[key].stations])  # noqa
-
-                        # Stations are co-located, throw error
-                        if colocated is not None:
-                            self._logger.error(
-                                "Stations in the {0} section "
-                                "are colocated.\n{1}".format(
-                                    key, ','.join(colocated[0])))
-                            sys.exit()
-
-        # clip the timeseries to the start and end date
-        for key in self.data.variables:
-            if hasattr(self.data, key):
-                d = getattr(self.data, key)
-                d = d[self.start_date:self.end_date]
-                setattr(self.data, key, d)
+            else:
+                self.distribute[module].stations = data.columns.tolist()
 
         # Does the user want to create a CSV copy of the station data used.
         if self.config["output"]['input_backup']:
@@ -442,6 +345,17 @@ class SMRF():
             self.distributeData_threaded()
         else:
             self.distributeData_single()
+
+    def initialize_distribution(self, date_time=None):
+        """Call the initialize method for each distribute module
+
+        Args:
+            date_time (list, optional): initialize with the datetime list
+                or not. Defaults to None.
+        """
+
+        for v in self.distribute:
+            self.distribute[v].initialize(self.topo, self.data, date_time)
 
     def distributeData_single(self):
         """
@@ -465,10 +379,7 @@ class SMRF():
             11. Output time step if needed
         """
 
-        # -------------------------------------
-        # Initialize the distibution
-        for v in self.distribute:
-            self.distribute[v].initialize(self.topo, self.data)
+        self.initialize_distribution()
 
         # -------------------------------------
         # Distribute the data
@@ -476,8 +387,12 @@ class SMRF():
             # wait here for the model to catch up if needed
 
             startTime = datetime.now()
-
             self._logger.info('Distributing time step %s' % t)
+
+            if self.hrrr_data_timestep:
+                self.data.load_class.load_timestep(t)
+                self.data.set_variables()
+
             # 0.1 sun angle for time step
             cosz, azimuth, rad_vec = sunang.sunang(
                 t.astimezone(pytz.utc),
@@ -541,23 +456,18 @@ class SMRF():
                 self.distribute['albedo'].albedo_vis,
                 self.distribute['albedo'].albedo_ir)
 
-            # 7. thermal radiation
-            if self.thermal_netcdf:
-                self.distribute['thermal'].distribute_thermal(
-                    self.data.thermal.loc[t],
-                    self.distribute['air_temp'].air_temp)
-            else:
-                self.distribute['thermal'].distribute(
-                    t,
-                    self.distribute['air_temp'].air_temp,
-                    self.distribute['vapor_pressure'].vapor_pressure,
-                    self.distribute['vapor_pressure'].dew_point,
-                    self.distribute['cloud_factor'].cloud_factor)
+            # 8. thermal radiation
+            self.distribute['thermal'].distribute(
+                t,
+                self.distribute['air_temp'].air_temp,
+                self.distribute['vapor_pressure'].vapor_pressure,
+                self.distribute['vapor_pressure'].dew_point,
+                self.distribute['cloud_factor'].cloud_factor)
 
-            # 8. Soil temperature
+            # 9. Soil temperature
             self.distribute['soil_temp'].distribute()
 
-            # 9. output at the frequency and the last time step
+            # 10. output at the frequency and the last time step
             self.output(t)
 
             telapsed = datetime.now() - startTime
@@ -582,6 +492,9 @@ class SMRF():
         distributed values into the
         :func:`DateQueue <smrf.utils.queue.DateQueue_Threading>`.
         """
+
+        # Load the data into the data queue
+        self.create_data_queue()
 
         # Create threads for distribution
         self.create_distributed_threads()
@@ -610,6 +523,33 @@ class SMRF():
 
         self._logger.debug('DONE!!!!')
 
+    def create_data_queue(self):
+
+        self._logger.info('Creating the data queue and loading current data')
+
+        self.data_queue = {}
+        for variable in self.data.VARIABLES[:-1]:
+            dq = queue.DateQueueThreading(
+                timeout=self.time_out,
+                name="data_{}".format(variable))
+
+            # load the data into the queue, all methods should have
+            # loaded something, even the HRRR will have a single hour
+            # of data loaded.
+            data = getattr(self.data, variable, pd.DataFrame())
+            for date_time, row in data.iterrows():
+                dq.put([date_time, row])
+
+            self.data_queue[variable] = dq
+
+        # create a thread to load the data
+        if self.hrrr_data_timestep:
+            data_thread = Thread(
+                target=self.data.load_class.load_timestep_thread,
+                name='data',
+                args=(self.date_time, self.data_queue))
+            data_thread.start()
+
     def set_queue_variables(self):
 
         # These are the variables that will be queued
@@ -618,7 +558,7 @@ class SMRF():
         for v in self.distribute:
             self.thread_queue_variables += self.distribute[v].thread_variables
 
-    def create_distributed_threads(self):
+    def create_distributed_threads(self, other_queue=None):
         """
         Creates the threads for a distributed run in smrf.
         Designed for smrf runs in memory
@@ -629,12 +569,10 @@ class SMRF():
         """
 
         # -------------------------------------
-        # Initialize the distibutions and get thread variables
+        # Initialize the distributions and get thread variables
         self._logger.info("Initializing distributed variables...")
 
-        for v in self.distribute:
-            self.distribute[v].initialize(self.topo, self.data)
-
+        self.initialize_distribution(self.date_time)
         self.set_queue_variables()
 
         # -------------------------------------
@@ -667,61 +605,24 @@ class SMRF():
             args=(self.smrf_queue, self.date_time,
                   self.topo.sin_slope, self.topo.aspect)))
 
-        # 1. Air temperature
-        self.threads.append(Thread(
-            target=self.distribute['air_temp'].distribute_thread,
-            name='air_temp',
-            args=(self.smrf_queue, self.data.air_temp)))
+        thread_dict = {
+            'air_temp': self.distribute['air_temp'].distribute_thread,
+            'vapor_pressure': self.distribute['vapor_pressure'].distribute_thread,  # noqa
+            'wind': self.distribute['wind'].distribute_thread,
+            'precipitation': self.distribute['precipitation'].distribute_thread,  # noqa
+            'albedo': self.distribute['albedo'].distribute_thread,
+            'cloud_factor': self.distribute['cloud_factor'].distribute_thread,
+            'solar': self.distribute['solar'].distribute_thread,
+            'thermal': self.distribute['thermal'].distribute_thread
+        }
 
-        # 2. Vapor pressure
-        self.threads.append(Thread(
-            target=self.distribute['vapor_pressure'].distribute_thread,
-            name='vapor_pressure',
-            args=(self.smrf_queue, self.data.vapor_pressure)))
-
-        # 3. Wind_speed and wind_direction
-        self.threads.append(Thread(
-            target=self.distribute['wind'].distribute_thread,
-            name='wind',
-            args=(self.smrf_queue, self.data.wind_speed,
-                  self.data.wind_direction)))
-
-        # 4. Precipitation
-        self.threads.append(Thread(
-            target=self.distribute['precipitation'].distribute_thread,
-            name='precipitation',
-            args=(self.smrf_queue, self.data, self.date_time,
-                  self.topo.mask)))
-
-        # 5. Albedo
-        self.threads.append(Thread(
-            target=self.distribute['albedo'].distribute_thread,
-            name='albedo',
-            args=(self.smrf_queue, self.date_time)))
-
-        # 6.Cloud Factor
-        self.threads.append(Thread(
-            target=self.distribute['cloud_factor'].distribute_thread,
-            name='cloud_factor',
-            args=(self.smrf_queue, self.data.cloud_factor)))
-
-        # 7 Net radiation
-        self.threads.append(Thread(
-            target=self.distribute['solar'].distribute_thread,
-            name='solar',
-            args=(self.smrf_queue, self.data.cloud_factor)))
-
-        # 8. thermal radiation
-        if self.thermal_netcdf:
-            self.threads.append(Thread(
-                target=self.distribute['thermal'].distribute_thermal_thread,
-                name='thermal',
-                args=(self.smrf_queue, self.data.thermal)))
-        else:
-            self.threads.append(Thread(
-                target=self.distribute['thermal'].distribute_thread,
-                name='thermal',
-                args=(self.smrf_queue, self.date_time)))
+        for name, target in thread_dict.items():
+            self.threads.append(
+                Thread(
+                    target=target,
+                    name=name,
+                    args=(self.smrf_queue, self.data_queue))
+            )
 
     def initializeOutput(self):
         """
@@ -875,7 +776,7 @@ def run_smrf(config):
         s.loadTopo()
 
         # initialize the distribution
-        s.initializeDistribution()
+        s.create_distribution()
 
         # initialize the outputs if desired
         s.initializeOutput()
@@ -907,18 +808,3 @@ def can_i_run_smrf(config):
     except Exception as e:
         raise e
         return False
-
-
-def find_pixel_location(row, vec, a):
-    """
-    Find the index of the stations X/Y location in the model domain
-
-    Args:
-        row (pandas.DataFrame): metadata rows
-        vec (nparray): Array of X or Y locations in domain
-        a (str): Column in DataFrame to pull data from (i.e. 'X')
-
-    Returns:
-        Pixel value in vec where row[a] is located
-    """
-    return np.argmin(np.abs(vec - row[a]))

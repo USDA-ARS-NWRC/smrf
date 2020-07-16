@@ -46,7 +46,7 @@ class ts(image_data.image_data):
 
         self._logger.debug('Created distribute.soil_temp')
 
-    def initialize(self, topo, data):
+    def initialize(self, topo, data, date_time=None):
         """
         Initialize the distribution and set the soil temperature to a constant
         value based on the configuration file.
@@ -60,6 +60,7 @@ class ts(image_data.image_data):
         """
 
         self._logger.debug('Initializing distribute.soil_temp')
+        self.date_time = date_time
 #         self._initialize(topo, metadata)
         self.soil_temp = float(self.config['temp']) * np.ones(topo.dem.shape)
 

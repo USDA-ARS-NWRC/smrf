@@ -83,7 +83,7 @@ class Albedo(image_data.image_data):
 
         self._logger.debug('Created distribute.albedo')
 
-    def initialize(self, topo, data):
+    def initialize(self, topo, data, date_time=None):
         """
         Initialize the distribution, calls image_data.image_data._initialize()
 
@@ -95,6 +95,7 @@ class Albedo(image_data.image_data):
 
         self._logger.debug('Initializing distribute.albedo')
         self.veg_type = topo.veg_type
+        self.date_time = date_time
         self._initialize(topo, data.metadata)
 
         if self.config["decay_method"] is None:
@@ -157,7 +158,7 @@ class Albedo(image_data.image_data):
             self.albedo_vis = np.zeros(storm_day.shape)
             self.albedo_ir = np.zeros(storm_day.shape)
 
-    def distribute_thread(self, queue, date):
+    def distribute_thread(self, smrf_queue, data_queue=None):
         """
         Distribute the data using threading and queue
 
@@ -171,15 +172,12 @@ class Albedo(image_data.image_data):
         """
         self._logger.info("Distributing {}".format(self.variable))
 
-        for t in date:
+        for date_time in self.date_time:
 
-            illum_ang = queue['illum_ang'].get(t)
-            storm_day = queue['storm_days'].get(t)
+            illum_ang = smrf_queue['illum_ang'].get(date_time)
+            storm_day = smrf_queue['storm_days'].get(date_time)
 
-            self.distribute(t, illum_ang, storm_day)
+            self.distribute(date_time, illum_ang, storm_day)
 
-            self._logger.debug('Putting %s -- %s' % (t, 'albedo_vis'))
-            queue['albedo_vis'].put([t, self.albedo_vis])
-
-            self._logger.debug('Putting %s -- %s' % (t, 'albedo_ir'))
-            queue['albedo_ir'].put([t, self.albedo_ir])
+            smrf_queue['albedo_vis'].put([date_time, self.albedo_vis])
+            smrf_queue['albedo_ir'].put([date_time, self.albedo_ir])

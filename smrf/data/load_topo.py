@@ -104,18 +104,11 @@ class Topo():
         # to double or int
         for v_smrf in self.IMAGES:
 
-            # check to see if the user defined any variables
-            # e.g. veg_height = veg_length
-            if v_smrf in self.topoConfig.keys():
-                v_file = self.topoConfig[v_smrf]
-            else:
-                v_file = v_smrf
-
-            if v_file in f.variables.keys():
+            if v_smrf in f.variables.keys():
                 if v_smrf == 'veg_type':
-                    result = f.variables[v_file][:].astype(int)
+                    result = f.variables[v_smrf][:].astype(int)
                 else:
-                    result = f.variables[v_file][:].astype(np.float64)
+                    result = f.variables[v_smrf][:].astype(np.float64)
 
             setattr(self, v_smrf, result)
 

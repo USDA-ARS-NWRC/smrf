@@ -7,11 +7,12 @@ class TestThreading(SMRFTestCaseLakes):
     Test for all defined BASE_THREAD_VARIABLES, not accounting for config
     dependent additions.
     """
+
     def test_multi_thread_variables(self):
         config = self.thread_config()
         smrf = SMRF(config)
         smrf.loadTopo()
-        smrf.initializeDistribution()
+        smrf.create_distribution()
 
         self.assertCountEqual(
             smrf.distribute['air_temp'].thread_variables,
@@ -35,8 +36,7 @@ class TestThreading(SMRFTestCaseLakes):
                 'percent_snow',
                 'snow_density',
                 'storm_days',
-                'storm_total',
-                'last_storm_day_basin'
+                'storm_total'
             ]
         )
 

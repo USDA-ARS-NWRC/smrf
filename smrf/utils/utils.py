@@ -8,6 +8,7 @@ from shutil import copyfile
 import numpy as np
 import pandas as pd
 import pytz
+import utm
 from inicheck.checkers import CheckType
 from inicheck.output import generate_config
 from inicheck.utilities import mk_lst
@@ -224,8 +225,6 @@ def backup_input(data, config_obj):
         backup_config_obj.cfg['csv'] = {}
         # With a new section added, we need to remove the other data sections
         # backup_config_obj.apply_recipes()
-    if 'mysql' in backup_config_obj.cfg.keys():
-        del backup_config_obj.cfg['mysql']
 
     if 'stations' in backup_config_obj.cfg.keys():
         if 'client' in backup_config_obj.cfg['stations']:
@@ -448,3 +447,35 @@ def grid_interpolate_deconstructed(tri, values, grid_points, method='linear'):
         return CloughTocher2DInterpolator(tri, values)(grid_points)
     elif method == 'linear':
         return LinearNDInterpolator(tri, values)(grid_points)
+
+
+def apply_utm(s, force_zone_number):
+    """
+    Calculate the utm from lat/lon for a series
+
+    Args:
+        s: pandas series with fields latitude and longitude
+        force_zone_number: default None, zone number to force to
+
+    Returns:
+        s: pandas series with fields 'X' and 'Y' filled
+    """
+    p = utm.from_latlon(s.latitude, s.longitude,
+                        force_zone_number=force_zone_number)
+    s['utm_x'] = p[0]
+    s['utm_y'] = p[1]
+    return s
+
+
+def date_range(start_date, end_date, increment, timezone):
+    """
+    Calculate a list between start and end date with
+    an increment
+    """
+
+    return list(pd.date_range(
+        start_date,
+        end_date,
+        freq="{}min".format(increment),
+        tz=timezone
+    ))
