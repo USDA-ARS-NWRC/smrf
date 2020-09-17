@@ -3,20 +3,22 @@
 
 import os
 
-import numpy
-from Cython.Distutils import build_ext
 from setuptools import Extension, find_packages, setup
+from setuptools.command.build_ext import build_ext as _build_ext
 
 
 def c_name_from_path(location, name):
     return os.path.join(location, name).replace('/', '.')
 
 
-with open('requirements.txt') as requirements_file:
-    requirements = requirements_file.read()
+class build_ext(_build_ext):
+    def finalize_options(self):
+        _build_ext.finalize_options(self)
+        # Prevent numpy from thinking it is still in its setup process:
+        __builtins__.__NUMPY_SETUP__ = False
+        import numpy
+        self.include_dirs.append(numpy.get_include())
 
-with open('README.md') as readme_file:
-    readme = readme_file.read()
 
 # Give user option to specify his local compiler name
 if "CC" not in os.environ:
@@ -26,7 +28,6 @@ if "CC" not in os.environ:
 
 ext_modules = []
 extension_params = dict(
-    include_dirs=[numpy.get_include()],
     extra_compile_args=['-fopenmp', '-O3'],
     extra_link_args=['-fopenmp', '-O3'],
 )
@@ -74,6 +75,12 @@ ext_modules += [
         **extension_params
     ),
 ]
+
+with open('requirements.txt') as requirements_file:
+    requirements = requirements_file.read()
+
+with open('README.md') as readme_file:
+    readme = readme_file.read()
 
 setup(
     name='smrf-dev',
@@ -130,6 +137,7 @@ setup(
         'local_scheme': 'node-and-date',
     },
     setup_requires=[
-        'setuptools_scm'
+        'setuptools_scm',
+        'numpy'
     ],
 )
