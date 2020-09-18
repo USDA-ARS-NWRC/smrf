@@ -3,30 +3,40 @@
 
 import os
 
-import numpy
-from Cython.Distutils import build_ext
 from setuptools import Extension, find_packages, setup
+from setuptools.command.build_ext import build_ext as _build_ext
+
+# Test if compiling with cython or using the C source
+try:
+    from Cython.Distutils import build_ext as _build_ext
+except ImportError:
+    USE_CYTHON = False
+else:
+    USE_CYTHON = True
+
+print('Using Cython {}'.format(USE_CYTHON))
+ext = '.pyx' if USE_CYTHON else '.c'
 
 
 def c_name_from_path(location, name):
     return os.path.join(location, name).replace('/', '.')
 
 
-with open('requirements.txt') as requirements_file:
-    requirements = requirements_file.read()
+class build_ext(_build_ext):
+    def finalize_options(self):
+        _build_ext.finalize_options(self)
+        # Prevent numpy from thinking it is still in its setup process:
+        __builtins__.__NUMPY_SETUP__ = False
+        import numpy
+        self.include_dirs.append(numpy.get_include())
 
-with open('README.md') as readme_file:
-    readme = readme_file.read()
 
 # Give user option to specify his local compiler name
 if "CC" not in os.environ:
-    # force the compiler to use gcc
     os.environ["CC"] = "gcc"
-
 
 ext_modules = []
 extension_params = dict(
-    include_dirs=[numpy.get_include()],
     extra_compile_args=['-fopenmp', '-O3'],
     extra_link_args=['-fopenmp', '-O3'],
 )
@@ -37,7 +47,7 @@ ext_modules += [
     Extension(
         c_name_from_path(source_folder, 'detrended_kriging'),
         sources=[os.path.join(source_folder, val) for val in [
-            "detrended_kriging.pyx",
+            "detrended_kriging" + ext,
             "krige.c",
             "lusolv.c",
             "array.c"
@@ -52,7 +62,7 @@ ext_modules += [
     Extension(
         c_name_from_path(source_folder, 'envphys_c'),
         sources=[os.path.join(source_folder, val) for val in [
-            "envphys_c.pyx",
+            "envphys_c" + ext,
             "topotherm.c",
             "dewpt.c",
             "iwbt.c"
@@ -67,13 +77,23 @@ ext_modules += [
     Extension(
         c_name_from_path(source_folder, 'wind_c'),
         sources=[os.path.join(source_folder, val) for val in [
-            "wind_c.pyx",
+            "wind_c" + ext,
             "breshen.c",
             "calc_wind.c"
         ]],
         **extension_params
     ),
 ]
+
+cmdclass = {}
+if USE_CYTHON:
+    cmdclass = {'build_ext': build_ext}
+
+with open('requirements.txt') as requirements_file:
+    requirements = requirements_file.read()
+
+with open('README.md') as readme_file:
+    readme = readme_file.read()
 
 setup(
     name='smrf-dev',
@@ -110,9 +130,7 @@ setup(
     ],
     test_suite='smrf.tests',
     # tests_require=test_requirements,
-    cmdclass={
-        'build_ext': build_ext
-    },
+    cmdclass=cmdclass,
     ext_modules=ext_modules,
     scripts=[
         'scripts/update_configs',
@@ -130,6 +148,7 @@ setup(
         'local_scheme': 'node-and-date',
     },
     setup_requires=[
-        'setuptools_scm'
+        'setuptools_scm',
+        'numpy'
     ],
 )

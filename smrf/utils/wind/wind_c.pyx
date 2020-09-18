@@ -1,3 +1,4 @@
+# cython: language_level=3
 """
 Cython wrapper to the underlying C code
 

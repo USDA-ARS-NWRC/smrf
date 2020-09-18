@@ -1,4 +1,5 @@
 # cython: embedsignature=True
+# cython: language_level=3
 '''
 Compiling dk's kriging function
 
