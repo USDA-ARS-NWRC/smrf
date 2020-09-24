@@ -218,6 +218,14 @@ class SMRF():
         self._logger.info('SMRF closed --> %s' % datetime.now())
         logging.shutdown()
 
+    @property
+    def possible_output_variables(self):
+        # Collect the potential output variables
+        variables = {}
+        for variable, module in self.distribute.items():
+            variables.update(module.output_variables)
+        return variables
+
     def loadTopo(self):
         """
         Load the information from the configFile in the ['topo'] section. See
@@ -626,32 +634,15 @@ class SMRF():
                     args=(self.smrf_queue, self.data_queue))
             )
 
-    def initializeOutput(self):
-        """
-        Initialize the output files based on the configFile section ['output'].
-        Currently only :func:`NetCDF files
-        <smrf.output.output_netcdf.OutputNetcdf>` are supported.
-        """
-        out_location = self.config['output']['out_location']
-
-        # determine the variables to be output
-        s_var_list = ", ".join(self.config['output']['variables'])
-        self._logger.info('{} variables will be output'.format(s_var_list))
-
-        output_variables = self.config['output']['variables']
-
-        # Collect the potential output variables
-        possible_output_variables = {}
-        for variable, module in self.distribute.items():
-            possible_output_variables.update(module.output_variables)
+    def create_output_variable_dict(self, output_variables, out_location):
 
         # determine which variables belong where
         variable_dict = {}
         for output_variable in output_variables:
 
-            if output_variable in possible_output_variables.keys():
+            if output_variable in self.possible_output_variables.keys():
                 fname = join(out_location, output_variable)
-                module = possible_output_variables[output_variable]['module']
+                module = self.possible_output_variables[output_variable]['module']
 
                 # TODO this is a hack to not have to redo the gold files
                 if module == 'precipitation':
@@ -670,8 +661,27 @@ class SMRF():
                 self._logger.error(
                     '{} not an output variable'.format(output_variable))
 
+        return variable_dict
+
+    def initializeOutput(self):
+        """
+        Initialize the output files based on the configFile section ['output'].
+        Currently only :func:`NetCDF files
+        <smrf.output.output_netcdf.OutputNetcdf>` are supported.
+        """
+        out_location = self.config['output']['out_location']
+
+        # determine the variables to be output
+        s_var_list = ", ".join(self.config['output']['variables'])
+        self._logger.info('{} variables will be output'.format(s_var_list))
+
+        output_variables = self.config['output']['variables']
+
+        variable_dict = self.create_output_variable_dict(
+            output_variables, out_location)
+
         self._logger.debug('{} of {} variables will be output'.format(
-            len(output_variables), len(possible_output_variables)))
+            len(output_variables), len(self.possible_output_variables)))
 
         # determine what type of file to output
         if self.config['output']['file_type'].lower() == 'netcdf':
