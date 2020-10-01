@@ -642,7 +642,7 @@ class SMRF():
 
             if output_variable in self.possible_output_variables.keys():
                 fname = join(out_location, output_variable)
-                module = self.possible_output_variables[output_variable]['module']
+                module = self.possible_output_variables[output_variable]['module']  # noqa
 
                 # TODO this is a hack to not have to redo the gold files
                 if module == 'precipitation':
