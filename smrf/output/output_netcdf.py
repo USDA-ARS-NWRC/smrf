@@ -55,6 +55,8 @@ class OutputNetcdf():
         # Retrieve projection information from topo
         map_meta = add_proj_from_file(topo.topoConfig['filename'])
 
+        precision = self.outConfig['netcdf_output_precision'][0]
+
         for v in self.variable_dict:
 
             f = self.variable_dict[v]
@@ -85,7 +87,8 @@ class OutputNetcdf():
                 s.createVariable('time', 'f', (dimensions[0]))
                 s.createVariable('y', 'f', dimensions[1])
                 s.createVariable('x', 'f', dimensions[2])
-                s.createVariable(f['variable'], 'f',
+                s.createVariable(f['variable'],
+                                 precision,
                                  (dimensions[0], dimensions[1], dimensions[2]),
                                  chunksizes=self.cs)
 

@@ -1,6 +1,7 @@
 import os
 
 import netCDF4 as nc
+import numpy as np
 
 from smrf import __version__
 from smrf.framework.model_framework import SMRF
@@ -10,14 +11,11 @@ from smrf.tests.smrf_test_case import SMRFTestCase
 
 class TestOutputNetCDF(SMRFTestCase):
 
-    @classmethod
-    def setUpClass(cls):
+    def setUp(self):
         super().setUpClass()
-        cls.smrf = SMRF(cls.config_file)
+        self.smrf = SMRF(self.config_file)
 
-    def test_netcdf_smrf_version(self):
-
-        variable_dict = {
+        self.variable_dict = {
             'air_temp': {
                 'variable': 'air_temp',
                 'module': 'air_temp',
@@ -33,16 +31,34 @@ class TestOutputNetCDF(SMRFTestCase):
             }
         }
 
+    def test_netcdf_smrf_version(self):
+
         self.smrf.loadTopo()
 
         OutputNetcdf(
-            variable_dict,
+            self.variable_dict,
             self.smrf.topo,
             self.smrf.config['time'],
             self.smrf.config['output'])
 
-        n = nc.Dataset(variable_dict['air_temp']['file_name'])
+        n = nc.Dataset(self.variable_dict['air_temp']['file_name'])
         version = n.getncattr('SMRF_version')
+        self.assertTrue(n.variables['air_temp'].dtype == np.float32)
         n.close()
 
         self.assertEqual(__version__, version)
+
+    def test_netcdf_precision(self):
+        self.smrf.config['output']['netcdf_output_precision'] = 'double'
+
+        self.smrf.loadTopo()
+
+        OutputNetcdf(
+            self.variable_dict,
+            self.smrf.topo,
+            self.smrf.config['time'],
+            self.smrf.config['output'])
+
+        n = nc.Dataset(self.variable_dict['air_temp']['file_name'])
+        self.assertTrue(n.variables['air_temp'].dtype == np.float64)
+        n.close()
