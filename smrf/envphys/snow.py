@@ -234,9 +234,9 @@ def susong1999(temperature, precipitation):
 
     # if no precipitation return all zeros
     if np.sum(precipitation) == 0:
-        return ps, sd
+        return {'pcs': ps, 'rho_s': sd}
 
-    # determine the indicies and allocate based on the table above
+    # determine the indices and allocate based on the table above
     for row in t:
 
         # get the values between the temperature ranges that have precip
