@@ -1,4 +1,4 @@
-import smrf.envphys as envphys
+from .utils import calc_percent_snow, check_temperature
 
 
 class PiecewiseSusong1999:
@@ -65,11 +65,11 @@ class PiecewiseSusong1999:
         """
         # again, this shouldn't be needed in this context
         if check_temps:
-            tpp, tsnow = envphys.Snow.check_temperature(
+            tpp, tsnow = check_temperature(
                 tpp, t_max=t_max, t_min=t_min
             )
 
-        pcs = envphys.Snow.calc_percent_snow(tpp, t_max=t_max)
+        pcs = calc_percent_snow(tpp, t_max=t_max)
 
         # New snow density - no compaction
         t_range = t_max - t_min

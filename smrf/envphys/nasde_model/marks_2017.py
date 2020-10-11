@@ -1,6 +1,7 @@
-import smrf.envphys.nasde_model as models
-import smrf.envphys as envphys
 import numpy as np
+
+from .utils import check_temperature
+from .piecewise_suosong_1999 import PiecewiseSusong1999
 
 
 class Marks2017:
@@ -122,12 +123,12 @@ class Marks2017:
         if np.any(pp > 0):
 
             # check the precipitation temperature
-            tpp, tsnow = envphys.Snow.check_temperature(
+            tpp, tsnow = check_temperature(
                 tpp, t_max=Marks2017.T_MAX, t_min=Marks2017.T_MIN
             )
 
             # Calculate the percent snow and initial uncompacted density
-            result = models.PiecewiseSusong1999.run(
+            result = PiecewiseSusong1999.run(
                 tpp, pp, t_max=Marks2017.T_MAX, t_min=Marks2017.T_MIN
             )
             pcs = result['pcs']
