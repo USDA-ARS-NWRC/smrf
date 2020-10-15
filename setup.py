@@ -142,6 +142,9 @@ setup(
             'sphinxcontrib-bibtex',
             'sphinxcontrib-websupport',
             'pydata-sphinx-theme'
+        ],
+        'tests': [
+            'mock',
         ]
     },
     use_scm_version={

@@ -20,6 +20,7 @@ env:
     - CIBW_MANYLINUX_X86_64_IMAGE=manylinux2014
     - CIBW_TEST_REQUIRES=nose
     - CIBW_TEST_COMMAND="NOT_ON_GOLD_HOST=yup nosetests -vv --exe smrf"
+    - CIBW_TEST_EXTRAS=tests
     - CIBW_BUILD="cp3*-manylinux_x86_64 cp3*-macosx_x86_64"
     - CIBW_SKIP="?p27* pp* cp35*"
     - CIBW_BUILD_VERBOSITY=1
@@ -45,7 +46,7 @@ unittest: &unittest
       packages:
         - eccodes
         - gcc@7
-  install: 
+  install:
     - python3 --version
     - python3 -m pip install tox-travis cython
   script: tox
@@ -99,7 +100,7 @@ jobs:
       python: 3.6
       install: skip
       script: travis/build-sdist.sh
-          
+
     # Deploy on linux
     - <<: *ci-build-wheels
       name: Build and deploy Linux wheels
