@@ -34,9 +34,9 @@ COPY --from=builder /root/.local /usr/local
 
 RUN apt-get update -y \
     && apt-get install -y --no-install-recommends libeccodes-tools \
-    && python3 -m pip install --no-cache-dir nose \
+    && python3 -m pip install --no-cache-dir nose smrf[tests] \
     && nosetests -vv --exe smrf \
-    && python3 -m pip uninstall -y nose \
+    && python3 -m pip uninstall -y nose smrf[tests] \
     && rm -rf /var/lib/apt/lists/*
 
 # Create a shared data volume
