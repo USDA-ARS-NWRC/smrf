@@ -139,13 +139,14 @@ setup(
     ],
     extras_require={
         'docs': [
-            'sphinxcontrib-bibtex',
-            'sphinxcontrib-websupport',
-            'pydata-sphinx-theme'
+            'Sphinx>=3.0,<=4.0',
+            'pydata-sphinx-theme',
+            'sphinxcontrib-bibtex>=1.0',
+            'sphinxcontrib-websupport>=1.0.1',
         ],
         'tests': [
             'mock',
-        ]
+        ],
     },
     use_scm_version={
         'local_scheme': 'node-and-date',
