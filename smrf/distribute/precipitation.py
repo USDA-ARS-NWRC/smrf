@@ -3,7 +3,7 @@ import netCDF4 as nc
 import numpy as np
 
 from smrf.distribute import image_data
-from smrf.envphys import precip, snow, storms
+from smrf.envphys import precip, Snow, storms
 from smrf.utils import utils
 
 
@@ -368,7 +368,7 @@ class ppt(image_data.image_data):
                 self._logger.debug('''Calculating new snow density for
                                     storm #{0}'''.format(self.storm_id+1))
                 # determine the precip phase and den
-                snow_den, perc_snow = snow.calc_phase_and_density(
+                snow_den, perc_snow = Snow.phase_and_density(
                     precip_temp,
                     self.precip,
                     nasde_model=self.nasde_model)
@@ -417,7 +417,7 @@ class ppt(image_data.image_data):
             self.precip = utils.set_min_max(self.precip, self.min, self.max)
 
             # determine the precip phase and den
-            snow_den, perc_snow = snow.calc_phase_and_density(
+            snow_den, perc_snow = Snow.phase_and_density(
                 ppt_temp,
                 self.precip,
                 nasde_model=self.nasde_model)
