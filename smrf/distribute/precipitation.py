@@ -134,28 +134,32 @@ class ppt(image_data.image_data):
             self._logger.debug('Reading {} from {}'.format(
                 'storm_days', self.config['storm_days_restart']))
             f = nc.Dataset(self.config['storm_days_restart'], 'r')
+            f.set_always_mask(False)
 
             if 'storm_days' in f.variables:
-                time = f.variables['time'][:]
                 t = f.variables['time']
-                time = nc.num2date(t[:], t.getncattr(
-                    'units'), t.getncattr('calendar'))
+                time = nc.num2date(
+                    t[:],
+                    t.getncattr('units'),
+                    t.getncattr('calendar'),
+                    only_use_cftime_datetimes=False)
+                time = np.array(
+                    [ti.replace(tzinfo=self.start_date.tzinfo) for ti in time])
+                time_ind = np.where(time == self.start_date.to_pydatetime())[0]
 
-                # start at index of storm_days - 1
-                time_ind = np.where(time == self.start_date)[0] - 1
-
-                if not time_ind:
+                if time_ind.size == 0:
                     self._logger.warning(
                         'Invalid storm_days input! Setting to 0.0')
                     self.storm_days = np.zeros((topo.ny, topo.nx))
 
                 else:
-                    self.storm_days = f.variables['storm_days'][time_ind, :, :][0]  # noqa
+                    # start at index of storm_days - 1
+                    self.storm_days = f.variables['storm_days'][time_ind - 1, :, :][0]  # noqa
             else:
-                self._logger.warning(
-                    'Variable {} not in {}, setting to 0.0'.format(
-                        'storm_days', self.config['storm_days_restart']))
-                self.storm_days = np.zeros((topo.ny, topo.nx))
+                self._logger.error(
+                    'Variable storm_days not in {}'.format(
+                        self.config['storm_days_restart'])
+                )
 
             f.close()
 
