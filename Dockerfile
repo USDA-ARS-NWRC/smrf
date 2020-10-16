@@ -20,10 +20,9 @@ WORKDIR /build
 
 RUN python3 -m pip install --no-cache-dir --upgrade pip \
     && python3 -m pip install --no-cache-dir setuptools wheel \
-    && python3 -m pip install --no-cache-dir --user -r requirements.txt \
+    && python3 -m pip install --no-cache-dir --user .[tests] \
     && python3 setup.py bdist_wheel \
-    && python3 setup.py build_ext --inplace \
-    && python3 setup.py install --user
+    && python3 setup.py build_ext --inplace
 
 ##############################################
 # main image

@@ -93,7 +93,7 @@ Ready to contribute? Here's how to set up `smrf` for local development.
 
     $ mkvirtualenv smrf
     $ cd smrf/
-    $ pip install -r requirements.txt
+    $ pip install -r requirements_dev.txt .[tests]
     $ pip install -e .
 
 4. Create a branch for local development::

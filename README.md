@@ -37,7 +37,7 @@ git clone https://github.com/USDA-ARS-NWRC/smrf.git
 And install the requirements, SMRF and run the tests.
 
 ```bash
-python3 -m pip install -r requirements_dev.txt
+python3 -m pip install -r requirements_dev.txt .[tests]
 python3 setup.py install
 ```
 

@@ -17,3 +17,6 @@ recursive-exclude * *.py[co]
 recursive-exclude * *.grib2.*.idx
 
 recursive-include docs *.rst conf.py Makefile make.bat *.jpg *.png *.gif
+
+include scripts/run_smrf
+include scripts/gen_maxus
