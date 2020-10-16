@@ -20,10 +20,9 @@ WORKDIR /build
 
 RUN python3 -m pip install --no-cache-dir --upgrade pip \
     && python3 -m pip install --no-cache-dir setuptools wheel \
-    && python3 -m pip install --no-cache-dir --user -r requirements.txt \
+    && python3 -m pip install --no-cache-dir --user .[tests] \
     && python3 setup.py bdist_wheel \
-    && python3 setup.py build_ext --inplace \
-    && python3 setup.py install --user
+    && python3 setup.py build_ext --inplace
 
 ##############################################
 # main image
@@ -34,9 +33,9 @@ COPY --from=builder /root/.local /usr/local
 
 RUN apt-get update -y \
     && apt-get install -y --no-install-recommends libeccodes-tools \
-    && python3 -m pip install --no-cache-dir nose smrf[tests] \
+    && python3 -m pip install --no-cache-dir nose \
     && nosetests -vv --exe smrf \
-    && python3 -m pip uninstall -y nose smrf[tests] \
+    && python3 -m pip uninstall -y nose \
     && rm -rf /var/lib/apt/lists/*
 
 # Create a shared data volume
