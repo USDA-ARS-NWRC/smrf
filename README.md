@@ -1,24 +1,51 @@
 # Spatial Modeling for Resources Framework
 
-[![GitHub version](https://badge.fury.io/gh/USDA-ARS-NWRC%2Fsmrf.svg)](https://badge.fury.io/gh/USDA-ARS-NWRC%2Fsmrf)
+[![Stable version](https://img.shields.io/badge/stable%20version-v0.9-blue)](https://img.shields.io/badge/stable%20version-v0.9-blue)
+[![Pypi version](https://img.shields.io/pypi/v/smrf-dev)](https://img.shields.io/pypi/v/smrf-dev)
 [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.898158.svg)](https://doi.org/10.5281/zenodo.898158)
 [![DOI](https://readthedocs.org/projects/smrf/badge/)](https://smrf.readthedocs.io)
-[![Docker Build Status](https://img.shields.io/docker/build/usdaarsnwrc/smrf.svg)](https://hub.docker.com/r/usdaarsnwrc/smrf/)
-[![Docker Automated build](https://img.shields.io/docker/automated/usdaarsnwrc/smrf.svg)](https://hub.docker.com/r/usdaarsnwrc/smrf/)
-[![Build Status](https://travis-ci.org/USDA-ARS-NWRC/smrf.svg?branch=develop)](https://travis-ci.org/USDA-ARS-NWRC/smrf)
-[![Coverage Status](https://coveralls.io/repos/github/USDA-ARS-NWRC/smrf/badge.svg?branch=HEAD)](https://coveralls.io/github/USDA-ARS-NWRC/smrf?branch=HEAD)
+[![Build Status](https://travis-ci.org/USDA-ARS-NWRC/smrf.svg?branch=master)](https://travis-ci.org/USDA-ARS-NWRC/smrf)
+[![Coverage Status](https://coveralls.io/repos/github/USDA-ARS-NWRC/smrf/badge.svg?branch=master)](https://coveralls.io/github/USDA-ARS-NWRC/smrf?branch=master)
+[![Maintainability](https://api.codeclimate.com/v1/badges/128437f4e928e99cace5/maintainability)](https://codeclimate.com/github/USDA-ARS-NWRC/smrf/maintainability)
 
 Spatial Modeling for Resources Framework (SMRF) was developed by Dr. Scott Havens at the USDA Agricultural Research Service (ARS) in Boise, ID. SMRF was designed to increase the flexibility of taking measured weather data and distributing the point measurements across a watershed. SMRF was developed to be used as an operational or research framework, where ease of use, efficiency, and ability to run in near real time are high priorities.
 
 Read the [full documentation for SMRF](https://smrf.readthedocs.io) including up to date installation instructions.
 
 - [Spatial Modeling for Resources Framework](#spatial-modeling-for-resources-framework)
+  - [Which version to use?](#which-version-to-use)
+    - [Stable](#stable)
+    - [Experimental](#experimental)
   - [Installation](#installation)
     - [System dependencies](#system-dependencies)
   - [Topo setup](#topo-setup)
   - [Input data](#input-data)
   - [Running SMRF](#running-smrf)
   - [Docker](#docker)
+
+## Which version to use?
+
+### Stable
+
+The stable version of SMRF is currently `v0.9`. The code can be downloaded from the [releases](https://github.com/USDA-ARS-NWRC/smrf/releases) or can be found on the `release-0.9` [branch](https://github.com/USDA-ARS-NWRC/smrf/tree/release-0.9).
+
+Best for:
+
+- Applying the model in near real time
+- Researchers wanting a ready to use model
+- Those wanting the most stable and tested code
+
+### Experimental
+
+> :warning: **Use at your own risk!** While this contains the latest code, it is not guaranteed to work with the whole modeling framework.
+
+The latest code on `master` contains all the latest development to SMRF. However, this must be used with caution as it can be under active development, may change at any time and is not guaranteed to work with the rest of the modeling framework at that moment. Once the code has been fully tested within the modeling framework, a new release will be created to signal a move to a stable version.
+
+Best for:
+
+- Those planning on developing with SMRF
+- Model simulations require features only found in the latest code
+- Okay with the possibility that SMRF doesn't work with the rest of the modeling system
 
 ## Installation
 
