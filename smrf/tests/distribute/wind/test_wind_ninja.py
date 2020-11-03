@@ -11,9 +11,12 @@ from smrf.utils.utils import date_range
 
 class TestWindNinja(SMRFTestCaseLakes):
 
-    def test_wind_ninja(self):
+    def setup_wind_ninja(self, config):
+        """Setup the wind ninja class
 
-        config = self.base_config.cfg
+        Args:
+            config (dict): config dict
+        """
 
         # Load the topo
         topo = Topo(config['topo'])
@@ -30,6 +33,13 @@ class TestWindNinja(SMRFTestCaseLakes):
         wn.initialize(topo, None)
         wn.initialize_interp(date_time[0])
         g_vel, g_ang = wn.convert_wind_ninja(date_time[0])
+
+        return topo, wn, g_vel, g_ang
+
+    def test_wind_ninja(self):
+
+        config = self.base_config.cfg
+        topo, wn, g_vel, g_ang = self.setup_wind_ninja(config)
 
         # The x values are ascending
         self.assertTrue(np.all(np.diff(wn.windninja_x) > 0))
@@ -57,3 +67,15 @@ class TestWindNinja(SMRFTestCaseLakes):
             g_ang
         )
         n.close()
+
+    def test_wind_ninja_interpolation(self):
+
+        config = self.base_config.cfg
+        config['wind']['wind_ninja_dxdy'] = 50
+        topo, wn, g_vel, g_ang = self.setup_wind_ninja(config)
+
+        # The implied assumption is that this does not throw an
+        # exception when running
+        self.assertTrue(np.all(np.diff(wn.windninja_x) > 0))
+        self.assertTrue(np.all(np.diff(wn.windninja_y) < 0))
+        self.assertTrue(np.sum(np.isnan(g_vel)) == 0)

@@ -264,20 +264,22 @@ class WindNinjaModel(image_data.image_data):
         iy = np.sum(np.isnan(g_vel[:, ix+1]))
 
         #  first go in the Y direction
-        yi = g_vel[:, ix:ix+10]
-        xi = self.X[0, ix:ix+10]
-        x = self.X[0, :ix]
+        if ix > 0:
+            yi = g_vel[:, ix:ix+10]
+            xi = self.X[0, ix:ix+10]
+            x = self.X[0, :ix]
 
-        o = np.apply_along_axis(interpx, axis=1, arr=yi, xi=xi, x=x)
-        g_vel[:, :ix] = o
+            o = np.apply_along_axis(interpx, axis=1, arr=yi, xi=xi, x=x)
+            g_vel[:, :ix] = o
 
         #  first go in the X direction
-        yi = g_vel[-iy-10:-iy, :]
-        xi = self.Y[-iy-10:-iy, 0]
-        x = self.Y[-iy:, 0]
+        if iy > 0:
+            yi = g_vel[-iy-10:-iy, :]
+            xi = self.Y[-iy-10:-iy, 0]
+            x = self.Y[-iy:, 0]
 
-        o = np.apply_along_axis(interpx, axis=0, arr=yi, xi=xi, x=x)
-        g_vel[-iy:, :] = o
+            o = np.apply_along_axis(interpx, axis=0, arr=yi, xi=xi, x=x)
+            g_vel[-iy:, :] = o
 
         if np.any(np.isnan(g_vel)):
             raise ValueError('WindNinja data still has NaN values')
