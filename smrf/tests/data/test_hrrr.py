@@ -1,9 +1,12 @@
 from copy import deepcopy
-
+import os
+import pandas as pd
 from inicheck.tools import cast_all_variables
 
 from smrf.framework.model_framework import run_smrf
 from smrf.tests.smrf_test_case import SMRFTestCase
+from smrf.tests.smrf_test_case_lakes import SMRFTestCaseLakes
+from smrf.data.hrrr_grib import InputGribHRRR
 
 
 class TestLoadHRRR(SMRFTestCase):
@@ -95,3 +98,36 @@ class TestLoadHRRR(SMRFTestCase):
         run_smrf(config)
 
         self.compare_hrrr_gold()
+
+
+class TestLoadHRRRLakes(SMRFTestCaseLakes):
+
+    # @classmethod
+    # def setUpClass(cls):
+    #     super().setUpClass()
+
+    #     config = cls.base_config_copy()
+
+    #     adj_config = {
+    #         'time': {
+    #             'start_date': '2018-12-04 13:00',
+    #             'end_date': '2018-12-04 13:30',
+    #             'time_zone': 'utc'
+    #         },
+    #         'system': {
+    #             'threading': False,
+    #             'log_file': None
+    #         },
+    #     }
+    #     config.raw_cfg.update(adj_config)
+    #     config.apply_recipes()
+    #     config = cast_all_variables(config, config.mcfg)
+
+    #     cls.config = config
+
+    def test_197_image_data_index(self):
+
+        # run_smrf(self.config)
+        config_file = os.path.join(self.basin_dir, 'config_issue_197.ini')
+        run_smrf(config_file)
+        self.config
