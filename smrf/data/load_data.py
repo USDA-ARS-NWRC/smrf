@@ -76,6 +76,10 @@ class InputData():
                 'config': smrf_config['gridded'],
                 'topo': self.topo
             }
+        else:
+            raise AttributeError(
+                'Missing required data type attribute in ini-file'
+            )
 
         # load the data
         self.load_class = self.DATA_FUNCTIONS[self.data_type](
