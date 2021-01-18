@@ -4,7 +4,6 @@ import netCDF4 as nc
 import numpy as np
 
 from smrf import __version__
-from smrf.framework.model_framework import SMRF
 from smrf.output.output_netcdf import OutputNetcdf
 from smrf.tests.smrf_test_case import SMRFTestCase
 
@@ -13,7 +12,7 @@ class TestOutputNetCDF(SMRFTestCase):
 
     def setUp(self):
         super().setUpClass()
-        self.smrf = SMRF(self.config_file)
+        self.smrf = self.smrf_instance
 
         self.variable_dict = {
             'air_temp': {
