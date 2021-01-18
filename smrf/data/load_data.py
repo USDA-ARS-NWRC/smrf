@@ -52,8 +52,6 @@ class InputData():
     OFFSET = 0.1
 
     def __init__(self, smrf_config, start_date, end_date, topo):
-
-        self.smrf_config = smrf_config
         self.start_date = start_date
         self.end_date = end_date
         self.time_zone = start_date.tzinfo
@@ -64,18 +62,18 @@ class InputData():
         # get the buffer gridded data domain extents in lat long
         self.model_domain_grid()
 
-        if 'csv' in self.smrf_config:
+        if 'csv' in smrf_config:
             self.data_type = InputCSV.DATA_TYPE
             data_inputs = {
-                'stations': self.smrf_config['csv']['stations'],
-                'config': self.smrf_config['csv']
+                'stations': smrf_config['csv']['stations'],
+                'config': smrf_config['csv']
             }
 
-        elif 'gridded' in self.smrf_config:
-            self.data_type = self.smrf_config['gridded']['data_type']
+        elif 'gridded' in smrf_config:
+            self.data_type = smrf_config['gridded']['data_type']
             data_inputs = {
                 'bbox': self.bbox,
-                'config': self.smrf_config['gridded'],
+                'config': smrf_config['gridded'],
                 'topo': self.topo
             }
 
@@ -121,13 +119,13 @@ class InputData():
                 'utm_y'), axis=1)
 
     def model_domain_grid(self):
-        '''
+        """
         Retrieve the bounding box for the gridded data by adding a buffer to
         the extents of the topo domain.
 
         Returns:
             tuple: (dlat, dlon) Domain latitude and longitude extents
-        '''
+        """
         dlat = np.zeros((2,))
         dlon = np.zeros_like(dlat)
 
@@ -153,7 +151,7 @@ class InputData():
                               self.dlon[1], self.dlat[1]])
 
     def get_latlon(self, utm_x, utm_y):
-        '''
+        """
         Convert UTM coords to Latitude and longitude
 
         Args:
@@ -163,13 +161,14 @@ class InputData():
         Returns:
             tuple: (lat,lon) latitude and longitude conversion from the UTM
                 coordinates
-        '''
+        """
 
         lat, lon = utm.to_latlon(utm_x, utm_y, self.topo.zone_number,
                                  northern=self.topo.northern_hemisphere)
         return lat, lon
 
-    def find_pixel_location(self, row, vec, a):
+    @staticmethod
+    def find_pixel_location(row, vec, a):
         """
         Find the index of the stations X/Y location in the model domain
 
