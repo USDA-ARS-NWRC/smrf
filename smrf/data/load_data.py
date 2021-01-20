@@ -6,7 +6,7 @@ import utm
 from smrf.data import InputCSV, InputGribHRRR, InputNetcdf, InputWRF
 
 
-class InputData():
+class InputData:
     """
     Class for loading and storing the data, either from
     - CSV file
@@ -41,12 +41,7 @@ class InputData():
         'thermal': 'thermal'
     }
 
-    DATA_FUNCTIONS = {
-        InputCSV.DATA_TYPE: InputCSV,
-        InputWRF.DATA_TYPE: InputWRF,
-        InputNetcdf.DATA_TYPE: InputNetcdf,
-        InputGribHRRR.DATA_TYPE: InputGribHRRR
-    }
+    GRIDDED_DATA_SET = 'gridded'
 
     # degree offset for a buffer around the model domain in degrees
     OFFSET = 0.1
@@ -62,30 +57,38 @@ class InputData():
         # get the buffer gridded data domain extents in lat long
         self.model_domain_grid()
 
-        if 'csv' in smrf_config:
-            self.data_type = InputCSV.DATA_TYPE
-            data_inputs = {
-                'stations': smrf_config['csv']['stations'],
-                'config': smrf_config['csv']
-            }
+        loader_args = dict(start_date=start_date, end_date=end_date)
 
-        elif 'gridded' in smrf_config:
-            self.data_type = smrf_config['gridded']['data_type']
-            data_inputs = {
-                'bbox': self.bbox,
-                'config': smrf_config['gridded'],
-                'topo': self.topo
-            }
+        if InputCSV.DATA_TYPE in smrf_config:
+            self.data_type = InputCSV.DATA_TYPE
+            self.load_class = InputCSV(
+                **loader_args,
+                stations=smrf_config[InputCSV.DATA_TYPE]['stations'],
+                config=smrf_config[InputCSV.DATA_TYPE],
+            )
+
+        elif self.GRIDDED_DATA_SET in smrf_config:
+            self.data_type = smrf_config[self.GRIDDED_DATA_SET]['data_type']
+            data_inputs = dict(
+                bbox=self.bbox,
+                config=smrf_config[self.GRIDDED_DATA_SET],
+                topo=self.topo,
+            )
+            if self.data_type == InputGribHRRR.DATA_TYPE:
+                self.load_class = InputGribHRRR(**loader_args, **data_inputs)
+            elif self.data_type == InputNetcdf.DATA_TYPE:
+                self.load_class = InputNetcdf(**loader_args, **data_inputs)
+            elif self.data_type == InputWRF.DATA_TYPE:
+                self.load_class = InputWRF(**loader_args, **data_inputs)
+            else:
+                raise AttributeError(
+                    'Unknown gridded data input type in ini-file'
+                )
         else:
             raise AttributeError(
                 'Missing required data type attribute in ini-file'
             )
 
-        # load the data
-        self.load_class = self.DATA_FUNCTIONS[self.data_type](
-            self.start_date,
-            self.end_date,
-            **data_inputs)
         self.load_class.load()
 
         self.set_variables()
