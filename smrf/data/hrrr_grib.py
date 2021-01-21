@@ -21,6 +21,8 @@ class InputGribHRRR:
         'cloud_factor'
     ]
 
+    TIME_STEP = pd.to_timedelta(20, 'minutes')
+
     def __init__(self, start_date, end_date, bbox=None,
                  topo=None, config=None):
 
@@ -34,8 +36,8 @@ class InputGribHRRR:
 
         self._logger = logging.getLogger(__name__)
 
-        if self.config['hrrr_load_method'] == 'timestep':
-            self._timedelta_steps = pd.to_timedelta(20, 'minutes')
+        if 'hrrr_load_method' in self.config and \
+                self.config['hrrr_load_method'] == 'timestep':
             self.timestep_dates()
             self.cf_memory = None
 
@@ -48,7 +50,7 @@ class InputGribHRRR:
             setattr(self, attribute, argument)
 
     def timestep_dates(self):
-        self.end_date = self.start_date + self._timedelta_steps
+        self.end_date = self.start_date + self.TIME_STEP
 
     def load(self):
         """
