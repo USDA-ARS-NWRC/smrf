@@ -1,17 +1,16 @@
-import logging
-
 import netCDF4 as nc
 import numpy as np
 import pandas as pd
 
 from smrf.utils.utils import apply_utm
+from .gridded_input import GriddedInput
 
 
 def metadata_name_from_index(index):
     return 'grid_y{:d}_x{:d}'.format(index[0], index[1])
 
 
-class InputNetcdf():
+class InputNetcdf(GriddedInput):
 
     DATA_TYPE = 'netcdf'
 
@@ -24,27 +23,12 @@ class InputNetcdf():
         'cloud_factor'
     ]
 
-    def __init__(self, start_date, end_date, bbox=None,
-                 topo=None, config=None):
-
-        self.start_date = start_date
-        self.end_date = end_date
-        self.topo = topo
-        self.bbox = bbox
-        self.config = config
-        self.time_zone = start_date.tzinfo
-
-        if topo is None:
-            raise Exception('Must supply topo to InputWRF')
-
-        if bbox is None:
-            raise Exception('Must supply bbox to InputWRF')
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
 
         self.variables = list(self.config.keys())
         self.variables.remove('data_type')
         self.variables.remove('netcdf_file')
-
-        self._logger = logging.getLogger(__name__)
 
     def load(self):
         """

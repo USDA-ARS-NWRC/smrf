@@ -1,5 +1,3 @@
-import logging
-
 import netCDF4 as nc
 import numpy as np
 import pandas as pd
@@ -8,9 +6,10 @@ import pytz
 from smrf.data.netcdf import metadata_name_from_index
 from smrf.envphys.vapor_pressure import satvp
 from smrf.utils.utils import apply_utm
+from .gridded_input import GriddedInput
 
 
-class InputWRF():
+class InputWRF(GriddedInput):
 
     DATA_TYPE = 'wrf'
 
@@ -28,24 +27,6 @@ class InputWRF():
         'cloud_factor': 'CLDFRA',
         'precip': 'RAINNC'
     }
-
-    def __init__(self, start_date, end_date, bbox=None,
-                 topo=None, config=None):
-
-        self.start_date = start_date
-        self.end_date = end_date
-        self.topo = topo
-        self.bbox = bbox
-        self.config = config
-        self.time_zone = start_date.tzinfo
-
-        if topo is None:
-            raise Exception('Must supply topo to InputWRF')
-
-        if bbox is None:
-            raise Exception('Must supply bbox to InputWRF')
-
-        self._logger = logging.getLogger(__name__)
 
     def get_file_times(self):
         """Read the times from the WRF file and attempt to
