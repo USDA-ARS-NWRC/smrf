@@ -1,5 +1,5 @@
 # test stage will test all branches against:
-#   - linux python 3.5, 3.6, 3.7, 3.8
+#   - linux python 3.6, 3.7, 3.8
 #   - osx python 3.7
 #
 # deploy stage builds and test the wheels when jobs is
@@ -65,26 +65,27 @@ jobs:
   include:
     # test stage
     - <<: *unittest
+      name: Python 3.6
       python: 3.6
       env: TOXENV=py36
 
     - <<: *unittest
-      python: 3.6
-      env: TOXENV=coverage
-
-    - <<: *unittest
-      python: 3.6
-      env: TOXENV=flake8
-
-    - <<: *unittest
+      name: Python 3.7
       python: 3.7
       env: TOXENV=py37
 
     - <<: *unittest
+      name: Python 3.8
       python: 3.8
       env: TOXENV=py38
 
     - <<: *unittest
+      name: Code Quality
+      python: 3.6
+      env: TOXENV=flake8,coverage
+
+    - <<: *unittest
+      name: Build on OS X
       os: osx
       osx_image: xcode11.2  # Python 3.7.X running on macOS 10.14
       language: shell
@@ -113,4 +114,4 @@ jobs:
 
   allow_failures:
     - python: 3.6
-      env: TOXENV=coverage
+      env: TOXENV=flake8,coverage
