@@ -56,7 +56,19 @@ class InputData:
         # get the buffer gridded data domain extents in lat long
         self.model_domain_grid()
 
-        loader_args = dict(start_date=start_date, end_date=end_date)
+        self.__determine_data_type(smrf_config)
+
+        self.load_class.load()
+
+        self.set_variables()
+
+        self.metadata_pixel_location()
+
+        if self.data_type == InputCSV.DATA_TYPE:
+            self.load_class.check_colocation()
+
+    def __determine_data_type(self, smrf_config):
+        loader_args = dict(start_date=self.start_date, end_date=self.end_date)
 
         if InputCSV.DATA_TYPE in smrf_config:
             self.data_type = InputCSV.DATA_TYPE
@@ -65,7 +77,6 @@ class InputData:
                 stations=smrf_config[InputCSV.DATA_TYPE]['stations'],
                 config=smrf_config[InputCSV.DATA_TYPE],
             )
-
         elif GriddedInput.TYPE in smrf_config:
             self.data_type = smrf_config[GriddedInput.TYPE]['data_type']
             data_inputs = dict(
@@ -87,15 +98,6 @@ class InputData:
             raise AttributeError(
                 'Missing required data type attribute in ini-file'
             )
-
-        self.load_class.load()
-
-        self.set_variables()
-
-        self.metadata_pixel_location()
-
-        if self.data_type == InputCSV.DATA_TYPE:
-            self.load_class.check_colocation()
 
     def set_variables(self):
         """Set the instance attributes for each variable
