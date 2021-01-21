@@ -17,14 +17,21 @@ class TestInputGribHRRR(unittest.TestCase):
         with self.assertRaisesRegex(TypeError, 'Missing argument: topo'):
             smrf_data.InputGribHRRR(
                 self.START_DATE, self.END_DATE,
-                bbox=[],
+                bbox=[], config={}
             )
 
     def test_missing_bbox_argument(self):
         with self.assertRaisesRegex(TypeError, 'Missing argument: bbox'):
             smrf_data.InputGribHRRR(
                 self.START_DATE, self.END_DATE,
-                topo=object,
+                topo=object, config={}
+            )
+
+    def test_missing_config_argument(self):
+        with self.assertRaisesRegex(TypeError, 'Missing argument: config'):
+            smrf_data.InputGribHRRR(
+                self.START_DATE, self.END_DATE,
+                topo=object, bbox=[]
             )
 
 

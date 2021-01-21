@@ -26,18 +26,11 @@ class InputGribHRRR:
 
         self.start_date = start_date
         self.end_date = end_date
-        self.config = config
         self.time_zone = start_date.tzinfo
 
-        if topo is None:
-            raise TypeError('Missing argument: topo')
-        else:
-            self.topo = topo
-
-        if bbox is None:
-            raise TypeError('Missing argument: bbox')
-        else:
-            self.bbox = bbox
+        self.set_attribute('topo', topo)
+        self.set_attribute('bbox', bbox)
+        self.set_attribute('config', config)
 
         self._logger = logging.getLogger(__name__)
 
@@ -47,6 +40,12 @@ class InputGribHRRR:
             self.cf_memory = None
 
         self.hrrr = HRRR(external_logger=self._logger)
+
+    def set_attribute(self, attribute, argument):
+        if argument is None:
+            raise TypeError('Missing argument: %s' % attribute)
+        else:
+            setattr(self, attribute, argument)
 
     def timestep_dates(self):
         self.end_date = self.start_date + self._timedelta_steps
