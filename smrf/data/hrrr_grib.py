@@ -8,7 +8,7 @@ from smrf.envphys.solar.cloud import get_hrrr_cloud
 from smrf.envphys.vapor_pressure import rh2vp
 
 
-class InputGribHRRR():
+class InputGribHRRR:
 
     DATA_TYPE = 'hrrr_grib'
 
@@ -26,16 +26,18 @@ class InputGribHRRR():
 
         self.start_date = start_date
         self.end_date = end_date
-        self.topo = topo
-        self.bbox = bbox
         self.config = config
         self.time_zone = start_date.tzinfo
 
         if topo is None:
-            raise Exception('Must supply topo to InputWRF')
+            raise TypeError('Missing argument: topo')
+        else:
+            self.topo = topo
 
         if bbox is None:
-            raise Exception('Must supply bbox to InputWRF')
+            raise TypeError('Missing argument: bbox')
+        else:
+            self.bbox = bbox
 
         self._logger = logging.getLogger(__name__)
 

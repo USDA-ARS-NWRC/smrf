@@ -1,13 +1,34 @@
+import unittest
+import pandas as pd
 from copy import deepcopy
 
 from inicheck.tools import cast_all_variables
 
+import smrf.data as smrf_data
 from smrf.framework.model_framework import run_smrf
 from smrf.tests.smrf_test_case import SMRFTestCase
 
 
-class TestLoadHRRR(SMRFTestCase):
+class TestInputGribHRRR(unittest.TestCase):
+    START_DATE = pd.to_datetime('2021-01-01')
+    END_DATE = pd.to_datetime('2021-01-02')
 
+    def test_missing_topo_argument(self):
+        with self.assertRaisesRegex(TypeError, 'Missing argument: topo'):
+            smrf_data.InputGribHRRR(
+                self.START_DATE, self.END_DATE,
+                bbox=[],
+            )
+
+    def test_missing_bbox_argument(self):
+        with self.assertRaisesRegex(TypeError, 'Missing argument: bbox'):
+            smrf_data.InputGribHRRR(
+                self.START_DATE, self.END_DATE,
+                topo=object,
+            )
+
+
+class TestLoadHRRR(SMRFTestCase):
     @classmethod
     def setUpClass(cls):
         super().setUpClass()
