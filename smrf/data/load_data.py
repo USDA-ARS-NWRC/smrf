@@ -4,6 +4,7 @@ import numpy as np
 import utm
 
 from smrf.data import InputCSV, InputGribHRRR, InputNetcdf, InputWRF
+from .gridded_input import GriddedInput
 
 
 class InputData:
@@ -41,8 +42,6 @@ class InputData:
         'thermal': 'thermal'
     }
 
-    GRIDDED_DATA_SET = 'gridded'
-
     # degree offset for a buffer around the model domain in degrees
     OFFSET = 0.1
 
@@ -67,11 +66,11 @@ class InputData:
                 config=smrf_config[InputCSV.DATA_TYPE],
             )
 
-        elif self.GRIDDED_DATA_SET in smrf_config:
-            self.data_type = smrf_config[self.GRIDDED_DATA_SET]['data_type']
+        elif GriddedInput.TYPE in smrf_config:
+            self.data_type = smrf_config[GriddedInput.TYPE]['data_type']
             data_inputs = dict(
                 bbox=self.bbox,
-                config=smrf_config[self.GRIDDED_DATA_SET],
+                config=smrf_config[GriddedInput.TYPE],
                 topo=self.topo,
             )
             if self.data_type == InputGribHRRR.DATA_TYPE:

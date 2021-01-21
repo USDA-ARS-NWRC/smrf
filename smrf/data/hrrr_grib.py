@@ -1,14 +1,13 @@
-import logging
-
 import numpy as np
 import pandas as pd
 from weather_forecast_retrieval.hrrr import HRRR
 
 from smrf.envphys.solar.cloud import get_hrrr_cloud
 from smrf.envphys.vapor_pressure import rh2vp
+from .gridded_input import GriddedInput
 
 
-class InputGribHRRR:
+class InputGribHRRR(GriddedInput):
 
     DATA_TYPE = 'hrrr_grib'
 
@@ -23,29 +22,13 @@ class InputGribHRRR:
 
     TIME_STEP = pd.to_timedelta(20, 'minutes')
 
-    def __init__(self, start_date, end_date, bbox=None,
-                 topo=None, config=None):
-
-        self.start_date = start_date
-        self.end_date = end_date
-        self.time_zone = start_date.tzinfo
-
-        self.set_attribute('topo', topo)
-        self.set_attribute('bbox', bbox)
-        self.set_attribute('config', config)
-
-        self._logger = logging.getLogger(__name__)
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
 
         if 'hrrr_load_method' in self.config and \
                 self.config['hrrr_load_method'] == 'timestep':
             self.timestep_dates()
             self.cf_memory = None
-
-    def set_attribute(self, attribute, argument):
-        if argument is None:
-            raise TypeError('Missing argument: %s' % attribute)
-        else:
-            setattr(self, attribute, argument)
 
     def timestep_dates(self):
         self.end_date = self.start_date + self.TIME_STEP
