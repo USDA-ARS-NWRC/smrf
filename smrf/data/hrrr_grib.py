@@ -41,8 +41,6 @@ class InputGribHRRR:
             self.timestep_dates()
             self.cf_memory = None
 
-        self.hrrr = HRRR(external_logger=self._logger)
-
     def set_attribute(self, attribute, argument):
         if argument is None:
             raise TypeError('Missing argument: %s' % attribute)
@@ -70,18 +68,18 @@ class InputGribHRRR:
         from the `air_temp` and `relative_humidity`. The `wind_speed` and
         `wind_direction` will be calculated from `wind_u` and `wind_v`
         """
-
         self._logger.info('Reading data from from HRRR directory: {}'.format(
             self.config['hrrr_directory']
         ))
 
-        metadata, data = self.hrrr.get_saved_data(
-            self.start_date,
-            self.end_date,
-            self.bbox,
-            output_dir=self.config['hrrr_directory'],
-            force_zone_number=self.topo.zone_number
-        )
+        metadata, data = HRRR(external_logger=self._logger).\
+            get_saved_data(
+                self.start_date,
+                self.end_date,
+                self.bbox,
+                output_dir=self.config['hrrr_directory'],
+                force_zone_number=self.topo.zone_number
+            )
 
         self.parse_data(metadata, data)
 
