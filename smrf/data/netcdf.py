@@ -89,7 +89,8 @@ class InputNetcdf(GriddedInput):
             v_file = self.config[variable]
             self._logger.debug(
                 'Loading variable {} from netcdf field {}'.format(
-                    variable, v_file))
+                    variable, v_file)
+            )
 
             df = pd.DataFrame(index=time, columns=primary_id)
             for i in a:
@@ -105,3 +106,5 @@ class InputNetcdf(GriddedInput):
 
             # Set variable and subset by start and end time
             setattr(self, variable, df)
+
+        f.close()
