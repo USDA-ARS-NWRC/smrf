@@ -33,12 +33,6 @@ class InputNetcdf(GriddedInput):
     def load(self):
         """
         Load the data from a generic netcdf file
-
-        Args:
-            lat: latitude field in file, 1D array
-            lon: longitude field in file, 1D array
-            elev: elevation field in file, 2D array
-            variable: variable name in file, 3D array
         """
 
         self._logger.info('Reading data coming from netcdf: {}'.format(
@@ -47,7 +41,6 @@ class InputNetcdf(GriddedInput):
 
         f = nc.Dataset(self.config['netcdf_file'], 'r')
 
-        # GET THE LAT, LON, ELEV FROM THE FILE
         mlat = f.variables['lat'][:]
         mlon = f.variables['lon'][:]
         mhgt = f.variables['elev'][:]
@@ -65,7 +58,6 @@ class InputNetcdf(GriddedInput):
         mlon = mlon[ind]
         mhgt = mhgt[ind]
 
-        # GET THE METADATA
         # create some fake station names based on the index
         a = np.argwhere(ind)
         primary_id = [metadata_name_from_index(i) for i in a]
@@ -85,7 +77,6 @@ class InputNetcdf(GriddedInput):
 
         self.metadata = metadata
 
-        # GET THE TIMES
         t = f.variables['time']
         time = nc.num2date(t[:].astype(int), t.getncattr(
             'units'), t.getncattr('calendar'))
@@ -94,7 +85,6 @@ class InputNetcdf(GriddedInput):
             [str(tm.replace(microsecond=0)) for tm in time], tz=self.time_zone
         )
 
-        # GET THE DATA, ONE AT A TIME
         for variable in self.VARIABLES:
             v_file = self.config[variable]
             self._logger.debug(
