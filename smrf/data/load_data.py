@@ -4,7 +4,7 @@ import numpy as np
 import utm
 
 from smrf.data import InputCSV, InputGribHRRR, InputNetcdf, InputWRF
-from .gridded_input import GriddedInput
+from smrf.data.gridded_input import GriddedInput
 
 
 class InputData:

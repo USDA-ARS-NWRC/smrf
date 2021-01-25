@@ -2,9 +2,9 @@ import numpy as np
 import pandas as pd
 from weather_forecast_retrieval.hrrr import HRRR
 
+from smrf.data.gridded_input import GriddedInput
 from smrf.envphys.solar.cloud import get_hrrr_cloud
 from smrf.envphys.vapor_pressure import rh2vp
-from .gridded_input import GriddedInput
 
 
 class InputGribHRRR(GriddedInput):
