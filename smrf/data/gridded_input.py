@@ -11,7 +11,6 @@ class GriddedInput:
 
         self.start_date = start_date
         self.end_date = end_date
-        self.time_zone = start_date.tzinfo
 
         self.topo = topo
         self.bbox = bbox
@@ -31,6 +30,10 @@ class GriddedInput:
                             datetime.__name__)
         else:
             self._start_date = value
+
+    @property
+    def time_zone(self):
+        return self.start_date.tzinfo
 
     @property
     def bbox(self):
