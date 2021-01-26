@@ -6,4 +6,4 @@ from .load_topo import Topo
 from .netcdf import InputNetcdf
 from .wrf import InputWRF
 
-from .load_data import InputData  # isort:skip
+from .input_data import InputData  # isort:skip
