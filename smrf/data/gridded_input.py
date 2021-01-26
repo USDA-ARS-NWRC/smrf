@@ -8,7 +8,23 @@ class GriddedInput:
     TYPE = 'gridded'
 
     def __init__(self, start_date, end_date, bbox, topo, config):
+        """
+        Base class to inherit for all gridded data input types.
+        This class ensures that all types have expected attributes initialized
+        and of the correct type.
 
+        Args:
+            start_date: datetime - SMRF config start_date
+            end_date:   datetime - SMRF config end_date
+            bbox:       list - Bounding box coordinates in form of
+                               [lonmin, latmin, lonmax, latmax]
+            topo:       Topo - Instance of the topo
+            config:     Parsed SMRF .ini file
+
+        Raises:
+            TypeError: Raises an error if a given init parameter is not of the
+                       expected instance type.
+        """
         self.start_date = start_date
         self.end_date = end_date
 
