@@ -68,6 +68,20 @@ class InputData:
             self.load_class.check_colocation()
 
     def __determine_data_type(self, smrf_config):
+        """
+        Sets the attributes `data_type` and 'loader_class` based of the
+        given `smrf_config` parameter. Currently supports two types of data
+        input:
+          * CSV
+          * Gridded (NetCDF, HRRR Grib file, WRF)
+
+        Args:
+            smrf_config: SMRF configuration
+
+        Raises:
+            AttributeError: If configuration does not contain a known input
+            data type
+        """
         loader_args = dict(start_date=self.start_date, end_date=self.end_date)
 
         if InputCSV.DATA_TYPE in smrf_config:
