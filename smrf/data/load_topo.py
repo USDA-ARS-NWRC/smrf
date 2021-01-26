@@ -8,7 +8,7 @@ from topocalc.viewf import viewf
 from utm import to_latlon
 
 
-class Topo():
+class Topo:
     """
     Class for topo images and processing those images. Images are:
     - DEM

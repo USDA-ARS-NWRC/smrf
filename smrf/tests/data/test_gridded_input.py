@@ -1,8 +1,10 @@
 import unittest
+from unittest.mock import MagicMock
 
 import pandas as pd
 
 from smrf.data.gridded_input import GriddedInput
+from smrf.data.load_topo import Topo
 
 
 class TestDataSource(GriddedInput):
@@ -10,11 +12,14 @@ class TestDataSource(GriddedInput):
 
 
 class TestGriddedInput(unittest.TestCase):
+    TOPO_MOCK = MagicMock(spec=Topo, instance=True)
+    BBOX = [1, 2, 3, 4]
+    CONFIG = MagicMock('config')
     START_DATE = pd.to_datetime('2021-01-01 00:00 UTC')
     END_DATE = pd.to_datetime('2021-01-02')
     VALID_ARGS = dict(
         start_date=START_DATE, end_date=END_DATE,
-        topo=object, bbox=[], config={}
+        topo=TOPO_MOCK, bbox=BBOX, config=CONFIG
     )
 
     def test_start_date(self):
@@ -41,25 +46,42 @@ class TestGriddedInput(unittest.TestCase):
             str(hrrr_input.time_zone)
         )
 
-    def test_missing_topo_argument(self):
-        with self.assertRaisesRegex(TypeError, 'Missing argument: topo'):
+    def test_topo(self):
+        hrrr_input = GriddedInput(**self.VALID_ARGS)
+
+        self.assertEqual(
+            self.TOPO_MOCK,
+            hrrr_input.topo
+        )
+
+    def test_box(self):
+        hrrr_input = GriddedInput(**self.VALID_ARGS)
+
+        self.assertEqual(
+            self.BBOX,
+            hrrr_input.bbox
+        )
+
+    def test_config(self):
+        hrrr_input = GriddedInput(**self.VALID_ARGS)
+
+        self.assertEqual(
+            self.CONFIG,
+            hrrr_input.config
+        )
+
+    def test_invalid_topo_argument(self):
+        with self.assertRaisesRegex(TypeError, 'Argument topo'):
             GriddedInput(
                 self.START_DATE, self.END_DATE,
-                bbox=[], config={}
+                bbox=self.BBOX, config={}, topo=object
             )
 
-    def test_missing_bbox_argument(self):
-        with self.assertRaisesRegex(TypeError, 'Missing argument: bbox'):
+    def test_invalid_bbox_argument(self):
+        with self.assertRaisesRegex(TypeError, 'Argument bbox'):
             GriddedInput(
                 self.START_DATE, self.END_DATE,
-                topo=object, config={}
-            )
-
-    def test_missing_config_argument(self):
-        with self.assertRaisesRegex(TypeError, 'Missing argument: config'):
-            GriddedInput(
-                self.START_DATE, self.END_DATE,
-                topo=object, bbox=[]
+                topo=self.TOPO_MOCK, config={}, bbox=[]
             )
 
     def test_logger_name(self):
