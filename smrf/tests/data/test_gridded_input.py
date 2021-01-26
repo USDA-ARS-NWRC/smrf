@@ -70,6 +70,13 @@ class TestGriddedInput(unittest.TestCase):
             hrrr_input.config
         )
 
+    def test_invalid_start_date_argument(self):
+        with self.assertRaisesRegex(TypeError, 'Argument start_date'):
+            GriddedInput(
+                '2021-01-01', self.END_DATE,
+                bbox=self.BBOX, config={}, topo=self.TOPO_MOCK
+            )
+
     def test_invalid_topo_argument(self):
         with self.assertRaisesRegex(TypeError, 'Argument topo'):
             GriddedInput(

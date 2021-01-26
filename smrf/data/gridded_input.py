@@ -1,4 +1,5 @@
 import logging
+from datetime import datetime
 
 from smrf.data.load_topo import Topo
 
@@ -18,6 +19,18 @@ class GriddedInput:
         self.config = config
 
         self._logger = logging.getLogger(self.__class__.__name__)
+
+    @property
+    def start_date(self):
+        return self._start_date
+
+    @start_date.setter
+    def start_date(self, value):
+        if not isinstance(value, datetime):
+            raise TypeError('Argument start_date is not an instance of %s',
+                            datetime.__name__)
+        else:
+            self._start_date = value
 
     @property
     def bbox(self):
