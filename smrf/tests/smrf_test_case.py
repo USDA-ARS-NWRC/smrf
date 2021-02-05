@@ -52,6 +52,10 @@ class SMRFTestCase(unittest.TestCase):
     def base_config(self):
         return self.base_config_copy()
 
+    @property
+    def smrf_instance(self):
+        return smrf.framework.SMRF(self.config_file)
+
     @classmethod
     def base_config_copy(cls):
         return deepcopy(cls._base_config)

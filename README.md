@@ -140,3 +140,15 @@ In a way that ARS uses this, we keep the config, topo and data on one location a
 ```bash
 docker run -v <input>:/data/input -v <output>:/data/output usdaarsnwrc/smrf run_smrf <path to config>
 ```
+
+## Development
+
+### Tests
+SMRF relies on class level and integration type testing.
+On the class level, tests cover expected structure and ensure proper attribute types.
+Example: `tests/data/test_gridded_input.py`
+
+The integration tests ensure that changes to the code base do not trigger unexpected changes to the model output.
+Example: `tests/test_full_smrf.py`
+
+All required data for integration tests is stored under: `tests/basins/` with two sample areas.

@@ -1,14 +1,13 @@
-import logging
-
 import numpy as np
 import pandas as pd
 from weather_forecast_retrieval.hrrr import HRRR
 
+from smrf.data.gridded_input import GriddedInput
 from smrf.envphys.solar.cloud import get_hrrr_cloud
 from smrf.envphys.vapor_pressure import rh2vp
 
 
-class InputGribHRRR():
+class InputGribHRRR(GriddedInput):
 
     DATA_TYPE = 'hrrr_grib'
 
@@ -21,33 +20,18 @@ class InputGribHRRR():
         'cloud_factor'
     ]
 
-    def __init__(self, start_date, end_date, bbox=None,
-                 topo=None, config=None):
+    TIME_STEP = pd.to_timedelta(20, 'minutes')
 
-        self.start_date = start_date
-        self.end_date = end_date
-        self.topo = topo
-        self.bbox = bbox
-        self.config = config
-        self.time_zone = start_date.tzinfo
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
 
-        if topo is None:
-            raise Exception('Must supply topo to InputWRF')
-
-        if bbox is None:
-            raise Exception('Must supply bbox to InputWRF')
-
-        self._logger = logging.getLogger(__name__)
-
-        if self.config['hrrr_load_method'] == 'timestep':
-            self._timedelta_steps = pd.to_timedelta(20, 'minutes')
+        if 'hrrr_load_method' in self.config and \
+                self.config['hrrr_load_method'] == 'timestep':
             self.timestep_dates()
             self.cf_memory = None
 
-        self.hrrr = HRRR(external_logger=self._logger)
-
     def timestep_dates(self):
-        self.end_date = self.start_date + self._timedelta_steps
+        self.end_date = self.start_date + self.TIME_STEP
 
     def load(self):
         """
@@ -67,18 +51,18 @@ class InputGribHRRR():
         from the `air_temp` and `relative_humidity`. The `wind_speed` and
         `wind_direction` will be calculated from `wind_u` and `wind_v`
         """
-
         self._logger.info('Reading data from from HRRR directory: {}'.format(
             self.config['hrrr_directory']
         ))
 
-        metadata, data = self.hrrr.get_saved_data(
-            self.start_date,
-            self.end_date,
-            self.bbox,
-            output_dir=self.config['hrrr_directory'],
-            force_zone_number=self.topo.zone_number
-        )
+        metadata, data = HRRR(external_logger=self._logger).\
+            get_saved_data(
+                self.start_date,
+                self.end_date,
+                self.bbox,
+                output_dir=self.config['hrrr_directory'],
+                force_zone_number=self.topo.zone_number
+            )
 
         self.parse_data(metadata, data)
 

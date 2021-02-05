@@ -7,7 +7,6 @@ from smrf.tests.smrf_test_case import SMRFTestCase
 
 
 class TestLoadHRRR(SMRFTestCase):
-
     @classmethod
     def setUpClass(cls):
         super().setUpClass()

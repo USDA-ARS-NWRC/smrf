@@ -4,9 +4,10 @@ import numpy as np
 import utm
 
 from smrf.data import InputCSV, InputGribHRRR, InputNetcdf, InputWRF
+from smrf.data.gridded_input import GriddedInput
 
 
-class InputData():
+class InputData:
     """
     Class for loading and storing the data, either from
     - CSV file
@@ -41,19 +42,10 @@ class InputData():
         'thermal': 'thermal'
     }
 
-    DATA_FUNCTIONS = {
-        InputCSV.DATA_TYPE: InputCSV,
-        InputWRF.DATA_TYPE: InputWRF,
-        InputNetcdf.DATA_TYPE: InputNetcdf,
-        InputGribHRRR.DATA_TYPE: InputGribHRRR
-    }
-
     # degree offset for a buffer around the model domain in degrees
     OFFSET = 0.1
 
     def __init__(self, smrf_config, start_date, end_date, topo):
-
-        self.smrf_config = smrf_config
         self.start_date = start_date
         self.end_date = end_date
         self.time_zone = start_date.tzinfo
@@ -64,26 +56,8 @@ class InputData():
         # get the buffer gridded data domain extents in lat long
         self.model_domain_grid()
 
-        if 'csv' in self.smrf_config:
-            self.data_type = InputCSV.DATA_TYPE
-            data_inputs = {
-                'stations': self.smrf_config['csv']['stations'],
-                'config': self.smrf_config['csv']
-            }
+        self.__determine_data_type(smrf_config)
 
-        elif 'gridded' in self.smrf_config:
-            self.data_type = self.smrf_config['gridded']['data_type']
-            data_inputs = {
-                'bbox': self.bbox,
-                'config': self.smrf_config['gridded'],
-                'topo': self.topo
-            }
-
-        # load the data
-        self.load_class = self.DATA_FUNCTIONS[self.data_type](
-            self.start_date,
-            self.end_date,
-            **data_inputs)
         self.load_class.load()
 
         self.set_variables()
@@ -92,6 +66,52 @@ class InputData():
 
         if self.data_type == InputCSV.DATA_TYPE:
             self.load_class.check_colocation()
+
+    def __determine_data_type(self, smrf_config):
+        """
+        Sets the attributes `data_type` and 'loader_class` based of the
+        given `smrf_config` parameter. Currently supports two types of data
+        input:
+          * CSV
+          * Gridded (NetCDF, HRRR Grib file, WRF)
+
+        Args:
+            smrf_config: SMRF configuration
+
+        Raises:
+            AttributeError: If configuration does not contain a known input
+            data type
+        """
+        loader_args = dict(start_date=self.start_date, end_date=self.end_date)
+
+        if InputCSV.DATA_TYPE in smrf_config:
+            self.data_type = InputCSV.DATA_TYPE
+            self.load_class = InputCSV(
+                **loader_args,
+                stations=smrf_config[InputCSV.DATA_TYPE]['stations'],
+                config=smrf_config[InputCSV.DATA_TYPE],
+            )
+        elif GriddedInput.TYPE in smrf_config:
+            self.data_type = smrf_config[GriddedInput.TYPE]['data_type']
+            data_inputs = dict(
+                bbox=self.bbox,
+                config=smrf_config[GriddedInput.TYPE],
+                topo=self.topo,
+            )
+            if self.data_type == InputGribHRRR.DATA_TYPE:
+                self.load_class = InputGribHRRR(**loader_args, **data_inputs)
+            elif self.data_type == InputNetcdf.DATA_TYPE:
+                self.load_class = InputNetcdf(**loader_args, **data_inputs)
+            elif self.data_type == InputWRF.DATA_TYPE:
+                self.load_class = InputWRF(**loader_args, **data_inputs)
+            else:
+                raise AttributeError(
+                    'Unknown gridded data input type in ini-file'
+                )
+        else:
+            raise AttributeError(
+                'Missing required data type attribute in ini-file'
+            )
 
     def set_variables(self):
         """Set the instance attributes for each variable
@@ -121,13 +141,13 @@ class InputData():
                 'utm_y'), axis=1)
 
     def model_domain_grid(self):
-        '''
+        """
         Retrieve the bounding box for the gridded data by adding a buffer to
         the extents of the topo domain.
 
         Returns:
             tuple: (dlat, dlon) Domain latitude and longitude extents
-        '''
+        """
         dlat = np.zeros((2,))
         dlon = np.zeros_like(dlat)
 
@@ -153,7 +173,7 @@ class InputData():
                               self.dlon[1], self.dlat[1]])
 
     def get_latlon(self, utm_x, utm_y):
-        '''
+        """
         Convert UTM coords to Latitude and longitude
 
         Args:
@@ -163,13 +183,14 @@ class InputData():
         Returns:
             tuple: (lat,lon) latitude and longitude conversion from the UTM
                 coordinates
-        '''
+        """
 
         lat, lon = utm.to_latlon(utm_x, utm_y, self.topo.zone_number,
                                  northern=self.topo.northern_hemisphere)
         return lat, lon
 
-    def find_pixel_location(self, row, vec, a):
+    @staticmethod
+    def find_pixel_location(row, vec, a):
         """
         Find the index of the stations X/Y location in the model domain
 
