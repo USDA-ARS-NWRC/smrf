@@ -17,10 +17,12 @@ then
     echo "Running SMRF"
     run_smrf tests/basins/RME/gold/gold_config.ini
 
-    echo "Cleaning up"
-    rm tests/basins/RME/gold/log.txt
-    rm tests/basins/RME/gold/config.ini
-    rm -rf tests/basins/RME/gold/input_backup
+    if [ $? == 0 ]; then
+        echo "Cleaning up"
+        rm tests/basins/RME/gold/log.txt
+        rm tests/basins/RME/gold/config.ini
+        rm -rf tests/basins/RME/gold/input_backup
+    fi
 else
     echo "RME station gold files not updated"
 fi
