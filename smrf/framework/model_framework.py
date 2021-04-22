@@ -160,8 +160,6 @@ class SMRF():
         if 'gridded' in self.config:
             self.gridded = True
             if self.config['gridded']['data_type'] in ['hrrr_grib']:
-                self.forecast_flag = \
-                    self.config['gridded']['hrrr_forecast_flag']
                 self.hrrr_data_timestep = \
                     self.config['gridded']['hrrr_load_method'] == 'timestep'
 
