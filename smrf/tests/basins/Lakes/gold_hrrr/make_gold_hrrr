@@ -13,14 +13,15 @@ then
     echo "Updating Lakes HRRR gold files"
     echo "Removing old gold files"
     rm tests/Lakes/gold_hrrr/*.nc
-    
-    echo "Running SMRF"
-    run_smrf tests/Lakes/gold_hrrr/gold_config.ini
 
-    echo "Cleaning up"
-    rm tests/Lakes/gold_hrrr/log.txt
-    rm tests/Lakes/gold_hrrr/config.ini
+    echo "Running SMRF"
+    run_smrf tests/basins/Lakes/gold_hrrr/gold_config.ini
+
+    if [ $? == 0 ]; then
+        echo "Cleaning up"
+        rm tests/basins/Lakes/gold_hrrr/log.txt
+        rm tests/basins/Lakes/gold_hrrr/config.ini
+    fi
 else
     echo "Lakes HRRR gold files not updated"
 fi
-

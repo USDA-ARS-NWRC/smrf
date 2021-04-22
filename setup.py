@@ -4,18 +4,17 @@
 import os
 
 from setuptools import Extension, find_packages, setup
-from setuptools.command.build_ext import build_ext as _build_ext
 
 # Test if compiling with cython or using the C source
 try:
     from Cython.Distutils import build_ext as _build_ext
 except ImportError:
-    USE_CYTHON = False
+    from setuptools.command.build_ext import build_ext as _build_ext
+    ext = '.c'
+    print('Using GCC')
 else:
-    USE_CYTHON = True
-
-print('Using Cython {}'.format(USE_CYTHON))
-ext = '.pyx' if USE_CYTHON else '.c'
+    ext = '.pyx'
+    print('Using Cython')
 
 
 def c_name_from_path(location, name):
@@ -85,10 +84,6 @@ ext_modules += [
     ),
 ]
 
-cmdclass = {}
-if USE_CYTHON:
-    cmdclass = {'build_ext': build_ext}
-
 with open('requirements.txt') as requirements_file:
     requirements = requirements_file.read()
 
@@ -130,7 +125,9 @@ setup(
     ],
     test_suite='smrf.tests',
     # tests_require=test_requirements,
-    cmdclass=cmdclass,
+    cmdclass={
+        'build_ext': build_ext
+    },
     ext_modules=ext_modules,
     scripts=[
         'scripts/update_configs',
