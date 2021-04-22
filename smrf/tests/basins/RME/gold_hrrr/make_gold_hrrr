@@ -5,7 +5,7 @@
 # file will put the outputs in the correct place
 #
 # Run as:
-#     $ ./tests/basins/RME/gold/make_gold_hrrr
+#     $ ./tests/basins/RME/gold_hrrr/make_gold_hrrr
 
 read -r -p "Recreating gold standard, are you sure? [y/N] " response
 if [[ "$response" = "yes" || "$response" = "y" ]]
@@ -17,10 +17,11 @@ then
     echo "Running SMRF"
     run_smrf tests/basins/RME/gold_hrrr/gold_config.ini
 
-    echo "Cleaning up"
-    rm tests/basins/RME/gold_hrrr/log.txt
-    rm tests/basins/RME/gold_hrrr/config.ini
+    if [ $? == 0 ]; then
+        echo "Cleaning up"
+        rm tests/basins/RME/gold_hrrr/log.txt
+        rm tests/basins/RME/gold_hrrr/config.ini
+    fi
 else
     echo "RME HRRR gold files not updated"
 fi
-
