@@ -38,12 +38,14 @@ if "CC" not in os.environ:
 # extension parameters
 # OSX with clang requires different link args for openmp
 extra_link_args = ['-fopenmp', '-O3']
+extra_compile_args = ['-fopenmp', '-O3']
 if platform == 'darwin':
+    extra_compile_args[0] = '-fopenmp=libiomp5'
     extra_link_args[0] = '-fopenmp=libiomp5'
 
 extension_params = dict(
     extra_compile_args=['-fopenmp', '-O3'],
-    extra_link_args=extra_link_args,
+    extra_link_args=['-fopenmp', '-O3'],
 )
 
 ext_modules = []
@@ -108,7 +110,7 @@ setup(
     long_description_content_type="text/markdown",
     packages=find_packages(include=['smrf', 'smrf.*']),
     install_requires=requirements,
-    python_requires='>3.5',
+    python_requires='>=3.6',
     include_package_data=True,
     package_data={
         'smrf': [
