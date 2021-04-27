@@ -91,6 +91,8 @@ jobs:
         run: |
           python3 setup.py build_ext --inplace -f
           python3 setup.py test
+        env:
+          CC: gcc-9
 
   build_wheels:
     needs: unittest
