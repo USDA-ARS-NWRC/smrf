@@ -1,6 +1,6 @@
 import numpy as np
 import pandas as pd
-from weather_forecast_retrieval.hrrr import HRRR
+import weather_forecast_retrieval.data.hrrr as hrrr_data
 
 from smrf.data.gridded_input import GriddedInput
 from smrf.envphys.solar.cloud import get_hrrr_cloud
@@ -55,14 +55,15 @@ class InputGribHRRR(GriddedInput):
             self.config['hrrr_directory']
         ))
 
-        metadata, data = HRRR(external_logger=self._logger).\
-            get_saved_data(
-                self.start_date,
-                self.end_date,
-                self.bbox,
-                output_dir=self.config['hrrr_directory'],
-                force_zone_number=self.topo.zone_number
-            )
+        metadata, data = hrrr_data.FileLoader(
+            file_dir=self.config['hrrr_directory'],
+            external_logger=self._logger
+        ).get_saved_data(
+            self.start_date,
+            self.end_date,
+            self.bbox,
+            force_zone_number=self.topo.zone_number
+        )
 
         self.parse_data(metadata, data)
 
