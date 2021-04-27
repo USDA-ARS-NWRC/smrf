@@ -2,6 +2,7 @@
 # -*- coding: utf-8 -*-
 
 import os
+from sys import platform
 
 from setuptools import Extension, find_packages, setup
 
@@ -34,11 +35,18 @@ class build_ext(_build_ext):
 if "CC" not in os.environ:
     os.environ["CC"] = "gcc"
 
-ext_modules = []
+# extension parameters
+# OSX with clang requires different link args for openmp
+extra_link_args = ['-fopenmp', '-O3']
+if platform == 'darwin':
+    extra_link_args[0] = '-fopenmp=libiomp5'
+
 extension_params = dict(
     extra_compile_args=['-fopenmp', '-O3'],
-    extra_link_args=['-fopenmp', '-O3'],
+    extra_link_args=extra_link_args,
 )
+
+ext_modules = []
 
 # detrended kriging
 source_folder = 'smrf/spatial/dk'
