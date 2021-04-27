@@ -93,8 +93,8 @@ with open('README.md') as readme_file:
 setup(
     name='smrf-dev',
     description="Distributed snow modeling for water resources",
-    author="Scott Havens",
-    author_email='scott.havens@ars.usda.gov',
+    author="USDA ARS NWRC",
+    author_email='snow@ars.usda.gov',
     url='https://github.com/USDA-ARS-NWRC/smrf',
     long_description=readme,
     long_description_content_type="text/markdown",
@@ -121,7 +121,8 @@ setup(
         'Programming Language :: Python :: 3',
         'Programming Language :: Python :: 3.6',
         'Programming Language :: Python :: 3.7',
-        'Programming Language :: Python :: 3.8'
+        'Programming Language :: Python :: 3.8',
+        'Programming Language :: Python :: 3.9'
     ],
     test_suite='smrf.tests',
     # tests_require=test_requirements,

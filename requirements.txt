@@ -8,7 +8,7 @@ scipy>=1.0.0,<1.5.0
 utm==0.4.0
 pykrige>=1.5.0
 spatialnc>=0.2.12
-weather-forecast-retrieval>=0.6.12
+weather-forecast-retrieval<0.7.0
 topocalc>=0.5
 setuptools_scm<4.2
 xarray>=0.15,<0.16
