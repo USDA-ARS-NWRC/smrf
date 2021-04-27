@@ -32,8 +32,8 @@ class build_ext(_build_ext):
 
 
 # Give user option to specify his local compiler name
-if "CC" not in os.environ:
-    os.environ["CC"] = "gcc"
+# if "CC" not in os.environ:
+#     os.environ["CC"] = "gcc"
 
 # extension parameters
 # OSX with clang requires different link args for openmp
