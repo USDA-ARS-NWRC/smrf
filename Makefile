@@ -54,9 +54,6 @@ lint:
 test:
 	python3 setup.py test
 
-test-all:
-	tox
-
 coverage: ## run coverage and submit
 	coverage run --source smrf setup.py test
 	coverage report --fail-under=75
