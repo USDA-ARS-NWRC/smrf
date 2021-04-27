@@ -47,8 +47,8 @@ articles, and such.
 
 Versioning
 ----------
-SMRF uses setuptools_scm to version control. Nothing major needs to be done with setuptools_scm as the
-version for SMRF will be derived from the git tags and will add the node on dev versions with the date.
+SMRF uses setuptools_scm to set the version from tags.
+
 
 The development team of SMRF attempted to adhere to semantic versioning. Here is the basics taken from
 the semantic versioning website.
@@ -65,6 +65,20 @@ the semantic versioning website.
     denote an alpha or beta release of the version X.Y
 
 For more info on versions see http://semver.org
+
+Releasing to PyPI
+-----------------
+
+A new release of SMRF will be pushed to the `smrf-dev <https://pypi.org/project/smrf-dev/>` development package on Pypi. This will
+not create a stable release and is intended on use by developers.
+
+To create a new release on `Pypi.org <https://pypi.org/>`_, follow these steps:
+
+#. Create a new release for weather_forecast_retrieval
+#. Name the tag and release the version number, for example `v0.7.0 <https://github.com/USDA-ARS-NWRC/weather_forecast_retrieval/releases/tag/v0.7.0>`_
+#. Add documentation about the release and why it's different from the previous.
+   Especially highlight any changes that will break existing integrations.
+#. Publish new release which will trigger a build to release to PyPI
 
 Submit Feedback
 ~~~~~~~~~~~~~~~
