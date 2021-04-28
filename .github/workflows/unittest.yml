@@ -90,7 +90,7 @@ jobs:
 
       - name: Install dependencies
         run: |
-          python3 -m pip install --upgrade pip wheel
+          python3 -m pip install --upgrade pip
           python3 -m pip install -r requirements.txt
           python3 -m pip install .[tests]
 
@@ -119,7 +119,7 @@ jobs:
         env:
           CIBW_SOME_OPTION: value
           CIBW_TEST_REQUIRES: nose
-          CIBW_TEST_COMMAND: "nosetests -vv --exe topocalc"
+          CIBW_TEST_COMMAND: "nosetests -vv --exe smrf"
           CIBW_BUILD: "cp3*-manylinux_x86_64 cp3*-macosx_x86_64"
           CIBW_SKIP: "?p27* pp* ?p35"
           CIBW_BUILD_VERBOSITY: 3
