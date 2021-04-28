@@ -88,10 +88,10 @@ jobs:
           python3 -m pip install .[tests]
 
       - name: Run unittests
-        run: |
-          python3 setup.py test
         env:
           CC: gcc-9
+        run: |
+          python3 setup.py test
 
   build_wheels:
     needs: unittest

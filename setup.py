@@ -31,6 +31,7 @@ class build_ext(_build_ext):
 
 
 # Give user option to specify local compiler name
+print(os.environ["CC"])
 if "CC" not in os.environ:
     os.environ["CC"] = "gcc"
 
