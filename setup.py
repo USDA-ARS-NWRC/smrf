@@ -2,7 +2,6 @@
 # -*- coding: utf-8 -*-
 
 import os
-from sys import platform
 
 from setuptools import Extension, find_packages, setup
 
@@ -36,13 +35,6 @@ if "CC" not in os.environ:
     os.environ["CC"] = "gcc"
 
 # extension parameters
-# OSX with clang requires different link args for openmp
-extra_link_args = ['-fopenmp', '-O3']
-extra_compile_args = ['-fopenmp', '-O3']
-if platform == 'darwin':
-    extra_compile_args[0] = '-fopenmp=libiomp5'
-    extra_link_args[0] = '-fopenmp=libiomp5'
-
 extension_params = dict(
     extra_compile_args=['-fopenmp', '-O3'],
     extra_link_args=['-fopenmp', '-O3'],
