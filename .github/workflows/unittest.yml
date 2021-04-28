@@ -55,9 +55,9 @@ jobs:
     # needs: [flake8, coverage]
     strategy:
       matrix:
-        # os: [ubuntu-latest, macos-latest]
+        os: [ubuntu-latest, macos-latest]
         python-version: [3.6, 3.7, 3.8, 3.9]
-        os: [ubuntu-latest]
+        # os: [ubuntu-latest]
         # python-version: [3.8]
     runs-on: ${{ matrix.os }}
     env:
@@ -86,7 +86,7 @@ jobs:
       - uses: actions/cache@v2
         with:
           path: ~/.cache/pip
-          key: ${{ matrix.os }}-${{ matrix.python-version }}-${{ hashFiles('requirements.txt') }}
+          key: ${{ matrix.os }}-${{ matrix.python-version }}-${{ hashFiles('setup.py') }}-${{ hashFiles('requirements.txt') }}
 
       - name: Install dependencies
         run: |
