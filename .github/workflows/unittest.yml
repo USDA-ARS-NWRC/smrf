@@ -55,10 +55,10 @@ jobs:
     # needs: [flake8, coverage]
     strategy:
       matrix:
-        # os: [ubuntu-latest, macos-latest]
-        # python-version: [3.6, 3.7, 3.8, 3.9]
         os: [ubuntu-latest, macos-latest]
-        python-version: [3.8]
+        python-version: [3.6, 3.7, 3.8, 3.9]
+        # os: [ubuntu-latest, macos-latest]
+        # python-version: [3.8]
     runs-on: ${{ matrix.os }}
     env:
       CC: gcc-9
@@ -76,7 +76,7 @@ jobs:
           if [ "$RUNNER_OS" == "Linux" ]; then
               sudo apt-get install -y libeccodes-tools
           elif [ "$RUNNER_OS" == "macOS" ]; then
-              brew install gcc@9
+              brew install eccodes
           else
               echo "$RUNNER_OS not supported"
               exit 1
@@ -85,14 +85,12 @@ jobs:
 
       - name: Install dependencies
         run: |
-          python3 -m pip install --upgrade pip
+          python3 -m pip install --upgrade pip wheel
           python3 -m pip install -r requirements.txt
           python3 -m pip install .[tests]
 
       - name: Run unittests
         run: |
-          gcc-9 --version
-          echo $CC
           python3 setup.py test
 
   build_wheels:
