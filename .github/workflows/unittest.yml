@@ -74,7 +74,7 @@ jobs:
           if [ "$RUNNER_OS" == "Linux" ]; then
               sudo apt-get install -y libeccodes-tools
           elif [ "$RUNNER_OS" == "macOS" ]; then
-              brew install eccodes
+              brew install eccodes gcc@9
           else
               echo "$RUNNER_OS not supported"
               exit 1
@@ -91,6 +91,8 @@ jobs:
         env:
           CC: gcc-9
         run: |
+          gcc-9 --version
+          echo $CC
           python3 setup.py test
 
   build_wheels:
