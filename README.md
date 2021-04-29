@@ -4,7 +4,6 @@
 [![Pypi version](https://img.shields.io/pypi/v/smrf-dev)](https://img.shields.io/pypi/v/smrf-dev)
 [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.898158.svg)](https://doi.org/10.5281/zenodo.898158)
 [![DOI](https://readthedocs.org/projects/smrf/badge/)](https://smrf.readthedocs.io)
-[![Build Status](https://travis-ci.com/USDA-ARS-NWRC/smrf.svg?branch=master)](https://travis-ci.com/USDA-ARS-NWRC/smrf)
 [![Coverage Status](https://coveralls.io/repos/github/USDA-ARS-NWRC/smrf/badge.svg?branch=master)](https://coveralls.io/github/USDA-ARS-NWRC/smrf?branch=master)
 [![Maintainability](https://api.codeclimate.com/v1/badges/128437f4e928e99cace5/maintainability)](https://codeclimate.com/github/USDA-ARS-NWRC/smrf/maintainability)
 
@@ -22,6 +21,8 @@ Read the [full documentation for SMRF](https://smrf.readthedocs.io) including up
   - [Input data](#input-data)
   - [Running SMRF](#running-smrf)
   - [Docker](#docker)
+  - [Development](#development)
+    - [Tests](#tests)
 
 ## Which version to use?
 
