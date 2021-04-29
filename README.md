@@ -109,7 +109,6 @@ Input meterological data for SMRF requires the following variables:
 The data can be supplied through the following formats:
 
 - CSV files
-- [MySQL database](https://github.com/USDA-ARS-NWRC/weather_database)
 - Weather Research and Forecasting (WRF) outputs
 - High Resolution Rapid Refresh (HRRR)
 - Generic netCDF
