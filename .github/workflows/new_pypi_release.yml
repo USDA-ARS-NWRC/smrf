@@ -63,7 +63,7 @@ jobs:
           CIBW_TEST_EXTRAS: tests
           CIBW_BUILD: "${{ matrix.cibw }}"
           CIBW_BUILD_VERBOSITY: 1
-          CIBW_BEFORE_BUILD_MACOS: "{package}/travis/cibuildwheel_before_build_macos.sh"
+          CIBW_BEFORE_BUILD_MACOS: "{package}/.github/cibuildwheel_before_build_macos.sh"
           CIBW_ENVIRONMENT_MACOS: "NOT_ON_GOLD_HOST=yup CC=gcc-9"
 
       - uses: actions/upload-artifact@v2
