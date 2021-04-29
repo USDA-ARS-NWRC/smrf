@@ -10,145 +10,88 @@ on: [push]
 
 jobs:
 
-  # flake8:
-  #   runs-on: ubuntu-latest
-  #   steps:
-  #     - uses: actions/checkout@v2
+  flake8:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
 
-  #     - name: Set up Python
-  #       uses: actions/setup-python@v2
-  #       with:
-  #         python-version: '3.7'
+      - name: Set up Python
+        uses: actions/setup-python@v2
+        with:
+          python-version: '3.7'
           
-  #     - name: Install dependencies
-  #       run: |
-  #         python3 -m pip install --upgrade pip
-  #         python3 -m pip install flake8
+      - name: Install dependencies
+        run: |
+          python3 -m pip install --upgrade pip
+          python3 -m pip install flake8
 
-  #     - name: Lint with flake8
-  #       run: |
-  #         flake8 smrf
+      - name: Lint with flake8
+        run: |
+          flake8 smrf
 
-  # coverage:
-  #   runs-on: ubuntu-latest
-  #   steps:
-  #     - uses: actions/checkout@v2
+  coverage:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
 
-  #     - name: Set up Python
-  #       uses: actions/setup-python@v2
-  #       with:
-  #         python-version: '3.7'
+      - name: Set up Python
+        uses: actions/setup-python@v2
+        with:
+          python-version: '3.7'
           
-  #     - name: Install dependencies
-  #       run: |
-  #         sudo apt-get install -y libeccodes-tools
-  #         python3 -m pip install --upgrade pip
-  #         python3 -m pip install coverage coveralls PyYAML
-  #         python3 -m pip install -r requirements.txt
-  #         python3 -m pip install .[tests]
+      - name: Install dependencies
+        run: |
+          sudo apt-get install -y libeccodes-tools
+          python3 -m pip install --upgrade pip
+          python3 -m pip install coverage coveralls PyYAML
+          python3 -m pip install -r requirements.txt
+          python3 -m pip install .[tests]
 
-  #     - name: Run coverage
-  #       run: |
-  #         make coveralls
+      - name: Run coverage
+        run: |
+          make coveralls
 
-  # unittest:
-  #   # needs: [flake8, coverage]
-  #   strategy:
-  #     matrix:
-  #       os: [ubuntu-latest, macos-latest]
-  #       python-version: [3.6, 3.7, 3.8, 3.9]
-  #       # os: [ubuntu-latest]
-  #       # python-version: [3.8]
-  #   runs-on: ${{ matrix.os }}
-  #   env:
-  #     CC: gcc-9
-
-  #   steps:
-  #     - uses: actions/checkout@v2
-
-  #     - name: Set up Python ${{ matrix.python-version }}
-  #       uses: actions/setup-python@v2
-  #       with:
-  #         python-version: ${{ matrix.python-version }}
-
-  #     - name: Install eccodes
-  #       run: |
-  #         if [ "$RUNNER_OS" == "Linux" ]; then
-  #             sudo apt-get install -y libeccodes-tools
-  #         elif [ "$RUNNER_OS" == "macOS" ]; then
-  #             brew install eccodes
-  #         else
-  #             echo "$RUNNER_OS not supported"
-  #             exit 1
-  #         fi
-  #       shell: bash
-
-  #     - uses: actions/cache@v2
-  #       with:
-  #         path: ~/.cache/pip
-  #         key: ${{ matrix.os }}-${{ matrix.python-version }}-${{ hashFiles('setup.py') }}-${{ hashFiles('requirements.txt') }}
-
-  #     - name: Install dependencies
-  #       run: |
-  #         python3 -m pip install --upgrade pip setuptools
-  #         python3 -m pip install -r requirements.txt
-  #         python3 -m pip install .[tests]
-
-  #     - name: Run unittests
-  #       run: |
-  #         python3 setup.py test
-
-  build_wheels_linux:
-    # needs: unittest
-    name: Build wheel ${{ matrix.cibw }}
-    runs-on: ubuntu-20.04
+  unittest:
+    needs: [flake8, coverage]
     strategy:
       matrix:
-        cibw: [cp36-manylinux_x86_64, cp37-manylinux_x86_64, cp38-manylinux_x86_64, cp39-manylinux_x86_64]
+        os: [ubuntu-latest, macos-latest]
+        python-version: [3.6, 3.7, 3.8, 3.9]
+    runs-on: ${{ matrix.os }}
+    env:
+      CC: gcc-9
 
     steps:
       - uses: actions/checkout@v2
 
-      - uses: actions/setup-python@v2
-        name: Install Python
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v2
         with:
-          python-version: '3.8'
+          python-version: ${{ matrix.python-version }}
 
-      - name: Build wheels
-        uses: joerick/cibuildwheel@v1.10.0
-        env:
-          CIBW_MANYLINUX_X86_64_IMAGE: manylinux2014
-          CIBW_TEST_REQUIRES: nose
-          CIBW_TEST_COMMAND: "NOT_ON_GOLD_HOST=yup nosetests -vv --exe smrf"
-          CIBW_TEST_EXTRAS: tests
-          CIBW_BUILD: "${{ matrix.cibw }}"
-          CIBW_BUILD_VERBOSITY: 1
-          CIBW_BEFORE_BUILD_LINUX: "{package}/travis/cibuildwheel_before_build_linux.sh"
-          CIBW_ENVIRONMENT: "NOT_ON_GOLD_HOST=yup"
+      - name: Install eccodes
+        run: |
+          if [ "$RUNNER_OS" == "Linux" ]; then
+              sudo apt-get install -y libeccodes-tools
+          elif [ "$RUNNER_OS" == "macOS" ]; then
+              brew install eccodes
+          else
+              echo "$RUNNER_OS not supported"
+              exit 1
+          fi
+        shell: bash
 
-  build_wheels_macos:
-    # needs: unittest
-    name: Build wheel ${{ matrix.cibw }}
-    runs-on: macos-10.15
-    strategy:
-      matrix:
-        cibw: [cp36-macosx_x86_64, cp37-macosx_x86_64, cp38-macosx_x86_64, cp39-macosx_x86_64]
-
-    steps:
-      - uses: actions/checkout@v2
-
-      - uses: actions/setup-python@v2
-        name: Install Python
+      - uses: actions/cache@v2
         with:
-          python-version: '3.8'
+          path: ~/.cache/pip
+          key: ${{ matrix.os }}-${{ matrix.python-version }}-${{ hashFiles('setup.py') }}-${{ hashFiles('requirements.txt') }}
 
-      - name: Build wheels
-        uses: joerick/cibuildwheel@v1.10.0
-        env:
-          CIBW_TEST_REQUIRES: nose
-          CIBW_TEST_COMMAND: "NOT_ON_GOLD_HOST=yup nosetests -vv --exe smrf"
-          CIBW_TEST_EXTRAS: tests
-          CIBW_BUILD: "${{ matrix.cibw }}"
-          CIBW_BUILD_VERBOSITY: 1
-          CIBW_BEFORE_BUILD_MACOS: "{package}/travis/cibuildwheel_before_build_macos.sh"
-          CIBW_ENVIRONMENT_MACOS: "NOT_ON_GOLD_HOST=yup CC=gcc-9"
+      - name: Install dependencies
+        run: |
+          python3 -m pip install --upgrade pip setuptools
+          python3 -m pip install -r requirements.txt
+          python3 -m pip install .[tests]
+
+      - name: Run unittests
+        run: |
+          python3 setup.py test
