@@ -51,55 +51,55 @@ jobs:
   #       run: |
   #         make coveralls
 
-  unittest:
-    # needs: [flake8, coverage]
-    strategy:
-      matrix:
-        os: [ubuntu-latest, macos-latest]
-        python-version: [3.6, 3.7, 3.8, 3.9]
-        # os: [ubuntu-latest]
-        # python-version: [3.8]
-    runs-on: ${{ matrix.os }}
-    env:
-      CC: gcc-9
+  # unittest:
+  #   # needs: [flake8, coverage]
+  #   strategy:
+  #     matrix:
+  #       os: [ubuntu-latest, macos-latest]
+  #       python-version: [3.6, 3.7, 3.8, 3.9]
+  #       # os: [ubuntu-latest]
+  #       # python-version: [3.8]
+  #   runs-on: ${{ matrix.os }}
+  #   env:
+  #     CC: gcc-9
 
-    steps:
-      - uses: actions/checkout@v2
+  #   steps:
+  #     - uses: actions/checkout@v2
 
-      - name: Set up Python ${{ matrix.python-version }}
-        uses: actions/setup-python@v2
-        with:
-          python-version: ${{ matrix.python-version }}
+  #     - name: Set up Python ${{ matrix.python-version }}
+  #       uses: actions/setup-python@v2
+  #       with:
+  #         python-version: ${{ matrix.python-version }}
 
-      - name: Install eccodes
-        run: |
-          if [ "$RUNNER_OS" == "Linux" ]; then
-              sudo apt-get install -y libeccodes-tools
-          elif [ "$RUNNER_OS" == "macOS" ]; then
-              brew install eccodes
-          else
-              echo "$RUNNER_OS not supported"
-              exit 1
-          fi
-        shell: bash
+  #     - name: Install eccodes
+  #       run: |
+  #         if [ "$RUNNER_OS" == "Linux" ]; then
+  #             sudo apt-get install -y libeccodes-tools
+  #         elif [ "$RUNNER_OS" == "macOS" ]; then
+  #             brew install eccodes
+  #         else
+  #             echo "$RUNNER_OS not supported"
+  #             exit 1
+  #         fi
+  #       shell: bash
 
-      - uses: actions/cache@v2
-        with:
-          path: ~/.cache/pip
-          key: ${{ matrix.os }}-${{ matrix.python-version }}-${{ hashFiles('setup.py') }}-${{ hashFiles('requirements.txt') }}
+  #     - uses: actions/cache@v2
+  #       with:
+  #         path: ~/.cache/pip
+  #         key: ${{ matrix.os }}-${{ matrix.python-version }}-${{ hashFiles('setup.py') }}-${{ hashFiles('requirements.txt') }}
 
-      - name: Install dependencies
-        run: |
-          python3 -m pip install --upgrade pip setuptools
-          python3 -m pip install -r requirements.txt
-          python3 -m pip install .[tests]
+  #     - name: Install dependencies
+  #       run: |
+  #         python3 -m pip install --upgrade pip setuptools
+  #         python3 -m pip install -r requirements.txt
+  #         python3 -m pip install .[tests]
 
-      - name: Run unittests
-        run: |
-          python3 setup.py test
+  #     - name: Run unittests
+  #       run: |
+  #         python3 setup.py test
 
   build_wheels:
-    needs: unittest
+    # needs: unittest
     name: Build wheels on ${{ matrix.os }}
     runs-on: ${{ matrix.os }}
     strategy:
@@ -117,10 +117,14 @@ jobs:
       - name: Build wheels
         uses: joerick/cibuildwheel@v1.10.0
         env:
-          CIBW_SOME_OPTION: value
+          CIBW_MANYLINUX_X86_64_IMAGE: manylinux2014
           CIBW_TEST_REQUIRES: nose
-          CIBW_TEST_COMMAND: "nosetests -vv --exe smrf"
+          CIBW_TEST_COMMAND: "NOT_ON_GOLD_HOST=yup nosetests -vv --exe smrf"
+          CIBW_TEST_EXTRAS: tests
           CIBW_BUILD: "cp3*-manylinux_x86_64 cp3*-macosx_x86_64"
-          CIBW_SKIP: "?p27* pp* ?p35"
-          CIBW_BUILD_VERBOSITY: 3
-          CIBW_BEFORE_BUILD: "pip install -r requirements.txt"
+          CIBW_SKIP: "?p27* pp* cp35*"
+          CIBW_BUILD_VERBOSITY: 1
+          CIBW_BEFORE_BUILD_LINUX: "{package}/travis/cibuildwheel_before_build_linux.sh"
+          CIBW_BEFORE_BUILD_MACOS: "{package}/travis/cibuildwheel_before_build_macos.sh"
+          CIBW_ENVIRONMENT: "NOT_ON_GOLD_HOST=yup"
+          CIBW_ENVIRONMENT_MACOS: "NOT_ON_GOLD_HOST=yup CC=gcc-9"
