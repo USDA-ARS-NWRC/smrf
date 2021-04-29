@@ -10,7 +10,6 @@ on:
 jobs:
 
   build_wheels_linux:
-    needs: unittest
     name: Build wheel ${{ matrix.cibw }}
     runs-on: ubuntu-20.04
     strategy:
@@ -42,7 +41,6 @@ jobs:
           path: ./wheelhouse/*.whl
 
   build_wheels_macos:
-    needs: unittest
     name: Build wheel ${{ matrix.cibw }}
     runs-on: macos-10.15
     strategy:
