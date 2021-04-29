@@ -41,7 +41,6 @@ clean-pyc:
 	find . -name '__pycache__' -exec rm -fr {} +
 
 clean-test:
-	rm -fr .tox/
 	rm -f .coverage
 	rm -fr htmlcov/
 	
@@ -53,9 +52,6 @@ lint:
 
 test:
 	python3 setup.py test
-
-test-all:
-	tox
 
 coverage: ## run coverage and submit
 	coverage run --source smrf setup.py test

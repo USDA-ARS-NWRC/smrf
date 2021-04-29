@@ -1,0 +1,97 @@
+# This workflow will install Python dependencies, run tests and lint with a variety of Python versions
+# For more information see: https://help.github.com/actions/language-and-framework-guides/using-python-with-github-actions
+
+name: Unittest, flake8, coverage
+
+# Run action on pull requests
+on:
+  pull_request:
+    branches: [ master ]
+
+jobs:
+
+  flake8:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Set up Python
+        uses: actions/setup-python@v2
+        with:
+          python-version: '3.7'
+          
+      - name: Install dependencies
+        run: |
+          python3 -m pip install --upgrade pip
+          python3 -m pip install flake8
+
+      - name: Lint with flake8
+        run: |
+          flake8 smrf
+
+  coverage:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Set up Python
+        uses: actions/setup-python@v2
+        with:
+          python-version: '3.7'
+          
+      - name: Install dependencies
+        run: |
+          sudo apt-get install -y libeccodes-tools
+          python3 -m pip install --upgrade pip
+          python3 -m pip install coverage coveralls PyYAML
+          python3 -m pip install -r requirements.txt
+          python3 -m pip install .[tests]
+
+      - name: Run coverage
+        run: |
+          make coveralls
+
+  unittest:
+    needs: [flake8, coverage]
+    strategy:
+      matrix:
+        os: [ubuntu-latest, macos-latest]
+        python-version: [3.6, 3.7, 3.8, 3.9]
+    runs-on: ${{ matrix.os }}
+    env:
+      CC: gcc-9
+
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v2
+        with:
+          python-version: ${{ matrix.python-version }}
+
+      - name: Install eccodes
+        run: |
+          if [ "$RUNNER_OS" == "Linux" ]; then
+              sudo apt-get install -y libeccodes-tools
+          elif [ "$RUNNER_OS" == "macOS" ]; then
+              brew install eccodes
+          else
+              echo "$RUNNER_OS not supported"
+              exit 1
+          fi
+        shell: bash
+
+      - uses: actions/cache@v2
+        with:
+          path: ~/.cache/pip
+          key: ${{ matrix.os }}-${{ matrix.python-version }}-${{ hashFiles('setup.py') }}-${{ hashFiles('requirements.txt') }}
+
+      - name: Install dependencies
+        run: |
+          python3 -m pip install --upgrade pip setuptools
+          python3 -m pip install -r requirements.txt
+          python3 -m pip install .[tests]
+
+      - name: Run unittests
+        run: |
+          python3 setup.py test

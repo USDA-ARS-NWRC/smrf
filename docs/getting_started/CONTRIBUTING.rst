@@ -47,8 +47,8 @@ articles, and such.
 
 Versioning
 ----------
-SMRF uses setuptools_scm to version control. Nothing major needs to be done with setuptools_scm as the
-version for SMRF will be derived from the git tags and will add the node on dev versions with the date.
+SMRF uses setuptools_scm to set the version from tags.
+
 
 The development team of SMRF attempted to adhere to semantic versioning. Here is the basics taken from
 the semantic versioning website.
@@ -65,6 +65,20 @@ the semantic versioning website.
     denote an alpha or beta release of the version X.Y
 
 For more info on versions see http://semver.org
+
+Releasing to PyPI
+-----------------
+
+A new release of SMRF will be pushed to the `smrf-dev <https://pypi.org/project/smrf-dev/>` development package on Pypi. This will
+not create a stable release and is intended on use by developers.
+
+To create a new release on `Pypi.org <https://pypi.org/>`_, follow these steps:
+
+#. Create a new release for `smrf`
+#. Name the tag and release the version number, for example `v0.11.0 <https://github.com/USDA-ARS-NWRC/smrf/releases/tag/v0.11.0>`_
+#. Add documentation about the release and why it's different from the previous.
+   Especially highlight any changes that will break existing integrations.
+#. Publish new release which will trigger a build to release to PyPI
 
 Submit Feedback
 ~~~~~~~~~~~~~~~
@@ -126,8 +140,8 @@ Before you submit a pull request, check that it meets these guidelines:
 2. If the pull request adds functionality, the docs should be updated. Put
    your new functionality into a function with a docstring, and add the
    feature to the list in README.rst.
-3. The pull request should work for Python 3.4+, and for PyPy. Check
-   https://travis-ci.com/USDA-ARA-NWRC/smrf/pull_requests
+3. The pull request should work for Python 3.6+, and for PyPy. Check
+   https://github.com/USDA-ARS-NWRC/smrf/actions
    and make sure that the tests pass for all supported Python versions.
 
 Tips

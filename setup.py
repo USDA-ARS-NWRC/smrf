@@ -30,15 +30,18 @@ class build_ext(_build_ext):
         self.include_dirs.append(numpy.get_include())
 
 
-# Give user option to specify his local compiler name
+# Give user option to specify local compiler name
 if "CC" not in os.environ:
     os.environ["CC"] = "gcc"
+print(os.environ["CC"])
 
-ext_modules = []
+# extension parameters
 extension_params = dict(
     extra_compile_args=['-fopenmp', '-O3'],
     extra_link_args=['-fopenmp', '-O3'],
 )
+
+ext_modules = []
 
 # detrended kriging
 source_folder = 'smrf/spatial/dk'
@@ -93,14 +96,14 @@ with open('README.md') as readme_file:
 setup(
     name='smrf-dev',
     description="Distributed snow modeling for water resources",
-    author="Scott Havens",
-    author_email='scott.havens@ars.usda.gov',
+    author="USDA ARS NWRC",
+    author_email='snow@ars.usda.gov',
     url='https://github.com/USDA-ARS-NWRC/smrf',
     long_description=readme,
     long_description_content_type="text/markdown",
     packages=find_packages(include=['smrf', 'smrf.*']),
     install_requires=requirements,
-    python_requires='>3.5',
+    python_requires='>=3.6',
     include_package_data=True,
     package_data={
         'smrf': [
@@ -121,7 +124,8 @@ setup(
         'Programming Language :: Python :: 3',
         'Programming Language :: Python :: 3.6',
         'Programming Language :: Python :: 3.7',
-        'Programming Language :: Python :: 3.8'
+        'Programming Language :: Python :: 3.8',
+        'Programming Language :: Python :: 3.9'
     ],
     test_suite='smrf.tests',
     # tests_require=test_requirements,

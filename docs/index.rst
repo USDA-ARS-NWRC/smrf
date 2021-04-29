@@ -15,7 +15,7 @@ Features
 SMRF was developed as a modular framework to enable new modules to be easily integrated
 and utilized.
 
-* Load data into SMRF from MySQL database, CSV files, or gridded climate models (i.e. WRF)
+* Load data into SMRF from CSV files or gridded climate models (i.e. WRF)
 * Variables currently implemented:
     * Air temperature
     * Vapor pressure

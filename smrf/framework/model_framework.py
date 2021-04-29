@@ -298,7 +298,6 @@ class SMRF():
         can be loaded from three different sources:
 
             * :func:`CSV files <smrf.data.loadData.wxdata>`
-            * :func:`MySQL database <smrf.data.loadData.wxdata>`
             * :func:`Gridded data source (WRF) <smrf.data.loadGrid.grid>`
 
         After loading, :func:`~smrf.framework.mode_framework.SMRF.loadData`
