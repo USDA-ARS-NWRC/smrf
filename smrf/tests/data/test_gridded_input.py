@@ -14,12 +14,12 @@ class TestDataSource(GriddedInput):
 class TestGriddedInput(unittest.TestCase):
     TOPO_MOCK = MagicMock(spec=Topo, instance=True)
     BBOX = [1, 2, 3, 4]
-    CONFIG = MagicMock('config')
+    CONFIG_MOCK = MagicMock('config', spec_set=dict)
     START_DATE = pd.to_datetime('2021-01-01 00:00 UTC')
     END_DATE = pd.to_datetime('2021-01-02')
     VALID_ARGS = dict(
         start_date=START_DATE, end_date=END_DATE,
-        topo=TOPO_MOCK, bbox=BBOX, config=CONFIG
+        topo=TOPO_MOCK, bbox=BBOX, config=CONFIG_MOCK
     )
 
     def test_start_date(self):
@@ -63,10 +63,14 @@ class TestGriddedInput(unittest.TestCase):
         )
 
     def test_config(self):
+        config_values = MagicMock('Gridded Config')
+        smrf_config = {GriddedInput.TYPE: config_values}
+        self.CONFIG_MOCK.__getitem__.side_effect = smrf_config.__getitem__
+
         hrrr_input = GriddedInput(**self.VALID_ARGS)
 
         self.assertEqual(
-            self.CONFIG,
+            config_values,
             hrrr_input.config
         )
 

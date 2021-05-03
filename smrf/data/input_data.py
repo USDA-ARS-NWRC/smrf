@@ -95,7 +95,7 @@ class InputData:
             self.data_type = smrf_config[GriddedInput.TYPE]['data_type']
             data_inputs = dict(
                 bbox=self.bbox,
-                config=smrf_config[GriddedInput.TYPE],
+                config=smrf_config,
                 topo=self.topo,
             )
             if self.data_type == InputGribHRRR.DATA_TYPE:

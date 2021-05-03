@@ -17,7 +17,11 @@ class TestInputGribHRRR(unittest.TestCase):
         hrrr_input = smrf_data.InputGribHRRR(
             self.START_DATE, self.END_DATE,
             topo=self.TOPO_MOCK, bbox=self.BBOX,
-            config={'hrrr_load_method': 'timestep'}
+            config={
+                'gridded': {
+                    'hrrr_load_method': 'timestep',
+                }
+            }
         )
 
         self.assertEqual(
