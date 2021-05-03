@@ -23,43 +23,43 @@ class TestGriddedInput(unittest.TestCase):
     )
 
     def test_start_date(self):
-        hrrr_input = GriddedInput(**self.VALID_ARGS)
+        gridded_input = GriddedInput(**self.VALID_ARGS)
 
         self.assertEqual(
             self.START_DATE,
-            hrrr_input.start_date
+            gridded_input.start_date
         )
 
     def test_end_date(self):
-        hrrr_input = GriddedInput(**self.VALID_ARGS)
+        gridded_input = GriddedInput(**self.VALID_ARGS)
 
         self.assertEqual(
             self.END_DATE,
-            hrrr_input.end_date
+            gridded_input.end_date
         )
 
     def test_time_zone(self):
-        hrrr_input = GriddedInput(**self.VALID_ARGS)
+        gridded_input = GriddedInput(**self.VALID_ARGS)
 
         self.assertEqual(
             'UTC',
-            str(hrrr_input.time_zone)
+            str(gridded_input.time_zone)
         )
 
     def test_topo(self):
-        hrrr_input = GriddedInput(**self.VALID_ARGS)
+        gridded_input = GriddedInput(**self.VALID_ARGS)
 
         self.assertEqual(
             self.TOPO_MOCK,
-            hrrr_input.topo
+            gridded_input.topo
         )
 
     def test_box(self):
-        hrrr_input = GriddedInput(**self.VALID_ARGS)
+        gridded_input = GriddedInput(**self.VALID_ARGS)
 
         self.assertEqual(
             self.BBOX,
-            hrrr_input.bbox
+            gridded_input.bbox
         )
 
     def test_config(self):
@@ -67,11 +67,11 @@ class TestGriddedInput(unittest.TestCase):
         smrf_config = {GriddedInput.TYPE: config_values}
         self.CONFIG_MOCK.__getitem__.side_effect = smrf_config.__getitem__
 
-        hrrr_input = GriddedInput(**self.VALID_ARGS)
+        gridded_input = GriddedInput(**self.VALID_ARGS)
 
         self.assertEqual(
             config_values,
-            hrrr_input.config
+            gridded_input.config
         )
 
     def test_invalid_start_date_argument(self):
