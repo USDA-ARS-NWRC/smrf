@@ -52,6 +52,7 @@ class WinstralWindModel(image_data.image_data):
     distributed flat wind speed and each cell's maxus value.
     """
 
+    MODEL_TYPE = 'winstral'
     VARIABLE = 'wind'
 
     BASE_THREAD_VARIABLES = frozenset([
