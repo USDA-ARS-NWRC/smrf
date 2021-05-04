@@ -1,8 +1,10 @@
 import numpy as np
 import pandas as pd
-import weather_forecast_retrieval.data.hrrr as hrrr_data
+import weather_forecast_retrieval as wfr
 
 from smrf.data.gridded_input import GriddedInput
+from smrf.distribute.wind import Wind
+from smrf.distribute.wind.wind_ninja import WindNinjaModel
 from smrf.envphys.solar.cloud import get_hrrr_cloud
 from smrf.envphys.vapor_pressure import rh2vp
 
@@ -15,9 +17,11 @@ class InputGribHRRR(GriddedInput):
         'air_temp',
         'vapor_pressure',
         'precip',
+        'cloud_factor'
+    ]
+    WIND_VARIABLES = [
         'wind_speed',
         'wind_direction',
-        'cloud_factor'
     ]
 
     TIME_STEP = pd.to_timedelta(20, 'minutes')
@@ -29,6 +33,17 @@ class InputGribHRRR(GriddedInput):
                 self.config['hrrr_load_method'] == 'timestep':
             self.timestep_dates()
             self.cf_memory = None
+
+        self._load_wind = not Wind.config_model_type(
+            kwargs['config'], WindNinjaModel.MODEL_TYPE
+        )
+
+    @property
+    def variables(self):
+        if self._load_wind:
+            return np.union1d(self.VARIABLES, self.WIND_VARIABLES)
+        else:
+            return self.VARIABLES
 
     def timestep_dates(self):
         self.end_date = self.start_date + self.TIME_STEP
@@ -55,14 +70,19 @@ class InputGribHRRR(GriddedInput):
             self.config['hrrr_directory']
         ))
 
-        metadata, data = hrrr_data.FileLoader(
+        var_keys = wfr.data.hrrr.GribFile.VARIABLES
+        if not self._load_wind:
+            var_keys = [v for v in var_keys if v not in ['wind_u', 'wind_v']]
+
+        metadata, data = wfr.data.hrrr.FileLoader(
             file_dir=self.config['hrrr_directory'],
             external_logger=self._logger
         ).get_saved_data(
             self.start_date,
             self.end_date,
             self.bbox,
-            force_zone_number=self.topo.zone_number
+            force_zone_number=self.topo.zone_number,
+            var_keys=var_keys
         )
 
         self.parse_data(metadata, data)
@@ -91,7 +111,7 @@ class InputGribHRRR(GriddedInput):
         for date_time in date_times[1:]:
             self.load_timestep(date_time)
 
-            for variable in self.VARIABLES:
+            for variable in self.variables:
                 data_queue[variable].put(
                     [date_time, getattr(self, variable).iloc[0]])
 
@@ -126,16 +146,7 @@ class InputGribHRRR(GriddedInput):
             data['relative_humidity'].values)
         self.vapor_pressure = pd.DataFrame(vp, index=idx, columns=cols)
 
-        # calculate the wind speed and wind direction
-        self._logger.debug('Loading wind_speed and wind_direction')
-
-        s = np.sqrt(data['wind_u']**2 + data['wind_v']**2)
-
-        d = np.degrees(np.arctan2(data['wind_v'], data['wind_u']))
-        ind = d < 0
-        d[ind] = d[ind] + 360
-        self.wind_speed = pd.DataFrame(s, index=idx, columns=cols)
-        self.wind_direction = pd.DataFrame(d, index=idx, columns=cols)
+        self.calculate_wind(data)
 
         # precip
         self._logger.debug('Loading precip')
@@ -148,6 +159,34 @@ class InputGribHRRR(GriddedInput):
         self.cloud_factor = get_hrrr_cloud(
             solar, self.metadata,
             self.topo.basin_lat, self.topo.basin_long)
+
+    def calculate_wind(self, data):
+        """
+        Calculate the wind speed and wind direction.
+
+        Args:
+            data: Loaded data from weather_forecast_retrival
+        """
+        dataframe_options = dict(
+            index=data['air_temp'].index,
+            columns=data['air_temp'].columns
+        )
+        wind_speed = np.zeros_like(data['air_temp'].values)
+        wind_direction = np.zeros_like(data['air_temp'].values)
+
+        if self._load_wind:
+            self._logger.debug('Loading wind_speed and wind_direction')
+
+            wind_speed = np.sqrt(data['wind_u']**2 + data['wind_v']**2)
+
+            wind_direction = np.degrees(
+                np.arctan2(data['wind_v'], data['wind_u'])
+            )
+            ind = wind_direction < 0
+            wind_direction[ind] = wind_direction[ind] + 360
+
+        self.wind_speed = pd.DataFrame(wind_speed, **dataframe_options)
+        self.wind_direction = pd.DataFrame(wind_direction, **dataframe_options)
 
     def check_cloud_factor(self):
         """Check the cloud factor when in the timestep mode.
