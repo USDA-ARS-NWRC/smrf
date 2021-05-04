@@ -2,11 +2,11 @@
 import logging
 
 import numpy as np
+from smrf.utils import utils
 
 from smrf.distribute import image_data
 from smrf.distribute.wind.wind_ninja import WindNinjaModel
 from smrf.distribute.wind.winstral import WinstralWindModel
-from smrf.utils import utils
 
 
 class Wind(image_data.image_data):
@@ -115,7 +115,7 @@ class Wind(image_data.image_data):
             bool: True/False if the wind_model is set in the config
         """
 
-        return config['wind']['wind_model'] == wind_model
+        return config.get('wind', {}).get('wind_model', None) == wind_model
 
     def initialize(self, topo, data, date_time=None):
         """

@@ -53,3 +53,22 @@ class TestWind(unittest.TestCase):
         self.assertTrue(
             wind_instance.model_type(WinstralWindModel.MODEL_TYPE)
         )
+
+    def test_config_model_type_true(self):
+        self.assertTrue(
+            Wind.config_model_type(
+                {'wind': {'wind_model': 'model'}}, 'model'
+            )
+        )
+
+    def test_config_model_type_false(self):
+        self.assertFalse(
+            Wind.config_model_type(
+                {}, 'model'
+            )
+        )
+        self.assertFalse(
+            Wind.config_model_type(
+                {'wind': {'parameter': 1}}, 'model'
+            )
+        )
