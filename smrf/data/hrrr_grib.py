@@ -165,14 +165,16 @@ class InputGribHRRR(GriddedInput):
         Calculate the wind speed and wind direction.
 
         Args:
-            data: Loaded data from weather_forecast_retrival
+            data: Loaded data from weather_forecast_retrieval
         """
         dataframe_options = dict(
             index=data['air_temp'].index,
             columns=data['air_temp'].columns
         )
-        wind_speed = np.zeros_like(data['air_temp'].values)
-        wind_direction = np.zeros_like(data['air_temp'].values)
+        wind_speed = np.empty_like(data['air_temp'].values)
+        wind_speed[:] = np.nan
+        wind_direction = np.empty_like(data['air_temp'].values)
+        wind_direction[:] = np.nan
 
         if self._load_wind:
             self._logger.debug('Loading wind_speed and wind_direction')
