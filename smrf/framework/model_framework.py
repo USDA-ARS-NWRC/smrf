@@ -36,15 +36,15 @@ import pytz
 from inicheck.config import UserConfig
 from inicheck.output import generate_config, print_config_report
 from inicheck.tools import check_config, get_user_config
+from smrf.envphys import sunang
+from smrf.utils import queue
 from topocalc.shade import shade
 
 from smrf import distribute
 from smrf.data import InputData, Topo
-from smrf.envphys import sunang
 from smrf.envphys.solar import model
 from smrf.framework import art, logger
 from smrf.output import output_hru, output_netcdf
-from smrf.utils import queue
 from smrf.utils.utils import backup_input, date_range, getqotw
 
 
@@ -234,14 +234,14 @@ class SMRF():
 
     def create_distribution(self):
         """
-        This initializes the distirbution classes based on the configFile
+        This initializes the distribution classes based on the configFile
         sections for each variable.
         :func:`~smrf.framework.model_framework.SMRF.create_distribution`
         will initialize the variables within the :func:`smrf.distribute`
         package and insert into a dictionary 'distribute' with variable names
         as the keys.
 
-        Variables that are intialized are:
+        Variables that are initialized are:
             * :func:`Air temperature <smrf.distribute.air_temp.ta>`
             * :func:`Vapor pressure <smrf.distribute.vapor_pressure.vp>`
             * :func:`Wind speed and direction <smrf.distribute.wind.wind>`
@@ -571,7 +571,7 @@ class SMRF():
         Designed for smrf runs in memory
 
         Returns
-            t: list of threads for distirbution
+            t: list of threads for distribution
             q: queue
         """
 

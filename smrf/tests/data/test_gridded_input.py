@@ -14,60 +14,64 @@ class TestDataSource(GriddedInput):
 class TestGriddedInput(unittest.TestCase):
     TOPO_MOCK = MagicMock(spec=Topo, instance=True)
     BBOX = [1, 2, 3, 4]
-    CONFIG = MagicMock('config')
+    CONFIG_MOCK = MagicMock('config', spec_set=dict)
     START_DATE = pd.to_datetime('2021-01-01 00:00 UTC')
     END_DATE = pd.to_datetime('2021-01-02')
     VALID_ARGS = dict(
         start_date=START_DATE, end_date=END_DATE,
-        topo=TOPO_MOCK, bbox=BBOX, config=CONFIG
+        topo=TOPO_MOCK, bbox=BBOX, config=CONFIG_MOCK
     )
 
     def test_start_date(self):
-        hrrr_input = GriddedInput(**self.VALID_ARGS)
+        gridded_input = GriddedInput(**self.VALID_ARGS)
 
         self.assertEqual(
             self.START_DATE,
-            hrrr_input.start_date
+            gridded_input.start_date
         )
 
     def test_end_date(self):
-        hrrr_input = GriddedInput(**self.VALID_ARGS)
+        gridded_input = GriddedInput(**self.VALID_ARGS)
 
         self.assertEqual(
             self.END_DATE,
-            hrrr_input.end_date
+            gridded_input.end_date
         )
 
     def test_time_zone(self):
-        hrrr_input = GriddedInput(**self.VALID_ARGS)
+        gridded_input = GriddedInput(**self.VALID_ARGS)
 
         self.assertEqual(
             'UTC',
-            str(hrrr_input.time_zone)
+            str(gridded_input.time_zone)
         )
 
     def test_topo(self):
-        hrrr_input = GriddedInput(**self.VALID_ARGS)
+        gridded_input = GriddedInput(**self.VALID_ARGS)
 
         self.assertEqual(
             self.TOPO_MOCK,
-            hrrr_input.topo
+            gridded_input.topo
         )
 
     def test_box(self):
-        hrrr_input = GriddedInput(**self.VALID_ARGS)
+        gridded_input = GriddedInput(**self.VALID_ARGS)
 
         self.assertEqual(
             self.BBOX,
-            hrrr_input.bbox
+            gridded_input.bbox
         )
 
     def test_config(self):
-        hrrr_input = GriddedInput(**self.VALID_ARGS)
+        config_values = MagicMock('Gridded Config')
+        smrf_config = {GriddedInput.TYPE: config_values}
+        self.CONFIG_MOCK.__getitem__.side_effect = smrf_config.__getitem__
+
+        gridded_input = GriddedInput(**self.VALID_ARGS)
 
         self.assertEqual(
-            self.CONFIG,
-            hrrr_input.config
+            config_values,
+            gridded_input.config
         )
 
     def test_invalid_start_date_argument(self):

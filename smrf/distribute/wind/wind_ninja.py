@@ -31,6 +31,7 @@ class WindNinjaModel(image_data.image_data):
     files and interpolates to the model domain.
     """
 
+    MODEL_TYPE = 'wind_ninja'
     VARIABLE = 'wind'
     WN_DATE_FORMAT = '%m-%d-%Y_%H%M'
     DATE_FORMAT = '%Y%m%d'

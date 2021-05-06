@@ -31,7 +31,7 @@ class GriddedInput:
         self.topo = topo
         self.bbox = bbox
 
-        self.config = config
+        self.config = config[GriddedInput.TYPE]
 
         self._logger = logging.getLogger(self.__class__.__name__)
 
