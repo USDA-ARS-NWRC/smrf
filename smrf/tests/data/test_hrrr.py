@@ -1,9 +1,13 @@
 from copy import deepcopy
+import os
+import unittest
 
 from inicheck.tools import cast_all_variables
 
 from smrf.framework.model_framework import run_smrf
 from smrf.tests.smrf_test_case import SMRFTestCase
+from smrf.tests.smrf_test_case_lakes import SMRFTestCaseLakes
+from smrf.tests.nwrc_check import NWRCCheck
 
 
 class TestLoadHRRR(SMRFTestCase):
@@ -94,3 +98,15 @@ class TestLoadHRRR(SMRFTestCase):
         run_smrf(config)
 
         self.compare_hrrr_gold()
+
+
+@unittest.skipUnless(
+    NWRCCheck.in_network(),
+    "Skipping because we are not on the NWRC network"
+)
+class TestLoadHRRRLakes(SMRFTestCaseLakes):
+
+    def test_197_image_data_index(self):
+
+        config_file = os.path.join(self.basin_dir, 'config_issue_197.ini')
+        run_smrf(config_file)

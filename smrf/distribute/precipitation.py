@@ -267,7 +267,7 @@ class ppt(image_data.image_data):
         """
 
         self._logger.debug('%s Distributing all precip' % data.name)
-        data = data[self.stations]
+        data = data.reindex(self.stations)
 
         if self.config['distribution'] != 'grid':
             if self.nasde_model == 'marks2017':

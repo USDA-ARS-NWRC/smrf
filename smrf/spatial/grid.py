@@ -93,6 +93,8 @@ class GRID:
         else:
             self.mask = np.ones_like(self.mx, dtype=bool)
 
+        self.metadata['mask'] = self.mask
+
     def detrendedInterpolation(self, data, flag=0, grid_method='linear'):
         """
         Interpolate using a detrended approach
@@ -102,7 +104,10 @@ class GRID:
             grid_method: scipy.interpolate.griddata interpolation method
         """
 
-        # get the trend, ensure it's positive
+        # remove nan values from the series
+        data = data.dropna()
+        if len(data) == 0:
+            raise Exception('All gridded values were NaN')
 
         if self.config['grid_local']:
             rtrend = self.detrendedInterpolationLocal(data, flag, grid_method)
@@ -123,7 +128,9 @@ class GRID:
 
         # take the new full_df and fill a data column
         df = self.full_df.copy()
-        df['data'] = data[df['cell_local']].values
+        df['data'] = data.reindex(df['cell_local']).values
+        df.dropna(how='any', axis=0, inplace=True)
+
         df = df.set_index('cell_id')
         df['fit'] = df.groupby('cell_id').apply(
             lambda x: np.polyfit(x.elevation, x.data, 1))
@@ -186,7 +193,9 @@ class GRID:
         """
 
         # get the trend, ensure it's positive
-        pv = np.polyfit(self.mz[self.mask].astype(float), data[self.mask], 1)
+        data_mask = data[self.metadata['mask']]
+        elevation_mask = self.metadata.loc[data_mask.index, 'elevation']
+        pv = np.polyfit(elevation_mask, data_mask, 1)
 
         # apply trend constraints
         if flag == 1 and pv[0] < 0:
@@ -197,14 +206,16 @@ class GRID:
         self.pv = pv
 
         # detrend the data
-        el_trend = self.mz * pv[0] + pv[1]
-        dtrend = data - el_trend
+        el_trend = elevation_mask * pv[0] + pv[1]
+        dtrend = data_mask - el_trend
 
         # interpolate over the DEM grid
-        idtrend = griddata((self.mx, self.my),
-                           dtrend,
-                           (self.GridX, self.GridY),
-                           method=grid_method)
+        idtrend = griddata(
+            (self.metadata.loc[data_mask.index, 'utm_x'],
+             self.metadata.loc[data_mask.index, 'utm_y']),
+            dtrend,
+            (self.GridX, self.GridY),
+            method=grid_method)
 
         # retrend the data
         rtrend = idtrend + pv[0]*self.GridZ + pv[1]
