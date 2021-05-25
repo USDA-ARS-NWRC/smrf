@@ -33,7 +33,7 @@ class SMRFTestCase(unittest.TestCase):
     THREAD_CONFIG = {
         'threading': True,
         'max_queue': 1,
-        # 'time_out': 5
+        'time_out': 5
     }
 
     BASE_INI_FILE_NAME = 'config.ini'
