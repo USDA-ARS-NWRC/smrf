@@ -41,9 +41,13 @@ class InputGribHRRR(GriddedInput):
     @property
     def variables(self):
         if self._load_wind:
-            return np.union1d(self.VARIABLES, self.WIND_VARIABLES)
+            return self.data_variables
         else:
             return self.VARIABLES
+
+    @property
+    def data_variables(self):
+        return np.union1d(self.VARIABLES, self.WIND_VARIABLES)
 
     def timestep_dates(self):
         self.end_date = self.start_date + self.TIME_STEP
@@ -111,7 +115,7 @@ class InputGribHRRR(GriddedInput):
         for date_time in date_times[1:]:
             self.load_timestep(date_time)
 
-            for variable in self.variables:
+            for variable in self.data_variables:
                 data_queue[variable].put(
                     [date_time, getattr(self, variable).iloc[0]])
 

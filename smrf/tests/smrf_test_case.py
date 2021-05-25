@@ -33,7 +33,7 @@ class SMRFTestCase(unittest.TestCase):
     THREAD_CONFIG = {
         'threading': True,
         'max_queue': 1,
-        'time_out': 5
+        # 'time_out': 5
     }
 
     BASE_INI_FILE_NAME = 'config.ini'
@@ -52,6 +52,10 @@ class SMRFTestCase(unittest.TestCase):
     def base_config(self):
         return self.base_config_copy()
 
+    @classmethod
+    def configure(cls):
+        cls.run_config = cls.base_config_copy()
+
     @property
     def smrf_instance(self):
         return smrf.framework.SMRF(self.config_file)
@@ -68,6 +72,7 @@ class SMRFTestCase(unittest.TestCase):
     def setUpClass(cls):
         cls.load_base_config()
         cls.create_output_dir()
+        cls.configure()
 
     @classmethod
     def tearDownClass(cls):
