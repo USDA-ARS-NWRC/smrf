@@ -1,4 +1,5 @@
 import logging
+from copy import deepcopy
 
 import numpy as np
 
@@ -223,8 +224,10 @@ class image_data():
         """
 
         # get the data for the desired stations
-        # this will also order it correctly how air_temp was initialized
-        data = data[self.stations]
+        # this will also order it correctly how image_data was initialized and
+        # fill any stations not in data as NaN
+        data = deepcopy(data)
+        data = data.reindex(self.stations)
 
         if np.sum(data.isnull()) == data.shape[0]:
             raise Exception("{}: All data values are NaN"
