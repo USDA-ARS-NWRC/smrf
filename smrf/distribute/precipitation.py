@@ -4,6 +4,7 @@ import numpy as np
 
 from smrf.distribute import image_data
 from smrf.envphys import precip, Snow, storms
+from smrf.data.modifiers import scale_data, get_scalar_value_key
 from smrf.utils import utils
 
 
@@ -268,6 +269,7 @@ class ppt(image_data.image_data):
 
         self._logger.debug('%s Distributing all precip' % data.name)
         data = data[self.stations]
+        input_scalar_key = get_scalar_value_key(self.config, "input")
 
         if self.config['distribution'] != 'grid':
             if self.nasde_model == 'marks2017':
@@ -282,6 +284,11 @@ class ppt(image_data.image_data):
                         temp,
                         self.config,
                         self.metadata)
+                # Scale input data based on config
+                if input_scalar_key is not None:
+                    self.corrected_precip.loc[time] = scale_data(
+                        self.corrected_precip.loc[time], input_scalar_key, self.config
+                    )
 
                 # Use the clipped and corrected precip
                 self.distribute_for_marks2017(
@@ -301,10 +308,18 @@ class ppt(image_data.image_data):
                         temp,
                         self.config,
                         self.metadata)
+                # Scale input data based on config
+                if input_scalar_key is not None:
+                    data.precip = scale_data(data.precip, input_scalar_key, self.config)
 
                     self.distribute_for_susong1999(
                         data, precip_temp, time)
         else:
+            # Scale input data based on config
+            if input_scalar_key is not None:
+                data.precip = scale_data(data.precip, input_scalar_key, self.config)
+
+            # distribute the data
             self.distribute_for_susong1999(data, precip_temp, time)
 
         # redistribute due to wind to account for driftin
@@ -323,6 +338,12 @@ class ppt(image_data.image_data):
                     self.veg_type,
                     self.veg,
                     self.config)
+
+        # scale the post distribution data based on user config
+        output_scalar_key = get_scalar_value_key(self.config, "output")
+        if output_scalar_key is not None:
+            self.precip = scale_data(self.precip, output_scalar_key, self.config)
+
 
     def distribute_for_marks2017(self, data, precip_temp, ta, time):
         """

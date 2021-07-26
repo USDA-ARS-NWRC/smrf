@@ -48,6 +48,22 @@ from smrf.output import output_hru, output_netcdf
 from smrf.utils.utils import backup_input, date_range, getqotw
 
 
+class SolarParams:
+    def __init__(self, cosz, azimuth, rad_vec, illum_ang):
+        """
+        Track the solar parameters for a timestep
+        Args:
+            cosz - cosine of the zenith angle, same shape as input position
+            azimuth - solar azimuth, same shape as input position
+            rad_vec - Earth-Sun radius vector
+            illum_ang - Illumination angle
+        """
+        self.cosz = cosz
+        self.azimuth = azimuth
+        self.rad_vec = rad_vec
+        self.illum_ang = illum_ang
+
+
 class SMRF():
     """
     SMRF - Spatial Modeling for Resources Framework
@@ -401,14 +417,14 @@ class SMRF():
 
         self.forcing_data = 1
 
-    def distribute_single_timestep(self, t):
-
-        self._logger.info('Distributing time step {}'.format(t))
-
-        if self.hrrr_data_timestep:
-            self.data.load_class.load_timestep(t)
-            self.data.set_variables()
-
+    def _prep_solar(self, t):
+        """
+        Initialize the solar parameters for the timestep
+        Args:
+            t: timestep (datetime)
+        Returns:
+            SolarParams instance
+        """
         # 0.1 sun angle for time step
         cosz, azimuth, rad_vec = sunang.sunang(
             t.astimezone(pytz.utc),
@@ -423,6 +439,17 @@ class SMRF():
                 self.topo.aspect,
                 azimuth,
                 cosz)
+        return SolarParams(cosz, azimuth, rad_vec, illum_ang)
+
+    def distribute_single_timestep(self, t):
+
+        self._logger.info('Distributing time step {}'.format(t))
+
+        if self.hrrr_data_timestep:
+            self.data.load_class.load_timestep(t)
+            self.data.set_variables()
+
+        solar_params = self._prep_solar(t)
 
         # 1. Air temperature
         self.distribute['air_temp'].distribute(self.data.air_temp.loc[t])
@@ -455,7 +482,7 @@ class SMRF():
         # 5. Albedo
         self.distribute['albedo'].distribute(
             t,
-            illum_ang,
+            solar_params.illum_ang,
             self.distribute['precipitation'].storm_days)
 
         # 6. cloud_factor
@@ -466,9 +493,9 @@ class SMRF():
         self.distribute['solar'].distribute(
             t,
             self.distribute["cloud_factor"].cloud_factor,
-            illum_ang,
-            cosz,
-            azimuth,
+            solar_params.illum_ang,
+            solar_params.cosz,
+            solar_params.azimuth,
             self.distribute['albedo'].albedo_vis,
             self.distribute['albedo'].albedo_ir)
 
