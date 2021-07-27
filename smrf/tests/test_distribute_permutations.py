@@ -1,4 +1,4 @@
-from unittest.mock import patch, MagicMock
+from unittest.mock import patch
 from inicheck.tools import cast_all_variables
 import numpy as np
 from parameterized import parameterized
@@ -9,7 +9,8 @@ import smrf
 
 
 class ConfigPermutations:
-    def __init__(self, config_changes, distribute_section, variable, expected_array):
+    def __init__(self, config_changes, distribute_section, variable,
+                 expected_array):
         self.config_changes = config_changes
         self.distribute_section = distribute_section
         self.variable = variable
@@ -62,15 +63,13 @@ class TestDistributePermutations(SMRFTestCase):
                  [8.0454048, 7.7767037, 7.8841841, 7.9379243],
                  [8.0454048, 7.9379243, 7.9379243, 8.1528852],
                  [7.8304439, 7.7767037, 8.0454048, 8.099145]
-                 ])),
-        ),
+                 ])),),
     ])
     def test_permutations_precip(self, test_permutation):
         cfg = self.configure_permutation(test_permutation.config_changes)
         s = self._prep_smrf_mock_topo(cfg)
         # only running one timestep
         t = s.date_time[0]
-        solar_params = s._prep_solar(t)
         # 1. Air temperature
         s.distribute['air_temp'].distribute(s.data.air_temp.loc[t])
         # 2. Vapor pressure
@@ -88,5 +87,8 @@ class TestDistributePermutations(SMRFTestCase):
             s.data.wind_speed.loc[t],
             s.data.air_temp.loc[t])
 
-        result = getattr(s.distribute[test_permutation.distribute_section], test_permutation.variable)
+        result = getattr(
+            s.distribute[test_permutation.distribute_section],
+            test_permutation.variable
+        )
         np.testing.assert_almost_equal(test_permutation.expected_array, result)

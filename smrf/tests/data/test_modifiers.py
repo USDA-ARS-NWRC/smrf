@@ -21,7 +21,8 @@ class TestModifiers(unittest.TestCase):
         [
             ('input', {}, None),
             ('input', {'input_scalar_type': 'factor'}, 'input_scalar_factor'),
-            ('output', {'output_scalar_type': 'factor'}, 'output_scalar_factor'),
+            ('output', {'output_scalar_type': 'factor'},
+             'output_scalar_factor'),
             ('output', {}, None)
         ]
     )
@@ -34,10 +35,14 @@ class TestModifiers(unittest.TestCase):
 
     @parameterized.expand(
         [
-            (input_array, "input_scalar_factor", {"input_scalar_factor": 2.1}, input_array * 2.1),
-            (input_series, "input_scalar_factor", {"input_scalar_factor": 2.0}, pd.Series([20.4, 84.0, 10.2])),
-            (input_array, "output_scalar_factor", {"output_scalar_factor": 1.0}, input_array),
-            (input_array, "output_scalar_factor", {"output_scalar_factor": 1.5}, input_array * 1.5),
+            (input_array, "input_scalar_factor",
+             {"input_scalar_factor": 2.1}, input_array * 2.1),
+            (input_series, "input_scalar_factor",
+             {"input_scalar_factor": 2.0}, pd.Series([20.4, 84.0, 10.2])),
+            (input_array, "output_scalar_factor",
+             {"output_scalar_factor": 1.0}, input_array),
+            (input_array, "output_scalar_factor",
+             {"output_scalar_factor": 1.5}, input_array * 1.5),
         ]
     )
     def test_scale_values(self, data, scalar_key, config, expected):

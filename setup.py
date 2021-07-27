@@ -147,6 +147,7 @@ setup(
         ],
         'tests': [
             'mock',
+            'parameterized~=0.8.1',
         ],
     },
     use_scm_version={

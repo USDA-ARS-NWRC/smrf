@@ -287,7 +287,8 @@ class ppt(image_data.image_data):
                 # Scale input data based on config
                 if input_scalar_key is not None:
                     self.corrected_precip.loc[time] = scale_data(
-                        self.corrected_precip.loc[time], input_scalar_key, self.config
+                        self.corrected_precip.loc[time], input_scalar_key,
+                        self.config
                     )
 
                 # Use the clipped and corrected precip
@@ -310,14 +311,16 @@ class ppt(image_data.image_data):
                         self.metadata)
                 # Scale input data based on config
                 if input_scalar_key is not None:
-                    data.precip = scale_data(data.precip, input_scalar_key, self.config)
+                    data.precip = scale_data(
+                        data.precip, input_scalar_key, self.config)
 
                     self.distribute_for_susong1999(
                         data, precip_temp, time)
         else:
             # Scale input data based on config
             if input_scalar_key is not None:
-                data.precip = scale_data(data.precip, input_scalar_key, self.config)
+                data.precip = scale_data(
+                    data.precip, input_scalar_key, self.config)
 
             # distribute the data
             self.distribute_for_susong1999(data, precip_temp, time)
@@ -342,8 +345,9 @@ class ppt(image_data.image_data):
         # scale the post distribution data based on user config
         output_scalar_key = get_scalar_value_key(self.config, "output")
         if output_scalar_key is not None:
-            self.precip = scale_data(self.precip, output_scalar_key, self.config)
-
+            self.precip = scale_data(
+                self.precip, output_scalar_key, self.config
+            )
 
     def distribute_for_marks2017(self, data, precip_temp, ta, time):
         """
