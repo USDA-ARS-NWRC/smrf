@@ -116,6 +116,7 @@ class ppt(image_data.image_data):
         self.getConfig(pptConfig)
         self.time_step = float(time_step)
         self.start_date = start_date
+        self._modifier = None
 
     def initialize(self, topo, data, date_time=None):
 
@@ -129,8 +130,6 @@ class ppt(image_data.image_data):
         self.storm_total = np.zeros((topo.ny, topo.nx))
         self.last_storm_day = np.zeros((topo.ny, topo.nx))
         self.dem = topo.dem
-
-        self._modifier = Modifiers.from_variable_config(self.config)
 
         # Assign storm_days array if given
         if self.config["storm_days_restart"] is not None:
@@ -197,6 +196,8 @@ class ppt(image_data.image_data):
                 data.precip,
                 self.storms,
                 stations=self.stations)
+            self.corrected_precip = self.modifier.scale_input_data(
+                self.corrected_precip)
 
             if storm_count != 0:
                 self._logger.info(
@@ -236,6 +237,12 @@ class ppt(image_data.image_data):
                         v[ms[1]] = float(self.config[m])
             self.veg = v
 
+    @property
+    def modifier(self):
+        if self._modifier is None:
+            self._modifier = Modifiers.from_variable_config(self.config)
+        return self._modifier
+
     def distribute(self, data, dpt, precip_temp, ta, time, wind, temp,
                    wind_direction=None, dir_round_cell=None, wind_speed=None,
                    cell_maxus=None):
@@ -271,7 +278,7 @@ class ppt(image_data.image_data):
 
         self._logger.debug('%s Distributing all precip' % data.name)
         data = data[self.stations]
-        data = self._modifier.scale_input_data(data)
+        data = self.modifier.scale_input_data(data)
 
         if self.config['distribution'] != 'grid':
             if self.nasde_model == 'marks2017':
@@ -330,7 +337,7 @@ class ppt(image_data.image_data):
                     self.config)
 
         # scale the post distribution data based on user config
-        self.precip = self._modifier.scale_output_data(self.precip)
+        self.precip = self.modifier.scale_output_data(self.precip)
 
     def distribute_for_marks2017(self, data, precip_temp, ta, time):
         """

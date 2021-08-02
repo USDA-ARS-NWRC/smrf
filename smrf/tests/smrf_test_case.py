@@ -11,6 +11,7 @@ from inicheck.tools import cast_all_variables, get_user_config
 
 import smrf
 from smrf.framework.model_framework import run_smrf
+from smrf.tests import non_distributed_variables
 
 
 class SMRFTestCase(unittest.TestCase):
@@ -176,6 +177,16 @@ class SMRFTestCase(unittest.TestCase):
             for file_name in self.gold_dir.glob('*.nc')
         ]
 
+    @staticmethod
+    def _validate_time(gold, test):
+        np.testing.assert_equal(
+            gold.variables['time'][:],
+            test.variables['time'][:],
+            err_msg="Time steps did not match: \nGOLD {0} \n TEST {1}".format(
+                gold.variables['time'], test.variables['time']
+            )
+        )
+
     def compare_netcdf_files(self, output_file):
         """
         Compare two netcdf files to ensure that they are identical. The
@@ -186,13 +197,7 @@ class SMRFTestCase(unittest.TestCase):
         gold = nc.Dataset(self.gold_dir.joinpath(output_file))
         test = nc.Dataset(self.output_dir.joinpath(output_file))
 
-        np.testing.assert_equal(
-            gold.variables['time'][:],
-            test.variables['time'][:],
-            err_msg="Time steps did not match: \nGOLD {0} \n TEST {1}".format(
-                gold.variables['time'], test.variables['time']
-            )
-        )
+        self._validate_time(gold, test)
 
         # go through all variables and compare everything including
         # the attributes and data
@@ -216,3 +221,33 @@ class SMRFTestCase(unittest.TestCase):
 
         gold.close()
         test.close()
+
+    def evaluate_netcdf_ratio(self, output_file):
+        """
+        Find a ratio between the primary variable for 2 datasets.
+        Args:
+            output_file: path to the test output file
+
+        Returns:
+            a tuple of the ratio ndarray and an ndarry of indices that should
+            be ignored
+        """
+
+        with nc.Dataset(self.gold_dir.joinpath(output_file)) as gold, \
+                nc.Dataset(self.output_dir.joinpath(output_file)) as test:
+
+            self._validate_time(gold, test)
+
+            for var_name, v in gold.variables.items():
+                if var_name not in non_distributed_variables:
+                    # ratio is meaningless if both cells are zero or nan
+                    ignore_indexes = (
+                        (test.variables[var_name][:] == 0.0)
+                         & (gold.variables[var_name][:] == 0.0)) \
+                        | (np.isnan(test.variables[var_name][:])
+                           & np.isnan(gold.variables[var_name][:]))
+                    return (test.variables[var_name][:] / gold.variables[
+                                                              var_name][:],
+                            ignore_indexes)
+
+        raise ValueError(f'{output_file} did not return a valid ratio')
