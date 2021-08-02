@@ -1,43 +1,45 @@
-def get_scalar_value_key(config, stage):
-    """
-    Get the config key that holds the values defining a data scalar approach
-    Args:
-        config: the variable specific config section
-        stage: the stage that the scaling is being applied to. Allowed values
-            are ["input", "output"]
 
-    Returns:
-        scalar_value_key: the config key that can access the values needed to
-            scale the data
-    """
-    if stage not in ["input", "output"]:
-        raise ValueError(
-            f"{stage} is not an allowed stage value for data scaling"
-        )
-    method = config.get(f"{stage}_scalar_type")
-    if method is None:
-        return None
-    return f"{stage}_scalar_{method}"
+class Modifiers:
+    INPUT_SCALAR_KEY = "input_scalar_factor"
+    OUTPUT_SCALAR_KEY = "output_scalar_factor"
+    KEY_OPTIONS = [INPUT_SCALAR_KEY, OUTPUT_SCALAR_KEY]
 
+    def __init__(self, input_scalar, output_scalar):
+        self._input_scalar = input_scalar
+        self._output_scalar = output_scalar
 
-def scale_data(data, scalar_key, config):
-    """
-    Scale the input vector data based on user config
-    Args:
-        data: the data to be scaled. This is a pandas series or a numpy array
-        scalar_key: config key for style of scaling. This let's us reuse this
-            method for input or output scaling
-        config: The variable config dictionary
+    @classmethod
+    def from_variable_config(cls, cfg):
+        input_scalar = cls._scalar_value_from_scalar_type_key(
+            "input_scalar_type", cfg)
+        output_scalar = cls._scalar_value_from_scalar_type_key(
+            "output_scalar_type", cfg)
+        return cls(input_scalar, output_scalar)
 
-    Returns:
-        scaled_data: The scaled data in the same format as the input
-    """
-    if scalar_key in ["input_scalar_factor", "output_scalar_factor"]:
-        scalar = config[scalar_key]
-        scaled_data = data * scalar
-    else:
-        raise NotImplementedError(
-            f"{scalar_key} is not an implemented scalar method."
-        )
+    @classmethod
+    def _scalar_value_from_scalar_type_key(cls, type_key, cfg):
+        input_scalar_type = cfg.get(type_key)
+        if input_scalar_type is None:
+            return None
+        scalar_key = f"{type_key.split('_type')[0]}_{input_scalar_type}"
+        cls._validate_scalar_key(scalar_key)
+        return cfg[scalar_key]
 
-    return scaled_data
+    @classmethod
+    def _validate_scalar_key(cls, key):
+        if key not in cls.KEY_OPTIONS:
+            raise ValueError(f"{key} is not a valid key option. Valid options:"
+                             f" {cls.KEY_OPTIONS}")
+
+    @staticmethod
+    def _scale_data(data, modification):
+        if modification is None:
+            return data
+        else:
+            return modification * data
+
+    def scale_input_data(self, data):
+        return self._scale_data(data, self._input_scalar)
+
+    def scale_output_data(self, data):
+        return self._scale_data(data, self._output_scalar)

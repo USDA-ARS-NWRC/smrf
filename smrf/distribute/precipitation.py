@@ -4,7 +4,7 @@ import numpy as np
 
 from smrf.distribute import image_data
 from smrf.envphys import precip, Snow, storms
-from smrf.data.modifiers import scale_data, get_scalar_value_key
+from smrf.data.modifiers import Modifiers
 from smrf.utils import utils
 
 
@@ -129,6 +129,8 @@ class ppt(image_data.image_data):
         self.storm_total = np.zeros((topo.ny, topo.nx))
         self.last_storm_day = np.zeros((topo.ny, topo.nx))
         self.dem = topo.dem
+
+        self._modifier = Modifiers.from_variable_config(self.config)
 
         # Assign storm_days array if given
         if self.config["storm_days_restart"] is not None:
@@ -269,7 +271,7 @@ class ppt(image_data.image_data):
 
         self._logger.debug('%s Distributing all precip' % data.name)
         data = data[self.stations]
-        input_scalar_key = get_scalar_value_key(self.config, "input")
+        data = self._modifier.scale_input_data(data)
 
         if self.config['distribution'] != 'grid':
             if self.nasde_model == 'marks2017':
@@ -284,12 +286,6 @@ class ppt(image_data.image_data):
                         temp,
                         self.config,
                         self.metadata)
-                # Scale input data based on config
-                if input_scalar_key is not None:
-                    self.corrected_precip.loc[time] = scale_data(
-                        self.corrected_precip.loc[time], input_scalar_key,
-                        self.config
-                    )
 
                 # Use the clipped and corrected precip
                 self.distribute_for_marks2017(
@@ -309,19 +305,10 @@ class ppt(image_data.image_data):
                         temp,
                         self.config,
                         self.metadata)
-                # Scale input data based on config
-                if input_scalar_key is not None:
-                    data.precip = scale_data(
-                        data.precip, input_scalar_key, self.config)
 
                     self.distribute_for_susong1999(
                         data, precip_temp, time)
         else:
-            # Scale input data based on config
-            if input_scalar_key is not None:
-                data.precip = scale_data(
-                    data.precip, input_scalar_key, self.config)
-
             # distribute the data
             self.distribute_for_susong1999(data, precip_temp, time)
 
@@ -343,11 +330,7 @@ class ppt(image_data.image_data):
                     self.config)
 
         # scale the post distribution data based on user config
-        output_scalar_key = get_scalar_value_key(self.config, "output")
-        if output_scalar_key is not None:
-            self.precip = scale_data(
-                self.precip, output_scalar_key, self.config
-            )
+        self.precip = self._modifier.scale_output_data(self.precip)
 
     def distribute_for_marks2017(self, data, precip_temp, ta, time):
         """

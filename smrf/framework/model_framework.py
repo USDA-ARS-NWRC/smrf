@@ -45,23 +45,7 @@ from smrf.data import InputData, Topo
 from smrf.envphys.solar import model
 from smrf.framework import art, logger
 from smrf.output import output_hru, output_netcdf
-from smrf.utils.utils import backup_input, date_range, getqotw
-
-
-class SolarParams:
-    def __init__(self, cosz, azimuth, rad_vec, illum_ang):
-        """
-        Track the solar parameters for a timestep
-        Args:
-            cosz - cosine of the zenith angle, same shape as input position
-            azimuth - solar azimuth, same shape as input position
-            rad_vec - Earth-Sun radius vector
-            illum_ang - Illumination angle
-        """
-        self.cosz = cosz
-        self.azimuth = azimuth
-        self.rad_vec = rad_vec
-        self.illum_ang = illum_ang
+from smrf.utils.utils import backup_input, date_range, getqotw, SolarParams
 
 
 class SMRF():
