@@ -243,7 +243,7 @@ class SMRFTestCase(unittest.TestCase):
                     # ratio is meaningless if both cells are zero or nan
                     ignore_indexes = (
                         (test.variables[var_name][:] == 0.0)
-                         & (gold.variables[var_name][:] == 0.0)) \
+                        & (gold.variables[var_name][:] == 0.0)) \
                         | (np.isnan(test.variables[var_name][:])
                            & np.isnan(gold.variables[var_name][:]))
                     return (test.variables[var_name][:] / gold.variables[
