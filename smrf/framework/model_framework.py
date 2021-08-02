@@ -401,7 +401,7 @@ class SMRF():
 
         self.forcing_data = 1
 
-    def _prep_solar(self, t):
+    def _solar_parameters(self, t):
         """
         Initialize the solar parameters for the timestep
         Args:
@@ -433,7 +433,7 @@ class SMRF():
             self.data.load_class.load_timestep(t)
             self.data.set_variables()
 
-        solar_params = self._prep_solar(t)
+        solar_params = self._solar_parameters(t)
 
         # 1. Air temperature
         self.distribute['air_temp'].distribute(self.data.air_temp.loc[t])

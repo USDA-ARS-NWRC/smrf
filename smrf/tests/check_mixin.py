@@ -52,6 +52,7 @@ class CheckSMRFOutputRatios(object):
             }
     """
     RATIO_MAP = {}
+    DECIMAL = 4
 
     def _assert_ratio(self, file_name, variable):
         # default ratio is 1:1
@@ -62,7 +63,8 @@ class CheckSMRFOutputRatios(object):
 
         np.testing.assert_almost_equal(
             ratio[~ignore_index],
-            desired_ratio_array[~ignore_index]
+            desired_ratio_array[~ignore_index],
+            decimal=self.DECIMAL
         )
 
     def test_air_temp(self):
