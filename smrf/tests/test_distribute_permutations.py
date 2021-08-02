@@ -1,11 +1,11 @@
 from inicheck.tools import cast_all_variables
 
 from smrf.framework.model_framework import run_smrf
-from smrf.tests.smrf_test_case import SMRFTestCase
+from smrf.tests.smrf_test_case_lakes import SMRFTestCaseLakes
 from smrf.tests.check_mixin import CheckSMRFOutputRatios
 
 
-class TestDistributePermutations(CheckSMRFOutputRatios, SMRFTestCase):
+class TestDistributePermutations(CheckSMRFOutputRatios, SMRFTestCaseLakes):
     RATIO_MAP = {
         'precip': 2.0
     }
@@ -14,7 +14,6 @@ class TestDistributePermutations(CheckSMRFOutputRatios, SMRFTestCase):
     def setUpClass(cls):
         super().setUpClass()
 
-        cls.gold_dir = cls.basin_dir.joinpath('gold')
         cfg = cls.configure_permutation({"precip": {
             "input_scalar_type": "factor",
             "input_scalar_factor": 1.0,

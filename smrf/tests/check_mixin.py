@@ -57,10 +57,13 @@ class CheckSMRFOutputRatios(object):
         # default ratio is 1:1
         desired_ratio = self.RATIO_MAP.get(variable, 1.0)
         ratio, ignore_index = self.evaluate_netcdf_ratio(file_name)
-        # make sure we have some data
-        assert not np.all(ignore_index)
         # assert that the data is all equal to the expected ratio
-        assert np.all(ratio[~ignore_index] == desired_ratio)
+        desired_ratio_array = np.ones_like(ratio) * desired_ratio
+
+        np.testing.assert_almost_equal(
+            ratio[~ignore_index],
+            desired_ratio_array[~ignore_index]
+        )
 
     def test_air_temp(self):
         self._assert_ratio('air_temp.nc', 'air_temp')
