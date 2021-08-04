@@ -66,3 +66,27 @@ class BaseRecipes():
             test_items.remove(item)
 
         self.assertTrue(len(test_items) == 0)
+
+    def check_config_values(self, section, desired_values, config):
+        """
+        Check for specific key:value mappings in the config
+        Arguments:
+            section: section name
+            desired_values: dictionary mapping key to desired value
+            config: {inicheck UserConfig} -- UserConfig object to check
+        """
+        config_section = config.cfg[section]
+        for key, value in desired_values.items():
+            self.assertEqual(value, config_section[key])
+
+    def check_keys_not_present(self, section, removed_keys, config):
+        """
+        Check that keys have been removed from the config
+        Arguments:
+            section: section name
+            removed_keys: keys that should not be in the config
+            config: {inicheck UserConfig} -- UserConfig object to check
+        """
+        config_section_keys = list(config.cfg[section].keys())
+        for key in removed_keys:
+            self.assertTrue(key not in config_section_keys)
