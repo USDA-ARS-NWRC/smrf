@@ -1,4 +1,5 @@
 import mock
+import pandas as pd
 
 import smrf.data as smrf_data
 from smrf.tests.smrf_test_case import SMRFTestCase
@@ -8,7 +9,7 @@ from smrf.tests.smrf_test_case_lakes import SMRFTestCaseLakes
 def mock_for_data_load(test_case):
     with mock.patch.multiple(
         smrf_data.InputData,
-        set_variables=mock.DEFAULT,
+        set_and_scale_variables=mock.DEFAULT,
         metadata_pixel_location=mock.DEFAULT
     ):
         input_data = smrf_data.InputData(
@@ -109,3 +110,44 @@ class TestInputDataGridded(SMRFTestCaseLakes):
         self.smrf.config['gridded']['data_type'] = 'unknown'
         with self.assertRaisesRegex(AttributeError, 'Unknown gridded'):
             mock_for_data_load(self)
+
+
+class CheckScaledDataMixin:
+    SCALE_INPUT_DICT = {
+        "precip":
+            {
+                "input_scalar_type": "factor",
+                "input_scalar_factor": 2.0
+            }
+    }
+
+    def test_precip_input_is_scaled(self):
+        with mock.patch.object(self.smrf, 'distribute') as mock_dist:
+            mock_dist.__getitem__.return_value.stations = None
+            self.smrf.loadData()
+            result = self.smrf.data.precip
+        expected = self.smrf.data.load_class.precip * \
+            self.SCALE_INPUT_DICT["precip"]["input_scalar_factor"]
+        pd.testing.assert_frame_equal(
+            result, expected
+        )
+
+
+class TestInputDataScalesStations(CheckScaledDataMixin, SMRFTestCase):
+    def setUp(self):
+        super(self.__class__, self).setUp()
+        self.smrf = self.smrf_instance
+        for k, values in self.SCALE_INPUT_DICT.items():
+            self.smrf.config[k].update(values)
+        self.smrf.config["output"]['input_backup'] = False
+        self.smrf.loadTopo()
+
+
+class TestInputPrecipScalesGridded(CheckScaledDataMixin, SMRFTestCaseLakes):
+    def setUp(self):
+        super(self.__class__, self).setUp()
+        self.smrf = self.smrf_instance
+        for k, values in self.SCALE_INPUT_DICT.items():
+            self.smrf.config[k].update(values)
+        self.smrf.config["output"]['input_backup'] = False
+        self.smrf.loadTopo()

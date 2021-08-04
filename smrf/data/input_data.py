@@ -5,6 +5,7 @@ import utm
 
 from smrf.data import InputCSV, InputGribHRRR, InputNetcdf, InputWRF
 from smrf.data.gridded_input import GriddedInput
+from smrf.data.modifiers import Modifiers
 
 
 class InputData:
@@ -30,6 +31,16 @@ class InputData:
         'thermal',
         'metadata'
     ]
+
+    # map variables to their relative config section
+    VARIABLES_TO_CONFIG = {
+        'air_temp': 'air_temp',
+        'vapor_pressure': 'vapor_pressure',
+        'precip': 'precip',
+        'wind_speed': 'wind',
+        'cloud_factor': 'cloud_factor',
+        'thermal': 'thermal',
+    }
 
     # Data variables and which module they belong to
     MODULE_VARIABLES = {
@@ -58,9 +69,15 @@ class InputData:
 
         self.__determine_data_type(smrf_config)
 
+        # create a dictionary mapping variable name to modifier
+        self._input_modifiers = {
+            key: Modifiers.from_variable_config(smrf_config[value])
+            for key, value in self.VARIABLES_TO_CONFIG.items()
+        }
+
         self.load_class.load()
 
-        self.set_variables()
+        self.set_and_scale_variables()
 
         self.metadata_pixel_location()
 
@@ -113,8 +130,10 @@ class InputData:
                 'Missing required data type attribute in ini-file'
             )
 
-    def set_variables(self):
-        """Set the instance attributes for each variable
+    def set_and_scale_variables(self):
+        """
+        Set the instance attributes for each variable and scale it using
+        the scaling specified in the config
         """
 
         for variable in self.VARIABLES:
@@ -123,6 +142,9 @@ class InputData:
                 setattr(self, variable, d)
             elif d is not None:
                 d = d.tz_convert(tz=self.time_zone)
+                if variable in self._input_modifiers:
+                    d = self._input_modifiers[variable].scale_input_data(d)
+
                 setattr(self, variable, d[self.start_date:self.end_date])
 
     def metadata_pixel_location(self):

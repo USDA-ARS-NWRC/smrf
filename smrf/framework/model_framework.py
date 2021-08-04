@@ -431,7 +431,7 @@ class SMRF():
 
         if self.hrrr_data_timestep:
             self.data.load_class.load_timestep(t)
-            self.data.set_variables()
+            self.data.set_and_scale_variables()
 
         solar_params = self._solar_parameters(t)
 

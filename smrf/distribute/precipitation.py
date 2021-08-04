@@ -196,8 +196,6 @@ class ppt(image_data.image_data):
                 data.precip,
                 self.storms,
                 stations=self.stations)
-            self.corrected_precip = self.modifier.scale_input_data(
-                self.corrected_precip)
 
             if storm_count != 0:
                 self._logger.info(
@@ -278,7 +276,6 @@ class ppt(image_data.image_data):
 
         self._logger.debug('%s Distributing all precip' % data.name)
         data = data[self.stations]
-        data = self.modifier.scale_input_data(data)
 
         if self.config['distribution'] != 'grid':
             if self.nasde_model == 'marks2017':
