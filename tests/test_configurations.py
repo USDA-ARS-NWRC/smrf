@@ -1,8 +1,10 @@
 import unittest
 import os, shutil
-from inicheck.tools import get_user_config, check_config
+from inicheck.tools import get_user_config, check_config, cast_all_variables
+from copy import deepcopy
 
-from smrf.framework.model_framework import can_i_run_smrf
+from smrf.framework.model_framework import can_i_run_smrf, SMRF
+from smrf.distribute.albedo import albedo
 
 
 class SMRFTestCase(unittest.TestCase):
@@ -42,7 +44,8 @@ class SMRFTestCase(unittest.TestCase):
             try:
                 if os.path.isfile(file_path):
                     os.unlink(file_path)
-                elif os.path.isdir(file_path): shutil.rmtree(file_path)
+                elif os.path.isdir(file_path):
+                    shutil.rmtree(file_path)
             except Exception as e:
                 print(e)
 
@@ -83,7 +86,6 @@ class SMRFTestCaseLakes(unittest.TestCase):
 #                print(e)
 
 
-
 class TestConfigurations(SMRFTestCase):
 
     def test_base_run(self):
@@ -99,3 +101,38 @@ class TestConfigurations(SMRFTestCase):
         # test the base run with the config file
         result = can_i_run_smrf(self.base_config)
         self.assertTrue(result)
+
+
+class TestConfigPermutations(unittest.TestCase):
+
+    def setUp(self) -> None:
+        config_file = os.path.join(
+            os.path.dirname(__file__), "test_base_config.ini"
+        )
+        self.base_config = get_user_config(config_file, modules='smrf')
+
+    def test_albedo_veg_unknown_values(self):
+        config_updates = {
+            "start_decay": ['1998-01-12'],
+            "end_decay": ['1998-07-01'],
+            "decay_method": ["date_method"],
+            "veg_1000": ["0.2"]
+        }
+        base_config = deepcopy(self.base_config)
+        base_config.raw_cfg["albedo"].update(config_updates)
+
+        base_config.apply_recipes()
+        test_config = cast_all_variables(base_config, base_config.mcfg)
+
+        warnings, errors = check_config(test_config)
+        self.assertTrue(len(errors) == 0)
+
+        # the issue is that we parse this as ['0.2']
+        self.assertEqual(test_config.cfg["albedo"]["veg_1000"], ['0.2'])
+        smrf_obj = SMRF(test_config)
+        albedo_obj = albedo(smrf_obj.ucfg.cfg["albedo"])
+
+        # show that we parsed the unknown values correctly in albedo section
+        self.assertEqual(0.2, albedo_obj.veg["1000"])
+        # default values still come in correctly
+        self.assertEqual(0.36, albedo_obj.veg["41"])
